@@ -1,5 +1,5 @@
 {
-  "sha1": "ba20c3a930cc25967f4ce3350dc3b4222541c004",
+  "sha1": "2bb862a8eb776bfe2b2c5959979ab68f797b137e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,11 +9,12 @@
       "title": "Bulk episode actions API bulk ack: processes valid items and persists one doc per episode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 23
       }
     },
@@ -22,11 +23,12 @@
       "title": "Bulk episode actions API bulk tag: processes valid items and persists one doc per episode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 93,
+        "line": 94,
         "column": 21
       }
     },
@@ -35,11 +37,12 @@
       "title": "Bulk episode actions API bulk unack: persists the unack doc",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 169,
+        "line": 170,
         "column": 27
       }
     },
@@ -48,11 +51,12 @@
       "title": "Bulk episode actions API bulk assign: persists the assign doc with its assignee_uid",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 206,
+        "line": 207,
         "column": 23
       }
     },
@@ -61,11 +65,12 @@
       "title": "Bulk episode actions API partial success: reports ALERT_NOT_FOUND when some alert_ids are unknown",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 245,
+        "line": 246,
         "column": 46
       }
     },
@@ -74,11 +79,12 @@
       "title": "Bulk episode actions API partial success: bulk tag reports ALERT_NOT_FOUND keyed by the unknown alert_id",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 291,
+        "line": 292,
         "column": 18
       }
     },
@@ -87,11 +93,12 @@
       "title": "Bulk episode actions API partial success: reports a per-item error for every item when every alert_id is unknown",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 352,
+        "line": 353,
         "column": 25
       }
     },
@@ -100,11 +107,12 @@
       "title": "Bulk episode actions API lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 371,
+        "line": 372,
         "column": 77
       }
     },
@@ -113,11 +121,12 @@
       "title": "Bulk episode actions API lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 430,
+        "line": 431,
         "column": 15
       }
     },
@@ -126,11 +135,12 @@
       "title": "Bulk episode actions API lifecycle: reports INVALID_ALERT_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 485,
+        "line": 486,
         "column": 13
       }
     },
@@ -139,11 +149,12 @@
       "title": "Bulk episode actions API lifecycle: reports INVALID_ALERT_STATE_TRANSITION for a bulk activate item whose episode is still active",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 546,
+        "line": 547,
         "column": 16
       }
     },
@@ -152,11 +163,12 @@
       "title": "Bulk episode actions API lifecycle: reports ALERT_NOT_LATEST for a bulk activate item targeting a superseded episode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 584,
+        "line": 585,
         "column": 14
       }
     },
@@ -165,11 +177,12 @@
       "title": "Bulk episode actions API lifecycle: bulk ack succeeds on a superseded episode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 634,
+        "line": 635,
         "column": 15
       }
     },
@@ -178,11 +191,12 @@
       "title": "Bulk episode actions API schema: rejects a bare array body with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 686,
+        "line": 687,
         "column": 67
       }
     },
@@ -191,11 +205,12 @@
       "title": "Bulk episode actions API schema: rejects empty items with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 696,
+        "line": 697,
         "column": 52
       }
     },
@@ -204,11 +219,12 @@
       "title": "Bulk episode actions API schema: rejects more than 100 items with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 705,
+        "line": 706,
         "column": 5
       }
     },
@@ -217,11 +233,12 @@
       "title": "Bulk episode actions API schema: rejects an unknown envelope key with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 715,
+        "line": 716,
         "column": 92
       }
     },
@@ -230,11 +247,12 @@
       "title": "Bulk episode actions API schema: rejects an item missing alert_id with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 727,
+        "line": 728,
         "column": 84
       }
     },
@@ -243,11 +261,12 @@
       "title": "Bulk episode actions API schema: rejects an item carrying action_type with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 736,
+        "line": 737,
         "column": 12
       }
     },
@@ -256,11 +275,12 @@
       "title": "Bulk episode actions API schema: rejects an item carrying group_hash with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 752,
+        "line": 753,
         "column": 4
       }
     },
@@ -269,11 +289,12 @@
       "title": "Bulk episode actions API schema: rejects a bulk tag item keyed by group_hash with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 766,
+        "line": 767,
         "column": 30
       }
     },
@@ -282,11 +303,12 @@
       "title": "Bulk episode actions API schema: rejects an item with an invalid per-action body with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 782,
+        "line": 783,
         "column": 37
       }
     },
@@ -295,11 +317,12 @@
       "title": "Bulk episode actions API schema: rejects an item with empty alert_id with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 798,
+        "line": 799,
         "column": 51
       }
     },
@@ -308,11 +331,12 @@
       "title": "Bulk episode actions API schema: rejects an item with alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 809,
+        "line": 810,
         "column": 13
       }
     },
@@ -321,11 +345,12 @@
       "title": "Bulk episode actions API schema: rejects an item with unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 819,
+        "line": 820,
         "column": 3
       }
     },
@@ -334,11 +359,12 @@
       "title": "Bulk episode actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 971,
+        "line": 972,
         "column": 27
       }
     },
@@ -347,11 +373,12 @@
       "title": "Bulk episode actions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 988,
+        "line": 989,
         "column": 27
       }
     },
@@ -360,11 +387,12 @@
       "title": "Bulk series actions API bulk snooze: processes valid items and persists one doc per series",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 23
       }
     },
@@ -373,11 +401,12 @@
       "title": "Bulk series actions API bulk unsnooze: persists the unsnooze doc",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 95,
+        "line": 96,
         "column": 25
       }
     },
@@ -386,11 +415,12 @@
       "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 7
       }
     },
@@ -399,11 +429,12 @@
       "title": "Bulk series actions API partial success: reports a per-item error for every item when every group_hash is unknown",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 181,
+        "line": 182,
         "column": 25
       }
     },
@@ -412,11 +443,12 @@
       "title": "Bulk series actions API schema: rejects a bare array body with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 210,
+        "line": 211,
         "column": 28
       }
     },
@@ -425,11 +457,12 @@
       "title": "Bulk series actions API schema: rejects empty items with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 220,
+        "line": 221,
         "column": 25
       }
     },
@@ -438,11 +471,12 @@
       "title": "Bulk series actions API schema: rejects more than 100 items with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 228,
+        "line": 229,
         "column": 59
       }
     },
@@ -451,11 +485,12 @@
       "title": "Bulk series actions API schema: rejects an unknown envelope key with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 242,
+        "line": 243,
         "column": 5
       }
     },
@@ -464,11 +499,12 @@
       "title": "Bulk series actions API schema: rejects an item missing group_hash with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 253,
+        "line": 254,
         "column": 22
       }
     },
@@ -477,11 +513,12 @@
       "title": "Bulk series actions API schema: rejects an item carrying action_type with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 263,
+        "line": 264,
         "column": 5
       }
     },
@@ -490,11 +527,12 @@
       "title": "Bulk series actions API schema: rejects an item carrying alert_id with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 275,
+        "line": 276,
         "column": 5
       }
     },
@@ -503,11 +541,12 @@
       "title": "Bulk series actions API schema: rejects an item with an invalid per-action body with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 289,
+        "line": 290,
         "column": 7
       }
     },
@@ -516,11 +555,12 @@
       "title": "Bulk series actions API schema: rejects an item with empty group_hash with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 302,
+        "line": 303,
         "column": 22
       }
     },
@@ -529,11 +569,12 @@
       "title": "Bulk series actions API schema: rejects an item whose group_hash is not a SHA-256 digest with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 314,
+        "line": 315,
         "column": 27
       }
     },
@@ -542,11 +583,12 @@
       "title": "Bulk series actions API schema: rejects an item with unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 331,
+        "line": 332,
         "column": 39
       }
     },
@@ -555,11 +597,12 @@
       "title": "Bulk series actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 347,
+        "line": 348,
         "column": 23
       }
     },
@@ -568,11 +611,12 @@
       "title": "Bulk series actions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 361,
+        "line": 362,
         "column": 18
       }
     },
@@ -685,11 +729,12 @@
       "title": "Create activate episode action API activate: writes an activate action and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 23
       }
     },
@@ -698,11 +743,12 @@
       "title": "Create activate episode action API activate: writes a synthetic .rule-events doc that flips the episode back to active + breached",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 22
       }
     },
@@ -711,11 +757,12 @@
       "title": "Create activate episode action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 125,
+        "line": 126,
         "column": 31
       }
     },
@@ -724,11 +771,12 @@
       "title": "Create activate episode action API schema: rejects empty reason with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 129,
+        "line": 130,
         "column": 9
       }
     },
@@ -737,11 +785,12 @@
       "title": "Create activate episode action API schema: rejects reason over 1024 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 139,
+        "line": 140,
         "column": 12
       }
     },
@@ -750,11 +799,12 @@
       "title": "Create activate episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 146,
+        "line": 147,
         "column": 7
       }
     },
@@ -763,11 +813,12 @@
       "title": "Create activate episode action API schema: rejects alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 154,
+        "line": 155,
         "column": 40
       }
     },
@@ -776,11 +827,12 @@
       "title": "Create activate episode action API returns 404 when alert_id matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 163,
+        "line": 164,
         "column": 13
       }
     },
@@ -789,11 +841,12 @@
       "title": "Create activate episode action API returns 409 when the episode exists but is not the latest of its series",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 172,
+        "line": 173,
         "column": 13
       }
     },
@@ -802,11 +855,12 @@
       "title": "Create activate episode action API precondition: rejects activate when the episode is already active",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 212,
+        "line": 213,
         "column": 57
       }
     },
@@ -815,11 +869,12 @@
       "title": "Create activate episode action API activate: allows a recovering episode to be reopened (cancel the wind-down)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 249,
+        "line": 250,
         "column": 43
       }
     },
@@ -828,11 +883,12 @@
       "title": "Create activate episode action API activate: allows a pending episode to be forced past the activation counter",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 285,
+        "line": 286,
         "column": 43
       }
     },
@@ -841,11 +897,12 @@
       "title": "Create activate episode action API activate: allows reopen of a naturally-recovered (never user-deactivated) episode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 317,
+        "line": 318,
         "column": 33
       }
     },
@@ -854,11 +911,12 @@
       "title": "Create activate episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 363,
+        "line": 364,
         "column": 14
       }
     },
@@ -867,11 +925,12 @@
       "title": "Create activate episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
-        "line": 378,
+        "line": 379,
         "column": 16
       }
     },
@@ -880,11 +939,12 @@
       "title": "Create assign episode action API assign: writes an assign action with assignee_uid and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 23
       }
     },
@@ -893,11 +953,12 @@
       "title": "Create assign episode action API assign: null assignee_uid clears the assignee and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 22
       }
     },
@@ -906,11 +967,12 @@
       "title": "Create assign episode action API assign: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 99,
+        "line": 100,
         "column": 22
       }
     },
@@ -919,11 +981,12 @@
       "title": "Create assign episode action API schema: rejects body missing assignee_uid with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 21
       }
     },
@@ -932,11 +995,12 @@
       "title": "Create assign episode action API schema: rejects alert_id in the body (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 158,
+        "line": 159,
         "column": 22
       }
     },
@@ -945,11 +1009,12 @@
       "title": "Create assign episode action API schema: rejects assignee_uid over 256 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 170,
+        "line": 171,
         "column": 16
       }
     },
@@ -958,11 +1023,12 @@
       "title": "Create assign episode action API schema: rejects assignee_uid that is neither string nor null with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 177,
+        "line": 178,
         "column": 76
       }
     },
@@ -971,11 +1037,12 @@
       "title": "Create assign episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 184,
+        "line": 185,
         "column": 5
       }
     },
@@ -984,11 +1051,12 @@
       "title": "Create assign episode action API schema: rejects alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 14
       }
     },
@@ -997,11 +1065,12 @@
       "title": "Create assign episode action API returns 404 when alert_id matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 201,
+        "line": 202,
         "column": 56
       }
     },
@@ -1010,11 +1079,12 @@
       "title": "Create assign episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 211,
+        "line": 212,
         "column": 7
       }
     },
@@ -1023,11 +1093,12 @@
       "title": "Create assign episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 221,
+        "line": 222,
         "column": 12
       }
     },
@@ -1036,11 +1107,12 @@
       "title": "Create deactivate episode action API deactivate: writes a deactivate action and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 23
       }
     },
@@ -1049,11 +1121,12 @@
       "title": "Create deactivate episode action API deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 69,
+        "line": 70,
         "column": 22
       }
     },
@@ -1062,11 +1135,12 @@
       "title": "Create deactivate episode action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 134,
+        "line": 135,
         "column": 27
       }
     },
@@ -1075,11 +1149,12 @@
       "title": "Create deactivate episode action API schema: rejects empty reason with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 9
       }
     },
@@ -1088,11 +1163,12 @@
       "title": "Create deactivate episode action API schema: rejects reason over 1024 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 12
       }
     },
@@ -1101,11 +1177,12 @@
       "title": "Create deactivate episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 7
       }
     },
@@ -1114,11 +1191,12 @@
       "title": "Create deactivate episode action API schema: rejects alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 154,
+        "line": 155,
         "column": 40
       }
     },
@@ -1127,11 +1205,12 @@
       "title": "Create deactivate episode action API returns 404 when alert_id matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 164,
+        "line": 165,
         "column": 13
       }
     },
@@ -1140,11 +1219,12 @@
       "title": "Create deactivate episode action API returns 409 when the episode exists but is not the latest of its series",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 174,
+        "line": 175,
         "column": 13
       }
     },
@@ -1153,11 +1233,12 @@
       "title": "Create deactivate episode action API precondition: rejects deactivate of an already-inactive episode with INVALID_ALERT_STATE_TRANSITION (409)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 215,
+        "line": 216,
         "column": 57
       }
     },
@@ -1166,11 +1247,12 @@
       "title": "Create deactivate episode action API precondition: allows deactivate of a pending episode (forces it closed before activation)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 252,
+        "line": 253,
         "column": 43
       }
     },
@@ -1179,11 +1261,12 @@
       "title": "Create deactivate episode action API precondition: allows deactivate of a recovering episode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 287,
+        "line": 288,
         "column": 52
       }
     },
@@ -1192,11 +1275,12 @@
       "title": "Create deactivate episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 318,
+        "line": 319,
         "column": 24
       }
     },
@@ -1205,11 +1289,12 @@
       "title": "Create deactivate episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
-        "line": 330,
+        "line": 331,
         "column": 28
       }
     },
@@ -1218,11 +1303,12 @@
       "title": "Create snooze series action API snooze: writes a snooze action with snoozed_until and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 23
       }
     },
@@ -1231,11 +1317,12 @@
       "title": "Create snooze series action API snooze: writes a snooze action without snoozed_until and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 22
       }
     },
@@ -1244,11 +1331,12 @@
       "title": "Create snooze series action API schema: rejects snoozed_until that is not ISO 8601 with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 100,
+        "line": 101,
         "column": 22
       }
     },
@@ -1257,11 +1345,12 @@
       "title": "Create snooze series action API schema: rejects snoozed_until without the time component with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 22
       }
     },
@@ -1270,11 +1359,12 @@
       "title": "Create snooze series action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 121,
+        "line": 122,
         "column": 7
       }
     },
@@ -1283,11 +1373,12 @@
       "title": "Create snooze series action API schema: rejects a group_hash with a plain label with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
+        "line": 152,
         "column": 31
       }
     },
@@ -1296,11 +1387,12 @@
       "title": "Create snooze series action API schema: rejects a group_hash with too few characters with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
+        "line": 152,
         "column": 31
       }
     },
@@ -1309,11 +1401,12 @@
       "title": "Create snooze series action API schema: rejects a group_hash with too many characters with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
+        "line": 152,
         "column": 31
       }
     },
@@ -1322,11 +1415,12 @@
       "title": "Create snooze series action API schema: rejects a group_hash with a non-hex character with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
+        "line": 152,
         "column": 31
       }
     },
@@ -1335,11 +1429,12 @@
       "title": "Create snooze series action API returns 404 when group_hash matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 159,
+        "line": 160,
         "column": 85
       }
     },
@@ -1348,11 +1443,12 @@
       "title": "Create snooze series action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 5
       }
     },
@@ -1361,11 +1457,12 @@
       "title": "Create snooze series action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 182,
+        "line": 183,
         "column": 8
       }
     },
@@ -1543,11 +1640,12 @@
       "title": "Create unack episode action API unack: writes an unack action and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 23
       }
     },
@@ -1556,11 +1654,12 @@
       "title": "Create unack episode action API unack: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 12
       }
     },
@@ -1569,11 +1668,12 @@
       "title": "Create unack episode action API schema: rejects alert_id in the body (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 14
       }
     },
@@ -1582,11 +1682,12 @@
       "title": "Create unack episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 120,
+        "line": 121,
         "column": 16
       }
     },
@@ -1595,11 +1696,12 @@
       "title": "Create unack episode action API schema: rejects alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 98
       }
     },
@@ -1608,11 +1710,12 @@
       "title": "Create unack episode action API returns 404 when alert_id matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 133,
+        "line": 134,
         "column": 12
       }
     },
@@ -1621,11 +1724,12 @@
       "title": "Create unack episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 5
       }
     },
@@ -1634,11 +1738,12 @@
       "title": "Create unack episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 61
       }
     },
@@ -1647,11 +1752,12 @@
       "title": "Create unsnooze series action API happy path: writes an unsnooze action and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 23
       }
     },
@@ -1660,11 +1766,12 @@
       "title": "Create unsnooze series action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 14
       }
     },
@@ -1673,11 +1780,12 @@
       "title": "Create unsnooze series action API schema: rejects a group_hash that is not a SHA-256 digest with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 98
       }
     },
@@ -1686,11 +1794,12 @@
       "title": "Create unsnooze series action API returns 404 when group_hash matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 85,
+        "line": 86,
         "column": 12
       }
     },
@@ -1699,11 +1808,12 @@
       "title": "Create unsnooze series action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 11
       }
     },
@@ -1712,11 +1822,12 @@
       "title": "Create unsnooze series action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 63
       }
     },
@@ -1725,11 +1836,12 @@
       "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history_rule_lookup.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 65
       }
     },
@@ -1738,12 +1850,13 @@
       "title": "List action policy execution history API validation: rejects page=0",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 36,
-        "column": 23
+        "line": 34,
+        "column": 21
       }
     },
     {
@@ -1751,12 +1864,13 @@
       "title": "List action policy execution history API validation: accepts perPage=0 (count-only read)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 40,
-        "column": 79
+        "line": 38,
+        "column": 77
       }
     },
     {
@@ -1764,12 +1878,13 @@
       "title": "List action policy execution history API validation: accepts perPage at the maximum",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 48,
-        "column": 24
+        "line": 46,
+        "column": 22
       }
     },
     {
@@ -1777,12 +1892,13 @@
       "title": "List action policy execution history API validation: rejects perPage above the maximum",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 56,
-        "column": 13
+        "line": 54,
+        "column": 11
       }
     },
     {
@@ -1790,12 +1906,13 @@
       "title": "List action policy execution history API validation: rejects page * perPage above the result window",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 62,
-        "column": 14
+        "line": 60,
+        "column": 12
       }
     },
     {
@@ -1803,12 +1920,13 @@
       "title": "List action policy execution history API validation: rejects an unknown sort field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 70,
+        "column": 5
       }
     },
     {
@@ -1816,12 +1934,13 @@
       "title": "List action policy execution history API returns the schema defaults for page, per_page and total",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 78,
-        "column": 42
+        "line": 75,
+        "column": 75
       }
     },
     {
@@ -1829,12 +1948,13 @@
       "title": "List action policy execution history API validation: accepts a `to` upper bound",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 87,
-        "column": 67
+        "line": 82,
+        "column": 65
       }
     },
     {
@@ -1842,12 +1962,13 @@
       "title": "List action policy execution history API validation: accepts an outcomes array filter",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 96,
-        "column": 13
+        "line": 91,
+        "column": 11
       }
     },
     {
@@ -1855,12 +1976,13 @@
       "title": "List action policy execution history API validation: rejects an unknown outcome value",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 106,
-        "column": 13
+        "line": 101,
+        "column": 11
       }
     },
     {
@@ -1868,12 +1990,13 @@
       "title": "List action policy execution history API validation: rejects non-numeric perPage",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 110,
-        "column": 8
+        "line": 105,
+        "column": 6
       }
     },
     {
@@ -1881,12 +2004,13 @@
       "title": "List action policy execution history API validation: rejects non-numeric page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 116,
-        "column": 58
+        "line": 111,
+        "column": 56
       }
     },
     {
@@ -1894,12 +2018,13 @@
       "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history read privilege",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 122,
-        "column": 70
+        "line": 117,
+        "column": 68
       }
     },
     {
@@ -1907,12 +2032,13 @@
       "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history all privilege",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 128,
-        "column": 14
+        "line": 123,
+        "column": 12
       }
     },
     {
@@ -1920,12 +2046,13 @@
       "title": "List action policy execution history API authorization: 403 without any alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 138,
-        "column": 7
+        "line": 133,
+        "column": 5
       }
     },
     {
@@ -1933,11 +2060,12 @@
       "title": "List rule executions API happy path: returns at least one execution record after the rule executor runs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 11
       }
     },
@@ -1946,11 +2074,12 @@
       "title": "List rule executions API space scoping: does not return executions from another space",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 16
       }
     },
@@ -1959,11 +2088,12 @@
       "title": "List rule executions API validation: accepts perPage=0 with a count only read",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 78
       }
     },
@@ -1972,11 +2102,12 @@
       "title": "List rule executions API validation: rejects page=0",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 11
       }
     },
@@ -1985,11 +2116,12 @@
       "title": "List rule executions API validation: rejects perPage above the maximum",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 12
       }
     },
@@ -1998,11 +2130,12 @@
       "title": "List rule executions API validation: rejects unknown outcome values",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 78
       }
     },
@@ -2011,11 +2144,12 @@
       "title": "List rule executions API validation: rejects malformed datetimes for from",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 69
       }
     },
@@ -2024,11 +2158,12 @@
       "title": "List rule executions API authorization: 200 with alerting_v2_execution_history read privilege",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 149,
+        "line": 150,
         "column": 12
       }
     },
@@ -2037,11 +2172,12 @@
       "title": "List rule executions API authorization: 200 with alerting_v2_execution_history all privilege",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 154,
+        "line": 155,
         "column": 22
       }
     },
@@ -2050,11 +2186,12 @@
       "title": "List rule executions API authorization: 403 without any alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 163,
+        "line": 164,
         "column": 16
       }
     },

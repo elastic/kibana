@@ -1,5 +1,5 @@
 {
-  "sha1": "69a8374617776d426229c4534f16debce2d6e32e",
+  "sha1": "fb3e560e1bac1005c16827489eecf3c3911d5080",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 85,
+        "line": 83,
         "column": 11
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 22
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 166,
+        "line": 164,
         "column": 12
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 210,
+        "line": 208,
         "column": 33
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 262,
+        "line": 260,
         "column": 33
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 318,
+        "line": 316,
         "column": 19
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 365,
+        "line": 363,
         "column": 31
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 433,
+        "line": 431,
         "column": 32
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 490,
+        "line": 488,
         "column": 24
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 551,
+        "line": 549,
         "column": 32
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 635,
+        "line": 633,
         "column": 18
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 677,
+        "line": 675,
         "column": 29
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 709,
+        "line": 707,
         "column": 20
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 748,
+        "line": 746,
         "column": 22
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 809,
+        "line": 807,
         "column": 28
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 851,
+        "line": 849,
         "column": 21
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 902,
+        "line": 900,
         "column": 71
       }
     },
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 952,
+        "line": 950,
         "column": 71
       }
     },
@@ -266,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1000,
+        "line": 998,
         "column": 76
       }
     },
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1080,
+        "line": 1078,
         "column": 86
       }
     },
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1189,
+        "line": 1187,
         "column": 18
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1263,
+        "line": 1261,
         "column": 35
       }
     },
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1328,
+        "line": 1326,
         "column": 35
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1424,
+        "line": 1422,
         "column": 15
       }
     },
@@ -350,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1365,
+        "line": 1364,
         "column": 31
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1595,
+        "line": 1593,
         "column": 24
       }
     },
@@ -378,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1661,
+        "line": 1659,
         "column": 33
       }
     },
@@ -392,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1777,
+        "line": 1775,
         "column": 33
       }
     },
@@ -406,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1870,
+        "line": 1868,
         "column": 33
       }
     },
@@ -420,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1924,
+        "line": 1922,
         "column": 25
       }
     },
@@ -434,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1990,
+        "line": 1988,
         "column": 22
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2034,
+        "line": 2032,
         "column": 25
       }
     },
@@ -462,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2053,
+        "line": 2051,
         "column": 31
       }
     },
@@ -476,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2112,
+        "line": 2110,
         "column": 31
       }
     },
@@ -490,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2193,
+        "line": 2191,
         "column": 37
       }
     },
@@ -504,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2249,
+        "line": 2247,
         "column": 13
       }
     },
@@ -518,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2312,
+        "line": 2310,
         "column": 15
       }
     },
@@ -532,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2362,
+        "line": 2360,
         "column": 27
       }
     },
@@ -546,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2416,
+        "line": 2414,
         "column": 4
       }
     },
@@ -555,11 +555,12 @@
       "title": "Rule executor (arrow ES|QL response format) writes one breach event per matching ES|QL row",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 85,
+        "line": 83,
         "column": 11
       }
     },
@@ -568,11 +569,12 @@
       "title": "Rule executor (arrow ES|QL response format) writes the columns returned by the query to the data field correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 22
       }
     },
@@ -581,11 +583,12 @@
       "title": "Rule executor (arrow ES|QL response format) persists ES|QL date columns as epoch millis in the data field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 166,
+        "line": 164,
         "column": 12
       }
     },
@@ -594,11 +597,12 @@
       "title": "Rule executor (arrow ES|QL response format) populates rule, source, and scheduling fields on every breach event",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 210,
+        "line": 208,
         "column": 33
       }
     },
@@ -607,11 +611,12 @@
       "title": "Rule executor (arrow ES|QL response format) stamps timestamp in Elasticsearch on every event of a multi-batch run",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 262,
+        "line": 260,
         "column": 33
       }
     },
@@ -620,11 +625,12 @@
       "title": "Rule executor (arrow ES|QL response format) writes one event per group when grouping.fields is set",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 318,
+        "line": 316,
         "column": 19
       }
     },
@@ -633,11 +639,12 @@
       "title": "Rule executor (arrow ES|QL response format) groups multiple documents into the same group correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 365,
+        "line": 363,
         "column": 31
       }
     },
@@ -646,11 +653,12 @@
       "title": "Rule executor (arrow ES|QL response format) produces stable group_hash for the same group across executions",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 433,
+        "line": 431,
         "column": 32
       }
     },
@@ -659,11 +667,12 @@
       "title": "Rule executor (arrow ES|QL response format) produces the correct breach events for match based queries without grouping",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 490,
+        "line": 488,
         "column": 24
       }
     },
@@ -672,11 +681,12 @@
       "title": "Rule executor (arrow ES|QL response format) extracts severity from the ES|QL row onto breached events as a top-level field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 551,
+        "line": 549,
         "column": 32
       }
     },
@@ -685,11 +695,12 @@
       "title": "Rule executor (arrow ES|QL response format) includes data within the lookback window even when older than schedule.every",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 635,
+        "line": 633,
         "column": 18
       }
     },
@@ -698,11 +709,12 @@
       "title": "Rule executor (arrow ES|QL response format) excludes data outside the lookback window",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 677,
+        "line": 675,
         "column": 29
       }
     },
@@ -711,11 +723,12 @@
       "title": "Rule executor (arrow ES|QL response format) defaults the lookback window to schedule.every when no lookback is set",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 709,
+        "line": 707,
         "column": 20
       }
     },
@@ -724,11 +737,12 @@
       "title": "Rule executor (arrow ES|QL response format) uses the configured time_field for the lookback range filter",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 748,
+        "line": 746,
         "column": 22
       }
     },
@@ -737,11 +751,12 @@
       "title": "Rule executor (arrow ES|QL response format) binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 809,
+        "line": 807,
         "column": 28
       }
     },
@@ -750,11 +765,12 @@
       "title": "Rule executor (arrow ES|QL response format) emits a recovered event under no_breach policy when a previously breaching group stops breaching",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 851,
+        "line": 849,
         "column": 21
       }
     },
@@ -763,11 +779,12 @@
       "title": "Rule executor (arrow ES|QL response format) does not emit recovery events for kind: \"signal\" rules when previously matching groups stop matching",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 902,
+        "line": 900,
         "column": 71
       }
     },
@@ -776,11 +793,12 @@
       "title": "Rule executor (arrow ES|QL response format) does not emit recovery events for alert rules with recovery.strategy \"manual\"",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 952,
+        "line": 950,
         "column": 71
       }
     },
@@ -789,11 +807,12 @@
       "title": "Rule executor (arrow ES|QL response format) uses the configured recover query",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1000,
+        "line": 998,
         "column": 76
       }
     },
@@ -802,11 +821,12 @@
       "title": "Rule executor (arrow ES|QL response format) emits one recovery event per active group when recover query matches multiple",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1080,
+        "line": 1078,
         "column": 86
       }
     },
@@ -815,11 +835,12 @@
       "title": "Rule executor (arrow ES|QL response format) does not recover a group when recover query returns no matching active group",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1189,
+        "line": 1187,
         "column": 18
       }
     },
@@ -828,11 +849,12 @@
       "title": "Rule executor (arrow ES|QL response format) does not recover a group when recover query returns zero rows",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1263,
+        "line": 1261,
         "column": 35
       }
     },
@@ -841,11 +863,12 @@
       "title": "Rule executor (arrow ES|QL response format) recovery.strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1328,
+        "line": 1326,
         "column": 35
       }
     },
@@ -854,11 +877,12 @@
       "title": "Rule executor (arrow ES|QL response format) recovery.strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1424,
+        "line": 1422,
         "column": 15
       }
     },
@@ -867,11 +891,12 @@
       "title": "Rule executor (arrow ES|QL response format) recovery.strategy 'query' emits no_data for an absent group that has no data",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1365,
+        "line": 1364,
         "column": 31
       }
     },
@@ -880,11 +905,12 @@
       "title": "Rule executor (arrow ES|QL response format) recovery.strategy 'query' keeps a group breached when the breach and recovery queries both match it",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1595,
+        "line": 1593,
         "column": 24
       }
     },
@@ -893,11 +919,12 @@
       "title": "Rule executor (arrow ES|QL response format) emits recovery events only for groups that stop breaching when others keep breaching",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1661,
+        "line": 1659,
         "column": 33
       }
     },
@@ -906,11 +933,12 @@
       "title": "Rule executor (arrow ES|QL response format) emits both breach and recovery events in the same execution when one group recovers and another keeps breaching",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1777,
+        "line": 1775,
         "column": 33
       }
     },
@@ -919,11 +947,12 @@
       "title": "Rule executor (arrow ES|QL response format) executes the concatenated base+breach query when the rule has a breach segment",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1870,
+        "line": 1868,
         "column": 33
       }
     },
@@ -932,11 +961,12 @@
       "title": "Rule executor (arrow ES|QL response format) emits a recovered event using the composed recovery segment",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1924,
+        "line": 1922,
         "column": 25
       }
     },
@@ -945,11 +975,12 @@
       "title": "Rule executor (arrow ES|QL response format) emits recovery via strategy: \"no_breach\" when an active group stops matching the breach query",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 1990,
+        "line": 1988,
         "column": 22
       }
     },
@@ -958,11 +989,12 @@
       "title": "Rule executor (arrow ES|QL response format) writes zero events when the ES|QL query returns no rows",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2034,
+        "line": 2032,
         "column": 25
       }
     },
@@ -971,11 +1003,12 @@
       "title": "Rule executor (arrow ES|QL response format) a disabled rule writes no new events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2053,
+        "line": 2051,
         "column": 31
       }
     },
@@ -984,11 +1017,12 @@
       "title": "Rule executor (arrow ES|QL response format) resumes producing events after a disabled rule is re-enabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2112,
+        "line": 2110,
         "column": 31
       }
     },
@@ -997,11 +1031,12 @@
       "title": "Rule executor (arrow ES|QL response format) no_data.strategy 'keep_last' writes a no_data rule event",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2193,
+        "line": 2191,
         "column": 37
       }
     },
@@ -1010,11 +1045,12 @@
       "title": "Rule executor (arrow ES|QL response format) no_data.strategy 'resolve' writes a no_data rule event",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2249,
+        "line": 2247,
         "column": 13
       }
     },
@@ -1023,11 +1059,12 @@
       "title": "Rule executor (arrow ES|QL response format) no_data.strategy 'ignore' does not write no_data events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2312,
+        "line": 2310,
         "column": 15
       }
     },
@@ -1036,11 +1073,12 @@
       "title": "Rule executor (arrow ES|QL response format) a deleted rule writes no new events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2362,
+        "line": 2360,
         "column": 27
       }
     },
@@ -1049,11 +1087,12 @@
       "title": "Rule executor (arrow ES|QL response format) an invalid ES|QL query writes no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
-        "line": 2416,
+        "line": 2414,
         "column": 4
       }
     }
