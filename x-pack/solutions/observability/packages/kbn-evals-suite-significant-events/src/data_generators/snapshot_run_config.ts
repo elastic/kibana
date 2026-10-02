@@ -24,7 +24,7 @@ export interface GcsConfig {
  * Override at runtime with:
  *   SIGEVENTS_SNAPSHOT_RUN=2026-02-23 node scripts/scout ...
  */
-export const SIGEVENTS_SNAPSHOT_RUN = process.env.SIGEVENTS_SNAPSHOT_RUN || '2026-03-27';
+export const SIGEVENTS_SNAPSHOT_RUN = process.env.SIGEVENTS_SNAPSHOT_RUN || '2026-09-18';
 
 export const resolveBasePath = (gcs: GcsConfig) =>
   gcs.runScoped === false ? gcs.basePathPrefix : `${SIGEVENTS_SNAPSHOT_RUN}/${gcs.basePathPrefix}`;
