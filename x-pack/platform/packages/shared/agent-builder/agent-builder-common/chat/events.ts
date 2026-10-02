@@ -8,6 +8,7 @@
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { OriginProjection } from './projection';
 import type {
   ConversationInternalState,
   ConversationRound,
@@ -48,7 +49,12 @@ export enum ChatEventType {
 export type ChatEventBase<
   TEventType extends ChatEventType,
   TData extends Record<string, any>
-> = AgentBuilderEvent<TEventType, TData>;
+> = AgentBuilderEvent<TEventType, TData> & {
+  /**
+   * Output from the origin adapter of the conversation's source, if any. Never persisted on the conversation.
+   */
+  projection?: OriginProjection;
+};
 
 // Tool call
 

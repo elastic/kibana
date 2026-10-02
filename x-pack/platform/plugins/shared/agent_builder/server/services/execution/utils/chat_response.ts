@@ -31,6 +31,7 @@ export const buildChatResponseFromEvents = (events: ChatEvent[]): ChatResponse =
   }
 
   const {
+    projection,
     data: { round },
   } = roundCompleteEvent;
   const {
@@ -45,6 +46,7 @@ export const buildChatResponseFromEvents = (events: ChatEvent[]): ChatResponse =
     response: {
       ...round.response,
       prompts: round.pending_prompts,
+      ...(projection ? { projection } : {}),
     },
   };
 };

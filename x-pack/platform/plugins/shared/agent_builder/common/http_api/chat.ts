@@ -11,6 +11,7 @@ import type {
   ConversationRound,
   AgentCapabilities,
   AssistantResponse,
+  OriginProjection,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -47,5 +48,7 @@ export type ChatResponse = Omit<
   round_id: string;
   response: Partial<AssistantResponse> & {
     prompts?: PromptRequest[];
+    /** Output from the origin adapter of the conversation's source, if any. */
+    projection?: OriginProjection;
   };
 };

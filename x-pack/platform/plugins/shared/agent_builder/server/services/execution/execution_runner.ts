@@ -45,6 +45,7 @@ import {
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
+import { applyOriginAdapters } from './origin_adapters';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -261,6 +262,7 @@ const handleConversationExecution = async ({
             logger.error(`Failed to report round complete telemetry: ${error}`);
           }
         }),
+        applyOriginAdapters({ source: conversation.source, logger }),
         convertErrors({
           agentId,
           logger,

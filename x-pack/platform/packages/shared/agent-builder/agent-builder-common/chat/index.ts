@@ -125,5 +125,6 @@ export {
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
 } from './events';
+export type { SlackMarkdownBlock, SlackPayload, OriginProjection } from './projection';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';

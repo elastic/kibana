@@ -11,6 +11,7 @@ import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
   ExecutionStatus,
+  isRoundCompleteEvent,
   type ChatEvent,
   type SerializedExecutionError,
 } from '@kbn/agent-builder-common';
@@ -257,6 +258,26 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
       status: ExecutionStatus.completed,
       response: buildChatResponseFromEvents(events),
     });
+  });
+
+  it('delivers the origin projection inside the response', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const projection = {
+      slack: { text: 'world', blocks: [{ type: 'markdown' as const, text: 'world' }] },
+    };
+    const eventsWithProjection = events.map((event) =>
+      isRoundCompleteEvent(event) ? { ...event, projection } : event
+    );
+
+    await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
+      callbackUrl,
+      executionId: 'execution-1',
+      events: eventsWithProjection,
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1]?.body as string);
+    expect(body.response.response.projection).toEqual(projection);
+    expect(body).not.toHaveProperty('projection');
   });
 });
 
