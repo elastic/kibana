@@ -50,7 +50,7 @@ spaceTest.describe(
 
     spaceTest(
       'opens the console from the case alert and keeps the history date picker usable',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { caseId, commentId } = requireSeededCase(seeded);
         const { caseView, documentFlyout, responseConsole } = pageObjects;
 
@@ -61,9 +61,8 @@ spaceTest.describe(
 
         await spaceTest.step('Respond is enabled and opens the console', async () => {
           await documentFlyout.openTakeActionMenu();
-          const respond = page.testSubj.locator('endpointResponseActions-action-item');
-          await expect(respond).toBeEnabled();
-          await respond.click();
+          await expect(responseConsole.respondAction).toBeEnabled();
+          await responseConsole.openFromRespondAction();
           await expect(responseConsole.overlay).toBeVisible();
         });
 
@@ -73,7 +72,7 @@ spaceTest.describe(
           await expect(responseConsole.dateQuickMenu).toBeHidden();
           await expect(responseConsole.actionLogDatesButton).toContainText('Last 7 days');
           await responseConsole.closeActionLog();
-          await expect(page.testSubj.locator('userMenuButton')).toBeVisible();
+          await expect(responseConsole.userMenu).toBeVisible();
         });
 
         await spaceTest.step('close the console', async () => {

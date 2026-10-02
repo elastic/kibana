@@ -14,6 +14,8 @@ const LAST_7_DAYS_TEST_SUBJ = 'superDatePickerCommonlyUsed_Last_7 days';
  */
 export class ResponseConsolePage {
   readonly overlay: Locator;
+  readonly respondAction: Locator;
+  readonly userMenu: Locator;
   readonly backLink: Locator;
   readonly actionLogButton: Locator;
   readonly actionLogFlyout: Locator;
@@ -24,6 +26,8 @@ export class ResponseConsolePage {
 
   constructor(private readonly page: ScoutPage) {
     this.overlay = page.testSubj.locator('consolePageOverlay');
+    this.respondAction = page.testSubj.locator('endpointResponseActions-action-item');
+    this.userMenu = page.testSubj.locator('userMenuButton');
     this.backLink = page.testSubj.locator('consolePageOverlay-header-back-link');
     this.actionLogButton = page.testSubj.locator('responderShowActionLogButton');
     this.actionLogFlyout = page.testSubj.locator('responderActionLogFlyout');
@@ -33,6 +37,11 @@ export class ResponseConsolePage {
     this.actionLogDatesButton = this.actionLogFlyout.getByTestId('superDatePickerShowDatesButton');
     this.dateQuickMenu = page.testSubj.locator('superDatePickerQuickMenu');
     this.last7DaysOption = page.testSubj.locator(LAST_7_DAYS_TEST_SUBJ);
+  }
+
+  async openFromRespondAction(): Promise<void> {
+    await this.respondAction.click();
+    await this.overlay.waitFor({ state: 'visible' });
   }
 
   async openActionLog(): Promise<void> {
