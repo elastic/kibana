@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
   getAllowedOutputTypesForIntegration,
+  getAllowedOutputTypesForMonitoring,
   getAllowedOutputTypesForPackagePolicy,
 } from '../../../common/services/output_helpers';
 
@@ -39,6 +40,20 @@ export async function getDataOutputForAgentPolicy(
   }
 
   return outputService.get(dataOutputId);
+}
+
+export async function getMonitoringOutputForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicy: Partial<AgentPolicySOAttributes>
+) {
+  const monitoringOutputId =
+    agentPolicy.monitoring_output_id || (await outputService.getDefaultMonitoringOutputId());
+
+  if (!monitoringOutputId) {
+    throw new OutputNotFoundError('No default monitoring output found.');
+  }
+
+  return outputService.get(monitoringOutputId);
 }
 
 /**
@@ -85,6 +100,18 @@ export async function validateOutputForPolicy(
   if (dataOutput && !allowedOutputTypeForPolicy.includes(dataOutput.type)) {
     throw new OutputInvalidError(
       `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
+    );
+  }
+
+  const monitoringOutput = await getMonitoringOutputForAgentPolicy(soClient, data).catch((err) => {
+    if (err instanceof OutputNotFoundError) return undefined;
+    // Dangling monitoring_output_id (deleted output) — don't block policy editing.
+    if (err?.output?.statusCode === 404 || err?.statusCode === 404) return undefined;
+    throw err;
+  });
+  if (monitoringOutput && !getAllowedOutputTypesForMonitoring().includes(monitoringOutput.type)) {
+    throw new OutputInvalidError(
+      `Output of type "${monitoringOutput.type}" is not usable as the monitoring output for policy "${data.name}". Clear the monitoring output override to use the default.`
     );
   }
 

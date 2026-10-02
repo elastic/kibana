@@ -6,11 +6,11 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
-import type { ListSourcesItem } from '../../../../server/threat_intel/routes/list_sources';
 import {
   LIST_SOURCES_API_PATH,
   SOURCE_BY_ID_API_PATH,
   THREAT_INTEL_INDICATORS_INDEX,
+  type ListSourcesItem,
 } from '../../../../common/threat_intel';
 import { apiTest, tags, testData, SECURITY_READ_ONLY_ROLE } from '../fixtures';
 

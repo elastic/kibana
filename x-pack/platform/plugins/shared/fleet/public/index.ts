@@ -132,7 +132,20 @@ export const LazyPackageCard = lazy(() =>
 export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
-export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
+export {
+  sendCreateAgentlessPolicy,
+  sendUpdateAgentlessPolicy,
+  sendDeleteAgentlessPolicy,
+  sendGetAgentlessPolicy,
+} from './hooks/use_request/agentless_policy';
+export {
+  sendUpdateCloudConnector,
+  sendVerifyCloudConnectorIacKey,
+} from './hooks/use_request/cloud_connector';
+export type {
+  IacRenderedTemplate,
+  IacTemplateLaunchedFor,
+} from './components/cloud_connector/components/iac_key_check';
 export {
   sendCreateCloudOnboardingDeployment,
   sendGetCloudOnboardingDeployment,
@@ -147,6 +160,11 @@ export type {
   UpdateCloudOnboardingDeploymentRequest,
 } from '../common/types/rest_spec/cloud_onboarding_deployment';
 export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
+export {
+  sendUpdatePackagePolicy,
+  sendDeletePackagePolicy,
+  sendGetOnePackagePolicy,
+} from './hooks/use_request/package_policy';
 export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
 export { useIacProvisioner } from './hooks/use_iac_provisioner';
 export type {
@@ -267,7 +285,10 @@ export const LazyAwsTemporaryKeysForm = lazy(() =>
 export type { AwsTemporaryKeysFormProps } from './components/cloud_connector/aws_connect_setup/aws_temporary_keys_form';
 
 // Agent policies query — used by the agent-based policy selector in ingest_hub
-export { useGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
+export {
+  useGetAgentPoliciesQuery,
+  useBulkGetAgentPoliciesQuery,
+} from './hooks/use_request/agent_policy';
 
 // Imperative agent policies fetcher — used to resolve the next available policy name
 export { sendGetAgentPolicies } from './hooks/use_request/agent_policy';

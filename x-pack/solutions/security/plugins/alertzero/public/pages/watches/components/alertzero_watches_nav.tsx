@@ -8,20 +8,17 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiSkeletonText,
   EuiTitle,
   useEuiTheme,
-  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
   compareWatchesForDisplay,
+  resolveWatchAccent,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  type Lifecycle,
   type Watch,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
@@ -35,16 +32,14 @@ import * as i18n from '../translations';
  */
 export type WatchesSectionId = string;
 
-const LIFECYCLE_LABEL: Record<Exclude<Lifecycle, 'ga'>, string> = {
-  beta: i18n.LIFECYCLE_BETA,
-  pilot: i18n.LIFECYCLE_PILOT,
-};
+/** Matches unexported `COMPACT_MIN_HEIGHT_PX` in `@kbn/ui-app-header`. */
+const NAV_HEADER_HEIGHT_PX = 48;
+
 interface AlertZeroWatchesNavProps {
   active: WatchesSectionId;
-  onCollapse: () => void;
 }
 
-export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active, onCollapse }) => {
+export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active }) => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading } = useWatches();
 
@@ -61,76 +56,83 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
       aria-label={i18n.SUBNAV_ARIA_LABEL}
       data-test-subj="alertZeroWatchesSubnav"
       css={css`
+        display: flex;
+        flex-direction: column;
         width: ${ALERTZERO_WATCHES_SUBNAV_WIDTH}px;
         flex-shrink: 0;
         height: 100%;
-        padding: ${euiTheme.size.m};
         border-right: 1px solid ${euiTheme.border.color};
-        background: ${euiTheme.colors.emptyShade};
+        background: ${euiTheme.colors.backgroundBaseSubdued};
       `}
     >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>{i18n.PAGE_TITLE}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.SUBNAV_COLLAPSE} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="menuLeft"
-              aria-label={i18n.SUBNAV_COLLAPSE}
-              color="text"
-              display="base"
-              data-test-subj="alertZeroWatchesSubnavCollapse"
-              onClick={onCollapse}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="xs"
-        responsive={false}
+      <div
         css={css`
-          margin-top: ${euiTheme.size.m};
+          display: flex;
+          align-items: center;
+          /* 48px row + border below it — compact AppHeader puts min-height on the row, not the box. */
+          min-height: calc(${NAV_HEADER_HEIGHT_PX}px + ${euiTheme.border.width.thin});
+          padding: 0 ${euiTheme.size.m};
+          border-bottom: ${euiTheme.border.thin};
+          flex-shrink: 0;
+        `}
+      >
+        <EuiTitle size="xs">
+          <h2>{i18n.PAGE_TITLE}</h2>
+        </EuiTitle>
+      </div>
+
+      <div
+        css={css`
+          flex: 1;
+          min-height: 0;
+          overflow: auto;
+          padding: ${euiTheme.size.s};
         `}
       >
         {isLoading && watches.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiSkeletonText
-              lines={5}
-              size="s"
-              isLoading
-              announceLoadedStatus={false}
-              aria-label={i18n.LOADING_WATCHES}
-              data-test-subj="alertZeroWatchesSubnavLoading"
-            />
-          </EuiFlexItem>
+          <EuiSkeletonText
+            lines={5}
+            size="s"
+            isLoading
+            announceLoadedStatus={false}
+            aria-label={i18n.LOADING_WATCHES}
+            data-test-subj="alertZeroWatchesSubnavLoading"
+          />
         ) : (
-          watches.map((watch) => (
-            <EuiFlexItem key={watch.id} grow={false}>
-              <WatchNavItem watch={watch} isActive={watch.id === active} />
-            </EuiFlexItem>
-          ))
+          <EuiListGroup
+            maxWidth={false}
+            css={css`
+              display: flex;
+              flex-direction: column;
+              gap: 2px;
+            `}
+          >
+            {watches.map((watch) => (
+              <WatchNavItem key={watch.id} watch={watch} isActive={watch.id === active} />
+            ))}
+          </EuiListGroup>
         )}
-      </EuiFlexGroup>
+      </div>
     </aside>
   );
 };
 
 const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, isActive }) => {
   const { euiTheme } = useEuiTheme();
-  const lifecycle = watch.lifecycle && watch.lifecycle !== 'ga' ? watch.lifecycle : undefined;
+  const history = useHistory();
+  const accent = resolveWatchAccent(euiTheme.colors, watch.color);
+  const path = `/watches/${encodeURIComponent(watch.id)}`;
 
-  return (
-    <NavButton id={watch.id} path={`/watches/${encodeURIComponent(watch.id)}`} isActive={isActive}>
+  const label = (
+    <span
+      css={css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        max-width: 100%;
+        min-width: 0;
+      `}
+    >
       <span
         aria-hidden={true}
         css={css`
@@ -138,12 +140,12 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
           width: ${euiTheme.size.s};
           height: ${euiTheme.size.s};
           border-radius: 50%;
-          background: ${watch.color};
+          background: ${accent};
         `}
       />
       <span
         css={css`
-          flex: 1;
+          flex: 1 1 auto;
           min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -152,66 +154,16 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
       >
         {watch.name}
       </span>
-      {lifecycle ? (
-        <EuiBadge color="hollow" data-test-subj={`alertZeroWatchesSubnavLifecycle-${watch.id}`}>
-          {LIFECYCLE_LABEL[lifecycle]}
-        </EuiBadge>
-      ) : null}
-    </NavButton>
+    </span>
   );
-};
-
-interface NavButtonProps {
-  id: WatchesSectionId;
-  path: string;
-  isActive: boolean;
-  children: React.ReactNode;
-}
-
-const NavButton: React.FC<NavButtonProps> = ({ id, path, isActive, children }) => {
-  const { euiTheme } = useEuiTheme();
-  const history = useHistory();
 
   return (
-    <button
-      type="button"
-      aria-current={isActive ? 'page' : undefined}
+    <EuiListGroupItem
+      label={label}
+      isActive={isActive}
       onClick={() => history.push(path)}
-      data-test-subj={`alertZeroWatchesSubnav-${id}`}
-      css={css`
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.s};
-        width: 100%;
-        padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        border: none;
-        border-radius: ${euiTheme.border.radius.medium};
-        background: ${isActive ? euiTheme.colors.lightShade : 'transparent'};
-        color: ${isActive ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued};
-        cursor: pointer;
-        font-size: ${euiTheme.size.m};
-        font-weight: ${isActive ? 600 : 500};
-        text-align: left;
-
-        &::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 8px;
-          bottom: 8px;
-          width: 3px;
-          border-radius: 0 2px 2px 0;
-          background: ${isActive ? euiTheme.colors.primary : 'transparent'};
-        }
-
-        &:hover {
-          background: ${euiTheme.colors.lightestShade};
-          color: ${euiTheme.colors.textParagraph};
-        }
-      `}
-    >
-      {children}
-    </button>
+      data-test-subj={`alertZeroWatchesSubnav-${watch.id}`}
+      aria-current={isActive ? 'page' : undefined}
+    />
   );
 };

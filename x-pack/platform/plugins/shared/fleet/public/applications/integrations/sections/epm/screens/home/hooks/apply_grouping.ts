@@ -121,8 +121,6 @@ export const applyGrouping = ({
       isUpdateAvailable: false,
       isReauthorizationRequired: false,
       searchableContent,
-      // Cap height to match min-height so long group descriptions don't overflow the card boundary.
-      maxCardHeight: 127,
     };
 
     collectionCards.push(collectionCard);

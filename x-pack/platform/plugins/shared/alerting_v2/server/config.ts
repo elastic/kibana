@@ -6,15 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, MIN_SCHEDULE_INTERVAL } from '@kbn/alerting-v2-schemas';
 import { parseDurationToMs, validateDuration } from './lib/duration';
-import {
-  DEFAULT_ESQL_RESPONSE_FORMAT,
-  ESQL_RESPONSE_FORMAT_NAMES,
-  getEsqlResponseFormat,
-  type EsqlResponseFormatName,
-} from './lib/services/query_service/formats';
+import type { EsqlResponseFormat } from './lib/services/query_service/formats';
 
 /** Default value of `xpack.alerting_v2.rules.minimumScheduleInterval`. */
 const MINIMUM_SCHEDULE_INTERVAL_DEFAULT = DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
@@ -104,15 +99,6 @@ const rulesSchema = schema.object({
   run: rulesRunSchema,
 });
 
-const esqlSchema = schema.object({
-  responseFormat: schema.oneOf(
-    ESQL_RESPONSE_FORMAT_NAMES.map((name) => schema.literal(name)) as [
-      Type<EsqlResponseFormatName>
-    ],
-    { defaultValue: DEFAULT_ESQL_RESPONSE_FORMAT }
-  ),
-});
-
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   invalidateApiKeysTask: schema.object({
@@ -120,21 +106,22 @@ export const configSchema = schema.object({
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
   }),
   rules: rulesSchema,
-  esql: esqlSchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
-export type EsqlConfig = TypeOf<typeof esqlSchema>;
 
 /**
  * Rows a single execution may request: the product-level `alerts.max` ceiling,
- * further capped by the configured response format when that format declares a
- * limit of its own.
+ * further capped by the active response format when that format declares a
+ * limit of its own. The format is passed in rather than read from config
+ * because it comes from the `alertingV2.esqlResponseFormat` feature flag, and
+ * the caller must derive the query `LIMIT` from the same format the query
+ * itself will use.
  */
-export const getQueryRowLimit = (config: PluginConfig): number => {
+export const getQueryRowLimit = (config: PluginConfig, format: EsqlResponseFormat): number => {
   const maxAlerts = config.rules.run.alerts.max;
-  const { maxRows } = getEsqlResponseFormat(config.esql.responseFormat);
+  const { maxRows } = format;
 
   return maxRows === undefined ? maxAlerts : Math.min(maxAlerts, maxRows);
 };

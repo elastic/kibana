@@ -1,0 +1,15 @@
+prs:
+- https://github.com/elastic/kibana/pull/287992
+issues:
+- https://github.com/elastic/security-team/issues/19046
+type: breaking-change
+subtype: api
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Record workflow executions in case activity
+description: When the Tech Preview **Run workflows from Cases** feature is enabled, `GET /api/cases/{caseId}/user_actions/_find` can return a new `workflow` user-action type and payload. The `types` query parameter also accepts `workflow`. API clients using exhaustive enum handling, closed generated unions, or strict response deserialization must accept the new variant or safely ignore unknown user-action types.
+impact: "API clients that deserialize responses from `GET /api/cases/{caseId}/user_actions/_find` using exhaustive enum handling, closed generated unions, or strict response deserialization must be updated. When the **Run workflows from Cases** Tech Preview feature is enabled, the endpoint can now return a `workflow` user-action type."
+action: "Update any code that deserializes the response of `GET /api/cases/{caseId}/user_actions/_find` to accept or safely ignore the new `workflow` user-action type and its payload. If your integration constructs the `types` query parameter programmatically, ensure it also accepts `workflow` as a valid value."

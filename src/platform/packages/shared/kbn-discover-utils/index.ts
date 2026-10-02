@@ -48,6 +48,8 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getFieldValueWithFallback,
+  getStacktraceFields,
   getChartHidden,
   getTableHidden,
   getSidebarHidden,
@@ -74,6 +76,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  openAfterDismissingOtherFlyouts,
   ErrorCallout,
   prepareDataViewForEditing,
   getEsqlDataView,
@@ -116,6 +119,8 @@ export type {
   MetricsGridSortDirection,
   MetricsGridSortField,
   SimpleAggregation,
+  LogDocument,
+  ObservabilityIndexes,
 } from './src';
 
 export * from './src/types';

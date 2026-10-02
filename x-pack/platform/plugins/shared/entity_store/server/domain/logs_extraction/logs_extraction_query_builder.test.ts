@@ -9,6 +9,7 @@ import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { validateQuery } from '@kbn/esql-language';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 
 describe('buildLogsExtractionEsqlQuery', () => {
   Object.values(EntityType.enum).forEach((type) => {
@@ -113,7 +114,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
     const sourceClauseOf = (query: string) => query.split('| EVAL')[0];
 
     it('priority gates on asset documents', () => {
-      expect(sourceClauseOf(buildForMode('priority'))).toContain(
+      expect(sourceClauseOf(buildForMode(EXTRACTION_MODE.priority))).toContain(
         'AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))'
       );
     });
@@ -127,7 +128,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
      * evaluator would report the document as matching either way, and so would not catch the bug.
      */
     it('nonPriority gates on the complement, including documents without event.kind', () => {
-      expect(sourceClauseOf(buildForMode('nonPriority'))).toContain(
+      expect(sourceClauseOf(buildForMode(EXTRACTION_MODE.nonPriority))).toContain(
         'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
       );
     });
@@ -136,8 +137,51 @@ describe('buildLogsExtractionEsqlQuery', () => {
       const single = buildForMode('single');
       const afterSourceClause = (query: string) => query.slice(sourceClauseOf(query).length);
 
-      expect(afterSourceClause(buildForMode('priority'))).toBe(afterSourceClause(single));
-      expect(afterSourceClause(buildForMode('nonPriority'))).toBe(afterSourceClause(single));
+      expect(afterSourceClause(buildForMode(EXTRACTION_MODE.priority))).toBe(
+        afterSourceClause(single)
+      );
+      expect(afterSourceClause(buildForMode(EXTRACTION_MODE.nonPriority))).toBe(
+        afterSourceClause(single)
+      );
+    });
+  });
+
+  describe('sampling stage', () => {
+    // Built with the non-priority definition since that is the only process the caller samples;
+    // the builder itself is mode-agnostic and just renders the rate it is given.
+    const buildWith = (samplingRate?: number) =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', EXTRACTION_MODE.nonPriority),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+        samplingRate,
+      });
+
+    it('emits SAMPLE after the source clause and before EVAL when the rate is below 1', async () => {
+      const query = buildWith(0.2);
+
+      const sampleIdx = query.indexOf('| SAMPLE 0.2');
+      const evalIdx = query.indexOf('| EVAL');
+      const whereIdx = query.indexOf('| WHERE');
+      expect(sampleIdx).toBeGreaterThan(whereIdx);
+      expect(sampleIdx).toBeLessThan(evalIdx);
+      expect(query).toMatchSnapshot();
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('a rate of 1 emits no SAMPLE stage - byte-identical to no rate at all', () => {
+      const withRateOne = buildWith(1);
+      const withoutRate = buildWith(undefined);
+
+      expect(withRateOne).toBe(withoutRate);
+      expect(withRateOne).not.toContain('SAMPLE');
+    });
+
+    it.each([0, -0.5, 1.5, NaN])('rejects out-of-range rate %p', (samplingRate) => {
+      expect(() => buildWith(samplingRate)).toThrow(/must be in \(0, 1\]/);
     });
   });
 

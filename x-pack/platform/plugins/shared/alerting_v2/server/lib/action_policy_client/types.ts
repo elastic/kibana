@@ -13,12 +13,12 @@ import type {
 
 export interface UpdateActionPolicyParams {
   data: UpdateActionPolicyData;
-  options: { id: string; version: string };
+  options: { id: string };
 }
 
 export interface CreateActionPolicyParams {
   data: CreateActionPolicyDataInput;
-  options?: { id?: string };
+  options?: { id?: string; enabled?: boolean };
 }
 
 export interface SnoozeActionPolicyParams {
@@ -59,6 +59,6 @@ export interface FindActionPoliciesResponse {
   perPage: number;
 }
 
-export interface MatchActionPoliciesForRuleParams {
+export interface MatchActionPoliciesParams {
   ruleTags?: string[];
 }

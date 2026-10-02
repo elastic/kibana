@@ -33,6 +33,7 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
     node scripts/evals start --suite agent-builder --grep "product documentation"
     node scripts/evals start --suite agent-builder --skip-server
+    node scripts/evals start --suite agent-builder --concurrency 8
     node scripts/evals stop
   `,
   flags: evalRunFlags,
@@ -50,10 +51,11 @@ export const startCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
+      suiteScoutEnv,
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
     const skipServer = flagsReader.boolean('skip-server');
 
@@ -97,6 +99,7 @@ export const startCmd: Command<void> = {
         repoRoot,
         log,
         profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
         requiresEisCcm,
       });
@@ -111,6 +114,7 @@ export const startCmd: Command<void> = {
       skipServer,
       suite,
       profileEnvOverrides,
+      suiteScoutEnv,
       flagsReader,
       log,
     });

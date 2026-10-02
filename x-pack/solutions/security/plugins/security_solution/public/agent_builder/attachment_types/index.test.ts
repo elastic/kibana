@@ -7,7 +7,7 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions } from '.';
+import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -15,12 +15,24 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
+  const resolveSecurityCanvasContext = jest.fn();
+  const getSpaceId = jest.fn().mockResolvedValue('default');
+  const mockData = { search: { search: jest.fn() } };
+
+  const register = () =>
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+      resolveSecurityCanvasContext,
+      getSpaceId,
+      data: mockData as never,
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -36,7 +48,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -52,11 +64,48 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity
     );
     expect(entityCall).toBeUndefined();
+  });
+
+  it('registers a renderConversationDetailsContent for security.alert', () => {
+    register();
+
+    const alertCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
+    );
+    expect(alertCall![1].renderConversationDetailsContent).toBeDefined();
+  });
+
+  it('registers a renderConversationDetailsContent for security.alerts', () => {
+    register();
+
+    const alertsCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
+    );
+    expect(alertsCall).toBeDefined();
+    expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
+  });
+});
+
+describe('registerImpactAttachment', () => {
+  it('registers the security.impact attachment type synchronously', () => {
+    const addAttachmentType = jest.fn();
+    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
+
+    registerImpactAttachment({ attachments });
+
+    expect(addAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.impact,
+      expect.objectContaining({
+        getIcon: expect.any(Function),
+        getLabel: expect.any(Function),
+        renderInlineContent: expect.any(Function),
+      })
+    );
   });
 });

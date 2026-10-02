@@ -9,3 +9,6 @@
 
 export { useCommentToEsql } from './use_comment_to_esql';
 export { useGhostLineHint } from './use_ghost_line_hint';
+export { useVisorNlToEsql } from './use_visor_nl_to_esql';
+export { useReplaceReview } from './use_replace_review';
+export type { ReviewState } from './use_replace_review';

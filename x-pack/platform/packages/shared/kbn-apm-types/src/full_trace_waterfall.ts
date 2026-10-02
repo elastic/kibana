@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TraceErrorRowSource } from './errors';
 import type { WaterfallGetErrorMarkerHref } from './waterfall';
 
 type FullTraceWaterfallScrollProps =
@@ -33,4 +34,5 @@ export type FullTraceWaterfallOnErrorClick = (params: {
   errorCount: number;
   errorDocId?: string;
   docIndex?: string;
+  errorSource?: TraceErrorRowSource;
 }) => void;

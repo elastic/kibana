@@ -15,7 +15,7 @@ import {
   filterGroupedModels,
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
-  TASK_TYPE_FILTERS,
+  MODEL_TYPE_FILTERS,
   type GroupedModel,
   type TaskTypeCategory,
 } from '../../utils/eis_utils';
@@ -66,9 +66,9 @@ describe('utils', () => {
     });
   });
 
-  describe('TASK_TYPE_FILTERS', () => {
+  describe('MODEL_TYPE_FILTERS', () => {
     it('covers all expected categories in order', () => {
-      expect(TASK_TYPE_FILTERS.map((f) => f.category)).toEqual(['LLM', 'Embedding', 'Rerank']);
+      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual(['LLM', 'Embedding', 'Rerank']);
     });
   });
 
@@ -289,6 +289,33 @@ describe('utils', () => {
       expect(result[0].endpoints).toHaveLength(2);
       expect(result[0].modelName).toBe('Elastic ELSER v2');
       expect(result[0].modelCreator).toBe('Elastic');
+    });
+
+    it('keeps release and end-of-life dates from a later endpoint when the first metadata has none', () => {
+      const withoutDates = {
+        ...makeEndpoint({
+          inference_id: 'eis-model-a',
+          task_type: 'chat_completion' as const,
+          service_settings: { model_id: 'shared-model' },
+        }),
+        metadata: { display: { name: 'Shared model', model_creator: 'Elastic' }, heuristics: {} },
+      } as EisInferenceEndpoint;
+      const withDates = {
+        ...makeEndpoint({
+          inference_id: 'eis-model-b',
+          task_type: 'completion' as const,
+          service_settings: { model_id: 'shared-model' },
+        }),
+        metadata: {
+          heuristics: { release_date: '2024-06-25', end_of_life_date: '2026-01-01' },
+        },
+      } as EisInferenceEndpoint;
+
+      const [grouped] = groupEndpointsByModel([withoutDates, withDates]);
+
+      expect(grouped.modelMetadata?.heuristics?.release_date).toBe('2024-06-25');
+      expect(grouped.modelMetadata?.heuristics?.end_of_life_date).toBe('2026-01-01');
+      expect(grouped.modelName).toBe('Shared model');
     });
   });
 
