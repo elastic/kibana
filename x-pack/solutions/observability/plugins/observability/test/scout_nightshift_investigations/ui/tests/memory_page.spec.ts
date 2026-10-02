@@ -604,12 +604,25 @@ test.describe(
      * hits it; the hover tooltip then names the keyword under the cursor, which
      * is read before the click rather than assumed afterwards.
      */
-    const clickLargestCell = async (page: ScoutPage, expectedKeyword: string) => {
-      const [canvas] = await page.testSubj
-        .locator('nightshiftMemoryTreemap')
-        .locator('canvas')
-        .all();
+    /**
+     * The treemap's canvas.
+     *
+     * The chart mounts its canvas only once the store-wide keyword query has
+     * answered, so the panel is visible a moment before there is anything to
+     * aim at.
+     */
+    const treemapCanvas = async (page: ScoutPage) => {
+      const canvases = () => page.testSubj.locator('nightshiftMemoryTreemap').locator('canvas');
+      await expect
+        .poll(async () => (await canvases().all()).length, { timeout: 30_000 })
+        .toBeGreaterThan(0);
+      const [canvas] = await canvases().all();
       await expect(canvas).toBeVisible();
+      return canvas;
+    };
+
+    const clickLargestCell = async (page: ScoutPage, expectedKeyword: string) => {
+      const canvas = await treemapCanvas(page);
       const box = await canvas.boundingBox();
       if (box === null) throw new Error('The keyword treemap canvas has no box');
 
