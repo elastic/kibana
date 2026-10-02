@@ -166,7 +166,6 @@ const RequiredFieldsList = ({
     Unfolded rows beyond the first ones render compact until the user focuses them.
   */
   const [isExpanded, setIsExpanded] = useState(false);
-  const expand = useCallback(() => setIsExpanded(true), []);
   const toggleExpanded = useCallback(() => setIsExpanded((value) => !value), []);
   const foldedRowsCount = isExpanded
     ? 0
@@ -223,7 +222,6 @@ const RequiredFieldsList = ({
               key={item.id}
               item={item}
               view={getRowView({ item, index, isExpanded })}
-              onFoldedRowError={expand}
               removeItem={removeItem}
               getWarnings={getWarnings}
               typesByFieldName={typesByFieldName}

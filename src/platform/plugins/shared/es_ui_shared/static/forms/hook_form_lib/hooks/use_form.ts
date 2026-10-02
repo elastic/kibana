@@ -139,9 +139,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const formData$ = useRef<Subject<FormData> | null>(null);
 
   /**
-   * Paths of the fields removed since the last form data update, see removeField()
+   * Form data copy that removed fields are deleted from before subscribers are notified, see removeField()
    */
-  const fieldNamesToRemoveFromFormData = useRef<string[]>([]);
+  const formDataWithPendingRemovals = useRef<FormData | null>(null);
 
   // ----------------------------------
   // -- HELPERS
@@ -322,36 +322,40 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const removeField: FormHook<T, I>['__removeField'] = useCallback(
     (_fieldNames) => {
       const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
-      const isFormDataUpdateScheduled = fieldNamesToRemoveFromFormData.current.length > 0;
+      const formDataSubject = getFormData$();
+
+      /**
+       * Every <UseField /> calls removeField() when it unmounts. Copying the form data and
+       * notifying subscribers for each field is O(n^2) when many fields unmount at once.
+       * Instead the form data is copied once per batch and the removed fields are deleted
+       * from the copy right away, so synchronous readers (e.g. validators of dependant fields)
+       * see the removals immediately, while subscribers are notified once for the whole batch.
+       * Any other form data update (e.g. a field value change) replaces the form data object and
+       * notifies subscribers itself, which ends the batch. We use a resolved Promise instead of
+       * "queueMicrotask()" as the latter is mocked by Jest fake timers.
+       */
+      if (formDataSubject.value !== formDataWithPendingRemovals.current) {
+        const batchedFormData = { ...formDataSubject.value };
+        formDataWithPendingRemovals.current = batchedFormData;
+        formDataSubject.setValueSilently(batchedFormData);
+
+        Promise.resolve().then(() => {
+          if (formDataWithPendingRemovals.current === batchedFormData) {
+            formDataWithPendingRemovals.current = null;
+          }
+
+          if (formDataSubject.value === batchedFormData) {
+            formDataSubject.notify();
+          }
+        });
+      }
 
       fieldNames.forEach((name) => {
         fieldsRemovedRefs.current[name] = fieldsRefs.current[name];
         updateFieldErrorMessage(name, null);
         delete fieldsRefs.current[name];
-        fieldNamesToRemoveFromFormData.current.push(name);
+        delete formDataSubject.value[name];
       });
-
-      /**
-       * Every <UseField /> calls removeField() when it unmounts. Copying the form data and
-       * notifying subscribers for each field is O(n^2) when many fields unmount at once,
-       * so we batch the removals and update the form data once. We use a resolved Promise
-       * instead of "queueMicrotask()" as the latter is mocked by Jest fake timers.
-       */
-      if (!isFormDataUpdateScheduled) {
-        Promise.resolve().then(() => {
-          const updatedFormData = { ...getFormData$().value };
-
-          for (const name of fieldNamesToRemoveFromFormData.current) {
-            // The field might have been added back in the meantime (e.g. an array item path was reused)
-            if (fieldsRefs.current[name] === undefined) {
-              delete updatedFormData[name];
-            }
-          }
-
-          fieldNamesToRemoveFromFormData.current = [];
-          updateFormData$(updatedFormData);
-        });
-      }
 
       /**
        * After removing a field, the form validity might have changed
@@ -366,7 +370,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         return prev;
       });
     },
-    [getFormData$, updateFormData$, fieldsToArray, updateFieldErrorMessage]
+    [getFormData$, fieldsToArray, updateFieldErrorMessage]
   );
 
   const getFormDefaultValue: FormHook<T, I>['__getFormDefaultValue'] = useCallback(

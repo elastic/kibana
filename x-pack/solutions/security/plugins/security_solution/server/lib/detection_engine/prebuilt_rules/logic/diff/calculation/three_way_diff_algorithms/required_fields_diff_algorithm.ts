@@ -84,16 +84,17 @@ const mergeVersions = ({
   diffOutcome,
   isRuleCustomized,
 }: MergeArgs): MergeResult => {
-  const dedupedCurrentVersion = dedupeRequiredFields(currentVersion);
   const dedupedTargetVersion = dedupeRequiredFields(targetVersion);
 
   switch (diffOutcome) {
+    // The current version is returned as-is so that `merged_version` matches `current_version`
+    // whenever `has_update` is false
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
       return {
         conflict: ThreeWayDiffConflict.NONE,
-        mergedVersion: dedupedCurrentVersion,
+        mergedVersion: currentVersion,
         mergeOutcome: ThreeWayMergeOutcome.Current,
       };
 

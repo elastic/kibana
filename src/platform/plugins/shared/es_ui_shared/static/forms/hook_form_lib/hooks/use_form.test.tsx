@@ -289,6 +289,22 @@ describe('useForm() hook', () => {
       subscription.unsubscribe();
     });
 
+    test('should remove the field from the form data synchronously', () => {
+      render(<TestComp fieldPaths={['field0', 'field1']} />);
+      const onFormDataChange = jest.fn();
+      const subscription = formHook!.__getFormData$().subscribe(onFormDataChange);
+      onFormDataChange.mockClear();
+
+      act(() => {
+        formHook!.__removeField('field1');
+
+        expect(formHook!.__getFormData$().value).toEqual({ field0: 'field0' });
+        expect(onFormDataChange).not.toHaveBeenCalled();
+      });
+
+      subscription.unsubscribe();
+    });
+
     test('should keep the form data of a field added back with the same path', async () => {
       const { rerender } = render(<TestComp fieldPaths={['foo']} fieldKey="initial" />);
 

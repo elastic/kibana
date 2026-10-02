@@ -274,7 +274,7 @@ describe('requiredFieldsDiffAlgorithm', () => {
       );
     });
 
-    it('deduplicates the merged version', () => {
+    it('keeps the current version as-is when there is no update', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one')],
         current_version: [field('one'), field('one')],
@@ -285,10 +285,31 @@ describe('requiredFieldsDiffAlgorithm', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          merged_version: [field('one')],
+          merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
           conflict: ThreeWayDiffConflict.NONE,
+          has_update: false,
+        })
+      );
+    });
+
+    it('deduplicates the target version when updating', () => {
+      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
+        base_version: [field('one')],
+        current_version: [field('one')],
+        target_version: [field('two'), field('two')],
+      };
+
+      const result = requiredFieldsDiffAlgorithm(mockVersions, false);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          merged_version: [field('two')],
+          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Target,
+          conflict: ThreeWayDiffConflict.NONE,
+          has_update: true,
         })
       );
     });

@@ -165,6 +165,14 @@ describe('RuleDefinitionSection', () => {
     const createRequiredFields = (count: number) =>
       Array.from({ length: count }, (_, i) => ({ name: `field${i}`, type: 'keyword', ecs: false }));
 
+    it('shows duplicated required fields once', () => {
+      const requiredFields = [...createRequiredFields(2), ...createRequiredFields(2)];
+
+      render(<RequiredFields requiredFields={requiredFields} />);
+
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')).toHaveLength(2);
+    });
+
     it('shows all required fields for short lists', () => {
       render(<RequiredFields requiredFields={createRequiredFields(15)} />);
 

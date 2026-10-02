@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { isEmpty } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
+import { isEmpty, uniqBy } from 'lodash/fp';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -326,19 +326,25 @@ interface RequiredFieldsProps {
 export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
   const styles = useRequiredFieldsStyles();
 
+  /* Stored lists may contain duplicates, see required fields diff algorithms */
+  const uniqueRequiredFields = useMemo(
+    () => uniqBy(({ name, type }) => `${name}\u0000${type}`, requiredFields),
+    [requiredFields]
+  );
+
   /* Long lists are folded to keep rule details and flyouts compact */
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleExpanded = useCallback(() => setIsExpanded((value) => !value), []);
-  const foldedFieldsCount = Math.max(requiredFields.length - MAX_UNFOLDED_REQUIRED_FIELDS, 0);
+  const foldedFieldsCount = Math.max(uniqueRequiredFields.length - MAX_UNFOLDED_REQUIRED_FIELDS, 0);
   const visibleRequiredFields = isExpanded
-    ? requiredFields
-    : requiredFields.slice(0, MAX_UNFOLDED_REQUIRED_FIELDS);
+    ? uniqueRequiredFields
+    : uniqueRequiredFields.slice(0, MAX_UNFOLDED_REQUIRED_FIELDS);
 
   return (
     <>
       <EuiFlexGrid data-test-subj="requiredFieldsPropertyValue" gutterSize={'s'}>
         {visibleRequiredFields.map((rF, index) => (
-          <EuiFlexItem grow={false} key={rF.name}>
+          <EuiFlexItem grow={false} key={`${rF.name}-${rF.type}`}>
             <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
               <EuiFlexItem grow={false}>
                 <RequiredFieldIcon type={rF.type} data-test-subj="field-type-icon" />

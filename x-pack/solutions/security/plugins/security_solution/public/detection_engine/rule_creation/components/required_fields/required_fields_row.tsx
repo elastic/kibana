@@ -37,7 +37,7 @@ export interface RequiredFieldWarnings {
 /*
   - "full" renders comboboxes
   - "compact" renders cheap text inputs until the user focuses the row
-  - "folded" renders nothing but keeps the row registered in the form
+  - "folded" renders nothing but keeps the row registered in the form, invalid folded rows reveal themselves
 */
 export type RequiredFieldRowView = 'full' | 'compact' | 'folded';
 
@@ -46,7 +46,6 @@ type RequiredFieldInputKey = keyof RequiredFieldInput;
 interface RequiredFieldRowProps {
   item: ArrayItem;
   view: RequiredFieldRowView;
-  onFoldedRowError: () => void;
   removeItem: (id: number) => void;
   typesByFieldName: Record<string, string[] | undefined>;
   getAvailableFieldNames: () => string[];
@@ -61,7 +60,6 @@ interface RequiredFieldRowProps {
 export const RequiredFieldRow = React.memo(function RequiredFieldRow({
   item,
   view,
-  onFoldedRowError,
   removeItem,
   typesByFieldName,
   getAvailableFieldNames,
@@ -81,7 +79,6 @@ export const RequiredFieldRow = React.memo(function RequiredFieldRow({
 
   const componentProps = useMemo(
     () => ({
-      onError: onFoldedRowError,
       itemId: item.id,
       autoFocus: item.isNew ? 'name' : undefined,
       onRemove: handleRemove,
@@ -89,15 +86,7 @@ export const RequiredFieldRow = React.memo(function RequiredFieldRow({
       getWarnings,
       getAvailableFieldNames,
     }),
-    [
-      onFoldedRowError,
-      item.id,
-      item.isNew,
-      handleRemove,
-      typesByFieldName,
-      getWarnings,
-      getAvailableFieldNames,
-    ]
+    [item.id, item.isNew, handleRemove, typesByFieldName, getWarnings, getAvailableFieldNames]
   );
 
   return (
@@ -260,23 +249,29 @@ const CompactRequiredFieldField = React.memo(function CompactRequiredFieldField(
   );
 });
 
-interface FoldedRequiredFieldFieldProps {
-  field: FieldHook<RequiredFieldInput>;
-  onError: () => void;
-}
-
-/* Keeps a folded row registered in the form without rendering it, unfolds rows on validation errors */
-const FoldedRequiredFieldField = ({ field, onError }: FoldedRequiredFieldFieldProps) => {
-  const hasErrors = field.errors.length > 0;
+/*
+  Keeps a folded row registered in the form without rendering it. An invalid folded row
+  reveals itself so the user can fix it while the rest of the list stays folded, and it stays
+  revealed once fixed so it doesn't disappear while being edited.
+*/
+const FoldedRequiredFieldField = React.memo(function FoldedRequiredFieldField(
+  props: RequiredFieldFieldProps
+) {
+  const hasErrors = props.field.errors.length > 0;
+  const [isRevealed, setIsRevealed] = useState(hasErrors);
 
   useEffect(() => {
     if (hasErrors) {
-      onError();
+      setIsRevealed(true);
     }
-  }, [hasErrors, onError]);
+  }, [hasErrors]);
 
-  return null;
-};
+  if (!isRevealed && !hasErrors) {
+    return null;
+  }
+
+  return <CompactRequiredFieldField {...props} />;
+});
 
 const ROW_VIEW_COMPONENTS = {
   full: RequiredFieldField,

@@ -548,7 +548,7 @@ describe('RequiredFields form part', () => {
       });
     });
 
-    it('unfolds the list when a folded required field is invalid', async () => {
+    it('reveals an invalid folded required field while keeping the list folded', async () => {
       const handleSubmit = jest.fn();
       const initialState = [...longInitialState, { name: 'field0', type: 'keyword' }];
 
@@ -560,7 +560,34 @@ describe('RequiredFields form part', () => {
         expect(handleSubmit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
       });
 
-      expect(screen.getByDisplayValue('field19')).toBeVisible();
+      expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent('Show 6 more');
+    });
+
+    it('collapses the list while a revealed required field is still invalid', async () => {
+      const handleSubmit = jest.fn();
+      const initialState = [...longInitialState, { name: 'field0', type: 'keyword' }];
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.getByTestId('requiredFieldNameCompact-field19')).toBeVisible();
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
       expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
     });
 
