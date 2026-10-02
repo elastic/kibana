@@ -27,7 +27,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
-import { AiIndexDetailPanelEmptyPrompt } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
+import { AiIndexDetailPanelEmptyState } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
 interface ConnectorsTabProps {
   selectedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
@@ -129,11 +129,11 @@ const ConnectorsTabContent = ({
         </EuiFlexGroup>
       )}
       {showEmptyPrompt && (
-        <AiIndexDetailPanelEmptyPrompt
+        <AiIndexDetailPanelEmptyState
           paddingSize="none"
           iconType="plugs"
           dataTestSubj="contextConnectorsEmpty"
-          title={
+          message={
             canCreateConnector ? (
               <FormattedMessage
                 id="xpack.contextEngine.sourcePicker.connectors.emptyBody"

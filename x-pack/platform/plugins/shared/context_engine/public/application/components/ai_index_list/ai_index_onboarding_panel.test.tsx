@@ -43,7 +43,7 @@ describe('AiIndexOnboardingPanel', () => {
 
     expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexOnboardingIllustration')).toBeInTheDocument();
-    expect(screen.getByText('Get started with Context')).toBeInTheDocument();
+    expect(screen.getByText('Get started')).toBeInTheDocument();
     expect(
       screen.getByText(
         /An AI Index stores precomputed, curated context derived from your source data/
@@ -52,9 +52,6 @@ describe('AiIndexOnboardingPanel', () => {
     expect(screen.getByTestId('contextCreateAiIndexButton')).toHaveTextContent('Create AI Index');
     const learnMoreLink = screen.getByTestId('contextAiIndexOnboardingLearnMoreLink');
     expect(learnMoreLink).toHaveTextContent('Learn what an AI index is');
-    expect(learnMoreLink).toHaveAttribute(
-      'href',
-      core.docLinks.links.contextEngine.buildAndMaintainAiIndex
-    );
+    expect(learnMoreLink).toHaveAttribute('href', core.docLinks.links.contextEngine.aiIndices);
   });
 });

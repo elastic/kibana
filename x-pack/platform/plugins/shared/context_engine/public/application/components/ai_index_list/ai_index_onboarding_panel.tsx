@@ -47,7 +47,7 @@ export const AiIndexOnboardingPanel = () => {
                 <h2>
                   <FormattedMessage
                     id="xpack.contextEngine.landing.onboarding.title"
-                    defaultMessage="Get started with Context"
+                    defaultMessage="Get started"
                   />
                 </h2>
               </EuiTitle>
@@ -69,7 +69,7 @@ export const AiIndexOnboardingPanel = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiLink
-                    href={docLinks.links.contextEngine.buildAndMaintainAiIndex}
+                    href={docLinks.links.contextEngine.aiIndices}
                     external
                     data-test-subj="contextAiIndexOnboardingLearnMoreLink"
                     {...getEbtProps({

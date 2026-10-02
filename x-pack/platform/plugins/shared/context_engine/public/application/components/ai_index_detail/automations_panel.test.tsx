@@ -175,11 +175,9 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No automations yet')).toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Create a Workflow to generate and refresh Knowledge Indicators from source data.'
-      )
+      screen.getByText('Automations keep Knowledge Indicators current as your sources change.')
     ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
@@ -188,10 +186,7 @@ describe('AutomationsPanel', () => {
     renderPanel({ isManaged: true });
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(
-      screen.getByText('No automations are configured for this AI index.')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('No automations yet')).not.toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 

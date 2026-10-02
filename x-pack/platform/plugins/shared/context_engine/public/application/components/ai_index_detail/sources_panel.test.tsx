@@ -119,14 +119,12 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No sources yet')).toBeInTheDocument();
+    expect(screen.getByText('No sources configured.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Add the data that automations should analyze when generating Knowledge Indicators.'
-      )
+      screen.getByText('Data that automations should analyze when generating Knowledge Indicators.')
     ).toBeInTheDocument();
   });
 
@@ -141,7 +139,7 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('This AI index has no sources.')).toBeInTheDocument();
+    expect(screen.getByText('No sources configured.')).toBeInTheDocument();
   });
 
   it('renders one row per source', () => {

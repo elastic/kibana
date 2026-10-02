@@ -66,9 +66,7 @@ describe('AiIndexManagedRow', () => {
 
     expect(screen.getByTestId('contextAiIndexManagedRowTitle')).toHaveTextContent('elastic');
     expect(screen.getByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent('Managed');
-    expect(screen.getByTestId('contextAiIndexManagedRowIntegratedVia')).toHaveTextContent(
-      'Elastic (built-in)'
-    );
+    expect(screen.queryByTestId('contextAiIndexManagedRowIntegratedVia')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexManagedRowActions')).toBeInTheDocument();
 
     await waitFor(() =>

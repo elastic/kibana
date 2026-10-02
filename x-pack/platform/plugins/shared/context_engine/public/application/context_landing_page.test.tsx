@@ -224,9 +224,7 @@ describe('ContextLandingPage', () => {
     expect(await screen.findByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent(
       'Managed'
     );
-    expect(screen.getByTestId('contextAiIndexManagedRowIntegratedVia')).toHaveTextContent(
-      'Elastic (built-in)'
-    );
+    expect(screen.queryByTestId('contextAiIndexManagedRowIntegratedVia')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
   });
 
