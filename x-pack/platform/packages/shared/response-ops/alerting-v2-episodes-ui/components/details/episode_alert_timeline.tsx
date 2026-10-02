@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AlertTimelineChart,
-  AlertTimelineLegend,
   deriveEpisodeAlertTimelineData,
+  deriveEpisodeSeverityTimelineData,
+  EpisodeSeverityTimelineRow,
+  formatTimestamp,
+  type EpisodeSeverityTimelineSegment,
 } from '../../alert_timeline';
+import { getEpisodeSeverityLabel } from '../severity/severity_utils';
+import { SeverityHeatmapDetailPanel } from './severity_heatmap_detail_panel';
 import { getPanelTitleSize } from './panel_title_sizes';
 import * as i18n from './translations';
 
@@ -34,11 +39,19 @@ export const AlertEpisodeAlertTimeline = ({
   compressed,
 }: AlertEpisodeAlertTimelineProps) => {
   const { services } = useKibana<AlertEpisodeAlertTimelineServices>();
+  const { euiTheme } = useEuiTheme();
+  const [selectedSeverityTransition, setSelectedSeverityTransition] =
+    useState<EpisodeSeverityTimelineSegment | null>(null);
   const baseTheme = services.charts.theme.useChartsBaseTheme();
   const timeZone = services.uiSettings.get<string>('dateFormat:tz', 'Browser');
   const timelineData = useMemo(
     () => deriveEpisodeAlertTimelineData(eventRows, Date.now()),
     [eventRows]
+  );
+  const severitySegments = useMemo(
+    () =>
+      timelineData ? deriveEpisodeSeverityTimelineData(eventRows, timelineData.windowEndMs) : [],
+    [eventRows, timelineData]
   );
 
   return (
@@ -46,9 +59,7 @@ export const AlertEpisodeAlertTimeline = ({
       <EuiTitle size={getPanelTitleSize(compressed)}>
         <h2>{i18n.ALERT_TIMELINE_TITLE}</h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <AlertTimelineLegend />
-      <EuiHorizontalRule margin="m" />
+      <EuiSpacer size="m" />
       {timelineData ? (
         <AlertTimelineChart
           rows={[timelineData.row]}
@@ -56,6 +67,28 @@ export const AlertEpisodeAlertTimeline = ({
           windowEndMs={timelineData.windowEndMs}
           baseTheme={baseTheme}
           timeZone={timeZone}
+          showEpisodeId={false}
+          labelColumnWidth={64}
+          renderSeriesLabel={() => (
+            <EuiText size="xs">{i18n.ALERT_TIMELINE_LIFECYCLE_LANE_LABEL}</EuiText>
+          )}
+          customRows={
+            severitySegments.length > 0
+              ? [
+                  {
+                    id: 'severity',
+                    label: <EuiText size="xs">{i18n.ALERT_TIMELINE_SEVERITY_LANE_LABEL}</EuiText>,
+                    render: (rowProps) => (
+                      <EpisodeSeverityTimelineRow
+                        segments={severitySegments}
+                        onTransitionClick={setSelectedSeverityTransition}
+                        {...rowProps}
+                      />
+                    ),
+                  },
+                ]
+              : []
+          }
         />
       ) : (
         <EuiEmptyPrompt
@@ -63,6 +96,18 @@ export const AlertEpisodeAlertTimeline = ({
           body={<p>{i18n.ALERT_TIMELINE_EMPTY_BODY}</p>}
           data-test-subj="alertingV2EpisodeAlertTimelineEmpty"
         />
+      )}
+      {selectedSeverityTransition && (
+        <>
+          <EuiSpacer size="s" />
+          <SeverityHeatmapDetailPanel
+            severityLabel={getEpisodeSeverityLabel(selectedSeverityTransition.severity)}
+            timestamp={formatTimestamp(selectedSeverityTransition.x0Ms, timeZone)}
+            eventData={selectedSeverityTransition.eventData}
+            euiTheme={euiTheme}
+            onClose={() => setSelectedSeverityTransition(null)}
+          />
+        </>
       )}
     </div>
   );

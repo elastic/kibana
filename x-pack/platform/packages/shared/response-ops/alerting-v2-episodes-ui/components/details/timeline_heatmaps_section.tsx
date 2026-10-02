@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
-import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
 const AlertEpisodeAlertTimeline = React.lazy(() =>
   import('./episode_alert_timeline').then((m) => ({ default: m.AlertEpisodeAlertTimeline }))
-);
-
-const AlertEpisodeSeverityHeatmap = React.lazy(() =>
-  import('./severity_heatmap').then((m) => ({ default: m.AlertEpisodeSeverityHeatmap }))
 );
 
 /** Matches the loaded heatmap layout: an xxs title, a spacer, and a 20px-high chart. */
@@ -51,11 +46,6 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
     isError,
   } = useFetchEpisodeEventsQuery({ episodeId, services });
 
-  const severityEventRows = useMemo(
-    () => (eventRows ?? []).filter((row) => isSupportedEpisodeSeverity(row.severity)),
-    [eventRows]
-  );
-
   if (isLoading) {
     return (
       <EuiPanel
@@ -85,14 +75,6 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
       <React.Suspense fallback={<HeatmapSkeleton />}>
         <AlertEpisodeAlertTimeline eventRows={eventRows ?? []} compressed={compressed} />
       </React.Suspense>
-      {severityEventRows.length > 0 && (
-        <>
-          <EuiSpacer size="l" />
-          <React.Suspense fallback={<HeatmapSkeleton />}>
-            <AlertEpisodeSeverityHeatmap eventRows={severityEventRows} compressed={compressed} />
-          </React.Suspense>
-        </>
-      )}
     </EuiPanel>
   );
 };
