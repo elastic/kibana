@@ -177,6 +177,48 @@ describe('InProgressResolver', () => {
     expect(logger.warn).toHaveBeenCalledTimes(2);
   });
 
+  it('reads one investigation as not in progress while the execution index has no available shard', async () => {
+    const { resolver, findExecutions, getWorkflowExecutions, logger } = setup();
+    const noShardAvailable = Object.assign(new Error('all shards failed'), {
+      statusCode: 503,
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          root_cause: [{ type: 'no_shard_available_action_exception' }],
+        },
+      },
+    });
+    findExecutions.mockRejectedValue(noShardAvailable);
+    getWorkflowExecutions.mockRejectedValue(
+      Object.assign(new Error('no such index'), {
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+      })
+    );
+
+    await expect(resolver.isInProgress(request, SPACE_ID, 'conv-a')).resolves.toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Could not read agent executions')
+    );
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('reads as not in progress when the agent execution service itself throws', async () => {
+    const logger = loggerMock.create();
+    const resolver = new InProgressResolver({
+      getAgentExecutions: () => {
+        throw new Error('execution service unavailable');
+      },
+      getWorkflowsManagement: () => undefined,
+      driverWorkflows: new InvestigationDriverWorkflowRegistry(),
+      logger,
+    });
+
+    await expect(resolver.isInProgress(request, SPACE_ID, 'conv-a')).resolves.toBe(false);
+    await expect(resolver.findInProgressIds(request, SPACE_ID)).resolves.toEqual(new Set());
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+  });
+
   it('checks one investigation by its exact concurrency key when no agent run holds it', async () => {
     const { resolver, getWorkflowExecutions } = setup({
       workflowExecutions: { 'driver-1': [{ concurrencyGroupKey: 'investigation:conv-b' }] },

@@ -83,6 +83,11 @@ export class InProgressResolver {
     return workflowIds.has(conversationId);
   }
 
+  /**
+   * On a fresh cluster the agent execution index may not exist yet or have no shard allocated;
+   * Agent Builder then throws (for example `no_shard_available_action_exception`). That, like any
+   * other failure here, is logged and reads as no agent runs, so it cannot fail the request.
+   */
   private async findAgentRunConversationIds(
     request: KibanaRequest,
     spaceId: string
