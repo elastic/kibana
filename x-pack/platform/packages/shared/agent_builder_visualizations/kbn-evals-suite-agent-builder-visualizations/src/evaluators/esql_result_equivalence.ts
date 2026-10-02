@@ -25,6 +25,9 @@ const roundValue = (value: unknown, floatTolerance: number): unknown =>
  * Serialises each row as a sorted bag of its values. Column names are dropped
  * because gold and candidate alias their STATS outputs differently, and column
  * order is dropped because `STATS a, b` and `STATS b, a` draw the same chart.
+ * Rows are compared whole by design: a candidate with one extra or missing
+ * column shares no row with the gold and scores 0. Partial credit for a
+ * nearly right query comes from Config vs Intent and the equivalence judge.
  */
 export function normalizeRows(values: unknown[][], options: RowNormalizeOptions = {}): string[] {
   const { floatTolerance = 2 } = options;
