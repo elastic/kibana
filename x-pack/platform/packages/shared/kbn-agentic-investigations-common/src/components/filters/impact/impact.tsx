@@ -61,6 +61,7 @@ export const Impact: React.FC<ImpactProps> = ({
                 onEntityFilterChange(entityFilter === pill.entityId ? null : pill.entityId)
               }
               onClickAriaLabel={pill.entityId}
+              title={pill.entityId}
               css={css({
                 background:
                   entityFilter === pill.entityId

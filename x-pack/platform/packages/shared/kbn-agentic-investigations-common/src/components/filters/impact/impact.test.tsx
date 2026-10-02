@@ -58,6 +58,20 @@ describe('Impact', () => {
     expect(screen.getByText('1')).toBeInTheDocument();
   });
 
+  it('exposes the full entity id as the pill title, since the visible label is cut at a fixed width', () => {
+    const longId = `host:${'h'.repeat(200)}`;
+
+    renderWithKibanaRenderContext(
+      <Impact
+        investigations={[investigation({ entityIds: [longId] })]}
+        entityFilter={null}
+        onEntityFilterChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: longId })).toHaveAttribute('title', longId);
+  });
+
   it('selects a pill and clears it on the second click', () => {
     const onEntityFilterChange = jest.fn();
     const investigations = [investigation({ entityIds: ['host-1'] })];
