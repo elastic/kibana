@@ -67,7 +67,7 @@ export const EditMode: Story = {
   },
 };
 
-export const PerEpisodeWithInterval: Story = {
+export const PerAlertWithInterval: Story = {
   args: {
     defaultValues: {
       name: 'Status change with reminders',
@@ -87,7 +87,7 @@ export const DigestMode: Story = {
   args: {
     defaultValues: {
       name: 'Digest summary',
-      description: 'Bundles all episodes into a single digest',
+      description: 'Bundles all alerts into a single digest',
       matcher: null,
       groupingMode: 'all',
       groupBy: [],

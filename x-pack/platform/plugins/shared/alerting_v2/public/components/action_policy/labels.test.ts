@@ -8,8 +8,8 @@
 import { getFrequencyLabel, getGroupingModeLabel } from './labels';
 
 describe('getGroupingModeLabel', () => {
-  it('returns the Episode label for per_alert', () => {
-    expect(getGroupingModeLabel('per_alert')).toBe('Episode');
+  it('returns the Alert label for per_alert', () => {
+    expect(getGroupingModeLabel('per_alert')).toBe('Alert');
   });
 
   it('returns the Group label for per_field', () => {

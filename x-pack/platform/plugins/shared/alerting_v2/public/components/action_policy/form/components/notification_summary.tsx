@@ -39,32 +39,31 @@ export const getDispatchSummary = ({
     switch (throttleStrategy) {
       case 'on_status_change':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChange',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.statusChange',
           {
-            defaultMessage:
-              'Sends one notification when an episode opens and one when it recovers.',
+            defaultMessage: 'Sends one notification when an alert opens and one when it recovers.',
           }
         );
       case 'per_status_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeNoInterval',
+            'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.statusChangeNoInterval',
             {
               defaultMessage: 'Sends a notification on status change.',
             }
           );
         }
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeRepeat',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.statusChangeRepeat',
           {
             defaultMessage:
-              'Sends a notification on status change and repeats every {interval} while the episode remains active.',
+              'Sends a notification on status change and repeats every {interval} while the alert remains active.',
             values: { interval },
           }
         );
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.alert.everyEvaluation',
           {
             defaultMessage:
               'Sends a notification for every rule evaluation. No limit on notification frequency.',
@@ -120,7 +119,7 @@ export const getDispatchSummary = ({
           return i18n.translate(
             'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttleNoInterval',
             {
-              defaultMessage: 'Combines all matching episodes into one notification.',
+              defaultMessage: 'Combines all matching alerts into one notification.',
             }
           );
         }
@@ -128,7 +127,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttle',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification at most every {interval}.',
+              'Combines all matching alerts into one notification at most every {interval}.',
             values: { interval },
           }
         );
@@ -137,7 +136,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.everyEvaluation',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.',
+              'Combines all matching alerts into one notification on every rule evaluation. No limit on notification frequency.',
           }
         );
     }
