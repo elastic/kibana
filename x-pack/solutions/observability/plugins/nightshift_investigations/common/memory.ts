@@ -130,4 +130,3 @@ export interface GetMemoryPageResponse {
   usefulness: number;
   confidence: number;
 }
-

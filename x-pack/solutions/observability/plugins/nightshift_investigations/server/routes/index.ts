@@ -65,7 +65,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getAutomationRoute,
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
-...listAutomationRunsRoute,
+  ...listAutomationRunsRoute,
   ...getMemoryAvailabilityRoute,
   ...listMemoryPagesRoute,
   ...getMemoryPageRoute,

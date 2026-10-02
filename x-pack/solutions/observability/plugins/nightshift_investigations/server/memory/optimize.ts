@@ -691,8 +691,7 @@ export const applyMemoryEdits = async ({
     }
 
     const named = recalledMemories.filter(
-      (page) =>
-        extra.replaces.includes(page.id) && !page.archived && !harmful.has(page.id)
+      (page) => extra.replaces.includes(page.id) && !page.archived && !harmful.has(page.id)
     );
     const harmfulReplaces = extra.replaces.filter((id) => harmful.has(id));
     if (harmfulReplaces.length > 0) {

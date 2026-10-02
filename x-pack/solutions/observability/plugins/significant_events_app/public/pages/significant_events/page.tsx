@@ -222,7 +222,7 @@ export function SignificantEventsPage() {
           ]
         : []),
     ],
-    [tab, router, isCortexEnabled, isDecisionTreesEnabled]
+    [tab, router, isCortexEnabled, isMemoryEnabled, isDecisionTreesEnabled]
   );
   const tabs = useMemo(
     () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
