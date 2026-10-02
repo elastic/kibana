@@ -8,7 +8,7 @@
 import type { BehaviorSubject } from 'rxjs';
 
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ViewMode, useSearchApi } from '@kbn/presentation-publishing';
+import type { PublishingSubject, ViewMode, useSearchApi } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 
 import type { LensRuntimeState } from '@kbn/lens-common';
