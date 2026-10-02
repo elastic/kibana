@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -66,8 +66,16 @@ export const PrivateLocationsTable = ({
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
-  const { resetMonitors, getUnhealthyLocationStatuses, getUnhealthyMonitorsForLocation } =
-    useMonitorIntegrationHealth();
+  const privateLocationIds = useMemo(
+    () => privateLocations.map(({ id }) => id),
+    [privateLocations]
+  );
+  const {
+    resetMonitors,
+    getUnhealthyLocationStatuses,
+    getUnhealthyMonitorsForLocation,
+    getUnhealthyConfigIdsForLocation,
+  } = useMonitorIntegrationHealth({ locationIds: privateLocationIds });
 
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
@@ -147,7 +155,10 @@ export const PrivateLocationsTable = ({
             <EuiFlexItem grow={false}>
               <ViewLocationMonitors count={monitors} locationName={item.label} />
             </EuiFlexItem>
-            <UnhealthyCountBadge item={item} />
+            <UnhealthyCountBadge
+              item={item}
+              unhealthyConfigIds={getUnhealthyConfigIdsForLocation(item.id)}
+            />
           </EuiFlexGroup>
         );
       },
