@@ -89,9 +89,10 @@ export function KiGenerationProvider({
   >({});
   const initialStatusFetchDoneRef = useRef(false);
   // Dedup guard: every refetch of the source list returns a new array, which
-  // re-fires the status-fetch effect. This ref tracks already-enqueued source ids
-  // so only new sources trigger network calls.
-  const enqueuedStreamNamesRef = useRef<Set<string>>(new Set());
+  // re-fires the status-fetch effect. This ref maps each enqueued source id to the query version
+  // (`esql_updated_at`) it was enqueued with, so only new sources and sources whose query changed
+  // (which resets their onboarding status) trigger network calls.
+  const enqueuedQueryVersionsRef = useRef<Map<string, string>>(new Map());
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
@@ -155,9 +156,9 @@ export function KiGenerationProvider({
     if (!fetchedSources) return;
 
     let hasNew = false;
-    fetchedSources.forEach(({ id }) => {
-      if (!enqueuedStreamNamesRef.current.has(id)) {
-        enqueuedStreamNamesRef.current.add(id);
+    fetchedSources.forEach(({ id, esql_updated_at: queryVersion }) => {
+      if (enqueuedQueryVersionsRef.current.get(id) !== queryVersion) {
+        enqueuedQueryVersionsRef.current.set(id, queryVersion);
         onboardingStatusUpdateQueue.add(id);
         hasNew = true;
       }

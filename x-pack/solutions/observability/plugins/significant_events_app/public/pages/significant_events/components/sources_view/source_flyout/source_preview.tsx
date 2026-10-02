@@ -29,6 +29,9 @@ interface SourcePreviewProps {
 }
 
 export function SourcePreview({ esql, runId }: SourcePreviewProps) {
+  // A refresh over unchanged absolute bounds leaves the query key as it was, so count it.
+  const [refreshCount, setRefreshCount] = useState(0);
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -43,19 +46,30 @@ export function SourcePreview({ esql, runId }: SourcePreviewProps) {
               <h3>{PREVIEW_TITLE}</h3>
             </EuiTitle>
           </EuiFlexGroup>
-          <SignificantEventsSearchBar showDatePicker />
+          <SignificantEventsSearchBar
+            showDatePicker
+            onQuerySubmit={(_payload, isUpdate) => {
+              if (!isUpdate) {
+                setRefreshCount((count) => count + 1);
+              }
+            }}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <EuiFlexItem grow>
-        <SourcePreviewContent esql={esql} runId={runId} />
+        <SourcePreviewContent esql={esql} runId={runId} refreshCount={refreshCount} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function SourcePreviewContent({ esql, runId }: SourcePreviewProps) {
-  const { data, error, isFetching } = useSourcePreview({ esql, runId });
+function SourcePreviewContent({
+  esql,
+  runId,
+  refreshCount,
+}: SourcePreviewProps & { refreshCount: number }) {
+  const { data, error, isFetching } = useSourcePreview({ esql, runId, refreshCount });
 
   if (esql.trim() === '') {
     return <EuiEmptyPrompt titleSize="xxs" title={<h4>{PREVIEW_IDLE_TITLE}</h4>} />;

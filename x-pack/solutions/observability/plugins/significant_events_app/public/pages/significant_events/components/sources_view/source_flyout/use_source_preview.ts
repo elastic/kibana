@@ -16,9 +16,18 @@ const PREVIEW_ROW_LIMIT = 100;
 
 /**
  * Sample rows of a source query over the app time range. Idle while the query is empty. `runId`
- * is part of the cache key, so each run of the same query fetches again.
+ * and `refreshCount` are part of the cache key, so each run of the same query, and each explicit
+ * time range refresh over unchanged absolute bounds, fetches again.
  */
-export function useSourcePreview({ esql, runId }: { esql: string; runId: number }) {
+export function useSourcePreview({
+  esql,
+  runId,
+  refreshCount,
+}: {
+  esql: string;
+  runId: number;
+  refreshCount: number;
+}) {
   const {
     dependencies: {
       start: { data },
@@ -29,7 +38,7 @@ export function useSourcePreview({ esql, runId }: { esql: string; runId: number 
   } = useTimefilter();
 
   return useQuery({
-    queryKey: ['sourcePreview', esql, start, end, runId],
+    queryKey: ['sourcePreview', esql, start, end, runId, refreshCount],
     queryFn: async ({ signal }) => {
       const { response } = await getESQLResults({
         esqlQuery: appendLimitToQuery(esql, PREVIEW_ROW_LIMIT),
