@@ -43,6 +43,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
 import { LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE, useColumns } from './use_columns';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 const EXPAND_COLUMN_WIDTH = '40px';
 const MAX_GROUP_BADGES = 5;
@@ -75,6 +76,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   barHighlightColorOverride,
   parentApi,
 }) => {
+  const isInteractive = useIsInteractive(parentApi);
+
   const prevSkippedColumns = usePrevious(skippedColumns);
 
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
@@ -257,7 +260,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
-    effectiveSkippedColumns,
+    skippedColumns,
     searchQuery,
     barColorOverride,
     barHighlightColorOverride
@@ -366,10 +369,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           if (Object.hasOwn(itemIdToExpandedRowMapValues, itemId)) {
             const component = itemIdToExpandedRowMapValues[itemId];
             itemIdToExpandedRowMapValues[itemId] = (
-              <LogRateAnalysisResultsTable
-                {...component.props}
-                skippedColumns={effectiveSkippedColumns}
-              />
+              <LogRateAnalysisResultsTable {...component.props} skippedColumns={skippedColumns} />
             );
           }
         }
