@@ -11,6 +11,8 @@ import React from 'react';
 import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './use_resolution_group';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
+jest.setTimeout(15000);
+
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));

@@ -207,6 +207,50 @@ describe('Editor actions provider', () => {
     );
   });
 
+  it('SHOULD keep an unfinished triple-quoted request selected from request-like content', async () => {
+    const lines = ['POST _query', '{', '  "script": """', '  GET _all', '  {', '', '  }'];
+    const model = createModel(lines);
+    const highlightedLines = {
+      clear: jest.fn(),
+      set: jest.fn(),
+    } as unknown as monaco.editor.IEditorDecorationsCollection;
+    const setEditorActionsCss = jest.fn();
+    const parsedRequests = createParser()(lines.join('\n'))?.requests;
+
+    expect(parsedRequests).toEqual([{ startOffset: 0 }]);
+    mockGetParsedRequests.mockResolvedValue(parsedRequests);
+    editor.getModel.mockReturnValue(model);
+    editor.getSelection.mockReturnValue({
+      startLineNumber: 4,
+      endLineNumber: 4,
+    } as unknown as monaco.Selection);
+    editor.getTopForLineNumber.mockReturnValue(100);
+    editor.getScrollTop.mockReturnValue(0);
+    editor.createDecorationsCollection = jest.fn(
+      () => highlightedLines
+    ) as unknown as typeof editor.createDecorationsCollection;
+    editorActionsProvider = new MonacoEditorActionsProvider(
+      editor,
+      setEditorActionsCss,
+      '.sampleHighlightedLinesClassName'
+    );
+
+    await (
+      editorActionsProvider as unknown as {
+        highlightRequests: (highlightedLinesClassName: string) => Promise<void>;
+      }
+    ).highlightRequests('.sampleHighlightedLinesClassName');
+
+    expect(editor.getTopForLineNumber).toHaveBeenCalledWith(1);
+    expect(setEditorActionsCss).toHaveBeenCalledWith({
+      visibility: 'visible',
+      top: 101,
+    });
+    const [{ range }] = (highlightedLines.set as jest.Mock).mock.calls[0][0];
+    expect(range.startLineNumber).toBe(1);
+    expect(range.endLineNumber).toBe(7);
+  });
+
   describe('WHEN the opening brace key is released', () => {
     beforeEach(() => {
       jest.useFakeTimers();

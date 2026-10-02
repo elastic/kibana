@@ -595,6 +595,7 @@ export const deletePackageHandler: FleetRequestHandler<
     pkgVersion,
     esClient,
     force: request.query?.force,
+    request,
   });
   const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,

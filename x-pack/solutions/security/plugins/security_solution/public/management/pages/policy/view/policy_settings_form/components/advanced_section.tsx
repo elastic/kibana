@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
@@ -117,7 +116,6 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
 
     const isEditMode = mode === 'edit';
-    const { canWriteAdminData } = useUserPrivileges().endpointPrivileges;
 
     const handleAdvancedSettingsButtonClick = useCallback(() => {
       setShowAdvancedPolicy((prevState) => !prevState);
@@ -187,15 +185,10 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                     first_supported_version: firstVersion,
                     last_supported_version: lastVersion,
                     license,
-                    requiresAdminPrivileges,
                   },
                   index
                 ) => {
                   if (!isPlatinumPlus && license === 'platinum') {
-                    return <React.Fragment key={key} />;
-                  }
-
-                  if (requiresAdminPrivileges && !canWriteAdminData) {
                     return <React.Fragment key={key} />;
                   }
 

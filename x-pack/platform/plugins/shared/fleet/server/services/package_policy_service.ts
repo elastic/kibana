@@ -134,7 +134,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -186,9 +186,7 @@ export interface PackagePolicyClient {
       bumpRevision?: boolean;
     },
     /** Request context so update callbacks can use the caller's Elasticsearch client. */
-    context?: RequestHandlerContext,
-    /** Original HTTP request, forwarded to external callbacks for privilege checks. */
-    request?: KibanaRequest
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy>;
 
   delete(
@@ -263,6 +261,11 @@ export interface PackagePolicyClient {
     outputId: string,
     options?: { force?: boolean }
   ): Promise<void>;
+
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
@@ -342,10 +345,18 @@ export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
+  /**
+   * When true, skip unassigning from surviving agent policies and skip the agent policy revision
+   * bump. This also suppresses the agentless agent policy cascade-delete. Use only when the caller
+   * manages those side-effects itself.
+   */
   skipUnassignFromAgentPolicies?: boolean;
+  /** Bypass `is_managed` and hosted-agent-policy guards. */
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;
+  /** When false, skip bumping agent policy revisions. Defaults to true. */
+  bumpRevision?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {

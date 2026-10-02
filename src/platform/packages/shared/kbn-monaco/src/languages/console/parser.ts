@@ -69,8 +69,13 @@ export const createParser = (): ConsoleParser => {
     lastRequest.endOffset = requestEndOffset;
     requests.push(lastRequest);
   };
-  const error = function (m: string, errorAt = at, errorEndAt?: number): never {
-    throw Object.assign(new SyntaxError(m), { at: errorAt, endAt: errorEndAt, text });
+  const error = function (
+    m: string,
+    errorAt = at,
+    errorEndAt?: number,
+    unterminated = false
+  ): never {
+    throw Object.assign(new SyntaxError(m), { at: errorAt, endAt: errorEndAt, text, unterminated });
   };
   const reset = function (newAt: number) {
     ch = text.charAt(newAt);
@@ -99,7 +104,9 @@ export const createParser = (): ConsoleParser => {
     const currentAt = at;
     const i = text.indexOf(upTo, currentAt);
     if (i < 0) {
-      error(errorMessage || "Expected '" + upTo + "'");
+      // Flag the error so `multiRequest()` error recovery knows the delimiter never
+      // closes and the rest of the input is string content.
+      error(errorMessage || "Expected '" + upTo + "'", currentAt, undefined, true);
     }
     // Example: `"query": """...""",` can be followed by more fields in the same body.
     // If the closing `"""` is stored as the request end, autocomplete below it shows request
@@ -463,8 +470,19 @@ export const createParser = (): ConsoleParser => {
         request();
         white();
       } catch (e: unknown) {
-        const syntaxError = e as { at?: number; endAt?: number };
+        const syntaxError = e as { at?: number; endAt?: number; unterminated?: boolean };
         addError(getErrorMessage(e), syntaxError.at, syntaxError.endAt);
+        // An unterminated string swallows the rest of the input: request- and comment-looking
+        // lines below the error are string content, not recovery anchors (the search for the
+        // closing delimiter already scanned to the end of the input).
+        // https://github.com/elastic/kibana/issues/284396
+        if (syntaxError.unterminated) {
+          // Consume the swallowed content so `parse()` does not also flag it as a leftover
+          // 'Syntax error' on top of the unterminated-delimiter error.
+          at = text.length;
+          ch = '';
+          return;
+        }
         // snap
         const remainingText = text.substr(at);
         // Match the verb without a trailing `\b` so that lines starting with

@@ -47,6 +47,7 @@ import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import {
+  collectCompiledSecretRefIds,
   getFleetServerHostsSecretReferences,
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
@@ -63,9 +64,13 @@ import {
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -83,6 +88,7 @@ export async function getFullAgentPolicy(
     agentVersion?: string;
     /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
     redactProxySecrets?: boolean;
+    spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
@@ -102,7 +108,11 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
@@ -157,6 +167,17 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
+
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
@@ -165,7 +186,8 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
@@ -233,9 +255,50 @@ export async function getFullAgentPolicy(
   const downloadSourceSecretReferences = downloadSource
     ? getDownloadSourceSecretReferences(downloadSource)
     : [];
-  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+  // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
+  // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
+  // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.
+  //
+  // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
+  // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
+  //
+  // Fail open: if the scan cannot serialize, keep every reference rather than dropping valid ones.
+  const rawPackagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
+  const compiledSecretIds =
+    rawPackagePolicySecretReferences.length > 0
+      ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
+      : new Set<string>();
+  let packagePolicySecretReferences = compiledSecretIds
+    ? rawPackagePolicySecretReferences.filter(({ id: refId }) => compiledSecretIds.has(refId))
+    : rawPackagePolicySecretReferences;
+
+  if (
+    compiledSecretIds &&
+    packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
+  ) {
+    const droppedIds = rawPackagePolicySecretReferences
+      .filter(({ id: refId }) => !compiledSecretIds.has(refId))
+      .map(({ id: refId }) => refId);
+    appContextService
+      .getLogger()
+      .info(
+        `Pruned ${
+          droppedIds.length
+        } package policy secret reference(s) not present in the compiled agent policy (agent policy: ${
+          agentPolicy.id
+        }): ${droppedIds.join(', ')}`
+      );
+  }
+
+  // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
+  const seenSecretIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id: refId }) => {
+    if (seenSecretIds.has(refId)) return false;
+    seenSecretIds.add(refId);
+    return true;
+  });
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,

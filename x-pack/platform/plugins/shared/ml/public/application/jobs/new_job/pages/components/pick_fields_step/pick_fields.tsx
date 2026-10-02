@@ -40,12 +40,15 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
 
   useEffect(() => {
     setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
+  }, [jobValidator, jobValidatorUpdated, selectionValid]);
 
-    return () => {
+  useEffect(
+    () => () => {
       setIsFlyoutVisible(false);
       setFieldName(undefined);
-    };
-  }, [jobValidator, jobValidatorUpdated, selectionValid, setIsFlyoutVisible, setFieldName]);
+    },
+    [setIsFlyoutVisible, setFieldName]
+  );
 
   return (
     <Fragment>

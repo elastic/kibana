@@ -49,3 +49,8 @@ export interface GetOutputHealthResponse {
   message: string;
   timestamp: string;
 }
+
+export interface GetOutputAgentPolicyCountResponse {
+  agentPolicyCount: number;
+  agentCount: number;
+}

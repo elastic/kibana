@@ -1690,6 +1690,7 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
+      await unenrollForAgentPolicyId(soClient, esClient, id, { revoke: true });
       // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
@@ -1816,6 +1817,7 @@ class AgentPolicyService {
       throwOnAgentlessError?: boolean;
       throwOnAnyError?: boolean;
       agentVersions?: string[];
+      spaceId?: string;
     }
   ) {
     return withActiveSpan(
@@ -1850,7 +1852,9 @@ class AgentPolicyService {
           });
         }
 
-        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
+        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds, {
+          ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
+        });
         const policiesMap = keyBy(policies, 'id');
 
         logger.debug(`Retrieving full agent policies`);
@@ -1864,6 +1868,7 @@ class AgentPolicyService {
             agentPolicyService
               .getFullAgentPolicy(soClient, agentPolicyId, {
                 agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
+                ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
               })
               .then((response) => {
                 if (!response) {
@@ -1952,7 +1957,8 @@ class AgentPolicyService {
               soClient,
               fleetServerPolicy,
               fullPolicy,
-              agentVersionsToUse
+              agentVersionsToUse,
+              options?.spaceId ? { spaceId: options.spaceId } : {}
             );
             fleetServerPolicies.push(...versionSpecificPolicies);
           }
@@ -2298,6 +2304,7 @@ class AgentPolicyService {
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
       redactProxySecrets?: boolean;
+      spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {
     const span = apm.startSpan(
@@ -2352,6 +2359,60 @@ class AgentPolicyService {
         }
       );
     }
+  }
+
+  private async getSpacesForPoliciesMatching(
+    searchFields: string[],
+    searchValue: string
+  ): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<AgentPolicySOAttributes>({
+        type: savedObjectType,
+        fields: ['space_ids'],
+        searchFields,
+        search: escapeSearchQueryPhrase(searchValue),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+    const spaceIds = new Set<string>();
+    for (const so of result.saved_objects) {
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
+    }
+    return { spaceIds, truncated: result.saved_objects.length < result.total };
+  }
+
+  public getSpacesForPoliciesUsingOutput(outputId: string) {
+    return this.getSpacesForPoliciesMatching(['data_output_id', 'monitoring_output_id'], outputId);
+  }
+
+  public getSpacesForPoliciesUsingFleetServerHost(fleetServerHostId: string) {
+    return this.getSpacesForPoliciesMatching(['fleet_server_host_id'], fleetServerHostId);
+  }
+
+  public getSpacesForPoliciesUsingDownloadSource(downloadSourceId: string) {
+    return this.getSpacesForPoliciesMatching(
+      ['download_source_id', 'download_source_ids'],
+      downloadSourceId
+    );
+  }
+
+  public async agentPoliciesExistForDownloadSourceId(downloadSourceId: string): Promise<boolean> {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(downloadSourceId);
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<AgentPolicySOAttributes>({
+        type: savedObjectType,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
+        fields: ['id'],
+        perPage: 1,
+        namespaces: ['*'],
+      });
+    return result.total > 0;
   }
 
   public async bumpAllAgentPoliciesForDownloadSource(
@@ -2931,9 +2992,6 @@ class AgentPolicyService {
   ): Promise<void> {
     const logger = this.getLogger('deleteVerifierPolicy');
     try {
-      // Force-revoke agents before deleting the policy because the agentless deployment
-      // is destroyed immediately, so agents can never check in to acknowledge a graceful unenroll.
-      await unenrollForAgentPolicyId(soClient, esClient, policyId, { revoke: true });
       await this.delete(soClient, esClient, policyId, { force: true });
     } catch (err) {
       logger.error(
