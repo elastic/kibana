@@ -41,6 +41,9 @@ const SCHEMA_RESOLUTION_OPTIONS: Array<
   },
 ];
 
+export const getSchemaResolutionDisplayLabel = (value: string): string =>
+  SCHEMA_RESOLUTION_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 /** An empty value means unset, so the request uses the API default. */
 export function SchemaResolutionSelect({
   value,
