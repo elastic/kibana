@@ -301,7 +301,7 @@ describe('registerConversationWorkflowEventBridge', () => {
     });
 
     it('logs a warning when the emit fails', async () => {
-      mockClient.emitEvent.mockRejectedValue(new Error('network error'));
+      (mockClient.emitEvent as jest.Mock).mockRejectedValue(new Error('network error'));
 
       eventBus.emitConversationUpdated(request, payload);
 
