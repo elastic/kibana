@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   type EsqlDatasetsResult,
   type ESQLSourceResult,
@@ -17,6 +19,7 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 import { getESQLTimeField } from './get_time_field';
+import { getESQLSourceInfo } from './get_source_info';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -48,6 +51,58 @@ async function getESQLAdHocDataviewId({
     .join('-');
   return sha256(dataViewIdentity);
 }
+
+/**
+ * Views and external datasets do not support the field caps API, so a data view built for
+ * them has no fields and the filter bar and KQL have nothing to offer. The columns of the
+ * bare source (`FROM <source> | LIMIT 0`) are the fields ES applies a DSL filter to.
+ * Temporary: remove together with the ES|QL ad-hoc data view (DataSource refactor).
+ */
+const getFieldSpecsFromSource = async ({
+  indexPattern,
+  timeFieldName,
+  http,
+  projectRouting,
+}: {
+  indexPattern: string;
+  timeFieldName: string | undefined;
+  http: HttpStart;
+  projectRouting: string | undefined;
+}): Promise<Record<string, FieldSpec> | undefined> => {
+  try {
+    const { columns } = await getESQLSourceInfo({
+      query: `FROM ${indexPattern}`,
+      http,
+      projectRouting,
+    });
+    if (columns.length === 0) {
+      return undefined;
+    }
+    const fields: Record<string, FieldSpec> = {};
+    for (const { name, esType } of columns) {
+      const type = esFieldTypeToKibanaFieldType(esType);
+      fields[name] = {
+        name,
+        type,
+        esTypes: [esType],
+        searchable: true,
+        aggregatable: type === KBN_FIELD_TYPES.DATE,
+      };
+    }
+    if (timeFieldName && !fields[timeFieldName]) {
+      fields[timeFieldName] = {
+        name: timeFieldName,
+        type: KBN_FIELD_TYPES.DATE,
+        esTypes: ['date'],
+        searchable: true,
+        aggregatable: true,
+      };
+    }
+    return fields;
+  } catch {
+    return undefined;
+  }
+};
 
 /**
  * Creates an ad-hoc DataView for ES|QL queries.
@@ -121,18 +176,46 @@ export async function getESQLAdHocDataview({
   }
 
   const skipFetchFields = options?.skipFetchFields ?? false;
+  const dataViewSpec = {
+    title: indexPattern,
+    type: ESQL_TYPE,
+    id: dataViewId,
+    allowNoIndex: options?.allowNoIndex,
+    timeFieldName: timeFieldName || undefined,
+  };
 
-  const dataView = await dataViewsService.create(
-    {
-      title: indexPattern,
-      type: ESQL_TYPE,
-      id: dataViewId,
-      allowNoIndex: options?.allowNoIndex,
+  const createFromSourceFields = async () => {
+    if (!http) {
+      return undefined;
+    }
+    const fields = await getFieldSpecsFromSource({
+      indexPattern,
       timeFieldName: timeFieldName || undefined,
-    },
+      http,
+      projectRouting,
+    });
+    if (!fields) {
+      return undefined;
+    }
+    dataViewsService.clearInstanceCache(dataViewId);
+    return dataViewsService.create({ ...dataViewSpec, fields }, true);
+  };
+
+  let dataView: Awaited<ReturnType<typeof dataViewsService.create>>;
+  try {
     // important to skip if you just need the dataview without the fields for performance reasons
-    skipFetchFields
-  );
+    dataView = await dataViewsService.create(dataViewSpec, skipFetchFields);
+  } catch (error) {
+    const fromSource = skipFetchFields ? undefined : await createFromSourceFields();
+    if (!fromSource) {
+      throw error;
+    }
+    return fromSource;
+  }
+
+  if (!skipFetchFields && dataView.fields?.length === 0) {
+    return (await createFromSourceFields()) ?? dataView;
+  }
   return dataView;
 }
 
