@@ -57,26 +57,36 @@ const buildAllowedEntitySet = (result: HuntCoordinatorCoreResult): Set<string> =
 };
 
 /**
- * A separator-joined identifier (`GHOST-HOST99`, `10.0.0.5`, `user.name`) that also carries a
- * digit or is all-uppercase once the separators are stripped. Plain hyphenated prose
- * (`real-time`, `well-known`) has neither, so it doesn't match; the asset/IOC naming
- * conventions this run's own context uses do. Same spirit as `report_grounding.ts`'s
- * `SINGLE_TOKEN` check: a narrow whitelist that only ever chooses which direction to be
- * wrong in, not a full simulation of every way a model might phrase a name.
+ * A separator-joined identifier (`GHOST-HOST99`, `10.0.0.5`) whose digits sit where a real
+ * asset/IOC name's do: mixed into the same segment as letters (`HOST99`), in every segment
+ * (an IP), or absent entirely with the whole token in caps. Plain hyphenated prose
+ * (`real-time`, `well-known`) has none of those shapes, so it doesn't match — and neither
+ * does a numeric quantity (`24-hour`, `5-minute`): its digits sit in their own segment, next
+ * to a plain word, not mixed into one. Same spirit as `report_grounding.ts`'s `SINGLE_TOKEN`
+ * check: a narrow whitelist that only ever chooses which direction to be wrong in, not a full
+ * simulation of every way a model might phrase a name.
  */
 const SEPARATOR_JOINED = /^[A-Za-z0-9]+([._-][A-Za-z0-9]+)+$/;
 
 const looksLikeEntity = (token: string): boolean => {
   if (!SEPARATOR_JOINED.test(token)) return false;
-  const bare = token.replace(/[._-]/g, '');
-  return /\d/.test(bare) || bare === bare.toUpperCase();
+  const segments = token.split(/[._-]/);
+  const bare = segments.join('');
+  if (bare === bare.toUpperCase()) return true;
+  if (segments.every((segment) => /^\d+$/.test(segment))) return true;
+  return segments.some((segment) => /[A-Za-z]/.test(segment) && /\d/.test(segment));
 };
 
-/** Entity-shaped tokens in free text, stripped of surrounding sentence punctuation. */
+/**
+ * Entity-shaped tokens in free text, stripped of surrounding sentence punctuation and the
+ * Markdown a model can wrap a name in (`` `GHOST-HOST99` ``, `**GHOST-HOST99**`) — code spans
+ * and emphasis markers would otherwise shield a hallucinated name from `looksLikeEntity`
+ * exactly the way an unlisted `entities_referenced` entry does.
+ */
 const extractEntityLikeTokens = (text: string): string[] =>
   text
     .split(/\s+/)
-    .map((token) => token.replace(/^[(["']+|[)\].,;:!?"']+$/g, ''))
+    .map((token) => token.replace(/^[(["'`*_]+|[)\].,;:!?"'`*_]+$/g, ''))
     .filter(looksLikeEntity);
 
 /**

@@ -222,6 +222,58 @@ describe('generateRecommendations', () => {
     ]);
   });
 
+  it('keeps a line naming a numeric duration, not just a bare time-of-day word', async () => {
+    // Libra P2: a standalone numeric segment next to a plain word ("24-hour") is a
+    // quantity, not an identifier — unlike a real asset name, whose digits sit inside
+    // the same segment as its letters (`HOST99`) or fill every segment (an IP).
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Review sign-in activity over a 24-hour window.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Review sign-in activity over a 24-hour window.']);
+  });
+
+  it('drops a hallucinated entity wrapped in Markdown code formatting', async () => {
+    // Libra P2: backticks/asterisks were never stripped, so a formatted name reached
+    // `looksLikeEntity` with the wrapping still attached and failed to match — the same
+    // hallucination this whole fix exists to catch, let through by formatting alone.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for `WIN-ANALYST01`.',
+          entities_referenced: [],
+        },
+        {
+          text: 'Isolate **GHOST-HOST99** immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for `WIN-ANALYST01`.']);
+  });
+
   it('falls back to the template floor when every generated line is ungrounded', async () => {
     const invoke = jest.fn().mockResolvedValue({
       recommendations: [
