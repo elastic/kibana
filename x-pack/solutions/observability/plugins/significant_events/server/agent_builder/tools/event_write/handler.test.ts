@@ -718,6 +718,62 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 
+  it('rejects an unknown continuation id without blocking valid new items', async () => {
+    const eventClient = makeEventClient();
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      rejectUnknownEventIds: true,
+      inputs: [{ ...baseInput, event_id: 'unknown-event-id' }, dedupInput],
+    });
+
+    expect(results[0]).toEqual({
+      index: 0,
+      event_id: 'unknown-event-id',
+      status: 'open',
+      written: false,
+      reason: 'unknown_event_id',
+      error: {
+        type: 'validation_error',
+        reason:
+          'event_id "unknown-event-id" does not exist. Do not resend this id. Resend the item once with the exact event_id of a different open event returned by event_search, or with no event_id to find-or-create.',
+        status: 404,
+      },
+    });
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].event_id).not.toBe('unknown-event-id');
+  });
+
+  it('accepts canonical lineage when the flag-aware read store has not refreshed yet', async () => {
+    const eventId = 'known-canonical-event';
+    const canonicalEvent = makeStoredEvent(eventId, {
+      event_uuid: 'canonical-event-uuid',
+      severity: '40-medium',
+    });
+    const eventSearchClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [canonicalEvent] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      rejectUnknownEventIds: true,
+      inputs: [{ ...baseInput, event_id: eventId }],
+    });
+
+    expect(result).toMatchObject({ event_id: eventId, written: true });
+    expect(eventSearchClient.findByEventId).toHaveBeenCalledWith(eventId);
+    expect(eventClient.findByEventId).toHaveBeenCalledWith(eventId);
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].previous_event_uuid).toBe(
+      'canonical-event-uuid'
+    );
+  });
+
   it('deduplicates when the candidate has the same identity regardless of change_point_type', async () => {
     const existingEvent = makeActiveDedupEvent({
       signals: [makeDetectionSignal({ change_point_type: 'spike' })],

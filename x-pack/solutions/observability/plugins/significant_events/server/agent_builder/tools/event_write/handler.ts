@@ -96,7 +96,7 @@ export interface EventsWriteFailureResult {
   event_id: string;
   status: SignificantEvent['status'];
   written: false;
-  reason: 'bulk_error' | 'duplicate_in_batch';
+  reason: 'bulk_error' | 'duplicate_in_batch' | 'unknown_event_id';
   error: CompactBulkError;
 }
 
@@ -497,6 +497,7 @@ const applyBulkResults = (
  *  - Otherwise write a new event with the caller-supplied status.
  *
  * Snapshot-mode items (`event_id` present):
+ *  - When `rejectUnknownEventIds` is enabled, reject IDs with no canonical lineage.
  *  - Skip the write (`unchanged_outcome`) when the latest stored version has the same severity and
  *    status, avoiding pure-churn duplicates.
  *  - Otherwise write a new version of the identified event, persisting the caller-supplied status.
@@ -509,6 +510,7 @@ export async function eventsWriteBulkHandler({
   eventSearchClient,
   inputs,
   source,
+  rejectUnknownEventIds,
   alertEventsClient,
   logger,
 }: {
@@ -523,6 +525,8 @@ export async function eventsWriteBulkHandler({
   eventSearchClient?: SignificantEventsReadClient;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
+  /** Discovery-only guard for explicit IDs that have no canonical event history. */
+  rejectUnknownEventIds?: boolean;
   /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
@@ -574,7 +578,31 @@ export async function eventsWriteBulkHandler({
     eventClient,
     toWrite
   );
-  const calibrated = toWrite.map((candidate) => ({
+  const knownCandidates = toWrite.filter((candidate) => {
+    if (
+      rejectUnknownEventIds &&
+      candidate.mode === 'snapshot' &&
+      !latestByEventId.has(candidate.eventId)
+    ) {
+      results[candidate.index] = {
+        index: candidate.index,
+        event_id: candidate.eventId,
+        status: candidate.input.status,
+        written: false,
+        reason: 'unknown_event_id',
+        error: {
+          type: 'validation_error',
+          reason: `event_id ${JSON.stringify(
+            candidate.eventId
+          )} does not exist. Do not resend this id. Resend the item once with the exact event_id of a different open event returned by event_search, or with no event_id to find-or-create.`,
+          status: 404,
+        },
+      };
+      return false;
+    }
+    return true;
+  });
+  const calibrated = knownCandidates.map((candidate) => ({
     ...candidate,
     input: {
       ...candidate.input,

@@ -16,6 +16,14 @@ import {
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
+interface WorkflowJsonSchema {
+  type?: string;
+  enum?: string[];
+  description?: string;
+  properties?: Record<string, WorkflowJsonSchema>;
+  items?: WorkflowJsonSchema;
+}
+
 interface WorkflowStep {
   name: string;
   type?: string;
@@ -36,6 +44,7 @@ interface WorkflowStep {
     stream_names?: string;
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
+    schema?: WorkflowJsonSchema;
   };
   foreach?: string;
 }
@@ -77,6 +86,22 @@ describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
     expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(23);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
+  });
+
+  it('accepts every non-written events_write result reason in the discovery output schema', () => {
+    const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
+    const properties = schema?.properties;
+    const eventProperties = properties?.significant_events?.items?.properties;
+    const nonWrittenReasons = [
+      'bulk_error',
+      'duplicate_in_batch',
+      'existing_active_event',
+      'unchanged_outcome',
+      'unknown_event_id',
+    ];
+
+    expect(eventProperties?.reason?.enum).toEqual(nonWrittenReasons);
+    expect(properties?.written_rule_uuids?.description).toContain('unknown_event_id');
   });
 
   it('bounds and forwards discovery model overrides', () => {

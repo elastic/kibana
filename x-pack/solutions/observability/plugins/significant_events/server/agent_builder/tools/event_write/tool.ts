@@ -7,7 +7,11 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
+import {
+  getAgentFromRunContext,
+  type BuiltinToolDefinition,
+  type StaticToolRegistration,
+} from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -31,6 +35,7 @@ import {
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
 } from '../bulk_write';
+import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
@@ -337,6 +342,9 @@ export function createEventsWriteTool({
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
+          rejectUnknownEventIds:
+            getAgentFromRunContext(context.runContext)?.agentId ===
+            SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
           alertEventsClient: await getAlertEventsClient(),
           logger,
         });
