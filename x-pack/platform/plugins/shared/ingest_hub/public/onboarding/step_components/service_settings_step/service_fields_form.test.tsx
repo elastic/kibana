@@ -281,3 +281,64 @@ describe('ServiceFieldsForm — data_stream.dataset onChange extraction', () => 
     );
   });
 });
+
+describe('ServiceFieldsForm — VarField onChange suppression', () => {
+  // Service with a text field that has a manifest default ('manifest-default').
+  // When the draft is empty the effective displayed value is that default; clearing
+  // it must still fire onFieldChange even though the raw draft entry is undefined.
+  const DEFAULT_SERVICE: AwsServiceMatrixEntry = {
+    id: 'test_default',
+    name: 'Test Default',
+    packageName: 'aws',
+    dataStreams: ['logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      logs: {
+        title: 'Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: [],
+        optionalConfig: ['my_field'],
+        varDefsByInput: {
+          'aws-s3': {
+            my_field: {
+              name: 'my_field',
+              type: 'text',
+              default: 'manifest-default',
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  function getVarFieldOnChange() {
+    const varFieldCall = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.find(
+      ([props]: [{ varDef?: { name?: string } }]) => props.varDef?.name === 'my_field'
+    );
+    expect(varFieldCall).toBeDefined();
+    return varFieldCall![0].onChange as (v: unknown) => void;
+  }
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('fires onFieldChange when clearing an untouched field with a manifest default', () => {
+    // Draft is empty — the field shows 'manifest-default' via toTyped but no draft entry exists.
+    const { onFieldChange } = renderForm(DEFAULT_SERVICE);
+    getVarFieldOnChange()('');
+    expect(onFieldChange).toHaveBeenCalledWith('logs', 'aws-s3', 'my_field', '');
+  });
+
+  it('suppresses onFieldChange when new value matches the effective displayed value', () => {
+    // User re-types the exact manifest default — no actual change.
+    const { onFieldChange } = renderForm(DEFAULT_SERVICE);
+    getVarFieldOnChange()('manifest-default');
+    expect(onFieldChange).not.toHaveBeenCalled();
+  });
+});

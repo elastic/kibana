@@ -152,7 +152,11 @@ function VarField({
                   ? (next as { dataset?: unknown }).dataset ?? ''
                   : next;
               const nextDraft = toDraft(raw);
-              if (nextDraft !== toDraft(draft[activeInput]?.[fieldName])) {
+              // Compare against the effective displayed value (toTyped materializes manifest
+              // defaults for untouched fields). Using draft[activeInput]?.[fieldName] here
+              // would be undefined for untouched fields, making toDraft() return '' and
+              // silently swallowing a clear-to-empty action on a field whose default is non-empty.
+              if (nextDraft !== toDraft(value)) {
                 onFieldChange(activeInput, fieldName, nextDraft);
               }
             }}
