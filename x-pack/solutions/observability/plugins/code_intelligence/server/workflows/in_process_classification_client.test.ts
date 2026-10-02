@@ -101,6 +101,128 @@ describe('InProcessClassificationWorkflowClient', () => {
     });
   });
 
+  it('forwards a complete finding on logging results, trimmed, whether or not the candidate is kept', async () => {
+    const client = clientReturning({
+      results: [
+        {
+          id: 'c1',
+          keep: true,
+          level: 'warn',
+          findingType: 'sensitive-data',
+          findingTitle: ' Admin password logged ',
+          findingSummary: 'Writes the generated admin password to the log at warn level. ',
+        },
+        {
+          id: 'c2',
+          keep: false,
+          findingType: 'odd',
+          findingTitle: 'Debug print in production path',
+          findingSummary: 'A bare print statement remains in request handling code.',
+        },
+      ],
+    });
+
+    const result = await client.classifyLogging({
+      candidates: [
+        loggingCandidate('c1', 'log.warn "Generated admin credentials: admin / $password"'),
+        loggingCandidate('c2', 'print(value)'),
+      ],
+    });
+
+    expect(result).toEqual({
+      status: 'success',
+      value: [
+        {
+          id: 'c1',
+          keep: true,
+          level: 'warn',
+          findingType: 'sensitive-data',
+          findingTitle: 'Admin password logged',
+          findingSummary: 'Writes the generated admin password to the log at warn level.',
+        },
+        {
+          id: 'c2',
+          keep: false,
+          findingType: 'odd',
+          findingTitle: 'Debug print in production path',
+          findingSummary: 'A bare print statement remains in request handling code.',
+        },
+      ],
+    });
+  });
+
+  it('forwards a complete finding on OTel results even when its text is not a source quote', async () => {
+    const client = clientReturning([
+      {
+        id: 'c1',
+        keep: false,
+        findingType: 'sensitive-data',
+        findingTitle: 'Card security code recorded as a span attribute',
+        findingSummary: 'The payment span attaches the card verification value as an integer.',
+      },
+    ]);
+
+    const result = await client.classifyOtel({ candidates: [otelCandidate('c1')] });
+
+    expect(result).toEqual({
+      status: 'success',
+      value: [
+        {
+          id: 'c1',
+          keep: false,
+          findingType: 'sensitive-data',
+          findingTitle: 'Card security code recorded as a span attribute',
+          findingSummary: 'The payment span attaches the card verification value as an integer.',
+        },
+      ],
+    });
+  });
+
+  it('treats findingType none as no finding, even when stray finding text is present', async () => {
+    const client = clientReturning({
+      results: [
+        { id: 'c1', keep: true, level: 'info', findingType: 'none' },
+        {
+          id: 'c2',
+          keep: false,
+          findingType: 'none',
+          findingTitle: 'No issue identified',
+          findingSummary: 'Nothing to review.',
+        },
+      ],
+    });
+
+    const result = await client.classifyLogging({
+      candidates: [loggingCandidate('c1', 'LOG.info("a")'), loggingCandidate('c2', 'print(b)')],
+    });
+
+    expect(result).toEqual({
+      status: 'success',
+      value: [
+        { id: 'c1', keep: true, level: 'info' },
+        { id: 'c2', keep: false },
+      ],
+    });
+  });
+
+  it('drops a result whose finding is left incomplete after blank text is removed', async () => {
+    const client = clientReturning({
+      results: [
+        { id: 'c1', keep: true, findingType: 'odd', findingTitle: ' ', findingSummary: 'x' },
+        { id: 'c2', keep: true },
+      ],
+    });
+
+    const result = await client.classifyLogging({
+      candidates: [
+        loggingCandidate('c1', 'LOG.info("a")'),
+        loggingCandidate('c2', 'LOG.info("b")'),
+      ],
+    });
+
+    expect(result).toEqual({ status: 'success', value: [{ id: 'c2', keep: true }] });
+  });
+
   it('reports a response without a result list as a retryable failure', async () => {
     const client = clientReturning({ text: 'I could not classify these.' });
 

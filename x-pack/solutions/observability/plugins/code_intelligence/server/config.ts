@@ -18,6 +18,11 @@ const configSchema = schema.object({
     minLength: 1,
     maxLength: 255,
   }),
+  findingsIndex: schema.string({
+    defaultValue: 'code-intelligence-findings',
+    minLength: 1,
+    maxLength: 255,
+  }),
   settingsIndex: schema.string({
     defaultValue: DEFAULT_SETTINGS_INDEX,
     minLength: 1,

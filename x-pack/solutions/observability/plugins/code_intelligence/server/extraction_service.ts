@@ -19,6 +19,7 @@ import type {
 } from '../common/extraction_batch';
 import { EXTRACTION_BATCH_LOCK_ID } from '../common/extraction_lock_id';
 import type { CatalogWriter } from './domain/ports/catalog_writer';
+import type { FindingsWriter } from './domain/ports/findings_writer';
 import type { QueryValidator } from './domain/ports/query_validator';
 import type { RepositoryResolver } from './domain/ports/repository_resolver';
 import { extractRepository, type ExtractionLogger } from './extract_repository';
@@ -36,6 +37,12 @@ export interface BatchRepository {
   readonly revision: string;
   readonly remoteUrl: string;
   readonly githubConnectorId?: string;
+}
+
+/** The 2 indexes one batch writes to, scoped to the user who started it. */
+export interface ExtractionWriters {
+  readonly catalogWriter: CatalogWriter;
+  readonly findingsWriter: FindingsWriter;
 }
 
 type Mutable<T> = { -readonly [Key in keyof T]: T[Key] };
@@ -87,7 +94,7 @@ export class ExtractionService {
     repositories: readonly BatchRepository[],
     request: KibanaRequest,
     spaceId: string,
-    catalogWriter: CatalogWriter
+    writers: ExtractionWriters
   ): Promise<string> {
     for (const batch of this.batches.values()) {
       if (batch.status === 'running') throw new ExtractionAlreadyRunningError(batch.id);
@@ -124,7 +131,7 @@ export class ExtractionService {
     });
     const locked = this.dependencies.lockManager.withLock(EXTRACTION_BATCH_LOCK_ID, async () => {
       signalAcquired();
-      await this.runBatch(batch, source, request, spaceId, catalogWriter);
+      await this.runBatch(batch, source, request, spaceId, writers);
     });
     try {
       await Promise.race([acquired, locked]);
@@ -173,14 +180,14 @@ export class ExtractionService {
     source: SourceSession,
     request: KibanaRequest,
     spaceId: string,
-    catalogWriter: CatalogWriter
+    writers: ExtractionWriters
   ): Promise<void> {
     try {
       for (const entry of batch.repositories) {
         entry.status = 'running';
         entry.startedAt = new Date().toISOString();
         try {
-          await this.runRepository(entry, source, request, spaceId, catalogWriter);
+          await this.runRepository(entry, source, request, spaceId, writers);
         } finally {
           entry.completedAt = new Date().toISOString();
           await source.finishRepository(entry.repository).catch(() => undefined);
@@ -198,7 +205,7 @@ export class ExtractionService {
     source: SourceSession,
     request: KibanaRequest,
     spaceId: string,
-    catalogWriter: CatalogWriter
+    writers: ExtractionWriters
   ): Promise<void> {
     const repositoryResolver: RepositoryResolver = {
       resolve: async (revisionRequest) => {
@@ -209,7 +216,8 @@ export class ExtractionService {
     };
     try {
       const result = await extractRepository({
-        catalogWriter,
+        catalogWriter: writers.catalogWriter,
+        findingsWriter: writers.findingsWriter,
         extractorVersion: '0.1.0',
         logger: this.dependencies.logger,
         now: () => new Date().toISOString(),
@@ -236,6 +244,9 @@ export class ExtractionService {
         .map(({ message }) => message);
       for (const template of result.value.generatedTemplates) {
         status.counts[template.signalType] = (status.counts[template.signalType] ?? 0) + 1;
+      }
+      if (result.value.findings.writtenIds.length > 0) {
+        status.counts.findings = result.value.findings.writtenIds.length;
       }
     } catch (_error: unknown) {
       status.status = 'failed';

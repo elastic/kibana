@@ -79,6 +79,7 @@ const setup = ({
   const es = fakeElasticsearch(new Map(stored.map((entry) => [entry.repository, entry])));
   registerRoutes({
     catalogIndex: 'catalog',
+    findingsIndex: 'findings',
     settingsIndex: 'settings',
     getServices: () => ({ getSpaceId: () => 'default', ...services }),
     router: {

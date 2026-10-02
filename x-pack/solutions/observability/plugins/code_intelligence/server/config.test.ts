@@ -12,6 +12,7 @@ describe('Code Intelligence configuration', () => {
     expect(config.schema.validate({})).toEqual({
       enabled: false,
       catalogIndex: 'code-intelligence-catalog',
+      findingsIndex: 'code-intelligence-findings',
       settingsIndex: 'code-intelligence-settings',
       github: {},
     });

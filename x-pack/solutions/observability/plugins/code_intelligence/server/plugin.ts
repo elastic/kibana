@@ -98,6 +98,7 @@ export class CodeIntelligencePlugin
     };
     registerRoutes({
       catalogIndex: this.config.catalogIndex,
+      findingsIndex: this.config.findingsIndex,
       settingsIndex: this.config.settingsIndex,
       getServices,
       router: core.http.createRouter(),
@@ -105,6 +106,7 @@ export class CodeIntelligencePlugin
     registerAgentBuilder({
       agentBuilder: plugins.agentBuilder,
       catalogIndex: this.config.catalogIndex,
+      findingsIndex: this.config.findingsIndex,
       settingsIndex: this.config.settingsIndex,
       getServices,
     });

@@ -29,6 +29,7 @@ import {
   type StartExtractionErrorAttributes,
 } from '../common/start_extraction_errors';
 import { ElasticsearchCatalogWriter } from './adapters/elasticsearch_catalog';
+import { ElasticsearchFindingsWriter } from './adapters/elasticsearch_findings';
 import { ElasticsearchRepositorySettingsStore } from './adapters/elasticsearch_settings';
 import { getCatalogEntry, searchCatalog, summarizeCatalog } from './catalog_service';
 import type { ExtractionService } from './extraction_service';
@@ -85,11 +86,13 @@ export interface RouteServices {
 
 export const registerRoutes = ({
   catalogIndex,
+  findingsIndex,
   settingsIndex,
   getServices,
   router,
 }: {
   readonly catalogIndex: string;
+  readonly findingsIndex: string;
   readonly settingsIndex: string;
   readonly getServices: () => RouteServices;
   readonly router: IRouter;
@@ -239,12 +242,16 @@ export const registerRoutes = ({
         });
       }
       try {
-        const id = await extractionService.start(
-          selection.selected,
-          request,
-          getSpaceId(request),
-          new ElasticsearchCatalogWriter(elasticsearch.client.asCurrentUser, catalogIndex)
-        );
+        const id = await extractionService.start(selection.selected, request, getSpaceId(request), {
+          catalogWriter: new ElasticsearchCatalogWriter(
+            elasticsearch.client.asCurrentUser,
+            catalogIndex
+          ),
+          findingsWriter: new ElasticsearchFindingsWriter(
+            elasticsearch.client.asCurrentUser,
+            findingsIndex
+          ),
+        });
         return response.accepted({ body: { id } });
       } catch (error) {
         const failure = describeStartFailure(error);

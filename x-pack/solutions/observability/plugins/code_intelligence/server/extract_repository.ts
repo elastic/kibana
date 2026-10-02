@@ -14,15 +14,22 @@ import {
   discoverLoggingCandidates,
   discoverOtelSignals,
   extractLogSignatures,
+  findingDocumentId,
   generateLogTemplates,
   generateOtelTemplates,
+  hasCompleteFinding,
   partitionClassificationResults,
   semanticDigest,
   sha256Digest,
   type CatalogWriteRequest,
   type CatalogWriteResult,
   type CatalogWriter,
+  type ClassificationFindingFields,
   type ClassificationWorkflowClient,
+  type FindingDocument,
+  type FindingsWriteResult,
+  type FindingsWriter,
+  type FindingType,
   type GeneratedTemplate,
   type LoggingCandidate,
   type LoggingClassificationCandidate,
@@ -36,6 +43,7 @@ import {
   type RepositoryResolver,
   type RepositoryRevisionRequest,
   type ResolvedRepository,
+  type SignalType,
   type SourceLocation,
   type SourceReader,
   type TemplateGenerationContext,
@@ -51,6 +59,8 @@ export interface ExtractionDiagnostic {
 /** Returns the completed extraction outcome without conflating invalid templates with run failure. */
 export interface ExtractionRunResult {
   readonly diagnostics: readonly ExtractionDiagnostic[];
+  /** Findings written for human review; a findings failure is a diagnostic, not a failed run. */
+  readonly findings: FindingsWriteResult;
   readonly generatedTemplates: readonly GeneratedTemplate[];
   readonly validation: ReadonlyMap<string, QueryValidationResult>;
   readonly write: CatalogWriteResult;
@@ -65,6 +75,7 @@ export interface ExtractionLogger {
 export interface ExtractRepositoryDependencies {
   readonly catalogWriter: CatalogWriter;
   readonly extractorVersion: string;
+  readonly findingsWriter: FindingsWriter;
   readonly logger: ExtractionLogger;
   readonly now: () => string;
   readonly reader: SourceReader;
@@ -97,11 +108,26 @@ const sourceCoverageFailure = (
         retryable: diagnostics.some(({ error }) => error.retryable),
       };
 
-/** Produces one workflow-safe opaque ID per OTel signal without requiring unique source locations. */
-const otelCandidateId = (signal: OtelSignal, index: number): string => {
-  /** Uses stable source facts so repeated runs submit stable classification IDs. */
-  const source: string = JSON.stringify({ evidence: signal.evidence, index, signal });
-  return `otel-${semanticDigest(source)}`;
+/**
+ * Produces one workflow-safe opaque ID per OTel signal without requiring unique source locations.
+ * The ID depends only on the signal's own source facts plus its ordinal among identical signals,
+ * so adding a signal elsewhere in the repository does not move the IDs (and therefore the
+ * findings) of unchanged signals.
+ */
+export const otelCandidatesFor = (
+  signals: readonly OtelSignal[]
+): readonly { readonly id: string; readonly signal: OtelSignal }[] => {
+  /** Counts identical signals seen so far so duplicates stay distinct in a stable order. */
+  const seen = new Map<string, number>();
+  return signals.map((signal) => {
+    const source: string = JSON.stringify({ evidence: signal.evidence, signal });
+    const ordinal = seen.get(source) ?? 0;
+    seen.set(source, ordinal + 1);
+    return {
+      id: `otel-${semanticDigest(ordinal === 0 ? source : `${source}#${ordinal}`)}`,
+      signal,
+    };
+  });
 };
 
 /** Counts the exact workflow-run JSON envelope bytes enforced by the HTTP workflow adapter. */
@@ -362,6 +388,95 @@ const catalogRequestsFor = ({
     ];
   });
 
+/** A finding collected during classification, before run metadata and timestamps are attached. */
+interface FindingDraft {
+  readonly candidateId: string;
+  /** IDs of the templates generated from the same candidate; filtered to persisted ones later. */
+  readonly catalogDocumentIds: readonly string[];
+  readonly cataloged: boolean;
+  readonly evidence: readonly SourceLocation[];
+  readonly findingType: FindingType;
+  readonly logLevel?: string;
+  readonly signalType: SignalType;
+  readonly summary: string;
+  readonly title: string;
+}
+
+/** Builds a finding from a classifier decision when it carries all 3 finding fields. */
+const findingDraftFor = ({
+  candidateId,
+  decision,
+  evidence,
+  logLevel,
+  signalType,
+  templates,
+}: {
+  readonly candidateId: string;
+  readonly decision: ClassificationFindingFields & { readonly keep: boolean };
+  readonly evidence: readonly SourceLocation[];
+  readonly logLevel?: string;
+  readonly signalType: SignalType;
+  readonly templates: readonly GeneratedTemplate[];
+}): FindingDraft | undefined =>
+  hasCompleteFinding(decision)
+    ? {
+        candidateId,
+        catalogDocumentIds: templates.map(({ id }) => id),
+        cataloged: decision.keep,
+        evidence,
+        findingType: decision.findingType,
+        ...(logLevel === undefined ? {} : { logLevel }),
+        signalType,
+        summary: decision.findingSummary,
+        title: decision.findingTitle,
+      }
+    : undefined;
+
+/** Converts collected drafts into codec-valid finding documents pinned to this run. */
+const findingDocumentsFor = ({
+  drafts,
+  extractorVersion,
+  now,
+  persistedTemplateIds,
+  repository,
+}: {
+  readonly drafts: readonly FindingDraft[];
+  readonly extractorVersion: string;
+  readonly now: () => string;
+  readonly persistedTemplateIds: ReadonlySet<string>;
+  readonly repository: ResolvedRepository;
+}): readonly FindingDocument[] =>
+  drafts.map((draft) => {
+    /** Uses one timestamp pair so a document represents one orchestration attempt. */
+    const timestamp: string = now();
+    return {
+      candidateId: draft.candidateId,
+      /** Only templates that reached the catalog are linked, so a reviewer never follows a dead ID. */
+      catalogDocumentIds: draft.catalogDocumentIds.filter((id) => persistedTemplateIds.has(id)),
+      cataloged: draft.cataloged,
+      createdAt: timestamp,
+      evidence: draft.evidence,
+      extractorVersion,
+      findingType: draft.findingType,
+      id: findingDocumentId({
+        candidateId: draft.candidateId,
+        findingType: draft.findingType,
+        repository: repository.repository,
+      }),
+      ...(draft.logLevel === undefined ? {} : { logLevel: draft.logLevel }),
+      repository: repository.repository,
+      revision: repository.commitSha,
+      signalType: draft.signalType,
+      summary: draft.summary,
+      title: draft.title,
+      updatedAt: timestamp,
+    };
+  });
+
+/** Maps an OTel signal to the catalog signal type its templates would carry. */
+const otelFindingSignalType = (signal: OtelSignal): SignalType =>
+  signal.kind === 'metric_name' ? 'metric' : 'trace';
+
 /** Composes complete discovery, required workflows, deterministic generation, validation, and catalog persistence. */
 export const extractRepository = async (
   dependencies: ExtractRepositoryDependencies
@@ -428,6 +543,8 @@ export const extractRepository = async (
   let unclassifiedLogging = 0;
   /** Retains source-backed templates from every batch; only a non-retryable workflow failure stops the run. */
   const loggingTemplates: GeneratedTemplate[] = [];
+  /** Collects review findings from both classifiers; `keep` and a finding are independent. */
+  const findingDrafts: FindingDraft[] = [];
   for (const candidates of loggingBatches.value) {
     const classified = await classifyWorkflowBatch({
       candidates,
@@ -445,29 +562,42 @@ export const extractRepository = async (
       classified.value.decisions.map((decision) => [decision.id, decision])
     );
     for (const candidate of candidates) {
-      /** Unclassified candidates have no decision and are skipped like rejected ones. */
+      /** Unclassified candidates have no decision and produce neither templates nor findings. */
       const decision = decisions.get(candidate.id);
-      if (decision?.keep !== true) continue;
-      /** Classifier text is optional; source extraction remains the deterministic fallback. */
-      const signatures = extractLogSignatures({
-        ...(decision.level !== undefined && decision.staticMessage !== undefined
-          ? {
-              classified: { level: decision.level, staticMessage: decision.staticMessage },
-              content: candidate.source.sourceWindow,
-            }
-          : { content: candidate.source.sourceWindow }),
+      if (decision === undefined) continue;
+      /** Rejected candidates generate nothing for the catalog but may still carry a finding. */
+      const generated: readonly GeneratedTemplate[] =
+        decision.keep === true
+          ? generateLogTemplates({
+              context,
+              /** Classifier text is optional; source extraction remains the deterministic fallback. */
+              signatures: extractLogSignatures({
+                ...(decision.level !== undefined && decision.staticMessage !== undefined
+                  ? {
+                      classified: { level: decision.level, staticMessage: decision.staticMessage },
+                      content: candidate.source.sourceWindow,
+                    }
+                  : { content: candidate.source.sourceWindow }),
+                evidence: candidate.source.evidence,
+                matchedLineIndex: candidate.source.matchedLineIndex,
+              }),
+            })
+          : [];
+      loggingTemplates.push(...generated);
+      const finding = findingDraftFor({
+        candidateId: candidate.id,
+        decision,
         evidence: candidate.source.evidence,
-        matchedLineIndex: candidate.source.matchedLineIndex,
+        ...(decision.level === undefined ? {} : { logLevel: decision.level }),
+        signalType: 'log',
+        templates: generated,
       });
-      loggingTemplates.push(...generateLogTemplates({ context, signatures }));
+      if (finding !== undefined) findingDrafts.push(finding);
     }
   }
 
   /** Assigns stable opaque IDs so multiple signals from one source line remain independently classifiable. */
-  const otelCandidates = otelSignals.map((signal, index) => ({
-    id: otelCandidateId(signal, index),
-    signal,
-  }));
+  const otelCandidates = otelCandidatesFor(otelSignals);
   /** Converts OTel source signals into workflow DTOs before exact byte-budget batching. */
   const otelWorkflowCandidates: readonly (OtelClassificationCandidate & {
     readonly source: OtelSignal;
@@ -513,20 +643,30 @@ export const extractRepository = async (
       classified.value.decisions.map((decision) => [decision.id, decision])
     );
     for (const candidate of candidates) {
-      /** Unclassified candidates have no decision and are skipped like rejected ones. */
+      /** Unclassified candidates have no decision and produce neither templates nor findings. */
       const decision = decisions.get(candidate.id);
-      if (decision?.keep !== true) continue;
+      if (decision === undefined) continue;
       /** Workflow metadata enriches presentation only; query text and evidence remain deterministic source facts. */
-      otelTemplates.push(
-        ...generateOtelTemplates({ context, signals: [candidate.source] }).map((template) => ({
-          ...template,
-          ...(decision.description === undefined ? {} : { description: decision.description }),
-          ...(decision.severityScore === undefined
-            ? {}
-            : { severityScore: decision.severityScore }),
-          ...(decision.title === undefined ? {} : { title: decision.title }),
-        }))
-      );
+      const generated: readonly GeneratedTemplate[] =
+        decision.keep === true
+          ? generateOtelTemplates({ context, signals: [candidate.source] }).map((template) => ({
+              ...template,
+              ...(decision.description === undefined ? {} : { description: decision.description }),
+              ...(decision.severityScore === undefined
+                ? {}
+                : { severityScore: decision.severityScore }),
+              ...(decision.title === undefined ? {} : { title: decision.title }),
+            }))
+          : [];
+      otelTemplates.push(...generated);
+      const finding = findingDraftFor({
+        candidateId: candidate.id,
+        decision,
+        evidence: candidate.source.evidence,
+        signalType: otelFindingSignalType(candidate.source),
+        templates: generated,
+      });
+      if (finding !== undefined) findingDrafts.push(finding);
     }
   }
 
@@ -581,17 +721,67 @@ export const extractRepository = async (
   }
   /** Empty valid output intentionally performs no catalog call, preserving the previous catalog unchanged. */
   const requests = catalogRequestsFor({ now: dependencies.now, templates, validation });
+  const findingDocuments = findingDocumentsFor({
+    drafts: findingDrafts,
+    extractorVersion: dependencies.extractorVersion,
+    now: dependencies.now,
+    persistedTemplateIds: new Set(requests.map(({ document }) => document.id)),
+    repository,
+  });
+  /** Findings never fail the run: the catalog outcome is already decided, so a findings problem is a diagnostic. */
+  const writeFindings = async (): Promise<FindingsWriteResult> => {
+    if (findingDocuments.length === 0) return { failures: [], writtenIds: [] };
+    const written = await dependencies.findingsWriter.write(findingDocuments);
+    if (written.status === 'failure') {
+      diagnostics.push({
+        code: 'findings_write_failure',
+        message: `${findingDocuments.length} findings could not be written, so findings from earlier extractions of this repository were kept and may be stale. ${written.error.message}`,
+      });
+      return { failures: [], writtenIds: [] };
+    }
+    if (written.value.failures.length > 0) {
+      diagnostics.push({
+        code: 'findings_write_failure',
+        message: `Elasticsearch rejected ${written.value.failures.length} of ${findingDocuments.length} findings, so findings from earlier extractions of this repository were kept and may be stale.`,
+      });
+    }
+    return written.value;
+  };
+  /** Removes findings whose source line is gone; only runs when this run saw every candidate. */
+  const pruneFindings = async (findings: FindingsWriteResult): Promise<void> => {
+    if (
+      unclassified > 0 ||
+      findings.failures.length > 0 ||
+      findings.writtenIds.length !== findingDocuments.length
+    ) {
+      return;
+    }
+    const prune = await dependencies.findingsWriter.prune({
+      keepIds: findings.writtenIds,
+      repository: repository.repository,
+    });
+    if (prune.status === 'failure') {
+      diagnostics.push({
+        code: 'findings_prune_failure',
+        message: `Findings were written, but stale findings from earlier extractions could not be removed. ${prune.error.message}`,
+      });
+    }
+  };
   if (requests.length === 0) {
+    /** Findings are written even when every candidate was rejected for the catalog. */
+    const findings = await writeFindings();
     if (classificationIncomplete) return incompleteClassification(false);
     diagnostics.push({
       code: 'prune_skipped_no_documents',
       message:
         'No catalog documents were produced, so documents from earlier extractions of this repository were kept and may be stale.',
     });
+    await pruneFindings(findings);
     return {
       status: 'success',
       value: {
         diagnostics,
+        findings,
         generatedTemplates: templates,
         validation,
         write: { failures: [], writtenIds: [] },
@@ -601,6 +791,7 @@ export const extractRepository = async (
   /** Classified entries are written even when too many candidates stayed unclassified, so 1 bad batch cannot empty a repository. */
   const write = await dependencies.catalogWriter.write(requests);
   if (write.status === 'failure') return write;
+  const findings = await writeFindings();
   if (classificationIncomplete) return incompleteClassification(true);
   /** Skipped candidates may match documents from earlier extractions, so those must not be pruned. */
   if (write.value.failures.length === 0 && unclassified > 0) {
@@ -626,9 +817,17 @@ export const extractRepository = async (
         status: 'failure',
       };
     }
+    /** Findings follow the catalog prune so both indexes describe the same revision. */
+    await pruneFindings(findings);
   }
   return {
     status: 'success',
-    value: { diagnostics, generatedTemplates: templates, validation, write: write.value },
+    value: {
+      diagnostics,
+      findings,
+      generatedTemplates: templates,
+      validation,
+      write: write.value,
+    },
   };
 };

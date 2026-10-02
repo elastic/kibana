@@ -9,10 +9,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { LockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 
 import { EXTRACTION_BATCH_LOCK_ID } from '../common/extraction_lock_id';
-import type { CatalogWriter } from './domain/ports/catalog_writer';
 import { extractRepository } from './extract_repository';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
-import { ExtractionService, type BatchRepository } from './extraction_service';
+import {
+  ExtractionService,
+  type BatchRepository,
+  type ExtractionWriters,
+} from './extraction_service';
 import { SourceUnavailableError, type SourceSession } from './source_session';
 
 jest.mock('./extract_repository', () => ({ extractRepository: jest.fn() }));
@@ -27,6 +30,7 @@ const completedRun: ExtractResult = {
   status: 'success',
   value: {
     diagnostics: [],
+    findings: { failures: [], writtenIds: [] },
     generatedTemplates: [],
     validation: new Map(),
     write: { failures: [], writtenIds: [] },
@@ -122,7 +126,7 @@ const start = (extractionService: ExtractionService, ...repositories: string[]) 
     repositories.map(repo),
     {} as KibanaRequest,
     'default',
-    {} as unknown as CatalogWriter
+    {} as unknown as ExtractionWriters
   );
 
 describe('ExtractionService batches', () => {

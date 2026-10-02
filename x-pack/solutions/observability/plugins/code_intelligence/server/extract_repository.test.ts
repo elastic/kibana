@@ -8,12 +8,14 @@
 import type {
   CatalogWriter,
   ClassificationWorkflowClient,
+  FindingsWriter,
+  OtelSignal,
   QueryValidator,
   RepositoryResolver,
   SourceReader,
 } from './domain';
 import { loggingIdiomPatterns } from './domain/logging/idiom_patterns';
-import { extractRepository, type ExtractionLogger } from './extract_repository';
+import { extractRepository, otelCandidatesFor, type ExtractionLogger } from './extract_repository';
 
 const repositoryResolver: RepositoryResolver = {
   resolve: async (request) => ({
@@ -123,15 +125,25 @@ const skippingWorkflows = (
   };
 };
 
+const successfulFindingsWriter = (): jest.Mocked<FindingsWriter> => ({
+  prune: jest.fn(async (_request) => ({ status: 'success' as const, value: { deleted: 0 } })),
+  write: jest.fn(async (documents) => ({
+    status: 'success' as const,
+    value: { failures: [], writtenIds: documents.map(({ id }) => id) },
+  })),
+});
+
 const run = (
   catalogWriter: CatalogWriter,
   reader: SourceReader = oneLogReader,
   classificationWorkflows: ClassificationWorkflowClient = workflows,
-  logger: ExtractionLogger = { warn: jest.fn() }
+  logger: ExtractionLogger = { warn: jest.fn() },
+  findingsWriter: FindingsWriter = successfulFindingsWriter()
 ) =>
   extractRepository({
     catalogWriter,
     extractorVersion: 'test',
+    findingsWriter,
     logger,
     now: () => '2026-09-28T00:00:00.000Z',
     reader,
@@ -140,6 +152,33 @@ const run = (
     validator,
     workflows: classificationWorkflows,
   });
+
+describe('otelCandidatesFor', () => {
+  const signal = (path: string, value: string): OtelSignal => ({
+    evidence: [{ excerpt: `span.setAttribute("${value}", v)`, line: 1, path }],
+    kind: 'attr_key',
+    language: 'typescript',
+    value,
+  });
+
+  it('keeps the ID of an unchanged signal when another signal is discovered before it', () => {
+    const original = signal('src/b.ts', 'payment.card_cvv');
+    const [before] = otelCandidatesFor([original]);
+    const [, after] = otelCandidatesFor([signal('src/a.ts', 'tenant.id'), original]);
+
+    expect(after?.id).toBe(before?.id);
+    expect(before?.id).toMatch(/^otel-[a-f0-9]{16}$/);
+  });
+
+  it('gives identical signals distinct IDs in a stable order', () => {
+    const duplicate = signal('src/a.ts', 'tenant.id');
+    const first = otelCandidatesFor([duplicate, duplicate]);
+    const second = otelCandidatesFor([duplicate, duplicate]);
+
+    expect(first[0]?.id).not.toBe(first[1]?.id);
+    expect(second.map(({ id }) => id)).toEqual(first.map(({ id }) => id));
+  });
+});
 
 describe('extractRepository', () => {
   it('completes without writes or a prune when standard discovery finds nothing', async () => {
@@ -426,6 +465,308 @@ describe('extractRepository', () => {
       status: 'failure',
     });
     expect(catalogWriter.write).not.toHaveBeenCalled();
+  });
+
+  describe('findings', () => {
+    const finding = {
+      findingSummary: 'The log line writes the user email address at info level.',
+      findingTitle: 'User email logged',
+      findingType: 'sensitive-data' as const,
+    };
+
+    /** Keeps candidate `a` with a finding, rejects `b` with a finding, keeps `c` with none. */
+    const findingWorkflows: ClassificationWorkflowClient = {
+      classifyLogging: async ({ candidates }) => ({
+        status: 'success',
+        value: candidates.map(({ excerpt, id }) => ({
+          id,
+          keep: !excerpt.includes('started b'),
+          level: 'info' as const,
+          ...(excerpt.includes('started c') ? {} : finding),
+        })),
+      }),
+      classifyOtel: workflows.classifyOtel,
+    };
+
+    it('writes a finding for a kept candidate, linked to its catalog document, and one for a rejected candidate', async () => {
+      const catalogWriter = successfulWriter();
+      const findingsWriter = successfulFindingsWriter();
+
+      const result = await run(
+        catalogWriter,
+        threeLogReader,
+        findingWorkflows,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result.status).toBe('success');
+      const catalogIds = catalogWriter.write.mock.calls[0]?.[0].map(({ document }) => document.id);
+      expect(catalogIds).toHaveLength(2);
+      expect(findingsWriter.write).toHaveBeenCalledTimes(1);
+      const documents = findingsWriter.write.mock.calls[0]?.[0] ?? [];
+      expect(documents).toHaveLength(2);
+      expect(documents[0]).toMatchObject({
+        candidateId: 'src/a.ts:1',
+        catalogDocumentIds: [catalogIds?.[0]],
+        cataloged: true,
+        evidence: [expect.objectContaining({ line: 1, path: 'src/a.ts' })],
+        extractorVersion: 'test',
+        findingType: 'sensitive-data',
+        logLevel: 'info',
+        repository: 'elastic/example',
+        revision: 'a'.repeat(40),
+        signalType: 'log',
+        summary: finding.findingSummary,
+        title: finding.findingTitle,
+      });
+      expect(documents[1]).toMatchObject({
+        candidateId: 'src/b.ts:1',
+        catalogDocumentIds: [],
+        cataloged: false,
+      });
+      expect(new Set(documents.map(({ id }) => id)).size).toBe(2);
+      expect(result.status === 'success' && result.value.findings.writtenIds).toEqual(
+        documents.map(({ id }) => id)
+      );
+      expect(catalogWriter.write.mock.invocationCallOrder[0]).toBeLessThan(
+        findingsWriter.write.mock.invocationCallOrder[0] ?? 0
+      );
+    });
+
+    it('prunes findings with the written IDs only after the catalog prune succeeds', async () => {
+      const catalogWriter = successfulWriter();
+      const findingsWriter = successfulFindingsWriter();
+
+      await run(
+        catalogWriter,
+        threeLogReader,
+        findingWorkflows,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      const written = (await findingsWriter.write.mock.results[0]?.value)?.value?.writtenIds;
+      expect(findingsWriter.prune).toHaveBeenCalledWith({
+        keepIds: written,
+        repository: 'elastic/example',
+      });
+      expect(catalogWriter.prune.mock.invocationCallOrder[0]).toBeLessThan(
+        findingsWriter.prune.mock.invocationCallOrder[0] ?? 0
+      );
+    });
+
+    it('still writes findings when every candidate was rejected for the catalog', async () => {
+      const catalogWriter = successfulWriter();
+      const findingsWriter = successfulFindingsWriter();
+      const rejectAll: ClassificationWorkflowClient = {
+        ...workflows,
+        classifyLogging: async ({ candidates }) => ({
+          status: 'success',
+          value: candidates.map(({ id }) => ({ id, keep: false, ...finding })),
+        }),
+      };
+
+      const result = await run(
+        catalogWriter,
+        oneLogReader,
+        rejectAll,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result).toMatchObject({
+        status: 'success',
+        value: {
+          diagnostics: [expect.objectContaining({ code: 'prune_skipped_no_documents' })],
+          write: { failures: [], writtenIds: [] },
+        },
+      });
+      expect(catalogWriter.write).not.toHaveBeenCalled();
+      expect(findingsWriter.write).toHaveBeenCalledTimes(1);
+      expect(findingsWriter.write.mock.calls[0]?.[0]).toEqual([
+        expect.objectContaining({ cataloged: false, findingType: 'sensitive-data' }),
+      ]);
+      expect(findingsWriter.prune).toHaveBeenCalledTimes(1);
+    });
+
+    it('prunes every earlier finding when a complete run files none', async () => {
+      const findingsWriter = successfulFindingsWriter();
+
+      const result = await run(
+        successfulWriter(),
+        oneLogReader,
+        workflows,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result.status === 'success' && result.value.findings).toEqual({
+        failures: [],
+        writtenIds: [],
+      });
+      expect(findingsWriter.write).not.toHaveBeenCalled();
+      expect(findingsWriter.prune).toHaveBeenCalledWith({
+        keepIds: [],
+        repository: 'elastic/example',
+      });
+    });
+
+    it('reports a findings write failure as a diagnostic, keeps the run successful, and skips the findings prune', async () => {
+      const catalogWriter = successfulWriter();
+      const findingsWriter = successfulFindingsWriter();
+      findingsWriter.write.mockResolvedValue({
+        error: { code: 'findings_transport_failure', message: 'down', retryable: true },
+        status: 'failure',
+      });
+
+      const result = await run(
+        catalogWriter,
+        threeLogReader,
+        findingWorkflows,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result).toMatchObject({
+        status: 'success',
+        value: {
+          diagnostics: [
+            expect.objectContaining({
+              code: 'findings_write_failure',
+              message: expect.stringContaining('2 findings could not be written'),
+            }),
+          ],
+          findings: { failures: [], writtenIds: [] },
+        },
+      });
+      expect(catalogWriter.prune).toHaveBeenCalledTimes(1);
+      expect(findingsWriter.prune).not.toHaveBeenCalled();
+    });
+
+    it('skips the findings prune when a bulk item was rejected', async () => {
+      const findingsWriter = successfulFindingsWriter();
+      findingsWriter.write.mockImplementation(async (documents) => ({
+        status: 'success',
+        value: {
+          failures: [
+            {
+              documentId: documents[0]?.id ?? '',
+              error: { code: 'findings_bulk_item_failure', message: 'rejected', retryable: false },
+            },
+          ],
+          writtenIds: documents.slice(1).map(({ id }) => id),
+        },
+      }));
+
+      const result = await run(
+        successfulWriter(),
+        threeLogReader,
+        findingWorkflows,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result.status === 'success' && result.value.diagnostics).toEqual([
+        expect.objectContaining({
+          code: 'findings_write_failure',
+          message: expect.stringContaining('rejected 1 of 2 findings'),
+        }),
+      ]);
+      expect(findingsWriter.prune).not.toHaveBeenCalled();
+    });
+
+    it('does not prune findings when the catalog write has failures or candidates stayed unclassified', async () => {
+      const failingCatalog = successfulWriter();
+      failingCatalog.write.mockImplementation(async (requests) => ({
+        status: 'success',
+        value: {
+          failures: requests.map(({ document }) => ({
+            documentId: document.id,
+            error: { code: 'catalog_bulk_item_failure', message: 'rejected', retryable: false },
+          })),
+          writtenIds: [],
+        },
+      }));
+      const afterCatalogFailure = successfulFindingsWriter();
+      await run(
+        failingCatalog,
+        threeLogReader,
+        findingWorkflows,
+        { warn: jest.fn() },
+        afterCatalogFailure
+      );
+      expect(afterCatalogFailure.write).toHaveBeenCalledTimes(1);
+      expect(afterCatalogFailure.prune).not.toHaveBeenCalled();
+
+      const afterSkip = successfulFindingsWriter();
+      await run(
+        successfulWriter(),
+        threeLogReader,
+        skippingWorkflows([1, 2, 3, 4]),
+        { warn: jest.fn() },
+        afterSkip
+      );
+      expect(afterSkip.prune).not.toHaveBeenCalled();
+    });
+
+    it('reports a findings prune failure as a diagnostic, not a run failure', async () => {
+      const findingsWriter = successfulFindingsWriter();
+      findingsWriter.prune.mockResolvedValue({
+        error: { code: 'findings_prune_transport_failure', message: 'prune down', retryable: true },
+        status: 'failure',
+      });
+
+      const result = await run(
+        successfulWriter(),
+        threeLogReader,
+        findingWorkflows,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result).toMatchObject({
+        status: 'success',
+        value: {
+          diagnostics: [
+            expect.objectContaining({
+              code: 'findings_prune_failure',
+              message: expect.stringContaining('prune down'),
+            }),
+          ],
+        },
+      });
+    });
+
+    it('writes findings before failing a run with too many unclassified candidates', async () => {
+      const findingsWriter = successfulFindingsWriter();
+      const names = Array.from({ length: 201 }, (_, index) => `f${index}`);
+      const classification: ClassificationWorkflowClient = {
+        ...workflows,
+        classifyLogging: async (request) =>
+          request.candidates.length === 1
+            ? {
+                status: 'success',
+                value: request.candidates.map(({ id }) => ({ id, keep: true, ...finding })),
+              }
+            : {
+                error: { code: 'workflow_execution_failed', message: 'down', retryable: true },
+                status: 'failure',
+              },
+      };
+
+      const result = await run(
+        successfulWriter(),
+        logReader(names),
+        classification,
+        { warn: jest.fn() },
+        findingsWriter
+      );
+
+      expect(result).toMatchObject({ error: { code: 'incomplete_classification' } });
+      expect(findingsWriter.write.mock.calls[0]?.[0]).toHaveLength(1);
+      expect(findingsWriter.prune).not.toHaveBeenCalled();
+    });
   });
 
   it('returns a prune failure as the run failure', async () => {
