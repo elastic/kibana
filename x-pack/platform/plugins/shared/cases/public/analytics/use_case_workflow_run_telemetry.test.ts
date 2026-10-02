@@ -27,7 +27,9 @@ jest.mock('../components/cases_context/use_cases_context', () => ({
 }));
 
 describe('getCaseWorkflowRunTelemetry', () => {
-  it.each<[string, CaseWorkflowRunOrigin, { origin: string; itemCount: number }]>([
+  it.each<
+    [string, CaseWorkflowRunOrigin, { origin: string; itemCount: number; attachmentType?: string }]
+  >([
     [
       'a case',
       { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' },
@@ -51,7 +53,7 @@ describe('getCaseWorkflowRunTelemetry', () => {
         attachmentType: 'security.alert',
         attachmentId: 'alert-1',
       },
-      { origin: 'security.alert', itemCount: 1 },
+      { origin: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, attachmentType: 'security.alert', itemCount: 1 },
     ],
     [
       'an attachment selection',
@@ -61,7 +63,7 @@ describe('getCaseWorkflowRunTelemetry', () => {
         attachmentType: 'security.event',
         attachmentIds: ['event-1', 'event-2', 'event-3'],
       },
-      { origin: 'security.event', itemCount: 3 },
+      { origin: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, attachmentType: 'security.event', itemCount: 3 },
     ],
   ])('maps a run from %s', (_label, origin, expected) => {
     expect(getCaseWorkflowRunTelemetry(origin, 1)).toEqual(expected);
