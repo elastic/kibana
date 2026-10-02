@@ -6,19 +6,47 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { createHash } from 'crypto';
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IRouter,
+  PluginInitializerContext,
+  RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 import type { EsqlQueryResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/logging';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import {
   getIndexPatternFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
   parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, TIMEFIELD_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
+
+// Same default/"advanced setting" split `data_views`'s `fields` endpoint uses for
+// its own stale-while-revalidate caching (`DEFAULT_FIELD_CACHE_FRESHNESS`) - the
+// timefield is just as mapping-derived as field-caps data, so it reuses the same
+// `data_views:cache_max_age` setting rather than introducing a near-identical one.
+// `esql`'s kibana.jsonc lists `dataViews` as a requiredPlugin, so this setting is
+// always registered.
+const DEFAULT_TIMEFIELD_CACHE_FRESHNESS = 5;
+
+function calculateEtag(bodyAsString: string): string {
+  return createHash('sha256').update(bodyAsString).digest('hex');
+}
+
+function unwrapEtag(ifNoneMatch: string): string {
+  let requestHash = ifNoneMatch.replace(/^"(.+)"$/, '$1');
+  if (requestHash.indexOf('-') > -1) {
+    requestHash = requestHash.split('-')[0];
+  }
+  return requestHash;
+}
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
@@ -222,6 +250,46 @@ const resolveTimeField = async (
   }
 };
 
+const nestingDepthExceededMessage = 'Query nesting depth exceeds the maximum allowed limit';
+
+type TimefieldOutcome =
+  | { outcome: 'badRequest' }
+  | { outcome: 'success'; body: { timeField: string | undefined } }
+  | { outcome: 'failure'; error: unknown };
+
+// Shared by both the GET and POST handlers below - resolution and the
+// success/failure metrics counter don't depend on how the request arrived.
+const resolveTimefieldForRequest = async (
+  requestHandlerContext: RequestHandlerContext,
+  logger: LoggerFactory,
+  query: string,
+  projectRouting: string | undefined
+): Promise<TimefieldOutcome> => {
+  if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
+    return { outcome: 'badRequest' };
+  }
+
+  const core = await requestHandlerContext.core;
+  const client = core.elasticsearch.client.asCurrentUser;
+
+  try {
+    const body = await resolveTimeField(client, query, logger.get(), projectRouting);
+    esqlRouteRequestCounter.add(1, {
+      route: 'timefield',
+      outcome: 'success',
+      'http.response.status_code': 200,
+    });
+    return { outcome: 'success', body };
+  } catch (error) {
+    esqlRouteRequestCounter.add(1, {
+      route: 'timefield',
+      outcome: 'failure',
+      'http.response.status_code': getErrorStatusCode(error),
+    });
+    return { outcome: 'failure', error };
+  }
+};
+
 export const registerGetTimeFieldRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
@@ -244,32 +312,107 @@ export const registerGetTimeFieldRoute = (
     },
     async (requestHandlerContext, request, response) => {
       const { query, projectRouting } = request.body;
+      const result = await resolveTimefieldForRequest(
+        requestHandlerContext,
+        logger,
+        query,
+        projectRouting
+      );
 
-      if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
-        return response.badRequest({
-          body: 'Query nesting depth exceeds the maximum allowed limit',
-        });
+      if (result.outcome === 'badRequest') {
+        return response.badRequest({ body: nestingDepthExceededMessage });
       }
-
-      const core = await requestHandlerContext.core;
-      const client = core.elasticsearch.client.asCurrentUser;
-
-      try {
-        const body = await resolveTimeField(client, query, logger.get(), projectRouting);
-        esqlRouteRequestCounter.add(1, {
-          route: 'timefield',
-          outcome: 'success',
-          'http.response.status_code': 200,
-        });
-        return response.ok({ body });
-      } catch (error) {
-        esqlRouteRequestCounter.add(1, {
-          route: 'timefield',
-          outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
-        });
-        throw error;
+      if (result.outcome === 'failure') {
+        throw result.error;
       }
+      return response.ok({ body: result.body });
     }
   );
+
+  // GET variant: identical resolution, but cacheable. Kept under
+  // TIMEFIELD_GET_MAX_QUERY_LENGTH so query-string encoding never risks hitting a
+  // URL-length limit imposed by infrastructure in front of Kibana; callers with a
+  // larger payload keep using the POST route above (uncached, as before).
+  router.get(
+    {
+      path: TIMEFIELD_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: {
+        query: schema.object({
+          query: schema.string({ maxLength: TIMEFIELD_GET_MAX_QUERY_LENGTH }),
+          projectRouting: schema.maybe(
+            schema.string({ maxLength: TIMEFIELD_GET_MAX_QUERY_LENGTH })
+          ),
+        }),
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      const { query, projectRouting } = request.query;
+      const result = await resolveTimefieldForRequest(
+        requestHandlerContext,
+        logger,
+        query,
+        projectRouting
+      );
+
+      if (result.outcome === 'badRequest') {
+        return response.badRequest({ body: nestingDepthExceededMessage });
+      }
+      if (result.outcome === 'failure') {
+        throw result.error;
+      }
+
+      return respondWithCacheHeaders(requestHandlerContext, request, response, result.body);
+    }
+  );
+};
+
+const respondWithCacheHeaders = async (
+  requestHandlerContext: RequestHandlerContext,
+  request: KibanaRequest,
+  response: KibanaResponseFactory,
+  body: { timeField: string | undefined }
+) => {
+  const core = await requestHandlerContext.core;
+  const uiSettings = core.uiSettings.client;
+
+  const bodyAsString = JSON.stringify(body);
+  const etag = calculateEtag(bodyAsString);
+
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    etag,
+  };
+
+  // Cache freshness is configurable in classic environments but not on serverless -
+  // same setting `data_views`'s `fields` endpoint already exposes for this exact
+  // category of data (mapping-derived, not document-data-derived).
+  let cacheMaxAge = DEFAULT_TIMEFIELD_CACHE_FRESHNESS;
+  const cacheMaxAgeSetting = await uiSettings.get<number | undefined>('data_views:cache_max_age');
+  if (cacheMaxAgeSetting !== undefined) {
+    cacheMaxAge = cacheMaxAgeSetting;
+  }
+
+  if (cacheMaxAge && body.timeField) {
+    const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
+    headers['cache-control'] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
+  } else {
+    headers['cache-control'] = 'private, no-cache';
+  }
+
+  const ifNoneMatch = request.headers['if-none-match'];
+  const ifNoneMatchString = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
+  if (ifNoneMatchString) {
+    const requestHash = unwrapEtag(ifNoneMatchString);
+    if (etag === requestHash) {
+      return response.notModified({ headers });
+    }
+  }
+
+  return response.ok({ body: bodyAsString, headers });
 };

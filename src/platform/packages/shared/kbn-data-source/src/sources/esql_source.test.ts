@@ -488,8 +488,12 @@ describe('EsqlSource', () => {
   });
 
   describe('create with http', () => {
-    const postedPaths = (http: HttpStart) =>
-      (http.post as jest.Mock).mock.calls.map((call) => call[0] as string);
+    // TIMEFIELD_ROUTE is requested via GET (http.fetch) for short queries, cacheable
+    // like the fields endpoint; SOURCE_INFO_ROUTE is still POST-only. Track both.
+    const requestedPaths = (http: HttpStart) => [
+      ...(http.post as jest.Mock).mock.calls.map((call) => call[0] as string),
+      ...(http.fetch as jest.Mock).mock.calls.map((call) => call[0] as string),
+    ];
 
     const createHttp = (overrides?: {
       sourceInfo?: { columns: Array<{ name: string; esType: string }> };
@@ -504,6 +508,9 @@ describe('EsqlSource', () => {
             }
             return overrides?.sourceInfo ?? { columns: [] };
           }
+          throw new Error(`unexpected path ${path}`);
+        }),
+        fetch: jest.fn(async (path: string) => {
           if (path === TIMEFIELD_ROUTE) {
             return { timeField: overrides?.timeField };
           }
@@ -528,7 +535,7 @@ describe('EsqlSource', () => {
         http,
       });
 
-      expect(postedPaths(http).sort()).toEqual([SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE].sort());
+      expect(requestedPaths(http).sort()).toEqual([SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE].sort());
       expect(source.timeFieldName).toBe('@timestamp');
       expect(source.getColumns()).toEqual([
         { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
@@ -566,8 +573,8 @@ describe('EsqlSource', () => {
         resultColumns: [makeColumn('message', 'string', 'keyword')],
       });
 
-      expect(postedPaths(http)).not.toContain(SOURCE_INFO_ROUTE);
-      expect(postedPaths(http)).not.toContain(TIMEFIELD_ROUTE);
+      expect(requestedPaths(http)).not.toContain(SOURCE_INFO_ROUTE);
+      expect(requestedPaths(http)).not.toContain(TIMEFIELD_ROUTE);
       expect(source.getColumns()).toEqual([
         { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
       ]);
@@ -626,8 +633,8 @@ describe('EsqlSource', () => {
       const second = await EsqlSource.create({ query, http });
 
       expect(second).toBe(first);
-      expect(postedPaths(http).filter((path) => path === SOURCE_INFO_ROUTE)).toHaveLength(1);
-      expect(postedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
+      expect(requestedPaths(http).filter((path) => path === SOURCE_INFO_ROUTE)).toHaveLength(1);
+      expect(requestedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
     });
   });
 });
