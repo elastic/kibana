@@ -319,15 +319,16 @@ const enforceForkLaneOrderForGraph = (
             // the fork node does not appear visually off-centre.
             const forkNode = mutableNodes.get(source);
             if (forkNode) {
-              const branchCenters = orderedHeads.flatMap((h) => {
+              const branchEdges = orderedHeads.flatMap((h) => {
                 const n = mutableNodes.get(h);
                 if (!n) return [];
-                return [n[crossAxis] + (crossAxis === 'x' ? n.width : n.height) / 2];
+                const span = crossAxis === 'x' ? n.width : n.height;
+                return [{ lo: n[crossAxis], hi: n[crossAxis] + span }];
               });
-              if (branchCenters.length > 0) {
-                const minCenter = Math.min(...branchCenters);
-                const maxCenter = Math.max(...branchCenters);
-                const midpoint = (minCenter + maxCenter) / 2;
+              if (branchEdges.length > 0) {
+                const leftEdge = Math.min(...branchEdges.map((e) => e.lo));
+                const rightEdge = Math.max(...branchEdges.map((e) => e.hi));
+                const midpoint = (leftEdge + rightEdge) / 2;
                 const forkSpan = crossAxis === 'x' ? forkNode.width : forkNode.height;
                 const newForkCross = midpoint - forkSpan / 2;
                 const forkDelta = newForkCross - forkNode[crossAxis];
@@ -604,6 +605,17 @@ export const enforceForkBranchCompoundOrder = (
       }
     }
 
+    // In-edges map: needed to propagate fork re-centering to straight-chain ancestors.
+    const inEdges = new Map<string, string[]>();
+    for (const e of graphSpineEdges) {
+      const existing = inEdges.get(e.target);
+      if (existing) {
+        existing.push(e.source);
+      } else {
+        inEdges.set(e.target, [e.source]);
+      }
+    }
+
     // Reachability BFS for exclusive branch membership computation.
     const adjList = new Map<string, string[]>();
     for (const e of graphSpineEdges) {
@@ -631,7 +643,7 @@ export const enforceForkBranchCompoundOrder = (
       return visited;
     };
 
-    for (const [, heads] of outEdges) {
+    for (const [source, heads] of outEdges) {
       if (heads.length >= 2) {
         // Build exclusive branch node sets (same logic as buildLaneSets).
         const perHeadReachable = new Map(heads.map((h) => [h, reachableFrom(h)]));
@@ -780,6 +792,48 @@ export const enforceForkBranchCompoundOrder = (
           }
 
           if (isFinite(branchCrossEnd)) prevBranchCrossEnd = branchCrossEnd;
+        }
+
+        // Re-center the fork source over its fully-packed branch heads.
+        // Pass 1 (enforceForkLaneOrder) centers the fork based on positions
+        // before pass 1b packing — if pass 1b moves any branch (e.g. closing a
+        // gap left when pass 1 re-ordered a wide branch-span), the fork's center
+        // drifts. Correct it here after all branches are in their final positions.
+        const forkNode = mutableNodes.get(source);
+        if (forkNode) {
+          let headMin = Infinity;
+          let headMax = -Infinity;
+          for (const head of heads) {
+            const n = mutableNodes.get(head);
+            if (n) {
+              const lo = n[crossAxis];
+              const hi = lo + n[crossSpan];
+              if (lo < headMin) headMin = lo;
+              if (hi > headMax) headMax = hi;
+            }
+          }
+          if (isFinite(headMin) && isFinite(headMax)) {
+            const midpoint = (headMin + headMax) / 2;
+            const newForkCross = midpoint - forkNode[crossSpan] / 2;
+            const forkDelta = newForkCross - forkNode[crossAxis];
+            if (Math.abs(forkDelta) >= 0.001) {
+              shiftNode(source, forkDelta);
+              // Propagate to straight-chain ancestors (same rule as pass 1).
+              let cur = source;
+              const visited = new Set<string>([cur]);
+              for (;;) {
+                const parents = inEdges.get(cur) ?? [];
+                if (parents.length !== 1) break;
+                const parent = parents[0];
+                if (visited.has(parent)) break;
+                const parentOuts = outEdges.get(parent);
+                if (!parentOuts || parentOuts.length !== 1) break;
+                shiftNode(parent, forkDelta);
+                visited.add(parent);
+                cur = parent;
+              }
+            }
+          }
         }
       } // end if (heads.length >= 2)
     }

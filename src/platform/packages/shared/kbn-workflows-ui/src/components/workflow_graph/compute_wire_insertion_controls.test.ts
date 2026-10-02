@@ -209,8 +209,8 @@ describe('computeWireInsertionControls', () => {
     expect(elseCtrl!.kind).toBe('terminal');
     // gate exit = center-bottom of gate: x=200, y=48.
     // Chip Y = gateExitY + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET.
-    // "+" centre Y = chipY + 14 (CHIP_PLUS_GAP).
-    const CHIP_PLUS_GAP = 14;
+    // "+" centre Y = chipY + 36 (CHIP_PLUS_GAP = chip_half_incl_border + button_half + 14px gap).
+    const CHIP_PLUS_GAP = 36;
     const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
     const gateExitY = 48; // gate y=0, height=48
     const expectedPlusY = gateExitY + chipOffset + CHIP_PLUS_GAP;

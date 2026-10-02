@@ -281,8 +281,9 @@ export function computeWireInsertionControls(args: {
         // Fork branch head "+" sits below the chip label (always visible, like a terminal).
         // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET below the source exit.
         const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
-        // "+" centre: 14px below chip centre (chip half-height≈10, 4px gap).
-        const CHIP_PLUS_GAP = 14;
+        // "+" centre must clear the chip AND the button itself with visible breathing room:
+        // chip half-height (11px incl 1px border) + button half-height (11px from CONTROL_SIZE=22) + 14px gap = 36px.
+        const CHIP_PLUS_GAP = 36;
         const chipX = direction === 'LR' ? start.x + chipOffset : end.x;
         const chipY = direction === 'LR' ? end.y : start.y + chipOffset;
         const plusX = chipX;
@@ -291,11 +292,14 @@ export function computeWireInsertionControls(args: {
         // Use position:'start' so clicking this "+" prepends to the branch.
         const headContext: WorkflowGraphInsertionContext =
           insertContext.mode === 'branch' ? { ...insertContext, position: 'start' } : insertContext;
+        // Arrow stub starts at chip bottom (chipY + chip half-height incl 1px border), not chip centre,
+        // so the dashed line doesn't overlap the chip label.
+        const chipBottomY = direction === 'LR' ? chipY : chipY + 11;
         controls.push({
           id: `terminal:fork:${edge.id}`,
           kind: 'terminal',
           centre: plusPos,
-          segmentStart: { x: chipX, y: chipY },
+          segmentStart: { x: chipX, y: chipBottomY },
           segmentEnd: plusPos,
           insertContext: headContext,
           fallbackStepName: fallbackStepNameFor(ports, sourceNode),
