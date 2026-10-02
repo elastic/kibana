@@ -8,7 +8,7 @@
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertTimelineSeries } from './types';
-import { deriveAlertTimelineData } from './derive_alert_timeline_data';
+import { deriveAlertTimelineDataFromEvents } from './derive_alert_timeline_events';
 
 export interface EpisodeAlertTimelineData {
   row: AlertTimelineSeries;
@@ -49,7 +49,7 @@ export const deriveEpisodeAlertTimelineData = (
   const windowEndMs = isRecovered
     ? Math.max(lastEvent.timestampMs, windowStartMs + 1)
     : Math.max(currentTimeMs, lastEvent.timestampMs, windowStartMs + 1);
-  const timelineData = deriveAlertTimelineData(
+  const timelineData = deriveAlertTimelineDataFromEvents(
     eventRows,
     {},
     'started_asc',

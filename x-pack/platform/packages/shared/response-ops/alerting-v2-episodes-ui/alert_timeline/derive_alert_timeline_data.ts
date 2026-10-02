@@ -9,7 +9,7 @@ import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-
 import type {
   AlertTimelineData,
   AlertTimelineGroupingValues,
-  AlertTimelineEventRow,
+  AlertTimelinePhaseRow,
   AlertTimelineSegment,
   AlertTimelineSeries,
   AlertTimelineSortPolicy,
@@ -39,52 +39,60 @@ const compareSeries = (
   }
 };
 
-interface ParsedEvent {
+interface ParsedPhase {
   episodeId: string;
   status: AlertEpisodeStatus;
-  timestampMs: number;
+  startMs: number;
+  endMs: number;
   groupHash: string;
-  sourceIndex: number;
 }
 
 /**
- * Builds timeline lanes from ordered raw rule events. Consecutive heartbeat events in
- * the same status are collapsed, while every actual status change is preserved. An
- * open episode's last status tails to `windowEndMs`; terminal INACTIVE only marks recovery.
+ * Builds timeline lanes from per-status episode phase rows (`buildEpisodePhasesQuery`):
+ * order each episode's phases by start and link each to the next (Gantt bar = phases
+ * end to end). An open episode's last phase tails to `windowEndMs`; a terminal INACTIVE phase
+ * just marks recovery (no bar). Summary/total are supplied externally. Segments are
+ * clipped to `[windowStartMs, windowEndMs]` for drawing; each segment keeps its `trueStartMs`
+ * (the window-independent start overlaid by `applyEpisodeStarts`) so the tooltip
+ * reports the real start even when the rendered left edge is clamped to `windowStartMs`.
  */
 export const deriveAlertTimelineData = (
-  eventRows: AlertTimelineEventRow[],
+  phaseRows: AlertTimelinePhaseRow[],
   groupingValuesByHash: AlertTimelineGroupingValues,
   sort: AlertTimelineSortPolicy,
   windowStartMs: number,
   windowEndMs: number,
   summary: AlertTimelineSummary
 ): AlertTimelineData => {
-  const eventsBySeries = new Map<string, ParsedEvent[]>();
+  const phasesBySeries = new Map<string, ParsedPhase[]>();
 
-  for (const [sourceIndex, row] of eventRows.entries()) {
-    const timestampMs = Date.parse(row['@timestamp']);
-    if (!Number.isFinite(timestampMs) || timestampMs > windowEndMs) continue;
-    const event: ParsedEvent = {
+  for (const row of phaseRows) {
+    const startMs = Date.parse(row.seg_start);
+    const endMs = Date.parse(row.seg_end);
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) continue;
+    const phase: ParsedPhase = {
       episodeId: row['episode.id'],
       status: row['episode.status'],
-      timestampMs,
+      startMs,
+      endMs,
       groupHash: row.group_hash,
-      sourceIndex,
     };
-    const list = eventsBySeries.get(row.group_hash);
-    if (list) list.push(event);
-    else eventsBySeries.set(row.group_hash, [event]);
+    const list = phasesBySeries.get(row.group_hash);
+    if (list) {
+      list.push(phase);
+    } else {
+      phasesBySeries.set(row.group_hash, [phase]);
+    }
   }
 
   const seriesByHash = new Map<string, AlertTimelineSeries>();
 
-  for (const [groupHash, events] of eventsBySeries) {
-    const eventsByEpisode = new Map<string, ParsedEvent[]>();
-    for (const event of events) {
-      const list = eventsByEpisode.get(event.episodeId);
-      if (list) list.push(event);
-      else eventsByEpisode.set(event.episodeId, [event]);
+  for (const [groupHash, phases] of phasesBySeries) {
+    const phasesByEpisode = new Map<string, ParsedPhase[]>();
+    for (const phase of phases) {
+      const list = phasesByEpisode.get(phase.episodeId);
+      if (list) list.push(phase);
+      else phasesByEpisode.set(phase.episodeId, [phase]);
     }
 
     const segments: AlertTimelineSegment[] = [];
@@ -94,51 +102,61 @@ export const deriveAlertTimelineData = (
     let seriesFirstMs = Infinity;
     let seriesLastMs = -Infinity;
 
-    for (const [episodeId, episodeEvents] of eventsByEpisode) {
-      episodeEvents.sort((a, b) => a.timestampMs - b.timestampMs || a.sourceIndex - b.sourceIndex);
-      const statusChanges = episodeEvents.filter(
-        (event, index) => index === 0 || event.status !== episodeEvents[index - 1].status
-      );
-      const earliestStartMs = episodeEvents[0].timestampMs;
+    for (const [episodeId, episodePhases] of phasesByEpisode) {
+      episodePhases.sort((a, b) => a.startMs - b.startMs);
 
-      for (let index = 0; index < statusChanges.length; index++) {
-        const event = statusChanges[index];
-        const next = statusChanges[index + 1];
-        transitions.push({ episodeId, status: event.status, tsMs: event.timestampMs });
+      const earliestStartMs = episodePhases[0].startMs;
 
-        if (next && next.timestampMs > event.timestampMs) {
-          segments.push({
-            episodeId,
-            status: event.status,
-            x0Ms: event.timestampMs,
-            x1Ms: next.timestampMs,
-            trueStartMs: event.timestampMs,
-          });
-        } else if (!next && isOpenStatus(event.status)) {
-          if (windowEndMs > event.timestampMs) {
+      for (let i = 0; i < episodePhases.length; i++) {
+        const phase = episodePhases[i];
+        const next = episodePhases[i + 1];
+
+        // A dot at the entry into each status (start, transitions, recovery).
+        transitions.push({ episodeId, status: phase.status, tsMs: phase.startMs });
+
+        if (next) {
+          // This phase runs until the next one begins.
+          if (next.startMs > phase.startMs) {
             segments.push({
               episodeId,
-              status: event.status,
-              x0Ms: event.timestampMs,
+              status: phase.status,
+              x0Ms: phase.startMs,
+              x1Ms: next.startMs,
+              trueStartMs: phase.startMs,
+            });
+          }
+        } else if (isOpenStatus(phase.status)) {
+          // Last phase, still open: tail to the window edge. (Could cap at `endMs`
+          // to avoid overstating a stopped rule — follow-up.)
+          if (windowEndMs > phase.startMs) {
+            segments.push({
+              episodeId,
+              status: phase.status,
+              x0Ms: phase.startMs,
               x1Ms: windowEndMs,
-              trueStartMs: event.timestampMs,
+              trueStartMs: phase.startMs,
             });
           }
           hasOpenEpisode = true;
-          longestOpenDurationMs = Math.max(longestOpenDurationMs, windowEndMs - earliestStartMs);
+          const openDuration = Math.max(0, windowEndMs - earliestStartMs);
+          if (openDuration > longestOpenDurationMs) longestOpenDurationMs = openDuration;
         }
-      }
+        // A terminal INACTIVE last phase draws nothing (recovery marker only).
 
-      seriesFirstMs = Math.min(seriesFirstMs, earliestStartMs);
-      seriesLastMs = Math.max(seriesLastMs, episodeEvents[episodeEvents.length - 1].timestampMs);
+        if (phase.startMs < seriesFirstMs) seriesFirstMs = phase.startMs;
+        if (phase.endMs > seriesLastMs) seriesLastMs = phase.endMs;
+      }
     }
 
-    const clippedSegments = segments
-      .filter((segment) => segment.x1Ms > windowStartMs)
-      .map((segment) =>
-        segment.x0Ms < windowStartMs ? { ...segment, x0Ms: windowStartMs } : segment
-      );
-    const clippedTransitions = transitions.filter((transition) => transition.tsMs >= windowStartMs);
+    // Clip the *rendered* edge to the visible window (phases may start before
+    // `windowStartMs`). `trueStartMs` is left untouched so the tooltip can still report
+    // the real start of a clipped bar.
+    const clippedSegments: AlertTimelineSegment[] = [];
+    for (const s of segments) {
+      if (s.x1Ms <= windowStartMs) continue;
+      clippedSegments.push(s.x0Ms < windowStartMs ? { ...s, x0Ms: windowStartMs } : s);
+    }
+    const clippedTransitions = transitions.filter((t) => t.tsMs >= windowStartMs);
 
     seriesByHash.set(groupHash, {
       groupHash,
@@ -149,12 +167,14 @@ export const deriveAlertTimelineData = (
       lastEventMs: seriesLastMs,
       hasOpenEpisode,
       longestOpenDurationMs,
-      episodeCount: eventsByEpisode.size,
+      episodeCount: phasesByEpisode.size,
     });
   }
 
+  const rows = [...seriesByHash.values()].sort((a, b) => compareSeries(a, b, sort));
+
   return {
-    rows: [...seriesByHash.values()].sort((a, b) => compareSeries(a, b, sort)),
+    rows,
     summary,
   };
 };
