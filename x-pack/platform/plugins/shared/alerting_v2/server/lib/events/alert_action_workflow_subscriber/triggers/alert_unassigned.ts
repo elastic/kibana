@@ -21,7 +21,7 @@ export { ALERT_UNASSIGNED_TRIGGER_ID } from '../../../../../common/workflows/tri
 
 /**
  * Binding from the bus `episode.unassigned` event to the
- * `alerting.userActions.alertUnassigned` workflow trigger.
+ * `alerting.actions.alertUnassigned` workflow trigger.
  */
 export const alertUnassignedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeUnassignedEvent,

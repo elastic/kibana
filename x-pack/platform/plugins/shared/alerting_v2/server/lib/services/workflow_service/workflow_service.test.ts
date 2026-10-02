@@ -16,7 +16,7 @@ import { WorkflowService } from './workflow_service';
 
 type WorkflowsExtensionsStart = ReturnType<typeof workflowsExtensionsMock.createStart>;
 
-const TRIGGER_ID = 'alerting.userActions.alertAssigned';
+const TRIGGER_ID = 'alerting.actions.alertAssigned';
 const PAYLOAD = { episodeId: 'episode-1' } as const;
 
 describe('WorkflowService', () => {

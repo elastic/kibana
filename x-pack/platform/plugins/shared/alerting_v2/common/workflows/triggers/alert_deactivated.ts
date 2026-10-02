@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
-export const ALERT_DEACTIVATED_TRIGGER_ID = 'alerting.userActions.alertDeactivated' as const;
+export const ALERT_DEACTIVATED_TRIGGER_ID = 'alerting.actions.alertDeactivated' as const;
 
 export const alertDeactivatedPayloadSchema = alertActionEnvelopeSchema.extend({
   reason: z

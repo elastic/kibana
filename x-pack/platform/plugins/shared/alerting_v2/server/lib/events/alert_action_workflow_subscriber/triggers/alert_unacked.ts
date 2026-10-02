@@ -21,7 +21,7 @@ export { ALERT_UNACKED_TRIGGER_ID } from '../../../../../common/workflows/trigge
 
 /**
  * Binding from the bus `episode.unacked` event to the
- * `alerting.userActions.alertUnacked` workflow trigger.
+ * `alerting.actions.alertUnacked` workflow trigger.
  */
 export const alertUnackedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeUnackedEvent,

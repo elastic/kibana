@@ -21,7 +21,7 @@ export { ALERT_SNOOZED_TRIGGER_ID } from '../../../../../common/workflows/trigge
 
 /**
  * Binding from the bus `episode.snoozed` event to the
- * `alerting.userActions.alertSnoozed` workflow trigger.
+ * `alerting.actions.alertSnoozed` workflow trigger.
  */
 export const alertSnoozedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeSnoozedEvent,

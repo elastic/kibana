@@ -10,7 +10,7 @@ import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
-export const ALERT_ACKED_TRIGGER_ID = 'alerting.userActions.alertAcked' as const;
+export const ALERT_ACKED_TRIGGER_ID = 'alerting.actions.alertAcked' as const;
 
 export const alertAckedPayloadSchema = alertActionEnvelopeSchema.extend({});
 

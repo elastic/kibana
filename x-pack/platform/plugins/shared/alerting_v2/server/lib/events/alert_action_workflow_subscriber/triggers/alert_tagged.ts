@@ -21,7 +21,7 @@ export { ALERT_TAGGED_TRIGGER_ID } from '../../../../../common/workflows/trigger
 
 /**
  * Binding from the bus `episode.tagged` event to the
- * `alerting.userActions.alertTagged` workflow trigger.
+ * `alerting.actions.alertTagged` workflow trigger.
  */
 export const alertTaggedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeTaggedEvent,

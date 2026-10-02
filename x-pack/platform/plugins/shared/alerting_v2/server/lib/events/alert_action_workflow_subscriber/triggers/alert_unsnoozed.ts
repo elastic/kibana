@@ -21,7 +21,7 @@ export { ALERT_UNSNOOZED_TRIGGER_ID } from '../../../../../common/workflows/trig
 
 /**
  * Binding from the bus `episode.unsnoozed` event to the
- * `alerting.userActions.alertUnsnoozed` workflow trigger.
+ * `alerting.actions.alertUnsnoozed` workflow trigger.
  */
 export const alertUnsnoozedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeUnsnoozedEvent,

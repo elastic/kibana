@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
-export const ALERT_ASSIGNED_TRIGGER_ID = 'alerting.userActions.alertAssigned' as const;
+export const ALERT_ASSIGNED_TRIGGER_ID = 'alerting.actions.alertAssigned' as const;
 
 export const alertAssignedPayloadSchema = alertActionEnvelopeSchema.extend({
   assigneeUid: z

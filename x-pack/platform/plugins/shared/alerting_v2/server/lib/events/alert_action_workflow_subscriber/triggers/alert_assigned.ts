@@ -21,7 +21,7 @@ export { ALERT_ASSIGNED_TRIGGER_ID } from '../../../../../common/workflows/trigg
 
 /**
  * Binding from the bus `episode.assigned` event to the
- * `alerting.userActions.alertAssigned` workflow trigger.
+ * `alerting.actions.alertAssigned` workflow trigger.
  *
  * Adding a new field to either side requires updating
  * {@link alertAssignedPayloadSchema} and {@link alertAssignedTrigger.toPayload}

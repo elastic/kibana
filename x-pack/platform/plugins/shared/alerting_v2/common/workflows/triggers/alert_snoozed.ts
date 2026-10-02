@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
-export const ALERT_SNOOZED_TRIGGER_ID = 'alerting.userActions.alertSnoozed' as const;
+export const ALERT_SNOOZED_TRIGGER_ID = 'alerting.actions.alertSnoozed' as const;
 
 export const alertSnoozedPayloadSchema = alertActionEnvelopeSchema.extend({
   expiry: z.iso
