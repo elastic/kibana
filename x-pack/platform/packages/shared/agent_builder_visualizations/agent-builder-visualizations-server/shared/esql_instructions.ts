@@ -48,10 +48,10 @@ Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time s
 
 ### FROM
 
-\`@timestamp\` — \`TBUCKET(100)\` only. No timestamp \`WHERE\`, no \`?_tstart\` / \`?_tend\`:
+\`@timestamp\` — \`TBUCKET(100, ?_tstart, ?_tend)\`. No timestamp \`WHERE\`. The bounds size the buckets; Kibana binds \`?_tstart\` / \`?_tend\` when the chart renders:
 
 \`\`\`esql
-FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100)
+FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
 \`\`\`
 
 Any other date field:
@@ -64,10 +64,10 @@ Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time fie
 
 ### TS
 
-The visualization framework automatically adds the \`@timestamp\` range for \`TS\` time series, so do not add \`TRANGE\` or pass \`?_tstart\` / \`?_tend\` to \`TBUCKET\`.
+The visualization framework automatically adds the \`@timestamp\` range for \`TS\` time series, so do not add \`TRANGE\`. Size the buckets with the time-picker bounds:
 
 \`\`\`esql
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100)
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
 \`\`\`
 
 Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).

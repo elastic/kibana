@@ -74,7 +74,7 @@ Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.k
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
 - **Categorical / metric** golds include the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`).
-- **`@timestamp` time-series** golds use `TBUCKET(100)` and omit the timestamp `WHERE`. Kibana supplies that filter, and `TBUCKET` sizes buckets from it. An extra `@timestamp` WHERE is still accepted and stripped before equivalence scoring.
+- **`@timestamp` time-series** golds use `TBUCKET(100, ?_tstart, ?_tend)` and omit the timestamp `WHERE`. The bounds size the buckets; Kibana binds them when the chart renders. An extra `@timestamp` WHERE is still accepted and stripped before equivalence scoring. `TBUCKET(100)` and `BUCKET(@timestamp, <count>, ?_tstart, ?_tend)` remain equivalent.
 - **Other date fields** (for example `order_date`) stay on `BUCKET(<time field>, 100, ?_tstart, ?_tend)`. `TBUCKET` only buckets `@timestamp`.
 
 This keeps gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which brackets both `kibana_sample_data_logs` and the synthtrace host-load fixture.
