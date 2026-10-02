@@ -597,13 +597,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.waitForWithTimeout(
         'ES|QL KEEP warning footer button to appear',
         testSubjects.TRY_TIME,
-        async () =>
-          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+        async () => await testSubjects.exists('ESQLEditor-footerPopoverButton-warning')
       );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
-      const warningContent = await testSubjects.find('ESQLEditor-errors-warnings-content');
-      const warningContentText = await warningContent.getVisibleText();
+      await testSubjects.existOrFail('ESQLEditor-errors-warnings-content');
+      const warningContentText = await testSubjects.getVisibleText(
+        'ESQLEditor-errors-warnings-content'
+      );
 
       expect(warningContentText).contain('KEEP processing command is recommended');
 

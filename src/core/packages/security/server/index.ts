@@ -27,6 +27,7 @@ export {
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from './src/service_account_workloads';
 export type {
+  AuthenticatedPrincipal,
   ServiceAccount,
   CreateServiceAccountParams,
   ServiceAccountWorkloadBinder,
@@ -34,6 +35,7 @@ export type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,

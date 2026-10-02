@@ -5,19 +5,23 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
+  request: KibanaRequest;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }
 
 export async function getKiIdentificationStatusToolHandler({
   streamName,
+  request,
   streamsKIsOnboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
   const { executionId, ...statusResult } = await streamsKIsOnboardingClient.getStatus({
     streamName,
+    request,
   });
 
   return {

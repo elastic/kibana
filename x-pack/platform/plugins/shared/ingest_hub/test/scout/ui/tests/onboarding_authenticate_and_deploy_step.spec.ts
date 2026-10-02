@@ -25,9 +25,15 @@ import {
 // session → reload → credentials → POST fires → success state renders.
 
 // Minimal aws manifest — must include `version` so deployGroup can resolve pkgVersion.
+// `vars` includes credential var names so buildPackageVars wires them into the PUT body,
+// making credential-stripping regressions detectable.
 const MOCK_AWS_PACKAGE_WITH_VERSION = {
   item: {
     version: '7.1.1',
+    vars: [
+      { name: 'access_key_id', type: 'text' },
+      { name: 'secret_access_key', type: 'password' },
+    ],
     policy_templates: [
       {
         name: 'elb',
@@ -169,9 +175,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
 
-    // Deploy must be enabled WITHOUT credentials — this exercises the isCleanupOnly bypass
-    // (!isDeployReady && !isCleanupOnly → disabled). Filling credentials first would mask a
-    // regression where the button is only enabled because isDeployReady, not isCleanupOnly.
+    // The managed-integrations deploy button is enabled for cleanup-only scenarios (agentless path)
+    // regardless of credential state — no credentials are required because the agentless handler
+    // does not rebuild package-level vars.
     const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
     await expect(deployButton).toBeEnabled();
 
@@ -230,7 +236,12 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ items: [] }),
+          // Return the seeded policy so AgentBasedSection keeps selectedAgentPolicyIds populated.
+          body: JSON.stringify({
+            items: [
+              { id: 'mock-agent-policy-id', name: 'Mock Agent Policy', namespace: 'default' },
+            ],
+          }),
         });
       }
     );
@@ -301,6 +312,15 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
 
+    // Credentials are required even in cleanup-only scenarios — cleanupAgentBasedPolicies
+    // rebuilds the shared policy's vars, so entering credentials prevents stripping them
+    // from the surviving integration.
+    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
+    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
+    await expect(accessKeyField).toBeVisible();
+    await accessKeyField.fill('AKIATEST');
+    await secretKeyField.fill('secrettest');
+
     const updateRequestPromise = page.waitForRequest(
       (req) =>
         req.method() === 'PUT' &&
@@ -311,7 +331,13 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await expect(nextButton).toBeEnabled();
     await nextButton.click();
 
-    await updateRequestPromise; // PUT — shared policy updated with elb inputs only
+    const updateRequest = await updateRequestPromise;
+    const putBody = updateRequest.postDataJSON() as { vars?: Record<string, string> };
+    // Credential vars must be present in the PUT — they were entered above. Their absence would
+    // indicate buildPackageVars ran without credentials and stripped them from the survivor.
+    expect(putBody.vars?.access_key_id).toBe('AKIATEST');
+    expect(putBody.vars?.secret_access_key).toBe('secrettest');
+
     await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
     expect(deleteObserved).toBe(false);
     expect(createObserved).toBe(false);

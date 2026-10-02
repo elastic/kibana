@@ -1,5 +1,5 @@
 {
-  "sha1": "ab5754ce7213077003adfa9fbd353493eec92ad1",
+  "sha1": "c42ae1c767ac7593607346122deaff92284757d5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 35,
+        "line": 38,
         "column": 9
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 48,
+        "line": 51,
         "column": 25
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 13
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 70,
+        "line": 73,
         "column": 10
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 81,
+        "line": 84,
         "column": 51
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 102,
+        "line": 105,
         "column": 23
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 125,
+        "line": 128,
         "column": 16
       }
     }

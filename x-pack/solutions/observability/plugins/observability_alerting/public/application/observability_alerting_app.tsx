@@ -13,22 +13,27 @@ import type {
 } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import {
-  OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
-  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+  OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
 } from '../constants';
+import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
+
+const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -183,6 +188,7 @@ export const ObservabilityAlertingApp = ({
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
             privilegeCheck={privilegeCheck}
+            createActions={createObservabilityEpisodeActions}
             manageRulesHref={manageRulesHref}
           />
         </EuiPageSection>

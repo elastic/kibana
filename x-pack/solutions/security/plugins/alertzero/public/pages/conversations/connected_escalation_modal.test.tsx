@@ -14,28 +14,43 @@ import type { Investigation } from '@kbn/agentic-investigations-common';
 import {
   useListEscalations,
   useCreateEscalation,
-  useAddToEscalation,
+  useAttachToEscalation,
   useCurrentUserProfile,
   useSuggestUserProfiles,
+  useEscalationsForInvestigation,
 } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { ConnectedEscalationModal } from './connected_escalation_modal';
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useListEscalations: jest.fn(),
   useCreateEscalation: jest.fn(),
-  useAddToEscalation: jest.fn(),
+  useAttachToEscalation: jest.fn(),
   useCurrentUserProfile: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
+  useEscalationsForInvestigation: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_agentic_investigations_capabilities', () => ({
+  useAgenticInvestigationsCapabilities: jest.fn(() => ({
+    showEscalations: true,
+    manageEscalations: true,
+    manageInvestigations: true,
+  })),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_open_in_chat', () => ({
+  useOpenInChat: jest.fn(),
+}));
+
 jest.mock('@kbn/user-profile-components', () => ({
   getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-  UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
+  UserProfilesSelectable: () => <div data-test-subj="escalationModalAssigneePicker" />,
 }));
 
 jest.mock('@kbn/core-http-browser', () => ({
@@ -46,14 +61,23 @@ const mockUseListEscalations = useListEscalations as jest.MockedFunction<typeof 
 const mockUseCreateEscalation = useCreateEscalation as jest.MockedFunction<
   typeof useCreateEscalation
 >;
-const mockUseAddToEscalation = useAddToEscalation as jest.MockedFunction<typeof useAddToEscalation>;
+const mockUseAttachToEscalation = useAttachToEscalation as jest.MockedFunction<
+  typeof useAttachToEscalation
+>;
 const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
   typeof useCurrentUserProfile
 >;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.MockedFunction<
   typeof useSuggestUserProfiles
 >;
+const mockUseEscalationsForInvestigation = useEscalationsForInvestigation as jest.MockedFunction<
+  typeof useEscalationsForInvestigation
+>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseOpenInChat = useOpenInChat as jest.MockedFunction<typeof useOpenInChat>;
+
+let getChatHref: jest.Mock;
+let openChatMock: jest.Mock;
 
 const createMutate = jest.fn();
 const addMutate = jest.fn();
@@ -90,6 +114,15 @@ const renderModal = (props: Partial<EscalationModalRenderProps> = {}) =>
   );
 
 beforeEach(() => {
+  getChatHref = jest.fn(
+    (id: string, agentId?: string) => `/mock-chat/${agentId ?? 'no-agent'}/${id}`
+  );
+  openChatMock = jest.fn();
+  mockUseOpenInChat.mockReturnValue({
+    getChatHref,
+    openChat: openChatMock,
+  });
+
   mockUseListEscalations.mockReturnValue({
     data: { results: [], pagination: { total: 0, page: 1, per_page: 20 } },
     isLoading: false,
@@ -102,20 +135,28 @@ beforeEach(() => {
     isLoading: false,
   } as unknown as ReturnType<typeof useCreateEscalation>);
 
-  mockUseAddToEscalation.mockReturnValue({
+  mockUseAttachToEscalation.mockReturnValue({
     mutate: addMutate,
     isLoading: false,
-  } as unknown as ReturnType<typeof useAddToEscalation>);
+  } as unknown as ReturnType<typeof useAttachToEscalation>);
 
   mockUseCurrentUserProfile.mockReturnValue({
     data: { uid: 'user-1', user: { username: 'alice' } },
     isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
   } as unknown as ReturnType<typeof useCurrentUserProfile>);
 
   mockUseSuggestUserProfiles.mockReturnValue({
     data: [],
     isFetching: false,
   } as unknown as ReturnType<typeof useSuggestUserProfiles>);
+
+  mockUseEscalationsForInvestigation.mockReturnValue({
+    data: { results: [], pagination: { total: 0, page: 1, per_page: 50 } },
+    isLoading: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useEscalationsForInvestigation>);
 
   mockUseKibana.mockReturnValue({
     services: {
@@ -253,6 +294,54 @@ describe('ConnectedEscalationModal', () => {
     expect(radio).toBeDisabled();
   });
 
+  it('shows a loading spinner in create mode while the user profile is loading', () => {
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
+
+    renderModal({ mode: 'create' });
+
+    // The create form must not render yet; a spinner is shown instead.
+    expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
+  });
+
+  it('shows an error callout with retry in create mode when the profile fetch fails', () => {
+    const refetch = jest.fn();
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch,
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
+
+    renderModal({ mode: 'create' });
+
+    expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
+    // The error callout must contain a retry button that calls refetch.
+    expect(screen.getByText('Failed to load your profile. Try again.')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Retry'));
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('shows an unavailable callout in create mode when the profile is null', () => {
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
+
+    renderModal({ mode: 'create' });
+
+    expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Your user profile is unavailable. Private escalations cannot be created.')
+    ).toBeInTheDocument();
+  });
+
   it('shows an error callout when the escalations query fails', () => {
     mockUseListEscalations.mockReturnValue({
       data: undefined,
@@ -266,27 +355,28 @@ describe('ConnectedEscalationModal', () => {
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
   });
 
-  it('success toast for create links to the newly created escalation', () => {
+  it('success toast for create links to the newly created escalation in Agent Builder', () => {
     renderModal({ mode: 'create' });
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     const [, callbacks] = createMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
-    // onSuccess receives the created Conversation; its id is used to build the deep link.
-    callbacks.onSuccess({ id: 'new-esc-1' });
+    // onSuccess receives the created Conversation; id and agent_id are used to deep-link.
+    callbacks.onSuccess({ id: 'new-esc-1', agent_id: 'new-agent-1' });
 
+    expect(getChatHref).toHaveBeenCalledWith('new-esc-1', 'new-agent-1');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         actionProps: expect.objectContaining({
           primary: expect.objectContaining({
-            href: '/base/app/alertzero/escalations?selectedConversationId=new-esc-1',
+            href: '/mock-chat/new-agent-1/new-esc-1',
           }),
         }),
       })
     );
   });
 
-  it('success toast for add-to links to the selected escalation', () => {
+  it('success toast for add-to links to the selected escalation in Agent Builder', () => {
     mockUseListEscalations.mockReturnValue({
       data: {
         results: [
@@ -306,20 +396,142 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
-    fireEvent.click(screen.getByTestId('escalationModalAddToEscalation'));
+    fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     const [, callbacks] = addMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
-    callbacks.onSuccess();
+    // onSuccess receives the updated Conversation; id and agent_id are used to deep-link.
+    callbacks.onSuccess({ id: 'esc-3', agent_id: 'agent-3' });
 
+    expect(getChatHref).toHaveBeenCalledWith('esc-3', 'agent-3');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         actionProps: expect.objectContaining({
           primary: expect.objectContaining({
-            href: '/base/app/alertzero/escalations?selectedConversationId=esc-3',
+            href: '/mock-chat/agent-3/esc-3',
           }),
         }),
       })
     );
+  });
+
+  describe('already-escalated callout', () => {
+    it('does not render a callout when the investigation has no existing escalations', () => {
+      // Default mock returns empty results — callout should be absent.
+      renderModal();
+
+      expect(
+        screen.queryByTestId('escalationModalAlreadyEscalatedCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders a callout with a link when the investigation is already in one escalation', () => {
+      mockUseEscalationsForInvestigation.mockReturnValue({
+        data: {
+          results: [
+            {
+              id: 'esc-existing-1',
+              agent_id: 'agent-existing-1',
+              title: 'P1 security breach',
+              metadata: {},
+              permissions: { rename: true, delete: true, update_access_control: true },
+            },
+          ],
+          pagination: { total: 1, page: 1, per_page: 50 },
+        },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useEscalationsForInvestigation>);
+
+      renderModal();
+
+      expect(screen.getByTestId('escalationModalAlreadyEscalatedCallout')).toBeInTheDocument();
+      const link = screen.getByTestId('escalationModalExistingEscalationLink-esc-existing-1');
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent('P1 security breach');
+      // href comes from getChatHref mock: /mock-chat/<agentId>/<id>
+      expect(link).toHaveAttribute('href', '/mock-chat/agent-existing-1/esc-existing-1');
+    });
+
+    it('renders a callout with multiple links when the investigation is in several escalations', () => {
+      mockUseEscalationsForInvestigation.mockReturnValue({
+        data: {
+          results: [
+            {
+              id: 'esc-a',
+              agent_id: 'agent-a',
+              title: 'Escalation A',
+              metadata: {},
+              permissions: { rename: true, delete: true, update_access_control: true },
+            },
+            {
+              id: 'esc-b',
+              agent_id: 'agent-b',
+              title: 'Escalation B',
+              metadata: {},
+              permissions: { rename: true, delete: true, update_access_control: true },
+            },
+          ],
+          pagination: { total: 2, page: 1, per_page: 50 },
+        },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useEscalationsForInvestigation>);
+
+      renderModal();
+
+      expect(screen.getByTestId('escalationModalAlreadyEscalatedCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('escalationModalExistingEscalationLink-esc-a')).toBeInTheDocument();
+      expect(screen.getByTestId('escalationModalExistingEscalationLink-esc-b')).toBeInTheDocument();
+    });
+
+    it('clicking a callout link calls openChat with the escalation id and agent id, then closes', () => {
+      mockUseEscalationsForInvestigation.mockReturnValue({
+        data: {
+          results: [
+            {
+              id: 'esc-nav',
+              agent_id: 'agent-nav',
+              title: 'Navigable escalation',
+              metadata: {},
+              permissions: { rename: true, delete: true, update_access_control: true },
+            },
+          ],
+          pagination: { total: 1, page: 1, per_page: 50 },
+        },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useEscalationsForInvestigation>);
+
+      renderModal();
+
+      const link = screen.getByTestId('escalationModalExistingEscalationLink-esc-nav');
+      fireEvent.click(link);
+
+      expect(openChatMock).toHaveBeenCalledWith('esc-nav', 'agent-nav');
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('does not fetch escalations when showEscalations is false', () => {
+      const { useAgenticInvestigationsCapabilities } = jest.requireMock(
+        '../../hooks/use_agentic_investigations_capabilities'
+      );
+      (useAgenticInvestigationsCapabilities as jest.Mock).mockReturnValueOnce({
+        showEscalations: false,
+        manageEscalations: false,
+        manageInvestigations: true,
+      });
+
+      renderModal();
+
+      // Both hooks should have been called with enabled: false.
+      expect(mockUseEscalationsForInvestigation).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ enabled: false })
+      );
+      expect(mockUseListEscalations).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
   });
 });
