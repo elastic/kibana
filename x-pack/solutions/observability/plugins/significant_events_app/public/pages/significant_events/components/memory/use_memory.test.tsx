@@ -10,13 +10,13 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
+  MEMORY_KEYWORD_SIZE,
   MEMORY_PAGE_SIZE,
-  MEMORY_TREEMAP_SIZE,
   useDeleteMemoryPage,
   useMemoryEnabled,
+  useMemoryKeywordPages,
   useMemoryPage,
   useMemoryPages,
-  useMemoryTreemapPages,
   useSetMemoryArchived,
 } from './use_memory';
 import type { MemoryListResult } from './types';
@@ -151,24 +151,63 @@ describe('useMemoryPages', () => {
   });
 });
 
-describe('useMemoryTreemapPages', () => {
-  it('asks the list route for one wide page of live memories', async () => {
+describe('useMemoryKeywordPages', () => {
+  it('asks the list route for the widest page of live memories', async () => {
     // The tab's own list is a 25-row slice, which would describe a quarter of
     // the store; the chart asks for its own wider page rather than a new route.
     fetchMock.mockResolvedValue(listResult(['memory_a']));
     const { wrapper } = createWrapper();
 
-    const { result } = renderHook(() => useMemoryTreemapPages(), { wrapper });
+    const { result } = renderHook(() => useMemoryKeywordPages(), { wrapper });
 
     await waitFor(() => expect(result.current.data?.pages).toHaveLength(1));
-    expect(listQueries()[0]).toEqual({ filter: 'active', size: MEMORY_TREEMAP_SIZE });
+    expect(listQueries()[0]).toEqual({ filter: 'active', size: MEMORY_KEYWORD_SIZE });
+  });
+
+  it('sends the selected keywords so the server returns the filtered set', async () => {
+    fetchMock.mockResolvedValue(listResult([]));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(
+      () => useMemoryKeywordPages(['invoke-agent', 'invoke_agent', 'cart cache']),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(listQueries()[0]).toEqual({
+      filter: 'active',
+      size: MEMORY_KEYWORD_SIZE,
+      // Every spelling of every selected keyword travels, so a document written
+      // before tags were canonicalized still matches.
+      tags: ['invoke-agent', 'invoke_agent', 'cart cache'],
+    });
+  });
+
+  it('refetches when the selection changes, rather than reusing the stale set', async () => {
+    fetchMock.mockResolvedValue(listResult([]));
+    const { wrapper } = createWrapper();
+
+    const { rerender } = renderHook(({ tags }: { tags: string[] }) => useMemoryKeywordPages(tags), {
+      wrapper,
+      initialProps: { tags: [] as string[] },
+    });
+    await waitFor(() => expect(listQueries()).toHaveLength(1));
+
+    rerender({ tags: ['kafka'] });
+
+    await waitFor(() => expect(listQueries()).toHaveLength(2));
+    expect(listQueries()[1]).toEqual({
+      filter: 'active',
+      size: MEMORY_KEYWORD_SIZE,
+      tags: ['kafka'],
+    });
   });
 
   it('stays disabled, and issues no request, when the client is absent', async () => {
     givenNoClient();
     const { wrapper } = createWrapper();
 
-    const { result } = renderHook(() => useMemoryTreemapPages(), { wrapper });
+    const { result } = renderHook(() => useMemoryKeywordPages(), { wrapper });
 
     expect(result.current.fetchStatus).toBe('idle');
     expect(fetchMock).not.toHaveBeenCalled();

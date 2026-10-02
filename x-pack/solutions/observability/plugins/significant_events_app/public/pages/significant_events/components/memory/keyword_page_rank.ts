@@ -20,7 +20,7 @@ import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 
 /** One memory, reduced to what the graph is built from. */
 export interface KeywordEntry {
-  keywords: readonly string[];
+  tags: readonly string[];
   usefulness: number;
   confidence: number;
 }
@@ -122,7 +122,7 @@ export function computeKeywordPageRank(
   let allowedKeywords: Set<string> | null = null;
   // Canonicalized once per entry and reused by both passes: `normalize('NFKC')`
   // is the most expensive thing in here, and this runs on the render path.
-  const keywordsByEntry = entries.map((entry) => entryKeywords(entry.keywords));
+  const keywordsByEntry = entries.map((entry) => entryKeywords(entry.tags));
   if (maxKeywords && maxKeywords > 0) {
     const counts = new Map<string, number>();
     for (const keywords of keywordsByEntry) {
@@ -224,6 +224,29 @@ export function computeKeywordPageRank(
 }
 
 /**
+ * The spelling to show for each keyword, keyed canonically.
+ *
+ * Tags are stored verbatim, so `Cart Cache` and `cart-cache` are one keyword
+ * with two spellings: the commonest one is the one a person recognizes. A tie
+ * goes to the first seen, which keeps the choice stable across renders.
+ */
+export const toKeywordDisplayNames = (
+  entries: readonly KeywordEntry[]
+): Map<string, string> => {
+  const spellings = new Map<string, Map<string, number>>();
+  for (const entry of entries) {
+    for (const original of entry.tags ?? []) {
+      const key = canonicalizeTag(String(original));
+      if (key === null || key === MEMORY_MARKER_TAG) continue;
+      const bySpelling = spellings.get(key) ?? new Map<string, number>();
+      bySpelling.set(String(original), (bySpelling.get(String(original)) ?? 0) + 1);
+      spellings.set(key, bySpelling);
+    }
+  }
+  return new Map([...spellings].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)]));
+};
+
+/**
  * The treemap's rows: the top keywords of the whole set, ranked and capped.
  *
  * Selected keywords are dropped rather than restyled, so the chart never shows
@@ -239,7 +262,7 @@ export const toKeywordCells = (
   const memories = new Map<string, number>();
   for (const entry of entries) {
     const counted = new Set<string>();
-    for (const original of entry.keywords ?? []) {
+    for (const original of entry.tags ?? []) {
       const key = canonicalizeTag(String(original));
       if (key === null || key === MEMORY_MARKER_TAG) continue;
       const bySpelling = spellings.get(key) ?? new Map<string, number>();
@@ -306,7 +329,7 @@ export const filterEntriesByKeywords = <T extends KeywordEntry>(
   const selected = keywords.map((keyword) => canonicalizeTag(keyword)).filter((kw) => kw !== null);
   if (selected.length === 0) return [...entries];
   return entries.filter((entry) => {
-    const present = new Set(entryKeywords(entry.keywords));
+    const present = new Set(entryKeywords(entry.tags));
     return selected.every((keyword) => present.has(keyword));
   });
 };
@@ -326,7 +349,7 @@ export const toTagFilterTerms = (
 ): string[] => {
   const spellings = new Map<string, Set<string>>();
   for (const entry of entries) {
-    for (const original of entry.keywords ?? []) {
+    for (const original of entry.tags ?? []) {
       const key = canonicalizeTag(String(original));
       if (key === null || key === MEMORY_MARKER_TAG) continue;
       const seen = spellings.get(key) ?? new Set<string>();
@@ -337,6 +360,8 @@ export const toTagFilterTerms = (
   return keywords.flatMap((keyword) => {
     const key = canonicalizeTag(keyword);
     if (key === null) return [];
-    return [key, ...(spellings.get(key) ?? [])];
+    // The canonical key is usually one of the spellings, so it is deduped rather
+    // than sent twice: the terms travel in a URL.
+    return [...new Set([key, ...(spellings.get(key) ?? [])])];
   });
 };

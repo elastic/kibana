@@ -18,7 +18,7 @@ import {
 } from './keyword_page_rank';
 
 const entry = (overrides: Partial<KeywordEntry> = {}): KeywordEntry => ({
-  keywords: [],
+  tags: [],
   usefulness: 1,
   confidence: 1,
   ...overrides,
@@ -28,7 +28,7 @@ const entry = (overrides: Partial<KeywordEntry> = {}): KeywordEntry => ({
 const storeOfSize = (pages: number, tagsPerPage: number): KeywordEntry[] =>
   Array.from({ length: pages }, (_, page) =>
     entry({
-      keywords: [
+      tags: [
         'memory',
         // Every page shares these, so they are the hub the ranking should find.
         'agent-builder',
@@ -47,9 +47,9 @@ describe('computeKeywordPageRank', () => {
 
   it('produces scores for co-occurring keywords', () => {
     const entries: KeywordEntry[] = [
-      entry({ keywords: ['foo', 'bar'] }),
-      entry({ keywords: ['foo', 'baz'] }),
-      entry({ keywords: ['foo', 'bar'], usefulness: 0.5 }),
+      entry({ tags: ['foo', 'bar'] }),
+      entry({ tags: ['foo', 'baz'] }),
+      entry({ tags: ['foo', 'bar'], usefulness: 0.5 }),
     ];
 
     const { scores } = computeKeywordPageRank(entries, { maxIterations: 50, tolerance: 1e-8 });
@@ -60,9 +60,9 @@ describe('computeKeywordPageRank', () => {
 
   it('supports limiting to top keywords', () => {
     const entries: KeywordEntry[] = [
-      entry({ keywords: ['foo', 'bar'] }),
-      entry({ keywords: ['foo', 'baz'] }),
-      entry({ keywords: ['qux', 'zap'] }),
+      entry({ tags: ['foo', 'bar'] }),
+      entry({ tags: ['foo', 'baz'] }),
+      entry({ tags: ['qux', 'zap'] }),
     ];
 
     const { scores } = computeKeywordPageRank(entries, { maxKeywords: 2 });
@@ -71,9 +71,9 @@ describe('computeKeywordPageRank', () => {
 
   it('ranks the hub keyword above the ones only it connects', () => {
     const entries: KeywordEntry[] = [
-      entry({ keywords: ['foo', 'bar'] }),
-      entry({ keywords: ['foo', 'baz'] }),
-      entry({ keywords: ['foo', 'bar'], usefulness: 0.5 }),
+      entry({ tags: ['foo', 'bar'] }),
+      entry({ tags: ['foo', 'baz'] }),
+      entry({ tags: ['foo', 'bar'], usefulness: 0.5 }),
     ];
 
     const { scores } = computeKeywordPageRank(entries);
@@ -86,9 +86,9 @@ describe('computeKeywordPageRank', () => {
     // Every keyword here co-occurs with another, so no mass is lost to a
     // dangling node; the dangling case is its own test below.
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['a', 'b', 'c'] }),
-      entry({ keywords: ['b', 'c', 'd'] }),
-      entry({ keywords: ['a', 'e'] }),
+      entry({ tags: ['a', 'b', 'c'] }),
+      entry({ tags: ['b', 'c', 'd'] }),
+      entry({ tags: ['a', 'e'] }),
     ]);
 
     const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
@@ -99,7 +99,7 @@ describe('computeKeywordPageRank', () => {
     // usefulness 0 × confidence 0 is zero, and a graph built from zero edges
     // would rank nothing at all — which is what MIN_EDGE_WEIGHT is for.
     const silent: KeywordEntry[] = [
-      entry({ keywords: ['foo', 'bar'], usefulness: 0, confidence: 0 }),
+      entry({ tags: ['foo', 'bar'], usefulness: 0, confidence: 0 }),
     ];
     const { scores } = computeKeywordPageRank(silent);
 
@@ -113,8 +113,8 @@ describe('computeKeywordPageRank', () => {
     // scale cancels out: what the usefulness signal changes is the ratio between
     // a well-supported pair and a floor-weighted one.
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['foo', 'bar'] }),
-      entry({ keywords: ['foo', 'baz'], usefulness: 0, confidence: 0 }),
+      entry({ tags: ['foo', 'bar'] }),
+      entry({ tags: ['foo', 'baz'], usefulness: 0, confidence: 0 }),
     ]);
 
     // `bar` hangs off one proven edge, `baz` off one floor-weight edge.
@@ -124,7 +124,7 @@ describe('computeKeywordPageRank', () => {
 
   it('keeps a duplicate tag in one entry from becoming a keyword of its own', () => {
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['foo', 'foo', 'bar'] }),
+      entry({ tags: ['foo', 'foo', 'bar'] }),
     ]);
 
     expect(Object.keys(scores).sort()).toEqual(['bar', 'foo']);
@@ -132,7 +132,7 @@ describe('computeKeywordPageRank', () => {
 
   it('scores a lone keyword as a dangling node rather than dropping it', () => {
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['alone'], usefulness: 1, confidence: 1 }),
+      entry({ tags: ['alone'], usefulness: 1, confidence: 1 }),
     ]);
 
     // No edges to give it rank, so it keeps only its teleport mass: (1 - d) / n.
@@ -141,9 +141,9 @@ describe('computeKeywordPageRank', () => {
 
   it('merges tags that canonicalize to one keyword', () => {
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['invoke_agent', 'kafka'] }),
-      entry({ keywords: ['invoke-agent', 'redis'] }),
-      entry({ keywords: ['Invoke Agent', 'otel'] }),
+      entry({ tags: ['invoke_agent', 'kafka'] }),
+      entry({ tags: ['invoke-agent', 'redis'] }),
+      entry({ tags: ['Invoke Agent', 'otel'] }),
     ]);
 
     expect(Object.keys(scores).sort()).toEqual(['invoke-agent', 'kafka', 'otel', 'redis']);
@@ -153,8 +153,8 @@ describe('computeKeywordPageRank', () => {
 
   it('leaves identifiers alone, so an index pattern is not folded into a phrase', () => {
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['traces-*', 'gen_ai.conversation.id'] }),
-      entry({ keywords: ['traces-*', 'ES|QL'] }),
+      entry({ tags: ['traces-*', 'gen_ai.conversation.id'] }),
+      entry({ tags: ['traces-*', 'ES|QL'] }),
     ]);
 
     expect(Object.keys(scores).sort()).toEqual([
@@ -166,8 +166,8 @@ describe('computeKeywordPageRank', () => {
 
   it('excludes the internal marker tag, which says nothing about the topic', () => {
     const { scores } = computeKeywordPageRank([
-      entry({ keywords: ['memory', 'kafka', 'redis'] }),
-      entry({ keywords: ['memory', 'kafka', 'otel'] }),
+      entry({ tags: ['memory', 'kafka', 'redis'] }),
+      entry({ tags: ['memory', 'kafka', 'otel'] }),
     ]);
 
     expect(Object.keys(scores)).not.toContain('memory');
@@ -190,10 +190,10 @@ describe('computeKeywordPageRank', () => {
 
 describe('toKeywordCells', () => {
   const store: KeywordEntry[] = [
-    entry({ keywords: ['memory', 'agent-builder', 'traces-*'], usefulness: 1, confidence: 1 }),
-    entry({ keywords: ['memory', 'agent-builder', 'Cart Cache'], usefulness: 1, confidence: 1 }),
-    entry({ keywords: ['memory', 'agent builder', 'redis'], usefulness: 1, confidence: 1 }),
-    entry({ keywords: ['memory', 'redis'], usefulness: 0, confidence: 0 }),
+    entry({ tags: ['memory', 'agent-builder', 'traces-*'], usefulness: 1, confidence: 1 }),
+    entry({ tags: ['memory', 'agent-builder', 'Cart Cache'], usefulness: 1, confidence: 1 }),
+    entry({ tags: ['memory', 'agent builder', 'redis'], usefulness: 1, confidence: 1 }),
+    entry({ tags: ['memory', 'redis'], usefulness: 0, confidence: 0 }),
   ];
 
   it('ranks by PageRank and labels each cell with the commonest spelling', () => {
@@ -210,7 +210,8 @@ describe('toKeywordCells', () => {
     const cells = toKeywordCells(store, ['agent-builder']);
 
     expect(cells.map((cell) => cell.keyword)).not.toContain('agent-builder');
-    expect(cells.length).toBe(store[0].keywords.length + store[2].keywords.length - 3);
+    // Four keywords in the fixture, one of them selected.
+    expect(cells).toHaveLength(3);
   });
 
   it('normalizes the scores into [0, 1] and sizes the cells by them', () => {
@@ -244,9 +245,9 @@ describe('toKeywordCells', () => {
 
 describe('filterEntriesByKeywords', () => {
   const store: KeywordEntry[] = [
-    entry({ keywords: ['kafka', 'redis'] }),
-    entry({ keywords: ['kafka'] }),
-    entry({ keywords: ['redis'] }),
+    entry({ tags: ['kafka', 'redis'] }),
+    entry({ tags: ['kafka'] }),
+    entry({ tags: ['redis'] }),
   ];
 
   it('returns everything when nothing is selected', () => {
@@ -260,7 +261,7 @@ describe('filterEntriesByKeywords', () => {
   });
 
   it('matches a keyword however it was spelled', () => {
-    const spelled = [entry({ keywords: ['Cart Cache', 'kafka'] })];
+    const spelled = [entry({ tags: ['Cart Cache', 'kafka'] })];
 
     expect(filterEntriesByKeywords(spelled, ['cart-cache'])).toHaveLength(1);
     expect(filterEntriesByKeywords(spelled, ['CART_CACHE'])).toHaveLength(1);
@@ -269,15 +270,14 @@ describe('filterEntriesByKeywords', () => {
 
 describe('toTagFilterTerms', () => {
   const store: KeywordEntry[] = [
-    entry({ keywords: ['memory', 'Cart Cache', 'cart-cache'] }),
-    entry({ keywords: ['memory', 'CART_CACHE'] }),
+    entry({ tags: ['memory', 'Cart Cache', 'cart-cache'] }),
+    entry({ tags: ['memory', 'CART_CACHE'] }),
   ];
 
   it('sends the canonical key plus every spelling of it', () => {
     expect(toTagFilterTerms(store, ['cart-cache']).sort()).toEqual([
       'CART_CACHE',
       'Cart Cache',
-      'cart-cache',
       'cart-cache',
     ]);
   });

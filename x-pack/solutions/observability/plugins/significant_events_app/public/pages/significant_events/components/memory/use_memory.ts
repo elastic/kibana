@@ -23,7 +23,8 @@ const memoryKeys = {
       'pages',
       MemoryFilter
     ],
-  treemap: ['nightshift', 'memory', 'treemap'] as const,
+  treemap: (tags: readonly string[]) =>
+    ['nightshift', 'memory', 'keywords', tags.join('|')] as const,
   page: (id: string) => ['nightshift', 'memory', 'page', id] as const,
 };
 
@@ -114,23 +115,34 @@ export const useMemoryPages = (filter: MemoryFilter = 'all') => {
 };
 
 /**
- * The live memories the usefulness × confidence treemap draws.
+ * The live memories the keyword treemap ranks.
  *
- * The tab's own list is a cursor-paginated slice, so sizing the chart from it
- * would describe 25 memories rather than the store. This asks the list route
- * for one larger page instead of adding a route.
+ * The tab's own list is a cursor-paginated slice, so ranking from it would
+ * describe 25 memories rather than the store. This asks the list route for the
+ * widest page it will return instead of adding a route, and passes the selected
+ * keywords so the server returns the filtered set the chart is drawn from.
+ *
+ * `tags` is one term per selected keyword plus every original spelling of it, so
+ * a document written before tags were canonicalized still matches. The
+ * selection is ANDed by the server, which is why the key carries every term.
  */
-export const MEMORY_TREEMAP_SIZE = 40;
+export const MEMORY_KEYWORD_SIZE = 200;
 
-export const useMemoryTreemapPages = () => {
+export const useMemoryKeywordPages = (tags: readonly string[] = []) => {
   const client = useMemoryClient();
 
   return useQuery({
-    queryKey: memoryKeys.treemap,
+    queryKey: memoryKeys.treemap(tags),
     queryFn: ({ signal }) =>
       client!.fetch('GET /internal/nightshift/memory/pages', {
         signal: signal ?? null,
-        params: { query: { filter: 'active', size: MEMORY_TREEMAP_SIZE } },
+        params: {
+          query: {
+            filter: 'active',
+            size: MEMORY_KEYWORD_SIZE,
+            ...(tags.length > 0 ? { tags: [...tags] } : {}),
+          },
+        },
       }) as Promise<MemoryListResult>,
     enabled: client !== undefined,
   });
