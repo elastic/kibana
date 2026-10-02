@@ -23,8 +23,8 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
-import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
-import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
+import { OperatingSystem, isPathValid, validateWildcardInput } from '@kbn/securitysolution-utils';
+import { isOneOfOperator, isOperator, matchesOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -44,6 +44,7 @@ import {
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
   FIELD_LABEL,
+  MATCHES_OPERATOR_LABEL,
   NAME_LABEL,
   OPERATOR_LABEL,
   POLICY_SELECT_DESCRIPTION,
@@ -74,7 +75,24 @@ interface BlocklistEntryMatchAny {
   value: string[];
 }
 
-export type BlocklistEntry = BlocklistEntryMatch | BlocklistEntryMatchAny;
+interface BlocklistEntryWildcard {
+  field: BlocklistConditionEntryField;
+  operator: ListOperatorEnum.INCLUDED;
+  type: ListOperatorTypeEnum.WILDCARD;
+  value: string;
+}
+
+export type BlocklistEntry = BlocklistEntryMatch | BlocklistEntryMatchAny | BlocklistEntryWildcard;
+
+// Fields that support the `Match` (wildcard) operator, in addition to `is one of`
+const WILDCARD_ELIGIBLE_FIELDS: ReadonlySet<BlocklistConditionEntryField> = new Set([
+  'file.path',
+  'file.path.caseless',
+  'file.name',
+]);
+
+// Endpoint artifact matching does not require escaping `\`, `*`, or `?`
+const UNNECESSARY_ESCAPING_REGEX = /\\[\\*?]/;
 
 type ERROR_KEYS = keyof typeof ERRORS;
 
@@ -131,8 +149,10 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const windowsSignatureField = 'file.Ext.code_signature';
     const isWindowsSignatureEntry = blocklistEntry.field === windowsSignatureField;
+    const isWildcardEligibleField = WILDCARD_ELIGIBLE_FIELDS.has(blocklistEntry.field);
     const displaySingleValueInput =
-      isWindowsSignatureEntry && blocklistEntry.type === ListOperatorTypeEnum.MATCH;
+      (isWindowsSignatureEntry && blocklistEntry.type === ListOperatorTypeEnum.MATCH) ||
+      blocklistEntry.type === ListOperatorTypeEnum.WILDCARD;
 
     const selectedOs = useMemo((): OperatingSystem => {
       if (!item?.os_types?.length) {
@@ -177,6 +197,14 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         'data-test-subj': getTestId('file.hash.*'),
       });
 
+      // Available for all operating systems
+      selectableFields.push({
+        value: 'file.name',
+        inputDisplay: CONDITION_FIELD_TITLE['file.name'],
+        dropdownDisplay: getDropdownDisplay('file.name'),
+        'data-test-subj': getTestId('file.name'),
+      });
+
       if (selectedOs === OperatingSystem.LINUX) {
         selectableFields.push({
           value: 'file.path',
@@ -206,19 +234,34 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [selectedOs, getTestId]);
 
     const operatorOptions: Array<EuiSuperSelectOption<ListOperatorTypeEnum>> = useMemo(() => {
+      const isOneOfOption = {
+        value: isOneOfOperator.type,
+        inputDisplay: isOneOfOperator.message,
+        dropdownDisplay: isOneOfOperator.message,
+      };
+
+      // Path and File Name support `is one of` + the new `Match` (wildcard) operator.
+      // Signer (the only other field with a selectable operator) keeps `is one of` + `is`.
+      if (isWildcardEligibleField) {
+        return [
+          isOneOfOption,
+          {
+            value: matchesOperator.type,
+            inputDisplay: MATCHES_OPERATOR_LABEL,
+            dropdownDisplay: MATCHES_OPERATOR_LABEL,
+          },
+        ];
+      }
+
       return [
-        {
-          value: isOneOfOperator.type,
-          inputDisplay: isOneOfOperator.message,
-          dropdownDisplay: isOneOfOperator.message,
-        },
+        isOneOfOption,
         {
           value: isOperator.type,
           inputDisplay: isOperator.message,
           dropdownDisplay: isOperator.message,
         },
       ];
-    }, []);
+    }, [isWildcardEligibleField]);
 
     const valueLabel = useMemo(() => {
       return (
@@ -285,6 +328,37 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         } else {
           delete newValueWarnings.INVALID_PATH;
         }
+
+        const hasWildcardCharacter = values.some((v) => !!validateWildcardInput(v));
+
+        // warn if a wildcard character is used without the Match operator, making the entry ineffective
+        if (type !== ListOperatorTypeEnum.WILDCARD && hasWildcardCharacter) {
+          newValueWarnings.WILDCARD_WRONG_OPERATOR = createValidationMessage(
+            ERRORS.WILDCARD_WRONG_OPERATOR
+          );
+        } else {
+          delete newValueWarnings.WILDCARD_WRONG_OPERATOR;
+        }
+
+        // warn about the performance impact of using a wildcard value with the Match operator
+        if (type === ListOperatorTypeEnum.WILDCARD && hasWildcardCharacter) {
+          newValueWarnings.WILDCARD_PRESENT = createValidationMessage(ERRORS.WILDCARD_PRESENT);
+        } else {
+          delete newValueWarnings.WILDCARD_PRESENT;
+        }
+
+        // warn if the wildcard value is unnecessarily escaped (Endpoint matching doesn't require it)
+        if (
+          type === ListOperatorTypeEnum.WILDCARD &&
+          values.some((v) => UNNECESSARY_ESCAPING_REGEX.test(v))
+        ) {
+          newValueWarnings.UNNECESSARY_ESCAPING = createValidationMessage(
+            ERRORS.UNNECESSARY_ESCAPING
+          );
+        } else {
+          delete newValueWarnings.UNNECESSARY_ESCAPING;
+        }
+
         // warn if duplicates
         if (values.length !== uniq(values).length) {
           newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
@@ -400,7 +474,10 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const generateBlocklistEntryValue = useCallback(
       (value: string | string[], newOperator: ListOperatorTypeEnum) => {
-        if (newOperator === ListOperatorTypeEnum.MATCH) {
+        if (
+          newOperator === ListOperatorTypeEnum.MATCH ||
+          newOperator === ListOperatorTypeEnum.WILDCARD
+        ) {
           return { value: Array.isArray(value) ? value.join(',') : value };
         } else {
           return {
@@ -614,7 +691,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiFormRow label={OPERATOR_LABEL} fullWidth>
-                {isWindowsSignatureEntry ? (
+                {isWindowsSignatureEntry || isWildcardEligibleField ? (
                   <EuiSuperSelect
                     name="operator"
                     options={operatorOptions}
