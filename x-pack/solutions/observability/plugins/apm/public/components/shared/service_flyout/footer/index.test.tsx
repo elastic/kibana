@@ -256,5 +256,30 @@ describe('useServiceFlyoutFooterMenu', () => {
 
       expect(mockOpenInDiscoverTab).toHaveBeenCalledTimes(1);
     });
+
+    it('lets a modified click follow the href without calling openInDiscoverTab', () => {
+      const mockOpenInDiscoverTab = jest.fn();
+      const preventDefault = jest.fn();
+      mockUseServiceFlyoutLinks.mockReturnValue(
+        makeLinks({ tracesOpenInDiscoverTab: mockOpenInDiscoverTab })
+      );
+      const { result } = renderFooterMenu();
+      const tracesAction = findItem(
+        result.current.panels[0].items,
+        'serviceFlyoutActionsMenuItem-openTracesInDiscover'
+      );
+
+      tracesAction?.onClick?.({
+        button: 0,
+        metaKey: true,
+        ctrlKey: false,
+        shiftKey: false,
+        altKey: false,
+        preventDefault,
+      });
+
+      expect(mockOpenInDiscoverTab).not.toHaveBeenCalled();
+      expect(preventDefault).not.toHaveBeenCalled();
+    });
   });
 });

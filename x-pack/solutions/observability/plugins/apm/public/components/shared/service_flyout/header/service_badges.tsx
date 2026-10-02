@@ -132,6 +132,7 @@ export function useServiceBadges(): ReactElement[] {
           data-test-subj={descriptor['data-test-subj']}
           toolTipContent={descriptor.toolTipContent}
           toolTipPosition="bottom"
+          role="img"
           aria-label={descriptor.ariaLabel}
         >
           {descriptor.label}
@@ -178,6 +179,7 @@ export function useServiceBadges(): ReactElement[] {
           data-slo-status={sloData.sloStatus}
           toolTipContent={descriptor.toolTipContent}
           toolTipPosition="bottom"
+          role="img"
           aria-label={descriptor.ariaLabel}
         >
           {descriptor.label}
@@ -210,6 +212,7 @@ export function useServiceBadges(): ReactElement[] {
           data-test-subj="serviceFlyoutAnomaliesBadge"
           toolTipContent={anomalyDescriptor.toolTipContent}
           toolTipPosition="bottom"
+          role="img"
           aria-label={anomalyDescriptor.ariaLabel}
         >
           {anomalyDescriptor.label}

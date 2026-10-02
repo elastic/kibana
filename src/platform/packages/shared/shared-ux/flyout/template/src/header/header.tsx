@@ -196,8 +196,10 @@ const renderBadge = (
   { label, toolTipContent, toolTipPosition, ...badgeProps }: HeaderBadgeDescriptor,
   key: string
 ): ReactNode => {
+  // Tooltips open from keyboard focus, so a tooltipped non-interactive badge needs a tab stop.
+  const needsTabStop = Boolean(toolTipContent) && !badgeProps.onClick && !badgeProps.href;
   const badge = (
-    <EuiBadge key={key} {...badgeProps}>
+    <EuiBadge key={key} tabIndex={needsTabStop ? 0 : undefined} {...badgeProps}>
       {label}
     </EuiBadge>
   );

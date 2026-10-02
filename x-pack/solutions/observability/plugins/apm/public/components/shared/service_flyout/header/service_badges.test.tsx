@@ -6,10 +6,15 @@
  */
 
 import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
-import { renderHook, waitFor } from '@testing-library/react';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
+import React from 'react';
 import type { ServiceFlyoutService } from '..';
 import { useServiceBadges } from './service_badges';
+
+jest.mock('@elastic/apm-rum');
 
 const mockNavigateToUrl = jest.fn();
 const mockUseServiceFlyoutContext = jest.fn();
@@ -218,5 +223,48 @@ describe('useServiceBadges', () => {
       });
       expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     });
+  });
+});
+
+function BadgesInTemplate() {
+  const badges = useServiceBadges();
+  return (
+    <FlyoutTemplate onClose={jest.fn()} session="never">
+      <FlyoutTemplate.Header title="opbeans-java">{badges}</FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+}
+
+describe('useServiceBadges in FlyoutTemplate', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupLinks();
+  });
+
+  it('renders display-only badges as labelled, focusable tooltip anchors', async () => {
+    setupContext();
+    setupBadgesData({
+      alertsCount: 3,
+      anomalyData: { anomalyScore: 0, anomalyEnvironment: 'production' },
+    });
+    render(
+      <IntlProvider locale="en">
+        <BadgesInTemplate />
+      </IntlProvider>
+    );
+
+    const alertsBadge = screen.getByTestId('serviceFlyoutAlertsBadge');
+    expect(alertsBadge).toHaveAttribute('role', 'img');
+    expect(alertsBadge).toHaveAttribute('tabindex', '0');
+    expect(alertsBadge).toHaveAttribute('aria-label', expect.stringContaining('opbeans-java'));
+
+    const anomalyBadge = screen.getByTestId('serviceFlyoutAnomaliesBadge');
+    expect(anomalyBadge).toHaveAttribute('role', 'img');
+    expect(anomalyBadge).toHaveAttribute('tabindex', '0');
+
+    act(() => anomalyBadge.focus());
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('No anomalies detected.');
   });
 });
