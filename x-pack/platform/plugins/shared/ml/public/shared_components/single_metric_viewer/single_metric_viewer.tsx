@@ -116,7 +116,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedEntities,
   selectedJobId,
   shouldShowForecastButton,
-  isInteractive,
+  isInteractive = true,
   uuid,
   isRenderComplete,
   wrapperRef,
