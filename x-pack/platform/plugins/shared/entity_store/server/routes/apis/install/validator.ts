@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
 import { LogExtractionInstallSchema } from '../utils/log_extraction_validator';
 import { HistorySnapshotConfigSchema } from '../utils/history_snapshot_validator';
 
-export const BodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
-  logExtraction: LogExtractionInstallSchema,
-  historySnapshot: HistorySnapshotConfigSchema.optional(),
-});
+export const BodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+    logExtraction: LogExtractionInstallSchema,
+    historySnapshot: HistorySnapshotConfigSchema.optional(),
+  })
+);

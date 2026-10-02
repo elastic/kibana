@@ -35,9 +35,11 @@ const baseRiskScoreRequestOptionsSchema = lazySchema(() =>
   })
 );
 
-export const riskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
-  factoryQueryType: z.literal(EntityRiskQueries.list),
-});
+export const riskScoreRequestOptionsSchema = lazySchema(() =>
+  baseRiskScoreRequestOptionsSchema.extend({
+    factoryQueryType: z.literal(EntityRiskQueries.list),
+  })
+);
 
 export type RiskScoreRequestOptionsInput = z.input<typeof riskScoreRequestOptionsSchema>;
 

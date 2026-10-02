@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { logStageUsage } from '../lib/cost_tracker';
 import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 import {
@@ -29,17 +29,19 @@ const RELEVANCE_REASON_CHAR_LIMIT = 2_000;
 /** A handful of links; the model is asked for the primary sources, not a crawl. */
 const MAX_PRIMARY_LINKS = 20;
 
-export const relevanceOutputSchema = z.object({
-  is_intelligence: z.boolean(),
-  quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
-  evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
-  needs_render: z.boolean(),
-  primary_links: z
-    .array(z.string())
-    .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
-  has_original_commentary: z.boolean(),
-  reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
-});
+export const relevanceOutputSchema = lazySchema(() =>
+  z.object({
+    is_intelligence: z.boolean(),
+    quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
+    evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
+    needs_render: z.boolean(),
+    primary_links: z
+      .array(z.string())
+      .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
+    has_original_commentary: z.boolean(),
+    reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
+  })
+);
 
 export type RelevanceOutput = z.infer<typeof relevanceOutputSchema>;
 export type RelevanceResult = RelevanceOutput & { context: Omit<ArticleContext, 'text'> };

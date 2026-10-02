@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -39,9 +39,11 @@ const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReaso
     }),
 };
 
-const UpdateWorkerRequestParams = z.object({
-  workerId: z.string().min(1).max(128),
-});
+const UpdateWorkerRequestParams = lazySchema(() =>
+  z.object({
+    workerId: z.string().min(1).max(128),
+  })
+);
 
 const hasManagedWorkflowUpdatePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.updateManaged.every(

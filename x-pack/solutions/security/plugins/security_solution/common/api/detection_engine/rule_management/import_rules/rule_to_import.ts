@@ -54,8 +54,10 @@ export const RuleToImport = lazySchema(() =>
  */
 export type ValidatedRuleToImport = z.infer<typeof ValidatedRuleToImport>;
 export type ValidatedRuleToImportInput = z.input<typeof ValidatedRuleToImport>;
-export const ValidatedRuleToImport = RuleToImport.and(
-  z.object({
-    version: RuleVersion,
-  })
+export const ValidatedRuleToImport = lazySchema(() =>
+  RuleToImport.and(
+    z.object({
+      version: RuleVersion,
+    })
+  )
 );
