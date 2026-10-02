@@ -29,6 +29,7 @@ import {
   QUERY_TYPE,
   SOURCE_ID,
   TYPE,
+  type KnowledgeIndicatorType,
 } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { StatusError } from '../../errors/status_error';
@@ -58,6 +59,10 @@ function ruleUnbackedPostGroupingWhere(
  */
 export class IndicatorReader {
   constructor(private readonly revisionReader: RevisionReader) {}
+
+  countKnowledgeIndicators(type: KnowledgeIndicatorType): Promise<number> {
+    return this.revisionReader.countLatestRevisions(inPredicate(TYPE, [type]), IS_NOT_DELETED);
+  }
 
   async getFeatures(
     sources: string | string[],

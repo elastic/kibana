@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { MAX_ID_LENGTH, type QueryLink } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  NightshiftModelBlockedError,
+  type QueryLink,
+} from '@kbn/significant-events-schema';
 import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
@@ -595,7 +599,6 @@ describe('generateQueriesRoute', () => {
         core: {
           featureFlags: {},
         },
-        searchInferenceEndpoints: undefined,
         agentBuilder,
       },
       maintenanceService: makeMaintenanceService(),
@@ -682,6 +685,21 @@ describe('generateQueriesRoute', () => {
       generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
     ).rejects.toThrow('Agent Builder is required');
     expect(mockGenerateKIQueries).not.toHaveBeenCalled();
+  });
+
+  it('maps a blocked model to a 400 response', async () => {
+    mockGenerateKIQueries.mockRejectedValueOnce(
+      new NightshiftModelBlockedError('custom-model', 'default-model')
+    );
+
+    await expect(
+      generateRoute.handler(
+        makeHandlerParams({
+          agentBuilder: makeAgentBuilder(),
+          body: { connectorId: 'custom-model' },
+        })
+      )
+    ).rejects.toMatchObject({ output: { statusCode: 400 } });
   });
 });
 

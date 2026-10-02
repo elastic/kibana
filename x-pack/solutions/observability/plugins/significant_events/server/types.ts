@@ -30,6 +30,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type {
   FieldsMetadataServerSetup,
   FieldsMetadataServerStart,
@@ -44,10 +45,6 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
-import type {
-  SearchInferenceEndpointsPluginSetup,
-  SearchInferenceEndpointsPluginStart,
-} from '@kbn/search-inference-endpoints/server';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -63,9 +60,9 @@ export interface SignificantEventsPluginSetupDependencies {
   alertingVTwo: void;
   fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
+  cps?: CPSServerSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   streams: StreamsPluginSetup;
   nightshiftSources: NightshiftSourcesServerSetup;
   nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
@@ -83,7 +80,6 @@ export interface SignificantEventsPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   streams: StreamsPluginStart;
   nightshiftSources: NightshiftSourcesServerStart;
@@ -99,7 +95,6 @@ export interface SignificantEventsServer {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;

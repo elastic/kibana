@@ -44,6 +44,7 @@ import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagno
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
 import { AgentRollbackModal } from '../components/agent_rollback_modal';
+import { AgentRestartModal } from '../components/agent_restart_modal';
 import { AgentPolicyYamlFlyout } from '../../../components';
 
 import type { SelectionMode } from './components/types';
@@ -103,6 +104,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
   const [agentToViewPolicy, setAgentToViewPolicy] = useState<Agent | undefined>(undefined);
   const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+  const [agentToRestart, setAgentToRestart] = useState<Agent | undefined>(undefined);
   const [agentToRemoveCollector, setAgentToRemoveCollector] = useState<Agent | undefined>(
     undefined
   );
@@ -246,6 +248,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onViewAgentJsonClick={() => setAgentToViewJson(agent)}
         onViewAgentPolicyClick={() => setAgentToViewPolicy(agent)}
         onRollbackClick={() => setAgentToRollback(agent)}
+        onRestartClick={() => setAgentToRestart(agent)}
         onRemoveCollectorClick={() => setAgentToRemoveCollector(agent)}
       />
     );
@@ -500,6 +503,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToRollback(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToRestart && (
+        <EuiPortal>
+          <AgentRestartModal
+            agents={[agentToRestart]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRestart(undefined);
               refreshAgents();
             }}
           />

@@ -10,10 +10,7 @@ import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
-import {
-  MAX_ID_LENGTH,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -29,7 +26,6 @@ import {
   type SourceClassificationResult,
 } from './classify_sources';
 import { reconcileSourceCatalog } from '../reconcile_source_catalog';
-import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -43,7 +39,6 @@ export interface EligibleStreamsResponse {
     enabled: boolean;
     intervalHours: number;
   };
-  connectorId: string;
   timeRange: {
     from: string;
     to: string;
@@ -121,21 +116,13 @@ const eligibleStreamsRoute = createServerRoute({
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const [connectorId, { sources }] = await Promise.all([
-      resolveConnectorForFeature({
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
-        featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-        featureName: 'knowledge indicator extraction',
-        request,
-      }),
-      reconcileSourceCatalog({
-        sourcesClient,
-        kiClient,
-        onboardingClient: streamsKIsOnboardingClient,
-        maintenanceService,
-        request,
-      }),
-    ]);
+    const { sources } = await reconcileSourceCatalog({
+      sourcesClient,
+      kiClient,
+      onboardingClient: streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
+    });
     const executions = await streamsKIsOnboardingClient.getRecentExecutions(request);
 
     const intervalHours =
@@ -164,7 +151,6 @@ const eligibleStreamsRoute = createServerRoute({
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
       },
-      connectorId,
       timeRange: {
         from: new Date(start).toISOString(),
         to: new Date(now).toISOString(),

@@ -215,7 +215,11 @@ describe('useFetchMetricsData', () => {
           dimension_fields: ['host.name'],
         },
       ],
-      rawResponse: {},
+      rawResponse: {
+        columns: [],
+        values: [],
+        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      },
       requestParams: { query: 'TS metrics-* | METRICS_INFO' },
     });
 
@@ -258,7 +262,11 @@ describe('useFetchMetricsData', () => {
     it('returns empty arrays when no data is available', async () => {
       mockExecuteEsqlQuery.mockResolvedValue({
         documents: [],
-        rawResponse: {},
+        rawResponse: {
+          columns: [],
+          values: [],
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
       mockParseMetricsWithTelemetry.mockReturnValue({
@@ -380,7 +388,11 @@ describe('useFetchMetricsData', () => {
               dimension_fields: ['host.name'],
             },
           ],
-          rawResponse: {},
+          rawResponse: {
+            columns: [],
+            values: [],
+            requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+          },
           requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         };
       });
@@ -417,7 +429,11 @@ describe('useFetchMetricsData', () => {
             dimension_fields: ['host.name'],
           },
         ],
-        rawResponse: {},
+        rawResponse: {
+          columns: [],
+          values: [],
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
 

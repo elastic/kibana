@@ -14,11 +14,10 @@ import {
 } from '@kbn/streams-schema';
 import {
   KIsOnboardingStep,
+  NIGHTSHIFT_DEFAULT_MODELS,
   SignificantEventsWorkflowStatus,
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import React, {
   createContext,
@@ -29,7 +28,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useInferenceFeatureConnectors } from '../../../../hooks/use_inference_feature_connectors';
 import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
 import { useBulkOnboarding } from '../../hooks/use_bulk_onboarding';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
@@ -41,6 +39,16 @@ interface ConnectorState {
   resolvedConnectorId: string | undefined;
   loading: boolean;
 }
+
+const featuresConnectors: ConnectorState = {
+  resolvedConnectorId: NIGHTSHIFT_DEFAULT_MODELS.kiExtraction,
+  loading: false,
+};
+
+const queriesConnectors: ConnectorState = {
+  resolvedConnectorId: NIGHTSHIFT_DEFAULT_MODELS.kiQueryGeneration,
+  loading: false,
+};
 
 interface KiGenerationContextValue {
   filteredStreams: ListStreamDetail[] | undefined;
@@ -88,28 +96,13 @@ export function KiGenerationProvider({
   // network calls.
   const enqueuedStreamNamesRef = useRef<Set<string>>(new Set());
 
-  const featuresConnectors = useInferenceFeatureConnectors(
-    SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
-  );
-  const queriesConnectors = useInferenceFeatureConnectors(
-    SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
-  );
-
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
-    connectors: {},
+    connectors: {
+      features: featuresConnectors.resolvedConnectorId,
+      queries: queriesConnectors.resolvedConnectorId,
+    },
   });
-
-  useEffect(() => {
-    setOnboardingConfig((prev) => {
-      const features = prev.connectors.features ?? featuresConnectors.resolvedConnectorId;
-      const queries = prev.connectors.queries ?? queriesConnectors.resolvedConnectorId;
-      if (features === prev.connectors.features && queries === prev.connectors.queries) {
-        return prev;
-      }
-      return { ...prev, connectors: { features, queries } };
-    });
-  }, [featuresConnectors.resolvedConnectorId, queriesConnectors.resolvedConnectorId]);
 
   const streamsListFetch = useFetchStreams({
     select: (result) => ({
@@ -269,8 +262,6 @@ export function KiGenerationProvider({
       streamStatusMap,
       onboardingConfig,
       setOnboardingConfig,
-      featuresConnectors,
-      queriesConnectors,
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,
