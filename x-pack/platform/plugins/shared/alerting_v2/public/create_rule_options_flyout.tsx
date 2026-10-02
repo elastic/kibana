@@ -198,7 +198,20 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
+  const handleHistoryBack = useCallback(() => {
+    setStep({ type: 'selector' });
+  }, []);
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
+  const [closeGeneration, setCloseGeneration] = useState(0);
+  const isAuthoringStep = step.type === 'esql' || step.type === 'threshold';
+
+  const handlePickerClose = useCallback(() => {
+    if (isAuthoringStep) {
+      setCloseGeneration((generation) => generation + 1);
+      return;
+    }
+    onClose();
+  }, [isAuthoringStep, onClose]);
 
   const rulesApi = useMemo(
     () => (value?.services ? new RulesApi(value.services.http) : undefined),
@@ -262,43 +275,6 @@ const CreateRuleOptionsFlyoutInner = ({
 
   const { services, ComposeDiscoverFlyout } = value;
 
-  if (step.type === 'esql') {
-    return (
-      <Context.Provider value={services.container}>
-        <ActionPolicyAwareComposeDiscoverFlyout
-          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-        />
-      </Context.Provider>
-    );
-  }
-
-  if (step.type === 'threshold') {
-    return (
-      <Context.Provider value={services.container}>
-        <ActionPolicyAwareComposeDiscoverFlyout
-          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          builderType="threshold"
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-        />
-      </Context.Provider>
-    );
-  }
-
   if (step.type === 'legacy') {
     const legacyItem = legacyRuleTypes?.find((item) => item.id === step.id);
     if (legacyItem) {
@@ -309,12 +285,29 @@ const CreateRuleOptionsFlyoutInner = ({
   return (
     <Context.Provider value={services.container}>
       <RuleCreateOptionsFlyout
-        onClose={onClose}
+        historyKey={historyKey}
+        onClose={handlePickerClose}
         onCreateEsqlRule={() => setStep({ type: 'esql' })}
         onCreateWithAgent={navigateToAgentBuilder}
         onCreateThresholdRule={() => setStep({ type: 'threshold' })}
         legacyRuleTypes={legacyPanelItems}
       />
+      {isAuthoringStep ? (
+        <ActionPolicyAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
+          historyKey={historyKey}
+          mode="create"
+          onClose={onClose}
+          onHistoryBack={handleHistoryBack}
+          closeGeneration={closeGeneration}
+          services={services}
+          builderType={step.type === 'threshold' ? 'threshold' : undefined}
+          onCreateRule={handleCreateRule}
+          isSaving={isSaving}
+          initialQuery={query}
+          esqlVariables={esqlVariables}
+        />
+      ) : null}
     </Context.Provider>
   );
 };

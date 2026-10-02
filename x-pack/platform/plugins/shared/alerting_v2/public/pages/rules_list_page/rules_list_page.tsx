@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
@@ -42,6 +42,7 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
+  const createSessionHistoryKey = useMemo(() => Symbol('rulesListCreateRule'), []);
   const {
     flyout,
     confirmationModal,
@@ -50,7 +51,12 @@ export const RulesListPage = () => {
     openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
-  } = useComposeDiscoverFlyout();
+    isOpen: isAuthoringFlyoutOpen,
+    requestClose: requestAuthoringClose,
+  } = useComposeDiscoverFlyout({
+    historyKey: createSessionHistoryKey,
+    onDismiss: closeCreateOptionsFlyout,
+  });
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
@@ -58,16 +64,19 @@ export const RulesListPage = () => {
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
   }, [rulesLocators]);
-  const onCreateEsqlRuleFromOptionsFlyout = () => {
+  const handlePickerClose = useCallback(() => {
+    if (isAuthoringFlyoutOpen) {
+      requestAuthoringClose();
+      return;
+    }
     closeCreateOptionsFlyout();
-    openCreateFlyout();
-  };
+  }, [isAuthoringFlyoutOpen, requestAuthoringClose, closeCreateOptionsFlyout]);
+
   const onCreateWithAgentFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
   const onCreateThresholdRuleFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
     openCreateBuilderFlyout('threshold');
   };
 
@@ -173,8 +182,9 @@ export const RulesListPage = () => {
       </ContentListProvider>
       {isCreateOptionsFlyoutOpen ? (
         <RuleCreateOptionsFlyout
-          onClose={closeCreateOptionsFlyout}
-          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          historyKey={createSessionHistoryKey}
+          onClose={handlePickerClose}
+          onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
         />
