@@ -20,7 +20,7 @@ interface GeneralLensApi {
   searchSessionId$: BehaviorSubject<string | undefined>;
   disabledActionIds$: BehaviorSubject<string[] | undefined>;
   setDisabledActionIds: (ids: string[] | undefined) => void;
-  viewMode$: BehaviorSubject<ViewMode | undefined>;
+  viewMode$: PublishingSubject<ViewMode>;
   settings: {
     syncColors$: BehaviorSubject<boolean>;
     syncCursor$: BehaviorSubject<boolean>;

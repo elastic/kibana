@@ -9,7 +9,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { apiHasDisableTriggers, useSearchApi } from '@kbn/presentation-publishing';
+import {
+  apiHasDisableTriggers,
+  apiPublishesViewMode,
+  useSearchApi,
+} from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
 import {
   LENS_EMBEDDABLE_TYPE,
@@ -83,7 +87,7 @@ export function LensRenderer({
     };
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
-  const viewMode$ = useObservableVariable(viewMode);
+  const viewMode$ = useObservableVariable(viewMode ?? 'view');
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
@@ -185,7 +189,7 @@ export function LensRenderer({
           searchSessionId$,
           disabledActionIds$,
           setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
-          viewMode$,
+          viewMode$: apiPublishesViewMode(parentApi) ? parentApi.viewMode$ : viewMode$, // parent API takes precedence for this value
           disableTriggers$: apiHasDisableTriggers(parentApi)
             ? parentApi.disableTriggers$ // parent API takes precedence for this value
             : disableTriggers$,
