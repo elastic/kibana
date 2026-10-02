@@ -493,6 +493,25 @@ describe('buildStreamVars — collect_s3_logs', () => {
     expect(out.collect_s3_logs).toBe(true);
   });
 
+  it('turns collect_s3_logs on for an access-point ARN alone', () => {
+    const service = makeService({
+      ...s3Service,
+      varDefsByInput: {
+        'aws-s3': {
+          ...s3Service.varDefsByInput!['aws-s3'],
+          access_point_arn: def('access_point_arn'),
+        },
+      },
+    });
+    const out = buildStreamVars(
+      service,
+      dsVars({ access_point_arn: 'arn:aws:s3:ap' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(true);
+  });
+
   it('keeps an explicit collect_s3_logs choice', () => {
     const out = buildStreamVars(
       s3Service,

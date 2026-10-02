@@ -481,6 +481,77 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
       ).toEqual([]);
     }
   );
+
+  it('under ECF, ignores a stored input ECF cannot route and requires a supported one', () => {
+    // WAF: agent-based allows CloudWatch, ECF routes S3 only (ecfInputs). A CloudWatch-only
+    // selection left over from agent-based must not count as a complete ECF config.
+    const optionalVar = (name: string) => ({
+      name,
+      type: 'text',
+      required: false,
+      show_user: true,
+    });
+    const wafEcfView = {
+      ...base,
+      dataStreams: ['waf'],
+      inputs: ['aws-s3'],
+      ecfInputs: ['aws-s3'],
+      settingsScope: 'ecf' as const,
+      requiredConfig: ['bucket_arn'],
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: { ...optionalVar('bucket_arn'), required: true } },
+        'aws-cloudwatch': { log_group_arn: optionalVar('log_group_arn') },
+      },
+      varDefsByDataStream: {
+        waf: {
+          inputs: ['aws-s3', 'aws-cloudwatch'],
+          defaultEnabledInputs: ['aws-s3'],
+          varDefsByInput: {
+            'aws-s3': { bucket_arn: { ...optionalVar('bucket_arn'), required: true } },
+            'aws-cloudwatch': { log_group_arn: optionalVar('log_group_arn') },
+          },
+        },
+      },
+    } as unknown as AwsServiceMatrixEntry;
+    const map = new Map([['cloudtrail', wafEcfView]]);
+    const withInputs = (
+      enabledInputs: string[],
+      varsByInput: Record<string, Record<string, string>>
+    ) => ({
+      cloudtrail: {
+        enabledDataStreams: ['waf'],
+        varsByDataStream: { waf: { enabledInputs, varsByInput } },
+      },
+    });
+
+    // CloudWatch only, with a log group: nothing ECF can route.
+    expect(
+      getIncompleteInstances(
+        instances,
+        withInputs(['aws-cloudwatch'], { 'aws-cloudwatch': { log_group_arn: 'arn:lg' } }),
+        map
+      )
+    ).toHaveLength(1);
+    // Both selected: the S3 side decides, and its bucket ARN is missing.
+    expect(
+      getIncompleteInstances(
+        instances,
+        withInputs(['aws-s3', 'aws-cloudwatch'], { 'aws-cloudwatch': { log_group_arn: 'arn:lg' } }),
+        map
+      )
+    ).toHaveLength(1);
+    // Both selected with a bucket ARN: complete (the CloudWatch value is just preserved).
+    expect(
+      getIncompleteInstances(
+        instances,
+        withInputs(['aws-s3', 'aws-cloudwatch'], {
+          'aws-s3': { bucket_arn: 'arn:b' },
+          'aws-cloudwatch': { log_group_arn: 'arn:lg' },
+        }),
+        map
+      )
+    ).toEqual([]);
+  });
 });
 
 describe('useServiceSettings — handleNext', () => {

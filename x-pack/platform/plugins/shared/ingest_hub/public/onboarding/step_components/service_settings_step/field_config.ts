@@ -75,10 +75,21 @@ export function resolveFieldMeta(
   };
 }
 
+/** True when a draft/stored var holds at least one non-blank value (string or multi-value array). */
+function hasValue(value: string | string[] | boolean | undefined): boolean {
+  return Array.isArray(value)
+    ? value.some((v) => v.trim() !== '')
+    : typeof value === 'string' && value.trim() !== '';
+}
+
+/** Sources that only make sense when `collect_s3_logs` is on (collect from the bucket, not SQS). */
+const BUCKET_MODE_SOURCE_VARS = ['bucket_arn', 'access_point_arn'];
+
 /**
- * `bucket_arn` and `queue_url` are alternatives gated by `collect_s3_logs`: an S3 input given only
- * a bucket ARN silently polls SQS unless the toggle is on. Returns true when the toggle should
- * default to on: the input declares it, the user left it unset, and a bucket ARN is present.
+ * `bucket_arn` / `access_point_arn` and `queue_url` are alternatives gated by `collect_s3_logs`: an
+ * S3 input given only a bucket or access-point ARN silently polls SQS unless the toggle is on.
+ * Returns true when the toggle should default to on: the input declares it, the user left it
+ * unset, and a bucket or access-point ARN is present.
  * Not applied to ECF-scoped services, which never read the toggle.
  */
 export function shouldDefaultCollectS3Logs(
@@ -89,11 +100,7 @@ export function shouldDefaultCollectS3Logs(
   if (service.settingsScope === 'ecf') return false;
   if (!service.varDefsByInput?.[input]?.collect_s3_logs) return false;
   if (vars?.collect_s3_logs !== undefined) return false;
-  const arn = vars?.bucket_arn;
-  const hasArn = Array.isArray(arn)
-    ? arn.some((a) => a.trim() !== '')
-    : typeof arn === 'string' && arn.trim() !== '';
-  return hasArn;
+  return BUCKET_MODE_SOURCE_VARS.some((name) => hasValue(vars?.[name]));
 }
 
 /**
@@ -117,8 +124,15 @@ function appliesSourceRule(service: AwsServiceMatrixEntry): boolean {
 }
 
 /**
- * The source vars of `input` when none of them is filled, otherwise undefined. The flyout hint
+ * The source vars `input` still needs, or undefined when its source is complete. The flyout hint
  * and the Step 2 / Step 3 gates both use this, so they cannot disagree.
+ *
+ * For S3 inputs that declare `collect_s3_logs` the source must match the collection mode: with the
+ * toggle on a bucket or access-point ARN is required, with it off a queue URL is. An unset toggle
+ * is derived the way `buildStreamVars` does (a bucket or access-point ARN means on, otherwise SQS),
+ * so either kind of source is accepted. Without that check a stored `true` (inferred from a
+ * since-replaced ARN) would let a queue-URL-only config through and deploy a bucket input with no
+ * bucket.
  */
 export function getMissingSourceGroup(
   service: AwsServiceMatrixEntry,
@@ -129,13 +143,21 @@ export function getMissingSourceGroup(
   const defs = service.varDefsByInput?.[input];
   const group = (SOURCE_VAR_GROUPS[input] ?? []).filter((name) => defs?.[name]);
   if (group.length < 2) return undefined;
-  const isFilled = (name: string) => {
-    const value = vars?.[name];
-    return Array.isArray(value)
-      ? value.some((v) => v.trim() !== '')
-      : typeof value === 'string' && value.trim() !== '';
-  };
-  return group.some(isFilled) ? undefined : group;
+
+  if (defs?.collect_s3_logs) {
+    const bucketModeVars = BUCKET_MODE_SOURCE_VARS.filter((name) => defs[name]);
+    const hasBucketSource = bucketModeVars.some((name) => hasValue(vars?.[name]));
+    const hasQueueUrl = hasValue(vars?.queue_url);
+    const toggle = vars?.collect_s3_logs;
+    if (toggle === undefined) {
+      return hasBucketSource || hasQueueUrl ? undefined : group;
+    }
+    const isBucketMode = toggle === true || toggle === 'true';
+    if (isBucketMode) return hasBucketSource ? undefined : bucketModeVars;
+    return hasQueueUrl ? undefined : ['queue_url'];
+  }
+
+  return group.some((name) => hasValue(vars?.[name])) ? undefined : group;
 }
 
 /**

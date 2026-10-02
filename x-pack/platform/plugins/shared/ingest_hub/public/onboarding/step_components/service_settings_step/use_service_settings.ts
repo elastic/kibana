@@ -153,7 +153,7 @@ export function isServiceConfigIncomplete(
     const dsInfo = service.varDefsByDataStream?.[dsId];
     const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
     const isSingleDs = service.dataStreams.length === 1;
-    const activeInputs = dsVars.enabledInputs.length
+    let activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
       : isSingleDs
       ? service.inputs ?? dsInfo?.inputs ?? []
@@ -161,6 +161,14 @@ export function isServiceConfigIncomplete(
       ? dsInfo.defaultEnabledInputs
       : dsInfo?.inputs?.slice(0, 1) ?? [];
     const dsView = makeDsView(service, dsId);
+    // Stored input selections outlive a method switch. Under ECF only the inputs ECF can route
+    // count (WAF: S3 only); a selection left over from agent-based (e.g. CloudWatch only) would
+    // otherwise pass with no supported source, and the ECF launch would carry none for the service.
+    if (service.settingsScope === 'ecf' && dsVars.enabledInputs.length > 0) {
+      const supportedInputs = dsView.inputs ?? [];
+      activeInputs = activeInputs.filter((input) => supportedInputs.includes(input));
+      if (activeInputs.length === 0) return true;
+    }
     return activeInputs.some(
       (inp) =>
         getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||

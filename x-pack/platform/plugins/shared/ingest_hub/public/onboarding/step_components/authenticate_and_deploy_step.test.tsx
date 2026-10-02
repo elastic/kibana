@@ -1131,6 +1131,7 @@ describe('AuthenticateAndDeployStep', () => {
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
         serviceSettingsMethod: settingsMethod,
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
         updateDetectAndReviewStep: jest.fn(),
         refetchAwsServiceMatrix: jest.fn(),
@@ -1213,6 +1214,86 @@ describe('AuthenticateAndDeployStep', () => {
       expect(
         screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
       ).not.toBeInTheDocument();
+    });
+  });
+  describe('managed deployment — settings with no source ECF can route', () => {
+    // The ECF view of an ECF-only service: the ARN is the required source.
+    const ecfView: AwsServiceMatrixEntry = {
+      ...ecfService,
+      dataStreams: ['cloudtrail'],
+      inputs: ['aws-s3'],
+      settingsScope: 'ecf',
+      requiredConfig: ['bucket_arn'],
+      varDefsByInput: {
+        'aws-s3': {
+          bucket_arn: { name: 'bucket_arn', type: 'text', required: true, show_user: true } as any,
+        },
+      },
+      ecfSettings: {
+        requiredConfig: ['bucket_arn'],
+        dataStreams: ['cloudtrail'],
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: [],
+      },
+    };
+
+    const arrange = (bucketArn: string) => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'ecs' },
+        awsServicesMap: new Map([['cloudtrail', ecfView]]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        serviceSettingsMethod: 'managed_integration',
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        refetchAwsServiceMatrix: jest.fn(),
+      });
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          instances: [
+            {
+              instanceId: 'cloudtrail',
+              serviceId: 'cloudtrail',
+              name: 'AWS CloudTrail',
+              isDuplicate: false,
+            },
+          ],
+          serviceVars: {
+            cloudtrail: {
+              enabledDataStreams: ['cloudtrail'],
+              varsByDataStream: {
+                cloudtrail: {
+                  enabledInputs: ['aws-s3'],
+                  varsByInput: { 'aws-s3': { bucket_arn: bucketArn } },
+                },
+              },
+            },
+          },
+        },
+        jest.fn(),
+      ]);
+      // ECF "done" so only the settings gate can hold Next back.
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: true }));
+    };
+
+    it('blocks Next and names the service when the ECF source is missing', () => {
+      arrange('');
+      renderStep();
+      const callout = screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout');
+      expect(callout).toHaveTextContent('Service settings are incomplete');
+      expect(callout).toHaveTextContent('AWS CloudTrail');
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('shows no callout and does not block Next once the source is set', () => {
+      arrange('arn:aws:s3:::bucket');
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
     });
   });
 });

@@ -180,29 +180,29 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         : [],
     [isAgentBased, serviceSettingsMethod, ecfCapableServiceIds, awsServicesMap]
   );
-  const incompleteAgentInstances = useMemo(
+  // Checked under both methods: `awsServicesMap` carries the view for the selected one, so a user
+  // who switches back from agent-based to managed is also stopped when the stored settings have no
+  // source ECF can route (e.g. WAF with only CloudWatch enabled).
+  const incompleteSettingsInstances = useMemo(
     () =>
-      isAgentBased
-        ? getIncompleteInstances(
-            ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
-            serviceVars,
-            awsServicesMap
-          )
-        : [],
-    [isAgentBased, ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
+      getIncompleteInstances(
+        ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
+        serviceVars,
+        awsServicesMap
+      ),
+    [ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
   );
-  const incompleteAgentSettingsCount = incompleteAgentInstances.length;
+  const incompleteSettingsCount = incompleteSettingsInstances.length;
   // Name the services that need attention: the incomplete ones while Next is blocked, otherwise
   // the ones whose settings were collected under the previous method.
   const calloutServiceNames =
-    incompleteAgentSettingsCount > 0
-      ? [...new Set(incompleteAgentInstances.map((inst) => inst.name))]
+    incompleteSettingsCount > 0
+      ? [...new Set(incompleteSettingsInstances.map((inst) => inst.name))]
       : settingsOutOfDateServiceNames;
   // Warning while required agent-based settings are missing (Next is blocked), info otherwise.
-  const SettingsChangedCallout =
-    incompleteAgentSettingsCount > 0 ? KbnWarningCallout : KbnInfoCallout;
+  const SettingsChangedCallout = incompleteSettingsCount > 0 ? KbnWarningCallout : KbnInfoCallout;
   const showSettingsChangedCallout =
-    settingsOutOfDateServiceNames.length > 0 || incompleteAgentSettingsCount > 0;
+    settingsOutOfDateServiceNames.length > 0 || incompleteSettingsCount > 0;
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const {
@@ -607,7 +607,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (showMiSection && !isMiDone) ||
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
-    incompleteAgentSettingsCount > 0 ||
+    incompleteSettingsCount > 0 ||
     (showAgentSection && isAgentDeploying) ||
     (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
@@ -684,15 +684,28 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           <SettingsChangedCallout
             announceOnMount
             title={
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.title"
-                defaultMessage="Service settings have changed"
-              />
+              incompleteSettingsCount > 0 && !isAgentBased ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.title"
+                  defaultMessage="Service settings are incomplete"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.title"
+                  defaultMessage="Service settings have changed"
+                />
+              )
             }
             data-test-subj="authenticateAndDeployStep-settingsChangedCallout"
             text={
               <p>
-                {incompleteAgentSettingsCount > 0 ? (
+                {incompleteSettingsCount > 0 && !isAgentBased ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.body"
+                    defaultMessage="Managed deployment needs a supported source for each service. Complete the required settings in Service Settings for {services} to continue."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                ) : incompleteSettingsCount > 0 ? (
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.incompleteBody"
                     defaultMessage="Agent-based deployment requires more settings than managed deployment. Complete the required settings in Service Settings for {services} to continue."
