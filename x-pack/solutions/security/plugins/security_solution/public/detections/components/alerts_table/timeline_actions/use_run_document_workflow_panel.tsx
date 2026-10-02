@@ -62,7 +62,7 @@ export const DocumentWorkflowsPanel = ({
         : { attachmentIds: documents.map(({ _id }) => _id) },
     [documents, originEventId]
   );
-  const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
+  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
     target,
   });
@@ -82,6 +82,7 @@ export const DocumentWorkflowsPanel = ({
       inputs={inputs}
       runWorkflow={runWorkflow}
       showSuccessToast={showSuccessToast}
+      telemetry={telemetry}
       sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}
