@@ -32,23 +32,14 @@ export const ruleOverviewQueryKeys = {
     ] as const,
   timelineSummary: (ruleId: string, windowStartMs: number, windowEndMs: number) =>
     [...ruleOverviewQueryKeys.all, 'timeline-summary', ruleId, windowStartMs, windowEndMs] as const,
-  episodePhases: (
-    ruleId: string,
-    windowStartMs: number,
-    windowEndMs: number,
-    episodeIds: readonly string[]
-  ) =>
+  ruleEvents: (ruleId: string, windowEndMs: number, episodeIds: readonly string[]) =>
     [
       ...ruleOverviewQueryKeys.all,
-      'episode-phases',
+      'rule-events',
       ruleId,
-      windowStartMs,
       windowEndMs,
       [...episodeIds].sort(),
     ] as const,
-  // Untimed: an episode's start is window-independent, so the cache survives time-range changes.
-  episodeStarts: (ruleId: string, episodeIds: readonly string[]) =>
-    [...ruleOverviewQueryKeys.all, 'episode-starts', ruleId, [...episodeIds].sort()] as const,
   seriesGroupingValues: (
     ruleId: string,
     groupHashes: readonly string[],

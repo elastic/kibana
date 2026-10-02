@@ -7,6 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERT_TIMELINE_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.title',
+  { defaultMessage: 'Alert series' }
+);
+
+export const ALERT_TIMELINE_EMPTY_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.emptyTitle',
+  { defaultMessage: 'No alert activity' }
+);
+
+export const ALERT_TIMELINE_EMPTY_BODY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.emptyBody',
+  { defaultMessage: 'Alert activity appears here when episode events are available.' }
+);
+
 /** --- Overview list --- */
 export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.overviewListSection.loadError',

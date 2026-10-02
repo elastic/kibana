@@ -48,6 +48,9 @@ const STATUS_PRIORITY: Record<string, number> = Object.fromEntries(
 
 const RECT_Y0 = 0.4;
 const RECT_Y1 = 0.6;
+const TRANSITION_POINT_RADIUS_PX = 3;
+const TRANSITION_POINT_STROKE_WIDTH_PX = 2;
+const CHART_LEFT_PADDING_PX = TRANSITION_POINT_RADIUS_PX + TRANSITION_POINT_STROKE_WIDTH_PX / 2;
 
 interface SegmentDetails {
   kind: 'segment';
@@ -208,7 +211,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
     <div
       css={css`
         height: ${height}px;
-        border-top: 1px solid ${euiTheme.colors.lightestShade};
+        box-shadow: inset 0 1px ${euiTheme.colors.lightestShade};
       `}
       data-test-subj="alertTimelineRow"
     >
@@ -222,7 +225,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
           onElementClick={onEpisodeClick ? handleElementClick : undefined}
           theme={{
             chartMargins: { top: 0, right: 0, bottom: 0, left: 0 },
-            chartPaddings: { top: 0, right: 0, bottom: 0, left: 0 },
+            chartPaddings: { top: 0, right: 0, bottom: 0, left: CHART_LEFT_PADDING_PX },
           }}
         />
         <Tooltip
@@ -354,9 +357,9 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
               line: { visible: false, opacity: 0 },
               point: {
                 visible: 'always',
-                radius: 3,
+                radius: TRANSITION_POINT_RADIUS_PX,
                 fill: euiTheme.colors.emptyShade,
-                strokeWidth: 2,
+                strokeWidth: TRANSITION_POINT_STROKE_WIDTH_PX,
               },
             }}
             pointStyleAccessor={(datum) => {

@@ -12,7 +12,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
  * Selects the episodes the alert timeline draws, scoped to the chosen top-N
  * series. One row per episode (its series + most-recent activity in the window).
  * `LIMIT ... BY group_hash` gives each series its own episode budget, so a busy
- * series can't crowd out quieter ones. Start/phases come from {@link buildEpisodePhasesQuery}.
+ * series can't crowd out quieter ones. Full event histories are fetched separately.
  */
 export interface EpisodeSelectionRow {
   'episode.id': string;
@@ -20,7 +20,7 @@ export interface EpisodeSelectionRow {
   last_ts: string;
 }
 
-/** Per-series cap on episodes drawn. A render-density limit (each episode is ~4 phase rows), so it can be generous. */
+/** Per-series cap on episodes drawn. */
 export const MAX_EPISODES_PER_LANE = 50;
 
 export interface BuildEpisodeSelectionQueryOptions {

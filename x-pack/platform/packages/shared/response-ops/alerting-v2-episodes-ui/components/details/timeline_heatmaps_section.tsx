@@ -12,8 +12,8 @@ import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
-const AlertEpisodeLifecycleHeatmap = React.lazy(() =>
-  import('./lifecycle_heatmap').then((m) => ({ default: m.AlertEpisodeLifecycleHeatmap }))
+const AlertEpisodeAlertTimeline = React.lazy(() =>
+  import('./episode_alert_timeline').then((m) => ({ default: m.AlertEpisodeAlertTimeline }))
 );
 
 const AlertEpisodeSeverityHeatmap = React.lazy(() =>
@@ -37,7 +37,7 @@ export interface AlertEpisodeTimelineHeatmapsSectionProps {
 }
 
 /**
- * Renders the episode (status) timeline and severity timeline inside a single
+ * Renders the episode alert timeline and severity timeline inside a single
  * shared bordered panel.
  */
 export const AlertEpisodeTimelineHeatmapsSection = ({
@@ -83,7 +83,7 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTimelineHeatmapsSection">
       <React.Suspense fallback={<HeatmapSkeleton />}>
-        <AlertEpisodeLifecycleHeatmap eventRows={eventRows ?? []} compressed={compressed} />
+        <AlertEpisodeAlertTimeline eventRows={eventRows ?? []} compressed={compressed} />
       </React.Suspense>
       {severityEventRows.length > 0 && (
         <>

@@ -14,7 +14,6 @@ const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
-
 const TARGET_TICK_COUNT = 7;
 
 interface Tick {
@@ -24,11 +23,9 @@ interface Tick {
 
 interface StepDef {
   ms: number;
-  /** 'second' = snap to second; 'minute' = snap to local minute; 'hour' = snap to local hour; 'day' = snap to local midnight. */
   unit: 'second' | 'minute' | 'hour' | 'day';
 }
 
-// Ordered smallest → largest. Picked so adjacent steps are nice multiples.
 const STEPS: StepDef[] = [
   { ms: 10 * SECOND_MS, unit: 'second' },
   { ms: 30 * SECOND_MS, unit: 'second' },
@@ -48,26 +45,17 @@ const STEPS: StepDef[] = [
   { ms: 30 * DAY_MS, unit: 'day' },
 ];
 
-const pickStep = (spanMs: number): StepDef => {
-  for (const step of STEPS) {
-    if (spanMs / step.ms <= TARGET_TICK_COUNT + 2) return step;
-  }
-  return STEPS[STEPS.length - 1];
-};
+const pickStep = (spanMs: number): StepDef =>
+  STEPS.find((step) => spanMs / step.ms <= TARGET_TICK_COUNT + 2) ?? STEPS[STEPS.length - 1];
 
 const snapForward = (ms: number, step: StepDef): number => {
-  const d = new Date(ms);
-  if (step.unit === 'day') {
-    d.setHours(0, 0, 0, 0);
-  } else if (step.unit === 'hour') {
-    d.setMinutes(0, 0, 0);
-  } else if (step.unit === 'minute') {
-    d.setSeconds(0, 0);
-  } else {
-    // second — snap to millisecond boundary
-    d.setMilliseconds(0);
-  }
-  let cursor = d.getTime();
+  const date = new Date(ms);
+  if (step.unit === 'day') date.setHours(0, 0, 0, 0);
+  else if (step.unit === 'hour') date.setMinutes(0, 0, 0);
+  else if (step.unit === 'minute') date.setSeconds(0, 0);
+  else date.setMilliseconds(0);
+
+  let cursor = date.getTime();
   if (step.unit === 'day') {
     const stepDays = Math.round(step.ms / DAY_MS);
     while (cursor < ms) {
@@ -91,36 +79,32 @@ const buildTicks = (
     !Number.isFinite(windowStartMs) ||
     !Number.isFinite(windowEndMs) ||
     windowEndMs <= windowStartMs
-  )
+  ) {
     return [];
+  }
 
   const span = windowEndMs - windowStartMs;
   const step = pickStep(span);
-
   const showDate = step.unit === 'day' || span > DAY_MS;
   const showTime = step.unit !== 'day';
-  const showSeconds = step.unit === 'second';
-  const resolvedTz = timeZone && timeZone !== 'Browser' ? timeZone : undefined;
   const formatter = new Intl.DateTimeFormat(locale, {
-    timeZone: resolvedTz,
+    timeZone: timeZone && timeZone !== 'Browser' ? timeZone : undefined,
     month: showDate ? 'short' : undefined,
     day: showDate ? 'numeric' : undefined,
     hour: showTime ? '2-digit' : undefined,
     minute: showTime ? '2-digit' : undefined,
-    second: showSeconds ? '2-digit' : undefined,
+    second: step.unit === 'second' ? '2-digit' : undefined,
     hour12: false,
   });
 
-  const stepDays = step.unit === 'day' ? Math.round(step.ms / DAY_MS) : 0;
-
   const ticks: Tick[] = [];
   let cursor = snapForward(windowStartMs, step);
-  let idx = 0;
-  while (cursor <= windowEndMs && idx++ < 200) {
+  let index = 0;
+  while (cursor <= windowEndMs && index++ < 200) {
     ticks.push({ ms: cursor, label: formatter.format(new Date(cursor)) });
     if (step.unit === 'day') {
       const next = new Date(cursor);
-      next.setDate(next.getDate() + stepDays);
+      next.setDate(next.getDate() + Math.round(step.ms / DAY_MS));
       cursor = next.getTime();
     } else {
       cursor += step.ms;
@@ -132,20 +116,14 @@ const buildTicks = (
 export interface AlertTimelineTimeAxisProps {
   windowStartMs: number;
   windowEndMs: number;
-  /** Kibana `dateFormat:tz` setting. Pass `'Browser'` or omit to use the browser's local timezone. */
   timeZone?: string;
 }
 
-/**
- * Top-of-chart date axis. Renders one subdued label per tick inside the
- * window, positioned by absolute percentage offset against the time domain
- * shared with the bars below.
- */
-export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({
+export const AlertTimelineTimeAxis = ({
   windowStartMs,
   windowEndMs,
   timeZone,
-}) => {
+}: AlertTimelineTimeAxisProps) => {
   const { euiTheme } = useEuiTheme();
   const ticks = useMemo(
     () => buildTicks(windowStartMs, windowEndMs, i18n.getLocale(), timeZone),
@@ -164,8 +142,8 @@ export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({
       data-test-subj="alertTimelineTimeAxis"
     >
       {ticks.map((tick) => {
-        const pct = ((tick.ms - windowStartMs) / span) * 100;
-        if (pct > 90) return null;
+        const percentage = ((tick.ms - windowStartMs) / span) * 100;
+        if (percentage > 90) return null;
         return (
           <div
             key={tick.ms}
@@ -175,7 +153,7 @@ export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({
               padding-right: ${euiTheme.size.s};
               white-space: nowrap;
             `}
-            style={{ left: `${pct}%` }}
+            style={{ left: `${percentage}%` }}
           >
             <EuiText size="xs" color="subdued">
               {tick.label}

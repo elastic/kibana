@@ -68,20 +68,12 @@ export interface AlertTimelineData {
   summary: AlertTimelineSummary;
 }
 
-/**
- * One status phase of an episode (a pre-aggregated span) — the row shape accepted
- * by deriveAlertTimelineData. Each row is `MIN`/`MAX` of `@timestamp` for a
- * contiguous run of one `episode.status`, so an episode is described by ≤4 rows
- * instead of thousands of raw heartbeat events.
- */
-export interface AlertTimelinePhaseRow {
+/** One raw rule event used to reconstruct an episode's ordered status transitions. */
+export interface AlertTimelineEventRow {
+  '@timestamp': string;
   'episode.id': string;
   'episode.status': AlertEpisodeStatus;
   group_hash: string;
-  /** ISO timestamp — MIN(@timestamp) for this (episode, status) phase. */
-  seg_start: string;
-  /** ISO timestamp — MAX(@timestamp) for this (episode, status) phase. */
-  seg_end: string;
 }
 
 /** Grouping values keyed by group hash. */
