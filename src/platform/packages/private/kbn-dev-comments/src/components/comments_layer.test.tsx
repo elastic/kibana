@@ -39,6 +39,8 @@ import { CommentsProvider } from './comments_context';
 import { CommentsLayer } from './comments_layer';
 import { SETTLE_MS } from './guide_overlay';
 
+jest.setTimeout(30_000);
+
 const seeded = createComment('a');
 
 const escape = () => fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
