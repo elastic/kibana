@@ -9,9 +9,9 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CreateAutomationFlyout } from './create_automation_flyout';
-import { useCreateAutomation } from '../hooks/use_automations';
+import { useCreateAutomation } from '../../hooks/use_automations';
 
-jest.mock('../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
+jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
 
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
@@ -152,7 +152,7 @@ describe('CreateAutomationFlyout', () => {
     expect(screen.queryByTestId('euiComboBoxPill')).not.toBeInTheDocument();
   });
 
-  it('closes a pristine draft without confirmation', () => {
+  it('closes a pristine form without confirmation', () => {
     renderFlyout();
 
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));

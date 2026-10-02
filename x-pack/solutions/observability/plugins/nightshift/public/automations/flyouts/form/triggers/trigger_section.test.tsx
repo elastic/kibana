@@ -8,12 +8,12 @@
 import React, { useState } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AutomationTriggerSection } from './automation_trigger_section';
-import type { TriggerDraft } from './automation_draft';
+import { AutomationTriggerSection } from './trigger_section';
+import type { TriggerFormValues } from '../automation_form_values';
 
 const onTriggerChange = jest.fn();
 
-const TriggerSection = ({ initialTrigger }: { initialTrigger?: TriggerDraft }) => {
+const TriggerSection = ({ initialTrigger }: { initialTrigger?: TriggerFormValues }) => {
   const [trigger, setTrigger] = useState(initialTrigger);
   const [dailyDispatchLimit, setDailyDispatchLimit] = useState('20');
   return (

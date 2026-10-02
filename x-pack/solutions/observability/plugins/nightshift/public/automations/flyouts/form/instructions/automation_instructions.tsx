@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { InstructionMode } from './automation_draft';
+import type { InstructionMode } from '../automation_form_values';
 
 const labels = {
   instructions: i18n.translate('xpack.nightshift.automations.flyout.instructions', {

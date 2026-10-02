@@ -11,8 +11,8 @@ import type {
   NightshiftInvestigationsAPIClientRequestParamsOf,
   NightshiftInvestigationsAPIReturnType,
 } from '@kbn/nightshift-investigations-plugin/public';
-import { isHttpClientError } from '../common/http_error';
-import { useKibana } from './use_kibana';
+import { isHttpClientError } from '../../common/http_error';
+import { useKibana } from '../../hooks/use_kibana';
 
 type AutomationsResponse =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations'>;

@@ -35,20 +35,20 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import cronstrue from 'cronstrue';
-import type { Automation } from '../hooks/use_automations';
-import { actionLabels } from './automation_actions_section';
+import type { Automation } from '../../../hooks/use_automations';
+import { actionLabels } from '../actions/automation_actions_section';
 import {
-  createTriggerDraft,
+  createTriggerFormValues,
   hasDailyLimit,
   isSlackTrigger,
   isValidCron,
   isValidDailyLimit,
   type AlertStatus,
   type ScheduleUnit,
-  type SlackTriggerDraft,
+  type SlackTriggerFormValues,
   type SlackTriggerKind,
-  type TriggerDraft,
-} from './automation_draft';
+  type TriggerFormValues,
+} from '../automation_form_values';
 
 const labels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
@@ -294,13 +294,13 @@ const TriggerPicker = ({
   onSelect,
 }: {
   button: (toggle: () => void) => React.ReactElement;
-  current?: TriggerDraft['kind'];
-  onSelect: (kind: TriggerDraft['kind']) => void;
+  current?: TriggerFormValues['kind'];
+  onSelect: (kind: TriggerFormValues['kind']) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const groupLabelCss = { paddingInline: euiTheme.size.s };
-  const options: Array<EuiSelectableOption<{ kind?: TriggerDraft['kind'] }>> = [
+  const options: Array<EuiSelectableOption<{ kind?: TriggerFormValues['kind'] }>> = [
     { label: labels.elastic, isGroupLabel: true, css: groupLabelCss },
     {
       label: labels.alertTriggered,
@@ -323,7 +323,7 @@ const TriggerPicker = ({
   ].map((option) => ({
     ...option,
     checked: 'kind' in option && option.kind === current ? 'on' : undefined,
-  })) as Array<EuiSelectableOption<{ kind?: TriggerDraft['kind'] }>>;
+  })) as Array<EuiSelectableOption<{ kind?: TriggerFormValues['kind'] }>>;
 
   return (
     <EuiPopover
@@ -562,8 +562,8 @@ const AlertTriggerEditor = ({
   trigger,
   onChange,
 }: {
-  trigger: Extract<TriggerDraft, { kind: 'alert' }>;
-  onChange: (trigger: TriggerDraft) => void;
+  trigger: Extract<TriggerFormValues, { kind: 'alert' }>;
+  onChange: (trigger: TriggerFormValues) => void;
 }) => {
   return (
     <Sentence>
@@ -619,8 +619,8 @@ const EveryTriggerEditor = ({
   trigger,
   onChange,
 }: {
-  trigger: Extract<TriggerDraft, { kind: 'every' }>;
-  onChange: (trigger: TriggerDraft) => void;
+  trigger: Extract<TriggerFormValues, { kind: 'every' }>;
+  onChange: (trigger: TriggerFormValues) => void;
 }) => (
   <Sentence>
     <EuiIcon type="calendar" aria-hidden={true} />
@@ -737,8 +737,8 @@ const SlackTriggerEditor = ({
   trigger,
   onChange,
 }: {
-  trigger: SlackTriggerDraft;
-  onChange: (trigger: TriggerDraft) => void;
+  trigger: SlackTriggerFormValues;
+  onChange: (trigger: TriggerFormValues) => void;
 }) => (
   <Sentence>
     <EuiIcon type="logoSlack" aria-hidden={true} />
@@ -794,8 +794,8 @@ const CronTriggerEditor = ({
   trigger,
   onChange,
 }: {
-  trigger: Extract<TriggerDraft, { kind: 'cron' }>;
-  onChange: (trigger: TriggerDraft) => void;
+  trigger: Extract<TriggerFormValues, { kind: 'cron' }>;
+  onChange: (trigger: TriggerFormValues) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isInvalid = !isValidCron(trigger.cronExpression);
@@ -838,8 +838,8 @@ const TriggerRow = ({
   onRemove,
   children,
 }: {
-  trigger: TriggerDraft;
-  onSelect: (kind: TriggerDraft['kind']) => void;
+  trigger: TriggerFormValues;
+  onSelect: (kind: TriggerFormValues['kind']) => void;
   onRemove: () => void;
   children: React.ReactNode;
 }) => {
@@ -901,18 +901,18 @@ export const AutomationTriggerSection = ({
   onTriggerChange,
   onDailyDispatchLimitChange,
 }: {
-  trigger?: TriggerDraft;
+  trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
-  onTriggerChange: (trigger?: TriggerDraft) => void;
+  onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [stashedTriggers, setStashedTriggers] = useState<
-    Partial<Record<TriggerDraft['kind'], TriggerDraft>>
+    Partial<Record<TriggerFormValues['kind'], TriggerFormValues>>
   >({});
-  const selectTrigger = (kind: TriggerDraft['kind']) => {
+  const selectTrigger = (kind: TriggerFormValues['kind']) => {
     if (trigger) setStashedTriggers((stash) => ({ ...stash, [trigger.kind]: trigger }));
-    onTriggerChange(stashedTriggers[kind] ?? createTriggerDraft(kind));
+    onTriggerChange(stashedTriggers[kind] ?? createTriggerFormValues(kind));
   };
 
   return (

@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationActionsSection } from './automation_actions_section';
-import type { SlackActionDraft } from './automation_draft';
+import type { SlackActionFormValues } from '../automation_form_values';
 
 const onSlackActionChange = jest.fn();
 
 const ActionsSection = () => {
-  const [slackAction, setSlackAction] = useState<SlackActionDraft | undefined>();
+  const [slackAction, setSlackAction] = useState<SlackActionFormValues | undefined>();
   return (
     <I18nProvider>
       <AutomationActionsSection

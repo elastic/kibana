@@ -17,11 +17,11 @@ import {
   useDeleteAutomation,
   useFetchAutomations,
   useToggleAutomation,
-} from '../hooks/use_automations';
+} from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from './hooks/use_automations';
 
-jest.mock('../hooks/use_automations', () => ({
+jest.mock('./hooks/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
@@ -32,7 +32,7 @@ jest.mock('../hooks/use_automations', () => ({
   useToggleAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('./create_automation_flyout', () => ({
+jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
 

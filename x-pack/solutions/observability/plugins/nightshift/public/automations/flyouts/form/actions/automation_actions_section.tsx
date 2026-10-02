@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { SlackActionDraft, SlackTarget } from './automation_draft';
+import type { SlackActionFormValues, SlackTarget } from '../automation_form_values';
 
 export const actionLabels = {
   actions: i18n.translate('xpack.nightshift.automations.flyout.actions', {
@@ -93,8 +93,8 @@ const SlackActionRow = ({
   onChange,
   onRemove,
 }: {
-  action: SlackActionDraft;
-  onChange: (action: SlackActionDraft) => void;
+  action: SlackActionFormValues;
+  onChange: (action: SlackActionFormValues) => void;
   onRemove: () => void;
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false} css={useActionRowCss()}>
@@ -151,8 +151,8 @@ export const AutomationActionsSection = ({
   slackAction,
   onSlackActionChange,
 }: {
-  slackAction?: SlackActionDraft;
-  onSlackActionChange: (action?: SlackActionDraft) => void;
+  slackAction?: SlackActionFormValues;
+  onSlackActionChange: (action?: SlackActionFormValues) => void;
 }) => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const rowCss = useActionRowCss();

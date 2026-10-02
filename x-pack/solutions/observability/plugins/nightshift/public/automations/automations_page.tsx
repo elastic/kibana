@@ -57,11 +57,11 @@ import {
   useFetchAutomations,
   useToggleAutomation,
   type Automation,
-} from '../hooks/use_automations';
+} from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
-import { toCloneAutomationBody } from './automation_draft';
-import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './automation_trigger_section';
-import { CreateAutomationFlyout } from './create_automation_flyout';
+import { toCloneAutomationBody } from './flyouts/form/automation_form_values';
+import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './flyouts/form/triggers/trigger_section';
+import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 
 const labels = {
   title: i18n.translate('xpack.nightshift.automations.pageTitle', {

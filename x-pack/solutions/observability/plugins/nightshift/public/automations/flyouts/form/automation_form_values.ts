@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { NightshiftInvestigationsAPIClientRequestParamsOf } from '@kbn/nightshift-investigations-plugin/public';
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../hooks/use_automations';
 
 export type CreateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'POST /internal/nightshift/automations'>['params']['body'];
@@ -27,7 +27,7 @@ export type SlackTriggerKind = keyof typeof SLACK_TRIGGER_EVENTS;
 export const isSlackTriggerKind = (kind: string): kind is SlackTriggerKind =>
   kind in SLACK_TRIGGER_EVENTS;
 
-export type TriggerDraft =
+export type TriggerFormValues =
   | {
       kind: 'alert';
       ruleNamePattern: string;
@@ -47,25 +47,25 @@ export type TriggerDraft =
   | { kind: 'cron'; cronExpression: string; timezone: string }
   | { kind: SlackTriggerKind; channels: string[]; users: string[]; messageFilter: string };
 
-export type SlackTriggerDraft = Extract<TriggerDraft, { kind: SlackTriggerKind }>;
+export type SlackTriggerFormValues = Extract<TriggerFormValues, { kind: SlackTriggerKind }>;
 
-export const isSlackTrigger = (trigger: TriggerDraft): trigger is SlackTriggerDraft =>
+export const isSlackTrigger = (trigger: TriggerFormValues): trigger is SlackTriggerFormValues =>
   isSlackTriggerKind(trigger.kind);
 
-export interface SlackActionDraft {
+export interface SlackActionFormValues {
   target: SlackTarget;
   destination: string;
 }
 
-export interface AutomationDraft {
+export interface AutomationFormValues {
   name: string;
   tags: string[];
   description: string;
-  trigger?: TriggerDraft;
+  trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
   instructions: string;
   mode: InstructionMode;
-  slackAction?: SlackActionDraft;
+  slackAction?: SlackActionFormValues;
   isEnabled: boolean;
 }
 
@@ -73,7 +73,7 @@ export const DEFAULT_TIMEZONE = 'UTC';
 export const DEFAULT_CRON = '0 9 * * *';
 const WEEKDAYS = [1, 2, 3, 4, 5];
 
-export const createTriggerDraft = (kind: TriggerDraft['kind']): TriggerDraft => {
+export const createTriggerFormValues = (kind: TriggerFormValues['kind']): TriggerFormValues => {
   if (isSlackTriggerKind(kind)) {
     return { kind, channels: [], users: [], messageFilter: '' };
   }
@@ -95,7 +95,7 @@ export const createTriggerDraft = (kind: TriggerDraft['kind']): TriggerDraft => 
   };
 };
 
-export const createAutomationDraft = (): AutomationDraft => ({
+export const createAutomationFormValues = (): AutomationFormValues => ({
   name: '',
   tags: [],
   description: '',
@@ -136,7 +136,7 @@ const toCronTime = (time: string): { minute: number; hour: number } => {
   return { minute, hour };
 };
 
-export const toEveryCron = (trigger: Extract<TriggerDraft, { kind: 'every' }>): string => {
+export const toEveryCron = (trigger: Extract<TriggerFormValues, { kind: 'every' }>): string => {
   const { minute, hour } = toCronTime(trigger.time);
   if (trigger.unit === 'hour') {
     const hours = trigger.betweenHours
@@ -160,17 +160,19 @@ export const isValidDailyLimit = (value: string): boolean => {
   return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= 200;
 };
 
-export const hasDailyLimit = (trigger?: TriggerDraft): boolean =>
+export const hasDailyLimit = (trigger?: TriggerFormValues): boolean =>
   trigger !== undefined && trigger.kind !== 'cron';
 
-export const isTriggerValid = (trigger?: TriggerDraft): trigger is TriggerDraft => {
+export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerFormValues => {
   if (!trigger) return false;
   if (trigger.kind === 'cron') return isValidCron(trigger.cronExpression);
   if (trigger.kind === 'every' && trigger.unit === 'week') return trigger.daysOfWeek.length > 0;
   return true;
 };
 
-const toTriggerRow = (trigger: TriggerDraft): CreateAutomationBody['trigger']['rows'][number] => {
+const toTriggerRow = (
+  trigger: TriggerFormValues
+): CreateAutomationBody['trigger']['rows'][number] => {
   if (trigger.kind === 'alert') {
     const ruleNamePattern = trigger.ruleNamePattern.trim();
     return {
@@ -208,26 +210,26 @@ const toTriggerRow = (trigger: TriggerDraft): CreateAutomationBody['trigger']['r
 };
 
 export const toCreateAutomationBody = (
-  draft: AutomationDraft & { trigger: TriggerDraft }
+  values: AutomationFormValues & { trigger: TriggerFormValues }
 ): CreateAutomationBody => {
-  const description = draft.description.trim();
-  const instructions = draft.instructions.trim();
-  const destination = draft.slackAction?.destination.trim();
+  const description = values.description.trim();
+  const instructions = values.instructions.trim();
+  const destination = values.slackAction?.destination.trim();
   return {
-    name: draft.name.trim(),
+    name: values.name.trim(),
     ...(description ? { description } : {}),
-    ...(draft.tags.length ? { tags: draft.tags } : {}),
-    isEnabled: draft.isEnabled,
-    trigger: { rows: [toTriggerRow(draft.trigger)] },
+    ...(values.tags.length ? { tags: values.tags } : {}),
+    isEnabled: values.isEnabled,
+    trigger: { rows: [toTriggerRow(values.trigger)] },
     execution: {
       ...(instructions ? { promptTemplate: instructions } : {}),
-      reasoningMode: draft.mode === 'investigate' ? 'investigate' : 'observe',
+      reasoningMode: values.mode === 'investigate' ? 'investigate' : 'observe',
     },
-    completion: draft.slackAction
-      ? { action: 'post_to_slack', targetMode: draft.slackAction.target, destination }
+    completion: values.slackAction
+      ? { action: 'post_to_slack', targetMode: values.slackAction.target, destination }
       : {},
-    runtime: hasDailyLimit(draft.trigger)
-      ? { dailyDispatchLimit: Number(draft.dailyDispatchLimit) }
+    runtime: hasDailyLimit(values.trigger)
+      ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
       : {},
   };
 };

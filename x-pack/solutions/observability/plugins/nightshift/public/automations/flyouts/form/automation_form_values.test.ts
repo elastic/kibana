@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../hooks/use_automations';
 import {
-  createAutomationDraft,
-  createTriggerDraft,
+  createAutomationFormValues,
+  createTriggerFormValues,
   hasDailyLimit,
   isTriggerValid,
   isValidCron,
@@ -16,8 +16,8 @@ import {
   toCloneAutomationBody,
   toCreateAutomationBody,
   toEveryCron,
-  type TriggerDraft,
-} from './automation_draft';
+  type TriggerFormValues,
+} from './automation_form_values';
 
 const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   id: 'automation-1',
@@ -34,15 +34,15 @@ const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   ...overrides,
 });
 
-const everyTrigger = (overrides: Partial<Extract<TriggerDraft, { kind: 'every' }>> = {}) => ({
-  ...(createTriggerDraft('every') as Extract<TriggerDraft, { kind: 'every' }>),
+const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'every' }>> = {}) => ({
+  ...(createTriggerFormValues('every') as Extract<TriggerFormValues, { kind: 'every' }>),
   ...overrides,
 });
 
-describe('automation draft', () => {
-  describe('createAutomationDraft', () => {
-    it('starts an empty disabled draft', () => {
-      expect(createAutomationDraft()).toEqual({
+describe('automation form values', () => {
+  describe('createAutomationFormValues', () => {
+    it('starts with empty, disabled values', () => {
+      expect(createAutomationFormValues()).toEqual({
         name: '',
         tags: [],
         description: '',
@@ -126,25 +126,25 @@ describe('automation draft', () => {
 
   it('only applies a daily limit to event and interval triggers', () => {
     expect(hasDailyLimit(undefined)).toBe(false);
-    expect(hasDailyLimit(createTriggerDraft('alert'))).toBe(true);
-    expect(hasDailyLimit(createTriggerDraft('every'))).toBe(true);
-    expect(hasDailyLimit(createTriggerDraft('cron'))).toBe(false);
+    expect(hasDailyLimit(createTriggerFormValues('alert'))).toBe(true);
+    expect(hasDailyLimit(createTriggerFormValues('every'))).toBe(true);
+    expect(hasDailyLimit(createTriggerFormValues('cron'))).toBe(false);
   });
 
   it('validates triggers', () => {
     expect(isTriggerValid(undefined)).toBe(false);
-    expect(isTriggerValid(createTriggerDraft('alert'))).toBe(true);
+    expect(isTriggerValid(createTriggerFormValues('alert'))).toBe(true);
     expect(isTriggerValid(everyTrigger({ unit: 'week', daysOfWeek: [] }))).toBe(false);
     expect(isTriggerValid({ kind: 'cron', cronExpression: 'bad', timezone: 'UTC' })).toBe(false);
   });
 
   describe('toCreateAutomationBody', () => {
-    const draft = createAutomationDraft();
+    const values = createAutomationFormValues();
 
     it('sends a trimmed alert automation', () => {
       expect(
         toCreateAutomationBody({
-          ...draft,
+          ...values,
           name: '  Triage  ',
           description: '  ',
           tags: ['oncall'],
@@ -175,7 +175,7 @@ describe('automation draft', () => {
     it('sends an interval schedule with its cron and preset', () => {
       expect(
         toCreateAutomationBody({
-          ...draft,
+          ...values,
           name: 'Report',
           mode: 'investigate',
           trigger: everyTrigger({ unit: 'week', time: '08:00', daysOfWeek: [1], timezone: 'PST' }),
@@ -198,7 +198,7 @@ describe('automation draft', () => {
     it('sends a custom cron without a daily limit and with a Slack action', () => {
       expect(
         toCreateAutomationBody({
-          ...draft,
+          ...values,
           name: 'Report',
           trigger: { kind: 'cron', cronExpression: ' 0 9 * * * ', timezone: 'UTC' },
           slackAction: { target: 'channel', destination: ' #oncall ' },
@@ -222,7 +222,7 @@ describe('automation draft', () => {
     it('sends a Slack trigger with its event, channels, people, and message filter', () => {
       expect(
         toCreateAutomationBody({
-          ...draft,
+          ...values,
           name: 'Slack',
           trigger: {
             kind: 'slack_message',
@@ -244,7 +244,7 @@ describe('automation draft', () => {
       });
       expect(
         toCreateAutomationBody({
-          ...draft,
+          ...values,
           name: 'Slack',
           trigger: { kind: 'slack_invite', channels: [], users: [], messageFilter: 'ignored' },
         }).trigger

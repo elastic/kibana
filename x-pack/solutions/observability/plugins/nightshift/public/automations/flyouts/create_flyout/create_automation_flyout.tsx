@@ -27,19 +27,19 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useCreateAutomation } from '../hooks/use_automations';
+import { useCreateAutomation } from '../../hooks/use_automations';
 import {
-  createAutomationDraft,
+  createAutomationFormValues,
   hasDailyLimit,
   isTriggerValid,
   isValidCron,
   isValidDailyLimit,
   toCreateAutomationBody,
-  type AutomationDraft,
-} from './automation_draft';
-import { AutomationActionsSection, actionLabels } from './automation_actions_section';
-import { AutomationInstructions } from './automation_instructions';
-import { AutomationTriggerSection } from './automation_trigger_section';
+  type AutomationFormValues,
+} from '../form/automation_form_values';
+import { AutomationActionsSection, actionLabels } from '../form/actions/automation_actions_section';
+import { AutomationInstructions } from '../form/instructions/automation_instructions';
+import { AutomationTriggerSection } from '../form/triggers/trigger_section';
 
 const MAX_TAG_LENGTH = 32;
 
@@ -141,12 +141,12 @@ const AutomationTagsField = ({
   );
 };
 
-const getSaveBlocker = (draft: AutomationDraft): string | undefined => {
-  if (draft.trigger?.kind === 'cron' && !isValidCron(draft.trigger.cronExpression)) {
+const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
+  if (values.trigger?.kind === 'cron' && !isValidCron(values.trigger.cronExpression)) {
     return labels.cronError;
   }
-  if (draft.slackAction && !draft.slackAction.destination.trim()) {
-    return draft.slackAction.target === 'channel'
+  if (values.slackAction && !values.slackAction.destination.trim()) {
+    return values.slackAction.target === 'channel'
       ? actionLabels.channelRequired
       : actionLabels.personRequired;
   }
@@ -160,32 +160,32 @@ export const CreateAutomationFlyout = ({
   onClose: () => void;
   tagSuggestions?: string[];
 }): React.ReactElement => {
-  const [initialDraft] = useState(createAutomationDraft);
-  const [draft, setDraft] = useState(initialDraft);
+  const [initialValues] = useState(createAutomationFormValues);
+  const [values, setValues] = useState(initialValues);
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const titleId = useGeneratedHtmlId();
   const createAutomation = useCreateAutomation();
   const { euiTheme } = useEuiTheme();
-  const update = (changes: Partial<AutomationDraft>) =>
-    setDraft((current) => ({ ...current, ...changes }));
-  const isDirty = JSON.stringify(draft) !== JSON.stringify(initialDraft);
-  const saveBlocker = getSaveBlocker(draft);
+  const update = (changes: Partial<AutomationFormValues>) =>
+    setValues((current) => ({ ...current, ...changes }));
+  const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
+  const saveBlocker = getSaveBlocker(values);
   const canSave =
-    isTriggerValid(draft.trigger) &&
-    (!hasDailyLimit(draft.trigger) || isValidDailyLimit(draft.dailyDispatchLimit)) &&
+    isTriggerValid(values.trigger) &&
+    (!hasDailyLimit(values.trigger) || isValidDailyLimit(values.dailyDispatchLimit)) &&
     !saveBlocker;
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
   const save = () => {
-    const { trigger } = draft;
+    const { trigger } = values;
     if (!isTriggerValid(trigger)) return;
-    if (!draft.name.trim()) {
+    if (!values.name.trim()) {
       setIsNameInvalid(true);
       return;
     }
-    createAutomation.mutate(toCreateAutomationBody({ ...draft, trigger }), { onSuccess: onClose });
+    createAutomation.mutate(toCreateAutomationBody({ ...values, trigger }), { onSuccess: onClose });
   };
 
   const saveButton = (
@@ -220,7 +220,7 @@ export const CreateAutomationFlyout = ({
             fullWidth
             compressed
             placeholder={labels.namePlaceholder}
-            value={draft.name}
+            value={values.name}
             isInvalid={isNameInvalid}
             onChange={(event) => {
               update({ name: event.target.value });
@@ -239,7 +239,7 @@ export const CreateAutomationFlyout = ({
           }
         >
           <AutomationTagsField
-            tags={draft.tags}
+            tags={values.tags}
             suggestions={tagSuggestions}
             onChange={(tags) => update({ tags })}
           />
@@ -261,28 +261,28 @@ export const CreateAutomationFlyout = ({
             css={{ fieldSizing: 'content', minBlockSize: 0, maxBlockSize: 160 }}
             maxLength={200}
             placeholder={labels.descriptionPlaceholder}
-            value={draft.description}
+            value={values.description}
             onChange={(event) => update({ description: event.target.value })}
             data-test-subj="automationDescription"
           />
         </EuiFormRow>
         <EuiSpacer size="l" />
         <AutomationTriggerSection
-          trigger={draft.trigger}
-          dailyDispatchLimit={draft.dailyDispatchLimit}
+          trigger={values.trigger}
+          dailyDispatchLimit={values.dailyDispatchLimit}
           onTriggerChange={(trigger) => update({ trigger })}
           onDailyDispatchLimitChange={(dailyDispatchLimit) => update({ dailyDispatchLimit })}
         />
         <EuiSpacer size="l" />
         <AutomationInstructions
-          instructions={draft.instructions}
-          mode={draft.mode}
+          instructions={values.instructions}
+          mode={values.mode}
           onInstructionsChange={(instructions) => update({ instructions })}
           onModeChange={(mode) => update({ mode })}
         />
         <EuiSpacer size="l" />
         <AutomationActionsSection
-          slackAction={draft.slackAction}
+          slackAction={values.slackAction}
           onSlackActionChange={(slackAction) => update({ slackAction })}
         />
       </EuiFlyoutBody>
@@ -300,8 +300,8 @@ export const CreateAutomationFlyout = ({
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   compressed
-                  label={draft.isEnabled ? labels.enabled : labels.disabled}
-                  checked={draft.isEnabled}
+                  label={values.isEnabled ? labels.enabled : labels.disabled}
+                  checked={values.isEnabled}
                   onChange={(event) => update({ isEnabled: event.target.checked })}
                   data-test-subj="automationEnabledSwitch"
                 />
@@ -314,7 +314,7 @@ export const CreateAutomationFlyout = ({
                 }}
               >
                 <EuiText size="xs" color="subdued">
-                  {draft.isEnabled ? labels.enablesWhenSaved : labels.savesAsDisabled}
+                  {values.isEnabled ? labels.enablesWhenSaved : labels.savesAsDisabled}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -339,7 +339,7 @@ export const CreateAutomationFlyout = ({
           buttonColor="danger"
           data-test-subj="automationDiscardModal"
         >
-          <p>{getDiscardBody(draft.name || labels.untitled)}</p>
+          <p>{getDiscardBody(values.name || labels.untitled)}</p>
         </EuiConfirmModal>
       )}
     </EuiFlyoutResizable>

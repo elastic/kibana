@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationInstructions } from './automation_instructions';
-import type { InstructionMode } from './automation_draft';
+import type { InstructionMode } from '../automation_form_values';
 
 const onInstructionsChange = jest.fn();
 
