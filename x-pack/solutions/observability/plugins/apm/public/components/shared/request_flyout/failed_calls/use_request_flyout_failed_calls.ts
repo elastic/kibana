@@ -69,6 +69,7 @@ export function useRequestFlyoutFailedCalls() {
   return {
     buckets: data?.buckets ?? [],
     totalFailed: data?.totalFailed ?? 0,
+    totalCalls: data?.totalCalls ?? 0,
     isSampled: data?.isSampled ?? false,
     isLoading: isPending(status),
   };

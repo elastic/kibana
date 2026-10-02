@@ -19,6 +19,7 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_ID,
+  TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
 import {
@@ -57,6 +58,7 @@ const GRPC_CODE_NAMES: Record<number, string> = {
 
 interface FailedSpan {
   spanId: string;
+  traceId: string | null;
   httpStatus: number | null;
   grpcCode: number | null;
 }
@@ -130,42 +132,75 @@ export function getConnectionFailedCalls({
     //   want *all* failed exit spans, including those that never reached s2
     //   (they won't have a child transaction).
     // -----------------------------------------------------------------------
-    const scopeFilter: Array<Record<string, unknown>> = [
+    // baseScopeFilter: service + resource (no outcome filter) — used for total-calls count.
+    // scopeFilter: baseScopeFilter + outcome=failure — used for failed spans.
+    const resourceFilter: Array<Record<string, unknown>> =
+      dependencies.length > 0
+        ? [{ terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } }]
+        : [];
+
+    if (dependencies.length === 0 && !targetServiceName) {
+      // Nothing to scope on — shouldn't happen in practice.
+      return { buckets: [], totalFailed: 0, totalCalls: 0, isSampled: false };
+    }
+
+    const baseScopeFilter: Array<Record<string, unknown>> = [
       { term: { [SERVICE_NAME]: sourceServiceName } },
+      ...resourceFilter,
+    ];
+    const scopeFilter: Array<Record<string, unknown>> = [
+      ...baseScopeFilter,
       { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
     ];
 
-    if (dependencies.length > 0) {
-      scopeFilter.push({ terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } });
-    } else if (!targetServiceName) {
-      // Nothing to scope on — shouldn't happen in practice.
-      return { buckets: [], totalFailed: 0, isSampled: false };
-    }
-
-    const failedSpanResponse = await apmEventClient.search(
-      'get_connection_failed_calls_failed_spans',
-      {
-        apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
-        track_total_hits: MAX_IDS + 1,
-        size: MAX_IDS,
-        _source: false,
-        fields: [SPAN_ID, HTTP_RESPONSE_STATUS_CODE, RPC_GRPC_STATUS_CODE, ATTRIBUTE_RPC_GRPC_STATUS_CODE],
-        query: {
-          bool: {
-            filter: [
-              ...scopeFilter,
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-            ],
+    const [failedSpanResponse, totalCallsResponse] = await Promise.all([
+      apmEventClient.search(
+        'get_connection_failed_calls_failed_spans',
+        {
+          apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+          track_total_hits: MAX_IDS + 1,
+          size: MAX_IDS,
+          _source: false,
+          fields: [SPAN_ID, TRACE_ID, HTTP_RESPONSE_STATUS_CODE, RPC_GRPC_STATUS_CODE, ATTRIBUTE_RPC_GRPC_STATUS_CODE],
+          query: {
+            bool: {
+              filter: [
+                ...scopeFilter,
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
+            },
           },
-        },
-      }
-    );
+        }
+      ),
+      apmEventClient.search(
+        'get_connection_failed_calls_total_count',
+        {
+          apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+          track_total_hits: true,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                ...baseScopeFilter,
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
+            },
+          },
+        }
+      ),
+    ]);
 
     const totalFailed =
       typeof failedSpanResponse.hits.total === 'number'
         ? failedSpanResponse.hits.total
         : failedSpanResponse.hits.total?.value ?? 0;
+
+    const totalCalls =
+      typeof totalCallsResponse.hits.total === 'number'
+        ? totalCallsResponse.hits.total
+        : totalCallsResponse.hits.total?.value ?? 0;
 
     const isSampled = totalFailed > MAX_IDS;
 
@@ -177,6 +212,7 @@ export function getConnectionFailedCalls({
         null;
       return {
         spanId: String(fields[SPAN_ID]?.[0] ?? ''),
+        traceId: (fields[TRACE_ID]?.[0] as string | undefined) ?? null,
         httpStatus,
         grpcCode,
       };
@@ -186,6 +222,7 @@ export function getConnectionFailedCalls({
       return {
         buckets: [],
         totalFailed: 0,
+        totalCalls,
         isSampled: false,
       };
     }
@@ -215,10 +252,12 @@ export function getConnectionFailedCalls({
           {
             type: 'dependency',
             count: failedSpans.length,
+            sampleTraceId: failedSpans[0]?.traceId ?? null,
             ...pickTopError({ errorDoc: topErrorDoc, httpStatuses, grpcCodes }),
           },
         ],
         totalFailed,
+        totalCalls,
         isSampled,
       };
     }
@@ -328,6 +367,7 @@ export function getConnectionFailedCalls({
         {
           type: 'caller',
           count: callerSpans.length,
+          sampleTraceId: callerSpans[0]?.traceId ?? null,
           ...pickTopError({
             errorDoc: callerErrorDoc,
             httpStatuses: callerHttpStatuses,
@@ -337,12 +377,14 @@ export function getConnectionFailedCalls({
         {
           type: 'server',
           count: serverSpans.length,
+          sampleTraceId: serverSpans[0]?.traceId ?? null,
           topError: serverErrorDoc?.message ?? null,
           topErrorGroupId: serverErrorDoc?.groupId ?? null,
         },
         {
           type: 'client',
           count: clientSpans.length,
+          sampleTraceId: clientSpans[0]?.traceId ?? null,
           ...pickTopError({
             errorDoc: null,
             httpStatuses: clientHttpStatuses,
@@ -351,6 +393,7 @@ export function getConnectionFailedCalls({
         },
       ],
       totalFailed,
+      totalCalls,
       isSampled,
     };
   });

@@ -37,12 +37,22 @@ export interface FailedCallBucket {
    * in that case there is no linkable error group.
    */
   topErrorGroupId: string | null;
+  /**
+   * A single representative trace ID from the failed spans in this bucket.
+   * Used for the "Open a failed trace" action. Null when no trace ID was available.
+   */
+  sampleTraceId: string | null;
 }
 
 export interface ConnectionFailedCallsResponse {
   buckets: FailedCallBucket[];
   /** Total number of failed exit spans for this connection. */
   totalFailed: number;
+  /**
+   * Total number of exit spans (successful + failed) for this connection.
+   * Used to compute the failure % column.
+   */
+  totalCalls: number;
   /**
    * True when the Phase 1 ID collection was capped at MAX_IDS.
    * Values may be slightly biased toward high-volume spans.

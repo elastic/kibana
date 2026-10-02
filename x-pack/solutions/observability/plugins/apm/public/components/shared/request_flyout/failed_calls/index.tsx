@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
 import React from 'react';
+import { asPercent } from '../../../../../common/utils/formatters';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutFailedCalls } from './use_request_flyout_failed_calls';
@@ -81,7 +82,7 @@ export function RequestFlyoutFailedCalls() {
   } = useRequestFlyoutContext();
 
   const { link } = useApmRouter();
-  const { buckets, totalFailed, isSampled, isLoading } = useRequestFlyoutFailedCalls();
+  const { buckets, totalFailed, totalCalls, isSampled, isLoading } = useRequestFlyoutFailedCalls();
 
   /**
    * Build a deep link to a specific APM error group page.
@@ -165,6 +166,45 @@ export function RequestFlyoutFailedCalls() {
       }),
       align: 'right' as const,
       render: (count: number) => count.toLocaleString(),
+    },
+    {
+      field: 'count',
+      name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.failureRate', {
+        defaultMessage: 'Failed %',
+      }),
+      align: 'right' as const,
+      render: (_count: number, item: FailedCallBucket) =>
+        totalCalls > 0 ? asPercent(item.count, totalCalls) : '—',
+    },
+    {
+      name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.actions', {
+        defaultMessage: 'Actions',
+      }),
+      align: 'right' as const,
+      width: '60px',
+      actions: [
+        {
+          name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.openTrace', {
+            defaultMessage: 'Open a failed trace',
+          }),
+          description: i18n.translate(
+            'xpack.apm.requestFlyout.failedCalls.action.openTrace.description',
+            { defaultMessage: 'Open a sample failed trace in the waterfall view' }
+          ),
+          type: 'icon' as const,
+          icon: 'timeline',
+          enabled: (item: FailedCallBucket) => item.sampleTraceId != null,
+          available: (item: FailedCallBucket) => item.sampleTraceId != null,
+          href: (item: FailedCallBucket) =>
+            item.sampleTraceId
+              ? link('/link-to/trace/{traceId}', {
+                  path: { traceId: item.sampleTraceId },
+                  query: { rangeFrom, rangeTo },
+                })
+              : '#',
+          'data-test-subj': 'requestFlyoutFailedCallsOpenTrace',
+        },
+      ],
     },
   ];
 
