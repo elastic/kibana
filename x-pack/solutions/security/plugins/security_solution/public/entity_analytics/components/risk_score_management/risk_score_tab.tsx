@@ -26,7 +26,6 @@ import type { RiskScoreConfiguration, UIAlertFilter } from './common';
 interface RiskScoreTabProps {
   hasReadPermissions: boolean;
   isPrivilegesLoading: boolean;
-  savedRiskEngineSettings?: RiskScoreConfiguration;
   selectedRiskEngineSettings?: RiskScoreConfiguration;
   selectedSettingsMatchSavedSettings: boolean;
   resetSelectedSettings: () => void;
@@ -43,7 +42,6 @@ interface RiskScoreTabProps {
 export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
   hasReadPermissions,
   isPrivilegesLoading,
-  savedRiskEngineSettings,
   selectedRiskEngineSettings,
   selectedSettingsMatchSavedSettings,
   resetSelectedSettings,
@@ -103,11 +101,7 @@ export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
           </>
         )}
       </EuiFlexGroup>
-      {((savedRiskEngineSettings && !selectedSettingsMatchSavedSettings) ||
-        (!savedRiskEngineSettings &&
-          selectedRiskEngineSettings &&
-          selectedRiskEngineSettings.filters &&
-          selectedRiskEngineSettings.filters.length > 0)) && (
+      {selectedRiskEngineSettings && !selectedSettingsMatchSavedSettings && (
         <RiskScoreSaveBar
           resetSelectedSettings={resetSelectedSettings}
           saveSelectedSettings={() => {

@@ -73,7 +73,6 @@ export const EntityAnalyticsManagementPage = () => {
 
   const riskEngineSettings = useConfigurableRiskEngineSettings();
   const {
-    savedRiskEngineSettings,
     selectedRiskEngineSettings,
     selectedSettingsMatchSavedSettings,
     resetSelectedSettings,
@@ -320,7 +319,6 @@ export const EntityAnalyticsManagementPage = () => {
         <RiskScoreTab
           hasReadPermissions={hasReadPermissions}
           isPrivilegesLoading={riskEnginePrivileges.isLoading}
-          savedRiskEngineSettings={savedRiskEngineSettings}
           selectedRiskEngineSettings={selectedRiskEngineSettings}
           selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
           resetSelectedSettings={resetSelectedSettings}
