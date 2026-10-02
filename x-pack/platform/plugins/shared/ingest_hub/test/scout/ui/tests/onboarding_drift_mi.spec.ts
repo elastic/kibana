@@ -581,39 +581,10 @@ test.describe(
       });
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
-      await page.addInitScript(
-        ({ key }) => {
-          sessionStorage.setItem(
-            key,
-            JSON.stringify({
-              globalRegion: 'us-east-1',
-              instances: [
-                { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
-              ],
-              serviceVars: {
-                elb: {
-                  enabledDataStreams: ['elb_logs'],
-                  varsByDataStream: {
-                    elb_logs: {
-                      enabledInputs: ['aws-s3'],
-                      varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::fail-test-bucket' } },
-                    },
-                  },
-                },
-              },
-            })
-          );
-        },
-        { key: SERVICE_SETTINGS_SESSION_KEY }
-      );
-
       // Seed detectAndReview so the MI section renders in deployed state (serviceStatuses keeps
       // the instance visible and isAlreadyDeployed=true so isDirty blocks Next - 4123190774).
-      // isDirty: true triggers the drift callout on mount.
-      // Note: page.reload() is intentionally avoided here. The hydration guard writes
-      // hydratedDeploymentId to session on the first load; the second gotoApp (same deploymentId)
-      // skips hydrateOnboardingSession, so init scripts take effect instead of being overwritten.
-      // ?deploymentId= is preserved so ManagedIntegrationsSection keeps isStaticKeysEditMode true.
+      // isDirty is intentionally NOT pre-seeded — drift detection computes it from the real
+      // bucket_arn change made in step 2 below, which is more robust than session injection.
       await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
@@ -624,17 +595,51 @@ test.describe(
               onboardingDeploymentId: depId,
               failedInstances: [],
               deployErrors: {},
-              isDirty: true,
             })
           );
         },
         { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
       );
 
+      // Seed instances so step 2 shows the ELB service with its edit button.
+      // serviceVars is intentionally empty — bucket_arn is filled via UI so the session
+      // format matches what drift detection expects without manual serialisation.
+      await page.addInitScript(
+        ({ key }) => {
+          sessionStorage.setItem(
+            key,
+            JSON.stringify({
+              globalRegion: 'us-east-1',
+              instances: [
+                { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+              ],
+              serviceVars: {},
+            })
+          );
+        },
+        { key: SERVICE_SETTINGS_SESSION_KEY }
+      );
+
+      // Navigate to step 2 so init scripts apply (hydration guard skips re-hydration because
+      // hydratedDeploymentId was set on the first load with the same DEP_ID).
       await page.gotoApp('onboarding/aws', {
         params: { deploymentId: DEP_ID },
-        hash: 'authenticate-and-deploy',
+        hash: 'service-settings',
       });
+      await expect(page.testSubj.locator('onboardingStep-service-settings')).toBeVisible();
+
+      // Open the ELB flyout and fill bucket_arn to create real service-var drift.
+      await page.testSubj.click('serviceSettingsStep-editButton-elb');
+      await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
+      const bucketArnInput = page.testSubj
+        .locator('serviceSettingsFlyout-aws-s3-field-bucket_arn')
+        .getByRole('textbox');
+      await bucketArnInput.fill('arn:aws:s3:::fail-test-bucket');
+      await bucketArnInput.press('Enter');
+      await page.testSubj.click('serviceSettingsFlyout-saveButton');
+
+      // Navigate to authenticate-and-deploy via Continue — drift effect fires on mount.
+      await page.testSubj.click('serviceSettingsStep-continueButton');
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
