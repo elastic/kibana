@@ -361,8 +361,8 @@ For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investig
 1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
    and an evaluator type bound to your task's output.
 2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
-   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, then
-   following the investigation to a terminal status.
+   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, passing
+   the eval model as `connector_id`, then following the investigation to a terminal status.
 3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
    against, a `seedSource`, and an `examples()` call returning ground truth. Export a
    `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes

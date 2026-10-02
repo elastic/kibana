@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
@@ -431,7 +432,8 @@ export interface PersistExecutionInterruptionParams {
  *
  * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
  *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
- *   terminal + attachment events. `status: completed`, no `state`.
+ *   terminal + attachment events. `status: completed`; `state` only carries a compaction summary
+ *   produced by the run, the rest of it is left as stored.
  * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
  *   events re-stamped with `exec_k`; the answered prompt is consumed: the round reads `completed`
  *   with an `interruption`.
@@ -500,6 +502,14 @@ export const persistExecutionInterruption = async (
       ? { attachments: { snapshot: conversation.attachments ?? [], produced: attachments } }
       : {};
     const workspaceUpdate = workspaceId ? { workspaceId } : {};
+    // A compaction that ran before the interruption must survive it: its summary covers context
+    // the next run would otherwise re-render verbatim. The rest of the state is left as stored.
+    const compactionSummary =
+      interrupted?.compaction_summary ?? completed?.conversation_state?.compaction_summary;
+    const stateUpdate =
+      compactionSummary && !isEqual(compactionSummary, conversation.state?.compaction_summary)
+        ? { state: { ...conversation.state, compaction_summary: compactionSummary } }
+        : {};
 
     /** `[]` when the client skipped the write because a terminal already existed. */
     const writtenTerminals = (
@@ -558,6 +568,7 @@ export const persistExecutionInterruption = async (
           skipIfTerminalExistsFor: executionId,
           ...attachmentsUpdate,
           ...workspaceUpdate,
+          ...stateUpdate,
         },
         { access: 'converse' }
       );
@@ -602,6 +613,7 @@ export const persistExecutionInterruption = async (
         skipIfTerminalExistsFor: executionId,
         ...attachmentsUpdate,
         ...workspaceUpdate,
+        ...stateUpdate,
       },
       { access: 'converse' }
     );

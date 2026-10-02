@@ -83,6 +83,15 @@ const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   `,
 });
 
+const titleStyles = () => ({
+  title: css`
+    a,
+    button {
+      font-weight: inherit;
+    }
+  `,
+});
+
 const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
   const duration = euiTheme.animation.normal;
   const easing = euiTheme.animation.resistance;
@@ -230,8 +239,9 @@ export const HeaderZone = ({
   const { euiTheme } = useEuiTheme();
   const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
+  const { title: titleCss } = useEuiMemoizedStyles(titleStyles);
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
-  const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
+  const { tabs, tabBarProps, selectedTabId, selectTab } = useFlyoutTabs();
   const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
   const {
     isCollapsed: isScrollCollapsed,
@@ -243,6 +253,7 @@ export const HeaderZone = ({
   const isCollapsed = collapsed || isScrollCollapsed;
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
   // removing one does not make React reuse the wrong element.
@@ -288,7 +299,7 @@ export const HeaderZone = ({
       <EuiFlyoutHeader
         hasBorder={false}
         className={FLYOUT_HEADER_CLASS_NAME}
-        data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
+        data-test-subj={headerTestSubj}
       >
         <KibanaErrorBoundary>
           {/* Wraps the header content so the collapse hook can reach the header element for wheel forwarding. */}
@@ -306,7 +317,7 @@ export const HeaderZone = ({
                     <EuiTitle size="xs">
                       <h3
                         id={flyoutTitleId}
-                        css={collapseStyles.collapsedTitle}
+                        css={[titleCss, collapseStyles.collapsedTitle]}
                         title={typeof title === 'string' ? title : undefined}
                       >
                         {title}
@@ -318,7 +329,9 @@ export const HeaderZone = ({
               ) : (
                 renderTitleWithIcon(
                   <EuiTitle size="m">
-                    <h3 id={flyoutTitleId}>{title}</h3>
+                    <h3 id={flyoutTitleId} css={titleCss}>
+                      {title}
+                    </h3>
                   </EuiTitle>,
                   titleIconNode
                 )
@@ -353,7 +366,10 @@ export const HeaderZone = ({
                 {hasMetaBlocks && (
                   <>
                     <EuiSpacer size="xs" />
-                    <MetaBlocks items={metaBlockItems} />
+                    <MetaBlocks
+                      items={metaBlockItems}
+                      data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'MetaBlocks')}
+                    />
                   </>
                 )}
                 {hasBadges && (
@@ -370,7 +386,10 @@ export const HeaderZone = ({
                 {hasInfoBlocks && (
                   <>
                     <EuiSpacer size="m" />
-                    <InfoBlocks items={infoBlockItems} maxColumns="auto" />
+                    <InfoBlocks
+                      items={infoBlockItems}
+                      data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'InfoBlocks')}
+                    />
                   </>
                 )}
               </div>
@@ -383,7 +402,16 @@ export const HeaderZone = ({
 
             {/* Always visible: tab bar. */}
             {showTabs && (
-              <EuiTabs bottomBorder={false} size="m">
+              <EuiTabs
+                {...tabBarProps}
+                data-test-subj={resolveZoneTestSubj(
+                  tabBarProps?.['data-test-subj'],
+                  headerTestSubj,
+                  'Tabs'
+                )}
+                bottomBorder={false}
+                size="m"
+              >
                 {tabs.map(({ id, label, tabDomId, panelDomId, ...tabProps }) => (
                   <EuiTab
                     key={id}

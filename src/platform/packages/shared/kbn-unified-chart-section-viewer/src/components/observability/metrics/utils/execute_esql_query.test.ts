@@ -117,6 +117,23 @@ describe('executeEsqlQuery', () => {
     );
   });
 
+  it('labels the request with the supplied executionContextName', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
+      search: mockSearch,
+      dataView: dataViewWithAtTimefieldMock,
+      uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
+      executionContextName: MetricsExecutionContextName.EXEMPLARS,
+    });
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: expect.objectContaining({ page: 'metrics_fetch_exemplars' }),
+      })
+    );
+  });
+
   it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',

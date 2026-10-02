@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
-import { MENU_ATTR } from '../constants';
+import React, { useEffect, useMemo } from 'react';
+import { Global, css } from '@emotion/react';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import { LAYER_ATTR, MENU_ATTR } from '../constants';
 import { useComments, useCommentsState } from './comments_context';
 import { CommentModeOverlay } from './comment_mode_overlay';
 import { CommentsPanel } from './comments_panel';
@@ -21,6 +23,20 @@ import { ResolvedAnchorsProvider } from './resolved_anchors';
 /** `⌘⇧K` / `Ctrl+Shift+K` */
 export const isToggleShortcut = (event: KeyboardEvent): boolean =>
   (event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === 'k';
+
+/** EUI's `::selection` rule for the layer's color mode: EUI sets it document-wide for the page's, which a nested provider of the other mode (a dark toolbar's) does not override. */
+const SelectionStyles = () => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      [${LAYER_ATTR}] ::selection {
+        background: ${transparentize(euiTheme.colors.primary, colorMode === 'LIGHT' ? 0.1 : 0.2)};
+      }
+    `,
+    [euiTheme.colors.primary, colorMode]
+  );
+  return <Global styles={styles} />;
+};
 
 export const CommentsLayer = () => {
   const controller = useComments();
@@ -92,6 +108,7 @@ export const CommentsLayer = () => {
   // The guide needs the page to be interactable again while it runs.
   return (
     <ResolvedAnchorsProvider>
+      <SelectionStyles />
       {!guided && !overlayOpen && <CommentModeOverlay />}
       <PinsLayer />
       {pending && <ComposerPopover pending={pending} />}
