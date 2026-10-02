@@ -43,7 +43,7 @@ const OpenFlyoutOnMount = ({
     hasOpened.current = true;
     resolveDescriptor().then((descriptor) => {
       if (descriptor) {
-        openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.INVESTIGATION_ATTACHMENT);
+        openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY);
       }
     });
   }, [resolveDescriptor, api]);

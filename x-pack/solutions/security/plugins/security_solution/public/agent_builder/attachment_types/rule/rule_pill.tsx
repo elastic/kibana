@@ -5,36 +5,23 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { encode } from '@kbn/rison';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
-import { toRuleDescriptor } from './to_flyout_descriptor';
-import { useFlyoutPill } from './use_flyout_pill';
-import { LinkPill } from './attachment_pill';
-import { CONVERSATION_DETAILS_LABELS } from './translations';
+import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { FlyoutPill, LinkPill } from '../conversation_details/pills';
+import { getRuleIdFromAttachment, getRuleName, parseRuleFromAttachment } from './helpers';
+import type { RuleAttachment } from './helpers';
+import { RULE_PILL_LABEL } from './translations';
 
 interface RulePillProps {
   attachment: UnknownAttachment;
   application: ApplicationStart;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
-
-const parseRuleName = (attachment: UnknownAttachment): string | undefined => {
-  const data = attachment.data as { attachmentLabel?: unknown; text?: unknown } | undefined;
-  if (typeof data?.attachmentLabel === 'string') return data.attachmentLabel;
-  if (typeof data?.text === 'string') {
-    try {
-      const parsed = JSON.parse(data.text) as { name?: unknown };
-      return typeof parsed?.name === 'string' ? parsed.name : undefined;
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
-};
 
 /**
  * Pill for `security.rule` attachments.
@@ -43,24 +30,34 @@ const parseRuleName = (attachment: UnknownAttachment): string | undefined => {
  */
 export const RulePill = memo(
   ({ attachment, application, resolveSecurityCanvasContext }: RulePillProps) => {
-    const descriptor = useMemo(() => toRuleDescriptor(attachment), [attachment]);
-    const label = CONVERSATION_DETAILS_LABELS.rules(1);
+    const ruleAttachment = attachment as unknown as RuleAttachment;
+    const ruleId = parseRuleFromAttachment(ruleAttachment)?.id ?? getRuleIdFromAttachment(ruleAttachment);
 
-    const resolveDescriptor = useCallback(() => Promise.resolve(descriptor), [descriptor]);
+    const resolveDescriptor = useCallback(
+      () =>
+        Promise.resolve(
+          ruleId ? { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId } : null
+        ),
+      [ruleId]
+    );
 
-    const pill = useFlyoutPill({ label, resolveDescriptor, resolveSecurityCanvasContext });
-
-    if (descriptor) {
-      return <>{pill}</>;
+    if (ruleId) {
+      return (
+        <FlyoutPill
+          label={RULE_PILL_LABEL}
+          resolveDescriptor={resolveDescriptor}
+          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+        />
+      );
     }
 
-    const ruleName = parseRuleName(attachment);
+    const ruleName = getRuleName(ruleAttachment);
     const query = ruleName ? `?rulesTable=${encode({ searchTerm: ruleName })}` : '';
     const href = application.getUrlForApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: `/management${query}`,
     });
-    return <LinkPill label={label} href={href} />;
+    return <LinkPill label={RULE_PILL_LABEL} href={href} />;
   }
 );
 RulePill.displayName = 'RulePill';

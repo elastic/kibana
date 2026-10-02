@@ -134,3 +134,8 @@ export const DIFF_AI_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.agentBuilder.ruleAttachment.diffAiDescription',
   { defaultMessage: 'The rule as suggested by the AI assistant' }
 );
+
+export const RULE_PILL_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.pillLabel',
+  { defaultMessage: '1 rule' }
+);

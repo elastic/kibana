@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
@@ -48,7 +47,6 @@ const renderInline = (data: AttackDiscoveryAttachment['data']) =>
 
 const makeDefinitionProps = () => ({
   getSpaceId: jest.fn().mockResolvedValue('default'),
-  search: jest.fn() as unknown as ISearchGeneric,
   resolveSecurityCanvasContext: jest.fn() as unknown as () => Promise<SecurityCanvasEmbeddedBundle>,
 });
 

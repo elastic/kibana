@@ -40,10 +40,10 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
   /**
-   * When provided, visible attachments whose type registers `renderConversationDetailsContent`
-   * are shown as pills in the overview tab.
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
    */
-  attachmentsService?: AttachmentServiceStartContract;
+  attachmentsService: AttachmentServiceStartContract;
 }
 
 export const OverviewSlot = ({

@@ -48,7 +48,7 @@ const makeService = (
 
 const renderTab = ({
   attachments,
-  attachmentsService,
+  attachmentsService = makeService(),
   investigationOverrides,
 }: {
   attachments?: VersionedAttachment[];
@@ -71,12 +71,6 @@ describe('OverviewTab', () => {
     expect(screen.queryByText('Compromised')).not.toBeInTheDocument();
     expect(screen.queryByText('cfo@corp')).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
-  });
-
-  it('does not render attachments section when no attachmentsService is provided', () => {
-    renderTab({ attachments: [attachment] });
-
-    expect(screen.queryByText('Attachments')).not.toBeInTheDocument();
   });
 
   it('calls renderConversationDetailsContent for each visible attachment', () => {

@@ -18,8 +18,8 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { AttackPill } from './attack_pill';
 
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -87,6 +87,11 @@ const DEFAULT_LABEL = i18n.translate(
   }
 );
 
+const ATTACK_PILL_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attackDiscoveryAttachment.pillLabel',
+  { defaultMessage: '1 attack' }
+);
+
 const DETAILS_TITLE = i18n.translate(
   'xpack.securitySolution.agentBuilder.attackDiscoveryAttachment.detailsTitle',
   {
@@ -139,57 +144,42 @@ export const AttackDiscoveryInlineContent = ({
 
 export const createAttackDiscoveryAttachmentDefinition = ({
   getSpaceId,
-  search,
   resolveSecurityCanvasContext,
 }: {
   getSpaceId: () => Promise<string>;
-  search: ISearchGeneric;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-}): AttachmentUIDefinition<AttackDiscoveryAttachment> => {
-  const LazyAttackPill = React.lazy(() =>
-    import(
-      /* webpackChunkName: "security_conversation_details_attack_pill" */
-      '../conversation_details/attack_pill'
-    ).then((m) => ({ default: m.AttackPill }))
-  );
-
-  return {
-    getIcon: () => 'sparkles',
-    getLabel: (attachment) =>
-      attachment.data?.title != null
-        ? withOriginalValues({
-            maxLength: MAX_TITLE_LENGTH,
-            replacements: attachment.data.replacements,
-            text: attachment.data.title,
-          })
-        : DEFAULT_LABEL,
-    renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
-    renderConversationDetailsContent: ({ attachment }) => (
-      <React.Suspense fallback={null}>
-        <LazyAttackPill
-          attachment={attachment}
-          getSpaceId={getSpaceId}
-          search={search}
-          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-        />
-      </React.Suspense>
-    ),
-  };
-};
+}): AttachmentUIDefinition<AttackDiscoveryAttachment> => ({
+  getIcon: () => 'sparkles',
+  getLabel: (attachment) =>
+    attachment.data?.title != null
+      ? withOriginalValues({
+          maxLength: MAX_TITLE_LENGTH,
+          replacements: attachment.data.replacements,
+          text: attachment.data.title,
+        })
+      : DEFAULT_LABEL,
+  renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
+  renderConversationDetailsContent: ({ attachment }) => (
+    <AttackPill
+      attachment={attachment}
+      getSpaceId={getSpaceId}
+      label={ATTACK_PILL_LABEL}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+    />
+  ),
+});
 
 export const registerAttackDiscoveryAttachment = ({
   attachments,
   getSpaceId,
-  search,
   resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   getSpaceId: () => Promise<string>;
-  search: ISearchGeneric;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.attackDiscovery,
-    createAttackDiscoveryAttachmentDefinition({ getSpaceId, search, resolveSecurityCanvasContext })
+    createAttackDiscoveryAttachmentDefinition({ getSpaceId, resolveSecurityCanvasContext })
   );
 };

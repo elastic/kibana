@@ -22,13 +22,13 @@ export const toRenderAttachment = (attachment: VersionedAttachment): UnknownAtta
     hidden: attachment.hidden,
     origin: attachment.origin,
     groupId: attachment.group_id,
-    versionData: version
-      ? {
-          version: version.version,
-          versionCount: attachment.versions.length,
-          createdAt: version.created_at,
-          originSyncedAt: attachment.origin_snapshot_at,
-        }
-      : undefined,
+    ...(version && {
+      versionData: {
+        version: version.version,
+        versionCount: attachment.versions.length,
+        createdAt: version.created_at,
+        originSyncedAt: attachment.origin_snapshot_at,
+      },
+    }),
   };
 };

@@ -15,7 +15,6 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
 import type { StartServices } from '../../types';
@@ -29,7 +28,7 @@ import { createImpactAttachmentDefinition } from './impact';
 import {
   renderAlertConversationDetails,
   renderAlertsConversationDetails,
-} from './conversation_details/alert_renderers';
+} from './alerts';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -79,13 +78,11 @@ export const registerAttachmentUiDefinitions = ({
   attachments,
   application,
   getSpaceId,
-  search,
   resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   getSpaceId: () => Promise<string>;
-  search: ISearchGeneric;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
@@ -112,7 +109,6 @@ export const registerAttachmentUiDefinitions = ({
           attachment,
           application,
           getSpaceId,
-          search,
           resolveSecurityCanvasContext,
         }),
     }
@@ -487,19 +483,17 @@ export const registerRulePreviewAttachment = ({
 export const registerAttackDiscoveryAttachment = ({
   attachments,
   getSpaceId,
-  search,
   resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   getSpaceId: () => Promise<string>;
-  search: ISearchGeneric;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   void import(
     /* webpackChunkName: "security_attack_discovery_attachment" */
     './attack_discovery'
   ).then(({ registerAttackDiscoveryAttachment: register }) => {
-    register({ attachments, getSpaceId, search, resolveSecurityCanvasContext });
+    register({ attachments, getSpaceId, resolveSecurityCanvasContext });
   });
 };
 

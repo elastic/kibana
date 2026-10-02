@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
@@ -14,14 +13,14 @@ import type { SecurityCanvasEmbeddedBundle } from '../../components/security_red
 const LazyAlertPill = React.lazy(() =>
   import(
     /* webpackChunkName: "security_conversation_details_alert_pill" */
-    './alert_pill'
+    './alert_pills'
   ).then((m) => ({ default: m.AlertPill }))
 );
 
 const LazyAlertsPill = React.lazy(() =>
   import(
     /* webpackChunkName: "security_conversation_details_alerts_pill" */
-    './alerts_pill'
+    './alert_pills'
   ).then((m) => ({ default: m.AlertsPill }))
 );
 
@@ -46,13 +45,11 @@ export const renderAlertsConversationDetails = ({
   attachment,
   application,
   getSpaceId,
-  search,
   resolveSecurityCanvasContext,
 }: {
   attachment: UnknownAttachment;
   application: ApplicationStart;
   getSpaceId: () => Promise<string>;
-  search: ISearchGeneric;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }) => (
   <React.Suspense fallback={null}>
@@ -60,7 +57,6 @@ export const renderAlertsConversationDetails = ({
       attachment={attachment}
       application={application}
       getSpaceId={getSpaceId}
-      search={search}
       resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   </React.Suspense>

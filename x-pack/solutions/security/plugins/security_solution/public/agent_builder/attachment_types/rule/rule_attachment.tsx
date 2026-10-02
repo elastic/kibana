@@ -24,6 +24,7 @@ import { extractRulesCapabilities } from '../../../common/utils/rules_capabiliti
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { RuleInlineContent } from './rule_inline_content';
 import { buildRuleActionButtons } from './rule_action_buttons';
+import { RulePill } from './rule_pill';
 import {
   type RuleAttachment,
   getRuleName,
@@ -67,12 +68,6 @@ export const createRuleAttachmentDefinition = ({
   uiSettings: IUiSettingsClient;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<RuleAttachment> => {
-  const LazyRulePill = React.lazy(() =>
-    import(
-      /* webpackChunkName: "security_conversation_details_rule_pill" */
-      '../conversation_details/rule_pill'
-    ).then((m) => ({ default: m.RulePill }))
-  );
   // `RuleInlineContent` only reads `rulesPrivileges.rules.read`, so derive privileges once from the
   // already-loaded capabilities instead of mounting the fetching `UserPrivilegesProvider` per card
   // (which fired duplicate privilege requests for every rendered attachment).
@@ -117,13 +112,11 @@ export const createRuleAttachmentDefinition = ({
       }
     },
     renderConversationDetailsContent: ({ attachment }) => (
-      <React.Suspense fallback={null}>
-        <LazyRulePill
-          attachment={attachment}
-          application={application}
-          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-        />
-      </React.Suspense>
+      <RulePill
+        attachment={attachment}
+        application={application}
+        resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+      />
     ),
   };
 };

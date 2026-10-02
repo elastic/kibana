@@ -20,10 +20,10 @@ export interface OverviewTabProps {
   investigation: Investigation;
   attachments: VersionedAttachment[] | undefined;
   /**
-   * When provided, visible attachments whose type registers `renderConversationDetailsContent`
-   * are shown as pills inside the "What's happened" block.
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
    */
-  attachmentsService?: AttachmentServiceStartContract;
+  attachmentsService: AttachmentServiceStartContract;
   /**
    * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
    * package cannot fetch a conversation's proposals itself, so a host that can (see
@@ -63,15 +63,11 @@ export const OverviewTab = memo<OverviewTabProps>(
                   </EuiButtonEmpty>
                 </div>
               )}
-              {attachmentsService && (
-                <>
-                  <EuiSpacer size={isCondensed ? 'xs' : 'l'} />
-                  <AttachmentsSection
-                    attachments={attachments}
-                    attachmentsService={attachmentsService}
-                  />
-                </>
-              )}
+              <EuiSpacer size={isCondensed ? 'xs' : 'l'} />
+              <AttachmentsSection
+                attachments={attachments}
+                attachmentsService={attachmentsService}
+              />
             </DetailsBlock>
           </EuiFlexItem>
         )}

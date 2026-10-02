@@ -373,13 +373,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         getSpaceId,
-        search: plugins.data.search.search,
         resolveSecurityCanvasContext,
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
         getSpaceId,
-        search: plugins.data.search.search,
         resolveSecurityCanvasContext,
       });
       registerAttackDiscoveryVerdictAttachment({

@@ -21,6 +21,7 @@ import type { ExperimentalFeatures } from '../../../../common/experimental_featu
 import type { EntityAttachment } from './types';
 import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
+import { EntityPill } from './entity_pill';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
   buildEntityRightPanel,
@@ -110,12 +111,6 @@ export const createEntityAttachmentDefinition = ({
   searchSession?: ISessionService;
   uiSettings?: IUiSettingsClient;
 }): AttachmentUIDefinition<EntityAttachment> => {
-  const LazyEntityPill = React.lazy(() =>
-    import(
-      /* webpackChunkName: "security_conversation_details_entity_pill" */
-      '../conversation_details/entity_pill'
-    ).then((m) => ({ default: m.EntityPill }))
-  );
   const getIsNewFlyoutEnabled = (): boolean =>
     !experimentalFeatures.newFlyoutSystemDisabled &&
     (uiSettings?.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false);
@@ -159,13 +154,11 @@ export const createEntityAttachmentDefinition = ({
   return {
     ...baseDefinition,
     renderConversationDetailsContent: ({ attachment }) => (
-      <React.Suspense fallback={null}>
-        <LazyEntityPill
-          attachment={attachment}
-          application={resolvedApplication}
-          resolveSecurityCanvasContext={resolvedResolveCanvasContext}
-        />
-      </React.Suspense>
+      <EntityPill
+        attachment={attachment}
+        application={resolvedApplication}
+        resolveSecurityCanvasContext={resolvedResolveCanvasContext}
+      />
     ),
     canvasWidth: ENTITY_CANVAS_WIDTH,
     renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>, { closeCanvas }) => (

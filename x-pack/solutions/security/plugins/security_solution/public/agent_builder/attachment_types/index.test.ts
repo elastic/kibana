@@ -7,7 +7,6 @@
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { ISearchGeneric } from '@kbn/search-types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
 
@@ -20,14 +19,12 @@ describe('registerAttachmentUiDefinitions', () => {
   const resolveSecurityCanvasContext = jest.fn();
   const application = {} as unknown as ApplicationStart;
   const getSpaceId = jest.fn().mockResolvedValue('default');
-  const search = jest.fn() as unknown as ISearchGeneric;
 
   const register = () =>
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       application,
       getSpaceId,
-      search,
       resolveSecurityCanvasContext,
     });
 
