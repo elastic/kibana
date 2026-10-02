@@ -67581,7 +67581,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the default. Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -67602,6 +67602,13 @@ paths:
                   logExtraction:
                     delay: null
                     frequency: null
+              updateHistorySnapshotExample:
+                description: Update the history snapshot interval and retention. Omit a field to leave it unchanged.
+                summary: Update history snapshot settings
+                value:
+                  historySnapshot:
+                    frequency: 12h
+                    retentionDays: 90
               updateLogExtractionExample:
                 description: Update the log extraction configuration with a new lookback period and frequency.
                 summary: Update log extraction settings
@@ -67614,6 +67621,18 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                historySnapshot:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    frequency:
+                      maxLength: 32
+                      pattern: '[smdh]$'
+                      type: string
+                    retentionDays:
+                      maximum: 3650
+                      minimum: 1
+                      type: integer
                 logExtraction:
                   additionalProperties: false
                   type: object
@@ -67678,8 +67697,6 @@ paths:
                       nullable: true
                       pattern: '[smdh]$'
                       type: string
-              required:
-                - logExtraction
       responses:
         '200':
           content:
@@ -67701,6 +67718,13 @@ paths:
                   value:
                     error: Bad Request
                     message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+                invalidHistorySnapshotFrequencyExample:
+                  description: The history snapshot interval must be at least 1 hour.
+                  summary: Invalid history snapshot interval
+                  value:
+                    error: Bad Request
+                    message: '[request body]: historySnapshot.frequency: must be a valid duration of at least 1 hour (e.g. 1h, 24h)'
                     statusCode: 400
           description: Bad request.
         '404':
@@ -67733,6 +67757,21 @@ paths:
                 "lookbackPeriod": "6h",
                 "frequency": "10m",
                 "fieldHistoryLength": 15
+              }
+            }
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"historySnapshot":{"frequency":"12h","retentionDays":90}}' \
+              "${KIBANA_URL}/api/security/entity_store"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store
+            {
+              "historySnapshot": {
+                "frequency": "12h",
+                "retentionDays": 90
               }
             }
       x-metaTags:
@@ -76332,12 +76371,10 @@ paths:
                   type: object
                   properties:
                     frequency:
-                      default: 24h
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     retentionDays:
-                      default: 60
                       maximum: 3650
                       minimum: 1
                       type: integer

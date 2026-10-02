@@ -20,6 +20,8 @@ import * as i18n from './translations';
 import type { JobsFilters, SecurityJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';
 
+const SEARCH_BAR_MIN_WIDTH = 200;
+
 interface JobsTableFiltersProps {
   securityJobs: SecurityJob[];
   onFilterChanged: Dispatch<SetStateAction<JobsFilters>>;
@@ -62,8 +64,8 @@ export const JobsTableFiltersComponent = ({
   }, [setShowElasticJobs, showCustomJobs, setShowCustomJobs]);
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={true}>
+    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
+      <EuiFlexItem grow={true} style={{ minWidth: SEARCH_BAR_MIN_WIDTH }}>
         <EuiSearchBar
           data-test-subj="jobs-filter-bar"
           box={{
