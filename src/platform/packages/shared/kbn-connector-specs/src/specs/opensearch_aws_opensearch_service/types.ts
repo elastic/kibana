@@ -23,6 +23,18 @@ const boundedRecord = (maxEntries: number) =>
       message: `Must contain at most ${maxEntries} top-level keys.`,
     });
 
+/** `plugins.alerting.monitor.max_triggers` defaults to 10 and can be raised to at most 50:
+ * https://github.com/opensearch-project/alerting/blob/main/alerting/src/main/kotlin/org/opensearch/alerting/settings/AlertingSettings.kt */
+const MAX_TRIGGERS_PER_MONITOR = 50;
+/** Matches the largest page getAlerts can return, so every returned alert can be acknowledged. */
+const MAX_ALERT_IDS = 1000;
+/** OpenSearch documents no limit on document fields beyond the per-index (configurable)
+ * `index.mapping.total_fields.limit`; this ceiling only guards against unbounded input. */
+const MAX_DOCUMENT_TOP_LEVEL_KEYS = 10000;
+/** OpenSearch documents no limit on backend roles per monitor; this ceiling only guards against
+ * unbounded input. */
+const MAX_RBAC_ROLES = 1000;
+
 const MonitorIdSchema = z
   .string()
   .min(1)
@@ -40,7 +52,7 @@ const DetectorIdSchema = z
 const AlertIdsSchema = z
   .array(z.string().min(1).max(200))
   .min(1)
-  .max(100)
+  .max(MAX_ALERT_IDS)
   .describe(
     'One or more alert IDs to acknowledge. Only alerts currently in the ACTIVE state are acknowledged; alerts already ERROR, COMPLETED, or ACKNOWLEDGED are reported back as failed.'
   );
@@ -111,9 +123,10 @@ const MonitorInputsSchema = lazySchema(() =>
 const MonitorTriggersSchema = lazySchema(() =>
   z
     .array(boundedRecord(30))
-    .max(10)
+    .max(MAX_TRIGGERS_PER_MONITOR)
     .describe(
       "The monitor's trigger(s), following the OpenSearch monitor definition. " +
+        'OpenSearch allows 10 triggers per monitor by default (plugins.alerting.monitor.max_triggers, up to 50). ' +
         'For query_level_monitor: [{ "name": "...", "severity": "1", "condition": { "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" } }, "actions": [...] }]. ' +
         'For bucket_level_monitor, wrap the same shape under a "bucket_level_trigger" key; for doc_level_monitor, under a "document_level_trigger" key. ' +
         'The "actions" array (notification destinations) may be left empty ([]) if no notification is needed.'
@@ -123,7 +136,7 @@ const MonitorTriggersSchema = lazySchema(() =>
 const RbacRolesSchema = lazySchema(() =>
   z
     .array(z.string().min(1).max(100))
-    .max(20)
+    .max(MAX_RBAC_ROLES)
     .optional()
     .describe(
       'Optional backend role names to limit access to this monitor (fine-grained security / rbac_roles). Only relevant for self-managed clusters with the Security plugin.'
@@ -394,7 +407,9 @@ export type RunQueryInput = z.infer<typeof RunQueryInputSchema>;
 export const IndexDocumentInputSchema = lazySchema(() =>
   z.object({
     index: z.string().min(1).max(255).describe('The index to write the document into.'),
-    document: boundedRecord(50).describe('The JSON document body to index.'),
+    document: boundedRecord(MAX_DOCUMENT_TOP_LEVEL_KEYS).describe(
+      'The JSON document body to index.'
+    ),
     id: z
       .string()
       .max(512)

@@ -599,7 +599,7 @@ describe('ThreatQ input schemas', () => {
       SearchIndicatorsInputSchema.safeParse({ criteria: { ['a'.repeat(101)]: 'x' } }).success
     ).toBe(false);
     expect(
-      SearchIndicatorsInputSchema.safeParse({ criteria: { value: 'a'.repeat(2001) } }).success
+      SearchIndicatorsInputSchema.safeParse({ criteria: { value: 'a'.repeat(10_001) } }).success
     ).toBe(false);
     expect(
       SearchIndicatorsInputSchema.safeParse({ criteria: { '+or': Array(51).fill('x') } }).success

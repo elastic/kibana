@@ -229,6 +229,15 @@ describe('Jenkins connector', () => {
       });
       expect(result).toEqual({ queueId: 7, queueUrl: `${BASE_URL}/queue/item/7/` });
     });
+
+    it('accepts a multi-line text parameter larger than 2048 characters', () => {
+      expect(() =>
+        Jenkins.actions.triggerBuildWithParameters.input.parse({
+          jobName: 'deploy',
+          parameters: { CONFIG: 'key: value\n'.repeat(1000) },
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('getQueueItem', () => {

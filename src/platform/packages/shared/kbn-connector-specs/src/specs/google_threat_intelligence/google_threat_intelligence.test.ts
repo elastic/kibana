@@ -292,7 +292,9 @@ describe('GoogleThreatIntelligenceConnector', () => {
       expect(SearchCollectionsInputSchema.safeParse({ filter: 'a'.repeat(2001) }).success).toBe(
         false
       );
-      expect(AdvancedSearchInputSchema.safeParse({ query: 'a'.repeat(2001) }).success).toBe(false);
+      expect(AdvancedSearchInputSchema.safeParse({ query: 'a'.repeat(10_001) }).success).toBe(
+        false
+      );
       expect(
         GetReportMitreAttackTechniquesInputSchema.safeParse({ reportId: 'campaign--123' }).success
       ).toBe(false);
@@ -501,7 +503,7 @@ describe('GoogleThreatIntelligenceConnector', () => {
       );
       expect(GetUrlReportInputSchema.safeParse({ url: 'not-a-url' }).success).toBe(false);
       expect(
-        GetUrlReportInputSchema.safeParse({ url: `https://example.com/${'a'.repeat(2048)}` })
+        GetUrlReportInputSchema.safeParse({ url: `https://example.com/${'a'.repeat(8192)}` })
           .success
       ).toBe(false);
     });

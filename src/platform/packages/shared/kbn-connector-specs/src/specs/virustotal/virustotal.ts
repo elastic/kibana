@@ -34,7 +34,10 @@ const VIRUSTOTAL_URL_SCHEMA = z.url({
 });
 
 // VirusTotal accepts direct file uploads up to 32 MB; base64 encoding inflates that by 4/3.
+// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const VIRUSTOTAL_MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((32 * 1024 * 1024) / 3);
+// VirusTotal documents no URL length limit; URLs beyond 2048 characters are legal.
+const MAX_URL_LENGTH = 8192;
 
 type VirusTotalResourceType = (typeof VIRUSTOTAL_RESOURCE_TYPES)[number];
 
@@ -73,7 +76,7 @@ const isValidDomain = (value: string): boolean =>
   VIRUSTOTAL_DOMAIN_SCHEMA.safeParse(normalizeDomain(value)).success;
 
 const urlOrDomainSchema = z.xor([
-  VIRUSTOTAL_URL_SCHEMA.max(2048),
+  VIRUSTOTAL_URL_SCHEMA.max(MAX_URL_LENGTH),
   VIRUSTOTAL_DOMAIN_SCHEMA.max(253),
 ]);
 
@@ -281,7 +284,7 @@ export const VirusTotalConnector: ConnectorSpec = {
           .string()
           .trim()
           .min(1)
-          .max(2048)
+          .max(MAX_URL_LENGTH)
           .describe('VirusTotal analysis ID, URL, domain, IP address, or file hash'),
         resourceType: z
           .enum(VIRUSTOTAL_RESOURCE_TYPES)

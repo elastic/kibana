@@ -17,6 +17,8 @@ const INSIGHT_ID_PATTERN =
 const TRACE_ID_PATTERN = /^[0-9a-zA-Z-]{1,35}$/;
 const INSIGHT_ID_LENGTH = 36;
 const TRACE_ID_MAX_LENGTH = 35;
+// GetTraceSummaries documents no length limit for FilterExpression; this only guards against unbounded input.
+const FILTER_EXPRESSION_MAX_LENGTH = 10000;
 
 const startTimeField = z
   .number()
@@ -114,7 +116,7 @@ export const GetTraceSummariesInputSchema = lazySchema(() =>
     endTime: endTimeField,
     filterExpression: z
       .string()
-      .max(2000)
+      .max(FILTER_EXPRESSION_MAX_LENGTH)
       .optional()
       .describe(
         'X-Ray filter expression to narrow results, e.g. \'service("api.example.com")\' or \'annotation.account = "12345"\'. Omit to return all traces in the time window.'

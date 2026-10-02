@@ -13,7 +13,10 @@ const MAX_QUERY_LENGTH = 2000;
 const MAX_TAG_LENGTH = 200;
 const MAX_TAGS = 50;
 const MAX_TITLE_LENGTH = 500;
-const MAX_TEXT_LENGTH = 10000;
+// Datadog documents no length limit on downtime messages or incident timeline cell content.
+const MAX_TEXT_LENGTH = 65_536;
+const DATADOG_EVENT_TEXT_MAX_LENGTH = 4000;
+const DATADOG_EVENT_AGGREGATION_KEY_MAX_LENGTH = 100;
 const MAX_ID_LENGTH = 128;
 const MAX_SCOPE_LENGTH = 500;
 const MAX_MONITOR_NAME_LENGTH = 500;
@@ -104,7 +107,6 @@ export const ListMonitorsInputSchema = z.object({
     .number()
     .int()
     .min(0)
-    .max(1000)
     .optional()
     .describe('Zero-based page index for pagination. Defaults to 0.'),
   pageSize: z
@@ -312,7 +314,11 @@ export const PostEventInputSchema = z.object({
     .min(1)
     .max(MAX_TITLE_LENGTH)
     .describe('Event title shown in the Datadog Events Explorer.'),
-  text: z.string().min(1).max(MAX_TEXT_LENGTH).describe('Event body text. Supports markdown.'),
+  text: z
+    .string()
+    .min(1)
+    .max(DATADOG_EVENT_TEXT_MAX_LENGTH)
+    .describe('Event body text (max 4000 characters). Supports markdown.'),
   tags: tagsSchema
     .optional()
     .describe('Optional tags for the event. Example: ["env:prod", "source:kibana"].'),
@@ -322,9 +328,9 @@ export const PostEventInputSchema = z.object({
     .describe('Event alert type that controls the icon/color. Defaults to "info".'),
   aggregationKey: z
     .string()
-    .max(200)
+    .max(DATADOG_EVENT_AGGREGATION_KEY_MAX_LENGTH)
     .optional()
-    .describe('Optional key used to aggregate related events in the stream.'),
+    .describe('Optional key (max 100 characters) used to aggregate related events in the stream.'),
   dateHappened: z
     .number()
     .int()

@@ -562,6 +562,19 @@ describe('GoogleGke', () => {
       expect(() => parse('setNodePoolSize', { ...poolRef, nodeCount: 1.5 })).toThrow();
     });
 
+    it('bounds per-zone and total node counts by the GKE limits', () => {
+      expect(() => parse('setNodePoolSize', { ...poolRef, nodeCount: 2000 })).not.toThrow();
+      expect(() => parse('setNodePoolSize', { ...poolRef, nodeCount: 2001 })).toThrow();
+      expect(() =>
+        parse('setNodePoolAutoscaling', {
+          ...poolRef,
+          enabled: true,
+          totalMinNodeCount: 0,
+          totalMaxNodeCount: 15000,
+        })
+      ).not.toThrow();
+    });
+
     it('setNodePoolAutoscaling sends per-zone bounds when enabling', async () => {
       mockClient.post.mockResolvedValue({ data: sampleOperation });
       await run('setNodePoolAutoscaling', {
@@ -712,6 +725,20 @@ describe('GoogleGke', () => {
       expect(() =>
         parse('createNodePool', { ...base, labels: { 'Not Valid!!': 'batch' } })
       ).toThrow();
+    });
+
+    it('createNodePool accepts surge settings up to the Standard parallel-upgrade limit', () => {
+      const base = {
+        location: ZONE,
+        clusterId: 'prod-web',
+        nodePoolId: 'batch-pool',
+        initialNodeCount: 1,
+      };
+      expect(() =>
+        parse('createNodePool', { ...base, maxSurge: 100, maxUnavailable: 100 })
+      ).not.toThrow();
+      expect(() => parse('createNodePool', { ...base, maxSurge: 101 })).toThrow();
+      expect(() => parse('createNodePool', { ...base, maxUnavailable: 101 })).toThrow();
     });
 
     it('labels totalNodeCountEstimate as an estimate that will not track an autoscaler with uneven zonal distribution', async () => {

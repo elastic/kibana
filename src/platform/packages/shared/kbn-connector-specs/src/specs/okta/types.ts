@@ -17,6 +17,8 @@ const MAX_FILTER_LENGTH = 1024;
 const MAX_SEARCH_LENGTH = 512;
 const MAX_LOG_LIMIT = 1000;
 const MAX_USER_LIMIT = 200;
+const MAX_LOG_KEYWORDS = 10;
+const MAX_LOG_KEYWORD_LENGTH = 40;
 
 export const UserIdSchema = z
   .string()
@@ -282,8 +284,22 @@ export const GetLogsInputSchema = lazySchema(() =>
     q: z
       .string()
       .max(MAX_SEARCH_LENGTH)
+      .refine(
+        (value) => {
+          const keywords = value.trim().split(/\s+/).filter(Boolean);
+          return (
+            keywords.length <= MAX_LOG_KEYWORDS &&
+            keywords.every((keyword) => keyword.length <= MAX_LOG_KEYWORD_LENGTH)
+          );
+        },
+        {
+          message: `q accepts at most ${MAX_LOG_KEYWORDS} space-separated keywords of up to ${MAX_LOG_KEYWORD_LENGTH} characters each`,
+        }
+      )
       .optional()
-      .describe('Case-insensitive keyword filter across log events.'),
+      .describe(
+        `Case-insensitive keyword filter across log events. Up to ${MAX_LOG_KEYWORDS} space-separated keywords, each at most ${MAX_LOG_KEYWORD_LENGTH} characters.`
+      ),
     limit: z
       .number()
       .int()

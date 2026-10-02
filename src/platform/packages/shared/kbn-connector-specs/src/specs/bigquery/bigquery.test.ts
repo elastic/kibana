@@ -62,6 +62,23 @@ describe('BigQuery', () => {
         location: 'US',
       });
     });
+
+    it.each(['runQuery', 'executeQuery'] as const)(
+      '%s should accept queries up to the 1 MB BigQuery limit and reject larger ones',
+      (actionName) => {
+        const { input } = BigQuery.actions[actionName];
+        const prefix = 'SELECT ';
+        const atLimit = prefix + 'a'.repeat(1024 * 1024 - prefix.length);
+
+        expect(input.safeParse({ query: atLimit }).success).toBe(true);
+        expect(input.safeParse({ query: `${atLimit}a` }).success).toBe(false);
+        expect(
+          input.safeParse({
+            query: prefix + 'é'.repeat(Math.ceil((1024 * 1024 - prefix.length) / 2)),
+          }).success
+        ).toBe(false);
+      }
+    );
   });
 
   describe('runQuery', () => {

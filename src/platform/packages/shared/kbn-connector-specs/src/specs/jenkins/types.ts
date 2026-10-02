@@ -12,6 +12,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const MAX_STRING_LENGTH = 2048;
 const MAX_JOB_NAME_LENGTH = 256;
 const MAX_PARAMETERS = 50;
+// Jenkins sets no per-parameter limit (text parameters are multi-line); the form body is
+// bounded by Jetty's default `maxFormContentSize` of 200,000 bytes.
+const MAX_FORM_CONTENT_SIZE = 200_000;
 
 export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
@@ -70,7 +73,7 @@ export const TriggerBuildWithParametersInputSchema = lazySchema(() =>
   z.object({
     jobName: jobNameField(),
     parameters: z
-      .record(z.string().max(200), z.string().max(MAX_STRING_LENGTH))
+      .record(z.string().max(200), z.string().max(MAX_FORM_CONTENT_SIZE))
       .refine((value) => Object.keys(value).length <= MAX_PARAMETERS, {
         message: `parameters must contain at most ${MAX_PARAMETERS} entries`,
       })

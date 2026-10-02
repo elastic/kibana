@@ -1300,7 +1300,7 @@ describe('URLScan.io connector', () => {
     it('bounds the search query and size', () => {
       expect(SearchScansInputSchema.safeParse({ q: 'ip:8.8.8.8' }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: '' }).success).toBe(false);
-      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(2001) }).success).toBe(false);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8193) }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_000 }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_001 }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 0 }).success).toBe(false);

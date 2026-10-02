@@ -11,6 +11,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 const BASE_URL = 'https://api.1password.com/v1';
+// The Users API returns at most 1000 users per page.
+const MAX_PAGE_SIZE = 1000;
 
 // So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
 const throwWithApiError = (error: unknown): never => {
@@ -97,9 +99,12 @@ export const OnePasswordConnector: ConnectorSpec = {
             ),
           maxPageSize: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_PAGE_SIZE)
             .optional()
             .describe(
-              'Maximum number of users to return per page. Uses the API default if omitted'
+              `Maximum number of users to return per page (1-${MAX_PAGE_SIZE}). Uses the API default of 25 if omitted`
             ),
           pageToken: z
             .string()

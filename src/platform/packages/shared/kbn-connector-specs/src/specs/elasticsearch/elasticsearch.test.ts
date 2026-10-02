@@ -361,14 +361,20 @@ describe('Elasticsearch connector', () => {
   // ============================================================================
 
   describe('SearchInputSchema', () => {
-    it('rejects index strings longer than 512 characters', () => {
-      const longIndex = 'a'.repeat(513);
+    it('rejects index strings longer than the 4096-byte HTTP request line limit', () => {
+      const longIndex = 'a'.repeat(4097);
       const result = SearchInputSchema.safeParse({ index: longIndex });
       expect(result.success).toBe(false);
     });
 
-    it('rejects arrays of more than 10 indices', () => {
-      const tooManyIndices = Array.from({ length: 11 }, (_, i) => `index-${i}`);
+    it('accepts a comma-separated list of several maximum-length index names', () => {
+      const indices = Array.from({ length: 10 }, (_, i) => `${i}`.padEnd(255, 'a')).join(',');
+      const result = SearchInputSchema.safeParse({ index: indices });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects arrays of more than 100 indices', () => {
+      const tooManyIndices = Array.from({ length: 101 }, (_, i) => `index-${i}`);
       const result = SearchInputSchema.safeParse({ index: tooManyIndices });
       expect(result.success).toBe(false);
     });
