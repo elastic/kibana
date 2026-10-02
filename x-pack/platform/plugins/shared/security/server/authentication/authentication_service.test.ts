@@ -1045,6 +1045,7 @@ describe('AuthenticationService', () => {
           protocol: 'socket',
           hostname: 'test-hostname',
           port: 1234,
+          maxPayload: 1048576,
         });
 
         service.setup(mockSetupAuthenticationParams);
