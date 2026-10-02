@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -15,21 +15,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiLink,
-  EuiSpacer,
 } from '@elastic/eui';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MAX_FLYOUT_WIDTH } from '../../constants';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
-import { useStartServices } from '../../hooks';
-import { AgentDetailsIntegration } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integration';
-import {
-  getInputUnitsByPackage,
-  getOutputUnitsByPackage,
-} from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/input_status_utils';
+import { AgentlessComponentHealth } from './component_health';
 
 export interface AgentlessStatusDetailsFlyoutProps {
   onClose: () => void;
@@ -54,25 +46,6 @@ export interface AgentlessStatusDetailsFlyoutProps {
 export const AgentlessStatusDetailsFlyout: React.FunctionComponent<
   AgentlessStatusDetailsFlyoutProps
 > = ({ onClose, policyName, agent, agentPolicy, packagePolicy }) => {
-  const { docLinks } = useStartServices();
-
-  const componentAlertLevel = useMemo(() => {
-    const { components } = agent;
-    if (!components) return null;
-    const units = packagePolicy.inputs.flatMap((input) => {
-      const inputId = input.id ?? packagePolicy.id;
-      return [
-        ...getInputUnitsByPackage(components, inputId),
-        ...getOutputUnitsByPackage(components, inputId),
-      ];
-    });
-    if (units.some((u) => u.status === 'FAILED')) return 'failed';
-    if (units.some((u) => u.status === 'DEGRADED')) return 'degraded';
-    return null;
-  }, [agent, packagePolicy]);
-
-  const CalloutComponent = componentAlertLevel === 'failed' ? KbnDangerCallout : KbnWarningCallout;
-
   return (
     <EuiFlyout
       data-test-subj="agentlessStatusDetailsFlyout"
@@ -91,53 +64,12 @@ export const AgentlessStatusDetailsFlyout: React.FunctionComponent<
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {componentAlertLevel && (
-          <>
-            <CalloutComponent
-              announceOnMount
-              title={
-                componentAlertLevel === 'failed'
-                  ? i18n.translate(
-                      'xpack.fleet.agentlessStatusDetailsFlyout.failedComponentsWarning',
-                      { defaultMessage: 'One or more components are in a failed state' }
-                    )
-                  : i18n.translate(
-                      'xpack.fleet.agentlessStatusDetailsFlyout.degradedComponentsWarning',
-                      { defaultMessage: 'One or more components are in a degraded state' }
-                    )
-              }
-              data-test-subj="agentlessStatusDetailsFlyoutComponentsWarning"
-              text={
-                componentAlertLevel === 'failed' ? (
-                  <FormattedMessage
-                    id="xpack.fleet.agentlessStatusDetailsFlyout.componentWarning.helperText"
-                    defaultMessage="{policyName} managed integration failed to establish. Check out the {troubleshootingGuideLink} for help."
-                    values={{
-                      policyName,
-                      troubleshootingGuideLink: (
-                        <EuiLink href={docLinks.links.fleet.troubleshooting} target="_blank">
-                          <FormattedMessage
-                            id="xpack.fleet.agentlessStatusDetailsFlyout.componentWarning.troubleshootingLinkLabel"
-                            defaultMessage="troubleshooting guide"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                ) : undefined
-              }
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {agentPolicy && packagePolicy && (
-          <AgentDetailsIntegration
-            agent={agent}
-            agentPolicy={agentPolicy}
-            packagePolicy={packagePolicy}
-            linkToLogs={false}
-          />
-        )}
+        <AgentlessComponentHealth
+          policyName={policyName}
+          agent={agent}
+          agentPolicy={agentPolicy}
+          packagePolicy={packagePolicy}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexStart">

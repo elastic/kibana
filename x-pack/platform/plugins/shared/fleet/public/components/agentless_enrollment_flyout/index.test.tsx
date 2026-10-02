@@ -33,6 +33,12 @@ const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock
 const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
 const mockUseFleetStatus = useFleetStatus as jest.Mock;
 
+// Stub out AgentDetailsIntegration — its internal hooks are not relevant here
+jest.mock(
+  '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integration',
+  () => ({ AgentDetailsIntegration: () => <div data-test-subj="agentDetailsIntegration" /> })
+);
+
 const makeDashboardInstallation = (count: number) => ({
   installed_kibana_space_id: 'default',
   installed_kibana: Array.from({ length: count }, (_, i) => ({
@@ -137,6 +143,43 @@ describe('AgentlessEnrollmentFlyout', () => {
         expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
         expect(getByText('Confirm incoming data')).toBeInTheDocument();
         expect(getByText('Step 2 is loading')).toBeInTheDocument();
+      });
+    });
+
+    it('shows component health details when the agent is online but a component is failed', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: {
+          data: {
+            items: [
+              {
+                status: 'online',
+                components: [
+                  {
+                    id: 'c1',
+                    type: 'logfile',
+                    status: 'FAILED',
+                    units: [{ id: 'input-1', type: 'input', status: 'FAILED', message: '' }],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, getByTestId } = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          agentPolicy={{ id: 'ap1', name: 'AP', package_policies: [] } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Confirm incoming data')).toBeInTheDocument();
+        expect(getByText('One or more components are in a failed state')).toBeInTheDocument();
+        expect(getByTestId('agentDetailsIntegration')).toBeInTheDocument();
       });
     });
 

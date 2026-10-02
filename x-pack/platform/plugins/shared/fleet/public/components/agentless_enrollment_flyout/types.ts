@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, PackagePolicy } from '../../types';
 
 /**
  * A connector referenced by an agentless policy, rendered as a deep-link card.
@@ -53,6 +53,8 @@ export interface AgentlessEnrollmentFlyoutProps {
   selectedInput?: AgentlessEnrollmentSelectedInput;
   /** Used only to render integration details in the enrollment error state. */
   agentPolicy?: AgentPolicy;
+  /** When provided, component-level health (failed/degraded) is shown once the agent is enrolled. */
+  packagePolicy?: PackagePolicy;
   /**
    * Connectors referenced by the policy, rendered as deep-link cards once data is
    * confirmed. The caller maps these from its own source (`PackagePolicy` inputs

@@ -11,17 +11,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
-import type { Agent, AgentPolicy } from '../../types';
+import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 import { useStartServices } from '../../hooks';
+import { AgentlessComponentHealth } from '../agentless_status_details_flyout/component_health';
 import { AgentDetailsIntegrations } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integrations';
 
 export const AgentlessStepConfirmEnrollment = ({
   agent,
   agentPolicy,
+  packagePolicy,
+  policyName,
   integrationTitle,
 }: {
   agent?: Agent;
   agentPolicy?: AgentPolicy;
+  packagePolicy?: PackagePolicy;
+  policyName: string;
   integrationTitle: string;
 }) => {
   const { docLinks } = useStartServices();
@@ -62,6 +67,17 @@ export const AgentlessStepConfirmEnrollment = ({
             />
           </p>
         </EuiText>
+        {agent && packagePolicy && (
+          <>
+            <EuiSpacer size="m" />
+            <AgentlessComponentHealth
+              policyName={policyName}
+              agent={agent}
+              agentPolicy={agentPolicy}
+              packagePolicy={packagePolicy}
+            />
+          </>
+        )}
       </>
     );
   } else if (overallState === 'failure') {

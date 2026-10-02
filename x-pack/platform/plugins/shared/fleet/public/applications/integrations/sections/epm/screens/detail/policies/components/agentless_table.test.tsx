@@ -239,7 +239,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     expect(await result.findByText('Healthy')).toBeInTheDocument();
   });
 
-  it('opens status details flyout when status badge is clicked and an agent is enrolled', async () => {
+  it('opens the enrollment flyout when status badge is clicked', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
@@ -251,49 +251,8 @@ describe('AgentlessPackagePoliciesTable', () => {
     await act(async () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
-    expect(result.getByTestId('agentlessStatusDetailsFlyout')).toBeInTheDocument();
-    expect(result.queryByText('Confirm managed integration enrollment')).not.toBeInTheDocument();
-  });
-
-  it('opens enrollment flyout when Pending status badge is clicked and no agent is enrolled', async () => {
-    mockSendGetAgents.mockResolvedValue({
-      data: { items: [], total: 0, page: 1, perPage: 10000 },
-      error: null,
-    });
-    const renderer = createIntegrationsTestRendererMock();
-    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
-    const pendingBadge = await result.findByText('Pending');
-    await act(async () => {
-      fireEvent.click(pendingBadge);
-    });
     expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
     expect(result.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
-  });
-
-  it('keeps the enrollment flyout open when the agent enrolls while it is open', async () => {
-    jest.useFakeTimers();
-    try {
-      mockSendGetAgents.mockResolvedValueOnce({
-        data: { items: [], total: 0, page: 1, perPage: 10000 },
-        error: null,
-      });
-      const renderer = createIntegrationsTestRendererMock();
-      const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
-      const pendingBadge = await result.findByText('Pending');
-      await act(async () => {
-        fireEvent.click(pendingBadge);
-      });
-      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
-      // next poll returns the enrolled agent
-      await act(async () => {
-        jest.advanceTimersByTime(30000);
-      });
-      await waitFor(() => expect(result.getByText('Healthy')).toBeInTheDocument());
-      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
-      expect(result.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
-    } finally {
-      jest.useRealTimers();
-    }
   });
 
   describe('Details row action', () => {

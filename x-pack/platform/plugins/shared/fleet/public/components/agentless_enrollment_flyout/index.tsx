@@ -62,6 +62,7 @@ export const AgentlessEnrollmentFlyout = ({
   packageInfo,
   selectedInput,
   agentPolicy,
+  packagePolicy,
   connectors,
 }: AgentlessEnrollmentFlyoutProps) => {
   const core = useStartServices();
@@ -196,6 +197,8 @@ export const AgentlessEnrollmentFlyout = ({
                 <AgentlessStepConfirmEnrollment
                   agent={agentData}
                   agentPolicy={agentPolicy}
+                  packagePolicy={packagePolicy}
+                  policyName={policyName}
                   integrationTitle={integrationTitle}
                 />
               ),
