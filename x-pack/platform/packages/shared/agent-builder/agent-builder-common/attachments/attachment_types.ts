@@ -18,6 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   connector = 'connector',
   image = 'image',
+  pdf = 'pdf',
 }
 
 interface AttachmentDataMap {
@@ -26,6 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
   [AttachmentType.image]: ImageAttachmentData;
+  [AttachmentType.pdf]: PdfAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -136,6 +138,10 @@ export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number]
 
 export const CHAT_ATTACHMENT_IMAGES_FILE_KIND = 'chat-attachment-images';
 
+export const CHAT_ATTACHMENT_PDFS_FILE_KIND = 'chat-attachment-pdfs';
+
+export const SUPPORTED_PDF_MIME_TYPE = 'application/pdf';
+
 export const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
 
 export const MAX_IMAGES_PER_ROUND = 10;
@@ -156,4 +162,32 @@ export interface ImageAttachmentData {
   name: string;
   /** mime type of the image */
   mime_type: SupportedImageMimeType;
+}
+
+export const MAX_PDF_BYTES = 10 * 1024 * 1024;
+
+export const MAX_PDF_PAGES = 20;
+
+/** Input sent by the client: a reference to the PDF in the Files API. */
+export const pdfAttachmentInputSchema = z.object({
+  file_id: z.string().max(1024),
+  name: z.string().max(1024),
+});
+
+export const pdfAttachmentDataSchema = z.object({
+  file_id: z.string().max(1024),
+  name: z.string().max(1024),
+  text: z.string(),
+});
+
+/**
+ * Data for a pdf attachment (stored shape, the original PDF stays in the Files API).
+ */
+export interface PdfAttachmentData {
+  /** id of the file in the Files API */
+  file_id: string;
+  /** original filename */
+  name: string;
+  /** text extracted from the PDF pages with OCR */
+  text: string;
 }

@@ -13,6 +13,7 @@ import {
   AttachmentType,
   MAX_IMAGE_BYTES,
   MAX_IMAGES_PER_ROUND,
+  MAX_PDF_BYTES,
   SUPPORTED_IMAGE_MIME_TYPES,
 } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -151,5 +152,32 @@ export const processImageFile = async ({
     if (abortSignal?.aborted) return true;
     addErrorToast({ title: labels.uploadError });
     return false;
+  }
+};
+
+/**
+ * Uploads a pasted PDF to the Files service and calls upsertAttachments.
+ */
+export const processPdfFile = async ({
+  file,
+  filesClient,
+  upsertAttachments,
+}: {
+  file: File;
+  filesClient: ScopedFilesClient;
+  upsertAttachments: (attachments: ConversationAttachment[]) => void;
+}): Promise<void> => {
+  // POC: no toast for a PDF that is too big
+  if (file.size > MAX_PDF_BYTES) return;
+
+  try {
+    const name = file.name || 'document.pdf';
+    const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
+    await filesClient.upload({ id: fileEntry.id, body: file, contentType: file.type });
+    upsertAttachments([
+      { type: AttachmentType.pdf, data: { file_id: fileEntry.id, name } } as ConversationAttachment,
+    ]);
+  } catch (err: unknown) {
+    // POC: no toast for upload errors
   }
 };

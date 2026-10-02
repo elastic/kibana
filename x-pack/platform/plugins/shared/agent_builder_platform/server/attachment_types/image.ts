@@ -19,7 +19,7 @@ import {
   type FilesStart,
 } from '@kbn/files-plugin/server';
 
-const streamToBuffer = (stream: Readable): Promise<Buffer> =>
+export const streamToBuffer = (stream: Readable): Promise<Buffer> =>
   new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk: Buffer) => chunks.push(chunk));

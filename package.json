@@ -1587,6 +1587,7 @@
     "papaparse": "5.5.3",
     "pbf": "3.2.1",
     "pdf-lib": "1.17.1",
+    "pdf-to-img": "7.0.0",
     "pdfmake": "0.2.20",
     "piscina": "5.3.1",
     "polished": "4.3.1",
