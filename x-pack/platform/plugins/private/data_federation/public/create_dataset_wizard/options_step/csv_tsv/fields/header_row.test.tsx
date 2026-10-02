@@ -29,23 +29,36 @@ const renderComponent = ({
     </EuiProvider>
   );
 
+const openComboBox = async (getByTestId: (id: string) => HTMLElement) => {
+  const combo = getByTestId('createDatasetSettingsHeaderRow');
+  await act(async () => {
+    fireEvent.click(combo.querySelector('input') ?? combo);
+  });
+};
+
 describe('HeaderRow', () => {
   it('calls onChange when the user selects an option', async () => {
     const onChange = jest.fn();
     const { getByTestId, getByRole } = renderComponent({ onChange });
 
-    const combo = getByTestId('createDatasetSettingsHeaderRow');
-    await act(async () => {
-      fireEvent.click(combo.querySelector('input') ?? combo);
-    });
+    await openComboBox(getByTestId);
 
     await act(async () => {
       fireEvent.click(
-        getByRole('option', { name: createDatasetWizardStrings.settingsHeaderRowFalse })
+        getByRole('option', { name: new RegExp(createDatasetWizardStrings.falseLabel) })
       );
     });
 
     expect(onChange).toHaveBeenCalledWith('false');
+  });
+
+  it('shows a description for each option', async () => {
+    const { getByTestId, getByText } = renderComponent();
+
+    await openComboBox(getByTestId);
+
+    expect(getByText(createDatasetWizardStrings.settingsHeaderRowTrueDescription)).toBeVisible();
+    expect(getByText(createDatasetWizardStrings.settingsHeaderRowFalseDescription)).toBeVisible();
   });
 
   it('clearing the selection results in empty form value', async () => {

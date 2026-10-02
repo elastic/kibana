@@ -59,7 +59,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 id="xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.descriptionTextWithNone"
                 defaultMessage="Character that surrounds field values. Enter {none} to turn off quoting. Overrides {quoteMode} in {commonSettings}."
                 values={{
-                  none: <EuiCode>{CSV_CHARACTER_NONE}</EuiCode>,
+                  none: `'${CSV_CHARACTER_NONE}'`,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
@@ -109,7 +109,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 id="xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.descriptionTextWithNone"
                 defaultMessage="Character used to escape special characters. Enter {none} to turn off escaping. Overrides {quoteMode} in {commonSettings}."
                 values={{
-                  none: <EuiCode>{CSV_CHARACTER_NONE}</EuiCode>,
+                  none: `'${CSV_CHARACTER_NONE}'`,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>

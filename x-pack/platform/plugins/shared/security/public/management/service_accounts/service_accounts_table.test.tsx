@@ -6,8 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { act, screen, within } from '@testing-library/react';
-import user from '@testing-library/user-event';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import React, { useState } from 'react';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -110,7 +109,9 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by free text', async () => {
     renderTable();
 
-    await user.type(screen.getByTestId('serviceAccountsSearch'), 'incident-responder');
+    fireEvent.change(screen.getByTestId('serviceAccountsSearch'), {
+      target: { value: 'incident-responder' },
+    });
 
     expect(await screen.findByText('incident-responder')).toBeVisible();
     expect(screen.queryByText('nightshift-relay')).not.toBeInTheDocument();
@@ -119,16 +120,21 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by the selected role and restores them when cleared', async () => {
     renderTable();
 
-    await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(await screen.findByRole('option', { name: 'viewer' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
+    const viewerOption = await screen.findByRole('option', { name: 'viewer' });
+    await waitFor(() => expect(viewerOption).toBeVisible());
+    fireEvent.click(viewerOption);
 
     expect(screen.getByText('nightshift-relay')).toBeVisible();
     expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
 
-    await user.click(await screen.findByRole('option', { name: 'viewer' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'viewer' }));
 
     expect(screen.getByText('incident-responder')).toBeVisible();
     expect(screen.getByText('nightshift-relay')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
+    await waitFor(() => expect(viewerOption).not.toBeVisible());
   });
 
   it.each([
@@ -140,12 +146,12 @@ describe('ServiceAccountsTable', () => {
       screen.getByRole('columnheader', { name: new RegExp(column) })
     ).getByRole('button');
 
-    await user.click(sortButton);
+    fireEvent.click(sortButton);
     screen.getAllByRole('rowheader').forEach((header, index) => {
       expect(header).toHaveTextContent(ascending[index]);
     });
 
-    await user.click(sortButton);
+    fireEvent.click(sortButton);
     const descending = [...ascending].reverse();
     screen.getAllByRole('rowheader').forEach((header, index) => {
       expect(header).toHaveTextContent(descending[index]);
@@ -174,7 +180,7 @@ describe('ServiceAccountsTable', () => {
     expect(
       screen.getByText('Search and filters currently include 2 loaded accounts.')
     ).toBeVisible();
-    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+    fireEvent.click(screen.getByTestId('serviceAccountsLoadMore'));
 
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
@@ -182,36 +188,43 @@ describe('ServiceAccountsTable', () => {
   it('keeps the current page after loading more accounts', async () => {
     renderPaginatedTable();
 
-    await user.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
     expect(screen.getByText('account-10')).toBeVisible();
     expect(screen.queryByText('account-00')).not.toBeInTheDocument();
 
-    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+    fireEvent.click(screen.getByTestId('serviceAccountsLoadMore'));
     expect(screen.getByText('account-10')).toBeVisible();
     expect(screen.queryByText('account-00')).not.toBeInTheDocument();
-    await user.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
     expect(screen.getByText('incident-responder')).toBeVisible();
   });
 
   it('resets the page when searching from a later page', async () => {
     renderPaginatedTable();
 
-    await user.click(screen.getByTestId('pagination-button-next'));
-    await user.type(screen.getByTestId('serviceAccountsSearch'), 'account-00');
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.change(screen.getByTestId('serviceAccountsSearch'), {
+      target: { value: 'account-00' },
+    });
 
-    expect(screen.getByText('account-00')).toBeVisible();
+    expect(await screen.findByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
   });
 
   it('resets the page when filtering by role from a later page', async () => {
     renderPaginatedTable();
 
-    await user.click(screen.getByTestId('pagination-button-next'));
-    await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(await screen.findByRole('option', { name: 'editor' }));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
+    const editorOption = await screen.findByRole('option', { name: 'editor' });
+    await waitFor(() => expect(editorOption).toBeVisible());
+    fireEvent.click(editorOption);
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
+    await waitFor(() => expect(editorOption).not.toBeVisible());
   });
 
   it('offers to retry when loading the next cursor page fails', () => {
