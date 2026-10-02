@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   GLOBAL_SPACE_ID,
@@ -327,9 +326,6 @@ export const seedDefaultSources = async ({
   return result;
 };
 
-/** Page size for disabling out-of-catalog enabled sources. Exported for multi-page tests. */
-export const LEGACY_SOURCE_DISABLE_PAGE_SIZE = 1000;
-
 const disableLegacySources = async ({
   esClient,
   logger,
@@ -340,61 +336,62 @@ const disableLegacySources = async ({
   now: string;
 }): Promise<{ disabled: number; failed: number }> => {
   const log = logger.get('seed-default-sources');
-  let disabled = 0;
-  let failed = 0;
-  let searchAfter: estypes.SortResults | undefined;
 
-  for (;;) {
-    const response = await esClient.search<{ enabled?: boolean }>({
+  try {
+    const response = await esClient.updateByQuery({
       index: THREAT_INTEL_SOURCES_INDEX,
-      size: LEGACY_SOURCE_DISABLE_PAGE_SIZE,
-      sort: [{ _id: 'asc' }],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-      _source: ['enabled'],
+      refresh: false,
+      conflicts: 'proceed',
+      wait_for_completion: true,
       query: {
         bool: {
           filter: [{ term: { enabled: true } }],
           must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
         },
       },
+      script: {
+        source: `
+          ctx._source.enabled = false;
+          ctx._source.updated_at = params.now;
+        `,
+        lang: 'painless',
+        params: { now },
+      },
     });
 
-    const hits = (response.hits.hits ?? []).filter((document) => document._id);
-    if (hits.length === 0) {
-      break;
+    const disabled = response.updated ?? 0;
+    // Only real per-document failures count as `failed`. The caller escalates a
+    // non-zero `failed` into a bootstrap retry and eventually a bootstrap
+    // rejection, which gates every route behind a 503 and leaves both tasks
+    // unscheduled, so it has to mean "something is actually wrong".
+    //
+    // `version_conflicts` is not that. Under `conflicts: 'proceed'` a conflict
+    // means an operator wrote to the source document between the scan and the
+    // update; the row is skipped, still matches the same query, and is picked up
+    // on the next boot. Reporting it as `failed` made a benign race able to fail
+    // bootstrap, while the failures that do mean something were dropped entirely.
+    const failures = response.failures ?? [];
+    const versionConflicts = response.version_conflicts ?? 0;
+
+    if (disabled > 0) {
+      log.info(`Disabled ${disabled} legacy source(s) outside the fixed catalog`);
+    }
+    if (failures.length > 0) {
+      log.warn(
+        `${failures.length} legacy source(s) outside the fixed catalog could not be disabled and ` +
+          `are still eligible for fetch (first failure: ${JSON.stringify(failures[0])})`
+      );
+    }
+    if (versionConflicts > 0) {
+      log.debug(
+        `${versionConflicts} legacy source(s) were skipped due to version conflicts; the next ` +
+          `boot's scan re-selects them.`
+      );
     }
 
-    for (const hit of hits) {
-      const sourceId = hit._id as string;
-      try {
-        await esClient.update({
-          index: THREAT_INTEL_SOURCES_INDEX,
-          id: sourceId,
-          doc: { enabled: false, updated_at: now },
-          refresh: false,
-        });
-        disabled += 1;
-        log.info(`Disabled legacy source outside the fixed catalog: ${sourceId}`);
-      } catch (err) {
-        failed += 1;
-        log.warn(`Failed to disable legacy source ${sourceId}: ${(err as Error).message}`);
-      }
-    }
-
-    if (hits.length < LEGACY_SOURCE_DISABLE_PAGE_SIZE) {
-      break;
-    }
-
-    const lastSort = hits[hits.length - 1]?.sort;
-    if (!lastSort) {
-      throw new Error('Legacy source search page is missing sort values for search_after');
-    }
-    searchAfter = lastSort;
+    return { disabled, failed: failures.length };
+  } catch (err) {
+    log.warn(`Failed to disable legacy sources: ${(err as Error).message}`);
+    return { disabled: 0, failed: 1 };
   }
-
-  if (disabled > 0) {
-    await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
-  }
-
-  return { disabled, failed };
 };

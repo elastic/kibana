@@ -43,7 +43,7 @@ responses:
 ```
 node scripts/type_check.js --project x-pack/solutions/security/plugins/cloud_defend/tsconfig.json
 node scripts/eslint.js x-pack/solutions/security/plugins/cloud_defend
-yarn test:jest x-pack/solutions/security/plugins/cloud_defend
+pnpm test:jest x-pack/solutions/security/plugins/cloud_defend
 ```
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.

@@ -7,6 +7,9 @@
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
+import { generalChartRules } from './general_rules';
+
+const toBullets = (rules: readonly string[]): string[] => rules.map((rule) => `- ${rule}`);
 
 export const getChartTypeSelectionPromptContent = () =>
   [
@@ -16,46 +19,14 @@ export const getChartTypeSelectionPromptContent = () =>
     ),
   ].join('\n');
 
-export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const rules = chartTypeRegistry[chartType].prompt.config?.rules;
-
-  if (!rules?.length) {
-    return '';
-  }
-
-  return [
-    `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...rules.map((rule) => `- ${rule}`),
-  ].join('\n');
-};
-
 /**
- * Compiles vis-author `config.rules` plus `review.critical` and
- * `review.suggestions` for every chart type that has any of them. Prettify
- * uses this so it can detect painted issues and describe the wanted edition;
- * the visualization author still sees only {@link getChartTypeConfigPromptContent}.
+ * Rules for authoring one chart type's Lens config: the general rules followed
+ * by the chart-specific ones. `getColorConfigPromptContent` compiles the color
+ * mechanics separately.
  */
-export const getChartTypeReviewPromptContent = (): string => {
-  const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
-    const configRules: string[] = prompt.config?.rules ?? [];
-    const critical: string[] = prompt.review?.critical ?? [];
-    const suggestions: string[] = prompt.review?.suggestions ?? [];
-
-    if (!configRules.length && !critical.length && !suggestions.length) {
-      return [];
-    }
-
-    return [
-      `### ${chartType}`,
-      ...configRules.map((rule) => `- ${rule}`),
-      ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
-      ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
-    ];
-  });
-
-  if (!sections.length) {
-    return '';
-  }
-
-  return ['CHART REVIEW RULES:', ...sections].join('\n');
-};
+export const getChartTypeConfigPromptContent = (chartType: SupportedChartType): string =>
+  [
+    `CHART RULES FOR ${chartType.toUpperCase()}:`,
+    ...toBullets(generalChartRules),
+    ...toBullets(chartTypeRegistry[chartType].prompt.rules ?? []),
+  ].join('\n');

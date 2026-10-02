@@ -27,11 +27,17 @@ export const ThresholdCardinality = lazySchema(() =>
       /**
        * The field on which to calculate and compare the cardinality.
        */
-      field: z.string(),
+      field: z.string().describe('The field on which to calculate and compare the cardinality.'),
       /**
        * The threshold value from which an alert is generated based on unique number of values of cardinality.field.
        */
-      value: z.number().int().min(0),
+      value: z
+        .number()
+        .int()
+        .min(0)
+        .describe(
+          'The threshold value from which an alert is generated based on unique number of values of cardinality.field.'
+        ),
     })
   )
 );

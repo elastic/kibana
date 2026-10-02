@@ -43,9 +43,11 @@ import {
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import {
+  appendOverviewStatusEffect,
   augmentStaleStatusEffect,
   fetchOverviewStatusEffect,
   fetchStaleStatusEffect,
+  refreshRemainingCardWindowEffect,
 } from './overview_status';
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
@@ -63,8 +65,10 @@ export const rootEffect = function* root(): Generator {
     fork(fetchSyntheticsMonitorEffect),
     fork(browserJourneyEffects),
     fork(fetchOverviewStatusEffect),
+    fork(appendOverviewStatusEffect),
     fork(fetchStaleStatusEffect),
     fork(augmentStaleStatusEffect),
+    fork(refreshRemainingCardWindowEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
     fork(fetchAgentStatsEffect),

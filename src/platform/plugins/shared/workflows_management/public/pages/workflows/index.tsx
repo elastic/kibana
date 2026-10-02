@@ -139,7 +139,7 @@ export function WorkflowsPage() {
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
   const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
   const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
-  const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
+  const isExecutionStatsBarEnabled = featureFlags.useBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
     false
   );
@@ -193,6 +193,7 @@ export function WorkflowsPage() {
         title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
         menu={appMenu}
         docLink={WORKFLOWS_DOCUMENTATION_URL}
+        spacing="compact"
       />
       <EuiPageTemplate.Section restrictWidth={false}>
         {shouldShowFilters ? (

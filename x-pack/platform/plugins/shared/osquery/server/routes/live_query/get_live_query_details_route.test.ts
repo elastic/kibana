@@ -97,6 +97,7 @@ describe('getLiveQueryDetailsRoute', () => {
     );
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
       },
@@ -174,6 +175,7 @@ describe('getLiveQueryDetailsRoute', () => {
     mockActionResponse();
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
         getIntegrationNamespaces: jest
@@ -209,6 +211,7 @@ describe('getLiveQueryDetailsRoute', () => {
     mockActionResponse();
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
         getIntegrationNamespaces: jest.fn().mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: [] }),
@@ -245,7 +248,7 @@ describe('getLiveQueryDetailsRoute', () => {
       const contextSearchFn = jest.fn();
 
       mockOsqueryContext = {
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
         },

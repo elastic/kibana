@@ -43,6 +43,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
 import { EsApiKeyStrategy } from './api_key_strategy';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
@@ -334,7 +335,7 @@ describe('TaskStore', () => {
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const request = httpServerMock.createKibanaRequest();
@@ -717,7 +718,7 @@ describe('TaskStore', () => {
       partition: 237,
       userScope: {
         apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         apiKeyCreatedByUser: false,
       },
       ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
@@ -1570,7 +1571,7 @@ describe('TaskStore', () => {
     const mockUserScope = {
       apiKeyId: 'apiKeyId',
       apiKeyCreatedByUser: false,
-      spaceId: 'testSpace',
+      spaceId: brandSpaceId('testSpace'),
     };
 
     beforeEach(() => {
@@ -1885,7 +1886,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -1975,7 +1976,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: true,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -2083,7 +2084,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -2376,7 +2377,7 @@ describe('TaskStore', () => {
         apiKeyId: 'apiKeyId',
         uiamApiKeyId: 'uiamApiKeyId',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const mockScopedClient = {
@@ -2428,7 +2429,7 @@ describe('TaskStore', () => {
                 apiKeyId: 'apiKeyId',
                 uiamApiKeyId: 'uiamApiKeyId',
                 apiKeyCreatedByUser: false,
-                spaceId: 'testSpace',
+                spaceId: brandSpaceId('testSpace'),
               },
             },
           ],
@@ -3076,7 +3077,7 @@ describe('TaskStore', () => {
           apiKeyId: 'api-key-id',
           uiamApiKeyId: 'uiam-api-key-id',
           apiKeyCreatedByUser: false,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
         },
       } as PartialConcreteTaskInstance;
 
@@ -3204,7 +3205,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3301,7 +3302,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId1',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3328,7 +3329,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId2',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3468,7 +3469,7 @@ describe('TaskStore', () => {
             apiKeyId: 'apiKeyId',
             uiamApiKeyId: 'uiamApiKeyId',
             apiKeyCreatedByUser: false,
-            spaceId: 'testSpace',
+            spaceId: brandSpaceId('testSpace'),
           },
         },
         references: [],
@@ -3961,7 +3962,7 @@ describe('TaskStore', () => {
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const request = httpServerMock.createKibanaRequest();

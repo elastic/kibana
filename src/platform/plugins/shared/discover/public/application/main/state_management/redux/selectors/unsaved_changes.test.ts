@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverTabType } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { cloneDeep } from 'lodash';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
@@ -52,6 +56,114 @@ const setup = async () => {
 };
 
 describe('selectHasUnsavedChanges', () => {
+  describe('control order', () => {
+    const first: ControlPanelState<OptionsListESQLControlState> = {
+      order: 0,
+      type: ESQL_CONTROL,
+      width: 'medium',
+      grow: true,
+      control_type: 'STATIC_VALUES',
+      variable_name: 'environment',
+      variable_type: 'values',
+      available_options: ['production', 'staging'],
+      selected_options: ['production'],
+      single_select: true,
+    };
+    const last = { ...first, order: 2, variable_name: 'region' };
+    const persistedControls = { first, last };
+
+    it.each<{
+      name: string;
+      controls: ControlPanelsState<OptionsListESQLControlState>;
+      storedControls?: ControlPanelsState<OptionsListESQLControlState>;
+      expected: ReturnType<typeof selectHasUnsavedChanges>;
+    }>([
+      {
+        name: 'ignores gaps in numeric positions',
+        controls: { first, last: { ...last, order: 1 } },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'ignores object key order when numeric positions are distinct',
+        controls: { last, first },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'ignores object key order when numeric positions are equal',
+        storedControls: { first, last: { ...last, order: 0 } },
+        controls: { last: { ...last, order: 0 }, first },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'ignores renumbering equal positions while preserving their sequence',
+        storedControls: { last: { ...last, order: 0 }, first },
+        controls: { last: { ...last, order: 0 }, first: { ...first, order: 1 } },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'detects a changed selection when numeric positions are equal',
+        storedControls: { first, last: { ...last, order: 0 } },
+        controls: {
+          last: { ...last, order: 0 },
+          first: { ...first, selected_options: ['staging'] },
+        },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects a change in visual order',
+        controls: { first: { ...first, order: 2 }, last: { ...last, order: 0 } },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects a changed selection',
+        controls: { first: { ...first, selected_options: ['staging'] }, last },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects a removed control',
+        controls: { first },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects an added control',
+        controls: { first, last, added: { ...first, order: 3, variable_name: 'service' } },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects changed layout settings',
+        controls: { first: { ...first, grow: false }, last },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+    ])('$name', async ({ controls, storedControls = persistedControls, expected }) => {
+      const { internalState, runtimeStateManager, services, getCurrentTab } = await setup();
+      const tabId = getCurrentTab().id;
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: { controlGroupState: controls },
+        })
+      );
+      const state = {
+        ...internalState.getState(),
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'test-id',
+          tabs: [
+            {
+              ...getPersistedTabMock({ tabId, dataView: dataViewWithTimefieldMock, services }),
+              controlGroupJson: JSON.stringify(storedControls),
+            },
+          ],
+        }),
+      };
+      const before = cloneDeep(state);
+
+      expect(selectHasUnsavedChanges(state, { runtimeStateManager, services })).toStrictEqual(
+        expected
+      );
+      expect(state).toStrictEqual(before);
+    });
+  });
+
   it('returns false when there is no persisted discover session', async () => {
     const services = createDiscoverServicesMock();
     const { internalState, runtimeStateManager, initializeTabs, addNewTab } =
@@ -98,6 +210,27 @@ describe('selectHasUnsavedChanges', () => {
       runtimeStateManager,
       services,
     });
+
+    expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+  });
+
+  it('does not flag the default query as a change when the saved query is missing', async () => {
+    const { internalState, runtimeStateManager, services, getCurrentTab } = await setup();
+    const persistedTab = getPersistedTabMock({
+      tabId: getCurrentTab().id,
+      dataView: dataViewWithTimefieldMock,
+      services,
+      appStateOverrides: { query: undefined },
+    });
+    const state = {
+      ...internalState.getState(),
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [persistedTab],
+      }),
+    };
+
+    const result = selectHasUnsavedChanges(state, { runtimeStateManager, services });
 
     expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
   });

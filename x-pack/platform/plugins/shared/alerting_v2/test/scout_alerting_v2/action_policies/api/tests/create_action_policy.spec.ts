@@ -53,7 +53,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
         name: 'my-policy',
         description: 'my-policy description',
         destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
-        matcher: "env == 'production' && region == 'us-east-1'",
+        matcher: { expression: "env == 'production' && region == 'us-east-1'" },
         group_by: ['service.name', 'environment'],
         throttle: { interval: '1m' },
       });
@@ -66,9 +66,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.name).toBe(body.name);
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
-      expect(response.body.matcher).toBe(body.matcher);
-      // The API key is server-side only and must never be exposed over the wire.
-      expect(response.body.auth.apiKey).toBeUndefined();
+      expect(response.body.matcher).toMatchObject(body.matcher);
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 
@@ -150,17 +150,19 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
-    'matcher: scopes a policy to a single rule via a rule.id matcher',
+    'matcher: scopes a policy to a single rule via tags',
     async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy' } })
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-for-scoped-policy', tags: ['notify-scoped'] },
+        })
       );
 
-      const matcher = `rule.id: "${rule.id}"`;
+      const matcher = { tags: ['notify-scoped'] };
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          name: 'rule-scoped-policy',
+          name: 'tag-scoped-policy',
           matcher,
         }),
       });
@@ -321,7 +323,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   apiTest('validation: rejects matcher over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ matcher: 'a'.repeat(MAX_KQL_LENGTH + 1) }),
+      body: buildCreateActionPolicyData({
+        matcher: { expression: 'a'.repeat(MAX_KQL_LENGTH + 1) },
+      }),
     });
 
     expect(response).toHaveStatusCode(400);

@@ -12,6 +12,7 @@ export type * from './src/connector_spec';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
+export { RELAY_AUTH_ID } from './src/auth_types/relay';
 export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 export {
   CERTIFICATE_BINDING_KINDS,
@@ -27,7 +28,11 @@ export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
 } from './src/connector_spec_has_events';
-export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
+export {
+  isInboundOnlyConnectorSpec,
+  connectorTypeIsInboundOnly,
+} from './src/is_inbound_only_connector_spec';
+export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
 export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
@@ -71,6 +76,15 @@ export {
   type ValidateEmittedEventsResult,
 } from './src/validate_emitted_events';
 export {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getEffectiveScope,
+  isSelectedActionEnabled,
+  isSpecificActionsSelection,
+  resolveActionScope,
+  type SelectedActions,
+} from './src/selected_actions';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,
@@ -87,16 +101,23 @@ export type { ConnectorAuthorizationReason } from './src/errors';
 export {
   AUTH_MODE_BY_AUTH_TYPE_ID,
   getAuthModeForAuthTypeId,
+  USES_RELAY_BY_AUTH_TYPE_ID,
+  authTypeUsesRelay,
+  isKibanaManagedAuthTypeId,
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
-export { clientTypes } from './src/lib/clients';
+export { fromConnectorSpecSchema } from './src/lib/deserialize_connector_spec';
+export type { ConnectorZodSchema } from './src/lib/deserialize_connector_spec';
+export { narrowSecretsSchemaForAuthMode } from './src/lib/narrow_secrets_schema_for_auth_mode';
 export type {
   ClientTypeSpec,
   BuildContext,
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,

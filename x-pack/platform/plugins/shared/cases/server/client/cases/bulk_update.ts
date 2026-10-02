@@ -218,11 +218,9 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
-  isCasesAttachmentsEnabled,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  isCasesAttachmentsEnabled: boolean;
 }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
@@ -249,7 +247,6 @@ async function getAlertComments({
     options: {
       filter: alertFilter,
     },
-    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
@@ -281,13 +278,11 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
-  isCasesAttachmentsEnabled,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
-  isCasesAttachmentsEnabled: boolean;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -313,7 +308,6 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
-    isCasesAttachmentsEnabled,
   });
 
   const alertsToUpdateByCaseId = totalAlerts.saved_objects.reduce(
@@ -560,10 +554,7 @@ export const bulkUpdate = async (
     logger,
     authorization,
     closeReasonValidator,
-    config,
   } = clientArgs;
-
-  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -704,6 +695,28 @@ export const bulkUpdate = async (
       )
     );
 
+    // Pre-fetch all field definitions once per owner for cases that have extended_fields with an
+    // effective template. validateCaseExtendedFields uses these to resolve $ref entries; without
+    // pre-fetching, every case in the Promise.all below would issue an identical SO query.
+    const uniqueOwnersNeedingAllFields = [
+      ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
+        if (!updateReq.extended_fields) return owners;
+        const hasEffectiveTemplate =
+          updateReq.template !== null &&
+          (updateReq.template != null || originalCase.attributes.template != null);
+        if (hasEffectiveTemplate) owners.add(originalCase.attributes.owner);
+        return owners;
+      }, new Set<string>()),
+    ];
+    const allFieldDefinitionsByOwner = new Map(
+      await Promise.all(
+        uniqueOwnersNeedingAllFields.map(async (owner) => {
+          const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+          return [owner, fieldDefinitions] as const;
+        })
+      )
+    );
+
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
         validateExtendedFieldsInRequest({
@@ -712,6 +725,7 @@ export const bulkUpdate = async (
           templatesService,
           fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+          fieldDefinitions: allFieldDefinitionsByOwner.get(originalCase.attributes.owner),
         })
       )
     );
@@ -907,7 +921,6 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
-      isCasesAttachmentsEnabled,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({

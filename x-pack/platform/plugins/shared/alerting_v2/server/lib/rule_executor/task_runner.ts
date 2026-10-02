@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 
-import type { HaltReason, RuleExecutorTaskParams } from './types';
+import type { HaltReason } from './types';
 import type {
   RuleExecutionPipelineContract,
   RuleExecutionPipelineInput,
@@ -46,18 +47,19 @@ export class RuleExecutorTaskRunner {
     signal: AbortSignal,
     executionUuid: string
   ): RuleExecutionPipelineInput {
-    const params = taskInstance.params as RuleExecutorTaskParams;
+    const params = taskInstance.params as { ruleId: string; spaceId: string };
+    const spaceId = brandSpaceId(params.spaceId);
     const scheduledAt = taskInstance.scheduledAt;
     const logger = this.logger.forSubsystem('ruleExecutor').withLabels({
       rule_id: params.ruleId,
-      space_id: params.spaceId,
+      space_id: spaceId,
       task_id: taskInstance.id,
       execution_id: executionUuid,
     });
 
     return {
       ruleId: params.ruleId,
-      spaceId: params.spaceId,
+      spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
       abortSignal: signal,
       executionUuid,

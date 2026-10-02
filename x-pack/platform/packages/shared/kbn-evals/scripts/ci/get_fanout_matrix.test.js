@@ -8,9 +8,9 @@
 const { buildFanoutMatrix, formatFanoutMatrix } = require('./get_fanout_matrix');
 
 const CONNECTORS = {
-  'eis-a': { config: { providerConfig: { model_id: 'a' } } },
-  'eis-b': { config: { providerConfig: { model_id: 'b' } } },
-  'eis-c': { config: { providerConfig: { model_id: 'c' } } },
+  'eis-a': { provider: 'elastic', providerConfig: { model_id: 'a' } },
+  'eis-b': { provider: 'elastic', providerConfig: { model_id: 'b' } },
+  'eis-c': { provider: 'elastic', providerConfig: { model_id: 'c' } },
 };
 
 const DISCOVERY = 'evals/discovery/discovery.spec.ts';

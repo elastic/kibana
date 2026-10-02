@@ -24,25 +24,19 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
-  matcher: 'data.severity : "critical"',
+  matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
-  tags: ['production'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
-  created_by: 'elastic',
+  created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'elastic' },
   updated_at: '2026-03-01T10:00:00.000Z',
-  auth: {
-    owner: 'elastic',
-    created_by_user: true,
-  },
 };
 
 describe('useActionPolicyForm', () => {
@@ -91,8 +85,7 @@ describe('useActionPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
-        tags: [],
-        matcher: '',
+        matcher: null,
         groupingMode: 'per_episode',
         groupBy: [],
         throttleStrategy: 'on_status_change',
@@ -180,8 +173,7 @@ describe('useActionPolicyForm', () => {
       expect(result.current.methods.getValues()).toEqual({
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
-        tags: ['production'],
-        matcher: 'data.severity : "critical"',
+        matcher: { expression: 'data.severity : "critical"' },
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
         throttleStrategy: 'time_interval',
@@ -209,7 +201,7 @@ describe('useActionPolicyForm', () => {
       expect(result.current.methods.getValues().throttleStrategy).toBe('on_status_change');
     });
 
-    it('calls onSubmitUpdate with id, raw form values, and version on submit', async () => {
+    it('calls onSubmitUpdate with id and raw form values on submit', async () => {
       const onSubmitUpdate = jest.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
@@ -224,22 +216,17 @@ describe('useActionPolicyForm', () => {
       });
 
       expect(onSubmitUpdate).toHaveBeenCalledTimes(1);
-      expect(onSubmitUpdate).toHaveBeenCalledWith(
-        'policy-1',
-        {
-          name: 'Critical production alerts',
-          description: 'Routes critical alerts',
-          groupingMode: 'per_field',
-          tags: ['production'],
-          matcher: 'data.severity : "critical"',
-          groupBy: ['host.name', 'service.name'],
-          throttleStrategy: 'time_interval',
-          throttleInterval: '5m',
-          destinations: [{ type: 'workflow', id: 'workflow-2' }],
-          inlineActions: [],
-        },
-        'WzEsMV0='
-      );
+      expect(onSubmitUpdate).toHaveBeenCalledWith('policy-1', {
+        name: 'Critical production alerts',
+        description: 'Routes critical alerts',
+        groupingMode: 'per_field',
+        matcher: { expression: 'data.severity : "critical"' },
+        groupBy: ['host.name', 'service.name'],
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
+      });
     });
 
     it('does not call onSubmitCreate in edit mode', async () => {

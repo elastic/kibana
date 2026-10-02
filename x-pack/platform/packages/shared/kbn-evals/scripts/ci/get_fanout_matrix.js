@@ -89,7 +89,7 @@ const assertListedModelsHaveConnectors = (connectors, groups) => {
     }
     if (selectConnectorIds(connectors, [group]).length === 0) {
       throw new Error(
-        `No connector in KIBANA_TESTING_AI_CONNECTORS matched model "${group}". ` +
+        `No connector in KIBANA_TESTING_INFERENCE_ENDPOINTS matched model "${group}". ` +
           `Available models: ${describeAvailableModels(connectors).join(',')}`
       );
     }
@@ -116,7 +116,7 @@ function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups })
  * Resolve the fanout steps for a suite.
  *
  * @param {object} params
- * @param {object} params.connectors           parsed KIBANA_TESTING_AI_CONNECTORS map
+ * @param {object} params.connectors           parsed KIBANA_TESTING_INFERENCE_ENDPOINTS map
  * @param {object} params.suiteInfo            get_suite_info.js output (shards, specModelGroups, weeklyEisModelGroups)
  * @param {string[]} params.requestedModelGroups  EVAL_MODEL_GROUPS (the provisioned universe)
  * @param {boolean} params.perSpec            weekly run (`KBN_EVALS_WEEKLY`); apply `specModelGroups` overrides
@@ -218,7 +218,7 @@ function main() {
 
   try {
     const rows = buildFanoutMatrix({
-      connectors: parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || ''),
+      connectors: parseMaybeBase64Json(process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS || ''),
       suiteInfo,
       requestedModelGroups: parseModelGroups(process.env.EVAL_MODEL_GROUPS || ''),
       perSpec: isTruthy(process.env.KBN_EVALS_WEEKLY),

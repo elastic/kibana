@@ -5,27 +5,11 @@
  * 2.0.
  */
 
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
-import {
-  KIBANA_OBSERVABILITY_SOLUTION,
-  KIBANA_SEARCH_SOLUTION,
-  KIBANA_SECURITY_SOLUTION,
-  KIBANA_VECTORDB_SOLUTION,
-  type KibanaSolution,
-} from '@kbn/projects-solutions-groups';
-
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from '../../uiam';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Partial<Record<KibanaSolution, UiamOAuthProjectType>> =
-  {
-    [KIBANA_SEARCH_SOLUTION]: 'elasticsearch',
-    [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
-    [KIBANA_SECURITY_SOLUTION]: 'security',
-    [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
-  };
 
 export function defineCreateOAuthClientRoute({
   router,

@@ -66,6 +66,89 @@ describe('RulesSavedObjectService', () => {
     ({ rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService());
   });
 
+  describe('bulkCreate', () => {
+    const attrs = { metadata: { name: 'rule-a' } } as never;
+
+    it('returns an empty array when given no items', async () => {
+      const result = await rulesSavedObjectService.bulkCreate([]);
+
+      expect(result).toEqual([]);
+      expect(mockSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('creates saved objects with overwrite false and maps successes', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+        ],
+      });
+
+      const result = await rulesSavedObjectService.bulkCreate([{ id: 'rule-1', attrs }]);
+
+      expect(mockSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-1',
+            attributes: attrs,
+          },
+        ],
+        { overwrite: false }
+      );
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+      ]);
+    });
+
+    it('maps mixed success and per-item saved object errors', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'rule-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      } as never);
+
+      const result = await rulesSavedObjectService.bulkCreate([
+        { id: 'rule-1', attrs },
+        { id: 'rule-2', attrs },
+      ]);
+
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+        {
+          id: 'rule-2',
+          error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+        },
+      ]);
+    });
+  });
+
   describe('getTotalScheduledPerMinute', () => {
     it('aggregates enabled rules across all spaces and sums their per-minute frequency', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(

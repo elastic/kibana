@@ -126,14 +126,8 @@ export enum SupportedChartType {
   Mosaic = 'mosaic',
 }
 
-export interface VisualizationResultData {
-  esql: string;
+interface VisualizationResultDataBase {
   time_range?: TimeRange;
-  renderer?: 'lens' | 'vega';
-  /** Shared visualization payload. Vega stores spec at visualization.spec. */
-  visualization: Record<string, unknown> & { spec?: string };
-  /** Optional chart type identifier (primarily Lens). */
-  chart_type?: SupportedChartType;
   /**
    * ID of the persisted visualization attachment. Present when persistence
    * succeeded; the agent renders the visualization inline via
@@ -143,6 +137,31 @@ export interface VisualizationResultData {
   /** Version of the persisted attachment backing this result. */
   version?: number;
 }
+
+/** A Lens or Vega result. `renderer` is omitted on results predating the discriminator. */
+export interface ChartVisualizationResultData extends VisualizationResultDataBase {
+  esql: string;
+  renderer?: 'lens' | 'vega';
+  /** Shared visualization payload. Vega stores spec at visualization.spec. */
+  visualization: Record<string, unknown> & { spec?: string };
+  /** Optional chart type identifier (primarily Lens). */
+  chart_type?: SupportedChartType;
+}
+
+/**
+ * A custom content result. The HTML template is deliberately absent — it lives in the
+ * attachment, and round-tripping KBs of markup through the model invites corruption.
+ */
+export interface CustomContentVisualizationResultData extends VisualizationResultDataBase {
+  renderer: 'custom_content';
+  esql?: string;
+  /** The prompt the template was generated from. */
+  visualization: { prompt: string };
+}
+
+export type VisualizationResultData =
+  | ChartVisualizationResultData
+  | CustomContentVisualizationResultData;
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
 

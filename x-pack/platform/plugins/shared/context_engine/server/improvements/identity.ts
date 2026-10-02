@@ -63,20 +63,21 @@ export const buildChangeFingerprint = ({
 };
 
 /**
- * Idempotent lineage key: `hash(ai_index_id + change_fingerprint)`. Two runs proposing the same
- * fix for the same AI index produce the same `improvement_id`, and therefore two revisions of one
- * improvement rather than two improvements.
+ * Idempotent lineage key: `hash(space + ai_index_id + change_fingerprint)`. Two runs proposing the
+ * same fix for the same AI index in the same space produce the same `improvement_id`.
  */
 export const buildImprovementId = ({
+  spaceId,
   aiIndexId,
   action,
   target,
 }: {
+  spaceId: string;
   aiIndexId: string;
   action: ImprovementAction;
   target?: ImprovementTarget;
 }): string =>
   createHash('sha256')
-    .update(`${aiIndexId}\u0000${buildChangeFingerprint({ action, target })}`)
+    .update(`${spaceId}\u0000${aiIndexId}\u0000${buildChangeFingerprint({ action, target })}`)
     .digest('hex')
     .slice(0, IMPROVEMENT_ID_LENGTH);

@@ -21,9 +21,10 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError, createSSERequestError, isSSEError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 import {
+  MAX_STREAM_NAME_LENGTH,
   Streams,
   type FlattenRecord,
-  flattenRecord,
+  boundedFlattenRecord,
   getStreamTypeFromDefinition,
   isOtelStream,
 } from '@kbn/streams-schema';
@@ -71,10 +72,10 @@ export interface SuggestIngestPipelineParams {
 }
 
 export const suggestIngestPipelineSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    connector_id: z.string(),
-    documents: z.array(flattenRecord),
+    connector_id: z.string().max(256),
+    documents: z.array(boundedFlattenRecord).max(1000),
     response_format: z.enum(['streamlang', 'ingest_pipeline']).optional(),
   }),
 }) satisfies z.Schema<SuggestIngestPipelineParams>;

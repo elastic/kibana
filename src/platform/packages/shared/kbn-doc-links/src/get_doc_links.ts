@@ -68,6 +68,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
       metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
+      troubleshootingTooManyTransactions: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -183,7 +184,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ingestionApis: `${ELASTIC_DOCS}solutions/search`,
       ingestPipelines: `${ELASTIC_DOCS}solutions/search/search-pipelines`,
       knnSearch: `${ELASTIC_DOCS}solutions/search/vector/knn`,
-      knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn#_combine_approximate_knn_with_other_features`,
+      knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn/approximate-knn-query-examples#combine_approximate_knn_with_other_features`,
       languageAnalyzers: `${ELASTIC_DOCS}reference/text-analysis/analysis-lang-analyzer`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
@@ -208,7 +209,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       vectorSearchDenseVector: `${ELASTIC_DOCS}solutions/search/vector/dense-vector`,
       jinaEmbeddingModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-jina`,
       vectorSearchBringOwnVectors: `${ELASTIC_DOCS}solutions/search/vector/bring-own-vectors`,
-      vectorDatabaseGetStarted: `${ELASTIC_DOCS}solutions/vector-database/get-started`,
+      vectorDatabaseFullTextSearch: `${ELASTIC_DOCS}solutions/vector-database/vector-full-text-search`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-model-ref`,
       syncRules: `${ELASTIC_DOCS}reference/search-connectors/es-sync-rules`,
@@ -379,6 +380,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
       mappingReference: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference`,
+      mappingKeyword: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/keyword`,
+      mappingBoolean: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/boolean`,
+      mappingIp: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/ip`,
+      mappingDate: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/date`,
+      mappingUnsignedLong: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/unsigned-long`,
+      mappingNumber: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/number`,
       mappingAnalyzer: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/analyzer`,
       mappingCoerce: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/coerce`,
       mappingCopyTo: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/copy-to`,
@@ -552,6 +559,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryESQLApproximateResults: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#approximation-fast-mode`,
       queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
       queryESQLMvIntersects: `${ELASTIC_DOCS}reference/query-languages/esql/functions-operators/mv-functions/mv_intersects`,
+      queryESQLViews: `${ELASTIC_DOCS}reference/query-languages/esql/esql-views`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
@@ -576,7 +584,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       savedObjectsApiList: isServerless
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
         : `${KIBANA_APIS}group/endpoint-saved-objects`,
-      apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
+      apiKeys: isServerless
+        ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
+        : `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
       queryActivity: `${ELASTIC_DOCS}deploy-manage/monitor/query-activity`,
     },
     ml: {
@@ -637,6 +647,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lensPanels: `${ELASTIC_DOCS}explore-analyze/visualize/lens`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,
       vega: `${ELASTIC_DOCS}explore-analyze/visualize/custom-visualizations-with-vega`,
+      customPanels: `${ELASTIC_DOCS}explore-analyze/visualize/custom-panels`,
       tsvbIndexPatternMode: `${ELASTIC_DOCS}explore-analyze/visualize/legacy-editors/tsvb#tsvb-data-view-mode`,
     },
     observability: {
@@ -738,6 +749,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elasticsearchSettings: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings`,
       elasticsearchEnableSecurity: `${ELASTIC_DOCS}deploy-manage/deploy/self-managed/installing-elasticsearch`,
       elasticsearchEnableApiKeys: `${ELASTIC_DOCS}reference/elasticsearch/configuration-reference/security-settings#api-key-service-settings`,
+      esqlDataFederationSecurityPrivileges: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-security#privileges`,
       indicesPrivileges: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#privileges-list-indices`,
       kibanaTLS: `${ELASTIC_DOCS}deploy-manage/security/set-up-basic-security#encrypt-internode-communication`,
       kibanaPrivileges: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges`,
@@ -1115,6 +1127,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       federatedIdentity: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-federated-identity`,
       querying: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-querying`,
       security: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-security`,
+    },
+    contextEngine: {
+      overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

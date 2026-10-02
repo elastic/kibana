@@ -8,13 +8,12 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
   shouldRunEvals,
-} from './eval_pipeline';
+} from './eval_pipeline.ts';
 
 // `jest.mock` calls are hoisted above the imports above, so `eval_pipeline` sees
 // the mocked `fs` / `child_process` when it is first evaluated.
@@ -206,11 +205,9 @@ describe('eval_pipeline', () => {
     });
 
     it('parses the JSON-array label form too (matches the child parser)', () => {
-      expect(
-        getForwardablePrLabels(
-          '["evals:smoke-tests","help wanted","ci:build-with-rspack-optimizer"]'
-        )
-      ).toBe('evals:smoke-tests,ci:build-with-rspack-optimizer');
+      expect(getForwardablePrLabels('["evals:smoke-tests","help wanted","ci:cloud-deploy"]')).toBe(
+        'evals:smoke-tests,ci:cloud-deploy'
+      );
     });
 
     it('returns an empty string when every label contains whitespace', () => {
@@ -246,14 +243,6 @@ describe('eval_pipeline', () => {
       expect(yaml).not.toContain("exit_status: '-1'");
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
-    });
-  });
-
-  describe('getEvalPipeline agent disk', () => {
-    it('requests an explicit boot disk so ES stays above its merge disk watermark', () => {
-      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
-
-      expect(yaml).toContain(`diskSizeGb: ${DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb}`);
     });
   });
 

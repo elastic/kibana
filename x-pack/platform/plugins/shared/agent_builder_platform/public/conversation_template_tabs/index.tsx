@@ -26,10 +26,10 @@ export const registerConversationTemplateTabs = ({
 }: {
   conversationTemplates: ConversationTemplateServiceStartContract;
 }): void => {
-  conversationTemplates.registerTab(TIMELINE_TAB_ID, {
+  conversationTemplates.registerTab(TIMELINE_TAB_ID, () => ({
     label: i18n.translate('xpack.agentBuilderPlatform.conversationTemplateTabs.timelineTabLabel', {
       defaultMessage: 'Timeline',
     }),
     content: TimelinePlaceholder,
-  });
+  }));
 };

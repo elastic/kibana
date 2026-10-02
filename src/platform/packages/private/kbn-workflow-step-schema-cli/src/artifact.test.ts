@@ -11,7 +11,7 @@ import fs from 'fs';
 import os from 'os';
 import Path from 'path';
 import { transformToStrict } from './template_transform';
-import { sha256Hex, stableStringify } from './hash';
+import { sha256Hex } from './hash';
 import { writeIndex, writeVariant } from './write_artifact';
 import type { IndexManifest, JsonObject, VariantManifest } from './types';
 
@@ -41,10 +41,7 @@ const baseDoc: JsonObject = {
 const makeTmpDir = (): string => fs.mkdtempSync(Path.join(os.tmpdir(), 'wf-schema-'));
 
 const manifestFor = (variant: VariantManifest): IndexManifest => ({
-  kibanaVersion: '9.4.0',
-  buildHash: 'test',
   profile: 'superset',
-  channel: 'release',
   connectorTypes: [],
   stepTypes: ['delay', 'http'],
   triggerTypes: [],
@@ -63,10 +60,10 @@ describe('writeVariant', () => {
     expect(fs.existsSync(absolute)).toBe(true);
 
     const written = fs.readFileSync(absolute, 'utf8');
-    // The file is exactly the minified, key-sorted document (no trailing newline).
-    expect(written).toBe(stableStringify(strictDoc, false));
-    // sha256 is over the exact served bytes.
+    // sha256 is over the exact served bytes (after canonicalization).
     expect(manifest.sha256).toBe(sha256Hex(written));
+    // The bytes are valid JSON and can be round-tripped.
+    expect(() => JSON.parse(written)).not.toThrow();
   });
 });
 
@@ -103,7 +100,49 @@ describe('determinism', () => {
     const indexPath = writeIndex(bundleDir, manifestFor(variant));
     const parsed = JSON.parse(fs.readFileSync(indexPath, 'utf8')) as Record<string, unknown>;
     expect(parsed.generatedAt).toBeUndefined();
-    expect(parsed.kibanaVersion).toBe('9.4.0');
-    expect(parsed.buildHash).toBe('test');
+  });
+
+  it('canonicalizes anyOf members: two docs with swapped anyOf order produce identical bytes and sha256', () => {
+    const docA: JsonObject = {
+      anyOf: [{ type: 'string' }, { type: 'number' }],
+    };
+    const docB: JsonObject = {
+      anyOf: [{ type: 'number' }, { type: 'string' }],
+    };
+    const dirA = makeTmpDir();
+    const dirB = makeTmpDir();
+    const manifestA = writeVariant({ bundleDir: dirA, variant: 'strict', doc: docA });
+    const manifestB = writeVariant({ bundleDir: dirB, variant: 'strict', doc: docB });
+
+    expect(manifestA.sha256).toBe(manifestB.sha256);
+    expect(fs.readFileSync(Path.join(dirA, 'strict/schema.json'), 'utf8')).toBe(
+      fs.readFileSync(Path.join(dirB, 'strict/schema.json'), 'utf8')
+    );
+  });
+
+  it('does NOT sort enum members: curated order (e.g. severity levels) is preserved', () => {
+    const doc: JsonObject = {
+      enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'],
+    };
+    const bundleDir = makeTmpDir();
+    writeVariant({ bundleDir, variant: 'strict', doc });
+    const written = fs.readFileSync(Path.join(bundleDir, 'strict/schema.json'), 'utf8');
+    const parsed = JSON.parse(written) as { enum: string[] };
+    expect(parsed.enum).toEqual(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']);
+  });
+
+  it('does NOT sort tuple-form items arrays: element order is semantically significant', () => {
+    // tuple-form items is an array, not a keyword-specific marker; the writer
+    // must not reorder it even if another keyword on the same object is sorted.
+    const doc: JsonObject = {
+      type: 'array',
+      anyOf: [{ type: 'string' }, { type: 'number' }],
+      items: [{ type: 'boolean' }, { type: 'string' }, { type: 'null' }],
+    };
+    const bundleDir = makeTmpDir();
+    writeVariant({ bundleDir, variant: 'strict', doc });
+    const written = fs.readFileSync(Path.join(bundleDir, 'strict/schema.json'), 'utf8');
+    const parsed = JSON.parse(written) as { items: Array<{ type: string }> };
+    expect(parsed.items.map((i) => i.type)).toEqual(['boolean', 'string', 'null']);
   });
 });

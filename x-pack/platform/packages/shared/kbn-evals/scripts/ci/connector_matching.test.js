@@ -13,18 +13,22 @@ const {
 } = require('./connector_matching');
 
 const CONNECTORS = {
-  'eis-openai-gpt-5-4': { config: { providerConfig: { model_id: 'openai-gpt-5.4' } } },
+  'eis-openai-gpt-5-4': { provider: 'elastic', providerConfig: { model_id: 'openai-gpt-5.4' } },
   'eis-anthropic-claude-4-6-sonnet': {
-    config: { providerConfig: { model_id: 'anthropic-claude-4.6-sonnet' } },
+    provider: 'elastic',
+    providerConfig: { model_id: 'anthropic-claude-4.6-sonnet' },
   },
-  'litellm-llm-gateway-gpt-4o': { config: { defaultModel: 'llm-gateway/gpt-4o' } },
+  'openrouter-openai-gpt-5-4': {
+    provider: 'openai',
+    providerConfig: { model_id: 'openai/gpt-5.4' },
+  },
 };
 
 describe('parseModelGroups', () => {
   it('splits, trims and drops empties', () => {
-    expect(parseModelGroups(' eis/openai-gpt-5.4 , , llm-gateway/gpt-4o ')).toEqual([
+    expect(parseModelGroups(' eis/openai-gpt-5.4 , , openrouter/openai-gpt-5.4 ')).toEqual([
       'eis/openai-gpt-5.4',
-      'llm-gateway/gpt-4o',
+      'openrouter/openai-gpt-5.4',
     ]);
   });
 
@@ -36,6 +40,7 @@ describe('parseModelGroups', () => {
 
 describe('connectorMatchesModelGroup', () => {
   const eis = CONNECTORS['eis-openai-gpt-5-4'];
+  const openrouter = CONNECTORS['openrouter-openai-gpt-5-4'];
 
   it('matches by connector id', () => {
     expect(connectorMatchesModelGroup('eis-openai-gpt-5-4', eis, 'eis-openai-gpt-5-4')).toBe(true);
@@ -46,15 +51,7 @@ describe('connectorMatchesModelGroup', () => {
     expect(connectorMatchesModelGroup('eis-openai-gpt-5-4', eis, 'eis/openai-gpt-5.4')).toBe(true);
   });
 
-  it('matches a litellm connector by its defaultModel', () => {
-    const litellm = CONNECTORS['litellm-llm-gateway-gpt-4o'];
-    expect(
-      connectorMatchesModelGroup('litellm-llm-gateway-gpt-4o', litellm, 'llm-gateway/gpt-4o')
-    ).toBe(true);
-  });
-
   it('matches an openrouter/<provider>-<model> group to the slugified connector id', () => {
-    const openrouter = { config: { defaultModel: 'openai/gpt-5.4' } };
     expect(
       connectorMatchesModelGroup(
         'openrouter-openai-gpt-5-4',
@@ -64,11 +61,16 @@ describe('connectorMatchesModelGroup', () => {
     ).toBe(true);
   });
 
-  it('matches a native openrouter id against defaultModel', () => {
-    const openrouter = { config: { defaultModel: 'openai/gpt-5.4' } };
+  it('matches a native openrouter id against providerConfig.model_id', () => {
     expect(
       connectorMatchesModelGroup('openrouter-openai-gpt-5-4', openrouter, 'openai/gpt-5.4')
     ).toBe(true);
+  });
+
+  it('does not match an eis/ group against a non-EIS endpoint', () => {
+    expect(
+      connectorMatchesModelGroup('openrouter-openai-gpt-5-4', openrouter, 'eis/openai/gpt-5.4')
+    ).toBe(false);
   });
 
   it('does not match an unrelated group', () => {
@@ -97,11 +99,11 @@ describe('selectConnectorIds', () => {
 });
 
 describe('describeAvailableModels', () => {
-  it('lists eis models with the eis/ prefix and litellm defaultModels as-is', () => {
+  it('lists eis models with the eis/ prefix and other endpoint model ids as-is', () => {
     expect(describeAvailableModels(CONNECTORS)).toEqual([
       'eis/openai-gpt-5.4',
       'eis/anthropic-claude-4.6-sonnet',
-      'llm-gateway/gpt-4o',
+      'openai/gpt-5.4',
     ]);
   });
 });

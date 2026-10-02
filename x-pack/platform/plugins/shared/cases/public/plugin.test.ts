@@ -295,7 +295,6 @@ describe('Cases Ui Plugin', () => {
           attachmentsEnabled: false,
           chatEnabled: false,
           runWorkflowsEnabled: true,
-          casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {
           canUseCases: expect.any(Function),

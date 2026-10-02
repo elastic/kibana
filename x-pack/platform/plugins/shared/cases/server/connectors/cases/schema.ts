@@ -111,7 +111,9 @@ export const CasesConnectorRunParamsSchema = schema.object({
   templateVersion: schema.nullable(
     schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
   ),
-  internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
+  /** Pre-upgrade tasks may omit this and send `internallyManagedAlerts`. */
+  source: schema.maybe(schema.oneOf([schema.literal('attack'), schema.literal('rule')])),
+  internallyManagedAlerts: schema.maybe(schema.nullable(schema.boolean())),
 });
 
 const ZAlertSchema = z.record(z.string(), z.any()).superRefine((value, ctx) => {
@@ -206,9 +208,26 @@ export const ZCasesConnectorRunParamsSchema = z
       .default(DEFAULT_MAX_OPEN_CASES),
     templateId: z.string().max(MAX_TEMPLATE_KEY_LENGTH).nullable().default(null),
     templateVersion: z.string().max(MAX_TEMPLATE_VERSION_STRING_LENGTH).nullable().default(null),
-    internallyManagedAlerts: z.boolean().default(false).nullable(),
+    source: z.enum(['attack', 'rule']).optional(),
+    internallyManagedAlerts: z.boolean().nullable().optional(),
   })
   .strict();
+
+export type CasesConnectorActionSource = 'attack' | 'rule';
+
+export const resolveCasesConnectorActionSource = ({
+  source,
+  internallyManagedAlerts,
+}: {
+  source?: CasesConnectorActionSource | null;
+  internallyManagedAlerts?: boolean | null;
+}): CasesConnectorActionSource => {
+  if (source === 'attack' || source === 'rule') {
+    return source;
+  }
+
+  return internallyManagedAlerts === true ? 'attack' : 'rule';
+};
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),

@@ -25,6 +25,9 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId,
   excludeFleetServer,
   refreshAgentPolicies,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }: {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;
@@ -34,6 +37,9 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
   refreshAgentPolicies: () => void;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
@@ -50,6 +56,9 @@ export const AgentPolicySelectionStep = ({
           onKeyChange={setSelectedAPIKeyId}
           refreshAgentPolicies={refreshAgentPolicies}
           excludeFleetServer={excludeFleetServer}
+          onAgentPolicyCreated={onAgentPolicyCreated}
+          defaultAgentPolicyName={defaultAgentPolicyName}
+          forceCreatePolicy={forceCreatePolicy}
         />
         {selectedPolicy?.min_agent_version != null && (
           <MinAgentVersionCallout minVersion={selectedPolicy.min_agent_version} />
