@@ -134,7 +134,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
                 'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.content',
                 {
                   defaultMessage:
-                    'This model was deprecated on {date}. We recommend a newer model for optimal results.',
+                    'This model has reached end of life on {date}. Use a more recent model instead.',
                   values: { date: endOfLifeDate },
                 }
               )}
