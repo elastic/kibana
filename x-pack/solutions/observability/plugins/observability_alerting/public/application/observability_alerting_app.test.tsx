@@ -72,7 +72,7 @@ const mockAlertingVTwo = {
   ),
   EpisodesPage: ({ hostApp, privilegeCheck, manageRulesHref }: AlertingV2PageProps) => (
     <Placeholder
-      name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`}
+      name={`episodesPage:${hostApp?.alerts?.app ?? 'none'}`}
       privilegeCheck={privilegeCheck}
       {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
@@ -93,7 +93,7 @@ const mockAlertingVTwo = {
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
-    episodes: { app: appId, pathPrefix: paths.episodes },
+    alerts: { app: appId, pathPrefix: paths.alerts },
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })),

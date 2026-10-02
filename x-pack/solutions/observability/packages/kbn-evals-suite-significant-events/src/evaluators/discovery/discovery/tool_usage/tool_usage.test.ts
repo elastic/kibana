@@ -77,11 +77,41 @@ describe('scoreToolUsage', () => {
     });
   });
 
-  it('scores 0 and labels missing-events_write when events_write is never called', () => {
-    const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENTS_WRITE);
+  it('scores 0 and labels missing-events_write when no event decision is not grounded', () => {
+    const steps = [
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+    ];
     const result = scoreToolUsage({ steps, detectionCount: 1 });
     expect(result.score).toBe(0);
     expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+  });
+
+  it('accepts a grounded no-event decision without an events_write call', () => {
+    const steps = allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE);
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toEqual({
+      score: 1,
+      label: 'correct',
+      explanation: 'Correctly called all tools',
+    });
+  });
+
+  it('rejects a no-event run that grounded fewer detections than the batch size', () => {
+    const steps = allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE);
+
+    const result = scoreToolUsage({ steps, detectionCount: 5 });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+  });
+
+  it('accepts a no-event run with one execute_esql call per detection', () => {
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 2 }).score).toBe(1);
   });
 
   it.each([undefined, {}, { items: [] }] as const)(
