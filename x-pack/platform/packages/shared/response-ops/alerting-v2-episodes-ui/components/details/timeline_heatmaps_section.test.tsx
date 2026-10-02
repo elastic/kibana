@@ -18,10 +18,10 @@ import { AlertEpisodeTimelineHeatmapsSection } from './timeline_heatmaps_section
 
 jest.mock('../../utils/run_esql_async_search');
 
-// Mock the heavy heatmap building blocks since the section dynamically imports them.
-jest.mock('./lifecycle_heatmap', () => ({
-  AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-    <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
+// Mock the heavy chart building blocks since the section dynamically imports them.
+jest.mock('./episode_alert_timeline', () => ({
+  AlertEpisodeAlertTimeline: ({ eventRows }: { eventRows: unknown[] }) => (
+    <div data-test-subj="alertingV2EpisodeAlertTimelineMock">{eventRows.length}</div>
   ),
 }));
 
@@ -44,7 +44,7 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     queryClient.clear();
   });
 
-  it('renders both heatmaps inside a single shared panel once events are loaded', async () => {
+  it('renders the alert timeline and severity heatmap inside a single shared panel', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -66,11 +66,11 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     );
 
     const panel = screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSection');
-    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeLifecycleHeatmapMock'));
+    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeAlertTimelineMock'));
     expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeSeverityHeatmapMock'));
   });
 
-  it('renders only the lifecycle heatmap when there are no supported severity events', async () => {
+  it('renders only the alert timeline when there are no supported severity events', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -88,7 +88,7 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeLifecycleHeatmapMock')).toBeInTheDocument()
+      expect(screen.getByTestId('alertingV2EpisodeAlertTimelineMock')).toBeInTheDocument()
     );
     expect(screen.queryByTestId('alertingV2EpisodeSeverityHeatmapMock')).not.toBeInTheDocument();
   });

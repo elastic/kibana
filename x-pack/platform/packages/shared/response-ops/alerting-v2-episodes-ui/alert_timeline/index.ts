@@ -12,14 +12,17 @@ export type {
   AlertTimelineSeries,
   AlertTimelineSummary,
   AlertTimelineData,
-  AlertTimelinePhaseRow,
+  AlertTimelineEventRow,
   AlertTimelineGroupingValues,
 } from './types';
 export { ALERT_TIMELINE_TOP_N_DEFAULT } from './types';
 export { deriveAlertTimelineData } from './derive_alert_timeline_data';
-export { applyEpisodeStarts, makeEpisodeStartKey } from './apply_episode_starts';
+export { deriveEpisodeAlertTimelineData } from './derive_episode_alert_timeline_data';
+export type { EpisodeAlertTimelineData } from './derive_episode_alert_timeline_data';
 export { AlertTimelineRow } from './alert_timeline_row';
 export type { AlertTimelineRowProps } from './alert_timeline_row';
+export { AlertTimelineChart } from './alert_timeline_chart';
+export type { AlertTimelineChartProps } from './alert_timeline_chart';
 export { formatTimestamp, formatDuration, describeSegmentSpan } from './alert_timeline_format';
 export type { SegmentSpanFlags } from './alert_timeline_format';
 export {
