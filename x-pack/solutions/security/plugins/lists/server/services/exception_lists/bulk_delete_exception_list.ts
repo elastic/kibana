@@ -6,6 +6,7 @@
  */
 
 import pMap from 'p-map';
+import { withSpan } from '@kbn/apm-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -25,11 +26,11 @@ import { deleteExceptionListItemsByListStreamed } from './delete_exception_list_
 import { transformSavedObjectToExceptionList } from './utils';
 
 /**
- * Runs registered `exceptionsListPreDeleteList` extension points for a single list and
- * returns the blockers that refuse its deletion. Throwing fails only the list being processed.
+ * Runs registered `exceptionsListPreDeleteList` extension points once for every list in the
+ * batch and returns the lists whose deletion is refused. Throwing refuses every list.
  */
 export type PreDeleteListHook = (
-  list: ExceptionListSchema
+  lists: ExceptionListSchema[]
 ) => Promise<ExceptionListPreDeleteListBlocker[]>;
 
 interface BulkDeleteExceptionListOptions {
@@ -43,7 +44,11 @@ export interface BulkDeleteExceptionListError {
   message: string;
   status_code: number;
   lists: Array<{ id: string; list_id?: string }>;
-  rule_references?: Array<{ rule_id: string; id: string; name: string }>;
+}
+
+interface ListOperationResult {
+  list: ExceptionListSchema;
+  error?: BulkDeleteExceptionListError;
 }
 
 export interface BulkDeleteExceptionListResult {
@@ -60,6 +65,44 @@ export interface BulkDeleteExceptionListResult {
 
 const BULK_DELETE_LIST_CONCURRENCY = 10;
 
+/**
+ * Validates data returned by an `exceptionsListPreDeleteList` extension point, so that a
+ * malformed response refuses the whole batch instead of being read as "not referenced".
+ */
+export const validatePreDeleteListResponse = (
+  listIds: string[],
+  {
+    lists,
+    blockedLists,
+  }: { lists: ExceptionListSchema[]; blockedLists: ExceptionListPreDeleteListBlocker[] }
+): Error | undefined => {
+  if (
+    !Array.isArray(lists) ||
+    lists.length !== listIds.length ||
+    lists.some((list, index) => list?.id !== listIds[index])
+  ) {
+    return new Error('exceptionsListPreDeleteList extension changed the lists being processed');
+  }
+
+  if (!Array.isArray(blockedLists)) {
+    return new Error('exceptionsListPreDeleteList extension returned a malformed [blockedLists]');
+  }
+
+  const requestedIds = new Set(listIds);
+  const blockedIds = new Set<string>();
+
+  for (const block of blockedLists) {
+    if (typeof block?.id !== 'string' || !requestedIds.has(block.id) || blockedIds.has(block.id)) {
+      return new Error(
+        'exceptionsListPreDeleteList extension returned a malformed [blockedLists] entry'
+      );
+    }
+    blockedIds.add(block.id);
+  }
+
+  return undefined;
+};
+
 const deleteListWithItems = async ({
   list,
   namespaceType,
@@ -70,13 +113,15 @@ const deleteListWithItems = async ({
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: SavedObjectType;
-}): Promise<{ list: ExceptionListSchema; error?: BulkDeleteExceptionListError }> => {
+}): Promise<ListOperationResult> => {
   // Delete the container first so detection rules can no longer reference the
   // list. Orphaned items left behind by a subsequent cleanup failure are inert
   // (unreachable without a container) and preferable to a half-emptied list
   // that rules still execute against.
   try {
-    await savedObjectsClient.delete(savedObjectType, list.id);
+    await withSpan('exception_lists.bulk_delete.delete_container', async () =>
+      savedObjectsClient.delete(savedObjectType, list.id)
+    );
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
@@ -90,11 +135,13 @@ const deleteListWithItems = async ({
   }
 
   try {
-    await deleteExceptionListItemsByListStreamed({
-      listId: list.list_id,
-      namespaceType,
-      savedObjectsClient,
-    });
+    await withSpan('exception_lists.bulk_delete.delete_items', async () =>
+      deleteExceptionListItemsByListStreamed({
+        listId: list.list_id,
+        namespaceType,
+        savedObjectsClient,
+      })
+    );
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
@@ -110,54 +157,55 @@ const deleteListWithItems = async ({
   return { list };
 };
 
-const checkAndDeleteList = async ({
-  list,
-  namespaceType,
-  preDeleteListHook,
-  savedObjectsClient,
-  savedObjectType,
-}: {
-  list: ExceptionListSchema;
-  namespaceType: NamespaceType;
-  preDeleteListHook?: PreDeleteListHook;
-  savedObjectsClient: SavedObjectsClientContract;
-  savedObjectType: SavedObjectType;
-}): Promise<{ list: ExceptionListSchema; error?: BulkDeleteExceptionListError }> => {
-  if (preDeleteListHook) {
-    let blockedBy: ExceptionListPreDeleteListBlocker[];
+const checkPreDeleteListHook = async (
+  lists: ExceptionListSchema[],
+  preDeleteListHook: PreDeleteListHook
+): Promise<{ deletableLists: ExceptionListSchema[]; refused: ListOperationResult[] }> => {
+  let blockedLists: ExceptionListPreDeleteListBlocker[];
 
-    try {
-      blockedBy = await preDeleteListHook(list);
-    } catch (err) {
-      const { message, statusCode } = transformError(err);
-      return {
+  try {
+    blockedLists = await withSpan(
+      {
+        labels: { list_count: String(lists.length), strategy: 'aggregation' },
+        name: 'exception_lists.bulk_delete.check_references',
+      },
+      async () => preDeleteListHook(lists)
+    );
+  } catch (err) {
+    const { message, statusCode } = transformError(err);
+    return {
+      deletableLists: [],
+      refused: lists.map((list) => ({
         error: {
           lists: [{ id: list.id, list_id: list.list_id }],
           message,
           status_code: statusCode,
         },
         list,
-      };
-    }
-
-    if (blockedBy.length > 0) {
-      return {
-        error: {
-          lists: [{ id: list.id, list_id: list.list_id }],
-          message: `Exception list "${list.name}" cannot be deleted because it is linked to ${
-            blockedBy.length
-          } ${
-            blockedBy.length === 1 ? 'rule' : 'rules'
-          }. Unlink the list from all rules before retrying.`,
-          rule_references: blockedBy,
-          status_code: 409,
-        },
-        list,
-      };
-    }
+      })),
+    };
   }
 
-  return deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient });
+  const blockedListIds = new Set(blockedLists.map(({ id }) => id));
+  const deletableLists: ExceptionListSchema[] = [];
+  const refused: ListOperationResult[] = [];
+
+  lists.forEach((list) => {
+    if (!blockedListIds.has(list.id)) {
+      deletableLists.push(list);
+      return;
+    }
+    refused.push({
+      error: {
+        lists: [{ id: list.id, list_id: list.list_id }],
+        message: `Exception list "${list.name}" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.`,
+        status_code: 409,
+      },
+      list,
+    });
+  });
+
+  return { deletableLists, refused };
 };
 
 export const bulkDeleteExceptionList = async ({
@@ -180,8 +228,15 @@ export const bulkDeleteExceptionList = async ({
 
   const savedObjectType = getSavedObjectType({ namespaceType });
 
-  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet<ExceptionListSoSchema>(
-    uniqueIds.map((id) => ({ id, type: savedObjectType }))
+  const { saved_objects: savedObjects } = await withSpan(
+    {
+      labels: { list_count: String(uniqueIds.length) },
+      name: 'exception_lists.bulk_delete.load_containers',
+    },
+    async () =>
+      savedObjectsClient.bulkGet<ExceptionListSoSchema>(
+        uniqueIds.map((id) => ({ id, type: savedObjectType }))
+      )
   );
 
   const validationErrors: BulkDeleteExceptionListError[] = [];
@@ -209,26 +264,21 @@ export const bulkDeleteExceptionList = async ({
     }
   });
 
-  const deleteResults =
-    foundLists.length > 0
-      ? await pMap(
-          foundLists,
-          (list) =>
-            checkAndDeleteList({
-              list,
-              namespaceType,
-              preDeleteListHook,
-              savedObjectType,
-              savedObjectsClient,
-            }),
-          { concurrency: BULK_DELETE_LIST_CONCURRENCY }
-        )
-      : [];
+  const { deletableLists, refused } =
+    preDeleteListHook && foundLists.length > 0
+      ? await checkPreDeleteListHook(foundLists, preDeleteListHook)
+      : { deletableLists: foundLists, refused: [] };
+
+  const deleteResults = await pMap(
+    deletableLists,
+    (list) => deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient }),
+    { concurrency: BULK_DELETE_LIST_CONCURRENCY }
+  );
 
   const results: ExceptionListSchema[] = [];
   const deleteErrors: BulkDeleteExceptionListError[] = [];
 
-  deleteResults.forEach(({ list, error }) => {
+  [...refused, ...deleteResults].forEach(({ list, error }) => {
     if (error) {
       deleteErrors.push(error);
     } else {

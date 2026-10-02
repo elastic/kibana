@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
@@ -16,7 +17,71 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import { EndpointHttpError } from '../../../endpoint/errors';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
-const MAX_REFERENCING_RULES = 1000;
+const REFERENCES_BY_LIST_AGGREGATION = 'referencesByList';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// Each bucket counts rule documents (not nested reference entries) that reference the list.
+// This shape is constrained by the Saved Objects aggregation validator, which rewrites the
+// `alert.references` paths to the root `references` field.
+const buildReferencesByListAggregation = (
+  listIds: string[],
+  referenceType: string
+): AggregationsAggregationContainer => ({
+  filters: {
+    filters: Object.fromEntries(
+      listIds.map((listId) => [
+        listId,
+        {
+          bool: {
+            filter: [
+              {
+                nested: {
+                  path: 'alert.references',
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { 'alert.references.id': { value: listId } } },
+                        { term: { 'alert.references.type': { value: referenceType } } },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ])
+    ),
+  },
+});
+
+// Fail closed: a missing or malformed bucket means the references could not be verified,
+// which must never be read as a count of zero.
+const getReferenceCountsByListId = (
+  aggregations: Record<string, unknown> | undefined,
+  listIds: string[]
+): Map<string, number> => {
+  const aggregation = aggregations?.[REFERENCES_BY_LIST_AGGREGATION];
+  const buckets = isRecord(aggregation) ? aggregation.buckets : undefined;
+
+  return new Map(
+    listIds.map((listId) => {
+      const bucket = isRecord(buckets) && Object.hasOwn(buckets, listId) ? buckets[listId] : null;
+      const docCount = isRecord(bucket) ? bucket.doc_count : undefined;
+
+      if (typeof docCount !== 'number' || !Number.isSafeInteger(docCount) || docCount < 0) {
+        throw new EndpointHttpError(
+          `Unable to verify detection rule references for exception list [${listId}]: unexpected rule search response`,
+          500
+        );
+      }
+
+      return [listId, docCount];
+    })
+  );
+};
 
 // Every list type goes through the rule reference check, including endpoint artifact
 // lists (trusted apps, blocklists, etc.). Artifact lists are never referenced by
@@ -26,20 +91,23 @@ export const getExceptionsPreDeleteListHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreDeleteListServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
+    if (data.lists.length === 0) {
+      return data;
+    }
+
     // Fail closed: without a request there is no way to check whether detection rules
-    // reference this list, and treating "cannot verify" as "not referenced" would allow
+    // reference these lists, and treating "cannot verify" as "not referenced" would allow
     // deleting a list that rules still depend on.
     if (!request) {
       throw new EndpointHttpError(
-        `Unable to verify detection rule references for exception list [${data.list.list_id}]: no request in context`,
+        'Unable to verify detection rule references for exception lists: no request in context',
         403
       );
     }
 
     // Fail closed: rule search results are silently filtered to the rule types the
-    // caller may read. For a caller without detection rule read access, an empty
-    // result means "hidden from you", not "no rule is attached", so refuse instead
-    // of trusting it.
+    // caller may read. For a caller without detection rule read access, a zero count
+    // means "hidden from you", not "no rule is attached", so refuse instead of trusting it.
     const alertingAuthorization = await endpointAppContextService.getAlertingAuthorization(request);
     const authorizedRuleTypes = await alertingAuthorization.getAllAuthorizedRuleTypesFindOperation({
       authorizationEntity: AlertingAuthorizationEntity.Rule,
@@ -48,41 +116,42 @@ export const getExceptionsPreDeleteListHandler = (
 
     if (authorizedRuleTypes.size === 0) {
       throw new EndpointHttpError(
-        `Unable to verify detection rule references for exception list [${data.list.list_id}]: not authorized to read detection rules`,
+        'Unable to verify detection rule references for exception lists: not authorized to read detection rules',
         403
       );
     }
 
+    const listIds = data.lists.map(({ id }) => id);
     const rulesClient = await endpointAppContextService.getRulesClient(request);
-    const { data: referencingRules } = await findRules({
+    const { aggregations } = await findRules({
       rulesClient,
-      perPage: MAX_REFERENCING_RULES,
-      hasReference: {
-        id: data.list.id,
-        type: getSavedObjectType({ namespaceType: data.namespaceType }),
-      },
+      perPage: 0,
+      page: undefined,
       filter: undefined,
-      fields: ['name', 'params.ruleId'],
       sortField: undefined,
       sortOrder: undefined,
-      page: undefined,
+      aggregations: {
+        [REFERENCES_BY_LIST_AGGREGATION]: buildReferencesByListAggregation(
+          listIds,
+          getSavedObjectType({ namespaceType: data.namespaceType })
+        ),
+      },
     });
 
-    if (referencingRules.length === 0) {
-      return data;
-    }
-
-    const blockers: ExceptionListPreDeleteListBlocker[] = referencingRules.map(
-      ({ id, name, params }) => ({
-        id,
-        name,
-        rule_id: params.ruleId,
-      })
+    const referenceCounts = getReferenceCountsByListId(aggregations, listIds);
+    const blockedListsById = new Map<string, ExceptionListPreDeleteListBlocker>(
+      data.blockedLists.map((block) => [block.id, block])
     );
+
+    referenceCounts.forEach((ruleReferenceCount, listId) => {
+      if (ruleReferenceCount > 0 && !blockedListsById.has(listId)) {
+        blockedListsById.set(listId, { id: listId });
+      }
+    });
 
     return {
       ...data,
-      blockedBy: [...data.blockedBy, ...blockers],
+      blockedLists: [...blockedListsById.values()],
     };
   };
 };

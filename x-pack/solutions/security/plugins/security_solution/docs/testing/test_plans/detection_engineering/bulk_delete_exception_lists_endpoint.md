@@ -61,6 +61,7 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
 ### Non-functional requirements
 
 - The endpoint must handle up to 100 lists per request.
+- The rule reference check runs once per request: a single rule search with one count aggregation bucket per list, returning no rule documents.
 - Item cascade uses bounded concurrency across lists (currently 10).
 - Item deletion uses PIT streaming (1,000 items per page) to bound memory usage regardless of item count.
 
@@ -72,7 +73,7 @@ Functional requirements derived from [#276458](https://github.com/elastic/kibana
 - The request must include `action: "delete"`.
 - The `ids` array must contain at least 1 and at most 100 entries.
 - Deleting a list cascades to all its exception list items.
-- Lists referenced by detection rules are blocked (409) with rule details in the error response. The reference check is provided by the Security Solution plugin as an extension point and applies to all list types; endpoint artifact lists are never attached to detection rules so the check is a no-op for them.
+- Lists referenced by detection rules are blocked (409) with an error stating the list is referenced by one or more detection rules. The referencing rules (ids, names, or count) are not returned. The reference check is provided by the Security Solution plugin as an extension point and applies to all list types; endpoint artifact lists are never attached to detection rules so the check is a no-op for them.
 - The response includes `success`, `results`, `errors`, and `summary` (total/succeeded/failed/skipped).
 - One list's failure does not abort other lists in the batch.
 - Duplicate identifiers in the request are deduplicated (tracked in `summary.skipped`).
@@ -151,7 +152,7 @@ Then the list container is deleted before its items
 
 ### Rule reference checking
 
-> **Implementation note:** The reference check is not built into the Lists plugin. It is provided by the Security Solution plugin via the `exceptionsListPreDeleteList` extension point. When no callback is registered (for example, in tests that run the Lists plugin in isolation), the pre-delete check is skipped and all lists are deleted unconditionally. The check fires only from the bulk delete endpoint; the single-delete endpoint (`DELETE /api/exception_lists`) does **not** invoke it.
+> **Implementation note:** The reference check is not built into the Lists plugin. It is provided by the Security Solution plugin via the `exceptionsListPreDeleteList` extension point, which is called once per request with every list that passed validation. If the check cannot complete, every list in that call is refused. When no callback is registered (for example, in tests that run the Lists plugin in isolation), the pre-delete check is skipped and all lists are deleted unconditionally. The check fires only from the bulk delete endpoint; the single-delete endpoint (`DELETE /api/exception_lists`) does **not** invoke it.
 
 #### **Scenario: Block deletion of a shared exception list linked to rules**
 
@@ -164,9 +165,7 @@ Then the response status is 200
 And "success" is false
 And "results" is empty
 And "errors" contains 1 entry with status_code 409
-And errors[0].message indicates the list is linked to 2 rules
-And errors[0].rule_references contains entries for "rule-A" and "rule-B"
-  with fields: rule_id, id, name
+And errors[0].message indicates the list is referenced by one or more detection rules
 And "summary.failed" is 1
 And the exception list still exists (not deleted)
 ```
@@ -181,7 +180,7 @@ When the user sends bulk action delete with ids: ["default-list-so-id"]
 Then the response status is 200
 And "success" is false
 And "errors" contains 1 entry with status_code 409
-And errors[0].rule_references contains "my-rule" details
+And errors[0].message indicates the list is referenced by one or more detection rules
 And the rule_default list still exists
 ```
 
@@ -198,7 +197,7 @@ And "results" contains the endpoint list
 And the list is deleted
 ```
 
-**Notes**: The reference check is still performed for endpoint artifact lists. Artifact lists are never referenced by detection rules via the standard `exceptions_list` rule parameter, so the check always returns no blockers and the deletion proceeds.
+**Notes**: The reference check is still performed for endpoint artifact lists. Artifact lists are never referenced by detection rules via the standard `exceptions_list` rule parameter, so the check always returns a zero count and the deletion proceeds.
 
 
 #### **Scenario: Mix of linked and unlinked lists produces partial failure**
@@ -228,11 +227,11 @@ When the user sends bulk action delete with ids: ["agnostic-list-so-id"] and nam
 Then the response status is 200
 And "success" is false
 And "errors" contains 1 entry with status_code 409
-And errors[0].rule_references contains the referencing rule
+And errors[0].message indicates the list is referenced by one or more detection rules
 And the agnostic list still exists
 ```
 
-**Notes**: The `hasReference` check uses saved object type `exception-list-agnostic` for agnostic lists (not `exception-list`). This test guards against a regression where the wrong type is used and the reference check silently finds nothing.
+**Notes**: The reference aggregation matches saved object type `exception-list-agnostic` for agnostic lists (not `exception-list`). This test guards against a regression where the wrong type is used and the reference check silently finds nothing.
 
 #### **Scenario: Caller without detection rule read access is refused for all detection lists**
 
@@ -240,31 +239,44 @@ And the agnostic list still exists
 
 ```Gherkin
 Given a user with the "exceptions_all_no_rules_read" role (exceptions-all, no detection rule read access)
-And a detection-type exception list exists
-When the user sends bulk action delete with ids: [the list's id]
+And two detection-type exception lists exist
+When the user sends bulk action delete with ids: [both list ids, "does-not-exist"]
 Then the response status is 200
 And "success" is false
-And "errors" contains 1 entry for the list
-And errors[0].message indicates the caller is not authorized to read detection rules
-And the list still exists (not deleted)
+And "errors" contains a 404 entry for "does-not-exist"
+And "errors" contains one 403 entry per existing list
+And each 403 message indicates the caller is not authorized to read detection rules
+And "summary.failed" is 3
+And both lists still exist (not deleted)
 ```
 
 **Notes**: Fail-closed behavior. Rule search results are silently filtered to types the caller may read. For a caller without detection rule read access, an empty result means "hidden from you", not "no rule is attached". The endpoint refuses rather than trusting an unverifiable empty result. This applies to every non-artifact list in the request, even when no rules reference those lists.
 
-#### **Scenario: Error response includes referencing rule details**
+#### **Scenario: A rule referencing several lists blocks each of them**
 
-**Automation**: 1 integration test.
+**Automation**: 1 integration test + unit tests.
 
 ```Gherkin
-Given "shared-list" is linked to 3 rules with known rule_id, id, and name
-When the user sends bulk action delete with ids: ["shared-list-id"]
-Then errors[0].rule_references is an array of 3 objects
-And each rule reference has:
-  | field   | type   |
-  | rule_id | string |
-  | id      | string |
-  | name    | string |
-And rule_id, id, and name match the actual rules linked to the list
+Given "list-a" and "list-b" are both referenced by the same rule "shared-rule"
+When the user sends bulk action delete with ids: ["list-a-id", "list-b-id"]
+Then the response status is 200
+And "errors" contains one 409 entry per list
+And "summary.failed" is 2
+And both lists still exist
+```
+
+**Notes**: The reference check counts matching rules per list in one aggregation, so a single rule shared by several lists blocks every one of them.
+
+#### **Scenario: Malformed or incomplete reference check results refuse deletion**
+
+**Automation**: unit tests.
+
+```Gherkin
+Given the rule search returns no aggregation, a missing bucket, or a non-integer count
+Or an extension point returns a malformed "blockedLists" value or changes the lists
+When the bulk delete service runs the reference check
+Then every list in the check is refused with its own error
+And no list is deleted
 ```
 
 ### Partial failure and error reporting

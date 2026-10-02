@@ -110,25 +110,6 @@ paths:
                               list_id:
                                 $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
                           description: Lists affected by this error.
-                        rule_references:
-                          type: array
-                          items:
-                            type: object
-                            required:
-                              - rule_id
-                              - id
-                              - name
-                            properties:
-                              rule_id:
-                                type: string
-                                description: The rule's `rule_id` (human-assigned identifier).
-                              id:
-                                type: string
-                                description: The rule's saved object id.
-                              name:
-                                type: string
-                                description: The rule's name.
-                          description: Rules that reference the affected lists. Present only for 409 (conflict) errors.
                     description: Per-list errors encountered during the operation.
                   summary:
                     type: object
@@ -198,18 +179,11 @@ paths:
                         updated_at: 2025-01-07T19:34:27.942Z
                         updated_by: elastic
                     errors:
-                      - message: 'Exception list "Blocked IPs" cannot be deleted because it is linked to 2 rules. Unlink the list from all rules before retrying.'
+                      - message: 'Exception list "Blocked IPs" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.'
                         status_code: 409
                         lists:
                           - id: b1c2d3e4-f5a6-47b8-99c0-d1e2f3a4b5c6
                             list_id: blocked_ips
-                        rule_references:
-                          - rule_id: my_rule_1
-                            id: abc123
-                            name: Malware Detection Rule
-                          - rule_id: my_rule_2
-                            id: def456
-                            name: Network Anomaly Rule
                     summary:
                       total: 2
                       succeeded: 1

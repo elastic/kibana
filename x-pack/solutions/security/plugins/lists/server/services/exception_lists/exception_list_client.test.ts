@@ -512,25 +512,23 @@ describe('exception_list_client', () => {
         });
       });
 
-      it('should execute the extension point once per list with `context` and pristine `blockedBy`', async () => {
+      it('should execute the extension point once for the whole batch with `context` and pristine `blockedLists`', async () => {
         const result = await exceptionListClient.bulkDeleteExceptionList({
           ids: ['so-1', 'so-2'],
           namespaceType: 'single',
         });
 
         const { callback } = extensionPointStorageContext.exceptionPreDeleteList;
-        expect(callback).toHaveBeenCalledTimes(2);
+        expect(callback).toHaveBeenCalledTimes(1);
         expect(callback.mock.calls[0][0].context).toEqual({
           exceptionListClient: expect.any(ExceptionListClient),
           request: kibanaRequest,
         });
-        expect(callback.mock.calls[0][0].data).toEqual(
-          expect.objectContaining({
-            blockedBy: [],
-            list: expect.objectContaining({ id: 'so-1' }),
-            namespaceType: 'single',
-          })
-        );
+        expect(callback.mock.calls[0][0].data).toEqual({
+          blockedLists: [],
+          lists: [expect.objectContaining({ id: 'so-1' }), expect.objectContaining({ id: 'so-2' })],
+          namespaceType: 'single',
+        });
         expect(result.success).toBe(true);
         expect(savedObjectsClient.delete).toHaveBeenCalledTimes(2);
       });
@@ -567,17 +565,12 @@ describe('exception_list_client', () => {
         expect(result.success).toBe(true);
       });
 
-      it('should report a per-list 409 conflict when the extension point returns blockers', async () => {
+      it('should report a per-list 409 conflict when the extension point blocks a list', async () => {
         extensionPointStorageContext.exceptionPreDeleteList.callback.mockImplementation(
-          async ({ data }) => {
-            if (data.list.id === 'so-1') {
-              return {
-                ...data,
-                blockedBy: [{ id: 'rule-so-1', name: 'Some Rule', rule_id: 'rule-1' }],
-              };
-            }
-            return data;
-          }
+          async ({ data }) => ({
+            ...data,
+            blockedLists: [{ id: 'so-1' }],
+          })
         );
 
         const result = await exceptionListClient.bulkDeleteExceptionList({
@@ -589,7 +582,6 @@ describe('exception_list_client', () => {
         expect(result.errors).toEqual([
           expect.objectContaining({
             lists: [{ id: 'so-1', list_id: 'list-id-so-1' }],
-            rule_references: [{ id: 'rule-so-1', name: 'Some Rule', rule_id: 'rule-1' }],
             status_code: 409,
           }),
         ]);
@@ -598,12 +590,12 @@ describe('exception_list_client', () => {
         expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-2');
       });
 
-      it('should report a per-list error and not delete when the extension point returns malformed `blockedBy`', async () => {
+      it('should refuse every list when the extension point returns malformed `blockedLists`', async () => {
         extensionPointStorageContext.exceptionPreDeleteList.callback.mockImplementation(
           async ({ data }) =>
             ({
               ...data,
-              blockedBy: [{ bogus: true }],
+              blockedLists: [{ bogus: true }],
             } as unknown as ExtensionPointCallbackDataArgument)
         );
 
@@ -614,7 +606,7 @@ describe('exception_list_client', () => {
 
         expect(result.success).toBe(false);
         expect(result.errors).toHaveLength(2);
-        expect(result.errors[0].message).toContain('malformed [blockedBy]');
+        expect(result.errors[0].message).toContain('malformed [blockedLists]');
         expect(savedObjectsClient.delete).not.toHaveBeenCalled();
         expect(extensionPointStorageContext.logger.error).toHaveBeenCalled();
       });

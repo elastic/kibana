@@ -155,26 +155,25 @@ export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDef
 >;
 
 /**
- * A rule that prevents an exception list container from being deleted.
+ * Refuses the deletion of one exception list container because detection rules reference it.
  */
 export interface ExceptionListPreDeleteListBlocker {
+  /** Saved object `id` of the blocked list; must be one of the lists passed to the extension. */
   id: string;
-  rule_id: string;
-  name: string;
 }
 
 /**
- * Extension point is triggered prior to deleting an exception list container. Handlers must
- * return the data unchanged, or with `blockedBy` populated to refuse the deletion. During a
- * bulk delete, a populated `blockedBy` (or a thrown error) fails only the list being
- * processed; every other list in the batch proceeds.
+ * Extension point is triggered once per bulk delete, before any exception list container is
+ * deleted, with every list that passed validation. Handlers must return the data unchanged, or
+ * with entries added to `blockedLists` (at most one per list) to refuse deleting those lists;
+ * the other lists proceed. Throwing refuses the deletion of every list in `lists`.
  */
 export type ExceptionsListPreDeleteListServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreDeleteList',
   {
-    list: ExceptionListSchema;
+    lists: ExceptionListSchema[];
     namespaceType: NamespaceType;
-    blockedBy: ExceptionListPreDeleteListBlocker[];
+    blockedLists: ExceptionListPreDeleteListBlocker[];
   }
 >;
 

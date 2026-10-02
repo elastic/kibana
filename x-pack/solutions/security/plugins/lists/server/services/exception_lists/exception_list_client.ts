@@ -81,7 +81,10 @@ import type {
   BulkDeleteExceptionListResult,
   PreDeleteListHook,
 } from './bulk_delete_exception_list';
-import { bulkDeleteExceptionList } from './bulk_delete_exception_list';
+import {
+  bulkDeleteExceptionList,
+  validatePreDeleteListResponse,
+} from './bulk_delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
@@ -572,35 +575,16 @@ export class ExceptionListClient {
     const { savedObjectsClient } = this;
 
     const preDeleteListHook: PreDeleteListHook = async (
-      list
+      lists
     ): Promise<ExceptionListPreDeleteListBlocker[]> => {
-      const { blockedBy } = await this.serverExtensionsClient.pipeRun(
+      const listIds = lists.map(({ id }) => id);
+      const { blockedLists } = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreDeleteList',
-        { blockedBy: [], list, namespaceType },
+        { blockedLists: [], lists, namespaceType },
         this.getServerExtensionCallbackContext(),
-        (returnedData) => {
-          if (returnedData.list.id !== list.id) {
-            return new Error(
-              `exceptionsListPreDeleteList extension changed the list being processed from [${list.id}] to [${returnedData.list.id}]`
-            );
-          }
-          if (
-            !Array.isArray(returnedData.blockedBy) ||
-            returnedData.blockedBy.some(
-              (blocker) =>
-                typeof blocker.id !== 'string' ||
-                typeof blocker.rule_id !== 'string' ||
-                typeof blocker.name !== 'string'
-            )
-          ) {
-            return new Error(
-              'exceptionsListPreDeleteList extension returned a malformed [blockedBy] value'
-            );
-          }
-          return undefined;
-        }
+        (returnedData) => validatePreDeleteListResponse(listIds, returnedData)
       );
-      return blockedBy;
+      return blockedLists;
     };
 
     return bulkDeleteExceptionList({

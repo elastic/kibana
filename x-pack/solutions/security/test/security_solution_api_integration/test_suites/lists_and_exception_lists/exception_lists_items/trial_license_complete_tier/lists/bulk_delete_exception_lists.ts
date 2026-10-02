@@ -390,11 +390,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should block deletion of a detection list referenced by a rule and leave the list intact', async () => {
           const list = await createDetectionList('referenced-list');
-          const rule = await createRuleReferencingList(
-            'bulk-delete-ref-rule-1',
-            'Rule referencing one list',
-            { id: list.id, list_id: list.list_id }
-          );
+          await createRuleReferencingList('bulk-delete-ref-rule-1', 'Rule referencing one list', {
+            id: list.id,
+            list_id: list.list_id,
+          });
 
           const { body } = await exceptionsApi
             .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
@@ -407,27 +406,22 @@ export default ({ getService }: FtrProviderContext) => {
           const [error] = body.errors;
           expect(error.status_code).to.eql(409);
           expect(error.lists).to.eql([{ id: list.id, list_id: 'referenced-list' }]);
-          expect(error.message).to.contain('linked to 1 rule');
-          expect(error.rule_references).to.eql([
-            {
-              rule_id: 'bulk-delete-ref-rule-1',
-              id: rule.id,
-              name: 'Rule referencing one list',
-            },
-          ]);
+          expect(error.message).to.eql(
+            `Exception list "${list.name}" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.`
+          );
           expect(body.summary).to.eql({ total: 1, succeeded: 0, failed: 1, skipped: 0 });
 
           // the list must survive the refused delete
           await getList('referenced-list').expect(200);
         });
 
-        it('should name every referencing rule when more than one rule points at the list', async () => {
+        it('should block a list that more than one rule points at', async () => {
           const list = await createDetectionList('multi-referenced-list');
-          const ruleA = await createRuleReferencingList('bulk-delete-ref-rule-a', 'Rule A', {
+          await createRuleReferencingList('bulk-delete-ref-rule-a', 'Rule A', {
             id: list.id,
             list_id: list.list_id,
           });
-          const ruleB = await createRuleReferencingList('bulk-delete-ref-rule-b', 'Rule B', {
+          await createRuleReferencingList('bulk-delete-ref-rule-b', 'Rule B', {
             id: list.id,
             list_id: list.list_id,
           });
@@ -441,12 +435,56 @@ export default ({ getService }: FtrProviderContext) => {
 
           const [error] = body.errors;
           expect(error.status_code).to.eql(409);
-          expect(error.message).to.contain('linked to 2 rules');
-          expect(
-            error.rule_references.map((reference: { id: string }) => reference.id).sort()
-          ).to.eql([ruleA.id, ruleB.id].sort());
 
           await getList('multi-referenced-list').expect(200);
+        });
+
+        it('should block every list referenced by a single shared rule', async () => {
+          const listA = await createDetectionList('shared-rule-list-a');
+          const listB = await createDetectionList('shared-rule-list-b');
+          await detectionsApi
+            .createRule({
+              body: {
+                description: 'Rule referencing two exception lists',
+                enabled: false,
+                exceptions_list: [listA, listB].map(({ id, list_id: listId }) => ({
+                  id,
+                  list_id: listId,
+                  namespace_type: 'single' as const,
+                  type: ExceptionListTypeEnum.DETECTION,
+                })),
+                index: ['auditbeat-*'],
+                name: 'Rule referencing two lists',
+                query: 'host.name: *',
+                risk_score: 1,
+                rule_id: 'bulk-delete-ref-rule-shared',
+                severity: 'high',
+                type: 'query' as const,
+              },
+            })
+            .expect(200);
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [listA.id, listB.id] } })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results).to.eql([]);
+          expect(body.errors).to.have.length(2);
+          expect(body.errors[0]).to.eql({
+            lists: [{ id: listA.id, list_id: 'shared-rule-list-a' }],
+            message: `Exception list "${listA.name}" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.`,
+            status_code: 409,
+          });
+          expect(body.errors[1]).to.eql({
+            lists: [{ id: listB.id, list_id: 'shared-rule-list-b' }],
+            message: `Exception list "${listB.name}" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.`,
+            status_code: 409,
+          });
+          expect(body.summary).to.eql({ total: 2, succeeded: 0, failed: 2, skipped: 0 });
+
+          await getList('shared-rule-list-a').expect(200);
+          await getList('shared-rule-list-b').expect(200);
         });
 
         it('should delete an unreferenced detection list while refusing a referenced one in the same request', async () => {
@@ -490,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const { body: rule } = await detectionsApi
+          await detectionsApi
             .createRule({
               body: {
                 description: 'Rule referencing an agnostic exception list',
@@ -526,13 +564,6 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.errors[0].status_code).to.eql(409);
           expect(body.errors[0].lists).to.eql([
             { id: list.id, list_id: 'agnostic-referenced-list' },
-          ]);
-          expect(body.errors[0].rule_references).to.eql([
-            {
-              rule_id: 'bulk-delete-ref-rule-agnostic',
-              id: rule.id,
-              name: 'Rule referencing agnostic list',
-            },
           ]);
 
           await supertest
@@ -644,26 +675,40 @@ export default ({ getService }: FtrProviderContext) => {
           await deleteAndReCreateUserRole(getService, role);
         });
 
-        it('should refuse all detection-type lists when the caller cannot read detection rules, and leave them intact', async () => {
-          const list = await createDetectionList('detection-list-no-rule-access');
+        it('should refuse every list when the caller cannot read detection rules, and leave them intact', async () => {
+          const listA = await createDetectionList('detection-list-no-rule-access-a');
+          const listB = await createDetectionList('detection-list-no-rule-access-b');
 
           const restrictedUser = { username: 'exceptions_all_no_rules_read', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
 
           const { body } = await restrictedApis
-            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
+            .bulkDeleteExceptionLists({
+              body: { action: 'delete', ids: [listA.id, listB.id, 'does-not-exist'] },
+            })
             .expect(200);
 
           expect(body.success).to.eql(false);
           expect(body.results).to.eql([]);
-          expect(body.errors).to.have.length(1);
-          expect(body.errors[0].lists).to.eql([
-            { id: list.id, list_id: 'detection-list-no-rule-access' },
+          expect(body.errors).to.have.length(3);
+          expect(body.errors[0]).to.eql({
+            lists: [{ id: 'does-not-exist' }],
+            message: 'exception list id: "does-not-exist" does not exist',
+            status_code: 404,
+          });
+          expect(body.errors.slice(1).map(({ lists }: { lists: unknown[] }) => lists)).to.eql([
+            [{ id: listA.id, list_id: 'detection-list-no-rule-access-a' }],
+            [{ id: listB.id, list_id: 'detection-list-no-rule-access-b' }],
           ]);
-          expect(body.errors[0].message).to.contain('not authorized to read detection rules');
+          body.errors.slice(1).forEach((error: { message: string; status_code: number }) => {
+            expect(error.status_code).to.eql(403);
+            expect(error.message).to.contain('not authorized to read detection rules');
+          });
+          expect(body.summary).to.eql({ total: 3, succeeded: 0, failed: 3, skipped: 0 });
 
-          // The list must survive the refused delete.
-          await getList('detection-list-no-rule-access').expect(200);
+          // The lists must survive the refused delete.
+          await getList('detection-list-no-rule-access-a').expect(200);
+          await getList('detection-list-no-rule-access-b').expect(200);
         });
       });
     });

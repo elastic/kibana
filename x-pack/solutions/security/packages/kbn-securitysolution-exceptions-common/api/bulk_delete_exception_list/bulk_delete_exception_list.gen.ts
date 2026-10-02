@@ -93,30 +93,6 @@ export const BulkDeleteExceptionListsResponse = lazySchema(() =>
               })
             )
             .describe('Lists affected by this error.'),
-          /**
-           * Rules that reference the affected lists. Present only for 409 (conflict) errors.
-           */
-          rule_references: z
-            .array(
-              z.object({
-                /**
-                 * The rule's `rule_id` (human-assigned identifier).
-                 */
-                rule_id: z.string().describe("The rule's `rule_id` (human-assigned identifier)."),
-                /**
-                 * The rule's saved object id.
-                 */
-                id: z.string().describe("The rule's saved object id."),
-                /**
-                 * The rule's name.
-                 */
-                name: z.string().describe("The rule's name."),
-              })
-            )
-            .optional()
-            .describe(
-              'Rules that reference the affected lists. Present only for 409 (conflict) errors.'
-            ),
         })
       )
       .describe('Per-list errors encountered during the operation.'),

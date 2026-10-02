@@ -10,9 +10,13 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
+import type { ExceptionListPreDeleteListBlocker } from '../extension_points';
 
 import type { PreDeleteListHook } from './bulk_delete_exception_list';
-import { bulkDeleteExceptionList } from './bulk_delete_exception_list';
+import {
+  bulkDeleteExceptionList,
+  validatePreDeleteListResponse,
+} from './bulk_delete_exception_list';
 import { deleteExceptionListItemsByListStreamed } from './delete_exception_list_items_by_list';
 
 jest.mock('./delete_exception_list_items_by_list');
@@ -343,7 +347,7 @@ describe('bulkDeleteExceptionList', () => {
   });
 
   describe('pre-delete list hook', () => {
-    test('is called once per found list with the transformed list', async () => {
+    test('is called once with every found list before any deletion', async () => {
       const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
       const list2 = getListMock({ id: 'so-2', list_id: 'list-2' });
 
@@ -354,7 +358,10 @@ describe('bulkDeleteExceptionList', () => {
       (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
       const preDeleteListHook: jest.MockedFunction<PreDeleteListHook> = jest
         .fn()
-        .mockResolvedValue([]);
+        .mockImplementation(async () => {
+          expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+          return [];
+        });
 
       await bulkDeleteExceptionList({
         ids: ['so-1', 'so-2', 'so-3'],
@@ -363,21 +370,37 @@ describe('bulkDeleteExceptionList', () => {
         savedObjectsClient,
       });
 
-      expect(preDeleteListHook).toHaveBeenCalledTimes(2);
-      expect(preDeleteListHook).toHaveBeenCalledWith(list1);
-      expect(preDeleteListHook).toHaveBeenCalledWith(list2);
+      expect(preDeleteListHook).toHaveBeenCalledTimes(1);
+      expect(preDeleteListHook).toHaveBeenCalledWith([list1, list2]);
+      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(2);
     });
 
-    test('blocks deletion with 409 and rule details when the hook returns one blocker', async () => {
+    test('is not called when no requested list passes validation', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [notFoundSavedObject('so-1')],
+      });
+      const preDeleteListHook: jest.MockedFunction<PreDeleteListHook> = jest.fn();
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1'],
+        namespaceType: 'single',
+        preDeleteListHook,
+        savedObjectsClient,
+      });
+
+      expect(preDeleteListHook).not.toHaveBeenCalled();
+      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
+    });
+
+    test('blocks deletion with 409 for a blocked list', async () => {
       const list = getListMock({ id: 'so-1', list_id: 'list-1', name: 'My Detection List' });
 
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.bulkGet.mockResolvedValue({
         saved_objects: [savedObjectFor(list)],
       });
-      const preDeleteListHook: PreDeleteListHook = async () => [
-        { id: 'rule-so-1', name: 'Malware Detection Rule', rule_id: 'rule-1' },
-      ];
+      const preDeleteListHook: PreDeleteListHook = async () => [{ id: 'so-1' }];
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-1'],
@@ -392,40 +415,13 @@ describe('bulkDeleteExceptionList', () => {
         {
           lists: [{ id: 'so-1', list_id: 'list-1' }],
           message:
-            'Exception list "My Detection List" cannot be deleted because it is linked to 1 rule. Unlink the list from all rules before retrying.',
-          rule_references: [{ id: 'rule-so-1', name: 'Malware Detection Rule', rule_id: 'rule-1' }],
+            'Exception list "My Detection List" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.',
           status_code: 409,
         },
       ]);
       expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
       expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
       expect(savedObjectsClient.delete).not.toHaveBeenCalled();
-    });
-
-    test('blocks deletion with all rule details when the hook returns multiple blockers', async () => {
-      const list = getListMock({ id: 'so-1', list_id: 'list-1', name: 'Shared List' });
-
-      const savedObjectsClient = savedObjectsClientMock.create();
-      savedObjectsClient.bulkGet.mockResolvedValue({
-        saved_objects: [savedObjectFor(list)],
-      });
-      const preDeleteListHook: PreDeleteListHook = async () => [
-        { id: 'rule-so-1', name: 'Rule A', rule_id: 'rule-1' },
-        { id: 'rule-so-2', name: 'Rule B', rule_id: 'rule-2' },
-        { id: 'rule-so-3', name: 'Rule C', rule_id: 'rule-3' },
-      ];
-
-      const result = await bulkDeleteExceptionList({
-        ids: ['so-1'],
-        namespaceType: 'single',
-        preDeleteListHook,
-        savedObjectsClient,
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.errors[0].message).toContain('linked to 3 rules');
-      expect(result.errors[0].rule_references).toHaveLength(3);
-      expect(result.errors[0].status_code).toBe(409);
     });
 
     test('partial failure: blocked lists get 409, unblocked lists are deleted', async () => {
@@ -445,8 +441,7 @@ describe('bulkDeleteExceptionList', () => {
         saved_objects: [savedObjectFor(linkedList), savedObjectFor(unlinkedList)],
       });
       (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
-      const preDeleteListHook: PreDeleteListHook = async (list) =>
-        list.id === 'so-linked' ? [{ id: 'rule-so-1', name: 'Some Rule', rule_id: 'rule-1' }] : [];
+      const preDeleteListHook: PreDeleteListHook = async () => [{ id: 'so-linked' }];
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-linked', 'so-unlinked'],
@@ -465,52 +460,58 @@ describe('bulkDeleteExceptionList', () => {
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-unlinked');
     });
 
-    test('reports a per-list error when the hook throws, without affecting other lists', async () => {
-      const failingList = getListMock({ id: 'so-fail', list_id: 'fail-list' });
-      const okList = getListMock({ id: 'so-ok', list_id: 'ok-list' });
+    test('refuses every list with its own error when the hook throws', async () => {
+      const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
+      const list2 = getListMock({ id: 'so-2', list_id: 'list-2' });
 
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.bulkGet.mockResolvedValue({
-        saved_objects: [savedObjectFor(failingList), savedObjectFor(okList)],
+        saved_objects: [savedObjectFor(list1), savedObjectFor(list2), notFoundSavedObject('so-3')],
       });
-      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
       // Simulates EndpointHttpError from the security_solution plugin without
       // importing it — the lists plugin only reads err.statusCode via transformError.
-      const preDeleteListHook: PreDeleteListHook = async (list) => {
-        if (list.id === 'so-fail') {
-          throw Object.assign(new Error('cannot verify rule references'), { statusCode: 403 });
-        }
-        return [];
+      const preDeleteListHook: PreDeleteListHook = async () => {
+        throw Object.assign(new Error('cannot verify rule references'), { statusCode: 403 });
       };
 
       const result = await bulkDeleteExceptionList({
-        ids: ['so-fail', 'so-ok'],
+        ids: ['so-1', 'so-2', 'so-3'],
         namespaceType: 'single',
         preDeleteListHook,
         savedObjectsClient,
       });
 
       expect(result.success).toBe(false);
-      expect(result.results).toEqual([okList]);
+      expect(result.results).toEqual([]);
       expect(result.errors).toEqual([
         {
-          lists: [{ id: 'so-fail', list_id: 'fail-list' }],
+          lists: [{ id: 'so-3' }],
+          message: 'exception list id: "so-3" does not exist',
+          status_code: 404,
+        },
+        {
+          lists: [{ id: 'so-1', list_id: 'list-1' }],
+          message: 'cannot verify rule references',
+          status_code: 403,
+        },
+        {
+          lists: [{ id: 'so-2', list_id: 'list-2' }],
           message: 'cannot verify rule references',
           status_code: 403,
         },
       ]);
-      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 1, total: 2 });
-      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-ok');
+      expect(result.summary).toEqual({ failed: 3, skipped: 0, succeeded: 0, total: 3 });
+      expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).not.toHaveBeenCalled();
     });
 
-    test('does not delete a list whose hook threw', async () => {
+    test('preserves a 500 classification for unexpected hook failures', async () => {
       const list = getListMock({ id: 'so-1', list_id: 'list-1' });
 
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [savedObjectFor(list)] });
       const preDeleteListHook: PreDeleteListHook = async () => {
-        throw Object.assign(new Error('forbidden'), { statusCode: 403 });
+        throw new Error('search failed');
       };
 
       const result = await bulkDeleteExceptionList({
@@ -520,15 +521,13 @@ describe('bulkDeleteExceptionList', () => {
         savedObjectsClient,
       });
 
-      expect(result.success).toBe(false);
       expect(result.errors).toEqual([
         {
           lists: [{ id: 'so-1', list_id: 'list-1' }],
-          message: 'forbidden',
-          status_code: 403,
+          message: 'search failed',
+          status_code: 500,
         },
       ]);
-      expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
       expect(savedObjectsClient.delete).not.toHaveBeenCalled();
     });
 
@@ -548,6 +547,44 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.success).toBe(true);
       expect(result.results).toEqual([list]);
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-1');
+    });
+  });
+
+  describe('validatePreDeleteListResponse', () => {
+    const lists = [getListMock({ id: 'so-1' }), getListMock({ id: 'so-2' })];
+    const listIds = ['so-1', 'so-2'];
+
+    test('accepts unchanged lists with valid blocks', () => {
+      expect(
+        validatePreDeleteListResponse(listIds, {
+          blockedLists: [{ id: 'so-2' }],
+          lists,
+        })
+      ).toBeUndefined();
+    });
+
+    test.each([
+      ['a removed list', { blockedLists: [], lists: [lists[0]] }],
+      ['reordered lists', { blockedLists: [], lists: [lists[1], lists[0]] }],
+    ])('rejects %s', (_, data) => {
+      expect(validatePreDeleteListResponse(listIds, data)?.message).toMatch(
+        /changed the lists being processed/
+      );
+    });
+
+    test.each([
+      ['a non-array value', 'not-an-array'],
+      ['an unknown list id', [{ id: 'so-3' }]],
+      ['a duplicated list id', [{ id: 'so-1' }, { id: 'so-1' }]],
+      ['a missing id', [{}]],
+      ['a null entry', [null]],
+    ])('rejects blockedLists with %s', (_, blockedLists) => {
+      expect(
+        validatePreDeleteListResponse(listIds, {
+          blockedLists: blockedLists as unknown as ExceptionListPreDeleteListBlocker[],
+          lists,
+        })?.message
+      ).toMatch(/malformed \[blockedLists\]/);
     });
   });
 
@@ -601,7 +638,8 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.success).toBe(true);
       expect(result.results).toHaveLength(100);
       expect(result.summary).toEqual({ failed: 0, skipped: 0, succeeded: 100, total: 100 });
-      expect(preDeleteListHook).toHaveBeenCalledTimes(100);
+      expect(preDeleteListHook).toHaveBeenCalledTimes(1);
+      expect(preDeleteListHook).toHaveBeenCalledWith(lists);
       expect(savedObjectsClient.delete).toHaveBeenCalledTimes(100);
       expect(deleteExceptionListItemsByListStreamed).toHaveBeenCalledTimes(100);
     });
