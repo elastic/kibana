@@ -16,6 +16,10 @@
  *   export KIBANA_EIS_CCM_API_KEY="..."
  *   node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/enable_eis_ccm.js
  *
+ * A serverless Scout cluster serves https with the dev CA, which `fetch` only trusts via:
+ *   NODE_EXTRA_CA_CERTS=src/platform/packages/shared/kbn-dev-utils/certs/ca.crt node x-pack/...
+ * (`node scripts/evals start` sets it automatically.)
+ *
  * Options:
  *   --scout-config-path <path>   Path to Scout servers JSON (default: .scout/servers/local.json)
  *   --es-url <url>               Elasticsearch base URL (overrides scout config)

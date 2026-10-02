@@ -101,10 +101,56 @@ describe('nightshift-investigations scout hook', () => {
     });
   });
 
+  it('splits a port embedded in host, with an explicit port taking precedence', () => {
+    const embedded = { apiKey: 'key', host: 'sandbox.example.com:9090' };
+    expect(runHook({ sandbox: embedded }).output.env).toMatchObject({
+      SANDBOX_API_HOST: 'sandbox.example.com',
+      SANDBOX_API_PORT: '9090',
+    });
+    expect(runHook({ sandbox: { ...embedded, port: 443 } }).output.env).toMatchObject({
+      SANDBOX_API_HOST: 'sandbox.example.com',
+      SANDBOX_API_PORT: '443',
+    });
+    expect(
+      runHook({}, { SANDBOX_API_KEY: 'key', SANDBOX_API_HOST: 'h.example.com:7000' }).output.env
+    ).toMatchObject({ SANDBOX_API_HOST: 'h.example.com', SANDBOX_API_PORT: '7000' });
+  });
+
+  it('rejects a non-numeric port', () => {
+    const { status, stderr } = runHook({
+      sandbox: { apiKey: 'key', host: 'sandbox.example.com', port: 'abc' },
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain("sandbox port must be a number, got 'abc'");
+  });
+
+  it("prefers the profile's address, in either form, over a shell SANDBOX_API_URL", () => {
+    const shell = { SANDBOX_API_URL: 'https://localhost:9090' };
+    expect(
+      runHook({ sandbox: { apiKey: 'key', host: 'remote.example.com', port: 9443 } }, shell).output
+        .env
+    ).toMatchObject({ SANDBOX_API_HOST: 'remote.example.com', SANDBOX_API_PORT: '9443' });
+    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
+      SANDBOX_API_HOST: 'sandbox.example.com',
+      SANDBOX_API_PORT: '9443',
+    });
+    expect(runHook({ sandbox: { apiKey: 'key' } }, shell).output.env).toMatchObject({
+      SANDBOX_API_HOST: 'localhost',
+      SANDBOX_API_PORT: '9090',
+    });
+  });
+
   it('leaves host and port unset so kibana.sandbox.yml defaults them', () => {
     const { output } = runHook({ sandbox: { apiKey: 'key' } });
     expect(output.env).not.toHaveProperty('SANDBOX_API_HOST');
     expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
+  });
+
+  it('reads mTLS file paths from the profile sandbox.ssl block', () => {
+    const { output } = runHook({
+      sandbox: { ...SANDBOX, ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA } },
+    });
+    expect(output.env).toMatchObject(MTLS);
   });
 
   it('ignores PEM contents in an older sandbox.ssl block', () => {
@@ -187,7 +233,7 @@ describe('nightshift-investigations scout hook', () => {
       { SANDBOX_CLIENT_CERT_PATH: CERT }
     );
     expect(status).toBe(1);
-    expect(stderr).toContain('set both SANDBOX_CLIENT_CERT_PATH and SANDBOX_CLIENT_KEY_PATH');
+    expect(stderr).toContain('set both sandbox.ssl.certificate and sandbox.ssl.key');
     expect(runHook({ sandbox: { apiKey: 'key' } }, { SANDBOX_CLIENT_KEY_PATH: KEY }).status).toBe(
       1
     );

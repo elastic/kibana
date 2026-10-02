@@ -91,15 +91,16 @@ A profile backed by a local config file (for example `--profile local`, reading
 ```
 
 Kibana connects to `url` over TLS and authenticates with the API key; without a port, `https`
-defaults to 443. Older configs with `host` / `port` still work, and an older `ssl` block is
-ignored.
+defaults to 443. `host` / `port` work instead of `url`. A sandbox that requires mTLS also needs
+`"ssl": { "certificate", "key", "certificateAuthorities" }` as PEM **file paths** (`certificate` and
+`key` together; inline PEM contents are ignored).
 
 Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
 `SANDBOX_API_KEY`, and `SANDBOX_API_URL` or `SANDBOX_API_HOST` / `SANDBOX_API_PORT` (default
-`localhost:9090`; the probe port is not the gRPC endpoint). Profile values take precedence over
-exported ones. If the sandbox requires mTLS, also export `SANDBOX_CLIENT_CERT_PATH` and
-`SANDBOX_CLIENT_KEY_PATH` (together), and `SANDBOX_CA_CERT_PATH` for a private CA, as PEM **file
-paths**. The hook fails early if one is not readable. A self-hosted sandbox must allow sandbox-api
+`localhost:9090`; the probe port is not the gRPC endpoint), plus `SANDBOX_CLIENT_CERT_PATH` /
+`SANDBOX_CLIENT_KEY_PATH` / `SANDBOX_CA_CERT_PATH` for mTLS. Profile values, including the
+profile's address in either form, take precedence over exported ones. The hook fails early if a
+PEM file is not readable. A self-hosted sandbox must allow sandbox-api
 to reach its containers; leave sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated
 conversations.
 
