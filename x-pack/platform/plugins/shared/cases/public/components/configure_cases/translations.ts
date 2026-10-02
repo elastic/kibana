@@ -323,3 +323,172 @@ export const EXTERNAL_SYNC_DESC = i18n.translate('xpack.cases.configureCases.ext
   defaultMessage:
     'Defaults for new cases that have a connector. Each case can override them in its Connectors panel.',
 });
+
+export const FIELD_SYNC_TITLE = i18n.translate('xpack.cases.configureCases.fieldSyncTitle', {
+  defaultMessage: 'Field sync',
+});
+
+export const FIELD_SYNC_DESC = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncDesc', {
+    values: { connectorName },
+    defaultMessage:
+      'Choose how each field moves between the case and {connectorName}. Conflict rules here override the default above for fields that pull.',
+  });
+
+export const FIELD_SYNC_NO_CONNECTOR = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncNoConnector',
+  {
+    defaultMessage: 'Select a connector above to choose which fields sync.',
+  }
+);
+
+export const FIELD_SYNC_CAPTION = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncCaption', {
+    values: { connectorName },
+    defaultMessage: 'Field sync for {connectorName}',
+  });
+
+export const FIELD_SYNC_COL_CASE_FIELD = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncColCaseField',
+  {
+    defaultMessage: 'Case field',
+  }
+);
+
+export const FIELD_SYNC_COL_EXTERNAL_FIELD = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncColExternalField', {
+    values: { connectorName },
+    defaultMessage: '{connectorName} field',
+  });
+
+export const FIELD_SYNC_COL_DIRECTION = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncColDirection',
+  {
+    defaultMessage: 'Direction',
+  }
+);
+
+export const FIELD_SYNC_COL_CONFLICT = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncColConflict',
+  {
+    defaultMessage: 'On conflict',
+  }
+);
+
+export const FIELD_SYNC_FIELD_TITLE = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncFieldTitle',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const FIELD_SYNC_FIELD_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncFieldDescription',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const FIELD_SYNC_FIELD_STATUS = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncFieldStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const FIELD_SYNC_FIELD_TAGS = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncFieldTags',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
+export const FIELD_SYNC_FIELD_COMMENTS = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncFieldComments',
+  {
+    defaultMessage: 'Comments',
+  }
+);
+
+export const FIELD_SYNC_EXTERNAL_STATUS = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncExternalStatus',
+  {
+    defaultMessage: 'Status (mapped automatically)',
+  }
+);
+
+export const FIELD_SYNC_EXTERNAL_WEBHOOK = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncExternalWebhook',
+  {
+    defaultMessage: 'Set in the connector',
+  }
+);
+
+export const FIELD_SYNC_EXTERNAL_NOT_MAPPED = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncExternalNotMapped',
+  {
+    defaultMessage: 'Not mapped',
+  }
+);
+
+export const FIELD_SYNC_EXTERNAL_MISSING = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncExternalMissing', {
+    values: { connectorName },
+    defaultMessage: '{connectorName} did not return this field. Sync will skip it.',
+  });
+
+export const FIELD_SYNC_DIRECTION_BOTH = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncDirectionBoth',
+  {
+    defaultMessage: 'Both ways',
+  }
+);
+
+export const FIELD_SYNC_DIRECTION_PUSH = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncDirectionPush',
+  {
+    defaultMessage: 'Push only',
+  }
+);
+
+export const FIELD_SYNC_DIRECTION_PULL = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncDirectionPull',
+  {
+    defaultMessage: 'Pull only',
+  }
+);
+
+export const FIELD_SYNC_DIRECTION_OFF = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncDirectionOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const FIELD_SYNC_DIRECTION_ARIA = (fieldLabel: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncDirectionAria', {
+    values: { fieldLabel },
+    defaultMessage: 'Direction for {fieldLabel}',
+  });
+
+export const FIELD_SYNC_CONFLICT_ARIA = (fieldLabel: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncConflictAria', {
+    values: { fieldLabel },
+    defaultMessage: 'On conflict for {fieldLabel}',
+  });
+
+export const FIELD_SYNC_CONFLICT_DEFAULT = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncConflictDefault',
+  {
+    defaultMessage: 'Use default',
+  }
+);
+
+export const FIELD_SYNC_NOT_APPLICABLE = i18n.translate(
+  'xpack.cases.configureCases.fieldSyncNotApplicable',
+  {
+    defaultMessage: 'Not applicable',
+  }
+);
+
+export { CONFLICT_KEEP_EXTERNAL, CONFLICT_KEEP_KIBANA } from '../edit_connector/translations';

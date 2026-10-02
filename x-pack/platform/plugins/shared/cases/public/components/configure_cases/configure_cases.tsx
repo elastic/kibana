@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -27,12 +28,14 @@ import { useKibana } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
 import { Connectors } from './connectors';
 import { SyncSettings } from '../edit_connector/sync_settings';
+import { FieldSyncTable } from './field_sync_table';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as configureCasesI18n from './translations';
 import { useConfigureCasesController } from './use_configure_cases_controller';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { ObservableTypes } from '../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
@@ -78,6 +81,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     observableTypes,
     extractObservables,
     externalSync,
+    externalSyncFields,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration,
@@ -97,6 +101,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onChangeClosureType,
     onChangeExtractObservables,
     onChangeExternalSync,
+    onChangeExternalSyncFields,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -107,6 +112,12 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
   const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
+  const syncControlsDisabled =
+    isPersistingConfiguration ||
+    isLoadingCaseConfiguration ||
+    isFetchingCaseConfiguration ||
+    isConfigurationFetchError ||
+    !permissions.settings;
 
   return (
     <>
@@ -156,6 +167,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       }
                       handleShowEditFlyout={onClickUpdateConnector}
                       hideTitle
+                      hideMappings={isExternalSyncEnabled}
                       isLoading={isLoadingAny}
                       mappings={mappings}
                       onChangeConnector={onChangeConnector}
@@ -190,15 +202,27 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                     >
                       <SyncSettings
                         value={externalSync}
-                        disabled={
-                          isPersistingConfiguration ||
-                          isLoadingCaseConfiguration ||
-                          isFetchingCaseConfiguration ||
-                          isConfigurationFetchError ||
-                          !permissions.settings
-                        }
+                        disabled={syncControlsDisabled}
                         onChange={onChangeExternalSync}
                       />
+                      <EuiSpacer size="l" />
+                      {connector.type !== ConnectorTypes.none ? (
+                        <FieldSyncTable
+                          connector={connector}
+                          mappings={mappings}
+                          rules={externalSyncFields}
+                          disabled={syncControlsDisabled}
+                          onChange={onChangeExternalSyncFields}
+                        />
+                      ) : (
+                        <EuiText
+                          size="s"
+                          color="subdued"
+                          data-test-subj="external-sync-field-table-no-connector"
+                        >
+                          {configureCasesI18n.FIELD_SYNC_NO_CONNECTOR}
+                        </EuiText>
+                      )}
                     </SettingsSection>
                   </>
                 )}

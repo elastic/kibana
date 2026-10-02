@@ -127,6 +127,7 @@ const convertConfigureResponseToCasesConfigure = (
     observableTypes,
     extractObservables,
     externalSync,
+    externalSyncFields,
   } = configuration;
 
   return {
@@ -141,5 +142,6 @@ const convertConfigureResponseToCasesConfigure = (
     observableTypes,
     extractObservables,
     externalSync,
+    externalSyncFields,
   };
 };
