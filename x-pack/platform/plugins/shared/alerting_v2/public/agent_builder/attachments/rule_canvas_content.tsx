@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import { PluginStart } from '@kbn/core-di';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
-import { RuleProvider } from '../../components/rule_details/rule_context';
 import {
-  RuleHeaderDescription,
-  RuleTagsList,
-} from '../../components/rule_details/rule_summary_header';
-import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
+  RuleSummaryAboutSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../components/rule/rule_summary';
+import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
-import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
+import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -40,9 +42,11 @@ export const RuleCanvasContent = ({
   const rulesApi = useService(RulesApi);
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
+  const [queryClient] = React.useState(() => new QueryClient());
 
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
+  const summaryRule = useMemo(() => ({ ...data, id: undefined }), [data]);
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -65,8 +69,10 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            await rulesApi.upsertRule(data.id!, buildRulePayload(data));
-            await updateOrigin(data.id!);
+            const savedRule = data.id
+              ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
+              : await rulesApi.createRule(buildRulePayload(data));
+            await updateOrigin(savedRule.id);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
                 defaultMessage: 'Rule "{name}" created',
@@ -125,23 +131,16 @@ export const RuleCanvasContent = ({
   ]);
 
   return (
-    <RuleProvider rule={data as unknown as RuleApiResponse}>
+    <QueryClientProvider client={queryClient}>
       <EuiPanel paddingSize="l" hasShadow={false}>
-        {data.metadata.description && (
-          <>
-            <RuleHeaderDescription />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {data.metadata.tags && data.metadata.tags.length > 0 && (
-          <>
-            <RuleTagsList />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <RuleSidebar showQueryPreview />
+        <RuleSummaryBody rule={summaryRule}>
+          <RuleSummaryAboutSection />
+          <RuleSummaryQueryPreviewSection />
+          <RuleSummaryInvestigationSection />
+          <RuleSummaryArtifactsSection />
+        </RuleSummaryBody>
       </EuiPanel>
-    </RuleProvider>
+    </QueryClientProvider>
   );
 };
 
