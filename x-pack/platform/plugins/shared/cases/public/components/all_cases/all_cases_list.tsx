@@ -15,7 +15,7 @@ import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
-import type { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '../../../common/types/domain';
 import { FieldType } from '../../../common/types/domain/template/fields';
 import { useCasesColumns } from './hooks/use_cases_columns';
 import { getUserPickerUidsFromCase } from './components/extended_field_columns';
@@ -33,7 +33,7 @@ import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesConfig } from '../../common/lib/kibana';
-import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
+import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 import { useIsLoadingCases } from './hooks/use_is_loading_cases';
 import { useAllCasesState } from './hooks/use_all_cases_state';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
@@ -148,11 +148,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       });
     }, []);
 
-    const selectAllCasesOnPage = useCallback(() => {
-      setSelectedCases(data.cases);
-    }, [data.cases]);
+    const getCaseIsSelectable = useCallback(
+      (theCase: CaseUI): boolean => {
+        if (permissions.update || permissions.delete || permissions.assign) return true;
+        if (permissions.reopenCase) return theCase.status === CaseStatuses.closed;
+        return false;
+      },
+      [permissions.update, permissions.delete, permissions.assign, permissions.reopenCase]
+    );
 
-    const isSelectable = !isReadOnlyPermissions(permissions);
+    const selectableCasesOnPage = useMemo(
+      () => data.cases.filter(getCaseIsSelectable),
+      [data.cases, getCaseIsSelectable]
+    );
+
+    const selectAllCasesOnPage = useCallback(() => {
+      setSelectedCases(selectableCasesOnPage);
+    }, [selectableCasesOnPage]);
 
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
@@ -270,9 +282,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       () => ({
         onSelectionChange: setSelectedCases,
         selected: selectedCases,
-        selectable: () => isSelectable,
+        selectable: getCaseIsSelectable,
       }),
-      [isSelectable, selectedCases]
+      [getCaseIsSelectable, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
@@ -365,7 +377,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           showClearFiltersButton={showClearFiltersButton}
           viewMode={viewMode}
           onSelectAll={selectAllCasesOnPage}
-          totalOnPage={data.cases.length}
+          totalOnPage={selectableCasesOnPage.length}
         />
         {viewMode === VIEW_TOGGLE_TABLE_ID ? (
           <>
@@ -397,7 +409,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             selectedFields={selectedFields}
             selectedCases={selectedCases}
             onSelectionChange={toggleCaseSelection}
-            isSelectable={isSelectable}
+            isSelectable={getCaseIsSelectable}
           />
         )}
       </>

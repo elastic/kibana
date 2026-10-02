@@ -18,6 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
 
+  // Migration recommendation: MIGRATE TO SCOUT
+  // Tests that data views can be created over ES index aliases and that Discover correctly reflects
+  // the hit count scoped to the aliased indices. No existing Scout coverage found (the
+  // discover_index_alias_access.spec.ts Scout test is unrelated — it tests alias-based role access
+  // control, not data view creation). This is a valid E2E test: it exercises ES alias setup,
+  // data view creation UI, and Discover hit counts end-to-end. Requires loading the `alias` ES
+  // archive and setting up updateAliases — both are achievable in Scout via the es fixture client.
   describe('Index patterns on aliases', function () {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();

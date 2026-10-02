@@ -7,6 +7,10 @@
 
 import { badRequest, conflict, notFound, serverUnavailable, tooManyRequests } from '@hapi/boom';
 import {
+  NightshiftModelBlockedError,
+  NightshiftModelNotFoundError,
+} from '@kbn/significant-events-schema';
+import {
   InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationMetadataMissingError,
@@ -16,6 +20,12 @@ import {
 } from '../client/errors';
 
 export function rethrowInvestigationClientError(error: unknown): never {
+  if (
+    error instanceof NightshiftModelNotFoundError ||
+    error instanceof NightshiftModelBlockedError
+  ) {
+    throw badRequest(error.message);
+  }
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
   }

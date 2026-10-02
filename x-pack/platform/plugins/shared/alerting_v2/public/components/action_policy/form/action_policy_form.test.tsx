@@ -7,7 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -19,6 +19,7 @@ const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
 let mockWorkflowsEnabled = true;
+const mockRefetchWorkflows = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -99,6 +100,7 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: { results: [], total: 0, page: 1, size: 100 },
     isLoading: false,
+    refetch: mockRefetchWorkflows,
   }),
 }));
 
@@ -325,6 +327,14 @@ describe('ActionPolicyForm', () => {
       '/app/workflows/create'
     );
     expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+  });
+
+  it('refetches workflows when the selector receives focus', () => {
+    renderForm();
+
+    fireEvent.focus(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
+
+    expect(mockRefetchWorkflows).toHaveBeenCalled();
   });
 
   it('renders warning callout when workflows are disabled', () => {

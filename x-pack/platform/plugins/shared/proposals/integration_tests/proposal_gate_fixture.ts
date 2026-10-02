@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
-import type { Proposal } from '@kbn/proposals-common';
+import type { Proposal, ProposalOrigin } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../server/storage/proposals_storage';
 import { ProposalsService } from '../server/services/proposals_service';
 import type { ProposalPrivilegesChecker } from '../server/services/check_proposal_privileges';
@@ -96,8 +96,12 @@ const createInMemoryStorage = () => {
 /** The gate's literal `timeout`, which is also the deadline on the record. */
 const GATE_TIMEOUT_MS = 72 * 60 * 60 * 1000;
 
+/** Required of every caller, but the gate never branches on it, so any member does. */
+const FIXTURE_ORIGIN = 'alertzero' satisfies ProposalOrigin;
+
 export interface ProposalGateFixture {
   engine: WorkflowRunFixture;
+  attachedProposalIds: () => string[];
   /** Every proposal written so far, in insertion order. */
   proposals: () => Array<Proposal & { id: string }>;
   /** The only proposal, asserting there is exactly one. */
@@ -172,13 +176,19 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     resumeWorkflowExecution: jest.fn(),
   };
 
+  const attachedProposalIds: string[] = [];
   const service = new ProposalsService({
     storage: client,
     logger: loggerMock.create(),
     getWorkflowsApi: () => workflowsApi as never,
     // The gate's behaviour does not depend on the conversation card, so the
     // attachment write is stubbed rather than simulated.
-    getAttachmentsClient: async () => ({ create: jest.fn() } as never),
+    getAttachmentsClient: async () =>
+      ({
+        create: jest.fn(async ({ origin }: { origin: string }) => {
+          attachedProposalIds.push(origin);
+        }),
+      } as never),
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -212,6 +222,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   return {
     engine,
+    attachedProposalIds: () => [...attachedProposalIds],
     proposals,
     onlyProposal: () => {
       const all = proposals();
@@ -239,7 +250,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     start: async (inputs = {}) => {
       await engine.runWorkflow({
         workflowYaml: gateWorkflowYaml(),
-        inputs: { conversationId: 'conv-1', comment: 'Tune the noisy rule', ...inputs },
+        inputs: {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          origin: FIXTURE_ORIGIN,
+          ...inputs,
+        },
       });
     },
     resume: async (approved, respondedBy = 'analyst') => {

@@ -28,6 +28,8 @@ export { columnFromDataViewField, columnFromDatatableColumn } from './src/to_col
 export { DataSourceService } from './src/data_source_service';
 export type { DataViewLookup } from './src/data_source_service';
 export {
+  getOrRegisterEsqlDataView,
+  getRegisteredEsqlDataView,
   registerEsqlSourceInDataViewsCache,
   unregisterFromDataViewsCache,
 } from './src/cache_adapter';

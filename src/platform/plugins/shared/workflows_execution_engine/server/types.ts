@@ -31,7 +31,7 @@ import type {
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
-import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+import type { IWorkflowLogsQueryService } from './workflow_event_logger';
 
 export type {
   DataClient,
@@ -83,7 +83,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   cancelWorkflowExecution: CancelWorkflowExecution;
   cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
   resumeWorkflowExecution: ResumeWorkflowExecution;
-  workflowEventLoggerService: IWorkflowEventLoggerService;
+  workflowEventLoggerService: IWorkflowLogsQueryService;
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;

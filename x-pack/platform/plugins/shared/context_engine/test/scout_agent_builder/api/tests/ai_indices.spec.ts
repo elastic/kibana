@@ -476,7 +476,9 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('Must use only lowercase letters');
+    expect(response.body.message).toContain(
+      'must name a single index or data stream, not a pattern'
+    );
   });
 
   apiTest('rejects a comma-separated dest', async ({ apiClient }) => {
@@ -487,7 +489,9 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('Must use only lowercase letters');
+    expect(response.body.message).toContain(
+      'must name a single index or data stream, not a pattern'
+    );
   });
 
   apiTest('rejects an alias dest', async ({ apiClient }) => {

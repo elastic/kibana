@@ -19,6 +19,12 @@
     "node",
     "jest"
   ],
+  "jsPlugins": [
+    {
+      "name": "@kbn/eslint",
+      "specifier": "./packages/kbn-eslint-plugin-eslint/oxlint_plugin.js"
+    }
+  ],
   "categories": {
     "correctness": "off"
   },
@@ -70,8 +76,196 @@
     "react/prefer-es6-class": [
       "error",
       "always"
-    ]
+    ],
+    "@kbn/eslint/no_async_promise_body": "error",
+    "@kbn/eslint/no_async_foreach": "error",
+    "@kbn/eslint/require_kibana_feature_privileges_naming": "warn",
+    "@kbn/eslint/no_trailing_import_slash": "error",
+    "@kbn/eslint/no_constructor_args_in_property_initializers": "error",
+    "@kbn/eslint/no_this_in_property_initializers": "error",
+    "@kbn/eslint/no_conditional_saved_object_type_registration": "error",
+    "@kbn/eslint/no_unsafe_console": "error",
+    "@kbn/eslint/no_unsafe_dynamic_http_path": "warn",
+    "@kbn/eslint/no_wrapped_error_in_logger": "error",
+    "@kbn/eslint/no_npx_playwright": "error"
   },
+  "overrides": [
+    {
+      "files": [
+        "{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}/**/*.ts",
+        "{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts",
+        "src/core/test/scout{_*,}/**/*.ts",
+        "packages/**/test/scout{_*,}/**/*.ts"
+      ],
+      "excludeFiles": ["src/platform/packages/shared/kbn-scout/test/**"],
+      "rules": {
+        "@kbn/eslint/scout_no_describe_configure": "error",
+        "@kbn/eslint/scout_test_file_naming": "error",
+        "@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests": "error",
+        "@kbn/eslint/scout_no_es_archiver_in_parallel_tests": "error",
+        "@kbn/eslint/scout_max_one_describe": "error",
+        "@kbn/eslint/scout_no_core_settings_in_space_test": "warn",
+        "@kbn/eslint/scout_no_deprecated_tags": "error",
+        "@kbn/eslint/scout_no_cross_boundary_imports": "error",
+        "@kbn/eslint/scout_expect_import": "error",
+        "@kbn/eslint/scout_no_at_in_test_titles": "warn",
+        "@kbn/eslint/scout_no_promise_all_with_playwright_apis": "error",
+        "@kbn/eslint/scout_no_locators": ["error", { "restricted": ["globalLoadingIndicator"] }],
+        "@kbn/eslint/require_include_in_check_a11y": "warn"
+      }
+    },
+    {
+      // Platform & Solutions API Tests
+      "files": [
+        "src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts",
+        "x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts",
+        "x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          { "alternativeFixtures": ["esClient"] }
+        ]
+      }
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      "files": ["x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts"],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          {
+            "alternativeFixtures": [
+              "esClient",
+              "detectionsApi",
+              "discoveriesApi",
+              "endpointExceptionsApi",
+              "endpointManagementApi",
+              "entityAnalyticsApi",
+              "exceptionsApi",
+              "listsApi",
+              "osqueryApi",
+              "timelinesApi"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Agent Builder API tests authenticate through role-scoped API client fixtures
+      "files": [
+        "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/*/api/**/*.ts",
+        "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          { "alternativeFixtures": ["esClient", "asAdmin", "asViewer", "asPrivilegedUser"] }
+        ]
+      }
+    },
+    {
+      // Workflows API tests use WorkflowsApiService (wrapping kbnClient/API) for workflow operations
+      "files": [
+        "src/platform/plugins/shared/workflows_management/test/scout/api/**/*.ts",
+        "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": "off"
+      }
+    },
+    {
+      "files": [
+        "src/platform/plugins/shared/**/*.ts",
+        "x-pack/solutions/**/*.ts",
+        "x-pack/plugins/**/*.ts",
+        "x-pack/platform/plugins/shared/**/*.ts"
+      ],
+      "excludeFiles": [
+        "**/*.{test,spec}.ts",
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/scripts/**",
+        "**/e2e/**",
+        "**/cypress/**",
+        "**/ftr_e2e/**",
+        "**/.storybook/**",
+        "**/json_schemas/**",
+        "src/platform/plugins/shared/telemetry/**",
+        "x-pack/solutions/security/packages/test-api-clients/**",
+        "x-pack/solutions/security/packages/kbn-security-evals-matrix/**",
+        "x-pack/platform/plugins/shared/automatic_import/**"
+      ],
+      "rules": {
+        "@kbn/eslint/require_kbn_fs": [
+          "error",
+          {
+            "restrictedMethods": [
+              "writeFile",
+              "writeFileSync",
+              "createWriteStream",
+              "appendFile",
+              "appendFileSync"
+            ],
+            "disallowedMessage": "Use `@kbn/fs` for file write operations instead of direct `fs` in production code"
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}"
+      ],
+      "rules": {
+        "@kbn/eslint/deployment_agnostic_test_context": "error"
+      }
+    },
+    {
+      "files": [
+        "src/platform/plugins/private/event_annotation/**/*",
+        "src/platform/plugins/private/event_annotation_listing/**/*",
+        "src/platform/plugins/private/vis_default_editor/**/*",
+        "src/platform/plugins/private/vis_types/**/*",
+        "src/platform/plugins/shared/chart_expressions/**/*",
+        "src/platform/plugins/shared/charts/**/*",
+        "src/platform/plugins/shared/expressions/**/*",
+        "src/platform/plugins/shared/vis_types/**/*",
+        "src/platform/plugins/shared/visualization_listing/**/*",
+        "src/platform/plugins/shared/visualizations/**/*",
+        "x-pack/platform/plugins/shared/lens/**/*",
+        "x-pack/platform/plugins/private/graph/**/*",
+        "src/platform/packages/private/kbn-lens-formula-docs/**/*",
+        "src/platform/packages/shared/kbn-lens-common/**/*",
+        "src/platform/packages/shared/kbn-lens-common-2/**/*",
+        "src/platform/packages/shared/kbn-coloring/**/*",
+        "src/platform/packages/shared/kbn-chart-icons/**/*",
+        "src/platform/packages/shared/kbn-event-annotation-common/**/*",
+        "src/platform/packages/shared/kbn-event-annotation-components/**/*"
+      ],
+      "rules": {
+        "@kbn/eslint/no_viz_naming": "error"
+      }
+    },
+    {
+      "files": [
+        "src/platform/plugins/**/server/index.ts",
+        "x-pack/platform/plugins/**/server/index.ts",
+        "x-pack/solutions/**/plugins/**/server/index.ts",
+        "examples/**/server/index.ts",
+        "packages/kbn-mock-idp-plugin/server/index.ts"
+      ],
+      "excludeFiles": ["**/test/**"],
+      "rules": {
+        "@kbn/eslint/no_sync_import_from_plugin": "error"
+      }
+    }
+  ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
   "ignorePatterns": [
