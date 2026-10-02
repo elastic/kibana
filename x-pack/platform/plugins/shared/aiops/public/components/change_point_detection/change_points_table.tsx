@@ -380,7 +380,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
   const { filters, query, attributes, timeRange } = useCommonChartProps({
     annotation,
     fieldConfig,
-    isInteractive: true,
+    isInteractive: false,
     bucketInterval: bucketInterval.expression,
   });
 
@@ -418,7 +418,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
         filters={filters}
         // @ts-ignore
         attributes={attributes}
-        renderMode={'non-interactive'}
+        renderMode={'preview'}
         executionContext={{
           type: 'aiops_change_point_detection_chart',
           name: 'Change point detection',
