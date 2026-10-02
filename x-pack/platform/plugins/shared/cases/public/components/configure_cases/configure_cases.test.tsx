@@ -575,9 +575,9 @@ describe('ConfigureCasesRedesign', () => {
     it('does not render the workflow tags section when workflows are unavailable for Cases', async () => {
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-      await screen.findByTestId('cases-redesign-settings-panel');
+      await screen.findByTestId('cases-settings-panel');
 
-      expect(screen.queryByTestId('cases-redesign-workflow-tags-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-workflow-tags-section')).not.toBeInTheDocument();
     });
 
     it('renders the workflow tags section when workflows are available for Cases', async () => {
@@ -585,7 +585,7 @@ describe('ConfigureCasesRedesign', () => {
 
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-      expect(await screen.findByTestId('cases-redesign-workflow-tags-section')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-workflow-tags-section')).toBeInTheDocument();
       expect(screen.getByText(configureCasesI18n.WORKFLOW_TAGS_TITLE)).toBeInTheDocument();
     });
 

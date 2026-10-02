@@ -237,7 +237,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {workflowsAvailableForCases && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-workflow-tags-section"
+                    data-test-subj="cases-workflow-tags-section"
                     title={configureCasesI18n.WORKFLOW_TAGS_TITLE}
                     description={configureCasesI18n.WORKFLOW_TAGS_DESCRIPTION}
                   >
