@@ -85,6 +85,8 @@ interface ConversationQueueProps {
    * Supplied by the page so that hook calls stay outside this package.
    */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  /** Optional: render an in-flight approve/decline badge on each full card. */
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -127,6 +129,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     canManageEscalations,
     canCloseInvestigation,
     renderAssignees,
+    renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
     // Work already finished reads as a list. Pinned to the bucket, not a prop: which
@@ -192,7 +195,11 @@ export const ConversationQueue = memo<ConversationQueueProps>(
               ) : (
                 // renderAssignees is only passed to the full card — decided rows (compact)
                 // do not expose the assignee widget.
-                <ConversationCard {...sharedProps} renderAssignees={renderAssignees} />
+                <ConversationCard
+                  {...sharedProps}
+                  renderAssignees={renderAssignees}
+                  renderInFlightStatus={renderInFlightStatus}
+                />
               )}
             </EuiFlexItem>
           );
