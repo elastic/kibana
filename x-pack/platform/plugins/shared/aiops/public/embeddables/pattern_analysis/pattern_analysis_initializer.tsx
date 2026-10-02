@@ -206,18 +206,21 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             <EuiButton
               onClick={onCreate.bind(null, updatedProps)}
               fill
-              aria-label={i18n.translate(
+              aria-label={
                 isNewPanel
-                  ? 'xpack.aiops.embeddablePatternAnalysis.config.saveFlyoutAriaLabel'
-                  : 'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
-                isNewPanel
-                  ? {
-                      defaultMessage: 'Save pattern analysis',
-                    }
-                  : {
-                      defaultMessage: 'Apply changes',
-                    }
-              )}
+                  ? i18n.translate(
+                      'xpack.aiops.embeddablePatternAnalysis.config.saveFlyoutAriaLabel',
+                      {
+                        defaultMessage: 'Save pattern analysis',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
+                      {
+                        defaultMessage: 'Apply changes',
+                      }
+                    )
+              }
               isDisabled={!isFormValid}
               iconType={isNewPanel ? undefined : 'check'}
               data-test-subj="aiopsPatternAnalysisConfirmButton"
