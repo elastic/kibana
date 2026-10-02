@@ -13,7 +13,7 @@ import {
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
-  type EventClient,
+  type SignificantEventsReadClient,
 } from '../../../lib/significant_events/events';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
@@ -67,7 +67,6 @@ export interface CompactEventSearchItem
     | 'causal_features'
     | 'confidence'
     | 'event_id'
-    | 'event_uuid'
     | 'severity'
     | 'status'
     | 'stream_names'
@@ -86,7 +85,6 @@ interface DetailedEventSearchItem
     | '@timestamp'
     | 'confidence'
     | 'event_id'
-    | 'event_uuid'
     | 'severity'
     | 'status'
     | 'stream_names'
@@ -172,7 +170,6 @@ const toEventSearchItemBase = (
   | '@timestamp'
   | 'confidence'
   | 'event_id'
-  | 'event_uuid'
   | 'severity'
   | 'status'
   | 'stream_names'
@@ -180,7 +177,6 @@ const toEventSearchItemBase = (
   | 'title'
 > => ({
   event_id: event.event_id,
-  event_uuid: event.event_uuid,
   '@timestamp': event['@timestamp'],
   title: event.title,
   symptom_hypothesis: event.symptom_hypothesis,
@@ -270,7 +266,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   eventClient,
   params,
 }: {
-  eventClient: EventClient;
+  eventClient: SignificantEventsReadClient;
   params: EventSearchInput & { view?: V };
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';

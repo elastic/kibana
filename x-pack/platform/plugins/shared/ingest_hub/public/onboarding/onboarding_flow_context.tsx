@@ -64,6 +64,24 @@ export interface DetectAndReviewStepState {
    * the instance is already gone from policyIdsByInstance.
    */
   pendingCleanupPolicyIds?: Record<string, string>;
+  /**
+   * True when service settings or auth credentials differ from the last-deployed SO state.
+   * Set at Deploy step mount after a drift check; cleared after a successful redeploy.
+   */
+  isDirty?: boolean;
+  /**
+   * True when the auth method or connector specifically differs from the last-deployed SO state.
+   * Subset of isDirty; used to gate overrideCloudConnector on MI policy updates so that a
+   * service-var-only redeploy does not silently re-attach the wizard's connector over one
+   * reassigned by an operator.
+   */
+  isAuthDirty?: boolean;
+  /**
+   * True when the selected agent policies differ from the last-deployed SO state. Subset of
+   * isDirty; gates overwriting package-policy `policy_ids` so a var-only redeploy does not
+   * detach agent policies attached outside the wizard.
+   */
+  isPolicySelectionDirty?: boolean;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -81,11 +99,7 @@ interface PersistedAuthenticateAndDeployStep {
   agentPolicyName?: string; // denormalised so step 4 needs no GET
   selectedAgentPolicyIds?: string[]; // for existing-policy mode
   // Agent-based credential method — persisted so switching steps preserves the selection.
-  agentCredentialMethod?:
-    | 'direct_access_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod?: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   // Non-secret credential fields for shared_credentials and assume_role methods.
   // secret_access_key / session_token are never persisted (memory only).
   sharedCredentialFile?: string;
@@ -113,6 +127,9 @@ interface PersistedDetectAndReviewStep {
   onboardingDeploymentId?: string;
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
   pendingCleanupPolicyIds?: Record<string, string>;
+  isDirty?: boolean;
+  isAuthDirty?: boolean;
+  isPolicySelectionDirty?: boolean;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -122,11 +139,7 @@ export interface AgentBasedDeploymentState {
   agentPolicyId?: string;
   agentPolicyName?: string;
   selectedAgentPolicyIds: string[];
-  agentCredentialMethod:
-    | 'direct_access_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   sharedCredentialFile?: string;
   credentialProfileName?: string;
   roleArn?: string;
@@ -137,6 +150,10 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  /** Clear only the in-memory staged credentials without touching persisted authMethod or connectorId. */
+  clearStagedStaticKeys: () => void;
+  /** Update persisted authMethod in place without touching connectorId or staticKeys. */
+  setAuthMethod: (method: CloudOnboardingDeploymentAuthMethod) => void;
   setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
@@ -208,6 +225,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authMethod: id ? ('identity_federation' as const) : undefined,
         accessKeyId: undefined,
       };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
+  );
+
+  const clearStagedStaticKeys = useCallback(() => {
+    setStaticKeysState(undefined);
+  }, []);
+
+  const setAuthMethod = useCallback(
+    (method: CloudOnboardingDeploymentAuthMethod) => {
+      const next = { ...persistedAuthStepRef.current, authMethod: method };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
     },
@@ -342,6 +372,12 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
             rest.pendingCleanupPolicyIds !== undefined
               ? rest.pendingCleanupPolicyIds
               : prev?.pendingCleanupPolicyIds,
+          isDirty: rest.isDirty !== undefined ? rest.isDirty : prev?.isDirty,
+          isAuthDirty: rest.isAuthDirty !== undefined ? rest.isAuthDirty : prev?.isAuthDirty,
+          isPolicySelectionDirty:
+            rest.isPolicySelectionDirty !== undefined
+              ? rest.isPolicySelectionDirty
+              : prev?.isPolicySelectionDirty,
         });
       }
     },
@@ -370,6 +406,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
     [setDetectAndReviewStep]
@@ -406,6 +445,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
     [removeDeployInstance, setDetectAndReviewStep]
@@ -481,6 +523,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         policyIdsByInstance: {},
         failedInstances: [],
         deployErrors: {},
+        isDirty: false,
       });
     },
     [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
@@ -501,7 +544,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     selectedAgentPolicyIds:
       persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? ([] as string[]),
     agentCredentialMethod:
-      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'direct_access_keys',
+      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'static_keys',
     sharedCredentialFile: persistedAuthenticateAndDeployStep?.sharedCredentialFile,
     credentialProfileName: persistedAuthenticateAndDeployStep?.credentialProfileName,
     roleArn: persistedAuthenticateAndDeployStep?.roleArn,
@@ -519,6 +562,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        clearStagedStaticKeys,
+        setAuthMethod,
         setPendingIacTemplate,
         setAgentBasedDeployment,
         agentBasedDeployment,

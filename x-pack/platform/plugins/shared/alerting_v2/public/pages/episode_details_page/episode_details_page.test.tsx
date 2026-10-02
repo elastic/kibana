@@ -23,7 +23,7 @@ import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { createMockLocators, TestProviders } from '../../test_utils/test_providers';
-import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
@@ -37,7 +37,7 @@ let mockCanReadExecutionHistory = true;
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
-  useEpisodeAutoAttach: jest.fn(),
+  useAlertAutoAttach: jest.fn(),
 }));
 
 jest.mock('@kbn/core-di-browser', () => {
@@ -145,7 +145,7 @@ const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
-const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
+const mockUseAlertAutoAttach = jest.mocked(useAlertAutoAttach);
 const mockRuleOverviewPanelSection = jest.mocked(AlertEpisodeRuleOverviewPanelSection);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
@@ -179,7 +179,7 @@ const fetchRuleResult = {
     enabled: true,
     metadata: { name: 'Rule A', description: 'Rule description' },
     grouping: { fields: ['host.name'] },
-    query: { format: 'standalone', breach: 'from index-*' },
+    query: { base: 'from index-*' },
     artifacts: [],
   },
   isLoading: false,
@@ -242,7 +242,7 @@ beforeEach(() => {
           ruleId: 'rule-1',
           lastDeactivateAction: null,
           lastSnoozeAction: null,
-          snoozeExpiry: null,
+          snoozedUntil: null,
           tags: [],
           lastSnoozeActor: null,
           lastDeactivateActor: null,
@@ -271,10 +271,31 @@ beforeEach(() => {
 });
 
 describe('EpisodeDetailsPage', () => {
+  it('makes only the loaded episode rule available to episode actions', () => {
+    renderPage();
+
+    const isRuleAvailable = mockCreateEpisodeActions.mock.calls.at(-1)?.[0].isRuleAvailable;
+    expect(isRuleAvailable?.('rule-1')).toBe(true);
+    expect(isRuleAvailable?.('another-rule')).toBe(false);
+  });
+
+  it('does not make an unavailable episode rule available to episode actions', () => {
+    mockUseFetchRule.mockReturnValue({
+      ...fetchRuleResult,
+      data: undefined,
+      ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
+    } as unknown as FetchRuleResult);
+
+    renderPage();
+
+    const isRuleAvailable = mockCreateEpisodeActions.mock.calls.at(-1)?.[0].isRuleAvailable;
+    expect(isRuleAvailable?.('rule-1')).toBe(false);
+  });
+
   it('renders the page structure once the episode loads', () => {
     renderPage();
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2AlertDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
     expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });
@@ -322,7 +343,7 @@ describe('EpisodeDetailsPage', () => {
             ruleId: 'rule-1',
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
             lastSnoozeAction: null,
-            snoozeExpiry: null,
+            snoozedUntil: null,
             tags: [],
             lastSnoozeActor: null,
             lastDeactivateActor: null,
@@ -335,7 +356,7 @@ describe('EpisodeDetailsPage', () => {
             ruleId: null,
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
             lastSnoozeAction: null,
-            snoozeExpiry: null,
+            snoozedUntil: null,
             tags: [],
             lastSnoozeActor: null,
             lastDeactivateActor: null,
@@ -361,7 +382,7 @@ describe('EpisodeDetailsPage', () => {
             ruleId: null,
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
             lastSnoozeAction: null,
-            snoozeExpiry: null,
+            snoozedUntil: null,
             tags: [],
             lastSnoozeActor: null,
             lastDeactivateActor: null,
@@ -493,7 +514,7 @@ describe('EpisodeDetailsPage', () => {
       id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
       order: 50,
       displayName: 'Open in Discover',
-      iconType: 'discoverApp',
+      iconType: 'productDiscover',
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     };
@@ -590,10 +611,10 @@ describe('EpisodeDetailsPage', () => {
   });
 
   describe('Agent Builder auto-attach', () => {
-    it('passes the loaded episode to useEpisodeAutoAttach', () => {
+    it('passes the loaded episode to useAlertAutoAttach', () => {
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+      expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
         mockEpisode,
         {
           ruleName: 'Rule A',
@@ -615,7 +636,7 @@ describe('EpisodeDetailsPage', () => {
 
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+      expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
         mockEpisode,
         {
           ruleName: undefined,
@@ -653,7 +674,7 @@ describe('EpisodeDetailsPage', () => {
         </MockChromeContextProvider>
       );
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(
+      expect(mockUseAlertAutoAttach).toHaveBeenLastCalledWith(
         nextEpisode,
         {
           ruleName: 'Rule A',

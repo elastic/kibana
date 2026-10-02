@@ -16,6 +16,7 @@ import type {
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { useCaseAttachmentWorkflowRouting } from '@kbn/cases-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux-v7';
 import * as i18n from '../../components/alerts_table/translations';
@@ -107,9 +108,11 @@ export const useBulkRunAlertWorkflowPanel = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const caseRouting = useCaseAttachmentWorkflowRouting();
   const canRunWorkflow = useMemo(
-    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow && caseRouting !== 'unavailable',
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
   const { uiSettings } = useKibana().services;

@@ -89,6 +89,11 @@ const mockAlertIdSearch = ({
   return searchHandler;
 };
 
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+}));
+
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
@@ -137,6 +142,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
     combineQueriesMock.mockReturnValue({
       filterQuery: '{"bool":{}}',
       kqlError: undefined,
@@ -208,6 +214,28 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
       expect(result.current.runWorkflowItems).toEqual([]);
       expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns empty arrays inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toEqual([]);
+      expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns run workflow items inside a case where Cases workflow runs are available', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toHaveLength(1);
+      expect(result.current.runWorkflowPanels).toHaveLength(1);
     });
   });
 

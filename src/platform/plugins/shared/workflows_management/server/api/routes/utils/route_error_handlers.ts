@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import {
   WorkflowDisabledError,
   WorkflowExecutionInvalidStatusError,
@@ -46,6 +48,16 @@ export function handleRouteError(
   error: Error,
   options?: HandleRouteErrorOptions
 ) {
+  if (error instanceof InvalidAccessControlError) {
+    return response.badRequest({ body: { message: error.message } });
+  }
+
+  if (Boom.isBoom(error)) {
+    return response.customError({
+      statusCode: error.output.statusCode,
+      body: { message: error.output.payload.message },
+    });
+  }
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
   }

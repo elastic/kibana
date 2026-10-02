@@ -1,5 +1,5 @@
 {
-  "sha1": "51619b0e8e43880dc55c3df3d4b5a5f35ade9690",
+  "sha1": "8d250ecdf54a902b9536997b9ab96ae073377a23",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -11,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.setup.ts",
-        "line": 7,
-        "column": 1
+        "line": 18,
+        "column": 16
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/add_to_case_privileged.spec.ts",
-        "line": 28,
-        "column": 25
+        "line": 36,
+        "column": 14
       }
     },
     {
@@ -47,8 +47,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/breakdown_by_dimension.spec.ts",
-        "line": 28,
-        "column": 15
+        "line": 38,
+        "column": 14
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/breakdown_by_dimension.spec.ts",
-        "line": 41,
-        "column": 15
+        "line": 66,
+        "column": 14
       }
     },
     {
@@ -83,8 +83,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/brush_to_zoom.spec.ts",
-        "line": 37,
-        "column": 66
+        "line": 47,
+        "column": 14
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/dimensions_wipe.spec.ts",
-        "line": 27,
-        "column": 25
+        "line": 35,
+        "column": 14
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/dimensions_wipe.spec.ts",
-        "line": 50,
-        "column": 24
+        "line": 82,
+        "column": 14
       }
     },
     {
@@ -137,8 +137,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
-        "line": 41,
-        "column": 58
+        "line": 54,
+        "column": 14
       }
     },
     {
@@ -155,8 +155,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
-        "line": 72,
-        "column": 11
+        "line": 104,
+        "column": 14
       }
     },
     {
@@ -173,8 +173,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
-        "line": 107,
-        "column": 36
+        "line": 148,
+        "column": 14
       }
     },
     {
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
-        "line": 140,
-        "column": 31
+        "line": 184,
+        "column": 14
       }
     },
     {
@@ -209,8 +209,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen_privileged.spec.ts",
-        "line": 41,
-        "column": 48
+        "line": 51,
+        "column": 14
       }
     },
     {
@@ -227,8 +227,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 27,
-        "column": 66
+        "line": 37,
+        "column": 14
       }
     },
     {
@@ -245,8 +245,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 73,
+        "column": 14
       }
     },
     {
@@ -263,8 +263,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 89,
+        "column": 14
       }
     },
     {
@@ -281,8 +281,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 89,
-        "column": 15
+        "line": 114,
+        "column": 14
       }
     },
     {
@@ -299,8 +299,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 25,
-        "column": 61
+        "line": 38,
+        "column": 14
       }
     },
     {
@@ -317,8 +317,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 46,
-        "column": 30
+        "line": 67,
+        "column": 14
       }
     },
     {
@@ -335,8 +335,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 67,
-        "column": 46
+        "line": 94,
+        "column": 14
       }
     },
     {
@@ -353,8 +353,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 99,
-        "column": 30
+        "line": 130,
+        "column": 14
       }
     },
     {
@@ -371,8 +371,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 157,
-        "column": 17
+        "line": 199,
+        "column": 14
       }
     },
     {
@@ -389,8 +389,62 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 183,
-        "column": 11
+        "line": 226,
+        "column": 14
+      }
+    },
+    {
+      "id": "8556b3250071fcb-53fabb119f6524c",
+      "title": "Metrics in Discover - Grid Settings never shows the configuration and insights flyouts at the same time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 268,
+        "column": 14
+      }
+    },
+    {
+      "id": "8556b3250071fcb-da9fbb7ce26fe76",
+      "title": "Metrics in Discover - Grid Settings leaves no gap after closing the configuration opened from the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 316,
+        "column": 14
+      }
+    },
+    {
+      "id": "8556b3250071fcb-4b23fb6ca974774",
+      "title": "Metrics in Discover - Grid Settings leaves no gap after closing the insights flyout opened from the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 338,
+        "column": 14
       }
     },
     {
@@ -407,8 +461,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 43,
-        "column": 24
+        "line": 56,
+        "column": 14
       }
     },
     {
@@ -425,8 +479,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 67,
-        "column": 13
+        "line": 92,
+        "column": 14
       }
     },
     {
@@ -443,8 +497,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 112,
-        "column": 9
+        "line": 141,
+        "column": 14
       }
     },
     {
@@ -461,8 +515,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 121,
-        "column": 22
+        "line": 153,
+        "column": 14
       }
     },
     {
@@ -479,8 +533,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 32,
-        "column": 66
+        "line": 42,
+        "column": 14
       }
     },
     {
@@ -497,8 +551,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 48,
-        "column": 13
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -515,8 +569,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 54,
-        "column": 15
+        "line": 71,
+        "column": 14
       }
     },
     {
@@ -533,8 +587,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 56,
-        "column": 21
+        "line": 78,
+        "column": 14
       }
     },
     {
@@ -551,8 +605,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 83,
+        "column": 14
       }
     },
     {
@@ -569,8 +623,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 63,
-        "column": 25
+        "line": 90,
+        "column": 14
       }
     },
     {
@@ -587,8 +641,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 67,
-        "column": 20
+        "line": 95,
+        "column": 14
       }
     },
     {
@@ -605,8 +659,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 71,
-        "column": 64
+        "line": 102,
+        "column": 14
       }
     },
     {
@@ -623,8 +677,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 81,
-        "column": 7
+        "line": 115,
+        "column": 14
       }
     },
     {
@@ -641,8 +695,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/insights_flyout.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 42,
+        "column": 14
       }
     },
     {
@@ -659,8 +713,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/insights_flyout.spec.ts",
-        "line": 62,
-        "column": 23
+        "line": 88,
+        "column": 14
       }
     },
     {
@@ -677,8 +731,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/inspect.spec.ts",
-        "line": 35,
-        "column": 25
+        "line": 43,
+        "column": 14
       }
     },
     {
@@ -693,8 +747,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/query_kickstart.spec.ts",
-        "line": 27,
-        "column": 25
+        "line": 35,
+        "column": 14
       }
     },
     {
@@ -709,8 +763,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/query_kickstart.spec.ts",
-        "line": 39,
-        "column": 24
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -727,8 +781,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/quick_actions_privileged.spec.ts",
-        "line": 45,
-        "column": 66
+        "line": 55,
+        "column": 14
       }
     },
     {
@@ -745,8 +799,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 88,
-        "column": 47
+        "line": 119,
+        "column": 16
       }
     },
     {
@@ -763,8 +817,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 88,
-        "column": 47
+        "line": 119,
+        "column": 16
       }
     },
     {
@@ -781,8 +835,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 88,
-        "column": 47
+        "line": 119,
+        "column": 16
       }
     },
     {
@@ -799,8 +853,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 88,
-        "column": 47
+        "line": 119,
+        "column": 16
       }
     },
     {
@@ -817,8 +871,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 88,
-        "column": 47
+        "line": 119,
+        "column": 16
       }
     },
     {
@@ -835,8 +889,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 105,
-        "column": 15
+        "line": 140,
+        "column": 14
       }
     },
     {
@@ -853,8 +907,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 113,
-        "column": 33
+        "line": 164,
+        "column": 14
       }
     },
     {
@@ -871,8 +925,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
-        "line": 35,
-        "column": 66
+        "line": 45,
+        "column": 14
       }
     },
     {
@@ -889,8 +943,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
-        "line": 33,
-        "column": 66
+        "line": 43,
+        "column": 14
       }
     },
     {
@@ -907,8 +961,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
-        "line": 41,
-        "column": 25
+        "line": 49,
+        "column": 14
       }
     },
     {
@@ -925,8 +979,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
-        "line": 46,
-        "column": 24
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -943,8 +997,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
-        "line": 62,
-        "column": 74
+        "line": 81,
+        "column": 14
       }
     },
     {
@@ -961,8 +1015,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
-        "line": 86,
-        "column": 22
+        "line": 113,
+        "column": 14
       }
     },
     {
@@ -979,8 +1033,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
-        "line": 110,
-        "column": 9
+        "line": 142,
+        "column": 14
       }
     },
     {
@@ -997,8 +1051,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 44,
-        "column": 25
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -1015,8 +1069,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 60,
-        "column": 34
+        "line": 93,
+        "column": 14
       }
     },
     {
@@ -1033,8 +1087,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 76,
-        "column": 31
+        "line": 113,
+        "column": 14
       }
     },
     {
@@ -1051,8 +1105,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 96,
-        "column": 50
+        "line": 137,
+        "column": 14
       }
     },
     {
@@ -1062,8 +1116,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
+        "line": 13,
+        "column": 19
       }
     }
   ]

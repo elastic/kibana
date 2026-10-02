@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
@@ -24,6 +25,14 @@ import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_erro
 import { WorkflowTriggerInputError } from '../../workflow_trigger_input_error';
 
 describe('handleRouteError', () => {
+  it('preserves service-account authorization errors', () => {
+    const response = httpServerMock.createResponseFactory();
+    handleRouteError(response, Boom.forbidden('manage_security is required'));
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'manage_security is required' },
+    });
+  });
   it('returns forbidden for managed workflow update policy errors', () => {
     const response = httpServerMock.createResponseFactory();
 

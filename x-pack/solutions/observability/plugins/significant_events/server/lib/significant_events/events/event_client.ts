@@ -12,21 +12,27 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   SignificantEvent,
   SignificantEventResponse,
-  Severity,
-  SignificantEventStatus,
   SignalEntry,
   SignalVerdict,
+  Severity,
+  SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import {
+  SEVERITY_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+} from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
-  type PaginatedSearchOptions,
   type PaginatedResponse,
+  type PaginatedSearchOptions,
+  MAX_DEDUP_SCAN_LIMIT,
   throwOnBulkCreateErrors,
 } from '../query_utils';
 import {
   andWhere,
+  applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
   fromIndexForSpace,
@@ -50,10 +56,163 @@ import type {
   SignificantEventsTriggerPayloadMap,
 } from '../../../../common/workflows/triggers';
 
+/**
+ * Filters shared by every "latest current state" read path, whether backed by `EventClient`
+ * (`EVENTS_DATA_STREAM`) or `RuleEventsClient` (`.rule-events`, gated by
+ * `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`).
+ */
+export interface EventsFilterOptions {
+  status?: SignificantEventStatus[];
+  severity?: Severity[];
+  stream?: string[];
+  search?: string;
+  eventIds?: string[];
+  ruleUuids?: string[];
+  topologyFeatureIds?: string[];
+}
+
+export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
+
+/**
+ * Read-only surface both `EventClient` and `RuleEventsClient` implement, so agent-side read call
+ * sites (`event_search`, `event_write`'s dedup scan, `attach_investigation`, SML) can depend on
+ * this interface instead of a concrete client and stay correct regardless of
+ * `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`. Write-only surface (`bulkCreate`, `emitTrigger`,
+ * `findByEventUuid`) is intentionally excluded — `RuleEventsClient` is read-only and
+ * `event_uuid` is not a real `.rule-events` field (see `RuleEventsClient` doc comment) — callers
+ * needing those must keep a separate `EventClient` obtained via `getEventClient()`.
+ */
+export interface SignificantEventsReadClient {
+  findLatestPaginated(
+    options?: EventsPaginatedSearchOptions
+  ): Promise<PaginatedResponse<SignificantEventResponse>>;
+  findLatestByCurrentStatePaginated(
+    options: EventsPaginatedSearchOptions
+  ): Promise<PaginatedResponse<SignificantEventResponse>>;
+  findLatestActive(
+    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+  ): Promise<{ hits: SignificantEvent[] }>;
+  findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }>;
+  findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined>;
+}
+
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 export type LegacySignal = Omit<SignalEntry, 'verdict'> & {
   verdict?: SignalVerdict;
   confirmed?: boolean;
+};
+
+type LegacySignificantEventStatus = 'open' | 'closed' | 'dismissed';
+type LegacySeverity = '80-critical' | '60-high' | '40-medium' | '20-low';
+type LegacyStoredSignificantEvent = Omit<SignificantEvent, 'event_id' | 'severity' | 'status'> & {
+  event_id?: string;
+  event_uuid?: string;
+  severity: Severity | LegacySeverity;
+  status: SignificantEventStatus | LegacySignificantEventStatus;
+};
+type LegacyStoredSignificantEventResponse = LegacyStoredSignificantEvent & {
+  created_at: string;
+};
+
+const legacyStatusToCanonicalStatus: Record<LegacySignificantEventStatus, SignificantEventStatus> =
+  {
+    open: 'active',
+    closed: 'inactive',
+    dismissed: 'inactive',
+  };
+
+const canonicalStatusToLegacyStatuses: Record<
+  SignificantEventStatus,
+  LegacySignificantEventStatus[]
+> = {
+  active: ['open'],
+  inactive: ['closed', 'dismissed'],
+};
+
+const legacySeverityToCanonicalSeverity: Record<LegacySeverity, Severity> = {
+  '80-critical': 'critical',
+  '60-high': 'high',
+  '40-medium': 'medium',
+  '20-low': 'low',
+};
+
+const canonicalSeverityToLegacySeverity: Record<Severity, LegacySeverity> = {
+  critical: '80-critical',
+  high: '60-high',
+  medium: '40-medium',
+  low: '20-low',
+};
+
+const expandWithLegacyStatuses = (
+  statuses: readonly SignificantEventStatus[]
+): Array<SignificantEventStatus | LegacySignificantEventStatus> => [
+  ...new Set(statuses.flatMap((status) => [status, ...canonicalStatusToLegacyStatuses[status]])),
+];
+
+const legacyStatusesFor = (
+  statuses: readonly SignificantEventStatus[] | undefined
+): Array<SignificantEventStatus | LegacySignificantEventStatus> | undefined =>
+  statuses === undefined ? undefined : expandWithLegacyStatuses(statuses);
+
+const legacySeveritiesFor = (
+  severities: readonly Severity[] | undefined
+): Array<Severity | LegacySeverity> | undefined =>
+  severities === undefined
+    ? undefined
+    : [
+        ...new Set(
+          severities.flatMap((severity) => [severity, canonicalSeverityToLegacySeverity[severity]])
+        ),
+      ];
+
+const hasOwn = (record: object, key: string): boolean =>
+  Object.prototype.hasOwnProperty.call(record, key);
+
+const isCanonicalSeverity = (value: string): value is Severity =>
+  SEVERITY_OPTIONS.some((option) => option === value);
+
+const isLegacySeverity = (value: string): value is LegacySeverity =>
+  hasOwn(legacySeverityToCanonicalSeverity, value);
+
+const isCanonicalStatus = (value: string): value is SignificantEventStatus =>
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.some((option) => option === value);
+
+const isLegacyStatus = (value: string): value is LegacySignificantEventStatus =>
+  hasOwn(legacyStatusToCanonicalStatus, value);
+
+const toCanonicalSeverity = (severity: string): Severity => {
+  if (isCanonicalSeverity(severity)) return severity;
+  if (isLegacySeverity(severity)) return legacySeverityToCanonicalSeverity[severity];
+  throw new Error(`Significant Event has an unmapped severity: ${severity}`);
+};
+
+const toCanonicalStatus = (status: string): SignificantEventStatus => {
+  if (isCanonicalStatus(status)) return status;
+  if (isLegacyStatus(status)) return legacyStatusToCanonicalStatus[status];
+  throw new Error(`Significant Event has an unmapped status: ${status}`);
+};
+
+/**
+ * Converts a stored event, which may use the old vocabularies, into the current shape. Three
+ * transformations: severity (`80-critical`... -> `critical`...), status (`open`/`closed`/
+ * `dismissed` -> `active`/`inactive`) and `event_id` <- `event_uuid`. Every read path that
+ * returns stored events must go through it; throws when an id, severity or status cannot be mapped.
+ * Bridge removal tracked at https://github.com/elastic/nightshift-program/issues/1493.
+ */
+const normalizeLegacyEvent = (event: LegacyStoredSignificantEvent): SignificantEvent => {
+  const { event_id: eventId, event_uuid: eventUuid, severity, status, ...eventFields } = event;
+  const stableEventId = eventId ?? eventUuid;
+
+  if (stableEventId === undefined) {
+    throw new Error('Significant Event is missing both event_id and event_uuid');
+  }
+
+  return normalizeLegacyVerification({
+    ...eventFields,
+    event_id: stableEventId,
+    severity: toCanonicalSeverity(severity),
+    status: toCanonicalStatus(status),
+  });
 };
 
 // TODO: Remove this function once old signals are replaced with the new signal schema
@@ -77,13 +236,6 @@ const normalizeLegacyVerification = (event: SignificantEvent): SignificantEvent 
   ...event,
   signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
 });
-
-/**
- * Maximum number of distinct active events returned by findLatestActive. With stream+rule
- * narrowing the result is proportional to the write batch size, so this cap is a safety bound
- * rather than an operational limit.
- */
-const MAX_DEDUP_SCAN_LIMIT = 500;
 
 const multiValueContainsAnyFilter = ({
   where,
@@ -137,26 +289,18 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
-export interface EventsFilterOptions {
-  status?: SignificantEventStatus[];
-  severity?: Severity[];
-  stream?: string[];
-  search?: string;
-  eventIds?: string[];
-  ruleUuids?: string[];
-  topologyFeatureIds?: string[];
-}
+const activeStatuses = expandWithLegacyStatuses(SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS);
+const activeStatusWhere = (): ESQLAstExpression =>
+  esql.exp`${esql.col('status')} IN (${activeStatuses.map((status) => esql.str(status))})`;
 
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
-
-export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
   afterEventId?: string;
   batchSize: number;
 };
 
-export class EventClient {
+export class EventClient implements SignificantEventsReadClient {
   constructor(
     private readonly clients: {
       dataStreamClient: EventDataStreamClient;
@@ -174,10 +318,18 @@ export class EventClient {
     this.clients.triggerEmitter?.(triggerId, payload);
   }
 
+  // Bridge removal tracked at https://github.com/elastic/nightshift-program/issues/1493: drop the
+  // `event_uuid` coalesce once no pre-`event_id` documents remain.
+  private withStableEventId(query: ComposerQuery): ComposerQuery {
+    return query.pipe`EVAL ${esql.col(FIELD_EVENT_ID)} = COALESCE(${esql.col(
+      FIELD_EVENT_ID
+    )}, ${esql.col(FIELD_EVENT_UUID)})`;
+  }
+
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;
 
-    where = inFilter({ where, field: 'status', values: options.status });
+    where = inFilter({ where, field: 'status', values: legacyStatusesFor(options.status) });
     where = multiValueContainsAnyFilter({
       where,
       field: 'stream_names',
@@ -213,34 +365,38 @@ export class EventClient {
     });
     const topologyWhere = topologyFeatureFilter(options.topologyFeatureIds);
 
-    let query = fromIndexForSpace({
-      index: EVENTS_DATA_STREAM,
-      space: this.clients.space,
-      columns: ['_id', '_source'],
-    }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
+    let query = this.withStableEventId(
+      fromIndexForSpace({
+        index: EVENTS_DATA_STREAM,
+        space: this.clients.space,
+        columns: ['_id', '_source'],
+      })
+    ).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
 
-    query = applyTimeRange({
-      query,
-      from: options.from,
-      to: options.to,
-    });
+    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    // Free-text search runs pre-latest; current state and continuation-candidate filters run
-    // post-latest so stale versions cannot make a closed episode appear open.
+    // Free-text search, current state and continuation-candidate filters all run post-latest, so
+    // they match the current version and stale versions cannot make an inactive episode appear active.
     const searchWhere = this.buildWhere({ search: options.search });
     if (searchWhere) {
       query = query.where`${searchWhere}`;
     }
 
-    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
+    // The time range selects events active during it, always shown in their current state.
+    query = applyLifetimeOverlap({
+      query,
+      from: options.from,
+      to: options.to,
+      activeWhere: activeStatusWhere(),
+    });
 
-    if (options.status?.length) {
-      query = query.where`${esql.col('status')} IN (${options.status.map((status) =>
-        esql.str(status)
-      )})`;
+    const statuses = legacyStatusesFor(options.status);
+    if (statuses?.length) {
+      query = query.where`${esql.col('status')} IN (${statuses.map((status) => esql.str(status))})`;
     }
-    if (options.severity?.length) {
-      query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
+    const severities = legacySeveritiesFor(options.severity);
+    if (severities?.length) {
+      query = query.where`${esql.col('severity')} IN (${severities.map((severity) =>
         esql.str(severity)
       )})`;
     }
@@ -275,14 +431,14 @@ export class EventClient {
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SignificantEvent[] }> {
-    const result = await runLatestSourceEsqlQuery<SignificantEvent>({
+    const result = await runLatestSourceEsqlQuery<LegacyStoredSignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
       groupBy: FIELD_EVENT_ID,
     });
-    return { hits: result.hits.map(normalizeLegacyVerification) };
+    return { hits: result.hits.map(normalizeLegacyEvent) };
   }
 
   async findLatestPaginated(
@@ -306,7 +462,7 @@ export class EventClient {
 
     const [total, hits] = await Promise.all([
       executeCountQuery({ esClient: this.clients.esClient, query: countQuery }),
-      executeEsqlQuery<SignificantEventResponse>({
+      executeEsqlQuery<LegacyStoredSignificantEventResponse>({
         esClient: this.clients.esClient,
         query: dataQuery,
         fields: ['created_at'],
@@ -318,7 +474,7 @@ export class EventClient {
 
     return {
       hits: paginatedHits.map((event) => ({
-        ...normalizeLegacyVerification(event),
+        ...normalizeLegacyEvent(event),
         created_at: event.created_at,
       })),
       page,
@@ -335,7 +491,7 @@ export class EventClient {
       query = query.where`${esql.col(FIELD_EVENT_ID)} > ${esql.str(options.afterEventId)}`;
     }
 
-    const hits = await executeEsqlQuery<SignificantEventResponse>({
+    const hits = await executeEsqlQuery<LegacyStoredSignificantEventResponse>({
       esClient: this.clients.esClient,
       query: query
         .sort([FIELD_EVENT_ID, 'ASC'])
@@ -346,17 +502,17 @@ export class EventClient {
 
     return {
       hits: hits.map((event) => ({
-        ...normalizeLegacyVerification(event),
+        ...normalizeLegacyEvent(event),
         created_at: event.created_at,
       })),
     };
   }
 
   /**
-   * Returns the latest version per event_id for all active (status "open") events within the
+   * Returns the latest version per event_id for all active (status "active") events within the
    * given time range, optionally narrowed to candidate stream/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. The status and candidate filters
-   * are applied after grouping so a closed/dismissed event is correctly excluded.
+   * are applied after grouping so an inactive event is correctly excluded.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With stream+rule narrowing the result
    * set is proportional to the write batch, so this limit is never approached in practice.
@@ -365,20 +521,20 @@ export class EventClient {
     options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
-      query: fromIndexForSpace({
-        index: EVENTS_DATA_STREAM,
-        space: this.clients.space,
-        columns: ['_id', '_source'],
-      }),
+      query: this.withStableEventId(
+        fromIndexForSpace({
+          index: EVENTS_DATA_STREAM,
+          space: this.clients.space,
+          columns: ['_id', '_source'],
+        })
+      ),
       from: options.from,
       to: options.to,
     });
 
     query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    query = query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
-      (s) => esql.str(s)
-    )})`;
+    query = query.where`${activeStatusWhere()}`;
 
     const candidateWhere = continuationCandidateFilter({
       streamNames: options.streamNames,
@@ -388,52 +544,64 @@ export class EventClient {
       query = query.where`${candidateWhere}`;
     }
 
-    const hits = await executeEsqlQuery<SignificantEvent>({
+    const hits = await executeEsqlQuery<LegacyStoredSignificantEvent>({
       esClient: this.clients.esClient,
       query: query.keep('_source').limit(MAX_DEDUP_SCAN_LIMIT),
     });
-    return { hits: hits.map(normalizeLegacyVerification) };
+    return { hits: hits.map(normalizeLegacyEvent) };
   }
 
   async findByEventUuid(id: string): Promise<{ hits: SignificantEvent[] }> {
-    const result = await runFindByIdEsqlQuery<SignificantEvent>({
+    const result = await runFindByIdEsqlQuery<LegacyStoredSignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
       idField: FIELD_EVENT_UUID,
       idValue: id,
     });
-    return { hits: result.hits.map(normalizeLegacyVerification) };
+    return { hits: result.hits.map(normalizeLegacyEvent) };
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
-    const query = fromIndexForSpace({
-      index: EVENTS_DATA_STREAM,
-      space: this.clients.space,
-      columns: ['_source'],
-    }).where`${esql.col(FIELD_EVENT_ID)} == ${esql.str(eventId)}`
+    const query = this.withStableEventId(
+      fromIndexForSpace({
+        index: EVENTS_DATA_STREAM,
+        space: this.clients.space,
+        columns: ['_source'],
+      })
+    ).where`${esql.col(FIELD_EVENT_ID)} == ${esql.str(eventId)}`
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`
       .sort(['@timestamp', 'ASC'])
       .keep('_source', 'created_at');
 
-    const hits = await executeEsqlQuery<SignificantEventResponse>({
+    const hits = await executeEsqlQuery<LegacyStoredSignificantEventResponse>({
       esClient: this.clients.esClient,
       query,
       fields: ['created_at'],
     });
     return {
       hits: hits.map((event) => ({
-        ...normalizeLegacyVerification(event),
+        ...normalizeLegacyEvent(event),
         created_at: event.created_at,
       })),
     };
+  }
+
+  /**
+   * Resolves the latest version for an event_id lineage. `findByEventId` returns all versions
+   * sorted ascending by `@timestamp`, so the latest version is always the last element — never
+   * the first (a caller-supplied id must never pin a read to a stale revision).
+   */
+  async findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined> {
+    const { hits } = await this.findByEventId(eventId);
+    return hits.at(-1);
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
     if (!eventIds.length) return new Map();
     const idLiterals = eventIds.map((s) => esql.str(s));
     const where = esql.exp`${esql.col(FIELD_EVENT_ID)} IN (${idLiterals})`;
-    const { hits } = await runPaginatedLatestSourceEsqlQuery<SignificantEvent>({
+    const { hits } = await runPaginatedLatestSourceEsqlQuery<LegacyStoredSignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options: { perPage: eventIds.length },
@@ -442,7 +610,7 @@ export class EventClient {
       groupBy: FIELD_EVENT_ID,
     });
     const map = new Map<string, SignificantEvent>();
-    for (const event of hits.map(normalizeLegacyVerification)) {
+    for (const event of hits.map(normalizeLegacyEvent)) {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;
