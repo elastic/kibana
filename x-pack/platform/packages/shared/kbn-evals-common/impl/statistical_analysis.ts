@@ -68,8 +68,16 @@ function isFiniteNumber(value: number | null | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
+// TODO: remove once `@elastic/statistics` exports `mean`.
 function mean(values: number[]): number {
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+  let sum = 0;
+  let compensation = 0;
+  for (const value of values) {
+    const next = sum + value;
+    compensation += Math.abs(sum) >= Math.abs(value) ? sum - next + value : value - next + sum;
+    sum = next;
+  }
+  return (sum + compensation) / values.length;
 }
 
 /**
