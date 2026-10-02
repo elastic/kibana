@@ -122,6 +122,14 @@ import {
   validateConversationEvents,
 } from '../../conversation_events';
 
+/**
+ * Whether a write is reported to `ai.conversation.updated`. `source` is required unless the
+ * write explicitly opts out with `emit: false`.
+ */
+type ConversationWriteEmission =
+  | { source: ConversationWriteSource; emit?: true }
+  | { emit: false; source?: never };
+
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
@@ -925,7 +933,8 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
-      source: null,
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
       fields: (current) =>
         updateReadBy({
           userId: this.getUser().id,
@@ -940,7 +949,8 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
-      source: null,
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
       fields: (current) =>
         updatePinnedBy({
           userId: this.getUser().id,
@@ -959,7 +969,8 @@ class ConversationClientImpl implements ConversationClient {
     await this.writeConversation({
       conversationId,
       access: 'owner',
-      source: null,
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
       fields: (current) => {
         const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
 
@@ -1420,16 +1431,14 @@ class ConversationClientImpl implements ConversationClient {
     conversationId,
     access,
     fields,
-    source,
     maxRetries = 5,
+    ...emission
   }: {
     conversationId: string;
     access: ConversationAccess;
     fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
-    /** Recorded on the `ai.conversation.updated` event; `null` for per-user writes, which never emit. */
-    source: ConversationWriteSource | null;
     maxRetries?: number;
-  }): Promise<Conversation> {
+  } & ConversationWriteEmission): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
@@ -1449,8 +1458,9 @@ class ConversationClientImpl implements ConversationClient {
         },
       });
 
-      if (source && before) {
+      if (emission.emit !== false && before) {
         const previous = before;
+        const { source } = emission;
         this.notifyConversationUpdated(conversationId, () =>
           describeConversationWrite({ before: previous, after: document, source })
         );
