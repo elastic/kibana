@@ -99,7 +99,11 @@ const dataView = {
   timeFieldName: '@timestamp',
 } as unknown as DataView;
 
-type HookProps = Parameters<typeof useFetchHistogramBounds>[0];
+type HookParams = Parameters<typeof useFetchHistogramBounds>[0];
+// Tests build on a populated `fetchParams`; the undefined case is covered explicitly below.
+type HookProps = Omit<HookParams, 'fetchParams'> & {
+  fetchParams: ChartSectionProps['fetchParams'];
+};
 
 const createProps = (overrides: Partial<HookProps> = {}): HookProps => ({
   enabled: true,
@@ -508,6 +512,21 @@ describe('useFetchHistogramBounds', () => {
         searchSessionId: 'next-session',
       },
     });
+
+    await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+  });
+
+  it('sends no request until the fetch params from the landed METRICS_INFO are available', async () => {
+    const { result, rerender } = renderHook((props: HookParams) => useFetchHistogramBounds(props), {
+      initialProps: { ...createProps(), fetchParams: undefined } as HookParams,
+    });
+
+    await act(async () => {});
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.bounds.size).toBe(0);
+
+    rerender(createProps());
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
   });

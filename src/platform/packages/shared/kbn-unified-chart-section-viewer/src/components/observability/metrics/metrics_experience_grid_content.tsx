@@ -19,6 +19,7 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
@@ -41,14 +42,30 @@ export interface MetricsExperienceGridContentProps
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   activeDimensions: Dimension[];
+  /**
+   * Fetch params captured when the current `metricItems` landed. The histogram bounds fetch is
+   * built from these so it never runs for stale items against new Discover inputs.
+   */
+  loadedFetchParams?: UnifiedMetricsGridProps['fetchParams'];
   isDiscoverLoading?: boolean;
   isTabSelected: boolean;
   isComponentVisible: boolean;
 }
 
+const useEsqlQueryParts = (query: Query | AggregateQuery | undefined) => {
+  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
+  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
+  const userSource = useMemo(
+    () => (esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) || undefined : undefined),
+    [esqlQuery]
+  );
+  return { whereStatements, userSource };
+};
+
 export const MetricsExperienceGridContent = ({
   metricItems,
   activeDimensions,
+  loadedFetchParams,
   services,
   discoverFetch$,
   fetchParams,
@@ -64,14 +81,9 @@ export const MetricsExperienceGridContent = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
-
-  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
-
-  const userSource = useMemo(
-    () => (esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) || undefined : undefined),
-    [esqlQuery]
-  );
+  const { whereStatements, userSource } = useEsqlQueryParts(query);
+  const { whereStatements: loadedWhereStatements, userSource: loadedUserSource } =
+    useEsqlQueryParts(loadedFetchParams?.query);
 
   const { searchTerm, currentPage, onPageChange, profileId } = useMetricsExperienceState();
 
@@ -86,12 +98,12 @@ export const MetricsExperienceGridContent = ({
   }) ?? {};
 
   useFetchHistogramBounds({
-    enabled: isComponentVisible && !isDiscoverLoading,
+    enabled: isComponentVisible,
     metricItems: currentPageFields,
-    fetchParams,
+    fetchParams: loadedFetchParams,
     services,
-    whereStatements,
-    originalSource: userSource,
+    whereStatements: loadedWhereStatements,
+    originalSource: loadedUserSource,
     profileId,
   });
 

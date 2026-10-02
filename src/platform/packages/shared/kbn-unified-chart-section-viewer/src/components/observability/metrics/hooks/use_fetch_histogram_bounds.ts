@@ -63,7 +63,8 @@ export const useFetchHistogramBounds = ({
 }: {
   enabled: boolean;
   metricItems: readonly ParsedMetricItem[];
-  fetchParams: ChartSectionProps['fetchParams'];
+  /** Fetch params captured when `metricItems` landed. Undefined until the first METRICS_INFO response. */
+  fetchParams?: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   whereStatements: readonly string[];
   originalSource?: string;
@@ -89,14 +90,22 @@ export const useFetchHistogramBounds = ({
       }),
     [metricItems, whereStatements, originalSource]
   );
-  const { dataView, relativeTimeRange, filters, esqlVariables, searchSessionId } = fetchParams;
+  const {
+    dataView,
+    relativeTimeRange,
+    filters,
+    esqlVariables,
+    searchSessionId,
+  }: Partial<ChartSectionProps['fetchParams']> = fetchParams ?? {};
   const search = services.data.search.search;
   const { uiSettings } = services;
 
-  // Discover replaces `abortController` and bumps `lastReloadRequestTime` on chart-only
-  // refetches (breakdown, vis context) that do not change these inputs. Keying on either
-  // would send a second MIN/MAX request per chart. A Discover refresh starts a new search
-  // session. Query order is ignored so a grid reorder does not refetch.
+  // `fetchParams` is the snapshot captured when `metricItems` landed, so the session, time
+  // range, filters, and query move together with the items. Reading Discover's live params
+  // instead would fire a request per stale chart one render early. Discover replaces
+  // `abortController` and bumps `lastReloadRequestTime` on chart-only refetches (breakdown,
+  // vis context); keying on either would send a second MIN/MAX request per chart. Query order
+  // is ignored so a grid reorder does not refetch.
   const requestKey = useMemo(
     () =>
       JSON.stringify({

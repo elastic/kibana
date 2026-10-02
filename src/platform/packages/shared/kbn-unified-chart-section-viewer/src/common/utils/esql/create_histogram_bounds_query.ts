@@ -28,8 +28,16 @@ const getBoundsExpression = (metricItem: ParsedMetricItem): string | undefined =
     return undefined;
   }
 
-  const fieldType = firstNonNullable(metricItem.fieldTypes);
-  if (!fieldType || !HISTOGRAM_FIELD_TYPES.has(fieldType)) {
+  // The same fieldTypes list is copied onto every per-index chart. A field typed as
+  // histogram in one stream and exponential_histogram in another would get one cast
+  // for both and fail with a verification_exception.
+  const uniqueFieldTypes = new Set(metricItem.fieldTypes.filter(Boolean));
+  if (uniqueFieldTypes.size !== 1) {
+    return undefined;
+  }
+
+  const [fieldType] = uniqueFieldTypes;
+  if (!HISTOGRAM_FIELD_TYPES.has(fieldType)) {
     return undefined;
   }
 

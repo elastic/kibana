@@ -152,6 +152,8 @@ export interface MetricsInfo extends ParsedMetrics {
   loading: boolean;
   error: Error | null;
   activeDimensions: Dimension[];
+  /** Fetch params captured when the current `metricItems` landed. */
+  loadedFetchParams?: ChartSectionProps['fetchParams'];
 }
 
 export interface ParsedMetricsWithTelemetry extends ParsedMetrics {

@@ -260,14 +260,17 @@ describe('MetricsExperienceGridContent', () => {
     expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 
-  it('fetches histogram bounds for the visible page', () => {
+  it('fetches histogram bounds for the visible page from the loaded fetch params', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
+    };
+
     render(
       <MetricsExperienceGridContent
         {...defaultProps}
-        fetchParams={{
-          ...fetchParams,
-          query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
-        }}
+        fetchParams={loadedFetchParams}
+        loadedFetchParams={loadedFetchParams}
       />,
       { wrapper: IntlProvider }
     );
@@ -276,6 +279,7 @@ describe('MetricsExperienceGridContent', () => {
       expect.objectContaining({
         enabled: true,
         metricItems: [metricItems[0]],
+        fetchParams: loadedFetchParams,
         originalSource: 'test-metrics-histograms',
         whereStatements: ['host.name == "a"'],
         profileId: 'test-profile-id',
@@ -283,13 +287,54 @@ describe('MetricsExperienceGridContent', () => {
     );
   });
 
-  it('keeps the histogram bounds fetch disabled while Discover is loading', () => {
+  it('builds the histogram bounds fetch from the loaded fetch params, not the in-flight ones', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      searchSessionId: 'loaded-session',
+      query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={{
+          ...fetchParams,
+          searchSessionId: 'next-session',
+          query: { esql: 'TS in-flight-* | WHERE host.name == "b"' },
+        }}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        fetchParams: loadedFetchParams,
+        originalSource: 'test-metrics-histograms',
+        whereStatements: ['host.name == "a"'],
+      })
+    );
+  });
+
+  it('sends no fetch params to the histogram bounds hook before METRICS_INFO has landed', () => {
+    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        fetchParams: undefined,
+        whereStatements: [],
+        originalSource: undefined,
+      })
+    );
+  });
+
+  it('keeps the histogram bounds fetch enabled while Discover is loading so previous bounds survive', () => {
     render(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />, {
       wrapper: IntlProvider,
     });
 
     expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: false })
+      expect.objectContaining({ enabled: true })
     );
   });
 

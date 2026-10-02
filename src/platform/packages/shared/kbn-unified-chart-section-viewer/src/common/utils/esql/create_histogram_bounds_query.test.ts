@@ -49,6 +49,29 @@ describe('createHistogramBoundsQuery', () => {
     );
   });
 
+  it('queries a repeated histogram field type', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({
+        fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+      }),
+    });
+
+    expect(boundsQuery?.esqlQuery).toContain(
+      'STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)'
+    );
+  });
+
+  it('returns undefined when histogram field types conflict across streams', () => {
+    expect(
+      createHistogramBoundsQuery({
+        metricItem: createMetric({
+          fieldTypes: [ES_FIELD_TYPES.HISTOGRAM, ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+        }),
+        originalSource: 'metrics-*',
+      })
+    ).toBeUndefined();
+  });
+
   it('casts a legacy histogram with TO_TDIGEST', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({
