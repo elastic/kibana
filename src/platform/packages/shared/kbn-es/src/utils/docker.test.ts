@@ -9,6 +9,7 @@
 
 import mockFs from 'mock-fs';
 
+import Fs from 'fs';
 import Fsp from 'fs/promises';
 import { basename, join } from 'path';
 
@@ -46,6 +47,7 @@ import {
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_OPERATOR_PATH,
+  SERVERLESS_SECRETS_DIR,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
@@ -928,6 +930,58 @@ describe('setupServerlessVolumes()', () => {
     );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });
+
+  test('should mount the bundled secrets file when no secure files are passed', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
+
+    expect(volumeCmd).toContain(
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.file_secrets).toBeUndefined();
+  });
+
+  test('should embed secure files as base64 file_secrets in an owner-only operator directory', async () => {
+    mockFs({
+      ...existingObjectStore,
+      '/creds/gcs.json': '{"type":"service_account"}',
+    });
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      secureFiles: ['gcs.client.default.credentials_file=/creds/gcs.json'],
+    });
+
+    const encoded = Buffer.from('{"type":"service_account"}').toString('base64');
+    expect(volumeCmd).toContain(
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+    const settingsPath = join(SERVERLESS_OPERATOR_PATH, 'settings.json');
+    const settings = JSON.parse(await Fsp.readFile(settingsPath, 'utf-8'));
+    expect(settings.state.cluster_secrets.file_secrets).toEqual({
+      'gcs.client.default.credentials_file': encoded,
+    });
+    expect((await Fsp.stat(SERVERLESS_SECRETS_DIR)).mode.toString(8).slice(-3)).toBe('700');
+    // The container's elasticsearch user reads the mounted file directly, so it stays world-readable.
+    expect((await Fsp.stat(settingsPath)).mode.toString(8).slice(-3)).toBe('644');
+  });
+
+  test('should reject a malformed secure file entry', async () => {
+    mockFs(existingObjectStore);
+
+    await expect(
+      setupServerlessVolumes(log, {
+        projectType,
+        basePath: baseEsPath,
+        secureFiles: ['/creds/gcs.json'],
+      })
+    ).rejects.toThrow('Invalid secure file "/creds/gcs.json", expected "setting=/path/to/file"');
+  });
 });
 
 describe('runServerlessEsNode()', () => {
@@ -1134,6 +1188,24 @@ describe('stopServerlessCluster()', () => {
       expect.arrayContaining(['container', 'stop'].concat(nodes))
     );
   });
+
+  test('should remove the operator secrets directory', async () => {
+    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await stopServerlessCluster(log, ['es01']);
+
+    await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
+  });
+
+  test('should remove the operator secrets directory even when stopping fails', async () => {
+    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    execa.mockImplementation(() => Promise.reject(new Error('No such container: es01')));
+
+    await expect(stopServerlessCluster(log, ['es01'])).rejects.toThrow('No such container');
+
+    await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
+  });
 });
 
 describe('teardownServerlessClusterSync()', () => {
@@ -1177,6 +1249,34 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(1);
+  });
+
+  test('should remove the operator secrets directory', () => {
+    const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
+    execa.commandSync.mockImplementation(() => ({ stdout: '' }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
+      recursive: true,
+      force: true,
+    });
+    rmSync.mockRestore();
+  });
+
+  test('should remove the operator secrets directory even when Docker is unavailable', () => {
+    const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
+    execa.commandSync.mockImplementation(() => {
+      throw new Error('Cannot connect to the Docker daemon');
+    });
+
+    expect(() => teardownServerlessClusterSync(log, defaultOptions)).toThrow('Docker daemon');
+
+    expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
+      recursive: true,
+      force: true,
+    });
+    rmSync.mockRestore();
   });
 });
 
