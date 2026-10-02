@@ -446,8 +446,8 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.9
-        version: 21.4.9
+        specifier: 21.4.10
+        version: 21.4.10
       '@hapi/hoek':
         specifier: 11.0.7
         version: 11.0.7
@@ -4149,7 +4149,7 @@ importers:
         version: 3.0.0
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.9)
+        version: 6.0.0(@hapi/hapi@21.4.10)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -11176,8 +11176,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.9':
-    resolution: {integrity: sha512-YnecZOVx2AD08VvPl0ZaFS0MjEHqg+InGRmBRli731ct+VwI++dpu3BIYA1Z4SMr6HUAnpyvbQ1aq5woe3fBWg==}
+  '@hapi/hapi@21.4.10':
+    resolution: {integrity: sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -28533,7 +28533,7 @@ snapshots:
       '@hapi/validate': 2.0.1
       '@hapi/wreck': 18.1.2
 
-  '@hapi/hapi@21.4.9':
+  '@hapi/hapi@21.4.10':
     dependencies:
       '@hapi/accept': 6.0.3
       '@hapi/ammo': 6.0.1
@@ -32776,7 +32776,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.9
+      '@hapi/hapi': 21.4.10
       '@types/node': 24.10.13
       joi: 17.13.8
 
@@ -34536,9 +34536,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.9):
+  brok@6.0.0(@hapi/hapi@21.4.10):
     dependencies:
-      '@hapi/hapi': 21.4.9
+      '@hapi/hapi': 21.4.10
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
