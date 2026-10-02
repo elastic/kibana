@@ -52,6 +52,7 @@ const summary = (
 ): InvestigationSummary => ({
   id,
   title: id,
+  title_pending: false,
   created_at: '2026-09-11T09:00:00.000Z',
   updated_at: '2026-09-11T09:00:00.000Z',
   agent_id: 'nightshift.investigation',

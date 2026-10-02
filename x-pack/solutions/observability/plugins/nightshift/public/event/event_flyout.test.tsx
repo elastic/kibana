@@ -37,6 +37,7 @@ jest.mock('@kbn/investigation-output', () => ({
 const investigationDetails = {
   id: 'conv-1',
   title: 'Web latency spike',
+  title_pending: false,
   created_at: '2026-07-10T12:00:00Z',
   updated_at: '2026-07-10T12:05:00Z',
   agent_id: 'nightshift.investigation',
