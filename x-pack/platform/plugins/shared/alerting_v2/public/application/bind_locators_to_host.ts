@@ -73,7 +73,7 @@ export const bindLocatorsToHost = (
 ): AlertingV2Locators => ({
   rulesLocators: bindLocatorToHost(locators.rulesLocators, hostApp.rules),
   ruleLibraryLocators: bindLocatorToHost(locators.ruleLibraryLocators, hostApp.ruleLibrary),
-  episodesLocators: bindLocatorToHost(locators.episodesLocators, hostApp.episodes),
+  episodesLocators: bindLocatorToHost(locators.episodesLocators, hostApp.alerts),
   actionPolicyLocators: bindLocatorToHost(locators.actionPolicyLocators, hostApp.actionPolicies),
   executionHistoryLocators: bindLocatorToHost(
     locators.executionHistoryLocators,

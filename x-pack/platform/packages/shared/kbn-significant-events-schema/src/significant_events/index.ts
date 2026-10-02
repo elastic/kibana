@@ -34,8 +34,6 @@ export {
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
-  SIGNIFICANT_EVENTS_SEVERITY_MAP,
-  SIGNIFICANT_EVENTS_STATUS_MAP,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
