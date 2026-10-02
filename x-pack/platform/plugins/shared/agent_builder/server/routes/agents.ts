@@ -165,6 +165,7 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   ],
   {
     meta: {
+      availability: { stability: 'stable', since: '9.4.0' },
       description:
         'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
     },
