@@ -87,7 +87,7 @@ import { eventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
+import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
@@ -183,11 +183,6 @@ export class SignificantEventsPlugin
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
     this.ebtTelemetryService.setup(core.analytics);
-
-    registerSignificantEventsInferenceFeatures(
-      plugins.searchInferenceEndpoints,
-      this.logger.get('inference-features')
-    );
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
@@ -417,6 +412,14 @@ export class SignificantEventsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
     );
+    plugins.workflowsExtensions?.registerStepDefinition(
+      resolveModelStepDefinition({
+        getInference: () => this.server?.inference,
+        getSavedObjects: () => this.server?.core?.savedObjects,
+        getUiSettings: () => this.server?.core?.uiSettings,
+        logger: this.logger.get('resolve_model'),
+      })
+    );
 
     // Custom event-driven triggers users can subscribe to from their own workflows.
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
@@ -500,7 +503,6 @@ export class SignificantEventsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.inference = plugins.inference;
       this.server.licensing = plugins.licensing;
-      this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
