@@ -6,14 +6,18 @@
  */
 
 import { EuiBadge, EuiBasicTable, type EuiBasicTableColumn } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { DependencyOperation } from '@kbn/apm-api-shared';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getESQLQuery } from '../../links/discover_links/get_esql_query';
 import { ImpactBar } from '../../impact_bar';
 import { TransactionTab } from '../../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { DependencyOperationDetailLink } from '../../../app/dependency_operation_detail_view/dependency_operation_detail_link';
@@ -38,6 +42,32 @@ export function RequestFlyoutOperations() {
   } = useRequestFlyoutContext();
 
   const { items, isLoading, resolvedDependencyName } = useRequestFlyoutOperations();
+
+  // Discover link — built per-row using the pure getESQLQuery function.
+  const { indexSettings = [] } = useApmIndexSettingsContext();
+  const { share } = useApmPluginContext();
+  const discoverLocator = share?.url.locators.get(DISCOVER_APP_LOCATOR);
+
+  const buildDiscoverHref = useCallback(
+    (item: DependencyOperation): string | undefined => {
+      const esqlQuery = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName: sourceServiceName,
+          spanName: item.spanName,
+          environment,
+          sortDirection: 'DESC',
+        },
+        indexSettings,
+      });
+      if (!esqlQuery || !discoverLocator) return undefined;
+      return discoverLocator.getRedirectUrl({
+        timeRange: { from: rangeFrom, to: rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [sourceServiceName, environment, rangeFrom, rangeTo, indexSettings, discoverLocator]
+  );
 
   const columns: Array<EuiBasicTableColumn<DependencyOperation>> = [
     {
@@ -112,6 +142,29 @@ export function RequestFlyoutOperations() {
       }),
       align: 'right' as const,
       render: (value: number) => <ImpactBar value={value} size="m" />,
+    },
+    {
+      name: i18n.translate('xpack.apm.requestFlyout.operations.column.actions', {
+        defaultMessage: 'Actions',
+      }),
+      align: 'right' as const,
+      width: '60px',
+      actions: [
+        {
+          name: i18n.translate('xpack.apm.requestFlyout.operations.action.viewInDiscover', {
+            defaultMessage: 'View traces in Discover',
+          }),
+          description: i18n.translate(
+            'xpack.apm.requestFlyout.operations.action.viewInDiscover.description',
+            { defaultMessage: 'Open traces for this operation in Discover' }
+          ),
+          type: 'icon' as const,
+          icon: 'discoverApp',
+          href: buildDiscoverHref,
+          available: (item: DependencyOperation) => buildDiscoverHref(item) != null,
+          'data-test-subj': 'requestFlyoutOperationViewInDiscover',
+        },
+      ],
     },
   ];
 

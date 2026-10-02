@@ -12,10 +12,15 @@ import {
   EuiSpacer,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getESQLQuery } from '../../links/discover_links/get_esql_query';
 import { ImpactBar } from '../../impact_bar';
+import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutTransactions } from './use_request_flyout_transactions';
 import type { ConnectionTransactionGroup } from './use_request_flyout_transactions';
 
@@ -39,7 +44,39 @@ interface RequestFlyoutAffectedEndpointsProps {
 export function RequestFlyoutAffectedEndpoints({
   onTransactionSelect,
 }: RequestFlyoutAffectedEndpointsProps) {
+  const {
+    connection: { sourceServiceName },
+    filters: { environment, rangeFrom, rangeTo },
+  } = useRequestFlyoutContext();
   const { items, isLoading, isMaxTransactionsReached } = useRequestFlyoutTransactions();
+
+  // Discover link helpers — called at component level so hooks stay at top-level.
+  // getESQLQuery is a pure function, safe to call per-row inside the href callback.
+  const { indexSettings = [] } = useApmIndexSettingsContext();
+  const { share } = useApmPluginContext();
+  const discoverLocator = share?.url.locators.get(DISCOVER_APP_LOCATOR);
+
+  const buildDiscoverHref = useCallback(
+    (item: ConnectionTransactionGroup): string | undefined => {
+      const esqlQuery = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName: sourceServiceName,
+          transactionName: item.name,
+          transactionType: item.transactionType,
+          environment,
+          sortDirection: 'DESC',
+        },
+        indexSettings,
+      });
+      if (!esqlQuery || !discoverLocator) return undefined;
+      return discoverLocator.getRedirectUrl({
+        timeRange: { from: rangeFrom, to: rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [sourceServiceName, environment, rangeFrom, rangeTo, indexSettings, discoverLocator]
+  );
 
   const onTransactionClick = useCallback(
     (item: ConnectionTransactionGroup) => {
@@ -98,6 +135,29 @@ export function RequestFlyoutAffectedEndpoints({
       align: 'right' as const,
       render: (value: number | null) =>
         value == null ? '—' : <ImpactBar value={value * 100} size="m" />,
+    },
+    {
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.actions', {
+        defaultMessage: 'Actions',
+      }),
+      align: 'right' as const,
+      width: '60px',
+      actions: [
+        {
+          name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.action.viewInDiscover', {
+            defaultMessage: 'View traces in Discover',
+          }),
+          description: i18n.translate(
+            'xpack.apm.requestFlyout.affectedEndpoints.action.viewInDiscover.description',
+            { defaultMessage: 'Open traces for this transaction in Discover' }
+          ),
+          type: 'icon' as const,
+          icon: 'discoverApp',
+          href: buildDiscoverHref,
+          available: (item: ConnectionTransactionGroup) => buildDiscoverHref(item) != null,
+          'data-test-subj': 'requestFlyoutTransactionViewInDiscover',
+        },
+      ],
     },
   ];
 
