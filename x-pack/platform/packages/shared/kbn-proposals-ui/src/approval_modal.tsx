@@ -101,6 +101,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           titleId={titleId}
           caption={getProposalCaption(proposal, { includeRiskDetails: true })}
           decision={getProposalDecision(proposal)}
+          previousAttemptError={proposal.previousExecutionError}
           isSubmitting={isSubmitting}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}

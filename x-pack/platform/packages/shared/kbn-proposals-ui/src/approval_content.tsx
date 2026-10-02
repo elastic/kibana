@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { DismissReason } from '@kbn/proposals-common';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
@@ -109,6 +110,11 @@ export interface ApprovalContentProps {
    * placed inside a modal or an Agent Builder chat card. Disabled whenever `primaryAction` is.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
+  /**
+   * Why the attempt this proposal re-offers failed. Shown only while the proposal still awaits a
+   * decision, so the analyst knows why it is back before deciding again.
+   */
+  previousAttemptError?: string;
   /** Extra content inserted between the body and the footer — use for host-specific inline content. */
   children?: React.ReactNode;
   'data-test-subj'?: string;
@@ -151,6 +157,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     primaryAction,
     secondaryActions,
     onDismiss,
+    previousAttemptError,
     children,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -300,6 +307,19 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               >
                 {comment}
               </EuiMarkdownFormat>
+            </div>
+          )}
+
+          {mode === 'view' && !isSettledOrTransient && previousAttemptError && (
+            <div css={css({ marginBottom: euiTheme.size.m })}>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
+                data-test-subj={dataTestSubj ? `${dataTestSubj}-previousFailure` : undefined}
+              >
+                {previousAttemptError}
+              </KbnWarningCallout>
             </div>
           )}
 

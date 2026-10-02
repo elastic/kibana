@@ -59,6 +59,7 @@ jest.mock('@kbn/proposals-ui', () => ({
     decision,
     isSubmitting,
     currentActorName,
+    previousAttemptError,
   }: {
     children?: React.ReactNode;
     tone?: string;
@@ -66,6 +67,7 @@ jest.mock('@kbn/proposals-ui', () => ({
     decision?: ApprovalDecision;
     isSubmitting?: 'applying' | 'declining';
     currentActorName?: string;
+    previousAttemptError?: string;
     primaryAction?: {
       label: string;
       onClick: () => void | Promise<void>;
@@ -98,6 +100,9 @@ jest.mock('@kbn/proposals-ui', () => ({
         )}
         {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
         {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
+        {previousAttemptError && (
+          <div data-test-subj="approval-previous-attempt-error">{previousAttemptError}</div>
+        )}
         {children}
       </div>
     );
@@ -292,11 +297,10 @@ describe('ProposalApprovalCard', () => {
       setupMocks(baseProposal({ status: 'pending', previousExecutionError: FAILURE }));
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      const callout = getByTestId('warning-callout');
-      expect(callout).toHaveTextContent('A previous attempt at this action failed');
-      // The reason is the actionable half: the title alone does not tell an
-      // analyst whether re-approving is likely to fail the same way.
-      expect(callout).toHaveTextContent(FAILURE);
+      // `ApprovalContent` renders the callout itself, so every surface showing the
+      // proposal explains the retry the same way. The reason is the actionable half:
+      // the title alone does not tell an analyst whether re-approving will fail again.
+      expect(getByTestId('approval-previous-attempt-error')).toHaveTextContent(FAILURE);
     });
 
     it('drops the explanation once the proposal is no longer awaiting a decision', () => {

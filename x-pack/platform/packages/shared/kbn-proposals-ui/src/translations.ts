@@ -76,6 +76,12 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
     defaultMessage: 'Action failed',
   }),
+  previousFailureCalloutTitle: i18n.translate(
+    'xpack.proposals.proposalCard.previousFailureCallout',
+    {
+      defaultMessage: 'A previous attempt at this action failed',
+    }
+  ),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
     defaultMessage: 'Approved — no action to run',
   }),

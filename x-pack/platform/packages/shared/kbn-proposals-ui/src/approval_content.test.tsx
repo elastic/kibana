@@ -176,6 +176,25 @@ describe('ApprovalContent', () => {
     expect(onChange).toHaveBeenCalledWith(true);
   });
 
+  describe('previous attempt error', () => {
+    const FAILURE = 'The rule was changed after this proposal was created';
+
+    it('explains why a pending proposal is being offered again', () => {
+      renderContent({ previousAttemptError: FAILURE });
+      const callout = screen.getByTestId('approvalContent-previousFailure');
+      expect(callout).toHaveTextContent('A previous attempt at this action failed');
+      expect(callout).toHaveTextContent(FAILURE);
+    });
+
+    it('drops the explanation once the proposal is decided', () => {
+      renderContent({
+        previousAttemptError: FAILURE,
+        decision: { status: 'applied', actorName: 'Ava' },
+      });
+      expect(screen.queryByTestId('approvalContent-previousFailure')).not.toBeInTheDocument();
+    });
+  });
+
   describe('built-in decline flow (onDismiss)', () => {
     it('renders a Decline trigger next to the primary action when onDismiss is supplied', () => {
       renderContent({ onDismiss: jest.fn(), 'data-test-subj': 'card' });
