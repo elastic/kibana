@@ -16,6 +16,7 @@ import { initializeManagedWorkflows } from './managed_workflows/initialize_manag
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
 import { ensureAgentSafe, registerAgentType } from './agent';
+import { registerSecurityInvestigationsAiIndex } from './context_engine/security_investigations_ai_index';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
 jest.mock('./managed_workflows/register_owner', () => ({
@@ -38,6 +39,10 @@ jest.mock('./agent', () => ({
 
 jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
+}));
+
+jest.mock('./context_engine/security_investigations_ai_index', () => ({
+  registerSecurityInvestigationsAiIndex: jest.fn(),
 }));
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
@@ -88,6 +93,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         setServerlessTierAvailable: expect.any(Function),
       });
       expect(registerOwner).not.toHaveBeenCalled();
+      expect(registerSecurityInvestigationsAiIndex).not.toHaveBeenCalled();
       expect(skills.register).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
@@ -155,6 +161,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         expect(result.isEnabled).toBe(true);
         expect(registerRoutes).toHaveBeenCalled();
         expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
+        expect(registerSecurityInvestigationsAiIndex).toHaveBeenCalled();
         // Step definitions register regardless: an installed workflow that reaches one of these
         // steps must fail on the named missing dependency, not on an unregistered step type.
         expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
@@ -203,6 +210,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         'security.alertzero.actions.list',
       ]);
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
+      expect(registerSecurityInvestigationsAiIndex).toHaveBeenCalledWith(
+        undefined,
+        expect.anything()
+      );
       expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({

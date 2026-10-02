@@ -12,9 +12,12 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
@@ -37,9 +40,12 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import ACTION_HANDOFF_TO_FORENSICS_YAML from './definitions/alertzero/actions/action_handoff_to_forensics.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
 import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
+import ATTACK_DISCOVERY_REVIEW_YAML from './definitions/alertzero/attack_discovery_review.yaml';
+import COVERAGE_WORKER_YAML from './definitions/alertzero/coverage_worker.yaml';
 import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
@@ -200,7 +206,7 @@ it.each([
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
     FORENSICS_ENDPOINT_ANALYSIS_YAML,
-    '2:733b12b2',
+    '3:300a1bde',
   ],
   [
     ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
@@ -218,6 +224,13 @@ it.each([
     DETECTION_RULE_COVERAGE_YAML,
     '1:7b889e7a',
   ],
+  [
+    ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
+    ACTION_HANDOFF_TO_FORENSICS_YAML,
+    '2:9a6a8b28',
+  ],
+  [ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID, ATTACK_DISCOVERY_REVIEW_YAML, '8:6f042bf5'],
+  [ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID, COVERAGE_WORKER_YAML, '5:4c87b419'],
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '3:5bff8110'],

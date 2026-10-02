@@ -16,6 +16,7 @@ import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
+import { renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 // `system-attack-discovery-generation` is already taken by the discoveries plugin,
@@ -44,16 +45,15 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  * The version carries the `resolve_display_text` step, which reads the discovery from
  * the Attack Discovery find API so the Investigation title, its summary, the journal
  * and the proposal's title and comment show its text with field tokens rendered and
- * original values restored. Bumped as a deliberate rollout signal for that step; the YAML
- * change alone already rolls out through `definitionHash`.
+ * original values restored, and it substitutes the shared investigations AI index id.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
-  yaml: ATTACK_DISCOVERY_REVIEW_YAML,
+  version: 8,
+  yaml: renderCommonWorkerYaml(ATTACK_DISCOVERY_REVIEW_YAML),
 } as const satisfies ManagedWorkflowDefinition;
 
 /**

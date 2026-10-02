@@ -6,7 +6,7 @@
  */
 
 import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { HUNT_COVERAGE_AI_INDEX_ID } from '../../../../../common/step_types/package_report';
+import { SECURITY_INVESTIGATIONS_AI_INDEX_ID } from '@kbn/workflows/managed';
 import { buildCoverageSubject } from './coverage_ki_id';
 import type { CoverageSubject, CoverageWriteResult } from './types';
 
@@ -64,7 +64,7 @@ export const createCoverageWriter = ({
 }): ((subjects: CoverageSubject[]) => Promise<CoverageWriteResult>) => {
   // Context Engine owns how an AI index id maps to a backing store, so ask it rather than
   // rebuilding the prefix here and drifting when it changes.
-  const { value: backingIndex } = getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID);
+  const { value: backingIndex } = getAiIndexDest('index', SECURITY_INVESTIGATIONS_AI_INDEX_ID);
 
   return async (subjects) => {
     const written: CoverageWriteResult['written'] = [];

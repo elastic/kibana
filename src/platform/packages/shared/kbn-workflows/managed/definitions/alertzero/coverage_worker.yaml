@@ -25,7 +25,7 @@ triggers:
         ai_index_id:
           type: string
           maxLength: 256
-          description: "AI index that holds the indicators. Default: security-investigations."
+          description: "AI index that holds the indicators. Default: __SECURITY_INVESTIGATIONS_AI_INDEX_ID__."
         max_open_checks:
           type: integer
           minimum: 1
@@ -60,7 +60,7 @@ outputs:
     type: boolean
 consts:
   # Defaults. A manual run can override each value through the input with the same name.
-  ai_index_id: security-investigations
+  ai_index_id: __SECURITY_INVESTIGATIONS_AI_INDEX_ID__
   # Maximum number of active reviews per space (across all sweeps). A sweep starts new
   # reviews only when the in-flight count is below this ceiling. Capped at 100 because
   # the executions API returns at most 100 results, so counting above 100 is impossible.

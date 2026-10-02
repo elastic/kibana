@@ -38,7 +38,7 @@ triggers:
           # Mirrors AI_INDEX_ID_PATTERN in the context engine, which is what an AI index id
           # is checked against when one is created.
           pattern: "^[a-z0-9][a-z0-9_-]*$"
-          description: "AI index that holds the indicators. Default: security-investigations."
+          description: "AI index that holds the indicators. Default: __SECURITY_INVESTIGATIONS_AI_INDEX_ID__."
         batch_size:
           type: integer
           minimum: 1
@@ -66,7 +66,7 @@ consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
-  ai_index_id: security-investigations
+  ai_index_id: __SECURITY_INVESTIGATIONS_AI_INDEX_ID__
   batch_size: 2
   lookback_days: 7
   # Liquid has no array literal, so `| default: []` falls back to nothing at all

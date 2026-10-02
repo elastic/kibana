@@ -139,10 +139,9 @@ consts:
   # attach_alerts batches start failing validation and the review says so.
   alerts_per_attachment: 20
   handoff_to_forensics_action: system-alertzero-action-handoff-to-forensics
-  # AI index the forensics handoff writes its knowledge indicator into. Both
-  # existing Context-Engine-as-IPC producers hardcode this same string; it is a
-  # convention rather than a shared constant.
-  forensics_ai_index_id: security-investigations
+  # AI index the forensics handoff writes its knowledge indicator into.
+  # Substituted by renderCommonWorkerYaml from SECURITY_INVESTIGATIONS_AI_INDEX_ID.
+  forensics_ai_index_id: __SECURITY_INVESTIGATIONS_AI_INDEX_ID__
   # Always-on Investigation journal. converse `trigger_mode: never` persists a
   # user_message without running the agent (elastic/kibana#290223).
   #

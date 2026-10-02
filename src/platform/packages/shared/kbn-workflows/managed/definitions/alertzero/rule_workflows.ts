@@ -17,6 +17,7 @@ import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
 import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
 import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
+import { renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
@@ -40,8 +41,8 @@ export const ALERTZERO_COVERAGE_WORKER_WORKFLOW = {
   id: ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
-  yaml: COVERAGE_WORKER_YAML,
+  version: 5,
+  yaml: renderCommonWorkerYaml(COVERAGE_WORKER_YAML),
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {

@@ -65,9 +65,8 @@ triggers:
               type: string
               maxLength: 256
               description: >-
-                AI index the knowledge indicator is written into. The existing
-                Context-Engine-as-IPC producers hardcode `security-investigations`;
-                it is a convention rather than a shared constant.
+                AI index the knowledge indicator is written into. Attack Discovery
+                review passes the shared investigations index id.
             attack_discovery_id:
               type: string
               maxLength: 512
