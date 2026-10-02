@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SetupDependencies, StartDependencies, DataFederationPluginStart } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { buildFederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
@@ -64,6 +65,15 @@ export class DataFederationPlugin
         coreStart.application.capabilities?.[PLUGIN_ID]?.manageFederatedData === true;
 
       if (!canManageFederatedData) {
+        return;
+      }
+
+      const isManagementUiEnabled = coreStart.uiSettings.get<boolean>(
+        DATA_FEDERATION_ENABLED_SETTING_ID,
+        false
+      );
+
+      if (!isManagementUiEnabled) {
         return;
       }
 

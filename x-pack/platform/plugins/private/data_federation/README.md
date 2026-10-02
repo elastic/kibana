@@ -17,11 +17,15 @@ When running on Elastic Cloud, data sources can authenticate using the workload 
 
 The issuer URL is injected by the kibana-controller via `xpack.dataFederation.workloadIdentityIssuerUrl`. If that config key is absent the read-only fields are hidden — no derived URL is shown.
 
+## Advanced setting
+
+`dataFederation:enabled` (registered by this plugin, disabled by default) controls whether the management app is registered in the browser. It only affects the UI: data sources and datasets keep working through the API and in ES|QL queries. It is the user-facing switch, as opposed to `xpack.dataFederation.enabled`, which is a deploy-time kill switch resolved by core: when it is `false` the plugin is not loaded at all, so neither the routes nor the advanced setting exist.
+
 ## Feature flags
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `xpack.dataFederation.enabled` | `true` | Enables data federation management app |
+| `xpack.dataFederation.enabled` | `false` | Loads the plugin. Enabled per project type in `config/serverless.<project>.yml` |
 | `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Enable federated identity auth option |
 | `xpack.dataFederation.enableGoogleCloudStorageDataSourceType` | `false` | Show GCS as a data source type |
 | `xpack.dataFederation.enableAzureDataSourceType` | `false` | Show Azure Blob as a data source type |

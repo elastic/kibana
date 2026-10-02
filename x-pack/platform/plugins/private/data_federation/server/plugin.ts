@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { PLUGIN_ID } from '../common';
 import { registerDataSetsRoutes } from './routes/register_routes';
+import { registerUiSettings } from './ui_settings';
 import type { DataFederationConfigType } from './config';
 
 export class DataFederationServerPlugin
@@ -20,10 +21,12 @@ export class DataFederationServerPlugin
     this.config = initializerContext.config.get<DataFederationConfigType>();
   }
 
-  public setup({ http }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {
+  public setup({ http, uiSettings }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {
     if (!this.config.enabled) {
       return;
     }
+
+    registerUiSettings({ uiSettings });
 
     features.registerElasticsearchFeature({
       id: PLUGIN_ID,
