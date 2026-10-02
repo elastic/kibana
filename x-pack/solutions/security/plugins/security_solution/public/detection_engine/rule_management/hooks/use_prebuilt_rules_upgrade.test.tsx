@@ -201,7 +201,7 @@ describe('usePrebuiltRulesUpgrade', () => {
 
   it('issues no request when every selected rule id is stale on upgradeRulesToTarget', async () => {
     const onUpgrade = jest.fn();
-    const { result } = renderHook(() => usePrebuiltRulesUpgrade({ onUpgrade }), {
+    const { result } = renderHook(() => usePrebuiltRulesUpgrade({ filter: {}, onUpgrade }), {
       wrapper: TestProviders,
     });
 
@@ -221,7 +221,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     });
 
     const onUpgrade = jest.fn();
-    const { result } = renderHook(() => usePrebuiltRulesUpgrade({ onUpgrade }), {
+    const { result } = renderHook(() => usePrebuiltRulesUpgrade({ filter: {}, onUpgrade }), {
       wrapper: TestProviders,
     });
 
