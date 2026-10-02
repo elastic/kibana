@@ -1,7 +1,7 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0"; you may not use this file except in compliance with the Elastic License
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
@@ -10,7 +10,7 @@ import {
   getDecisionTreeReinforcementAgentType,
   registerDecisionTreeReinforcementAgentType,
   NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
-} from './index';
+} from '.';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { DECISION_TREE_TOOL_IDS } from '../../tools/decision_tree';
 

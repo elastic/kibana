@@ -209,7 +209,7 @@ describe('nightshift agent optimize workflow', () => {
 
     expect(timeoutFor('reinforce_decision_trees')?.timeout).toBe('900s');
     expect(timeoutFor('optimize_workspaces')?.timeout).toBe('120s');
-    expect(timeoutFor('obtain_sandbox')?.timeout).toBe('45s');
+    expect(timeoutFor('obtain_sandbox')?.timeout).toBe('60s');
 
     // The agent compiles as a top-level atomic step, reached after the parallel. Were it
     // inside a branch, the build would have thrown on the flow-control wrappers its `if`
