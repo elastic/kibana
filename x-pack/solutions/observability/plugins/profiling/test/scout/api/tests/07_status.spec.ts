@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout-oblt';
+import type { ApiClientFixture, RoleApiCredentials, RoleSessionCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import {
   esArchiversPath,
@@ -17,13 +17,23 @@ import {
   profilingApiEndpoints,
 } from '../../common/fixtures/constants';
 
+const ROLES = ['admin', 'viewer'] as const;
+
+// The internal status endpoint is called with an interactive session, as the profiling UI does,
+// and the public setup endpoint with an API key.
+interface RoleCredentials {
+  role: (typeof ROLES)[number];
+  session: RoleSessionCredentials;
+  apiKey: RoleApiCredentials;
+}
+
 const get = async (
   apiClient: ApiClientFixture,
   endpoint: string,
-  credentials: RoleApiCredentials
+  authHeaders: Record<string, string>
 ) => {
   const res = await apiClient.get(endpoint, {
-    headers: { ...credentials.apiKeyHeader, ...internalApiHeaders },
+    headers: { ...authHeaders, ...internalApiHeaders },
     responseType: 'json',
   });
   expect(res.statusCode).toBe(200);
@@ -31,45 +41,51 @@ const get = async (
 };
 
 apiTest.describe('Profiling status', { tag: tags.stateful.classic }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  let viewerApiCredentials: RoleApiCredentials;
+  let credentialsByRole: RoleCredentials[];
 
-  apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup, esClient }) => {
-    let status = await profilingSetup.checkStatus();
+  apiTest.beforeAll(
+    async ({ requestAuth, samlAuth, profilingHelper, profilingSetup, esClient }) => {
+      let status = await profilingSetup.checkStatus();
 
-    if (!status.has_setup) {
-      await profilingHelper.installPolicies();
-      await profilingSetup.setupResources();
+      if (!status.has_setup) {
+        await profilingHelper.installPolicies();
+        await profilingSetup.setupResources();
+      }
+
+      if (!status.has_data) {
+        await profilingSetup.loadData(esArchiversPath);
+      }
+
+      status = await profilingSetup.checkStatus();
+      expect(status.has_setup).toBe(true);
+      expect(status.has_data).toBe(true);
+
+      await esClient.index({
+        index: OTEL_PROFILING_EVENTS_DATA_STREAM,
+        op_type: 'create',
+        refresh: true,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          'stacktrace.id': 'S07KmaoGhvNte78xwwRbZQ',
+          count: 1,
+        },
+      });
+
+      credentialsByRole = await Promise.all(
+        ROLES.map(async (role) => ({
+          role,
+          session: await samlAuth.asInteractiveUser(role),
+          apiKey: await requestAuth.getApiKey(role),
+        }))
+      );
     }
-
-    if (!status.has_data) {
-      await profilingSetup.loadData(esArchiversPath);
-    }
-
-    status = await profilingSetup.checkStatus();
-    expect(status.has_setup).toBe(true);
-    expect(status.has_data).toBe(true);
-
-    await esClient.index({
-      index: OTEL_PROFILING_EVENTS_DATA_STREAM,
-      op_type: 'create',
-      refresh: true,
-      document: {
-        '@timestamp': new Date().toISOString(),
-        'stacktrace.id': 'S07KmaoGhvNte78xwwRbZQ',
-        count: 1,
-      },
-    });
-
-    adminApiCredentials = await requestAuth.getApiKey('admin');
-    viewerApiCredentials = await requestAuth.getApiKey('viewer');
-  });
+  );
 
   apiTest('matches the Universal Profiling setup status', async ({ apiClient }) => {
-    for (const credentials of [adminApiCredentials, viewerApiCredentials]) {
+    for (const { session, apiKey } of credentialsByRole) {
       const [status, setupStatus] = await Promise.all([
-        get(apiClient, profilingApiEndpoints.status, credentials),
-        get(apiClient, esResourcesEndpoint, credentials),
+        get(apiClient, profilingApiEndpoints.status, session.cookieHeader),
+        get(apiClient, esResourcesEndpoint, apiKey.apiKeyHeader),
       ]);
 
       expect(status).toStrictEqual({
@@ -80,14 +96,15 @@ apiTest.describe('Profiling status', { tag: tags.stateful.classic }, () => {
           hasSetup: setupStatus.has_setup,
           hasData: setupStatus.has_data,
           hasLegacyData: setupStatus.pre_8_9_1_data,
+          // Universal Profiling is set up, so the setup privileges (`canSetup`) aren't reported
         },
       });
     }
   });
 
   apiTest('reports OTel data', async ({ apiClient }) => {
-    for (const credentials of [adminApiCredentials, viewerApiCredentials]) {
-      const status = await get(apiClient, profilingApiEndpoints.status, credentials);
+    for (const { session } of credentialsByRole) {
+      const status = await get(apiClient, profilingApiEndpoints.status, session.cookieHeader);
 
       expect(status.isEnabled).toBe(true);
       expect(status.otel).toStrictEqual({ isAvailable: true, hasData: true });
