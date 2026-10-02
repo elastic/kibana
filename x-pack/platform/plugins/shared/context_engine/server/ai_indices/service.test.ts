@@ -204,6 +204,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
+          getRegistration: () => undefined,
           ensure: jest.fn(),
         },
       });
@@ -332,6 +333,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
+          getRegistration: () => undefined,
           ensure: jest.fn(),
         },
       });
@@ -916,6 +918,61 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('reads dest from the registration for a managed AI index, leaving the rest as stored', async () => {
+      const staleDocument: AiIndexDocument = {
+        ...aiIndexDocument,
+        id: 'elastic',
+        managed: true,
+        dest: { type: 'index', value: 'ai-index-idx-sml-data' },
+        traces: [],
+      };
+      mockSearchHits(
+        storedHit(staleDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
+      );
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        managedBootstrap: {
+          isManaged: (id) => id === 'elastic',
+          getManagedIds: () => ['elastic'],
+          getRegistration: () => ({
+            description: 'from code',
+            dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+            automations: [{ type: 'workflow', value: 'from-code' }],
+            sources: [{ type: 'esql', value: 'FROM code' }],
+            traces: [{ type: 'index', value: 'from-code' }],
+          }),
+          ensure: jest.fn(),
+        },
+      });
+
+      await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(
+        toHttpItem({
+          ...staleDocument,
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+        })
+      );
+    });
+
+    it('returns a user-owned AI index squatting a managed id as stored', async () => {
+      const squatter: AiIndexDocument = { ...aiIndexDocument, id: 'elastic', managed: false };
+      mockSearchHits(storedHit(squatter));
+      const getRegistration = jest.fn();
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        managedBootstrap: {
+          isManaged: (id) => id === 'elastic',
+          getManagedIds: () => ['elastic'],
+          getRegistration,
+          ensure: jest.fn(),
+        },
+      });
+
+      await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(toHttpItem(squatter));
+      expect(getRegistration).not.toHaveBeenCalled();
+    });
+
     it('ensures a missing managed AI index and returns it', async () => {
       const managedDocument: AiIndexDocument = {
         ...aiIndexDocument,
@@ -934,6 +991,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
+          getRegistration: () => undefined,
           ensure,
         },
       });
@@ -952,6 +1010,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
+          getRegistration: () => undefined,
           ensure,
         },
       });
@@ -970,6 +1029,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
+          getRegistration: () => undefined,
           ensure,
         },
       });
@@ -1041,6 +1101,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'elastic',
           getManagedIds: () => ['elastic'],
+          getRegistration: () => undefined,
           ensure,
         },
       });
@@ -1048,6 +1109,43 @@ describe('AiIndexService', () => {
       await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(managedDocument)]);
       expect(ensure).toHaveBeenCalledWith('elastic', DEFAULT_SPACE);
       expect(storageClient.search).toHaveBeenCalledTimes(2);
+    });
+
+    it('resolves managed AI indices against their registration, leaving user-owned ones as stored', async () => {
+      const managedDocument: AiIndexDocument = {
+        ...aiIndexDocument,
+        id: 'elastic',
+        managed: true,
+        dest: { type: 'index', value: 'ai-index-idx-sml-data' },
+      };
+      mockSearchHits(
+        storedHit(managedDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') }),
+        storedHit(aiIndexDocument)
+      );
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        managedBootstrap: {
+          isManaged: (id) => id === 'elastic',
+          getManagedIds: () => ['elastic'],
+          getRegistration: () => ({
+            dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+            automations: [],
+            sources: [],
+            traces: [],
+          }),
+          ensure: jest.fn(),
+        },
+      });
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([
+        toHttpItem({
+          ...managedDocument,
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+        }),
+        toHttpItem(aiIndexDocument),
+      ]);
+      expect(storageClient.search).toHaveBeenCalledTimes(1);
     });
 
     it('logs and continues when one managed AI index fails to bootstrap, returning the rest', async () => {
@@ -1066,6 +1164,7 @@ describe('AiIndexService', () => {
         managedBootstrap: {
           isManaged: (id) => id === 'ok' || id === 'broken',
           getManagedIds: () => ['ok', 'broken'],
+          getRegistration: () => undefined,
           ensure,
         },
       });

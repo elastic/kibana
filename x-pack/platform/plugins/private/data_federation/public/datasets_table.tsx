@@ -8,13 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSpacer,
-  EuiTextBlockTruncate,
-} from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiSpacer, EuiTextBlockTruncate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -46,22 +40,11 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   onDeleteSelected,
 }) => {
   const {
-    services: { docLinks, discoverLocator },
+    services: { discoverLocator },
   } = useKibana<DataFederationKibanaServices>();
   const history = useHistory();
   const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
 
-  const emptyMessage = useMemo(
-    () => (
-      <>
-        {mainTranslations.columns.dataSets.noItems}{' '}
-        <EuiLink href={docLinks.links.dataFederation.datasets} target="_blank">
-          {mainTranslations.docsLink}
-        </EuiLink>
-      </>
-    ),
-    [docLinks.links.dataFederation.datasets]
-  );
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
       {
@@ -204,7 +187,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         }}
         data-test-subj="dataSetsSetsTable"
         tableCaption={mainTranslations.columns.dataSets.caption}
-        noItemsMessage={emptyMessage}
+        noItemsMessage={mainTranslations.columns.dataSets.noItems}
         tableLayout="auto"
         responsiveBreakpoint={false}
       />

@@ -35,6 +35,9 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
+  - '@kbn/license-api-guard-plugin'
 tags:
   - plugin
   - prod
