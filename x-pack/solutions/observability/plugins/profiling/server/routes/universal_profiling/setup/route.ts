@@ -6,6 +6,7 @@
  */
 
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/server';
+import { isServerless } from '@kbn/profiling-data-access-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { RouteRegisterParameters } from '../..';
@@ -31,7 +32,7 @@ export function registerSetupRoute({
   // Universal Profiling setup is not supported on serverless. Skipping registration keeps these
   // routes out of serverless builds and out of the serverless OAS docs, whose generation
   // force-enables every plugin regardless of `xpack.profiling.enabled`.
-  if (dependencies.buildFlavor === 'serverless') {
+  if (isServerless(dependencies.buildFlavor)) {
     return;
   }
 

@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { isServerless } from '@kbn/profiling-data-access-plugin/server';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
 import type { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
@@ -23,7 +24,7 @@ export function registerStatusRoute({ router, logger, dependencies }: RouteRegis
   loading the security dependency into the data access plugin, which other plugins consume.
   */
   const getCanSetupUniversalProfiling = async (request: KibanaRequest): Promise<boolean> => {
-    if (buildFlavor === 'serverless') {
+    if (isServerless(buildFlavor)) {
       return false;
     }
 
