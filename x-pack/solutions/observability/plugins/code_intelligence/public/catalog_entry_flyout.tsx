@@ -31,6 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import { AddQueryToAgentButton } from './agent_builder/add_query_context';
 import type { CatalogItem } from './api';
 import { SeverityBadge } from './severity_badge';
 import { SignalTypeBadge } from './signal_type_badge';
@@ -198,14 +199,21 @@ export const CatalogEntryFlyout = ({ item, onClose }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiTitle size="m">
-          <h2 id={titleId}>
-            {item.title ??
-              i18n.translate('xpack.codeIntelligence.catalogEntry.untitled', {
-                defaultMessage: 'Untitled entry',
-              })}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2 id={titleId}>
+                {item.title ??
+                  i18n.translate('xpack.codeIntelligence.catalogEntry.untitled', {
+                    defaultMessage: 'Untitled entry',
+                  })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AddQueryToAgentButton entry={item} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {item.description !== undefined && item.description.trim() !== '' && (

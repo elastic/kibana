@@ -32,6 +32,7 @@ import {
   type CatalogSignalType,
   type CatalogSort,
 } from '../common/catalog_filters';
+import { AddQueryToAgentButtonIcon } from './agent_builder/add_query_context';
 import type { CatalogPageContext } from './agent_builder/page_context';
 import type { CatalogItem, CatalogResponse, Repository } from './api';
 import { getCatalog } from './api';
@@ -72,10 +73,13 @@ const CatalogRow = ({ item, onOpen }: { item: CatalogItem; onOpen: () => void })
           <SeverityBadge score={item.severity_score} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiText size="xs" color="subdued">
           {item.repository}
         </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AddQueryToAgentButtonIcon entry={item} />
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="xs" />

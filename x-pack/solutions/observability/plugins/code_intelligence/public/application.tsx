@@ -14,6 +14,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CatalogSeverity } from '../common/catalog_filters';
+import { AddQueryToAgentContext, useAddQueryToAgent } from './agent_builder/add_query_context';
 import type { PageContext } from './agent_builder/page_context';
 import { useAgentBuilderPageContext } from './agent_builder/use_agent_builder_page_context';
 import type { Repository } from './api';
@@ -48,7 +49,17 @@ const Application = ({
     () => (agentBuilder === undefined ? undefined : core.chrome.sidebar.getApp('agentBuilder')),
     [agentBuilder, core.chrome.sidebar]
   );
-  useAgentBuilderPageContext({ agentBuilder, sidebar, context: pageContext });
+  const pageContextAttachment = useAgentBuilderPageContext({
+    agentBuilder,
+    sidebar,
+    context: pageContext,
+  });
+  const addQuery = useAddQueryToAgent({
+    agentBuilder,
+    sidebar,
+    toasts: core.notifications.toasts,
+    pageContext: pageContextAttachment,
+  });
 
   const reload = useCallback(() => setRequestSequence((value) => value + 1), []);
   const viewCatalog = useCallback((repository: string, severity?: CatalogSeverity) => {
@@ -112,37 +123,39 @@ const Application = ({
         ]}
       />
       <EuiPageTemplate.Section>
-        {tab === 'repositories' ? (
-          <RepositoriesView
-            http={core.http}
-            repositories={repositories}
-            loading={loading}
-            error={error}
-            reload={reload}
-            onViewCatalog={viewCatalog}
-            onContextChange={setPageContext}
-          />
-        ) : (
-          <CatalogView
-            key={
-              catalogPreset === undefined
-                ? 'all'
-                : `${catalogPreset.repository}:${catalogPreset.severity ?? ''}`
-            }
-            http={core.http}
-            repositories={repositories}
-            repositoriesLoading={loading}
-            repositoriesError={error}
-            reloadRepositories={reload}
-            initialRepositories={
-              catalogPreset === undefined ? undefined : [catalogPreset.repository]
-            }
-            initialSeverities={
-              catalogPreset?.severity === undefined ? undefined : [catalogPreset.severity]
-            }
-            onContextChange={setPageContext}
-          />
-        )}
+        <AddQueryToAgentContext.Provider value={addQuery}>
+          {tab === 'repositories' ? (
+            <RepositoriesView
+              http={core.http}
+              repositories={repositories}
+              loading={loading}
+              error={error}
+              reload={reload}
+              onViewCatalog={viewCatalog}
+              onContextChange={setPageContext}
+            />
+          ) : (
+            <CatalogView
+              key={
+                catalogPreset === undefined
+                  ? 'all'
+                  : `${catalogPreset.repository}:${catalogPreset.severity ?? ''}`
+              }
+              http={core.http}
+              repositories={repositories}
+              repositoriesLoading={loading}
+              repositoriesError={error}
+              reloadRepositories={reload}
+              initialRepositories={
+                catalogPreset === undefined ? undefined : [catalogPreset.repository]
+              }
+              initialSeverities={
+                catalogPreset?.severity === undefined ? undefined : [catalogPreset.severity]
+              }
+              onContextChange={setPageContext}
+            />
+          )}
+        </AddQueryToAgentContext.Provider>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

@@ -10,6 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 
 import { severityForScore } from '../common/catalog_filters';
+import { AddQueryToAgentContext } from './agent_builder/add_query_context';
 import type { CatalogItem, Repository } from './api';
 import { getCatalog } from './api';
 import { evidenceLanguage } from './catalog_entry_flyout';
@@ -234,6 +235,41 @@ describe('CatalogView', () => {
         query: item.query,
       },
     });
+  });
+
+  it('adds the query to the AI Agent from the row without opening the flyout', async () => {
+    getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 1, items: [item] });
+    const addQuery = jest.fn();
+    render(
+      <AddQueryToAgentContext.Provider value={addQuery}>
+        <CatalogView
+          http={{} as HttpSetup}
+          repositories={[repository]}
+          repositoriesLoading={false}
+          reloadRepositories={jest.fn()}
+        />
+      </AddQueryToAgentContext.Provider>
+    );
+
+    fireEvent.click(await screen.findByTestId('codeIntelligenceCatalogRowAddToAgent'));
+
+    expect(addQuery).toHaveBeenCalledWith(item);
+    expect(screen.queryByTestId('codeIntelligenceCatalogEntryFlyout')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('codeIntelligenceCatalogRow'));
+    fireEvent.click(screen.getByTestId('codeIntelligenceCatalogEntryFlyoutAddToAgent'));
+
+    expect(addQuery).toHaveBeenCalledTimes(2);
+  });
+
+  it('has no AI Agent buttons without Agent Builder', async () => {
+    getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 1, items: [item] });
+    renderView();
+
+    fireEvent.click(await screen.findByTestId('codeIntelligenceCatalogRow'));
+
+    expect(screen.queryByTestId('codeIntelligenceCatalogRowAddToAgent')).toBeNull();
+    expect(screen.queryByTestId('codeIntelligenceCatalogEntryFlyoutAddToAgent')).toBeNull();
   });
 });
 

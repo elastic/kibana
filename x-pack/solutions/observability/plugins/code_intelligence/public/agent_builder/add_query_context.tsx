@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ToastsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+
+import type { CatalogItem } from '../api';
+import { addQueryAttachment, hasQuery } from './add_query_attachment';
+import type { AgentBuilderSidebar } from './use_agent_builder_page_context';
+
+export type AddQueryToAgent = (entry: CatalogItem) => void;
+
+/** Absent when Agent Builder is off or the user cannot chat. */
+export const AddQueryToAgentContext = createContext<AddQueryToAgent | undefined>(undefined);
+
+/**
+ * Absent until Agent Builder reports the user can chat: the `agentBuilder.show` capability,
+ * the license, and an LLM connector.
+ */
+export const useAddQueryToAgent = ({
+  agentBuilder,
+  sidebar,
+  toasts,
+  pageContext,
+}: {
+  agentBuilder:
+    | Pick<AgentBuilderPluginStart, 'getAgentBuilderAccess' | 'openChat' | 'addAttachment'>
+    | undefined;
+  sidebar: Pick<AgentBuilderSidebar, 'isOpen'> | undefined;
+  toasts: Pick<ToastsStart, 'addSuccess'>;
+  pageContext: AttachmentInput | undefined;
+}): AddQueryToAgent | undefined => {
+  const [canChat, setCanChat] = useState(false);
+  useEffect(() => {
+    if (agentBuilder === undefined) return;
+    let active = true;
+    agentBuilder.getAgentBuilderAccess().then(
+      ({ hasRequiredLicense, hasLlmConnector }) => {
+        if (active) setCanChat(hasRequiredLicense && hasLlmConnector);
+      },
+      () => undefined
+    );
+    return () => {
+      active = false;
+    };
+  }, [agentBuilder]);
+
+  const addQuery = useCallback(
+    (entry: CatalogItem) => {
+      if (agentBuilder === undefined || sidebar === undefined) return;
+      addQueryAttachment({ agentBuilder, sidebar, toasts, pageContext }, entry);
+    },
+    [agentBuilder, pageContext, sidebar, toasts]
+  );
+
+  return canChat && agentBuilder !== undefined && sidebar !== undefined ? addQuery : undefined;
+};
+
+const addQueryLabel = i18n.translate('xpack.codeIntelligence.agentBuilder.addQueryAriaLabel', {
+  defaultMessage: 'Add query to AI Agent',
+});
+
+export const AddQueryToAgentButtonIcon = ({ entry }: { entry: CatalogItem }) => {
+  const addQuery = useContext(AddQueryToAgentContext);
+  if (addQuery === undefined || !hasQuery(entry)) return null;
+  return (
+    <EuiToolTip content={addQueryLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="addToChat"
+        aria-label={addQueryLabel}
+        size="xs"
+        data-test-subj="codeIntelligenceCatalogRowAddToAgent"
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          addQuery(entry);
+        }}
+      />
+    </EuiToolTip>
+  );
+};
+
+export const AddQueryToAgentButton = ({ entry }: { entry: CatalogItem }) => {
+  const addQuery = useContext(AddQueryToAgentContext);
+  if (addQuery === undefined || !hasQuery(entry)) return null;
+  return (
+    <EuiButton
+      iconType="addToChat"
+      size="s"
+      data-test-subj="codeIntelligenceCatalogEntryFlyoutAddToAgent"
+      onClick={() => addQuery(entry)}
+    >
+      {i18n.translate('xpack.codeIntelligence.agentBuilder.addQueryButton', {
+        defaultMessage: 'Add to AI Agent',
+      })}
+    </EuiButton>
+  );
+};
