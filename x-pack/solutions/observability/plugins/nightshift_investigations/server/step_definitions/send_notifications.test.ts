@@ -32,14 +32,19 @@ const createContext = (
   signal = new AbortController().signal,
   spaceId = 'ops',
   kibanaUrl = 'https://kibana.example.com',
-  investigationId = 'inv-1'
+  investigationId = 'inv-1',
+  executionId = investigationId
 ) =>
   ({
     input: { investigation_id: investigationId },
     rawInput: { investigation_id: investigationId },
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
-      getContext: jest.fn().mockReturnValue({ kibanaUrl, workflow: { spaceId } }),
+      getContext: jest.fn().mockReturnValue({
+        kibanaUrl,
+        execution: { id: executionId },
+        workflow: { spaceId },
+      }),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn((value) => value),
       callKibanaApi: jest.fn(),
@@ -118,6 +123,35 @@ const setup = () => {
 };
 
 describe('sendNotificationsStepDefinition', () => {
+  it('rejects another investigation before creating a client or resolving Actions', async () => {
+    const {
+      definition,
+      getInvestigationsClient,
+      get,
+      getActions,
+      claimNotificationDestination,
+      recordNotificationOutcome,
+      execute,
+    } = setup();
+    await expect(
+      definition.handler(
+        createContext(
+          new AbortController().signal,
+          'ops',
+          'https://kibana.example.com',
+          'inv-1',
+          'inv-2'
+        )
+      )
+    ).rejects.toThrow('Notifications can only be sent for the current investigation execution');
+    expect(getInvestigationsClient).not.toHaveBeenCalled();
+    expect(get).not.toHaveBeenCalled();
+    expect(getActions).not.toHaveBeenCalled();
+    expect(claimNotificationDestination).not.toHaveBeenCalled();
+    expect(recordNotificationOutcome).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['default', '/app/r'],
     ['ops', '/s/ops/app/r'],

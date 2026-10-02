@@ -48,9 +48,13 @@ export const sendNotificationsStepDefinition = ({
       const request = context.contextManager.getFakeRequest();
       const {
         kibanaUrl,
+        execution: { id: executionId },
         workflow: { spaceId },
       } = context.contextManager.getContext();
       const { investigation_id: investigationId } = inputSchema.parse(context.input);
+      if (investigationId !== executionId) {
+        throw new Error('Notifications can only be sent for the current investigation execution');
+      }
 
       // Reads the settled record rather than the agent output so the message matches Kibana.
       const client = getInvestigationsClient(request, spaceId);
