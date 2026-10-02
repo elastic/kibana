@@ -60,7 +60,7 @@ import type {
 export interface EventsFilterOptions {
   status?: SignificantEventStatus[];
   severity?: Severity[];
-  stream?: string[];
+  sourceIds?: string[];
   search?: string;
   eventIds?: string[];
   ruleUuids?: string[];
@@ -86,7 +86,7 @@ export interface SignificantEventsReadClient {
     options: EventsPaginatedSearchOptions
   ): Promise<PaginatedResponse<SignificantEventResponse>>;
   findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+    options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }>;
   findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }>;
   findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined>;
@@ -117,6 +117,7 @@ export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
 
 const normalizeLegacyVerification = (event: SignificantEvent): SignificantEvent => ({
   ...event,
+  source_ids: event.source_ids ?? [],
   signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
 });
 
@@ -138,16 +139,16 @@ const multiValueContainsAnyFilter = ({
 };
 
 const continuationCandidateFilter = ({
-  streamNames,
+  sourceIds,
   ruleUuids,
 }: {
-  streamNames: string[] | undefined;
+  sourceIds: string[] | undefined;
   ruleUuids: string[] | undefined;
 }): ESQLAstExpression | undefined => {
-  const streamFilter = multiValueContainsAnyFilter({
+  const sourceFilter = multiValueContainsAnyFilter({
     where: undefined,
-    field: 'stream_names',
-    values: streamNames,
+    field: 'source_ids',
+    values: sourceIds,
   });
   const ruleFilter = multiValueContainsAnyFilter({
     where: undefined,
@@ -155,11 +156,11 @@ const continuationCandidateFilter = ({
     values: ruleUuids,
   });
 
-  if (streamFilter && ruleFilter) {
-    return andWhere(streamFilter, ruleFilter);
+  if (sourceFilter && ruleFilter) {
+    return andWhere(sourceFilter, ruleFilter);
   }
 
-  return streamFilter ?? ruleFilter;
+  return sourceFilter ?? ruleFilter;
 };
 
 const topologyFeatureFilter = (
@@ -208,8 +209,8 @@ export class EventClient implements SignificantEventsReadClient {
     where = inFilter({ where, field: 'status', values: options.status });
     where = multiValueContainsAnyFilter({
       where,
-      field: 'stream_names',
-      values: options.stream,
+      field: 'source_ids',
+      values: options.sourceIds,
     });
     if (options.search) {
       const escaped = options.search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
@@ -231,7 +232,7 @@ export class EventClient implements SignificantEventsReadClient {
 
   private buildLatestByCurrentStateQuery(options: EventsCurrentStateSearchOptions): ComposerQuery {
     const candidateWhere = continuationCandidateFilter({
-      streamNames: options.stream,
+      sourceIds: options.sourceIds,
       ruleUuids: options.ruleUuids,
     });
     const eventIdWhere = inFilter({
@@ -384,15 +385,15 @@ export class EventClient implements SignificantEventsReadClient {
 
   /**
    * Returns the latest version per event_id for all active (status "open") events within the
-   * given time range, optionally narrowed to candidate stream/rule identities so the scan stays
+   * given time range, optionally narrowed to candidate source/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. The status and candidate filters
    * are applied after grouping so a closed/dismissed event is correctly excluded.
    *
-   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With stream+rule narrowing the result
+   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With source+rule narrowing the result
    * set is proportional to the write batch, so this limit is never approached in practice.
    */
   async findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+    options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
       query: fromIndexForSpace({
@@ -409,7 +410,7 @@ export class EventClient implements SignificantEventsReadClient {
     query = query.where`${activeStatusWhere()}`;
 
     const candidateWhere = continuationCandidateFilter({
-      streamNames: options.streamNames,
+      sourceIds: options.sourceIds,
       ruleUuids: options.ruleUuids,
     });
     if (candidateWhere) {

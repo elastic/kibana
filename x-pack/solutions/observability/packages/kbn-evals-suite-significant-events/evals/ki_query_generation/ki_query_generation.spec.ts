@@ -167,7 +167,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             const canonicalKIs =
               extractionScenario?.output.expected_ground_truth != null
                 ? canonicalKIFeaturesFromExpectedGroundTruth({
-                    streamName: scenario.input.stream_name,
+                    sourceId: scenario.input.source_id,
                     scenarioId: scenario.input.scenario_id,
                     expectedGroundTruth: extractionScenario.output.expected_ground_truth,
                   })
@@ -185,7 +185,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   log,
                   source.snapshotName,
                   source.gcs,
-                  scenario.input.stream_name
+                  scenario.input.source_id
                 );
 
             if (!shouldUseCanonicalKIs && resolvedKIs.length === 0) {
@@ -226,7 +226,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             let kis: Feature[];
             if (shouldUseCanonicalKIs) {
               const computedKIs = getComputedKIFeaturesFromDocs({
-                streamName: scenario.input.stream_name,
+                sourceId: scenario.input.source_id,
                 docs: sampleDocs,
               });
               kis = [...resolvedKIs, ...computedKIs];

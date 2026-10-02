@@ -13,53 +13,52 @@ import {
   type SourceCatalog,
 } from './resolve_source_slugs';
 
-/** Tool input for the stored `stream_names` field. Values are source slugs. */
+/** Tool input for the stored `source_ids` field. Values are source slugs. */
 export const sourceSlugsSchema = nightshiftSourceSlugsField('Disabled sources are accepted.');
 
-interface NestedStreamName {
-  stream_name?: string;
+interface NestedSourceId {
+  source_id?: string;
 }
 
 interface SlugScopedEvent {
   slugs: readonly string[];
-  signals?: ReadonlyArray<NestedStreamName>;
-  causal_features?: ReadonlyArray<NestedStreamName>;
-  blast_radius?: ReadonlyArray<NestedStreamName>;
+  signals?: ReadonlyArray<NestedSourceId>;
+  causal_features?: ReadonlyArray<NestedSourceId>;
+  blast_radius?: ReadonlyArray<NestedSourceId>;
 }
 
-interface StoredStreamNames {
-  stream_names: readonly string[];
-  signals?: ReadonlyArray<NestedStreamName>;
-  causal_features?: ReadonlyArray<NestedStreamName>;
-  blast_radius?: ReadonlyArray<NestedStreamName>;
+interface StoredSourceIds {
+  source_ids: readonly string[];
+  signals?: ReadonlyArray<NestedSourceId>;
+  causal_features?: ReadonlyArray<NestedSourceId>;
+  blast_radius?: ReadonlyArray<NestedSourceId>;
 }
 
-const rewriteNested = <T extends NestedStreamName>(
+const rewriteNested = <T extends NestedSourceId>(
   entries: readonly T[],
   mapName: (name: string) => string
 ): T[] =>
   entries.map((entry) =>
-    entry.stream_name === undefined ? entry : { ...entry, stream_name: mapName(entry.stream_name) }
+    entry.source_id === undefined ? entry : { ...entry, source_id: mapName(entry.source_id) }
   );
 
 /**
- * Copies resolved source ids into the stored `stream_names` and nested
- * `stream_name` keys. This is the only assignment site; a later rename of
- * those keys happens here.
+ * Copies resolved source ids into the stored `source_ids` and nested
+ * `source_id` keys. This is the only assignment site.
  *
  * Only `slugs` must resolve. A nested value that matches no source is kept as
- * is: continuing an event stored against a stream name must not fail the batch.
+ * is: continuing a stored event must not fail the batch.
  */
 export function assignStoredSourceIds<T extends SlugScopedEvent>(
   catalog: SourceCatalog,
   item: T
-): Omit<T, 'slugs'> & { stream_names: string[] } {
+): Omit<T, 'slugs'> & { source_ids: string[] } {
   const { slugs, ...rest } = item;
   const idOf = (slugOrId: string): string => findSource(catalog, slugOrId)?.id ?? slugOrId;
 
   return {
     ...rest,
-    stream_names: resolveSourcesBySlug(catalog, slugs).map((source) => source.id),
+    source_ids: resolveSourcesBySlug(catalog, slugs).map((source) => source.id),
     ...(item.signals ? { signals: rewriteNested(item.signals, idOf) } : {}),
     ...(item.causal_features ? { causal_features: rewriteNested(item.causal_features, idOf) } : {}),
     ...(item.blast_radius ? { blast_radius: rewriteNested(item.blast_radius, idOf) } : {}),
@@ -67,17 +66,17 @@ export function assignStoredSourceIds<T extends SlugScopedEvent>(
 }
 
 /**
- * Shows stored source ids as slugs on `stream_names` and nested `stream_name`.
+ * Shows stored source ids as slugs on `source_ids` and nested `source_id`.
  * An id missing from the catalog is left unchanged.
  */
-export function presentStoredSourceFields<T extends StoredStreamNames>(
+export function presentStoredSourceFields<T extends StoredSourceIds>(
   catalog: SourceCatalog,
   item: T
 ): T {
   const show = (storedId: string) => presentSlug(catalog, storedId);
   return {
     ...item,
-    stream_names: item.stream_names.map(show),
+    source_ids: item.source_ids.map(show),
     ...(item.signals ? { signals: rewriteNested(item.signals, show) } : {}),
     ...(item.causal_features ? { causal_features: rewriteNested(item.causal_features, show) } : {}),
     ...(item.blast_radius ? { blast_radius: rewriteNested(item.blast_radius, show) } : {}),

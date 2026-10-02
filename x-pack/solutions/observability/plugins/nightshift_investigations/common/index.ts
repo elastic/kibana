@@ -71,9 +71,10 @@ export interface StartInvestigationRequest {
    */
   message?: string;
   /**
-   * Stream names the investigation should scope its signal search to.
+   * Nightshift source ids (or slugs) the investigation should scope its queries to. The
+   * investigation workflow resolves them to slug and ES|QL view.
    */
-  stream_names?: string[];
+  source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   /**

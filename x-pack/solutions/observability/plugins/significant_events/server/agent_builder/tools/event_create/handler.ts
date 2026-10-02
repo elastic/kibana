@@ -16,11 +16,11 @@ import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
  * Chat-initiated event input — a minimal subset of EventsWriteInput.
  *
  * Always-write snapshot: a generated `event_id` is supplied so find-or-create does not
- * collapse chat creates onto an existing same-stream event. `status` defaults to 'open'.
+ * collapse chat creates onto an existing same-source event. `status` defaults to 'open'.
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
-  'title' | 'symptom_hypothesis' | 'summary' | 'stream_names' | 'severity' | 'confidence'
+  'title' | 'symptom_hypothesis' | 'summary' | 'source_ids' | 'severity' | 'confidence'
 > & {
   status?: EventsWriteInput['status'];
 };

@@ -33,7 +33,7 @@ interface WorkflowStep {
     subject_id?: string;
     trigger_type?: string;
     message?: string;
-    stream_names?: string;
+    source_ids?: string;
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
   };
@@ -75,7 +75,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(23);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -129,7 +129,7 @@ describe('significant events persistence workflow contracts', () => {
       'on-failure': { continue: true },
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
-    expect(triggerStep.with?.stream_names).toContain('stream_names');
+    expect(triggerStep.with?.source_ids).toContain('source_ids');
   });
 
   it('bounds the discovery investigation message below the trigger input limit', () => {

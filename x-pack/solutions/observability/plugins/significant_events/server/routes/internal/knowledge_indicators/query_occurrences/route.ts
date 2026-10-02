@@ -13,7 +13,7 @@ import { createSignificantEventsTracedEsClient } from '../../../../lib/significa
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { resolveSourceIds } from '../../../utils/resolve_source_ids';
+import { MAX_SOURCE_IDS_PER_REQUEST, resolveSourceIds } from '../../../utils/resolve_source_ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -31,13 +31,13 @@ const readQueryOccurrencesRoute = createServerRoute({
         .regex(BUCKET_SIZE_PATTERN)
         .describe('Size of time buckets for aggregation'),
       query: z.string().max(4096).optional().describe('Query string to filter stream queries'),
-      streamNames: z
+      sourceIds: z
         .union([
           z
             .string()
             .max(MAX_STREAM_NAME_LENGTH)
             .transform((val) => [val]),
-          z.array(z.string().max(MAX_STREAM_NAME_LENGTH)),
+          z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST),
         ])
         .optional()
         .describe('Source ids to filter results by'),
@@ -85,13 +85,13 @@ const readQueryOccurrencesRoute = createServerRoute({
       to,
       bucketSize,
       query,
-      streamNames,
+      sourceIds: requestedSourceIds,
       rule_uuid: ruleUuids,
       searchMode,
     } = params.query;
     assertValidDateRange(from, to);
 
-    const sourceIds = await resolveSourceIds(streamNames, scopedClients.sourcesClient);
+    const sourceIds = await resolveSourceIds(requestedSourceIds, scopedClients.sourcesClient);
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -103,7 +103,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames: sourceIds,
+        sourceIds,
         ruleUuids,
         searchMode,
         alertsReader,

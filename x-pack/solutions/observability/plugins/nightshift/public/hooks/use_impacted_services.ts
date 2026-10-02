@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
-  getImpactedServiceStreamNames,
+  getImpactedServiceSourceIds,
   resolveImpactedServices,
   type ResolvedImpactedService,
 } from '../common/impacted_services';
@@ -24,8 +24,8 @@ export interface ImpactedServicesResult {
  * topology. Impacted services are event-level: every detection of an event shares this list.
  */
 export const useImpactedServices = (event: SignificantEvent): ImpactedServicesResult => {
-  const streamNames = useMemo(() => getImpactedServiceStreamNames([event]), [event]);
-  const { features, isInitialLoading } = useFetchStreamFeatures(streamNames);
+  const sourceIds = useMemo(() => getImpactedServiceSourceIds([event]), [event]);
+  const { features, isInitialLoading } = useFetchStreamFeatures(sourceIds);
   const services = useMemo(() => resolveImpactedServices(event, features), [event, features]);
 
   return { services, isInitialLoading };

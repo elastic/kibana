@@ -13,7 +13,7 @@ const detectionSignal = (
   verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
 ): Extract<SignalEntry, { type: 'detection' }> => ({
   type: 'detection',
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   description: `Signal for ${ruleUuid}`,
   verdict,
   metadata: {
@@ -31,7 +31,7 @@ const makeEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     event_id: 'event-id',
     status: 'open',
     severity: '40-medium',
-    stream_names: ['logs.test'],
+    source_ids: ['logs.test'],
     title: 'Test event',
     summary: 'Test summary',
     confidence: 0.8,

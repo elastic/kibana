@@ -8,11 +8,12 @@
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { listAllSources } from './list_all_sources';
 
+export const MAX_SOURCE_IDS_PER_REQUEST = 100;
+
 /**
  * Source ids for a KI read. An omitted filter is the whole catalog. A
  * caller-provided list is returned as-is, since those values are already
  * source ids and checking them would list every source on the read path.
- * The HTTP query parameter is still named `streamNames`.
  */
 export async function resolveSourceIds(
   sourceIds: string[] | undefined,

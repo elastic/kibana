@@ -34,7 +34,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   event_id: 'evt-001',
   event_uuid: 'evt-uuid-001',
   status: 'open',
-  stream_names: ['logs.web-frontend'],
+  source_ids: ['logs.web-frontend'],
   title: 'Latency spike on web-frontend',
   summary: 'Summary',
   severity: '60-high',

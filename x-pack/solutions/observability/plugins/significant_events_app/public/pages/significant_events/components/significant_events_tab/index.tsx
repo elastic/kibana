@@ -250,7 +250,7 @@ export const getSignificantEventTableColumns = ({
 }: {
   selectedEventId?: string;
   onToggleEvent: (eventId: string) => void;
-  /** Resolves `stream_names` (source ids) to titles; unknown values are shown as-is. */
+  /** Resolves `source_ids` to titles; unknown values are shown as-is. */
   getSourceTitle: (sourceId: string) => string;
 }): Array<EuiBasicTableColumn<SignificantEventResponse>> => [
   {
@@ -303,7 +303,7 @@ export const getSignificantEventTableColumns = ({
     ),
   },
   {
-    field: 'stream_names',
+    field: 'source_ids',
     name: i18n.translate('xpack.significantEventsApp.sources.significantEventsTab.sourcesColumn', {
       defaultMessage: 'Sources',
     }),
@@ -311,8 +311,8 @@ export const getSignificantEventTableColumns = ({
     // Required for the column's `width` to actually constrain the cell — EUI's
     // `truncateText` only kicks in when the cell is bounded (see tableLayout="fixed" below).
     truncateText: true,
-    render: (streamNames: string[]) => {
-      const names = (streamNames ?? []).map(getSourceTitle);
+    render: (sourceIds: string[]) => {
+      const names = (sourceIds ?? []).map(getSourceTitle);
       const [first, ...rest] = names;
       if (!first) return null;
       const overflowCount = rest.length;
@@ -500,7 +500,7 @@ export const SignificantEventsTab = () => {
       to: timeState.end,
       status: statusFilter.length > 0 ? statusFilter : undefined,
       severity: severityFilter.length > 0 ? severityFilter : undefined,
-      stream: streamFilter.length > 0 ? streamFilter : undefined,
+      source_id: streamFilter.length > 0 ? streamFilter : undefined,
       topologyFeatureIds: serviceFilter.length > 0 ? serviceFilter : undefined,
       search: debouncedSearch || undefined,
       eventId: selectedEventId,
@@ -544,7 +544,7 @@ export const SignificantEventsTab = () => {
   );
 
   const resolvedStreamNames = useMemo(
-    () => resolvedSelectedEvent?.stream_names.join(','),
+    () => resolvedSelectedEvent?.source_ids.join(','),
     [resolvedSelectedEvent]
   );
 

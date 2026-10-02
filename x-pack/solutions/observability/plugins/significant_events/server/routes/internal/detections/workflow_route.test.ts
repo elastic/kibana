@@ -23,7 +23,7 @@ type ScanHandlerParams = Parameters<typeof scanRoute.handler>[0];
 
 const makeLink = (sourceId: string, ruleId: string): QueryLink =>
   ({
-    stream_name: sourceId,
+    source_id: sourceId,
     rule_backed: true,
     rule_id: ruleId,
     query: { id: `${ruleId}-query`, severity_score: 90 },

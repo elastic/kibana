@@ -628,9 +628,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       async function persistGroundedQuery(title: string) {
         const response = await apiClient
-          .fetch('POST /internal/streams/{streamName}/queries/_persist', {
+          .fetch('POST /internal/streams/{sourceId}/queries/_persist', {
             params: {
-              path: { streamName: STREAM_NAME },
+              path: { sourceId: STREAM_NAME },
               body: {
                 queries: [
                   {

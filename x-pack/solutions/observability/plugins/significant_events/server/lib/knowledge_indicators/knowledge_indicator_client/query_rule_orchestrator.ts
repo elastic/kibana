@@ -114,7 +114,7 @@ export class QueryRuleOrchestrator {
       const ruleBacked = canQueryBeRuleBacked({ type: queryType, esql: query.esql });
       if (!current) {
         const link: QueryLink = {
-          stream_name: sourceId,
+          source_id: sourceId,
           rule_backed: ruleBacked,
           rule_id: ruleId,
           query: typedQuery,
@@ -135,7 +135,7 @@ export class QueryRuleOrchestrator {
         allNext.push({ query: typedQuery, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
-          stream_name: sourceId,
+          source_id: sourceId,
           rule_backed: true,
           rule_id: ruleId,
           query: typedQuery,
@@ -467,9 +467,9 @@ export class QueryRuleOrchestrator {
 
     const bySource = new Map<string, string[]>();
     for (const link of toPromote) {
-      const group = bySource.get(link.stream_name) ?? [];
+      const group = bySource.get(link.source_id) ?? [];
       group.push(link.query.id);
-      bySource.set(link.stream_name, group);
+      bySource.set(link.source_id, group);
     }
 
     const knownSourceIds = new Set(sourceIds);
@@ -515,8 +515,8 @@ export class QueryRuleOrchestrator {
     return this.rulesManagementClient.findStreamNamesWithOwnedRules();
   }
 
-  findOwnedRuleIds(streamName: string): Promise<string[]> {
-    return this.rulesManagementClient.findOwnedRuleIds(streamName);
+  findOwnedRuleIds(sourceId: string): Promise<string[]> {
+    return this.rulesManagementClient.findOwnedRuleIds(sourceId);
   }
 
   async reconcileStream(

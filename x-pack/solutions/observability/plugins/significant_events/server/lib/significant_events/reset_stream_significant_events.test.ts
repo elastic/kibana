@@ -34,12 +34,12 @@ describe('resetSignificantEvents', () => {
         .fn()
         .mockResolvedValue(['logs.nginx', 'logs.apache']),
       getStreamToQueryLinksMap: jest.fn().mockImplementation(async (names: string[]) => {
-        const streamName = names[0];
-        if (streamName === 'logs.nginx') {
+        const sourceId = names[0];
+        if (sourceId === 'logs.nginx') {
           return {
-            [streamName]: [
+            [sourceId]: [
               {
-                stream_name: streamName,
+                source_id: sourceId,
                 rule_backed: true,
                 rule_id: 'rule-a',
                 query: { id: 'q-1' },
@@ -47,7 +47,7 @@ describe('resetSignificantEvents', () => {
             ],
           };
         }
-        return { [streamName]: [] };
+        return { [sourceId]: [] };
       }),
       getFeatures: jest.fn().mockResolvedValue({ hits: [{ id: 'f-1' }] }),
       deleteAllQueries: jest.fn().mockResolvedValue(undefined),
@@ -92,7 +92,7 @@ describe('resetSignificantEvents', () => {
     );
 
     expect(result).toEqual({
-      streams: ['logs.nginx', 'logs.apache'],
+      sources: ['logs.nginx', 'logs.apache'],
       canceled_onboarding_count: 2,
       deleted: {
         queries: 1,
@@ -100,7 +100,7 @@ describe('resetSignificantEvents', () => {
         rules: 1,
         alerts_v1: 9,
       },
-      by_stream: {
+      by_source: {
         'logs.nginx': {
           queries: 1,
           features: 1,
@@ -123,7 +123,7 @@ describe('resetSignificantEvents', () => {
       getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
         'logs.nginx': [
           {
-            stream_name: 'logs.nginx',
+            source_id: 'logs.nginx',
             rule_backed: true,
             rule_id: 'legacy-rule',
             query: { id: 'q-1' },
@@ -173,9 +173,9 @@ describe('resetSignificantEvents', () => {
       deleteLegacyRules,
     });
 
-    expect(result.streams).toEqual([]);
+    expect(result.sources).toEqual([]);
     expect(result.deleted).toEqual(emptySignificantEventsResetDeletedCounts());
-    expect(result.by_stream).toEqual({});
+    expect(result.by_source).toEqual({});
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
   });
 

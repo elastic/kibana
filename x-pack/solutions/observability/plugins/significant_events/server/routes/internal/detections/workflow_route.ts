@@ -176,7 +176,7 @@ const changePointScanRoute = createServerRoute({
     // that goes quiet reads as a drop. Scanning them would turn every disable into detections.
     const enabledSourceIds = new Set(enabledSources.map(({ id }) => id));
     const queryLinks = (await kiClient.getRuleBackedQueryLinks()).filter((link) =>
-      enabledSourceIds.has(link.stream_name)
+      enabledSourceIds.has(link.source_id)
     );
 
     const defaultConfig = getAnalysisProfileConfig({ severity_score: 0 });

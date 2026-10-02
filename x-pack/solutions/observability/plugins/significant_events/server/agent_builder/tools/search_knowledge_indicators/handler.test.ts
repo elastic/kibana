@@ -33,7 +33,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
     run_id: 'run-id',
     updated_at: '2026-01-01T00:00:00Z',
     expires_at: '2026-02-01T00:00:00Z',
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
@@ -102,7 +102,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         'asset.uuid': 'a1',
         'asset.type': 'query',
         'asset.id': 'q1',
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
         rule_backed: true,
         rule_id: 'rule-1',
         query: makeStreamQuery({ id: 'q1', severity_score: 75 }),
@@ -128,7 +128,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         'asset.uuid': 'a1',
         'asset.type': 'query',
         'asset.id': 'q1',
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
         rule_backed: false,
         rule_id: 'rule-1',
         query: makeStreamQuery({ id: 'q1' }),
@@ -158,7 +158,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
           backed: false,
           id: 'rule-1',
         },
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
       },
     ]);
   });
@@ -279,7 +279,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       byId: new Map([[source.id, source]]),
     };
     kiClient.getFeatures = jest.fn().mockResolvedValue({
-      hits: [makeFeature({ id: 'f1', stream_name: source.id })],
+      hits: [makeFeature({ id: 'f1', source_id: source.id })],
       total: 1,
     });
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
@@ -289,7 +289,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       sources: [source],
       kiClient,
       logger,
-      params: { stream_names: [source.id], kind: ['feature'] },
+      params: { source_ids: [source.id], kind: ['feature'] },
       view: 'full',
     });
 
@@ -303,7 +303,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(result.knowledge_indicators[0]).toEqual(
       expect.objectContaining({
         kind: 'feature',
-        feature: expect.objectContaining({ stream_name: 'nginx-errors' }),
+        feature: expect.objectContaining({ source_id: 'nginx-errors' }),
       })
     );
   });
@@ -316,7 +316,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         'asset.uuid': 'a1',
         'asset.type': 'query',
         'asset.id': 'q1',
-        stream_name: 'logs.payments',
+        source_id: 'logs.payments',
         rule_backed: true,
         rule_id: 'rule-1',
         query: makeStreamQuery({ id: 'q1' }),
@@ -325,7 +325,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         'asset.uuid': 'a2',
         'asset.type': 'query',
         'asset.id': 'q2',
-        stream_name: 'logs.legacy',
+        source_id: 'logs.legacy',
         rule_backed: true,
         rule_id: 'rule-2',
         query: makeStreamQuery({ id: 'q2' }),
@@ -366,7 +366,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.payments', expect.any(Object));
   });
 
-  it('filters requested streamNames against accessible streams', async () => {
+  it('filters requested source_ids against accessible sources', async () => {
     catalog = catalogFor(['logs.allowed']);
 
     kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
@@ -376,7 +376,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       catalog,
       kiClient,
       logger,
-      params: { stream_names: ['logs.allowed', 'logs.not_allowed'] },
+      params: { source_ids: ['logs.allowed', 'logs.not_allowed'] },
       view: 'compact',
     });
 
@@ -672,7 +672,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
           'asset.uuid': 'a1',
           'asset.type': 'query',
           'asset.id': 'q1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
           rule_backed: true,
           rule_id: 'rule-1',
           query: makeStreamQuery({

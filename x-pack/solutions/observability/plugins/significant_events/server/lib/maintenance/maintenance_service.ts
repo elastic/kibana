@@ -255,7 +255,7 @@ export const createSignificantEventsMaintenanceService = ({
       ]);
       const disabledSourceIds = new Set(disabledSources.map(({ id }) => id));
       const disabledSourceRuleIds = new Set(
-        links.filter((link) => disabledSourceIds.has(link.stream_name)).map((link) => link.rule_id)
+        links.filter((link) => disabledSourceIds.has(link.source_id)).map((link) => link.rule_id)
       );
       const ruleIdsToEnable = ruleIds.filter((id) => !disabledSourceRuleIds.has(id));
       if (ruleIdsToEnable.length === 0) {

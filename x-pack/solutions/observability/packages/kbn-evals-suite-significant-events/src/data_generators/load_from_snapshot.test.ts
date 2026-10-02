@@ -73,7 +73,7 @@ describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('restores into temp index and returns matching KI feature docs', async () => {
+  it('restores into temp index and returns matching KI feature docs with a source_id', async () => {
     mockRestoreSnapshot.mockImplementation(
       async ({
         snapshotName,
@@ -94,7 +94,7 @@ describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
     esClient.search.mockResolvedValue({
       hits: {
         hits: [
-          { _source: { uuid: 'u1', id: 'f1', stream_name: 'logs', type: 'entity' } },
+          { _source: { uuid: 'u1', id: 'f1', source_id: 'logs', type: 'entity' } },
           { _source: { uuid: 'u2', id: 'f2', stream_name: 'logs', type: 'dependency' } },
         ],
       },
@@ -109,7 +109,11 @@ describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
       'logs'
     );
 
-    expect(features).toHaveLength(2);
+    expect(features).toEqual([
+      { uuid: 'u1', id: 'f1', source_id: 'logs', type: 'entity' },
+      { uuid: 'u2', id: 'f2', source_id: 'logs', type: 'dependency' },
+    ]);
+    features.forEach((feature) => expect(feature).not.toHaveProperty('stream_name'));
 
     expect(mockCreateGcsRepository).toHaveBeenCalledWith({
       bucket: GCS_BUCKET,
@@ -131,6 +135,12 @@ describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: tempIndex,
+        query: {
+          bool: {
+            should: [{ term: { source_id: 'logs' } }, { term: { stream_name: 'logs' } }],
+            minimum_should_match: 1,
+          },
+        },
       })
     );
   });

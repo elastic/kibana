@@ -24,8 +24,8 @@ export function canonicalSignificantEventFromGroundTruth({
   eventUuid,
 }: ToSignificantEventSeedParams): SignificantEvent {
   const signals = discovery.signals ?? [];
-  const streamNames = [
-    ...new Set(signals.map((s) => s.stream_name).filter((name): name is string => Boolean(name))),
+  const sourceIds = [
+    ...new Set(signals.map((s) => s.source_id).filter((name): name is string => Boolean(name))),
   ];
 
   const now = new Date().toISOString();
@@ -35,7 +35,7 @@ export function canonicalSignificantEventFromGroundTruth({
     event_id: discovery.event_id ?? eventUuid,
     status: 'open',
     severity: discovery.severity ?? '40-medium',
-    stream_names: streamNames.length > 0 ? streamNames : ['unknown'],
+    source_ids: sourceIds.length > 0 ? sourceIds : ['unknown'],
     title: discovery.title ?? 'eval-seeded-event',
     symptom_hypothesis: discovery.symptom_hypothesis,
     summary: discovery.summary ?? '',

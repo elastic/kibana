@@ -72,8 +72,8 @@ Call budget: up to three calls per batch — query search, feature search, and o
 2. Match results to detections by exact `rule.id`:
 3. Collect and deduplicate each matched query's `query.features[].id`. These are the referenced feature IDs.
 4. Spend the second call on feature page 1:
-   - Referenced feature IDs exist → use `kind: ["feature"]`, pass them as `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; set `slugs` to the matched queries' `stream_name` values, and use `page: 1` and `per_page: 50`.
-   - No referenced feature IDs, including when no query matched → use `kind: ["feature"]`, omit `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; set `slugs` to all distinct batch `stream_name` values, and use `page: 1` and `per_page: 50`.
+   - Referenced feature IDs exist → use `kind: ["feature"]`, pass them as `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; set `slugs` to the matched queries' `source_id` values, and use `page: 1` and `per_page: 50`.
+   - No referenced feature IDs, including when no query matched → use `kind: ["feature"]`, omit `feature_ids`, and set `feature_types` to exactly `["dependency", "entity", "infrastructure"]`; set `slugs` to all distinct batch `source_id` values, and use `page: 1` and `per_page: 50`.
    - Feature IDs are unique only within a source, so never omit `slugs` from a feature search.
    - Stop after page 1, unless `feature_ids` parameter was passed, the response returned `has_more: true`, and one or more requested IDs are missing from response. Only then request `next_page` once with identical filters. Never paginate the fallback search or request another page to discover more context.
 
@@ -105,7 +105,7 @@ Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In on
    - **Executed form vs. stored form**: ordering and limit are executed only and must not be stored in `evidence.esql_query`. Preserve any original KI projection in the stored query, with `METADATA` removed and the required `?_tstart`/`?_tend` predicate; never copy the tool result's rewritten query.
 3. **Mandatory time scope:** insert `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` immediately after `FROM` and pass a matching `time_range`. Placeholders bind only that argument; omitting it falls back to screen context or the last 24 hours. Let `t` be the detection `@timestamp`. Discovery runs at or just after the change point: there is no future data, so `to` is always `now`, never `t+15m` or `t+60m`. Confirmation sample: `{ "from": "t-15m", "to": "now" }` so `ASC LIMIT 5` is the onset of the elapsed neighborhood. Absent, mismatched, or unapplied range → `inconclusive`. Skip `ROW`/`SHOW`/`METRICS`.
 4. **Never** modify `WHERE` clauses, field names, or `FROM`. This can lead to unnecessary errors. Skip the query on execution failure.
-5. If the KI's `query.esql.query` starts with `FROM $.<name>`, copy that `FROM` verbatim. Otherwise copy into `FROM` the `view_name` of the response `sources` entry whose `slug` equals the KI's `stream_name`. Do not assemble the view name, and do not strip a `$.` prefix.
+5. If the KI's `query.esql.query` starts with `FROM $.<name>`, copy that `FROM` verbatim. Otherwise copy into `FROM` the `view_name` of the response `sources` entry whose `slug` equals the KI's `source_id`. Do not assemble the view name, and do not strip a `$.` prefix.
 
 KI query (original):
   FROM <source> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
@@ -169,10 +169,10 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
    Example: a confirming signal identifies `service-a` as unable to connect to a database; a fetched dependency has `source: service-a`, `target: sql`, and connection-timeout evidence; and one fetched entity has `name: orders-db`, `technology: sql`, with metadata attributing it to `service-a`. Activate the path, select `orders-db` as causal, and retain the dependency as blast radius. If multiple entities match `sql` without attribution, select no target and use `service-a` as the causal fallback.
 2. **Build `causal_features`.** Add the entity or infrastructure that a confirming signal's found row identifies as failed. Otherwise, for an activated dependency path with a confirmed source match, add the uniquely attributed fetched target. If no target entity or infrastructure KI resolves, add the activated path's fetched source instead. Do not invent missing targets.
 3. **Build `blast_radius`.** Add every dependency edge in an active path. Add the confirmed source entity when the active path's signal shows that source is affected and it is not already in `causal_features`, and add any other affected entity or infrastructure component only when a confirming signal's found row shows that impact. A `causal_features` entry cannot also appear in `blast_radius`. Use:
-   - cause: `{ feature_id, type, subtype, name, stream_name? }`
-   - dependency: `{ type: "dependency", subtype, feature_id, source, target, protocol?, stream_name? }`
-   - entity: `{ type: "entity", subtype, feature_id, name, stream_name? }`
-   - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, stream_name? }`
+   - cause: `{ feature_id, type, subtype, name, source_id? }`
+   - dependency: `{ type: "dependency", subtype, feature_id, source, target, protocol?, source_id? }`
+   - entity: `{ type: "entity", subtype, feature_id, name, source_id? }`
+   - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, source_id? }`
 
    Copy classification verbatim from each fetched KI: `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label shown above.
 4. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and `not_checked` may inform narrative assessment but cannot establish active topology.
@@ -185,7 +185,7 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
 
 Each entry:
 - `type`: always `"detection"`
-- `stream_name`: the detection's batch `stream_name`, copied as is. It identifies the source, so quiet-rule entries carry it too. Not the title and not the view name.
+- `source_id`: the detection's batch `source_id`, copied as is. It identifies the source, so quiet-rule entries carry it too. Not the title and not the view name.
 - `description`: Signal Verdict narrative; never include raw sensitive values from the query row
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries

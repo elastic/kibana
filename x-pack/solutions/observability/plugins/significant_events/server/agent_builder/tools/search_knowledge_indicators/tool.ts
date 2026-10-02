@@ -201,7 +201,7 @@ export function createSearchKnowledgeIndicatorsTool({
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const params = {
           ...restParams,
-          ...(sources ? { stream_names: sources.map((source) => source.id) } : {}),
+          ...(sources ? { source_ids: sources.map((source) => source.id) } : {}),
           per_page: Math.min(restParams.per_page, maxPerPage),
         };
 

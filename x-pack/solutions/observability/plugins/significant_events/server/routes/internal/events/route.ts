@@ -59,12 +59,12 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
     for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') continue;
       const { detection_id, rule_name, change_point_type } = signal.metadata;
-      const streamName = signal.stream_name;
+      const sourceId = signal.source_id;
       const parsedChangePointType = parseChangePointType(change_point_type);
       if (
         !detection_id ||
         !rule_name ||
-        !streamName ||
+        !sourceId ||
         !parsedChangePointType ||
         seen.has(detection_id)
       ) {
@@ -74,7 +74,7 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
       result.push({
         detection_id,
         rule_name,
-        stream_name: streamName,
+        source_id: sourceId,
         change_point_type: parsedChangePointType,
       });
     }
@@ -107,7 +107,10 @@ const eventsSearchRoute = createServerRoute({
           z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
         ])
         .optional(),
-      stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
+      source_id: z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(50)])
+        .optional()
+        .describe('Source id(s) to filter events by'),
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
@@ -129,7 +132,7 @@ const eventsSearchRoute = createServerRoute({
 
     const {
       status,
-      stream,
+      source_id: sourceId,
       search,
       severity,
       from,
@@ -145,7 +148,7 @@ const eventsSearchRoute = createServerRoute({
       from,
       to,
       status: toArray(status),
-      stream: toArray(stream),
+      sourceIds: toArray(sourceId),
       severity: toArray(severity),
       topologyFeatureIds: toArray(topologyFeatureId),
       search: search || undefined,
@@ -200,7 +203,7 @@ const eventsLifecycleRoute = createServerRoute({
     );
 
     const detections: LifecycleDetection[] = embedded.flatMap(
-      ({ detection_id, rule_name, stream_name, change_point_type }) => {
+      ({ detection_id, rule_name, source_id, change_point_type }) => {
         const hit = hitsByDetectionId.get(detection_id);
         if (!hit) {
           return [];
@@ -216,7 +219,7 @@ const eventsLifecycleRoute = createServerRoute({
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
             rule_uuid: hit.rule_uuid,
-            stream_name: hit.stream_name ?? stream_name,
+            source_id: hit.source_id ?? source_id,
             change_point_type: hitChangePointType,
             '@timestamp': hit['@timestamp'],
           },

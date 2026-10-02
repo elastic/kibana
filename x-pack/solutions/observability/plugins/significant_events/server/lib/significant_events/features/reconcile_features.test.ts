@@ -18,7 +18,7 @@ const createStoredFeature = ({
 }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
   uuid: `uuid-${overrides.type ?? 'technology'}-${id}`,
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   type: 'technology',
   subtype: 'library',
   title: id,

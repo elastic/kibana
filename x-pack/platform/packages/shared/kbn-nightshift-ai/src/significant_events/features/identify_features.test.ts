@@ -189,7 +189,7 @@ describe('identifyFeatures', () => {
         filter: undefined,
       }),
     ]);
-    expect(result.features[0]).not.toHaveProperty('stream_name');
+    expect(result.features[0]).not.toHaveProperty('source_id');
     expect(result.ignoredFeatures).toEqual([
       {
         feature_id: 'excluded',

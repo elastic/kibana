@@ -44,7 +44,7 @@ const DUAL_WRITE_CONCURRENCY = 10;
 export type EventsWriteInput = Pick<
   SignificantEvent,
   | 'status'
-  | 'stream_names'
+  | 'source_ids'
   | 'title'
   | 'symptom_hypothesis'
   | 'summary'
@@ -193,7 +193,7 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
   });
 
 /**
- * Flags candidates that share an in-batch dedup identity (stream+rules exact-set match) or
+ * Flags candidates that share an in-batch dedup identity (source+rules exact-set match) or
  * event_id (snapshot mode) as `duplicate_in_batch` errors, keeping the first occurrence. Returns
  * the remainder.
  */
@@ -207,7 +207,7 @@ const markDuplicateKeys = (
     const key =
       candidate.mode === 'dedup'
         ? makeIdentity({
-            streamNames: candidate.input.stream_names,
+            sourceIds: candidate.input.source_ids,
             ruleUuids: candidate.ruleUuids,
           })
         : candidate.eventId;
@@ -246,15 +246,13 @@ const fetchActiveEventsForDedup = async (
 ): Promise<SignificantEvent[]> => {
   if (dedupCandidates.length === 0) return [];
 
-  // Narrow by stream/rule only when every candidate carries one, otherwise an AND'd filter
+  // Narrow by source/rule only when every candidate carries one, otherwise an AND'd filter
   // could exclude a candidate's genuine duplicate that has no value for that field.
-  const allCandidatesHaveStreamNames = dedupCandidates.every(
-    (c) => c.input.stream_names.length > 0
-  );
+  const allCandidatesHaveSourceIds = dedupCandidates.every((c) => c.input.source_ids.length > 0);
   const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
   const { hits } = await eventSearchClient.findLatestActive({
-    streamNames: allCandidatesHaveStreamNames
-      ? [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))]
+    sourceIds: allCandidatesHaveSourceIds
+      ? [...new Set(dedupCandidates.flatMap((c) => c.input.source_ids))]
       : undefined,
     ruleUuids: allCandidatesHaveRuleUuids
       ? [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))]
@@ -265,13 +263,13 @@ const fetchActiveEventsForDedup = async (
 
 /**
  * Returns true when the candidate's rule set is entirely contained in the active event's rule set
- * and at least one stream name is shared — meaning this detection is already tracked.
+ * and at least one source id is shared — meaning this detection is already tracked.
  *
  * Subset matching (not exact-set) handles co-detection noise: a candidate carrying rules [A]
  * correctly finds an active event with rules [A, B] rather than creating a duplicate. A new rule C
  * not present in any active event still produces a new event.
  *
- * Empty-rule candidates only match empty-rule events to avoid false-matching any event on stream
+ * Empty-rule candidates only match empty-rule events to avoid false-matching any event on source
  * overlap alone.
  */
 const isCoveredByActiveEvent = (
@@ -281,9 +279,9 @@ const isCoveredByActiveEvent = (
 ): boolean => {
   if (!activeStatuses.includes(ev.status)) return false;
 
-  const candidateStreamSet = new Set(candidate.input.stream_names);
-  const streamsOverlap = (ev.stream_names ?? []).some((s) => candidateStreamSet.has(s));
-  if (!streamsOverlap) return false;
+  const candidateSourceSet = new Set(candidate.input.source_ids);
+  const sourcesOverlap = (ev.source_ids ?? []).some((s) => candidateSourceSet.has(s));
+  if (!sourcesOverlap) return false;
 
   const eventRuleUuids = extractRuleUuids(ev.signals);
   if (candidate.ruleUuids.length === 0) return eventRuleUuids.length === 0;
@@ -293,7 +291,7 @@ const isCoveredByActiveEvent = (
 };
 
 /**
- * Marks dedup candidates whose rules are a subset of an active event's rules (with stream overlap)
+ * Marks dedup candidates whose rules are a subset of an active event's rules (with source overlap)
  * as `existing_active_event` in `results`. Returns the candidates that still need to be written.
  */
 const resolveDedupSkips = (
@@ -400,7 +398,7 @@ const buildPendingWrite = (
   const episodeContext = isContinuation
     ? mergeEpisodeContext(priorDocs, rest, timestamp)
     : {
-        streamNames: rest.stream_names,
+        sourceIds: rest.source_ids,
         causalFeatures: rest.causal_features ?? [],
         blastRadius: rest.blast_radius ?? [],
       };
@@ -439,7 +437,7 @@ const buildPendingWrite = (
       previous_event_uuid: latestLegacyEvent?.event_uuid,
       investigations: latestLegacyEvent?.investigations,
       signals,
-      stream_names: episodeContext.streamNames,
+      source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
       blast_radius: episodeContext.blastRadius,
       severity: candidate.input.severity,
@@ -487,7 +485,7 @@ const applyBulkResults = (
  *
  * Find-or-create items (no `event_id`):
  *  - Scan all currently-active events for one whose rules contain the candidate rules and whose
- *    streams overlap the candidate streams.
+ *    sources overlap the candidate sources.
  *  - If found, skip the write and return the existing event_id (existing_active_event).
  *  - Otherwise write a new event with the caller-supplied status.
  *

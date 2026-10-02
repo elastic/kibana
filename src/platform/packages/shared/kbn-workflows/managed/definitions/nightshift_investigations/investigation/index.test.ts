@@ -60,13 +60,15 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 describe('Nightshift investigation workflow', () => {
   it('persists the shared investigation output without sig-events write-back', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(1);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(2);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
       'ensure_investigation_agent',
       'persist_investigation_started',
       'emit_investigation_started',
+      'list_nightshift_sources',
+      'resolve_investigation_sources',
       'investigate',
       'persist_investigation_completed',
       'persist_investigation_failed',
@@ -113,6 +115,24 @@ describe('Nightshift investigation workflow', () => {
       '{{ steps.resolve_model.output.connector_id }}'
     );
     expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
+  });
+
+  it('resolves source ids to slug and view name before the agent kickoff', () => {
+    expect(investigation.triggers[0].inputs.properties.source_ids).toEqual(
+      expect.objectContaining({ type: 'array' })
+    );
+    expect(investigation.triggers[0].inputs.properties).not.toHaveProperty('stream_names');
+    expect(requireStep('list_nightshift_sources').with).toMatchObject({
+      method: 'GET',
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100',
+    });
+    expect(requireStep('list_nightshift_sources')['on-failure']).toEqual({ continue: true });
+    expect(requireStep('resolve_investigation_sources')).toMatchObject({ type: 'data.set' });
+
+    const message = requireStep('investigate').with?.message;
+    expect(message).toContain('Related sources:');
+    expect(message).toContain('{{ source.slug }}: FROM {{ source.view_name }}');
+    expect(message).not.toContain('Related streams');
   });
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {

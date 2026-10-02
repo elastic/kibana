@@ -18,7 +18,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   event_uuid: 'event-uuid-1',
   event_id: 'event-id-1',
   status: 'open',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: '40-medium',
@@ -51,7 +51,7 @@ describe('emitSignificantEventWriteTriggers', () => {
       summary: 'Test summary',
       status: 'open',
       severity: '40-medium',
-      stream_names: ['logs.test'],
+      source_ids: ['logs.test'],
       occurred_at: '2026-01-01T00:00:00.000Z',
     });
   });
@@ -74,7 +74,7 @@ describe('emitSignificantEventWriteTriggers', () => {
       summary: 'Test summary',
       status: 'closed',
       severity: '40-medium',
-      stream_names: ['logs.test'],
+      source_ids: ['logs.test'],
       occurred_at: '2026-01-01T00:00:00.000Z',
       previous_status: 'open',
     });

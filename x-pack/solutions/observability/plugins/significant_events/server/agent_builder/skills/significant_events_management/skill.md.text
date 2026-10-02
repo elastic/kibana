@@ -13,7 +13,7 @@ Examples of conversation signals that may indicate a SignificantEvent:
 </significant_events_concept>
 
 <tools>
-- **event_search** — search existing significant events by query, source slug, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `slugs` to search every source. Use `status: "open"` to focus on active events. An event stored against a stream name is not found by its slug.
+- **event_search** — search existing significant events by query, source slug, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `slugs` to search every source. Use `status: "open"` to focus on active events. Events written before the source id cutover carry no source and are not matched.
 - **event_create** — create a new significant event. Only after confirming no similar event exists. The system generates internal identifiers and timestamps automatically.
 - **event_status_update** — update an existing event's status to `open`, `closed`, or `dismissed`. Creates a new event version on success.
 - **search_knowledge_indicators** — query the service knowledge base for feature and query KIs. Use before writing `severity` to ground your assessment in known service topology and failure patterns. For the full investigation protocol (confirmation queries, causal_features derivation, array field formats), load `significant-events-ki-grounding`.
@@ -95,7 +95,7 @@ Field-level format rules are in the tool schema descriptions — read them when 
 
 - `status`: default to `open` for new events unless user intent says otherwise.
 - `summary`: do not lead with internal alert names or metric values.
-- `slugs`: Nightshift source slugs for every affected source. Tell the user the titles. Nested `stream_name` values on signals, causal features, and blast radius are slugs too.
+- `slugs`: Nightshift source slugs for every affected source. Tell the user the titles. Nested `source_id` values on signals, causal features, and blast radius are slugs too.
 </significant_event_property_guidance>
 
 <tool_examples>

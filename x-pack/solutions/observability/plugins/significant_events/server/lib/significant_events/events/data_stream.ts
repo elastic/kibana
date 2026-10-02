@@ -20,7 +20,7 @@ export const eventsMappings = {
     event_uuid: mappings.keyword(),
     event_id: mappings.keyword(),
     previous_event_uuid: mappings.keyword(),
-    stream_names: mappings.keyword(),
+    source_ids: mappings.keyword(),
     status: mappings.keyword(),
     severity: mappings.keyword(),
     title: mappings.text(),
@@ -63,18 +63,18 @@ export type { SignificantEvent };
 /**
  * Stored form of a SignificantEvent document:
  * - `severity` is encoded as a sortable prefixed keyword (e.g. `"60-high"`)
- * - `stream_names` is derived from `signals[].stream_name` when not provided
+ * - `source_ids` is derived from `signals[].source_id` when not provided
  */
 export const storedEventSchema = significantEventSchema.transform((doc) => ({
   ...doc,
-  stream_names: doc.stream_names?.length
-    ? doc.stream_names
-    : [...new Set((doc.signals ?? []).map((s) => s.stream_name).filter(Boolean))],
+  source_ids: doc.source_ids?.length
+    ? doc.source_ids
+    : [...new Set((doc.signals ?? []).map((signal) => signal.source_id).filter(Boolean))],
 }));
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 12,
+  version: 13,
   hidden: true,
   template: {
     priority: 500,

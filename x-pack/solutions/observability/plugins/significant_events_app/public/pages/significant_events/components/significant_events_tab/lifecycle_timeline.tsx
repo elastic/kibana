@@ -52,7 +52,7 @@ function buildEntries(
     timestamp: detection['@timestamp'],
     title: detection.rule_name ?? '-',
     description: [
-      detection.stream_name && getSourceTitle(detection.stream_name),
+      detection.source_id && getSourceTitle(detection.source_id),
       changeTypeLabel(detection.change_point_type),
     ]
       .filter(Boolean)

@@ -41,7 +41,7 @@ export type {
  * Space-scoped access to knowledge indicators keyed by Nightshift source id.
  *
  * A source id identifies the unit of data a KI describes. Callers pass a
- * Nightshift source id. Route paths still say `{streamName}`. The server
+ * Nightshift source id. Route paths name it `{sourceId}`. The server
  * stamps the id on every revision; it is never part of a write payload.
  *
  * Every read filters on the space the client was built for and every write is
@@ -182,7 +182,7 @@ export class KnowledgeIndicatorClient {
     return this.reader.getRuleBackedQueryLinks();
   }
 
-  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; source_id: string }>> {
     return this.reader.findFeaturesByIds(ids);
   }
 
@@ -209,8 +209,8 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.findStreamNamesWithOwnedRules();
   }
 
-  findOwnedRuleIds(streamName: string): Promise<string[]> {
-    return this.orchestrator.findOwnedRuleIds(streamName);
+  findOwnedRuleIds(sourceId: string): Promise<string[]> {
+    return this.orchestrator.findOwnedRuleIds(sourceId);
   }
 
   findIndicators(

@@ -356,7 +356,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           {formatTimestamp(event.created_at ?? event['@timestamp'])}
         </EuiText>
         <EuiSpacer size="m" />
-        <BadgeRow items={(event.stream_names ?? []).map(getSourceTitle)} color="hollow" />
+        <BadgeRow items={(event.source_ids ?? []).map(getSourceTitle)} color="hollow" />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>

@@ -21,7 +21,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   event_uuid: 'event-1',
   event_id: 'agent-event-1',
   status: 'open',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: '40-medium',

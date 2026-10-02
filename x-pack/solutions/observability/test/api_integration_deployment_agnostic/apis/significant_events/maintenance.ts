@@ -68,7 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const reconcileProbe = (expectStatusCode: number) =>
     apiClient
       .fetch('POST /internal/streams/queries/_reconcile', {
-        params: { body: { streamNames: ['logs.maintenance-probe-missing'] } },
+        params: { body: { sourceIds: ['logs.maintenance-probe-missing'] } },
       })
       .expect(expectStatusCode);
 
@@ -145,7 +145,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await upsertFeature(apiClient, RESET_STREAM_NAME, {
           id: 'reset-feature',
-          stream_name: RESET_STREAM_NAME,
           type: 'entity',
           subtype: 'service',
           title: 'Reset feature',
@@ -198,7 +197,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             detection_id: 'maintenance-reset-detection',
             rule_uuid: 'maintenance-reset-rule',
             rule_name: 'Maintenance reset rule',
-            stream_name: RESET_STREAM_NAME,
+            source_id: RESET_STREAM_NAME,
             change_point_type: 'spike',
             p_value: 0.01,
             'kibana.space_ids': ['default'],
@@ -213,7 +212,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             event_uuid: 'maintenance-reset-event',
             event_id: 'maintenance-reset-event',
             status: 'open',
-            stream_names: [RESET_STREAM_NAME],
+            source_ids: [RESET_STREAM_NAME],
             title: 'Maintenance reset test event',
             summary: 'Representative event removed by the maintenance reset test.',
             severity: '40-medium',

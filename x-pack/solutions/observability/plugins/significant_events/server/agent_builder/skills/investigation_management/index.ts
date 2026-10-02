@@ -15,7 +15,7 @@ export const streamsInvestigationManagementSkill = defineSkillType({
   name: 'streams-investigation-management',
   basePath: 'skills/platform/streams',
   description:
-    'Streams investigation management: trigger a root-cause analysis workflow for an observability issue, significant event, or alert; check the status of a running investigation; and summarise the structured findings once complete. Load when the user asks to investigate an incident, error, or anomaly — including a significant event attached to the conversation or a fired alert — optionally scoped to specific data streams.',
+    'Streams investigation management: trigger a root-cause analysis workflow for an observability issue, significant event, or alert; check the status of a running investigation; and summarise the structured findings once complete. Load when the user asks to investigate an incident, error, or anomaly — including a significant event attached to the conversation or a fired alert — optionally scoped to specific Nightshift sources.',
   content,
   experimental: true,
   excludeFromElasticCapabilities: true,

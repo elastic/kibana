@@ -15,6 +15,7 @@
       "dataViews",
       "features",
       "lens",
+      "nightshiftSources",
       "observabilityShared",
       "share",
       "significantEvents",

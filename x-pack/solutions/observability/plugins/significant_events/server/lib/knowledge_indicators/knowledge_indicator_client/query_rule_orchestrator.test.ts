@@ -32,7 +32,7 @@ const makeLink = (
   overrides: Partial<StreamQuery> & { id?: string; ruleBacked?: boolean } = {}
 ): QueryLink => ({
   query: makeQuery(overrides),
-  stream_name: SOURCE,
+  source_id: SOURCE,
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
 });
@@ -468,7 +468,7 @@ describe('QueryRuleOrchestrator', () => {
   describe('reconcileStream', () => {
     function makeReconcileLink(overrides: Partial<QueryLink> = {}): QueryLink {
       return {
-        stream_name: SOURCE,
+        source_id: SOURCE,
         rule_backed: true,
         rule_id: 'rule-1',
         expires_at: '2020-01-01T00:00:00.000Z',
@@ -487,7 +487,7 @@ describe('QueryRuleOrchestrator', () => {
     function makeFeature(id: string): Feature {
       return {
         id,
-        stream_name: SOURCE,
+        source_id: SOURCE,
         type: 'entity',
         description: '',
         properties: {},

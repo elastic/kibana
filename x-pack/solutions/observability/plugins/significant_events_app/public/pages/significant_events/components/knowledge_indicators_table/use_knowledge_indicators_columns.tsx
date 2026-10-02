@@ -195,7 +195,7 @@ export const useKnowledgeIndicatorsColumns = ({
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            streamName={getKnowledgeIndicatorSourceId(ki)}
+            sourceId={getKnowledgeIndicatorSourceId(ki)}
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />

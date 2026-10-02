@@ -31,6 +31,13 @@ jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => mockStreamFeatures(),
 }));
 
+jest.mock('../hooks/use_sources_by_id', () => ({
+  useSourcesById: () => ({
+    sourcesById: new Map(),
+    getSourceTitle: (sourceId: string) => sourceId,
+  }),
+}));
+
 jest.mock('./change_point_lens_chart', () => ({
   ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
     <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
@@ -69,14 +76,14 @@ jest.mock('../hooks/use_kibana', () => ({
 const webFrontendFeature = {
   uuid: 'feat-web-frontend',
   id: 'web-frontend',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   type: 'entity',
   subtype: 'service',
   title: 'web-frontend',
   description: 'Frontend service entity',
   properties: {},
   confidence: 90,
-  evidence: ['stream_name = logs.web-frontend'],
+  evidence: ['source_id = logs.web-frontend'],
 };
 
 const mockEvent: SignificantEvent = {
@@ -84,7 +91,7 @@ const mockEvent: SignificantEvent = {
   event_id: 'evt-001',
   event_uuid: 'evt-uuid-001',
   status: 'open',
-  stream_names: ['logs.web-frontend'],
+  source_ids: ['logs.web-frontend'],
   title: 'Web latency spike',
   summary: 'Latency increased on web-frontend.',
   severity: '80-critical',
@@ -95,7 +102,7 @@ const mockEvent: SignificantEvent = {
       subtype: 'service',
       feature_id: 'feat-web-frontend',
       name: 'web-frontend',
-      stream_name: 'logs.web-frontend',
+      source_id: 'logs.web-frontend',
     },
   ],
 };
@@ -104,14 +111,14 @@ const mockDetection: LifecycleDetection = {
   detection_id: 'det-1',
   rule_name: 'latency-p95-spike',
   rule_uuid: 'rule-uuid-001',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   change_point_type: 'spike',
   '@timestamp': '2026-07-10T12:00:00Z',
 };
 
 const mockSignal: SignalEntry = {
   type: 'detection',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   description: 'P95 latency on web-frontend rose from 120ms to 890ms.',
   verdict: 'confirms',
   evidence: {
@@ -132,7 +139,7 @@ describe('DetectionFlyout', () => {
     mockOpenChat.mockClear();
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature],
-      failedStreamNames: [],
+      failedSourceIds: [],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -243,7 +250,7 @@ describe('DetectionFlyout', () => {
     expect(entityFlyout).toBeInTheDocument();
     expect(within(entityFlyout).getByText('Summary')).toBeInTheDocument();
     expect(within(entityFlyout).getByText(webFrontendFeature.description)).toBeInTheDocument();
-    expect(within(entityFlyout).getByText('stream_name = logs.web-frontend')).toBeInTheDocument();
+    expect(within(entityFlyout).getByText('source_id = logs.web-frontend')).toBeInTheDocument();
   });
 
   it('closes the entity flyout without closing the detection flyout', () => {
@@ -262,7 +269,7 @@ describe('DetectionFlyout', () => {
   it('hides the impacted services section when no entry resolves to a service', () => {
     mockStreamFeatures.mockReturnValue({
       features: [],
-      failedStreamNames: [],
+      failedSourceIds: [],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -278,12 +285,12 @@ describe('DetectionFlyout', () => {
       ...webFrontendFeature,
       uuid: 'feat-payments',
       id: 'payments-api',
-      stream_name: 'logs.payments',
+      source_id: 'logs.payments',
       title: 'payments-api',
     };
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature, paymentsFeature],
-      failedStreamNames: ['logs.payments', 'logs.checkout'],
+      failedSourceIds: ['logs.payments', 'logs.checkout'],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -298,7 +305,7 @@ describe('DetectionFlyout', () => {
             type: 'entity',
             subtype: 'service',
             name: 'payments-api',
-            stream_name: 'logs.payments',
+            source_id: 'logs.payments',
           },
         ],
       },

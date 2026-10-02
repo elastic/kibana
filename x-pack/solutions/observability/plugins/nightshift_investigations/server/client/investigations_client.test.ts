@@ -778,7 +778,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('uses the caller-supplied message and stream_names when provided', async () => {
+  it('uses the caller-supplied message and source_ids when provided', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-789');
 
@@ -787,17 +787,17 @@ describe('NightshiftInvestigationsClient.start()', () => {
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'manual',
       message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
-      stream_names: ['logs.checkout'],
+      source_ids: ['logs.checkout'],
     });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.message).toBe('Checkout latency breach\n\nP99 latency climbed above 2s.');
-    expect(inputs.stream_names).toEqual(['logs.checkout']);
+    expect(inputs.source_ids).toEqual(['logs.checkout']);
   });
 
   // Uses a significant event subject: an alert investigation cannot reach the generic fallback
   // any more, because it is rejected without the alert data the brief is composed from.
-  it('falls back to a generic message and empty stream_names when omitted', async () => {
+  it('falls back to a generic message and empty source_ids when omitted', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
@@ -809,7 +809,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.message).toBe('Investigation requested for significant_event se-1');
-    expect(inputs.stream_names).toEqual([]);
+    expect(inputs.source_ids).toEqual([]);
   });
 
   it('ensures the investigation agent exists in the space before running the workflow', async () => {
@@ -963,7 +963,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     // Without this, `event_uuid` reaches the workflow's attach steps and files an alert's findings
     // against a significant event.
-    it.each([['event_uuid'], ['stream_names'], ['source']])(
+    it.each([['event_uuid'], ['source_ids'], ['source']])(
       'rejects an alert investigation whose context also carries %s',
       async (key) => {
         mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);

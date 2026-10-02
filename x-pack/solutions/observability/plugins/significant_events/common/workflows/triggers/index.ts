@@ -27,7 +27,7 @@ const baseEventSchema = z.object({
   severity: z
     .enum(SEVERITY_OPTIONS)
     .describe('Severity: "80-critical", "60-high", "40-medium", or "20-low".'),
-  stream_names: z.array(z.string()).describe('Data streams associated with this event.'),
+  source_ids: z.array(z.string()).describe('Nightshift source ids associated with this event.'),
   occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
 });
 
@@ -69,7 +69,7 @@ export const eventCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
       'xpack.significantEvents.workflowTriggers.eventCreated.documentation.details',
       {
         defaultMessage:
-          'Emitted when the first version of a significant event is created. Filter with KQL on event.* (e.g. event.severity, event.status, event.stream_names).',
+          'Emitted when the first version of a significant event is created. Filter with KQL on event.* (e.g. event.severity, event.status, event.source_ids).',
       }
     ),
     examples: [

@@ -238,7 +238,7 @@ export function makeService(params?: {
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({
       rule_id,
-      stream_name: params?.disabledSourceRuleIds?.includes(rule_id)
+      source_id: params?.disabledSourceRuleIds?.includes(rule_id)
         ? 'disabled-source'
         : 'enabled-source',
     }))

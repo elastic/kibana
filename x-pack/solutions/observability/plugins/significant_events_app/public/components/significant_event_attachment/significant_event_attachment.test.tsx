@@ -26,7 +26,7 @@ const attachment: SignificantEventAttachment = {
     event_uuid: 'event-1',
     event_id: 'payment-outage',
     status: 'open',
-    stream_names: ['logs.payment'],
+    source_ids: ['logs.payment'],
     title: 'Payment outage',
     summary: 'Payments are failing.',
     severity: '60-high',

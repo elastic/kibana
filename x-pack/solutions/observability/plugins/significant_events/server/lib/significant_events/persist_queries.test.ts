@@ -35,7 +35,7 @@ const makeLink = (
     esql: { query: overrides.esql ?? 'FROM logs | WHERE body.text:"error"' },
     severity_score: overrides.severity_score ?? 60,
   },
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
   ...(overrides.expiresAt ? { expires_at: overrides.expiresAt } : {}),

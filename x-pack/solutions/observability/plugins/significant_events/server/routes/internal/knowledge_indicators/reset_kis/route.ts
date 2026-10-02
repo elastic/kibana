@@ -27,7 +27,7 @@ const resetKIsRoute = createServerRoute({
       'backing rules visible in this space, and removes v1 alert documents from ' +
       '`.alerts-streams.alerts-default` (cluster-wide). ' +
       'Does not modify detections, discoveries, events, memories, or `.rule-events`. ' +
-      'Re-onboard streams via POST /internal/streams/{streamName}/onboarding/_execute to create ' +
+      'Re-onboard sources via POST /internal/streams/{sourceId}/onboarding/_execute to create ' +
       'new KIs and v2 rules. Blocked while Significant Events activity is paused (resume first), ' +
       'because reset deletes rules that Pause recorded for Resume.',
   },

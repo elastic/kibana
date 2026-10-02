@@ -28,11 +28,13 @@ triggers:
           description: >
             Short human-readable headline for the investigation (for example, an event title or
             alert rule name). Never an ID or UUID.
-        stream_names:
+        source_ids:
           type: array
           items:
             type: string
-          description: Optional logical stream names to scope observability queries.
+          description: >
+            Optional Nightshift source ids (slugs also match) to scope observability queries. The
+            workflow resolves them to slug and ES|QL view for the investigator.
         context:
           type: object
           additionalProperties: true
@@ -93,6 +95,24 @@ steps:
     on-failure:
       continue: true
 
+  # Lists the space's sources once so every caller can pass plain ids. Capped at one page of 100.
+  - name: list_nightshift_sources
+    type: kibana.request
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  - name: resolve_investigation_sources
+    type: data.set
+    with:
+      investigation_sources: >-
+        ${{ steps.list_nightshift_sources.output.sources | default: []
+          | where_exp: 'source', 'inputs.source_ids contains source.id or inputs.source_ids contains source.slug' }}
+
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
@@ -111,9 +131,9 @@ steps:
       message: |
         {{ inputs.message }}
 
-        {% if inputs.stream_names and inputs.stream_names.size > 0 %}
-        Related streams:
-        {% for stream in inputs.stream_names %}- {{ stream }}
+        {% if variables.investigation_sources and variables.investigation_sources.size > 0 %}
+        Related sources:
+        {% for source in variables.investigation_sources %}- {{ source.slug }}: FROM {{ source.view_name }}
         {% endfor %}
         {% endif %}
 
@@ -461,9 +481,10 @@ steps:
                       type: string
                       maxLength: 255
                       description: Knowledge Indicator feature_id when this entity came from one.
-                    stream_name:
+                    source_slug:
                       type: string
                       maxLength: 255
+                      description: Nightshift source slug from the kickoff Related sources list.
                     evidence:
                       description: >
                         How this entity was affected: a short description and, when you have the

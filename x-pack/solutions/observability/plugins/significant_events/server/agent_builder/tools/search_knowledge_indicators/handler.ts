@@ -216,19 +216,19 @@ function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, 
       ...indicator,
       feature: {
         ...indicator.feature,
-        stream_name: presentSlug(catalog, indicator.feature.stream_name),
+        source_id: presentSlug(catalog, indicator.feature.source_id),
       },
     };
   }
 
   return {
     ...indicator,
-    stream_name: presentSlug(catalog, indicator.stream_name),
+    source_id: presentSlug(catalog, indicator.source_id),
   };
 }
 
 function storedSourceIdOf(indicator: KnowledgeIndicator): string {
-  return indicator.kind === 'feature' ? indicator.feature.stream_name : indicator.stream_name;
+  return indicator.kind === 'feature' ? indicator.feature.source_id : indicator.source_id;
 }
 
 /**

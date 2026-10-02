@@ -142,7 +142,7 @@ describe('event_search tool', () => {
       success: true,
       result_count: 1,
       has_query: false,
-      has_stream_filter: true,
+      has_source_filter: true,
       status_filter: 'open',
       view: 'compact',
       page: 1,
@@ -160,7 +160,7 @@ describe('event_search tool', () => {
   it('accepts searches that omit slugs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_uuid: 'e2', stream_names: ['source-uuid'] }],
+      events: [{ event_uuid: 'e2', source_ids: ['source-uuid'] }],
       view: 'compact',
       page: 1,
       total: 1,
@@ -203,7 +203,7 @@ describe('event_search tool', () => {
             view_name: '$.nightshift.sources.default.nginx-errors',
           },
         ],
-        events: [expect.objectContaining({ stream_names: ['nginx-errors'] })],
+        events: [expect.objectContaining({ source_ids: ['nginx-errors'] })],
       })
     );
   });

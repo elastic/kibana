@@ -85,7 +85,7 @@ export async function runFeatureIdentificationAgent({
     title: `Feature identification: ${streamName}`,
   });
   const userMessage = buildFeatureIdentificationUserMessage({
-    streamName,
+    sourceId: streamName,
     sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures: previouslyIdentifiedFeatures?.length
       ? JSON.stringify(previouslyIdentifiedFeatures)

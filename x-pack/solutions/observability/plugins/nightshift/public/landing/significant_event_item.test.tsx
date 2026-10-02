@@ -17,7 +17,7 @@ const mockEvent: SignificantEvent = {
   event_id: 'evt-1',
   event_uuid: 'evt-uuid-1',
   status: 'open',
-  stream_names: ['service-a'],
+  source_ids: ['service-a'],
   title: 'Test significant event',
   summary: 'Something happened',
   severity: '60-high',

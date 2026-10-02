@@ -35,7 +35,7 @@ export interface EventSearchInput {
   query?: string;
   page?: number;
   per_page?: number;
-  stream_names?: string[];
+  source_ids?: string[];
   status?: SignificantEventStatus;
   rule_uuids?: string[];
   event_ids?: string[];
@@ -52,7 +52,7 @@ type SignalSummary = {
 } & Record<Signal['verdict'], number>;
 
 interface DetailedEventSignal {
-  stream_name: string;
+  source_id: string;
   rule_uuid?: string;
   verdict: Signal['verdict'];
   description?: string;
@@ -70,7 +70,7 @@ export interface CompactEventSearchItem
     | 'event_uuid'
     | 'severity'
     | 'status'
-    | 'stream_names'
+    | 'source_ids'
     | 'summary'
     | 'symptom_hypothesis'
     | 'title'
@@ -89,7 +89,7 @@ interface DetailedEventSearchItem
     | 'event_uuid'
     | 'severity'
     | 'status'
-    | 'stream_names'
+    | 'source_ids'
     | 'symptom_hypothesis'
     | 'title'
   > {
@@ -175,7 +175,7 @@ const toEventSearchItemBase = (
   | 'event_uuid'
   | 'severity'
   | 'status'
-  | 'stream_names'
+  | 'source_ids'
   | 'symptom_hypothesis'
   | 'title'
 > => ({
@@ -187,7 +187,7 @@ const toEventSearchItemBase = (
   status: event.status,
   severity: event.severity,
   confidence: event.confidence,
-  stream_names: event.stream_names,
+  source_ids: event.source_ids,
 });
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
@@ -220,7 +220,7 @@ const toDetailedEvent = (
   return {
     ...toEventSearchItemBase(event),
     signals: pageSignals.map((signal) => ({
-      stream_name: signal.stream_name,
+      source_id: signal.source_id,
       rule_uuid: getRuleUuid(signal),
       verdict: signal.verdict,
       description: truncateSignalDescription(signal.description),
@@ -241,7 +241,7 @@ const buildSearchParams = (view: EventSearchView, params: EventSearchInput) => {
     page: view === 'full' ? 1 : params.page ?? 1,
     perPage: Math.min(requestedPerPage, maxPerPage),
     search: normalizeEventSearchQuery(params.query),
-    stream: params.stream_names,
+    sourceIds: params.source_ids,
     from: params.from ?? DEFAULT_EVENTS_SEARCH_FROM,
     to: params.to ?? DEFAULT_EVENTS_SEARCH_TO,
   };

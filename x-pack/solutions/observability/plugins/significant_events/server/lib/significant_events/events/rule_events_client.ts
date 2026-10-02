@@ -109,10 +109,10 @@ interface RuleEventSourceRow {
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
 
 /**
- * `.rule-events` doesn't guarantee `stream_names` is an array — bridge docs write a scalar
+ * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
  * string, and the field can be absent. Normalize so callers always get `string[]`.
  */
-const normalizeStreamNames = (value: unknown): string[] => {
+const normalizeSourceIds = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string');
   return [];
@@ -129,7 +129,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   >;
   return {
     ...data,
-    stream_names: normalizeStreamNames(data.stream_names),
+    source_ids: normalizeSourceIds(data.source_ids),
     '@timestamp': row['@timestamp'],
     event_uuid: row[GROUP_HASH_FIELD],
     status:
@@ -204,13 +204,13 @@ const eventIdIn = (eventIds: string[]): ESQLAstExpression =>
 
 /**
  * `EventClient`'s `multiValueContainsAnyFilter` equivalent, targeting `FIELD_EXTRACT(data,
- * "stream_names")` instead of a top-level column. `MV_INTERSECTS` works correctly against
+ * "source_ids")` instead of a top-level column. `MV_INTERSECTS` works correctly against
  * `FIELD_EXTRACT`'s output for array, scalar-string, and absent-field shapes (verified live
  * against `.rule-events` on nightshift-program#1492) — no extra normalization is needed here.
  */
 const streamNamesIntersects = (values: string[]): ESQLAstExpression =>
   esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-    'stream_names'
+    'source_ids'
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
@@ -300,8 +300,8 @@ export class RuleEventsClient implements SignificantEventsReadClient {
         esql.str(SIGNIFICANT_EVENTS_SEVERITY_MAP[severity])
       )})`;
     }
-    if (options.stream?.length) {
-      query = query.where`${streamNamesIntersects(options.stream)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${streamNamesIntersects(options.sourceIds)}`;
     }
     if (options.eventIds?.length) {
       query = query.where`${eventIdIn(options.eventIds)}`;
@@ -394,17 +394,17 @@ export class RuleEventsClient implements SignificantEventsReadClient {
 
   /**
    * Returns the latest version per `group_hash` for all active ("open") events within the given
-   * time range, optionally narrowed to candidate stream/rule identities so the scan stays
+   * time range, optionally narrowed to candidate source/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. Mirrors `EventClient`'s
    * `findLatestActive`, but filters on the nested `alert.status` column (via
    * `SIGNIFICANT_EVENTS_STATUS_MAP`, see `buildLatestByCurrentStateQuery`'s status branch) instead
-   * of a top-level `status` column, and reads `stream_names` / `signals.metadata.rule_uuid`
+   * of a top-level `status` column, and reads `source_ids` / `signals.metadata.rule_uuid`
    * through `FIELD_EXTRACT` since both live in the flattened `data` column.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events, same bound as `EventClient`.
    */
   async findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+    options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
       query: buildBaseQuery(this.clients.space),
@@ -416,8 +416,8 @@ export class RuleEventsClient implements SignificantEventsReadClient {
 
     query = query.where`${activeStatusWhere()}`;
 
-    if (options.streamNames?.length) {
-      query = query.where`${streamNamesIntersects(options.streamNames)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${streamNamesIntersects(options.sourceIds)}`;
     }
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;

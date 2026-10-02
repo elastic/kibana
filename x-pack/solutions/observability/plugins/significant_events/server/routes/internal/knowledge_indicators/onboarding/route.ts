@@ -41,7 +41,7 @@ const mapStepsToSkipFlags = (
 });
 
 const onboardingExecuteRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/onboarding/_execute',
+  endpoint: 'POST /internal/streams/{sourceId}/onboarding/_execute',
   options: {
     access: 'internal',
     summary: 'Onboard stream',
@@ -54,7 +54,7 @@ const onboardingExecuteRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.discriminatedUnion('action', [
       z.object({
         action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
@@ -109,11 +109,11 @@ const onboardingExecuteRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      path: { streamName },
+      path: { sourceId },
       body,
     } = params;
 
-    const { source } = await sourcesClient.get(streamName);
+    const { source } = await sourcesClient.get(sourceId);
 
     if (body.action === 'schedule') {
       if (!source.enabled) {
@@ -145,7 +145,7 @@ const onboardingExecuteRoute = createServerRoute({
       ]);
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
-        streamName: source.id,
+        sourceId: source.id,
         sourceSlug: source.slug,
         features: {
           skip: skipFeatures,
@@ -168,13 +168,13 @@ const onboardingExecuteRoute = createServerRoute({
     // Cancellation may be a no-op (nothing running, or already terminal), so we
     // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({
-      streamName: source.id,
+      sourceId: source.id,
       sourceSlug: source.slug,
       request,
     });
 
     return streamsKIsOnboardingClient.getStatus({
-      streamName: source.id,
+      sourceId: source.id,
       sourceSlug: source.slug,
       queryUpdatedAt: source.esql_updated_at,
       request,
@@ -183,7 +183,7 @@ const onboardingExecuteRoute = createServerRoute({
 });
 
 const onboardingStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/onboarding/_status',
+  endpoint: 'GET /internal/streams/{sourceId}/onboarding/_status',
   options: {
     access: 'internal',
     summary: 'Check the status of stream onboarding',
@@ -195,7 +195,7 @@ const onboardingStatusRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({
     params,
@@ -213,13 +213,13 @@ const onboardingStatusRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      path: { streamName },
+      path: { sourceId },
     } = params;
 
-    const { source } = await sourcesClient.get(streamName);
+    const { source } = await sourcesClient.get(sourceId);
 
     return streamsKIsOnboardingClient.getStatus({
-      streamName: source.id,
+      sourceId: source.id,
       sourceSlug: source.slug,
       queryUpdatedAt: source.esql_updated_at,
       request,
@@ -242,10 +242,7 @@ const onboardingBulkStatusRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      streamNames: z
-        .array(z.string().max(MAX_STREAM_NAME_LENGTH))
-        .min(1)
-        .max(MAX_STREAMS_PER_QUERY),
+      sourceIds: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).min(1).max(MAX_STREAMS_PER_QUERY),
     }),
   }),
   handler: async ({
@@ -264,13 +261,13 @@ const onboardingBulkStatusRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      body: { streamNames },
+      body: { sourceIds },
     } = params;
 
     // Executions are keyed by slug, so ids are resolved through this space's catalog.
     // Anything outside the catalog stays not_started.
     const catalog = await listAllSources(sourcesClient);
-    const requestedIds = new Set(streamNames);
+    const requestedIds = new Set(sourceIds);
     const knownSources = catalog.filter((source) => requestedIds.has(source.id));
     const knownStatuses = await streamsKIsOnboardingClient.getStatuses({
       sources: knownSources,
@@ -278,7 +275,7 @@ const onboardingBulkStatusRoute = createServerRoute({
     });
 
     const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
-    for (const sourceId of streamNames) {
+    for (const sourceId of sourceIds) {
       statuses[sourceId] = knownStatuses[sourceId] ?? {
         status: SignificantEventsWorkflowStatus.NotStarted,
         executionId: null,

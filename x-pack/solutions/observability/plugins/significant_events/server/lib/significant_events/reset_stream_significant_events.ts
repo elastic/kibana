@@ -23,12 +23,12 @@ export interface SignificantEventsResetDeletedCounts {
 
 /** Response from POST /internal/streams/significant_events/_reset_kis. */
 export interface SignificantEventsResetResult {
-  /** Stream names that had knowledge indicators before the reset. */
-  streams: string[];
+  /** Source ids that had knowledge indicators before the reset. */
+  sources: string[];
   canceled_onboarding_count: number;
   deleted: SignificantEventsResetDeletedCounts;
-  /** Per-stream KI and rule snapshot counts before deletion. */
-  by_stream: Record<string, SignificantEventsResetDeletedCounts>;
+  /** Per-source KI and rule snapshot counts before deletion. */
+  by_source: Record<string, SignificantEventsResetDeletedCounts>;
 }
 
 export const emptySignificantEventsResetDeletedCounts =
@@ -170,9 +170,9 @@ export const resetSignificantEvents = async ({
   deleted.alerts_v1 = alertsDeleteResponse.deleted ?? 0;
 
   return {
-    streams: streamNames,
+    sources: streamNames,
     canceled_onboarding_count: canceledOnboardingCount,
     deleted,
-    by_stream: byStream,
+    by_source: byStream,
   };
 };

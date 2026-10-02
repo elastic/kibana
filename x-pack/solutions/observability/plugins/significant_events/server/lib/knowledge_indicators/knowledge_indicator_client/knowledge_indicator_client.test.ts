@@ -50,9 +50,9 @@ const SPACE = 'marketing';
 const SOURCE = 'logs-app';
 
 // Mirrors the server-side derivation: the stored document `id` is the
-// deterministic uuid computed from (slug, stream_name).
+// deterministic uuid computed from (slug, source_id).
 function featureUuid(slug: string): string {
-  return computeFeatureUuid({ id: slug, stream_name: SOURCE });
+  return computeFeatureUuid({ id: slug, source_id: SOURCE });
 }
 
 function createFeatureDoc(

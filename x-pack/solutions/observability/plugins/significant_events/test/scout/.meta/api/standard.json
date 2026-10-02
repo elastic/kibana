@@ -149,8 +149,8 @@
       }
     },
     {
-      "id": "670d85d4e7806a5-6eae18e8b4c773e",
-      "title": "Onboarding bulk status API rejects an empty streamNames array",
+      "id": "670d85d4e7806a5-3ee47c15c4bf695",
+      "title": "Onboarding bulk status API rejects an empty sourceIds array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -177,7 +177,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 53,
-        "column": 30
+        "column": 28
       }
     },
     {

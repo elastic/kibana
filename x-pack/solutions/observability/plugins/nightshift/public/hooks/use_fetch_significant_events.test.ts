@@ -25,7 +25,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     event_id: 'evt-1',
     event_uuid: 'evt-uuid-1',
     status: 'open',
-    stream_names: ['service-a'],
+    source_ids: ['service-a'],
     title: 'Event',
     summary: 'Summary',
     severity: '40-medium',

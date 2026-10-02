@@ -13,7 +13,7 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { assertNotPaused } from '../../utils/assert_not_paused';
 
 const reconcileKnowledgeIndicatorsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_reconcile',
+  endpoint: 'POST /internal/streams/{sourceId}/knowledge_indicators/_reconcile',
   options: {
     access: 'internal',
     summary: 'Reconcile knowledge indicators for a stream',
@@ -24,7 +24,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients, server, maintenanceService }) => {
     const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
@@ -34,7 +34,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { source } = await sourcesClient.get(params.path.streamName);
+    const { source } = await sourcesClient.get(params.path.sourceId);
     const kiClient = await getKnowledgeIndicatorClient();
     return kiClient.reconcileStream(source.id);
   },

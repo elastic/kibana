@@ -85,7 +85,7 @@ const compareFeatures = (
   if (byConfidence !== 0) {
     return byConfidence;
   }
-  const byStream = current.feature.stream_name.localeCompare(next.feature.stream_name);
+  const byStream = current.feature.source_id.localeCompare(next.feature.source_id);
   if (byStream !== 0) {
     return byStream;
   }
@@ -102,7 +102,7 @@ const compareQueries = (
   if (byScore !== 0) {
     return byScore;
   }
-  const byStream = current.stream_name.localeCompare(next.stream_name);
+  const byStream = current.source_id.localeCompare(next.source_id);
   if (byStream !== 0) {
     return byStream;
   }
@@ -135,42 +135,42 @@ async function resolveStreamNames(
   getStreamNames: () => Promise<string[]>
 ): Promise<string[]> {
   const accessible = await getStreamNames();
-  const requested = params.stream_names?.length
-    ? intersection(uniq(params.stream_names), accessible)
+  const requested = params.source_ids?.length
+    ? intersection(uniq(params.source_ids), accessible)
     : accessible;
   return compact(requested.filter((name) => typeof name === 'string' && name.length > 0));
 }
 
 async function fetchFeatureIndicators({
-  streamNames,
+  sourceIds,
   searchText,
   featureTypes,
   featureIds,
   getFeatures,
   onFeatureFetchError,
 }: {
-  streamNames: string[];
+  sourceIds: string[];
   searchText: string | undefined;
   featureTypes: SearchKnowledgeIndicatorsInput['feature_types'];
   featureIds: string[] | undefined;
   getFeatures: (
-    streamName: string,
+    sourceId: string,
     options: {
       searchText?: string;
       featureTypes?: SearchKnowledgeIndicatorsInput['feature_types'];
       featureIds?: string[];
     }
   ) => Promise<Feature[]>;
-  onFeatureFetchError?: (streamName: string, error: unknown) => void;
+  onFeatureFetchError?: (sourceId: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
   const results = await Promise.allSettled(
-    streamNames.map((name) => getFeatures(name, { searchText, featureTypes, featureIds }))
+    sourceIds.map((name) => getFeatures(name, { searchText, featureTypes, featureIds }))
   );
 
   const indicators: KnowledgeIndicatorFeature[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      onFeatureFetchError?.(streamNames[index], result.reason);
+      onFeatureFetchError?.(sourceIds[index], result.reason);
       return;
     }
     result.value.forEach((feature) => indicators.push(featureToKnowledgeIndicatorFeature(feature)));
@@ -180,7 +180,7 @@ async function fetchFeatureIndicators({
 }
 
 async function fetchQueryIndicators(
-  streamNames: string[],
+  sourceIds: string[],
   options: {
     searchText: string | undefined;
     queryTypes: SearchKnowledgeIndicatorsInput['query_types'];
@@ -189,7 +189,7 @@ async function fetchQueryIndicators(
     ruleBacked: boolean | undefined;
   },
   getQueries: (
-    streamNames: string[],
+    sourceIds: string[],
     options: {
       searchText?: string;
       queryTypes?: SearchKnowledgeIndicatorsInput['query_types'];
@@ -199,7 +199,7 @@ async function fetchQueryIndicators(
     }
   ) => Promise<QueryLink[]>
 ): Promise<KnowledgeIndicatorQuery[]> {
-  const links = await getQueries(streamNames, options);
+  const links = await getQueries(sourceIds, options);
   return links.map(queryLinkToKnowledgeIndicatorQuery);
 }
 
@@ -247,7 +247,7 @@ export async function searchKnowledgeIndicators({
 }: {
   getStreamNames(): Promise<string[]>;
   getFeatures(
-    streamName: string,
+    sourceId: string,
     options: {
       searchText?: string;
       featureTypes?: SearchKnowledgeIndicatorsInput['feature_types'];
@@ -255,7 +255,7 @@ export async function searchKnowledgeIndicators({
     }
   ): Promise<Feature[]>;
   getQueries(
-    streamNames: string[],
+    sourceIds: string[],
     options: {
       searchText?: string;
       queryTypes?: SearchKnowledgeIndicatorsInput['query_types'];
@@ -264,18 +264,17 @@ export async function searchKnowledgeIndicators({
       ruleBacked?: boolean;
     }
   ): Promise<QueryLink[]>;
-  onFeatureFetchError?: (streamName: string, error: unknown) => void;
+  onFeatureFetchError?: (sourceId: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
 }): Promise<SearchKnowledgeIndicatorsOutput> {
   // Step 1: Normalize inputs.
   const normalized = normalizeParams(params);
 
   // Step 2: Resolve streams (requested ∩ accessible).
-  const streamNames = await resolveStreamNames(params, getStreamNames);
-  const hasRequestedStreamNames =
-    Array.isArray(params.stream_names) && params.stream_names.length > 0;
+  const sourceIds = await resolveStreamNames(params, getStreamNames);
+  const hasRequestedStreamNames = Array.isArray(params.source_ids) && params.source_ids.length > 0;
   // Handle the case where no streams are accessible and streams were requested.
-  if (hasRequestedStreamNames && streamNames.length === 0) {
+  if (hasRequestedStreamNames && sourceIds.length === 0) {
     return {
       knowledge_indicators: [],
       page: normalized.page,
@@ -290,7 +289,7 @@ export async function searchKnowledgeIndicators({
   // Step 3: Fetch features.
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
-        streamNames,
+        sourceIds,
         searchText: normalized.searchText,
         featureTypes: params.feature_types,
         featureIds: params.feature_ids,
@@ -302,7 +301,7 @@ export async function searchKnowledgeIndicators({
   // Step 4: Fetch queries.
   const queries = normalized.includeQueries
     ? await fetchQueryIndicators(
-        streamNames,
+        sourceIds,
         {
           searchText: normalized.searchText,
           queryTypes: params.query_types,

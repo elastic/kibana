@@ -48,13 +48,13 @@ export function useBulkOnboarding({
   const [isScheduling, setIsScheduling] = useState(false);
 
   const bulkScheduleOnboarding = useCallback(
-    async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
+    async (sourceIds: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
       setIsScheduling(true);
       const succeeded: string[] = [];
       const failures: Array<{ streamName: string; error: unknown }> = [];
       try {
         await pMap(
-          streamNames,
+          sourceIds,
           async (streamName) => {
             try {
               await scheduleOnboarding(streamName, options);
@@ -111,13 +111,13 @@ export function useBulkOnboarding({
   );
 
   const bulkOnboardAll = useCallback(
-    (streamNames: string[]) => bulkScheduleOnboarding(streamNames, onboardingConfig),
+    (sourceIds: string[]) => bulkScheduleOnboarding(sourceIds, onboardingConfig),
     [bulkScheduleOnboarding, onboardingConfig]
   );
 
   const bulkOnboardFeaturesOnly = useCallback(
-    (streamNames: string[]) =>
-      bulkScheduleOnboarding(streamNames, {
+    (sourceIds: string[]) =>
+      bulkScheduleOnboarding(sourceIds, {
         steps: [KIsOnboardingStep.FeaturesIdentification],
         connectors: onboardingConfig.connectors,
       }),
@@ -125,8 +125,8 @@ export function useBulkOnboarding({
   );
 
   const bulkOnboardQueriesOnly = useCallback(
-    (streamNames: string[]) =>
-      bulkScheduleOnboarding(streamNames, {
+    (sourceIds: string[]) =>
+      bulkScheduleOnboarding(sourceIds, {
         steps: [KIsOnboardingStep.QueriesGeneration],
         connectors: onboardingConfig.connectors,
       }),

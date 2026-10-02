@@ -28,7 +28,7 @@ const event: SignificantEvent = {
   event_id: 'event-1',
   event_uuid: 'event-1-v1',
   status: 'open',
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   summary: 'Checkout latency increased.',
   severity: '80-critical',

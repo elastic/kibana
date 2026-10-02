@@ -39,7 +39,7 @@ let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undef
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({
     features: [],
-    failedStreamNames: [],
+    failedSourceIds: [],
     isInitialLoading: false,
     isFetching: false,
     isError: false,
@@ -76,7 +76,7 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
           detection_id: 'det-1',
           rule_name: 'latency-p95-spike',
           rule_uuid: 'rule-uuid-001',
-          stream_name: 'logs.web-frontend',
+          source_id: 'logs.web-frontend',
           change_point_type: 'spike',
           '@timestamp': '2026-07-10T12:00:00Z',
         },
@@ -131,7 +131,7 @@ const mockEvent: SignificantEvent = {
   event_id: 'evt-001',
   event_uuid: 'evt-uuid-001',
   status: 'open',
-  stream_names: ['logs.web-frontend', 'logs.api-gateway'],
+  source_ids: ['logs.web-frontend', 'logs.api-gateway'],
   title: 'Web latency spike across frontend and API gateway',
   summary:
     'P95 latency jumped from 120ms to 890ms on web-frontend and api-gateway services. This is a long summary that should be truncated because it exceeds three hundred characters total length when we add enough text here to push it past the limit for the show more toggle to appear in the UI component. Adding even more text to ensure we are definitely past the three hundred character maximum truncation threshold.',

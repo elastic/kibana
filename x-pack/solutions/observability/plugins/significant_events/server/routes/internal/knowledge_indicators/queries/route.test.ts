@@ -31,7 +31,7 @@ jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alert
   getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
   toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
     ...queryLink.query,
-    stream_name: queryLink.stream_name,
+    source_id: queryLink.source_id,
     rule_backed: queryLink.rule_backed,
     occurrences: [],
     change_points: {},
@@ -62,14 +62,14 @@ const RECONCILE_MAX_STREAMS = 10;
 type HandlerParams = Parameters<typeof route.handler>[0];
 type DiscoveryHandlerParams = Parameters<typeof discoveryQueriesRoute.handler>[0];
 type GenerateHandlerParams = Parameters<
-  (typeof internalKIQueriesRoutes)['POST /internal/streams/{streamName}/queries/_generate']['handler']
+  (typeof internalKIQueriesRoutes)['POST /internal/streams/{sourceId}/queries/_generate']['handler']
 >[0];
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
   getState: jest.fn().mockResolvedValue(state),
 });
 
-const makeQueryLink = (id: string, severityScore: number, streamName = 'logs.test'): QueryLink => ({
+const makeQueryLink = (id: string, severityScore: number, sourceId = 'logs.test'): QueryLink => ({
   query: {
     id,
     type: 'match',
@@ -78,7 +78,7 @@ const makeQueryLink = (id: string, severityScore: number, streamName = 'logs.tes
     esql: { query: `FROM logs-* | WHERE id == "${id}"` },
     severity_score: severityScore,
   },
-  stream_name: streamName,
+  source_id: sourceId,
   rule_backed: true,
   rule_id: `rule-${id}`,
 });
@@ -103,17 +103,17 @@ const discoveryBaseQuery = {
 };
 
 describe('reconcileQueriesRoute', () => {
-  it('requires explicit stream names with a bounded batch size', () => {
+  it('requires explicit source ids with a bounded batch size', () => {
     expect(route.params.safeParse({ body: null }).success).toBe(false);
     expect(route.params.safeParse({ body: {} }).success).toBe(false);
     expect(
       route.params.safeParse({
         body: {
-          streamNames: Array.from({ length: RECONCILE_MAX_STREAMS + 1 }, (_, i) => `logs.${i}`),
+          sourceIds: Array.from({ length: RECONCILE_MAX_STREAMS + 1 }, (_, i) => `logs.${i}`),
         },
       }).success
     ).toBe(false);
-    expect(route.params.safeParse({ body: { streamNames: ['logs.test'] } }).success).toBe(true);
+    expect(route.params.safeParse({ body: { sourceIds: ['logs.test'] } }).success).toBe(true);
   });
 
   it('replays current stream queries through replaceStreamQueries', async () => {
@@ -124,7 +124,7 @@ describe('reconcileQueriesRoute', () => {
         expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
       });
     const handlerParams = {
-      params: { body: { streamNames: ['logs.test'] } },
+      params: { body: { sourceIds: ['logs.test'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
@@ -145,7 +145,7 @@ describe('reconcileQueriesRoute', () => {
     expect(result).toEqual({
       reconciled: 1,
       failed: 0,
-      streams: [{ streamName: 'logs.test', status: 'reconciled', queries: 2 }],
+      sources: [{ sourceId: 'logs.test', status: 'reconciled', queries: 2 }],
     });
   });
 
@@ -155,7 +155,7 @@ describe('reconcileQueriesRoute', () => {
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('rules unavailable'));
     const handlerParams = {
-      params: { body: { streamNames: ['logs.a', 'logs.b'] } },
+      params: { body: { sourceIds: ['logs.a', 'logs.b'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
@@ -178,10 +178,10 @@ describe('reconcileQueriesRoute', () => {
     expect(result).toEqual({
       reconciled: 1,
       failed: 1,
-      streams: [
-        { streamName: 'logs.a', status: 'reconciled', queries: 0 },
+      sources: [
+        { sourceId: 'logs.a', status: 'reconciled', queries: 0 },
         {
-          streamName: 'logs.b',
+          sourceId: 'logs.b',
           status: 'failed',
           queries: 0,
           error: 'rules unavailable',
@@ -195,7 +195,7 @@ describe('pause guard on rule-touching query routes', () => {
   const reconcileRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
   const demoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_demote'];
   const generateRoute =
-    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
 
   // getKnowledgeIndicatorClient is the first rule-touching call in each handler and
   // runs only after the guard, so "not called" proves the guard short-circuits first.
@@ -225,7 +225,7 @@ describe('pause guard on rule-touching query routes', () => {
 
   it('rejects _reconcile with 409 while paused', async () => {
     await expectPausedBeforeRuleWork(reconcileRoute.handler, {
-      body: { streamNames: ['logs.test'] },
+      body: { sourceIds: ['logs.test'] },
     });
   });
 
@@ -235,7 +235,7 @@ describe('pause guard on rule-touching query routes', () => {
 
   it('rejects _generate with 409 while paused', async () => {
     await expectPausedBeforeRuleWork(generateRoute.handler, {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: null,
     });
   });
@@ -247,7 +247,7 @@ describe('pause guard on rule-touching query routes', () => {
         title: 'Error count',
         description: '',
         esql: { query: 'FROM logs.test | WHERE log.level == "error"' },
-        target_name: 'logs.test',
+        source_id: 'logs.test',
       },
     });
   });
@@ -400,7 +400,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
       logger: { warn: jest.fn() },
     } as unknown as DiscoveryHandlerParams);
 
-  it('lists streams then searches when query is set and streamNames is omitted', async () => {
+  it('lists streams then searches when query is set and sourceIds is omitted', async () => {
     await discoveryQueriesRoute.handler(
       makeDiscoveryHandlerParams({ ...discoveryBaseQuery, query: 'checkout' })
     );
@@ -408,7 +408,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
     expect(list).toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamNames: ['logs.a', 'logs.b'],
+        sourceIds: ['logs.a', 'logs.b'],
         query: 'checkout',
       }),
       kiClient
@@ -420,27 +420,27 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
       makeDiscoveryHandlerParams({
         ...discoveryBaseQuery,
         query: 'checkout',
-        streamNames: ['logs.only'],
+        sourceIds: ['logs.only'],
       })
     );
 
     expect(list).not.toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamNames: ['logs.only'],
+        sourceIds: ['logs.only'],
         query: 'checkout',
       }),
       kiClient
     );
   });
 
-  it('resolves streams for the unfiltered list path when streamNames is omitted', async () => {
+  it('resolves streams for the unfiltered list path when sourceIds is omitted', async () => {
     await discoveryQueriesRoute.handler(makeDiscoveryHandlerParams({ ...discoveryBaseQuery }));
 
     expect(list).toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamNames: ['logs.a', 'logs.b'],
+        sourceIds: ['logs.a', 'logs.b'],
         query: undefined,
       }),
       kiClient
@@ -473,7 +473,7 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
     });
   });
 
-  it('lists streams before searching occurrences when streamNames is omitted', async () => {
+  it('lists streams before searching occurrences when sourceIds is omitted', async () => {
     const handlerParams = {
       params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
       request: {},
@@ -494,7 +494,7 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
     expect(list).toHaveBeenCalled();
     expect(mockGetQueryOccurrences).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamNames: ['logs.a', 'logs.b'],
+        sourceIds: ['logs.a', 'logs.b'],
         query: 'checkout',
       }),
       expect.objectContaining({ kiClient })
@@ -533,11 +533,11 @@ describe('promoteUnbackedQueriesRoute', () => {
 
 describe('persistQueriesRoute', () => {
   const persistRoute =
-    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_persist'];
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_persist'];
 
   it('rejects a disabled source, which would get a live rule', async () => {
     const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: { queries: [] } },
+      params: { path: { sourceId: 'logs.test' }, body: { queries: [] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
@@ -560,7 +560,7 @@ describe('persistQueriesRoute', () => {
 
 describe('generateQueriesRoute', () => {
   const generateRoute =
-    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
   const strictGenerateParams = DeepStrict(generateRoute.params);
 
   beforeEach(() => {
@@ -584,7 +584,7 @@ describe('generateQueriesRoute', () => {
     body?: Record<string, unknown>;
   }) =>
     ({
-      params: { path: { streamName: 'logs.test' }, body },
+      params: { path: { sourceId: 'logs.test' }, body },
       request: { spaceId: 'space-a', events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
@@ -611,7 +611,7 @@ describe('generateQueriesRoute', () => {
 
   it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
     const parsed = strictGenerateParams.safeParse({
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: { runId: 'run-1' },
     });
 
@@ -621,13 +621,13 @@ describe('generateQueriesRoute', () => {
     }
     expect(
       strictGenerateParams.safeParse({
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         body: { runId: '   ' },
       }).success
     ).toBe(false);
     expect(
       strictGenerateParams.safeParse({
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
       }).success
     ).toBe(false);
@@ -712,11 +712,11 @@ describe('upsertQueryRoute', () => {
     esql: { query: 'FROM logs.test, logs.test.* | WHERE log.level == "error"' },
   };
 
-  it('upserts against the provided target_name', async () => {
+  it('upserts against the provided source_id', async () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const getQueryLinks = jest.fn();
     const handlerParams = {
-      params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
@@ -740,7 +740,7 @@ describe('upsertQueryRoute', () => {
     );
   });
 
-  it('resolves the stream from an existing query when target_name is omitted', async () => {
+  it('resolves the stream from an existing query when source_id is omitted', async () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: upsertBody },
@@ -761,7 +761,7 @@ describe('upsertQueryRoute', () => {
     expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
   });
 
-  it('throws 404 when the query is missing and no target_name is provided', async () => {
+  it('throws 404 when the query is missing and no source_id is provided', async () => {
     const upsertQuery = jest.fn();
     const handlerParams = {
       params: { path: { queryId: 'missing' }, body: upsertBody },
@@ -812,7 +812,7 @@ describe('upsertQueryRoute', () => {
     const handlerParams = {
       params: {
         path: { queryId: 'q1' },
-        body: { ...upsertBody, esql: { query: 'NOT VALID' }, target_name: 'logs.test' },
+        body: { ...upsertBody, esql: { query: 'NOT VALID' }, source_id: 'logs.test' },
       },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({

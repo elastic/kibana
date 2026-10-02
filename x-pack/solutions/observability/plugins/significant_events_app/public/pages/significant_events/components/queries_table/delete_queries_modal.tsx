@@ -69,11 +69,11 @@ export function DeleteQueriesModal({
         ),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: STREAM_COLUMN_LABEL,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{getSourceTitle(item.stream_name)}</EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.source_id)}</EuiBadge>
         ),
       },
     ],

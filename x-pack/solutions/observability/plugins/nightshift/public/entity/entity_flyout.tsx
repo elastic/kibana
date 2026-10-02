@@ -32,6 +32,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../hooks/use_kibana';
+import { useSourcesById } from '../hooks/use_sources_by_id';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -148,6 +149,7 @@ export function EntityFlyout({
 }: EntityFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
+  const { getSourceTitle } = useSourcesById();
   const title = feature.title ?? feature.id;
   const evidence = feature.evidence ?? [];
   const isServiceEntity = feature.subtype === 'service';
@@ -164,7 +166,7 @@ export function EntityFlyout({
         {
           id: feature.uuid,
           type: KI_FEATURE_ATTACHMENT_TYPE,
-          origin: encodeFeatureAttachmentOrigin(feature.stream_name, feature.id),
+          origin: encodeFeatureAttachmentOrigin(feature.source_id, feature.id),
           description: formatChatAttachmentDescription('Entity', title),
           data: feature,
         },
@@ -219,7 +221,7 @@ export function EntityFlyout({
           )}
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-              {feature.stream_name}
+              {getSourceTitle(feature.source_id)}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>

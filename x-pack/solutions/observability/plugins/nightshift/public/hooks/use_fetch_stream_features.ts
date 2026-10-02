@@ -16,57 +16,57 @@ const NO_STREAM_NAMES: string[] = [];
 
 export interface StreamFeaturesQueryData {
   features: Feature[];
-  failedStreamNames: string[];
+  failedSourceIds: string[];
 }
 
 /**
- * Splits per-stream loads into the features that resolved and the streams that did not.
+ * Splits per-source loads into the features that resolved and the sources that did not.
  *
- * One unreachable stream must not blank out the services resolved from the others, so a partial
+ * One unreachable source must not blank out the services resolved from the others, so a partial
  * failure returns what loaded and names the rest. A total failure rethrows instead: an empty
  * impact list would otherwise read as "nothing was impacted".
  */
 export const collectStreamFeatures = (
-  streamNames: string[],
+  sourceIds: string[],
   settled: Array<PromiseSettledResult<Feature[]>>
 ): StreamFeaturesQueryData => {
-  const failedStreamNames = streamNames.filter((_, index) => settled[index].status === 'rejected');
-  if (streamNames.length > 0 && failedStreamNames.length === streamNames.length) {
+  const failedSourceIds = sourceIds.filter((_, index) => settled[index].status === 'rejected');
+  if (sourceIds.length > 0 && failedSourceIds.length === sourceIds.length) {
     throw (settled[0] as PromiseRejectedResult).reason;
   }
 
   return {
     features: settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : [])),
-    failedStreamNames,
+    failedSourceIds,
   };
 };
 
 export interface StreamFeaturesResult {
   features: Feature[];
   /**
-   * Streams that could not be reached. Their services are missing from `features`, so a caller
+   * Sources that could not be reached. Their services are missing from `features`, so a caller
    * rendering an impact list has to say so rather than present a short list as a complete one.
    */
-  failedStreamNames: string[];
+  failedSourceIds: string[];
   /** True only until the first load settles; a refetch keeps the previous features on screen. */
   isInitialLoading: boolean;
   /** True for any request in flight, including a retry after an error. */
   isFetching: boolean;
-  /** True only when every stream failed; a partial failure reports `failedStreamNames` instead. */
+  /** True only when every source failed; a partial failure reports `failedSourceIds` instead. */
   isError: boolean;
   refetch: () => void;
 }
 
 const fetchStreamFeatures = async (
   significantEventsRepositoryClient: SignificantEventsRepositoryClient,
-  streamName: string,
+  sourceId: string,
   signal: AbortSignal | undefined
 ): Promise<Feature[]> => {
   const response = await significantEventsRepositoryClient.fetch(
-    'GET /internal/streams/{name}/features',
+    'GET /internal/streams/{sourceId}/features',
     {
       params: {
-        path: { name: streamName },
+        path: { sourceId },
         query: {
           include_excluded: true,
         },
@@ -79,30 +79,30 @@ const fetchStreamFeatures = async (
 };
 
 /**
- * Loads every stream's knowledge indicators under a single cache entry so the returned array keeps
+ * Loads every source's knowledge indicators under a single cache entry so the returned array keeps
  * a stable identity across renders — callers memoize impacted entities on it, and a fresh array
  * each render would retrigger their effects.
  */
-export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesResult => {
+export const useFetchStreamFeatures = (sourceIds: string[]): StreamFeaturesResult => {
   const {
     application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
   const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const uniqueStreamNames = [...new Set(streamNames)].sort();
+  const uniqueSourceIds = [...new Set(sourceIds)].sort();
 
   const { data, isInitialLoading, isFetching, isError, refetch } = useQuery<
     StreamFeaturesQueryData,
     Error
   >({
-    queryKey: ['nightshift.streamFeatures', uniqueStreamNames],
-    enabled: canShow && uniqueStreamNames.length > 0,
+    queryKey: ['nightshift.streamFeatures', uniqueSourceIds],
+    enabled: canShow && uniqueSourceIds.length > 0,
     queryFn: async ({ signal }) =>
       collectStreamFeatures(
-        uniqueStreamNames,
+        uniqueSourceIds,
         await Promise.allSettled(
-          uniqueStreamNames.map((streamName) =>
-            fetchStreamFeatures(significantEventsRepositoryClient, streamName, signal)
+          uniqueSourceIds.map((sourceId) =>
+            fetchStreamFeatures(significantEventsRepositoryClient, sourceId, signal)
           )
         )
       ),
@@ -110,7 +110,7 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
 
   return {
     features: data?.features ?? NO_FEATURES,
-    failedStreamNames: data?.failedStreamNames ?? NO_STREAM_NAMES,
+    failedSourceIds: data?.failedSourceIds ?? NO_STREAM_NAMES,
     isInitialLoading,
     isFetching,
     isError,

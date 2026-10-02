@@ -25,7 +25,7 @@ import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 const MAX_INPUT_STRING_LENGTH = 255;
 
 const upsertFeatureRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features',
+  endpoint: 'POST /internal/streams/{sourceId}/features',
   options: {
     access: 'internal',
     summary: 'Upserts a feature for a stream',
@@ -37,7 +37,7 @@ const upsertFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: baseFeatureSchema.and(z.object({ expires_at: z.iso.datetime().optional() })),
   }),
   handler: async ({
@@ -50,23 +50,23 @@ const upsertFeatureRoute = createServerRoute({
     const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await sourcesClient.get(params.path.name);
+    await sourcesClient.get(params.path.sourceId);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { id, expires_at, ...baseBody } = params.body;
 
     if (id) {
-      const { hits } = await kiClient.getFeatures(params.path.name, { id: [id] });
+      const { hits } = await kiClient.getFeatures(params.path.sourceId, { id: [id] });
       const [resolved] = hits;
-      if (resolved && resolved.stream_name !== params.path.name) {
+      if (resolved && resolved.source_id !== params.path.sourceId) {
         throw new StatusError(
-          `Feature ${id} belongs to stream '${resolved.stream_name}', not '${params.path.name}'`,
+          `Feature ${id} belongs to source '${resolved.source_id}', not '${params.path.sourceId}'`,
           400
         );
       }
     }
 
-    await kiClient.bulk(params.path.name, [
+    await kiClient.bulk(params.path.sourceId, [
       {
         index: {
           feature: {
@@ -84,7 +84,7 @@ const upsertFeatureRoute = createServerRoute({
 });
 
 const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
+  endpoint: 'DELETE /internal/streams/{sourceId}/features/{id}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -97,7 +97,7 @@ const deleteFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().max(MAX_INPUT_STRING_LENGTH),
+      sourceId: z.string().max(MAX_INPUT_STRING_LENGTH),
       id: z.string().max(MAX_INPUT_STRING_LENGTH).max(MAX_INPUT_STRING_LENGTH),
     }),
   }),
@@ -112,16 +112,18 @@ const deleteFeatureRoute = createServerRoute({
     const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await sourcesClient.get(params.path.name);
+    await sourcesClient.get(params.path.sourceId);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
+    await kiClient.bulk(params.path.sourceId, [
+      { delete: { type: 'feature', id: params.path.id } },
+    ]);
 
     try {
-      await kiClient.reconcileStream(params.path.name);
+      await kiClient.reconcileStream(params.path.sourceId);
     } catch (err) {
       logger.warn(
-        `reconcileStream after feature delete failed for stream "${params.path.name}": ${
+        `reconcileStream after feature delete failed for stream "${params.path.sourceId}": ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -132,7 +134,7 @@ const deleteFeatureRoute = createServerRoute({
 });
 
 const listFeaturesRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features',
+  endpoint: 'GET /internal/streams/{sourceId}/features',
   options: {
     access: 'internal',
     summary: 'Lists all features for a stream',
@@ -144,7 +146,7 @@ const listFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().max(MAX_INPUT_STRING_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_INPUT_STRING_LENGTH) }),
     query: z.optional(
       z.object({
         query: z.string().max(MAX_TEXT_LENGTH).optional(),
@@ -163,7 +165,7 @@ const listFeaturesRoute = createServerRoute({
     const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await sourcesClient.get(params.path.name);
+    await sourcesClient.get(params.path.sourceId);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
@@ -172,8 +174,8 @@ const listFeaturesRoute = createServerRoute({
       include_excluded: includeExcluded,
     } = params.query ?? {};
     const { hits: features } = query
-      ? await kiClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
-      : await kiClient.getFeatures(params.path.name, { includeExcluded });
+      ? await kiClient.findFeatures(params.path.sourceId, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(params.path.sourceId, { includeExcluded });
 
     return { features };
   },
@@ -236,7 +238,7 @@ export const listAllFeaturesRoute = createServerRoute({
 });
 
 const bulkFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_bulk',
+  endpoint: 'POST /internal/streams/{sourceId}/features/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk changes to features',
@@ -248,7 +250,7 @@ const bulkFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       operations: z.array(
         z.union([
@@ -291,25 +293,25 @@ const bulkFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      path: { name },
+      path: { sourceId },
       body: { operations },
     } = params;
 
-    await sourcesClient.get(name);
+    await sourcesClient.get(sourceId);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const kiOps: KIBulkOperation[] = operations.map((op) =>
       'delete' in op ? { delete: { type: 'feature' as const, id: op.delete.id } } : op
     );
-    await kiClient.bulk(name, kiOps);
+    await kiClient.bulk(sourceId, kiOps);
 
     const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
     if (hasShrinkingOp) {
       try {
-        await kiClient.reconcileStream(name);
+        await kiClient.reconcileStream(sourceId);
       } catch (err) {
         logger.warn(
-          `reconcileStream after bulk feature ops failed for stream "${name}": ${
+          `reconcileStream after bulk feature ops failed for stream "${sourceId}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );
@@ -362,7 +364,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
-    // Resolve UUID → stream_name server-side. UUIDs not found in storage are
+    // Resolve UUID → source_id server-side. UUIDs not found in storage are
     // idempotent no-ops counted as `skipped` (matching the queries endpoint
     // pattern, which uses getQueryLinks for the same purpose).
     const opsByUuid = new Map<string, KIBulkOperation>();
@@ -378,15 +380,15 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     // Group resolved ops by stream.
     const byStream = resolved.reduce<Record<string, KIBulkOperation[]>>(
-      (acc, { id: featureId, stream_name: streamName }) => {
+      (acc, { id: featureId, source_id: sourceId }) => {
         const op = opsByUuid.get(featureId);
         if (!op) {
           return acc;
         }
-        if (!acc[streamName]) {
-          acc[streamName] = [];
+        if (!acc[sourceId]) {
+          acc[sourceId] = [];
         }
-        acc[streamName].push(op);
+        acc[sourceId].push(op);
         return acc;
       },
       {}

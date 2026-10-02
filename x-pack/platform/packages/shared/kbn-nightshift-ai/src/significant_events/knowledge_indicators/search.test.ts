@@ -12,7 +12,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
     id: 'feature-id',
     uuid: 'feature-uuid',
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
@@ -43,7 +43,7 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'q1', severity_score: 50 }),
           rule_backed: true,
           rule_id: 'rule-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
       ],
     });
@@ -62,7 +62,7 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'q1' }),
           rule_backed: false,
           rule_id: 'rule-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
       ]
     );
@@ -95,12 +95,12 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators[0].kind).toBe('feature');
   });
 
-  it('filters requested stream_names against accessible streams', async () => {
+  it('filters requested source_ids against accessible streams', async () => {
     const getFeatures = jest.fn(async () => []);
     const getQueries = jest.fn(async () => []);
 
     await searchKnowledgeIndicators({
-      params: { stream_names: ['logs.allowed', 'logs.denied'] },
+      params: { source_ids: ['logs.allowed', 'logs.denied'] },
       getStreamNames: async () => ['logs.allowed'],
       getFeatures,
       getQueries,
@@ -114,12 +114,12 @@ describe('searchKnowledgeIndicators', () => {
     );
   });
 
-  it('returns empty when requested stream_names are not accessible', async () => {
+  it('returns empty when requested source_ids are not accessible', async () => {
     const getFeatures = jest.fn(async () => []);
     const getQueries = jest.fn(async () => []);
 
     const res = await searchKnowledgeIndicators({
-      params: { stream_names: ['logs.missing'] },
+      params: { source_ids: ['logs.missing'] },
       getStreamNames: async () => ['logs.allowed'],
       getFeatures,
       getQueries,
@@ -144,13 +144,13 @@ describe('searchKnowledgeIndicators', () => {
             query: makeStreamQuery({ id: 'q1' }),
             rule_backed: true,
             rule_id: 'rule-1',
-            stream_name: 'logs.test',
+            source_id: 'logs.test',
           },
           {
             query: makeStreamQuery({ id: 'q2' }),
             rule_backed: true,
             rule_id: 'rule-2',
-            stream_name: 'logs.test',
+            source_id: 'logs.test',
           },
         ] as QueryLink[],
     });
@@ -228,13 +228,13 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'matching', type: 'match' }),
           rule_backed: true,
           rule_id: 'rule-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
         {
           query: makeStreamQuery({ id: 'wrong-rule', type: 'match' }),
           rule_backed: true,
           rule_id: 'rule-2',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
       ]
     );
@@ -414,8 +414,8 @@ describe('searchKnowledgeIndicators', () => {
       params: { kind: ['feature'] },
       onFeatureFetchError,
       getStreamNames: async () => ['logs.bad', 'logs.good'],
-      getFeatures: async (streamName) => {
-        if (streamName === 'logs.bad') {
+      getFeatures: async (sourceId) => {
+        if (sourceId === 'logs.bad') {
           throw new Error('boom');
         }
         return [makeFeature({ id: 'ok' })];

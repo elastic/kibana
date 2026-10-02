@@ -94,7 +94,7 @@ describe('events_write tool', () => {
   it('rejects duplicate detection rules anywhere in a write', () => {
     const signal = {
       type: 'detection' as const,
-      stream_name: 'logs.test',
+      source_id: 'logs.test',
       description: 'Found: error. Impact: requests failed.',
       verdict: 'confirms',
       evidence: { esql_query: 'FROM logs.test', result: 'found' },
@@ -129,7 +129,7 @@ describe('events_write tool', () => {
   describe('open high-severity confirms invariant', () => {
     const signalWith = (verdict: string) => ({
       type: 'detection' as const,
-      stream_name: 'logs.test',
+      source_id: 'logs.test',
       description: 'Found: matching failure logs at similar pre/post rates. Impact: not new.',
       verdict,
       evidence: { esql_query: 'FROM logs.test', result: 'found' },
@@ -181,7 +181,7 @@ describe('events_write tool', () => {
     it('rejects mixing confirms and not_checked on the same item', () => {
       const quiet = {
         type: 'detection' as const,
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
         description: 'Rule Y: no backed query KI matched this detection.',
         verdict: 'not_checked' as const,
         metadata: {
@@ -211,7 +211,7 @@ describe('events_write tool', () => {
     it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {
       const quiet = {
         type: 'detection' as const,
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
         description: 'Rule X: no backed query KI matched this detection.',
         verdict: 'not_checked',
         metadata: {
@@ -251,14 +251,14 @@ describe('events_write tool', () => {
   });
 
   it('enriches causal features from their Knowledge Indicators', async () => {
-    getFeatures.mockImplementation((_streams, options) => {
+    getFeatures.mockImplementation((_sourceIds, options) => {
       const hits =
         'featureIds' in (options ?? {})
           ? [
               {
                 id: 'checkout-api',
                 uuid: 'uuid-checkout',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
                 type: 'entity',
                 subtype: 'service',
               },
@@ -267,7 +267,7 @@ describe('events_write tool', () => {
               {
                 id: 'other-api',
                 uuid: 'other-feature-uuid',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
                 type: 'technology',
                 subtype: 'web_server',
               },
@@ -295,12 +295,12 @@ describe('events_write tool', () => {
               {
                 feature_id: 'checkout-api',
                 name: 'Checkout API',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
               },
               {
                 feature_id: 'other-feature-uuid',
                 name: 'Other API',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
               },
             ],
             blast_radius: [
@@ -308,7 +308,7 @@ describe('events_write tool', () => {
                 type: 'entity' as const,
                 feature_id: 'checkout-api',
                 name: 'Checkout API',
-                stream_name: 'logs.test',
+                source_id: 'logs.test',
               },
             ],
           },
@@ -342,20 +342,20 @@ describe('events_write tool', () => {
     );
   });
 
-  it('disambiguates stream-less causal features using the event streams', async () => {
+  it('disambiguates source-less causal features using the event sources', async () => {
     getFeatures.mockResolvedValue({
       hits: [
         {
           id: 'uuid-web',
           uuid: 'uuid-web',
-          stream_name: 'logs.web',
+          source_id: 'logs.web',
           type: 'entity',
           subtype: 'service',
         },
         {
           id: 'uuid-web',
           uuid: 'uuid-batch',
-          stream_name: 'logs.batch',
+          source_id: 'logs.batch',
           type: 'technology',
           subtype: 'web_server',
         },

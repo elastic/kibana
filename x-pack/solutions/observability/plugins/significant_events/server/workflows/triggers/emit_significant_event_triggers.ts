@@ -24,7 +24,7 @@ type SignificantEventSource = Pick<
   | 'summary'
   | 'status'
   | 'severity'
-  | 'stream_names'
+  | 'source_ids'
 >;
 
 const baseSignificantEventPayload = (
@@ -36,7 +36,7 @@ const baseSignificantEventPayload = (
   summary: significantEvent.summary,
   status: significantEvent.status,
   severity: significantEvent.severity,
-  stream_names: significantEvent.stream_names,
+  source_ids: significantEvent.source_ids,
   occurred_at: significantEvent['@timestamp'],
 });
 

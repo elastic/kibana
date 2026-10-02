@@ -21,7 +21,7 @@ interface UseFetchSignificantEventsParams {
   to: string | number;
   status?: SignificantEventStatus[];
   severity?: Severity[];
-  stream?: string[];
+  source_id?: string[];
   search?: string;
   /** Knowledge Indicator feature ids matched against `causal_features` and `blast_radius`. */
   topologyFeatureIds?: string[];
@@ -33,7 +33,7 @@ export const useFetchSignificantEvents = ({
   to,
   status,
   severity,
-  stream,
+  source_id,
   search,
   topologyFeatureIds,
   eventId,
@@ -45,7 +45,7 @@ export const useFetchSignificantEvents = ({
 
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, status, severity, stream, search, topologyFeatureIds, eventId]);
+  }, [from, to, status, severity, source_id, search, topologyFeatureIds, eventId]);
 
   const query = useQuery<PaginatedResponse<SignificantEventResponse>, Error>({
     // Deep-link lookups must not depend on time or filters. DateRangeRedirect writing
@@ -60,7 +60,7 @@ export const useFetchSignificantEvents = ({
           to,
           status,
           severity,
-          stream,
+          source_id,
           search,
           topologyFeatureIds,
         ],
@@ -77,7 +77,7 @@ export const useFetchSignificantEvents = ({
               to: new Date(to).toISOString(),
               ...(status?.length ? { status } : {}),
               ...(severity?.length ? { severity } : {}),
-              ...(stream?.length ? { stream } : {}),
+              ...(source_id?.length ? { source_id } : {}),
               ...(search ? { search } : {}),
               ...(topologyFeatureIds?.length ? { topology_feature_id: topologyFeatureIds } : {}),
             }),

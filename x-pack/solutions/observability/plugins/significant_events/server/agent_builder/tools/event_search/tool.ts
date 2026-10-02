@@ -48,7 +48,7 @@ const searchEventsSchema = significantEventSchema
     slugs: sourceSlugsSchema.optional().describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.slugs', {
         defaultMessage:
-          'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted. An event stored against a stream name is not found by its slug.',
+          'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted. Events written before the source id cutover carry no source and are not matched.',
       })
     ),
     status: significantEventSchema.shape.status.default('open').describe(
@@ -185,12 +185,12 @@ const searchEventsSchema = significantEventSchema
 function sourcesForSearchResult(
   catalog: SourceCatalog,
   filterSources: readonly NightshiftSource[],
-  events: ReadonlyArray<{ stream_names?: readonly string[] }>
+  events: ReadonlyArray<{ source_ids?: readonly string[] }>
 ): NightshiftSource[] {
   const seen = new Set<string>();
   const storedIds = [
     ...filterSources.map((source) => source.id),
-    ...events.flatMap((event) => event.stream_names ?? []),
+    ...events.flatMap((event) => event.source_ids ?? []),
   ];
 
   return storedIds.flatMap((storedId) => {
@@ -265,7 +265,7 @@ export function createSearchEventsTool({
           eventClient: await getEventSearchClient(),
           params: {
             ...searchParams,
-            stream_names: slugs ? filterSources.map((source) => source.id) : undefined,
+            source_ids: slugs ? filterSources.map((source) => source.id) : undefined,
             query,
           },
         });
@@ -274,7 +274,7 @@ export function createSearchEventsTool({
           success: true,
           result_count: data.total,
           has_query: query !== undefined,
-          has_stream_filter: (slugs?.length ?? 0) > 0,
+          has_source_filter: (slugs?.length ?? 0) > 0,
           status_filter: toolParams.status,
           view: data.view,
           page: data.page,
@@ -292,7 +292,7 @@ export function createSearchEventsTool({
                 events: data.events.map((event) =>
                   presentStoredSourceFields(catalog, {
                     ...event,
-                    stream_names: event.stream_names ?? [],
+                    source_ids: event.source_ids ?? [],
                   })
                 ),
               },
@@ -307,7 +307,7 @@ export function createSearchEventsTool({
           success: false,
           result_count: 0,
           has_query: query !== undefined,
-          has_stream_filter: (toolParams.slugs?.length ?? 0) > 0,
+          has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
           status_filter: toolParams.status,
           view: toolParams.view,
           page: toolParams.page,

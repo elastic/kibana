@@ -48,7 +48,7 @@ describe('startKiIdentificationToolHandler', () => {
     const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
-      streamName: 'logs.nginx',
+      sourceId: 'logs.nginx',
       sourceSlug: 'logs-nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       streamsKIsOnboardingClient,
@@ -80,7 +80,7 @@ describe('startKiIdentificationToolHandler', () => {
 
     await expect(
       startKiIdentificationToolHandler({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
         sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
@@ -98,7 +98,7 @@ describe('startKiIdentificationToolHandler', () => {
 
     await expect(
       startKiIdentificationToolHandler({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
         sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,

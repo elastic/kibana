@@ -19,7 +19,7 @@ const parseSignal = (
 ): ReturnType<typeof signalEntrySchema.safeParse> =>
   signalEntrySchema.safeParse({
     type: 'detection',
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     description: 'Found: payment refused. Impact: checkout blocked.',
     collected_at: '2026-07-20T08:00:00.000Z',
     metadata,
@@ -110,18 +110,18 @@ describe('topology classification compatibility', () => {
       feature_id: 'orders-db',
       source: 'orders-api',
       target: 'postgres',
-      stream_name: 'logs.orders',
+      source_id: 'logs.orders',
     },
     {
       type: 'infrastructure',
       feature_id: 'orders-cluster',
-      stream_name: 'logs.orders',
+      source_id: 'logs.orders',
     },
     {
       type: 'entity',
       feature_id: 'orders-api',
       name: 'orders-api',
-      stream_name: 'logs.orders',
+      source_id: 'logs.orders',
     },
   ])('accepts legacy $type blast-radius rows without subtype', (entry) => {
     expect(blastRadiusEntrySchema.safeParse(entry).success).toBe(true);
@@ -132,7 +132,7 @@ describe('topology classification compatibility', () => {
       causalFeatureSchema.safeParse({
         feature_id: 'orders-api',
         name: 'orders-api',
-        stream_name: 'logs.orders',
+        source_id: 'logs.orders',
       }).success
     ).toBe(true);
   });

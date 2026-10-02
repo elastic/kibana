@@ -31,7 +31,7 @@ const toLifecycleDetection = (detection: Detection): LifecycleDetection | undefi
     detection_id: detection.detection_id,
     rule_name: detection.rule_name,
     rule_uuid: detection.rule_uuid,
-    stream_name: detection.stream_name,
+    source_id: detection.source_id,
     change_point_type: detection.change_point_type,
   };
 };
@@ -40,7 +40,7 @@ export const formatDetectionAsText = (detection: LifecycleDetection): string => 
   return [
     `Significant Events detection "${detection.rule_name}"`,
     `Detection ID: ${detection.detection_id}`,
-    `Stream: ${detection.stream_name}`,
+    `Source: ${detection.source_id}`,
     `Change point: ${detection.change_point_type}`,
     `Timestamp: ${detection['@timestamp']}`,
   ].join('\n');

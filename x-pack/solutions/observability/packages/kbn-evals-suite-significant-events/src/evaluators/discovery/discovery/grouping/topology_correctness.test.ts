@@ -17,7 +17,7 @@ import {
 
 const signal = (ruleUuid: string): SignalEntry => ({
   type: 'detection',
-  stream_name: 'logs',
+  source_id: 'logs',
   verdict: 'confirms',
   description: 'test signal',
   metadata: {
@@ -33,7 +33,7 @@ const feature = (feature_id: string) => ({
   type: 'entity',
   subtype: 'service',
   name: feature_id,
-  stream_name: 'logs',
+  source_id: 'logs',
 });
 
 const event = (
@@ -53,7 +53,7 @@ const event = (
     source: 'a',
     target: 'b',
     protocol: 'http' as const,
-    stream_name: 'logs',
+    source_id: 'logs',
   })),
 });
 

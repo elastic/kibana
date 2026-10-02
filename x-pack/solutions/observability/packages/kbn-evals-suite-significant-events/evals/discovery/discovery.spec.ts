@@ -180,7 +180,7 @@ evaluate.describe(
             // Change points are re-stamped onto the replayed timeline inside each task, using
             // the shift of the replay the agent actually queries.
             const detections = canonicalDetectionsFromGroundTruth({
-              streamName: scenario.input.stream_name,
+              sourceId: scenario.input.source_id,
               rules: scenario.input.detections,
             });
 
@@ -306,7 +306,7 @@ evaluate.describe(
                     const seeded = await seedChronicBackground({
                       esClient,
                       log,
-                      streamName: input.stream_name,
+                      streamName: input.source_id,
                       ruleUuid: rule.rule_uuid,
                       ruleName: rule.rule_name ?? rule.rule_uuid,
                       config: input.chronic_seed,
@@ -317,7 +317,7 @@ evaluate.describe(
                     }));
                   } else if (lastReplayShift) {
                     stampedDetections = canonicalDetectionsFromGroundTruth({
-                      streamName: input.stream_name,
+                      sourceId: input.source_id,
                       rules: input.detections,
                       shift: lastReplayShift,
                     });

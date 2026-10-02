@@ -23,6 +23,8 @@ const config: ConnectionConfig = {
 const ctx: SeedContext = {
   ...config,
   streamName: 'logs-synth-default',
+  sourceId: 'seed-source-id',
+  viewName: '$.nightshift.sources.default.significant-events-seed',
   scenarioName: 'fraud_check_redis_herring',
   seed: 42,
   space: 'seed-space',
@@ -129,6 +131,10 @@ describe('runDiscovery', () => {
       ['GET', '/api/workflows/executions/discovery-execution'],
       ['GET', expect.stringContaining('/internal/significant_events/events?')],
     ]);
+    const [, , eventsPath] = request.mock.calls[4];
+    const eventsParams = new URL(eventsPath, config.kibanaUrl).searchParams;
+    expect(eventsParams.get('source_id')).toBe('seed-source-id');
+    expect(eventsParams.has('stream')).toBe(false);
     expect(esClient.esql.query).toHaveBeenCalledWith({
       query: expect.stringContaining('METADATA _index, _id'),
     });

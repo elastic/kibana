@@ -16,7 +16,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   event_id: 'evt-1',
   event_uuid: 'evt-uuid-1',
   status: 'open',
-  stream_names: ['logs.app'],
+  source_ids: ['logs.app'],
   title: 'Latency spike',
   summary: 'Summary',
   severity: '80-critical',

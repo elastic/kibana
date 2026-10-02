@@ -444,7 +444,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(minimalImpact).success).toBe(true);
   });
 
-  it('accepts an impact entity with feature_id and stream_name under both schemas', () => {
+  it('accepts an impact entity with feature_id and source_slug under both schemas', () => {
     const withKi = {
       ...validPayload,
       impact: {
@@ -453,7 +453,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
             name: 'cart-service',
             type: 'service',
             feature_id: 'ki-abc123',
-            stream_name: 'logs-app',
+            source_slug: 'logs-app',
           },
         ],
       },

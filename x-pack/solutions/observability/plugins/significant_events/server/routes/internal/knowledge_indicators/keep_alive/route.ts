@@ -12,7 +12,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
 const keepAlivePersistentIndicatorsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
+  endpoint: 'POST /internal/streams/{sourceId}/knowledge_indicators/_keep_alive',
   options: {
     access: 'internal',
     summary: 'Keep alive persistent (durable or excluded) knowledge indicators for a stream',
@@ -23,7 +23,7 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
@@ -32,7 +32,7 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing });
-    const { source } = await sourcesClient.get(params.path.streamName);
+    const { source } = await sourcesClient.get(params.path.sourceId);
 
     const kiClient = await getKnowledgeIndicatorClient();
     const { refreshed } = await kiClient.keepAlivePersistentIndicators(source.id, {
