@@ -161,7 +161,7 @@ describe('createMemoryPageStore', () => {
     expect(got?.telemetry.impressions).toBe(10);
   });
 
-  it('sends an exists check rather than a term match for the archived filter', async () => {
+  it('sends one shared archived clause everywhere, not just an exists check', async () => {
     const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     const store = createMemoryPageStore({
       esClient: { search } as never,
@@ -172,10 +172,70 @@ describe('createMemoryPageStore', () => {
 
     await store.list({ filter: 'active' });
     const activeClause = JSON.stringify(search.mock.calls[0][0]);
-    expect(activeClause).toContain('exists');
+    // Both archived markers, in one clause: `archive_reason` is what is written,
+    // and legacy `status: 'archived'` is only read so pre-existing documents
+    // cannot show up as active or be recalled.
     expect(activeClause).toContain('attributes.archive_reason');
-    // The removed `status` field must never be queried again.
-    expect(activeClause).not.toContain('attributes.status');
+    expect(activeClause).toContain('"attributes.status":"archived"');
+    // Anything else on the removed `status` field must stay out of the query.
+    expect(activeClause).not.toContain('"attributes.status":"established"');
+    expect(activeClause).not.toContain('"attributes.status":"tentative"');
+  });
+
+  it('treats a legacy status-only archived document as archived in every query', async () => {
+    // A document written before `archive_reason` existed. The read path already
+    // derived `archived: true` from it, so the queries have to agree — otherwise
+    // it is listed as active and handed to the agent.
+    const legacy = {
+      ...source,
+      attributes: { ...source.attributes, status: 'archived' as const },
+    };
+    delete (legacy.attributes as { archive_reason?: string }).archive_reason;
+    const search = jest.fn(() =>
+      Promise.resolve({ hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: legacy }] } })
+    );
+    const store = createMemoryPageStore({
+      esClient: {
+        search,
+        get: jest.fn().mockResolvedValue({
+          found: true,
+          _id: 'space-a:memory_kafka-lag',
+          _source: legacy,
+        }),
+      } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    expect((await store.get('memory_kafka-lag'))?.archived).toBe(true);
+
+    // The legacy marker has to be in every query that excludes archived pages:
+    // the active listing, the archived listing, the archived count, and recall.
+    await store.list({ filter: 'active' });
+    await store.listPaginated({ filter: 'archived' });
+    await store.retrieve();
+
+    const calls = search.mock.calls as unknown as Array<[Record<string, never>]>;
+    const serialized = calls.map(([request]) => JSON.stringify(request));
+    // 0: active listing. 1: archived listing page. 2: its stats aggregation. 3: recall.
+    expect(serialized[0]).toContain('"attributes.status":"archived"');
+    expect(serialized[1]).toContain('"attributes.status":"archived"');
+    expect(serialized[3]).toContain('"attributes.status":"archived"');
+    // The archived count is a filter aggregation, so it has to use the same clause
+    // or the header reports a legacy archived page as active.
+    const statsQuery = calls[2][0] as unknown as {
+      aggs: { archived: { filter: unknown } };
+    };
+    expect(statsQuery.aggs.archived.filter).toEqual({
+      bool: {
+        should: [
+          { exists: { field: 'attributes.archive_reason' } },
+          { term: { 'attributes.status': 'archived' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
   });
 
   it('paginates on a total order so no row is skipped or repeated', async () => {
@@ -755,7 +815,17 @@ describe('createMemoryPageStore', () => {
         sort: [{ '@timestamp': { order: 'desc' } }],
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            must_not: [{ exists: { field: 'attributes.archive_reason' } }],
+            must_not: [
+              {
+                bool: {
+                  should: [
+                    { exists: { field: 'attributes.archive_reason' } },
+                    { term: { 'attributes.status': 'archived' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           }),
         }),
       }),

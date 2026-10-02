@@ -201,6 +201,67 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     expect((await storeB.get(pageB.id))?.title).toBe('Payments database recovery');
   });
 
+  it('excludes a legacy status-only archived document from active listing and recall', async () => {
+    // Written the way a pre-`archive_reason` document looks: `status: 'archived'`
+    // and no reason. The read path has always reported it as archived, so the
+    // queries have to agree — otherwise it is listed as active and recalled.
+    // Its own Space, so the counts below are about this document alone.
+    const spaceId = 'space-legacy';
+    const storedId = `${spaceId}:memory_legacy-archived`;
+    await esClient.index({
+      index: MEMORY_INDEX,
+      id: storedId,
+      refresh: 'wait_for',
+      document: {
+        '@timestamp': new Date(NOW_SECONDS * 1000).toISOString(),
+        type: 'memory',
+        title: 'Legacy archived memory',
+        content: 'Retired before archive_reason existed.',
+        tags: ['memory'],
+        attributes: {
+          status: 'archived',
+          slug: 'legacy-archived',
+          space_id: spaceId,
+          impressions: 4,
+          conversions: 2,
+          last_impression_time: new Date(NOW_SECONDS * 1000).toISOString(),
+          categories: [],
+          references: [],
+          created_at: new Date(NOW_SECONDS * 1000).toISOString(),
+          updated_at: new Date(NOW_SECONDS * 1000).toISOString(),
+          created_by: 'nightshift-test',
+          updated_by: 'nightshift-test',
+        },
+      },
+    });
+
+    const store = createMemoryPageStore({
+      esClient,
+      logger,
+      spaceId,
+      now: () => NOW_SECONDS,
+    });
+
+    try {
+      expect((await store.get('memory_legacy-archived'))?.archived).toBe(true);
+
+      // Recall must not hand an archived memory to the agent.
+      expect(await store.retrieve()).toEqual([]);
+
+      // Nothing active, and the header counts it as archived rather than active.
+      const active = await store.listPaginated({ filter: 'active' });
+      expect(active.pages).toEqual([]);
+      expect(active.total).toBe(0);
+      expect(active.stats).toMatchObject({ total: 0, archived: 0 });
+
+      const archived = await store.listPaginated({ filter: 'archived' });
+      expect(archived.pages.map(({ id }) => id)).toEqual(['memory_legacy-archived']);
+      expect(archived.stats).toMatchObject({ total: 1, archived: 1 });
+    } finally {
+      await esClient.delete({ index: MEMORY_INDEX, id: storedId, refresh: 'wait_for' });
+    }
+  });
+
   // Semantic/RRF retrieval requires a configured inference endpoint and is intentionally
   // separate coverage. These writes omit context so this test never downloads or provisions a model.
 });

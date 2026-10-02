@@ -33,8 +33,26 @@ const MAX_COUNTER_UPDATE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
 const ARCHIVE_REASON_FIELD = 'attributes.archive_reason';
+/** Legacy field. Read only, so a pre-`archive_reason` document still reads archived. */
+const STATUS_FIELD = 'attributes.status';
 const UPDATED_AT_FIELD = 'attributes.updated_at';
 const SLUG_FIELD = 'attributes.slug';
+
+/**
+ * The one definition of "archived" for every query in this file. It matches
+ * `toPage`'s read-side derivation, so a document the read path calls archived can
+ * never appear in the active listing, the archived count, or a recall result.
+ *
+ * `archive_reason` is the field that is written; `status: 'archived'` only exists
+ * on documents written before it was introduced, and `exists` is true even for an
+ * empty reason, so a malformed one still reads as archived.
+ */
+const ARCHIVED_CLAUSE: object = {
+  bool: {
+    should: [{ exists: { field: ARCHIVE_REASON_FIELD } }, { term: { [STATUS_FIELD]: 'archived' } }],
+    minimum_should_match: 1,
+  },
+};
 
 export type { CounterUpdate };
 
@@ -351,15 +369,14 @@ export const createMemoryPageStore = ({
   };
 
   /**
-   * `updated_at desc, _id asc` — a total order, so `search_after` can never skip
+   * `updated_at desc, slug asc` — a total order, so `search_after` can never skip
    * or repeat a row. `updated_at` alone is not stable: the optimizer writes many
    * memories with the same timestamp, and a non-unique sort key makes paging
    * silently drop documents.
    */
-  // `attributes.slug` is the tiebreaker, not `_id`: Elasticsearch refuses
-  // fielddata access on `_id`, so sorting on it fails outright. The slug is
-  // unique per page and mapped inside the flattened `attributes`, so it gives
-  // the same total order.
+  // The tiebreaker is the slug, not `_id`: Elasticsearch refuses fielddata access
+  // on `_id`, so sorting on it fails outright. The slug is unique per page and
+  // mapped inside the flattened `attributes`, so it gives the same total order.
   const PAGINATION_SORT: estypes.Sort = [
     { [UPDATED_AT_FIELD]: { order: 'desc', unmapped_type: 'date' } },
     { [SLUG_FIELD]: { order: 'asc', unmapped_type: 'keyword' } },
@@ -371,19 +388,16 @@ export const createMemoryPageStore = ({
   ];
 
   /**
-   * `active` is "no `archive_reason`". `exists` is true even for an empty string,
-   * so a malformed empty reason still reads as archived rather than slipping into
-   * the active set.
+   * `active` is "not archived", where archived is `ARCHIVED_CLAUSE` — the same
+   * definition the read path applies, so a legacy `status: 'archived'` document
+   * with no reason is not offered as active.
    */
   const filterClause = (filter: MemoryFilter): object[] => {
     switch (filter) {
       case 'active':
-        return [
-          ...spaceAndTagFilter,
-          { bool: { must_not: [{ exists: { field: ARCHIVE_REASON_FIELD } }] } },
-        ];
+        return [...spaceAndTagFilter, { bool: { must_not: [ARCHIVED_CLAUSE] } }];
       case 'archived':
-        return [...spaceAndTagFilter, { exists: { field: ARCHIVE_REASON_FIELD } }];
+        return [...spaceAndTagFilter, ARCHIVED_CLAUSE];
       case 'all':
       default:
         return spaceAndTagFilter;
@@ -414,7 +428,30 @@ export const createMemoryPageStore = ({
     decayed_conversions: 0,
   });
 
-  /** Decayed totals over the whole filtered set, independent of the page slice. */
+  /**
+   * Sum a counter held inside the flattened `attributes` object.
+   *
+   * `attributes` is mapped `flattened`, so every leaf is indexed as a keyword and
+   * Elasticsearch refuses `sum` on it outright (`not supported for aggregation
+   * [sum]`). A script sum is the supported way to total those values. The values
+   * are written as JSON numbers and come back as strings, so they are parsed
+   * rather than coerced, and the loop covers a document that somehow carries
+   * several values for the key.
+   */
+  const counterSum = (field: string): estypes.AggregationsAggregationContainer => ({
+    sum: {
+      script: {
+        source:
+          'double total = 0.0; ' +
+          `def values = doc['${field}']; ` +
+          'if (values.size() != 0) { for (def value : values) { ' +
+          'total += Double.parseDouble(value); } } ' +
+          'return total;',
+      },
+    },
+  });
+
+  /** Counter totals over the whole filtered set, independent of the page slice. */
   const aggregateStats = async (filter: MemoryFilter): Promise<MemoryStats> => {
     try {
       const response = await esClient.search<StoredMemoryPage>(
@@ -424,9 +461,9 @@ export const createMemoryPageStore = ({
           size: 0,
           track_total_hits: true,
           aggs: {
-            archived: { filter: { exists: { field: ARCHIVE_REASON_FIELD } } },
-            impressions: { sum: { field: 'attributes.impressions' } },
-            conversions: { sum: { field: 'attributes.conversions' } },
+            archived: { filter: ARCHIVED_CLAUSE },
+            impressions: counterSum('attributes.impressions'),
+            conversions: counterSum('attributes.conversions'),
           },
         },
         { signal }
@@ -563,9 +600,9 @@ export const createMemoryPageStore = ({
       const trimmed = query?.trim();
       const isSearch = trimmed !== undefined && trimmed.length > 0;
       const pageSize = size ?? (isSearch ? 50 : 150);
-      // Recall never returns archived memories; the `exists` check is on
-      // `archive_reason` rather than the removed `status` value.
-      const notArchived = { exists: { field: ARCHIVE_REASON_FIELD } };
+      // Recall never returns archived memories, so the archived clause goes in
+      // `must_not` here — the name says what it matches, not what it selects.
+      const archived = ARCHIVED_CLAUSE;
       logger.debug(
         `Memory retrieve start match=${match} search=${isSearch} size=${pageSize} ` +
           `space=${spaceId} query=${JSON.stringify(previewText(trimmed))}`
@@ -579,7 +616,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                   must: [
                     {
                       bool: {
@@ -614,7 +651,7 @@ export const createMemoryPageStore = ({
                   filter: {
                     bool: {
                       filter: spaceAndTagFilter,
-                      must_not: [notArchived],
+                      must_not: [archived],
                     },
                   },
                   rank_window_size: pageSize,
@@ -639,7 +676,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                   must: [{ match: { context: queryText } }],
                 },
               },
@@ -660,7 +697,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                 },
               },
               size: pageSize,
