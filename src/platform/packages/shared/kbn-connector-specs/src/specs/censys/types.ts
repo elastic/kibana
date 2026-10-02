@@ -13,9 +13,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // Shared primitives
 // =============================================================================
 
+const MAX_IPV4_LENGTH = 15;
+// Longest textual IPv6 form is an IPv4-mapped address, e.g. "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255".
+const MAX_IPV6_LENGTH = 45;
+const MAX_ID_LENGTH = 200;
+
 export const HOST_SCHEMA = lazySchema(() =>
   z
-    .union([z.ipv4(), z.ipv6()])
+    .union([z.ipv4().max(MAX_IPV4_LENGTH), z.ipv6().max(MAX_IPV6_LENGTH)])
     .describe(
       'Host identifier — an IPv4 or IPv6 address (e.g., "8.8.8.8" or "2001:4860:4860::8888")'
     )
@@ -29,7 +34,7 @@ const DOMAIN_HOSTNAME_SCHEMA = lazySchema(() =>
 
 export const HOSTNAME_SCHEMA = lazySchema(() =>
   z
-    .union([z.ipv4(), z.ipv6(), DOMAIN_HOSTNAME_SCHEMA])
+    .union([z.ipv4().max(MAX_IPV4_LENGTH), z.ipv6().max(MAX_IPV6_LENGTH), DOMAIN_HOSTNAME_SCHEMA])
     .describe('Hostname, domain, or IP address (IPv4 or IPv6), e.g. "example.com" or "8.8.8.8"')
 );
 
@@ -40,6 +45,7 @@ export const PORT_SCHEMA = lazySchema(() =>
 export const SHA256_SCHEMA = lazySchema(() =>
   z
     .string()
+    .max(64)
     .regex(/^[a-fA-F0-9]{64}$/, { message: 'Must be a 64-character SHA-256 hex string' })
     .describe('SHA-256 fingerprint as a 64-character lowercase hex string')
 );
@@ -51,7 +57,7 @@ export const TRANSPORT_PROTOCOL_SCHEMA = lazySchema(() =>
 );
 
 const RFC3339_TIMESTAMP_SCHEMA = lazySchema(() =>
-  z.string().datetime({
+  z.string().max(64).datetime({
     offset: true,
     message: 'Must be an RFC 3339 timestamp (e.g., "2025-01-01T00:00:00Z")',
   })
@@ -121,6 +127,7 @@ const RescanServiceSchema = lazySchema(() =>
       protocol: z
         .string()
         .min(1)
+        .max(100)
         .describe('Application-layer protocol on the service (e.g., "HTTP", "SSH", "TLS")'),
       transportProtocol: TRANSPORT_PROTOCOL_SCHEMA,
     })
@@ -150,7 +157,11 @@ export type RescanInput = z.infer<typeof RescanInputSchema>;
 
 export const ScanStatusInputSchema = lazySchema(() =>
   z.object({
-    scanId: z.string().min(1).describe('Scan ID returned by a prior rescan call'),
+    scanId: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .describe('Scan ID returned by a prior rescan call'),
   })
 );
 export type ScanStatusInput = z.infer<typeof ScanStatusInputSchema>;
@@ -200,7 +211,11 @@ export type CensEyeCreateAnalysisJobInput = z.infer<typeof CensEyeCreateAnalysis
 
 export const CensEyeJobStatusInputSchema = lazySchema(() =>
   z.object({
-    jobId: z.string().min(1).describe('Censeye job ID returned by censEyeCreateAnalysisJob'),
+    jobId: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .describe('Censeye job ID returned by censEyeCreateAnalysisJob'),
   })
 );
 export type CensEyeJobStatusInput = z.infer<typeof CensEyeJobStatusInputSchema>;
@@ -210,6 +225,7 @@ export const CensEyeJobResultInputSchema = lazySchema(() =>
     jobId: z
       .string()
       .min(1)
+      .max(MAX_ID_LENGTH)
       .describe(
         'Censeye job ID whose results to retrieve. Call censEyeJobStatus first to confirm completion.'
       ),

@@ -35,6 +35,9 @@ const VIRUSTOTAL_URL_SCHEMA = lazySchema(() =>
   })
 );
 
+// VirusTotal accepts direct file uploads up to 32 MB; base64 encoding inflates that by 4/3.
+const VIRUSTOTAL_MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((32 * 1024 * 1024) / 3);
+
 type VirusTotalResourceType = (typeof VIRUSTOTAL_RESOURCE_TYPES)[number];
 
 /**
@@ -72,7 +75,7 @@ const isValidDomain = (value: string): boolean =>
   VIRUSTOTAL_DOMAIN_SCHEMA.safeParse(normalizeDomain(value)).success;
 
 const urlOrDomainSchema = lazySchema(() =>
-  z.xor([VIRUSTOTAL_URL_SCHEMA, VIRUSTOTAL_DOMAIN_SCHEMA])
+  z.xor([VIRUSTOTAL_URL_SCHEMA.max(2048), VIRUSTOTAL_DOMAIN_SCHEMA.max(253)])
 );
 
 const getVirusTotalUrlIdentifier = (urlOrId: string): string => {
@@ -170,10 +173,12 @@ export const VirusTotalConnector: ConnectorSpec = {
   actions: {
     scanFileHash: {
       isTool: true,
+      description:
+        'Look up an existing VirusTotal file report by MD5, SHA-1, or SHA-256 hash. Use this to check whether a known file is malicious without uploading it; use submitFile only when the hash is unknown to VirusTotal. Returns the file attributes and last_analysis_stats (malicious, suspicious, harmless, undetected counts).',
       scope: 'read',
       input: lazySchema(() =>
         z.object({
-          hash: z.string().min(32).describe('File hash (MD5, SHA-1, or SHA-256)'),
+          hash: z.string().min(32).max(64).describe('File hash (MD5, SHA-1, or SHA-256)'),
           failOnError: z
             .boolean()
             .optional()
@@ -206,6 +211,8 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     scanUrl: {
       isTool: true,
+      description:
+        'Analyze a URL or domain. A bare domain returns its existing VirusTotal domain report (attributes, reputation, last_analysis_stats); an absolute http(s) URL is submitted for a fresh scan and returns the analysis ID, status, and stats. If the status is still queued, poll getAnalysisResults with the returned ID.',
       scope: 'write',
       input: lazySchema(() =>
         z.object({
@@ -267,6 +274,8 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     getAnalysisResults: {
       isTool: true,
+      description:
+        'Retrieve a VirusTotal object by ID. Use resourceType "analysis" (default) to poll the result of a scanUrl or submitFile analysis, or "url", "domain", "ip", or "file" to fetch the stored report for that URL, domain, IP address, or file hash. Returns the object type, attributes, status, stats, and links.',
       scope: 'read',
       input: lazySchema(() =>
         z.object({
@@ -274,6 +283,7 @@ export const VirusTotalConnector: ConnectorSpec = {
             .string()
             .trim()
             .min(1)
+            .max(2048)
             .describe('VirusTotal analysis ID, URL, domain, IP address, or file hash'),
           resourceType: z
             .enum(VIRUSTOTAL_RESOURCE_TYPES)
@@ -322,11 +332,16 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     submitFile: {
       isTool: true,
+      description:
+        'Upload a file (base64-encoded, up to 32 MB) to VirusTotal for scanning. Use this only when scanFileHash reports the hash as not found. Returns the analysis ID and links; pass the ID to getAnalysisResults to retrieve the verdict once the analysis completes.',
       scope: 'write',
       input: lazySchema(() =>
         z.object({
-          file: z.string().describe('Base64-encoded file content'),
-          filename: z.string().optional().describe('Original filename'),
+          file: z
+            .string()
+            .max(VIRUSTOTAL_MAX_FILE_BASE64_LENGTH)
+            .describe('Base64-encoded file content'),
+          filename: z.string().max(255).optional().describe('Original filename'),
           failOnError: z
             .boolean()
             .optional()
@@ -361,10 +376,12 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     getIpReport: {
       isTool: true,
+      description:
+        'Get the VirusTotal reputation report for an IPv4 address. Use this to assess whether an IP is associated with malicious activity. Returns the IP attributes, including reputation score, country, and last_analysis_stats.',
       scope: 'read',
       input: lazySchema(() =>
         z.object({
-          ip: z.ipv4().describe('IP address'),
+          ip: z.ipv4().max(15).describe('IP address'),
           failOnError: z
             .boolean()
             .optional()

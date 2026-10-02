@@ -12,11 +12,17 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const DEFAULT_MAX_RESULTS = 1000;
 const MAX_RESULTS_LIMIT = 10000;
 const MAX_TIMEOUT_MS = 300000;
+const MAX_QUERY_LENGTH = 100000;
+const MAX_LOCATION_LENGTH = 64;
+const MAX_PROJECT_ID_LENGTH = 200;
+const MAX_JOB_ID_LENGTH = 1024;
+const MAX_PAGE_TOKEN_LENGTH = 2048;
 
 const QuerySchema = lazySchema(() =>
   z
     .string()
     .min(1)
+    .max(MAX_QUERY_LENGTH)
     .describe(
       'GoogleSQL query text to execute in BigQuery. Use fully-qualified table names such as `project.dataset.table`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.'
     )
@@ -27,6 +33,7 @@ const CommonQueryInputSchema = lazySchema(() =>
     query: QuerySchema,
     location: z
       .string()
+      .max(MAX_LOCATION_LENGTH)
       .optional()
       .describe(
         'BigQuery processing location, such as "US", "EU", "us-central1", or "europe-west1". If omitted, uses the connector default location.'
@@ -81,13 +88,19 @@ export type ExecuteQueryInput = z.infer<typeof ExecuteQueryInputSchema>;
 
 export const GetQueryResultsInputSchema = lazySchema(() =>
   z.object({
-    jobId: z.string().min(1).describe('BigQuery job ID returned from runQuery or executeQuery.'),
+    jobId: z
+      .string()
+      .min(1)
+      .max(MAX_JOB_ID_LENGTH)
+      .describe('BigQuery job ID returned from runQuery or executeQuery.'),
     projectId: z
       .string()
+      .max(MAX_PROJECT_ID_LENGTH)
       .optional()
       .describe('Project ID that owns the BigQuery job. If omitted, uses the connector projectId.'),
     location: z
       .string()
+      .max(MAX_LOCATION_LENGTH)
       .optional()
       .describe(
         'BigQuery job location, such as "US", "EU", "us-central1", or "europe-west1". Use the location returned in jobReference when present.'
@@ -101,6 +114,7 @@ export const GetQueryResultsInputSchema = lazySchema(() =>
       .describe(`Maximum number of result rows to return (1-${MAX_RESULTS_LIMIT}).`),
     pageToken: z
       .string()
+      .max(MAX_PAGE_TOKEN_LENGTH)
       .optional()
       .describe('Pagination token returned by a previous BigQuery response.'),
     timeoutMs: z
@@ -118,6 +132,7 @@ export const ListDatasetsInputSchema = lazySchema(() =>
   z.object({
     projectId: z
       .string()
+      .max(MAX_PROJECT_ID_LENGTH)
       .optional()
       .describe('Project ID whose datasets to list. If omitted, uses the connector projectId.'),
     maxResults: z
@@ -131,6 +146,7 @@ export const ListDatasetsInputSchema = lazySchema(() =>
       ),
     pageToken: z
       .string()
+      .max(MAX_PAGE_TOKEN_LENGTH)
       .optional()
       .describe('Pagination token returned by a previous listDatasets response.'),
   })

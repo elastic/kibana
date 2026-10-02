@@ -9,6 +9,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// HubSpot documents no limit on requested properties, and an object can have hundreds of them.
+const MAX_PROPERTIES = 1000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -33,12 +36,14 @@ export const SearchCrmObjectsInputSchema = lazySchema(() =>
       ),
     query: z
       .string()
+      .max(2000)
       .optional()
       .describe(
         'Search keyword for the given object type, or omit to list records (pagination via `after`).'
       ),
     properties: z
-      .array(z.string())
+      .array(z.string().max(200))
+      .max(MAX_PROPERTIES)
       .optional()
       .describe(
         'Property internal names to return (e.g. ["firstname","email","phone"]). Omit to let HubSpot return default properties.'
@@ -46,6 +51,7 @@ export const SearchCrmObjectsInputSchema = lazySchema(() =>
     limit: z.number().optional().describe('Max results for this request (default: 10).'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Pagination cursor (`paging.next.after`) from a previous response.'),
     includeAssociatedDeals: z
@@ -73,9 +79,10 @@ export const GetCrmObjectInputSchema = lazySchema(() =>
         'tasks',
       ])
       .describe('CRM object type to retrieve when you already have the record ID.'),
-    objectId: z.string().describe('HubSpot internal object ID for the record.'),
+    objectId: z.string().max(200).describe('HubSpot internal object ID for the record.'),
     properties: z
-      .array(z.string())
+      .array(z.string().max(200))
+      .max(MAX_PROPERTIES)
       .optional()
       .describe(
         'Property internal names to return (e.g. ["firstname","lastname","email"]). Omit for default properties.'
@@ -92,7 +99,7 @@ export const ListOwnersInputSchema = lazySchema(() =>
       .describe(
         'Max owners to return (default: 20). Use for resolving names/emails to hubspot_owner_id.'
       ),
-    after: z.string().optional().describe('Pagination cursor from a previous response.'),
+    after: z.string().max(2048).optional().describe('Pagination cursor from a previous response.'),
   })
 );
 export type ListOwnersInput = z.infer<typeof ListOwnersInputSchema>;
@@ -101,28 +108,32 @@ export const SearchDealsInputSchema = lazySchema(() =>
   z.object({
     query: z
       .string()
+      .max(2000)
       .optional()
       .describe('Keyword to match deal names or other indexed deal properties.'),
     pipeline: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Pipeline ID to match (e.g. "default"). Call listPipelines first to list valid pipeline and stage IDs.'
       ),
     dealStage: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Deal stage ID (e.g. "appointmentscheduled", "closedwon", "closedlost"). IDs are portal-specific; use listPipelines.'
       ),
     ownerId: z
       .string()
+      .max(200)
       .optional()
       .describe(
         'Numeric hubspot_owner_id. Use listOwners to map from an owner name or email when unknown.'
       ),
     limit: z.number().optional().describe('Max deals to return (default: 10).'),
-    after: z.string().optional().describe('Pagination cursor from a previous response.'),
+    after: z.string().max(2048).optional().describe('Pagination cursor from a previous response.'),
   })
 );
 export type SearchDealsInput = z.infer<typeof SearchDealsInputSchema>;
@@ -131,6 +142,7 @@ export const SearchBroadInputSchema = lazySchema(() =>
   z.object({
     query: z
       .string()
+      .max(2000)
       .describe(
         'Single keyword or phrase applied in parallel to contacts, companies, deals, and tickets.'
       ),

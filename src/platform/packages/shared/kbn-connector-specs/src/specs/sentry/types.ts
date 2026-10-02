@@ -13,6 +13,7 @@ const MAX_SLUG_LENGTH = 200;
 const MAX_QUERY_LENGTH = 2000;
 const MAX_ID_LENGTH = 64;
 const MAX_CURSOR_LENGTH = 1024;
+const MAX_RULE_ITEMS = 100;
 export const SentryListIssuesInputSchema = lazySchema(() =>
   z.object({
     project: z
@@ -261,12 +262,14 @@ export const SentryCreateIssueAlertRuleInputSchema = lazySchema(() =>
     conditions: z
       .array(z.record(z.string().max(200), z.unknown()))
       .min(1)
+      .max(MAX_RULE_ITEMS)
       .describe(
         'Sentry condition objects, e.g. [{"id": "sentry.rules.conditions.first_seen_event.FirstSeenEventCondition"}]. See Sentry\'s issue alert rule docs for the full condition/action id catalog.'
       ),
     actions: z
       .array(z.record(z.string().max(200), z.unknown()))
       .min(1)
+      .max(MAX_RULE_ITEMS)
       .describe(
         'Sentry action objects, e.g. [{"id": "sentry.rules.actions.notify_event.NotifyEventAction"}]. See Sentry\'s issue alert rule docs for the full condition/action id catalog.'
       ),
@@ -301,10 +304,12 @@ export const SentryUpdateIssueAlertRuleInputSchema = lazySchema(() =>
       .describe('Whether all, any, or none of the conditions must match to trigger the rule.'),
     conditions: z
       .array(z.record(z.string().max(200), z.unknown()))
+      .max(MAX_RULE_ITEMS)
       .optional()
       .describe('Replacement set of Sentry condition objects. Omit to leave conditions unchanged.'),
     actions: z
       .array(z.record(z.string().max(200), z.unknown()))
+      .max(MAX_RULE_ITEMS)
       .optional()
       .describe('Replacement set of Sentry action objects. Omit to leave actions unchanged.'),
     frequency: z

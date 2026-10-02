@@ -18,6 +18,7 @@ export {
   apiTest,
   globalSetupHook,
   globalTeardownHook,
+  getPlaywrightTagsFor,
   tags,
 } from './src/playwright';
 
