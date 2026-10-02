@@ -55,6 +55,11 @@ declare module 'monaco-editor/editor/editor.api' {
             readonly isHoverVisible: boolean | undefined;
             readonly _contentWidget?: {
               getDomNode: () => HTMLElement;
+              // The states Monaco's own `_shouldKeepCurrentHover` refuses to dismiss on,
+              // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/hover/browser/contentHoverController.ts#L149-L151
+              readonly isFocused?: boolean;
+              readonly isResizing?: boolean;
+              readonly isVisibleFromKeyboard?: boolean;
             };
           })
         | undefined;
