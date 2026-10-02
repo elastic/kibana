@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { EnabledProfilingStatus, ProfilingStatus } from '@kbn/profiling-utils';
 
 jest.mock('../../components/contexts/profiling_status/use_profiling_status');
 jest.mock('./add_data_instructions', () => ({
@@ -25,8 +25,8 @@ import { useProfilingStatus } from '../../components/contexts/profiling_status/u
 import { AddDataView } from '.';
 
 const makeStatus = (
-  universalProfiling: Partial<ProfilingStatus['universalProfiling']>
-): ProfilingStatus => ({
+  universalProfiling: Partial<EnabledProfilingStatus['universalProfiling']>
+): EnabledProfilingStatus => ({
   isEnabled: true,
   otel: { isAvailable: true, hasData: false },
   universalProfiling: {

@@ -53,6 +53,9 @@ export type {
   StackTraceID,
 } from './common/profiling';
 export type {
+  DisabledProfilingStatus,
+  EnabledProfilingSchemasStatus,
+  EnabledProfilingStatus,
   OtelProfilingSchemaStatus,
   ProfilingSchemasStatus,
   ProfilingStatus,

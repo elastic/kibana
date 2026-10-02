@@ -125,6 +125,15 @@ describe('registerStatusRoute', () => {
     });
   });
 
+  it('only reports that profiling is disabled, without the setup privileges', async () => {
+    const { getProfilingStatus, getStatus, response } = setup();
+    getStatus.mockResolvedValue({ isEnabled: false });
+
+    await getProfilingStatus();
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { isEnabled: false } });
+  });
+
   it('passes the request scoped clients, space and abort signal to the status service', async () => {
     const { getProfilingStatus, getStatus, coreContext } = setup();
 

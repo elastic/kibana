@@ -27,6 +27,7 @@ describe('hasProfilingData', () => {
     ['data in both schemas', makeStatus(true, true), true],
     ['no data', makeStatus(false, false), false],
     ['an unresolved status', undefined, false],
+    ['profiling disabled in Elasticsearch', { isEnabled: false } as const, false],
   ])('returns the expected value for %s', (_name, status, expected) => {
     expect(hasProfilingData(status)).toBe(expected);
   });

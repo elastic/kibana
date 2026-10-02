@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
+import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { AddDataInstructions } from './add_data_instructions';
 import { DeleteDataInstructions } from './delete_data_instructions';
 import { UniversalProfilingSetupPrompt } from './universal_profiling_setup_prompt';
 
 export function AddDataView() {
-  const { data } = useProfilingStatus();
+  const {
+    data: { universalProfiling },
+  } = useEnabledProfilingStatus();
 
-  if (data?.universalProfiling.hasLegacyData) {
+  if (universalProfiling.hasLegacyData) {
     return <DeleteDataInstructions />;
   }
 
-  if (!data?.universalProfiling.hasSetup) {
+  if (!universalProfiling.hasSetup) {
     return <UniversalProfilingSetupPrompt />;
   }
 

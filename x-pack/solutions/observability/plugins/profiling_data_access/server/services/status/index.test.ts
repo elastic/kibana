@@ -61,22 +61,18 @@ describe('createGetProfilingStatusService', () => {
     });
   });
 
-  it('skips the schema checks when profiling is disabled in Elasticsearch', async () => {
-    profilingStatus.mockResolvedValue({ profiling: { enabled: false } });
+  it.each(['traditional', 'serverless'] as const)(
+    'only reports that profiling is disabled in Elasticsearch on %s builds',
+    async (buildFlavor) => {
+      profilingStatus.mockResolvedValue({ profiling: { enabled: false } });
 
-    await expect(createService()({ esClient, soClient })).resolves.toEqual({
-      isEnabled: false,
-      otel: { isAvailable: true, hasData: false },
-      universalProfiling: {
-        isAvailable: true,
-        hasSetup: false,
-        hasData: false,
-        hasLegacyData: false,
-      },
-    });
-    expect(getOtelStatus).not.toHaveBeenCalled();
-    expect(getUniversalProfilingStatus).not.toHaveBeenCalled();
-  });
+      await expect(createService(buildFlavor)({ esClient, soClient })).resolves.toStrictEqual({
+        isEnabled: false,
+      });
+      expect(getOtelStatus).not.toHaveBeenCalled();
+      expect(getUniversalProfilingStatus).not.toHaveBeenCalled();
+    }
+  );
 
   it('reads whether profiling is enabled as the internal user', async () => {
     await createService()({ esClient, soClient });
@@ -119,14 +115,6 @@ describe('createGetProfilingStatusService', () => {
     });
     expect(getUniversalProfilingStatus).not.toHaveBeenCalled();
     expect(getOtelStatus).toHaveBeenCalled();
-  });
-
-  it('reports Universal Profiling as unavailable on serverless when profiling is disabled', async () => {
-    profilingStatus.mockResolvedValue({ profiling: { enabled: false } });
-
-    const status = await createService('serverless')({ esClient, soClient });
-
-    expect(status.universalProfiling.isAvailable).toBe(false);
   });
 
   it('passes the abort signal to every check', async () => {

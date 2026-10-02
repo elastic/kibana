@@ -58,6 +58,10 @@ export function registerStatusRoute({ router, logger, dependencies }: RouteRegis
           getCanSetupUniversalProfiling(request),
         ]);
 
+        if (!status.isEnabled) {
+          return response.ok({ body: status });
+        }
+
         const body: ProfilingStatus = {
           ...status,
           universalProfiling: { ...status.universalProfiling, canSetup },

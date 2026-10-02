@@ -26,12 +26,21 @@ export interface UniversalProfilingSchemaStatus {
   hasLegacyData: boolean;
 }
 
-export interface ProfilingSchemasStatus {
-  isEnabled: boolean;
+// When profiling is disabled in Elasticsearch, neither schema can be used, so no schema status is reported.
+export interface DisabledProfilingStatus {
+  isEnabled: false;
+}
+
+export interface EnabledProfilingSchemasStatus {
+  isEnabled: true;
   otel: OtelProfilingSchemaStatus;
   universalProfiling: UniversalProfilingSchemaStatus;
 }
 
-export interface ProfilingStatus extends ProfilingSchemasStatus {
+export type ProfilingSchemasStatus = DisabledProfilingStatus | EnabledProfilingSchemasStatus;
+
+export interface EnabledProfilingStatus extends EnabledProfilingSchemasStatus {
   universalProfiling: UniversalProfilingSchemaStatus & { canSetup: boolean };
 }
+
+export type ProfilingStatus = DisabledProfilingStatus | EnabledProfilingStatus;
