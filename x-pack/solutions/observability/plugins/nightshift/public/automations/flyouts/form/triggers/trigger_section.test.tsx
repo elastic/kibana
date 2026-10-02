@@ -144,15 +144,17 @@ describe('AutomationTriggerSection', () => {
     );
   });
 
-  it('lists common timezones with their offset', async () => {
+  it('lists IANA timezones with their offset', async () => {
     render(<TriggerSection />);
     await selectTrigger('automationAddTrigger', 'Custom cron…');
 
     fireEvent.click(screen.getByTestId('automationTimezone'));
-    expect(await screen.findByText('IST')).toBeInTheDocument();
-    expect(screen.getByText('GMT+5.5')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('PST'));
-    expect(lastTrigger()).toMatchObject({ kind: 'cron', timezone: 'PST' });
+    fireEvent.change(await screen.findByPlaceholderText('City or timezone…'), {
+      target: { value: 'Tokyo' },
+    });
+    expect(await screen.findByText('GMT+9')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Asia/Tokyo'));
+    expect(lastTrigger()).toMatchObject({ kind: 'cron', timezone: 'Asia/Tokyo' });
   });
 
   it('restores the previous values when switching back to a trigger type', async () => {
