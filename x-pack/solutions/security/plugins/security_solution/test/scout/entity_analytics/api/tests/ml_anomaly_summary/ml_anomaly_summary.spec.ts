@@ -100,11 +100,9 @@ apiTest.describe(
         body: {},
       });
 
-      const startMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
-
       // Install PAD integration to create the necessary ML job and anomaly index.
       log.debug(`Setting up agent policy for PAD integration...`);
-      const agentPolicyRes = await apiClient.post('/api/fleet/agent_policies?sys_monitoring=true', {
+      const agentPolicyRes = await apiClient.post('/api/fleet/agent_policies', {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -169,8 +167,7 @@ apiTest.describe(
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
         useDedicatedIndex: false,
-        startDatafeed: true,
-        start: startMs,
+        startDatafeed: false,
       });
 
       // Create Security: Authentication ML jobs
@@ -180,8 +177,7 @@ apiTest.describe(
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
         useDedicatedIndex: false,
-        startDatafeed: true,
-        start: startMs,
+        startDatafeed: false,
       });
 
       // Index source events that determine baseline behavior for the rare detector.
