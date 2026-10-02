@@ -19,6 +19,7 @@ import {
 import dateMath from '@kbn/datemath';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import type { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { UnifiedHistogramFetchParamsExternal } from '@kbn/unified-histogram';
 import {
@@ -199,7 +200,7 @@ export const EpisodesHistogram = ({
       requestAdapter: undefined,
       abortController,
       searchSessionId: histogramSessionId,
-      dataView,
+      dataSource: new DataViewSource(dataView),
       query: esqlQuery,
       table,
       columns: table.columns,
@@ -250,7 +251,7 @@ export const EpisodesHistogram = ({
     () =>
       dataView ? (
         <UnifiedBreakdownFieldSelector
-          dataView={dataView}
+          dataSource={new DataViewSource(dataView)}
           breakdown={{ field: breakdownDataViewField }}
           esqlColumns={HISTOGRAM_BREAKDOWN_COLUMNS}
           onBreakdownFieldChange={handleBreakdownFieldChange}

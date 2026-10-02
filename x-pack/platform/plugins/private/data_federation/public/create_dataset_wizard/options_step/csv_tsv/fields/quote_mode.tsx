@@ -36,6 +36,9 @@ const OPTIONS: Array<EuiComboBoxNoCustomOptionOption<Exclude<DatasetModeFormValu
   },
 ];
 
+export const getQuoteModeDisplayLabel = (value: string): string =>
+  OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export function QuoteMode({
   value,
   onChange,

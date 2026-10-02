@@ -357,7 +357,9 @@ test.describe(
         await expect(page.getByTestId('createDatasetWizardReview-mode')).toContainText(
           settings.mode
         );
-        await expect(page.getByTestId('createDatasetWizardReview-header_row')).toContainText('No');
+        await expect(page.getByTestId('createDatasetWizardReview-header_row')).toContainText(
+          settings.headerRow
+        );
         await expect(page.getByTestId('createDatasetWizardReview-skip_rows')).toContainText(
           settings.skipRows
         );
@@ -380,7 +382,7 @@ test.describe(
           settings.columnPrefix
         );
         await expect(page.getByTestId('createDatasetWizardReview-trim_spaces')).toContainText(
-          'Enabled'
+          settings.trimSpaces
         );
         await expect(page.getByTestId('createDatasetWizardReview-file_exclusions')).toContainText(
           settings.fileExclusions
@@ -407,18 +409,19 @@ test.describe(
         // Mapping summary
         await expect(
           page.getByTestId('createDatasetWizardReview-schema_mapping_mode')
-        ).toContainText('Declared in wizard');
-        await expect(page.getByTestId('createDatasetWizardReview-dynamic_fields')).toContainText(
-          'Off'
-        );
-        await expect(page.getByTestId('createDatasetWizardReview-mapped_fields')).toContainText(
-          String(mappingFields.length + 1) // +1 for @timestamp
-        );
+        ).toContainText('Use mapped fields only');
+        const mappedFields = page.getByTestId('createDatasetWizardReview-mapped_fields');
+        // +1 for @timestamp
+        await expect(mappedFields).toHaveText(new RegExp(`^${mappingFields.length + 1} fields`));
+        await expect(mappedFields).toContainText('Custom');
         await expect(page.getByTestId('createDatasetWizardReview-timestamp_mapping')).toContainText(
           'On'
         );
         await expect(page.getByTestId('createDatasetWizardReview-timestamp_path')).toContainText(
           timestamp.path
+        );
+        await expect(page.getByTestId('createDatasetWizardReview-timestamp_type')).toContainText(
+          'Date nanos'
         );
         await expect(page.getByTestId('createDatasetWizardReview-timestamp_format')).toContainText(
           timestamp.format

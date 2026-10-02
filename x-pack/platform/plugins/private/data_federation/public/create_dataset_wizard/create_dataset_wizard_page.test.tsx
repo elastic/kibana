@@ -654,6 +654,105 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
+  const renderEditWizard = (initialDataSet: DataSetWithName) =>
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router
+              history={createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] })}
+            >
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add: jest.fn(), delete: jest.fn() },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={[initialDataSet.name]}
+                  loadDataSets={jest.fn().mockResolvedValue(undefined)}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+  it('shows a Tab delimiter picked in the form as the separator in the summary', async () => {
+    const { getByTestId, findByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'));
+    const delimiterCombo = getByTestId('createDatasetSettingsDelimiter');
+    await act(async () => {
+      fireEvent.click(delimiterCombo.querySelector('input') ?? delimiterCombo);
+    });
+    await act(async () => {
+      fireEvent.click(await findByTestId('createDatasetSettingsDelimiterOption-tab'));
+    });
+
+    await clickNext(getByTestId);
+    await waitFor(() => getByTestId('createDatasetWizardMappingStep'));
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
+    await clickNext(getByTestId);
+    await waitFor(() => getByTestId('createDatasetWizardReviewStep'));
+
+    expect(getByTestId('createDatasetWizardReview-delimiter')).toHaveTextContent('Tab (\\t)Custom');
+  });
+
+  it('summarizes the invisible characters of an edited dataset and keeps API-only settings out', async () => {
+    const { getByTestId, queryByTestId } = renderEditWizard({
+      name: 'logs-dataset',
+      data_source: 'source-1',
+      resource: 's3://bucket/*',
+      description: '',
+      settings: {
+        format: 'tsv',
+        delimiter: '\t',
+        null_value: '\t',
+        comment: '\t',
+        trim_spaces: false,
+        file_exclusions: ['**/tmp ', '**/\t*'],
+        target_split_size: '512mb',
+      },
+    });
+
+    await clickNext(getByTestId);
+    await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'));
+    await clickNext(getByTestId);
+    await waitFor(() => getByTestId('createDatasetWizardMappingStep'));
+    await clickNext(getByTestId);
+    await waitFor(() => getByTestId('createDatasetWizardReviewStep'));
+
+    const valueOf = (key: string) => getByTestId(`createDatasetWizardReview-${key}`);
+    expect(valueOf('delimiter')).toHaveTextContent('Tab (\\t)Custom');
+    expect(valueOf('null_value')).toHaveTextContent('\\tCustom');
+    expect(valueOf('trim_spaces')).toHaveTextContent('FalseCustom');
+    expect(valueOf('file_exclusions')).toHaveTextContent('"**/tmp ", **/\\t*Custom', {
+      normalizeWhitespace: false,
+    });
+    // Persisted on edit and sent in the request, but intentionally not summarized.
+    expect(queryByTestId('createDatasetWizardReview-target_split_size')).toBeNull();
+    expect(queryByTestId('createDatasetWizardReview-comment')).toBeNull();
+    fireEvent.click(getByTestId('createDatasetWizardReviewRequestTabButton'));
+    expect(getByTestId('createDatasetWizardReviewRequest')).toHaveTextContent(
+      '"target_split_size": "512mb"'
+    );
+  });
+
   it('requires at least one mapped field when Define schema is selected', async () => {
     const { getByTestId, findByTestId, queryByTestId } = renderWizard();
 

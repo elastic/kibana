@@ -44,6 +44,9 @@ const PARTITION_DETECTION_OPTIONS: Array<
   },
 ];
 
+export const getPartitionDetectionDisplayLabel = (value: string): string =>
+  PARTITION_DETECTION_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export function PartitionDetectionSelect({
   value,
   onChange,

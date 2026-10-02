@@ -20,6 +20,9 @@ import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import { useComboBoxSelectionValidity } from '../combo_box_selection_validity';
 import { DEFAULT_SCHEMA_RESOLUTION, SchemaResolutionSelect } from './schema_resolution_select';
 
+export const getSchemaResolutionDisplayLabel = (value: string): string =>
+  SCHEMA_RESOLUTION_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: boolean }) => {
   const {
     field: schemaResolutionField,
