@@ -21,6 +21,7 @@ import {
   buildFpCloseComment,
   findPendingFpCloseProposal,
   MAX_FP_CLOSE_ALERT_IDS,
+  MAX_FP_CLOSE_REVISIONS,
   unionAlertIds,
   type FpCloseStepDependencies,
   type PendingFpCloseProposal,
@@ -234,7 +235,12 @@ export const coalesceFpCloseProposalStepDefinition = ({
         if (head.status !== 'pending' || head.decision != null) {
           return false;
         }
-        return unionAlertIds(pending.alertIds, batchAlertIds).length <= MAX_FP_CLOSE_ALERT_IDS;
+        // A proposal that is full or out of revisions takes no more batches, so it is not a
+        // reason to withhold the batch's own proposal.
+        return (
+          head.revision < MAX_FP_CLOSE_REVISIONS &&
+          unionAlertIds(pending.alertIds, batchAlertIds).length <= MAX_FP_CLOSE_ALERT_IDS
+        );
       };
 
       try {
@@ -288,7 +294,8 @@ export const coalesceFpCloseProposalStepDefinition = ({
 /**
  * Revises the live head of a proposal to close the union of its alerts and the batch's. `revise`
  * replaces `alertIds` rather than merging it, so the whole union is sent. Returns `undefined`
- * when the proposal settled, expired or is full, which means the batch needs a proposal of its own.
+ * when the proposal settled, expired, is full or has used its revisions, which means the batch
+ * needs a proposal of its own.
  */
 const reviseWithBatch = async ({
   service,
@@ -331,6 +338,9 @@ const reviseWithBatch = async ({
     };
     if (appended.added_count === 0) {
       return { ...appended, proposal_id: head.proposalId };
+    }
+    if (head.revision >= MAX_FP_CLOSE_REVISIONS) {
+      return undefined;
     }
 
     try {

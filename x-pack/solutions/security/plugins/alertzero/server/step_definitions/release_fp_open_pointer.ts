@@ -17,8 +17,8 @@ export const RELEASE_FP_OPEN_POINTER_STEP_ID = 'alertzero.releaseFpOpenPointer';
 /**
  * Removes the rule's open-proposal pointer once the proposal it leads to has been decided or has
  * expired, so a later batch raises a proposal without first waiting on a proposal that is gone.
- * Only the pointer of the given Investigation is removed: a pointer that already leads elsewhere
- * belongs to a newer proposal.
+ * Only the pointer this review wrote is removed: a pointer written by another review belongs to a
+ * newer proposal, even when it leads to the same Investigation.
  */
 export const releaseFpOpenPointerStepDefinition = ({
   isPointerStoreAvailable,
@@ -30,7 +30,7 @@ export const releaseFpOpenPointerStepDefinition = ({
     }),
     description: i18n.translate('xpack.alertzero.steps.releaseFpOpenPointer.description', {
       defaultMessage:
-        "Removes a detection rule's open closure proposal pointer when it still leads to the given Investigation.",
+        "Removes a detection rule's open closure proposal pointer when this review wrote it and it still leads to the given Investigation.",
     }),
     category: StepCategory.Kibana,
     inputSchema: z.object({
@@ -52,7 +52,10 @@ export const releaseFpOpenPointerStepDefinition = ({
       }
 
       const { rule_id: ruleId, conversation_id: conversationId } = context.input;
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const {
+        workflow: { spaceId },
+        execution,
+      } = context.contextManager.getContext();
       const store = createFpOpenPointerStore({
         esClient: context.contextManager.getScopedEsClient(),
         spaceId,
@@ -60,7 +63,14 @@ export const releaseFpOpenPointerStepDefinition = ({
       });
 
       const stored = await store.get(ruleId);
-      if (!stored || stored.pointer.conversationId !== conversationId) {
+      // The Investigation alone does not identify the proposal: a later batch reuses the standing
+      // Investigation, and when it finds that proposal settled its review writes a pointer to the
+      // same Investigation for its own new proposal. Only the review that wrote the pointer may
+      // release it, and a pointer that records no review is left to be replaced.
+      const ownsPointer =
+        stored?.pointer.conversationId === conversationId &&
+        stored.pointer.reviewExecutionId === execution.id;
+      if (!stored || !ownsPointer) {
         return { output: { released: false } };
       }
 

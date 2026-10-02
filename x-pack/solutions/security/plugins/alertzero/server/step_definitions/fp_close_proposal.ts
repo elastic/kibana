@@ -18,6 +18,14 @@ type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
  */
 export const MAX_FP_CLOSE_ALERT_IDS = 10_000;
 
+/**
+ * Most revisions one closure proposal takes from later batches. Every revision stores the whole
+ * alert list and the superseded ones stay, so a rule that fires often while its proposal waits
+ * would otherwise grow the chain without bound. A proposal at this limit stops taking batches and
+ * the next one raises a proposal of its own.
+ */
+export const MAX_FP_CLOSE_REVISIONS = 50;
+
 /** A rule's Investigations hold one pending closure proposal, so a small page always finds it. */
 const PENDING_PROPOSAL_PAGE_SIZE = 20;
 
@@ -30,6 +38,7 @@ export interface FpCloseStepDependencies {
 export interface PendingFpCloseProposal {
   proposalId: string;
   alertIds: string[];
+  revision: number;
 }
 
 export const alertIdsOf = (actionInput: Record<string, unknown> | undefined): string[] => {
@@ -78,7 +87,11 @@ export const findPendingFpCloseProposal = async ({
       actionWorkflowId === ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID && decision == null
   );
   return proposal
-    ? { proposalId: proposal.id, alertIds: alertIdsOf(proposal.actionInput) }
+    ? {
+        proposalId: proposal.id,
+        alertIds: alertIdsOf(proposal.actionInput),
+        revision: proposal.revision ?? 1,
+      }
     : undefined;
 };
 

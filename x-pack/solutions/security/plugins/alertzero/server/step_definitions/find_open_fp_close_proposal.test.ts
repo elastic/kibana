@@ -6,7 +6,7 @@
  */
 
 import { findOpenFpCloseProposalStepDefinition } from './find_open_fp_close_proposal';
-import { MAX_FP_CLOSE_ALERT_IDS } from './fp_close_proposal';
+import { MAX_FP_CLOSE_ALERT_IDS, MAX_FP_CLOSE_REVISIONS } from './fp_close_proposal';
 import {
   createProposalsMock,
   createStepContext,
@@ -96,5 +96,27 @@ describe('findOpenFpCloseProposalStepDefinition', () => {
     service.list.mockResolvedValue({ proposals: [pendingFpCloseProposal('fp-1', full)], total: 1 });
 
     await expect(run()).resolves.toEqual({ output: { found: false } });
+  });
+
+  it('finds nothing when the pending proposal has used its revisions', async () => {
+    const { run, service } = setup();
+    service.list.mockResolvedValue({
+      proposals: [pendingFpCloseProposal('fp-1', ['a'], MAX_FP_CLOSE_REVISIONS)],
+      total: 1,
+    });
+
+    await expect(run()).resolves.toEqual({ output: { found: false } });
+  });
+
+  it('still finds a pending proposal one revision short of the limit', async () => {
+    const { run, service } = setup();
+    service.list.mockResolvedValue({
+      proposals: [pendingFpCloseProposal('fp-1', ['a'], MAX_FP_CLOSE_REVISIONS - 1)],
+      total: 1,
+    });
+
+    await expect(run()).resolves.toEqual({
+      output: expect.objectContaining({ found: true, proposal_id: 'fp-1' }),
+    });
   });
 });

@@ -15,6 +15,9 @@ jest.mock('../rule_dispositions/fp_open_pointer_store', () => ({
 
 const INPUT = { rule_id: 'rule-1', conversation_id: 'conv-standing' };
 
+/** The execution id `createStepContext` gives the review that runs the step. */
+const THIS_REVIEW = 'review-exec-2';
+
 const setup = ({ isPointerStoreAvailable = true } = {}) => {
   const { context } = createStepContext(INPUT);
   const run = () =>
@@ -25,7 +28,7 @@ const setup = ({ isPointerStoreAvailable = true } = {}) => {
 describe('releaseFpOpenPointerStepDefinition', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockStore.get.mockResolvedValue(storedPointer());
+    mockStore.get.mockResolvedValue(storedPointer({ reviewExecutionId: THIS_REVIEW }));
     mockStore.release.mockResolvedValue('released');
   });
 
@@ -36,15 +39,36 @@ describe('releaseFpOpenPointerStepDefinition', () => {
     expect(mockStore.get).not.toHaveBeenCalled();
   });
 
-  it('removes the pointer that still leads to the settled Investigation, as read', async () => {
+  it('removes the pointer this review wrote, as read', async () => {
     const { run } = setup();
 
     await expect(run()).resolves.toEqual({ output: { released: true } });
-    expect(mockStore.release).toHaveBeenCalledWith('rule-1', storedPointer());
+    expect(mockStore.release).toHaveBeenCalledWith(
+      'rule-1',
+      storedPointer({ reviewExecutionId: THIS_REVIEW })
+    );
+  });
+
+  it('leaves a pointer a newer review wrote for the same reused Investigation', async () => {
+    mockStore.get.mockResolvedValue(storedPointer({ reviewExecutionId: 'review-exec-newer' }));
+    const { run } = setup();
+
+    await expect(run()).resolves.toEqual({ output: { released: false } });
+    expect(mockStore.release).not.toHaveBeenCalled();
+  });
+
+  it('leaves a pointer that records no review', async () => {
+    mockStore.get.mockResolvedValue(storedPointer());
+    const { run } = setup();
+
+    await expect(run()).resolves.toEqual({ output: { released: false } });
+    expect(mockStore.release).not.toHaveBeenCalled();
   });
 
   it('leaves a pointer that already leads to a newer proposal', async () => {
-    mockStore.get.mockResolvedValue(storedPointer({ conversationId: 'conv-newer' }));
+    mockStore.get.mockResolvedValue(
+      storedPointer({ conversationId: 'conv-newer', reviewExecutionId: THIS_REVIEW })
+    );
     const { run } = setup();
 
     await expect(run()).resolves.toEqual({ output: { released: false } });

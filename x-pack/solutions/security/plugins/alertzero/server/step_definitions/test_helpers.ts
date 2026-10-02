@@ -50,19 +50,30 @@ export const createStepContext = (input: Record<string, unknown>) => {
   return { context, logger };
 };
 
-export const pendingFpCloseProposal = (id: string, alertIds: string[]) => ({
+export const pendingFpCloseProposal = (id: string, alertIds: string[], revision = 1) => ({
   id,
   actionWorkflowId: ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
   actionInput: { alertIds, reason: 'false_positive' },
   status: 'pending',
   decision: undefined,
+  revision,
 });
 
 export const storedPointer = ({
   conversationId = 'conv-standing',
   updatedAt = '2026-01-01T00:00:00.000Z',
-}: { conversationId?: string; updatedAt?: string } = {}): StoredFpOpenPointer => ({
-  pointer: { ruleId: 'rule-1', conversationId, updatedAt },
+  reviewExecutionId,
+}: {
+  conversationId?: string;
+  updatedAt?: string;
+  reviewExecutionId?: string;
+} = {}): StoredFpOpenPointer => ({
+  pointer: {
+    ruleId: 'rule-1',
+    conversationId,
+    updatedAt,
+    ...(reviewExecutionId ? { reviewExecutionId } : {}),
+  },
   seqNo: 7,
   primaryTerm: 1,
 });

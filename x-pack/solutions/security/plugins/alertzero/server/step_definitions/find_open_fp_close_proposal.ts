@@ -13,6 +13,7 @@ import { createFpOpenPointerStore } from '../rule_dispositions/fp_open_pointer_s
 import {
   findPendingFpCloseProposal,
   MAX_FP_CLOSE_ALERT_IDS,
+  MAX_FP_CLOSE_REVISIONS,
   type FpCloseStepDependencies,
 } from './fp_close_proposal';
 
@@ -44,7 +45,9 @@ export const findOpenFpCloseProposalStepDefinition = ({
     outputSchema: z.object({
       found: z
         .boolean()
-        .describe('True when the rule has a pending closure proposal that can take more alerts.'),
+        .describe(
+          'True when the rule has a pending closure proposal that can take more alerts: it is not full and has revisions left.'
+        ),
       conversation_id: z
         .string()
         .optional()
@@ -81,7 +84,11 @@ export const findOpenFpCloseProposalStepDefinition = ({
         spaceId,
         request,
       });
-      if (!pending || pending.alertIds.length >= MAX_FP_CLOSE_ALERT_IDS) {
+      if (
+        !pending ||
+        pending.alertIds.length >= MAX_FP_CLOSE_ALERT_IDS ||
+        pending.revision >= MAX_FP_CLOSE_REVISIONS
+      ) {
         return NOT_FOUND;
       }
 

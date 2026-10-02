@@ -6,7 +6,7 @@
  */
 
 import { coalesceFpCloseProposalStepDefinition } from './coalesce_fp_close_proposal';
-import { MAX_FP_CLOSE_ALERT_IDS } from './fp_close_proposal';
+import { MAX_FP_CLOSE_ALERT_IDS, MAX_FP_CLOSE_REVISIONS } from './fp_close_proposal';
 import {
   createProposalsMock,
   createStepContext,
@@ -49,15 +49,16 @@ const setup = ({ isPointerStoreAvailable = true } = {}) => {
 /** The pending head the pointer leads to, as `list` and `getLatestRevision` report it. */
 const withPendingHead = (
   service: ReturnType<typeof createProposalsMock>['service'],
-  alertIds: string[]
+  alertIds: string[],
+  revision = 1
 ) => {
   service.list.mockResolvedValue({
-    proposals: [pendingFpCloseProposal('fp-1', alertIds)],
+    proposals: [pendingFpCloseProposal('fp-1', alertIds, revision)],
     total: 1,
   });
   service.getLatestRevision.mockResolvedValue({
     proposalId: 'fp-1',
-    revision: 1,
+    revision,
     status: 'pending',
     actionInput: { alertIds, reason: 'false_positive' },
   });
@@ -145,6 +146,42 @@ describe('coalesceFpCloseProposalStepDefinition', () => {
     await expect(run()).resolves.toEqual(MINT);
     expect(service.revise).not.toHaveBeenCalled();
     expect(mockStore.write).toHaveBeenCalledWith(expect.anything(), stored);
+  });
+
+  it('raises a new proposal when the pending one has used its revisions', async () => {
+    const stored = storedPointer();
+    mockStore.get.mockResolvedValue(stored);
+    const { run, service } = setup();
+    withPendingHead(service, ['a'], MAX_FP_CLOSE_REVISIONS);
+
+    await expect(run()).resolves.toEqual(MINT);
+    expect(service.revise).not.toHaveBeenCalled();
+    expect(mockStore.write).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'conv-batch' }),
+      stored
+    );
+  });
+
+  it('still adds to the pending proposal one revision short of the limit', async () => {
+    mockStore.get.mockResolvedValue(storedPointer());
+    const { run, service } = setup();
+    withPendingHead(service, ['a'], MAX_FP_CLOSE_REVISIONS - 1);
+    service.revise.mockResolvedValue({ proposalId: 'fp-2', revision: MAX_FP_CLOSE_REVISIONS });
+
+    await expect(run()).resolves.toEqual({
+      output: expect.objectContaining({ mode: 'appended', proposal_id: 'fp-2' }),
+    });
+  });
+
+  it('reports a batch already on a proposal that has used its revisions as appended', async () => {
+    mockStore.get.mockResolvedValue(storedPointer());
+    const { run, service } = setup();
+    withPendingHead(service, ['c', 'd'], MAX_FP_CLOSE_REVISIONS);
+
+    await expect(run()).resolves.toEqual({
+      output: expect.objectContaining({ mode: 'appended', added_count: 0, total_count: 2 }),
+    });
+    expect(service.revise).not.toHaveBeenCalled();
   });
 
   it('replaces a stale pointer without waiting when its proposal was decided long ago', async () => {
