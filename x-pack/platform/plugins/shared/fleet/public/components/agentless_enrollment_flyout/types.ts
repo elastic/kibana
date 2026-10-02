@@ -51,7 +51,7 @@ export interface AgentlessEnrollmentFlyoutProps {
    * (today the `PackagePolicy` enabled input).
    */
   selectedInput?: AgentlessEnrollmentSelectedInput;
-  /** Used only to render integration details in the enrollment error state. */
+  /** Used to render integration details in the enrollment error state and component health once enrolled. */
   agentPolicy?: AgentPolicy;
   /** When provided, component-level health (failed/degraded) is shown once the agent is enrolled. */
   packagePolicy?: PackagePolicy;
