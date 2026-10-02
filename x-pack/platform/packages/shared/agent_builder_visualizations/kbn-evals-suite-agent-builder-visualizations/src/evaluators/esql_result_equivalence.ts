@@ -253,6 +253,16 @@ export function createEsqlResultEquivalenceEvaluator<
       }
 
       const goldValues = goldResult.value.values ?? [];
+      if (goldValues.length === 0) {
+        // Usually a missing fixture or time window; an empty candidate would otherwise match for free.
+        return {
+          score: null,
+          label: 'gold-empty-result',
+          explanation:
+            'Gold query returned no rows, so there is nothing to compare result sets against.',
+          metadata: { goldQuery, candidateQueries },
+        };
+      }
       if (
         goldLimit.sorted &&
         (await limitCutsThroughTie(normalizedGold, goldValues.length, goldLimit.sorted, runQuery))
