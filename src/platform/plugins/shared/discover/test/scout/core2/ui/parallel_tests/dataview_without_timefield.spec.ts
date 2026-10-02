@@ -11,12 +11,12 @@
  * Tests for timepicker and data view switching behavior.
  */
 
-import type { PageObjects } from '@kbn/scout';
-import { spaceTest } from '@kbn/scout';
+import type { DiscoverPageObjects } from '../fixtures';
+import { spaceTest } from '../fixtures';
 import { expect } from '@kbn/scout/ui';
 
 const expectTimePickerState = async (
-  datePicker: PageObjects['datePicker'],
+  datePicker: DiscoverPageObjects['datePicker'],
   expected: 'enabled' | 'disabled'
 ) => {
   await expect(datePicker.getTimePickerControl()).toBeVisible();
