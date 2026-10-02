@@ -399,8 +399,12 @@ describe('automation template rendering', () => {
       ['document', () => renderDocumentOrchestrationTemplate(documentValues)],
       ['unit profile', () => renderUnitProfileTemplate(unitValues)],
       ['index metadata', () => renderIndexMetadataTemplate(indexMetadataValues)],
+      [
+        'targeted KI writer',
+        () => renderTargetedKiWriterTemplate({ aiIndexId: 'a', kis: '- ki_id: a\n  ki: {}' }),
+      ],
     ])(
-      'runs the %s loop five at a time, matching the pilot size of 5 the automations skill names',
+      'runs the %s loop five at a time, as the automations skill says every template loop does',
       (_name, render) => {
         const loops = allSteps(parse(render()).steps).filter((step) => step.type === 'parallel');
 
