@@ -104,10 +104,11 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
       // when total stack RSS approaches Docker VM limit.
+      // Needs 2g: startup builds the citus, vector/pg_diskann and pgcosmos/postgis extensions.
       '--memory',
-      '1g',
+      '2g',
       '--memory-swap',
-      '1g',
+      '2g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -431,10 +432,11 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
     readyCheckRetries++;
     if (readyCheckRetries >= MAX_CONTAINER_READY_CHECK_RETRIES) {
       await tryExportLogs(container.name, log);
+      const memoryPressure = await tryDescribeMemoryPressure(container.name, log);
       throw new Error(
         `The "${container.name}" container failed to start within ${
           CONTAINER_STARTUP_TIMEOUT_MS / 1000
-        } seconds. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
+        } seconds. Last known status: ${currentStatus}.${memoryPressure} Check the logs with ${chalk.bold(
           `docker logs -f ${container.name}`
         )}`
       );
@@ -545,6 +547,27 @@ export async function initializeUiamContainers(log: ToolingLog) {
       `Cosmos DB (${MOCK_IDP_UIAM_COSMOS_DB_URL}/${MOCK_IDP_UIAM_COSMOS_DB_NAME}) has been successfully initialized.`
     )
   );
+}
+
+// Reads the cgroup OOM-kill counter rather than `docker inspect .State.OOMKilled`, which stays
+// false when the cap kills a child process while the container's entrypoint survives.
+async function tryDescribeMemoryPressure(containerName: string, log: ToolingLog) {
+  try {
+    const { stdout } = await execa('docker', [
+      'exec',
+      containerName,
+      'cat',
+      '/sys/fs/cgroup/memory.events',
+    ]);
+    const oomKills = /^oom_kill (\d+)$/m.exec(stdout)?.[1];
+
+    return oomKills && oomKills !== '0'
+      ? ` The container's memory cap OOM-killed ${oomKills} process(es), so it is under-provisioned rather than slow.`
+      : '';
+  } catch (err) {
+    log.debug(`Failed to read cgroup memory events for container ${containerName}: ${err}`);
+    return '';
+  }
 }
 
 async function tryExportLogs(containerName: string, log: ToolingLog) {
