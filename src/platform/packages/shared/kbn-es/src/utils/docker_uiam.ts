@@ -105,9 +105,9 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
       // when total stack RSS approaches Docker VM limit.
       '--memory',
-      '1g',
+      '2g',
       '--memory-swap',
-      '1g',
+      '2g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
