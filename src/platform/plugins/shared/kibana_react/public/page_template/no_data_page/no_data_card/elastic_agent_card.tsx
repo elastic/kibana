@@ -32,6 +32,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   button,
   layout,
   category,
+  isDisabled,
   ...cardRest
 }) => {
   const {
@@ -93,7 +94,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      <EuiButton fill href={resolvedHref} onClick={onClick}>
+      <EuiButton fill href={resolvedHref} onClick={onClick} isDisabled={isDisabled}>
         {button || title || defaultCTAtitle}
       </EuiButton>
     );
@@ -113,6 +114,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
       footer={footer}
       layout={layout as 'vertical' | undefined}
+      isDisabled={isDisabled}
       {...cardRest}
     />
   );
