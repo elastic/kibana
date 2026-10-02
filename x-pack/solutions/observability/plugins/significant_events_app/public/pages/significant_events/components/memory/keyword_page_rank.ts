@@ -230,9 +230,7 @@ export function computeKeywordPageRank(
  * with two spellings: the commonest one is the one a person recognizes. A tie
  * goes to the first seen, which keeps the choice stable across renders.
  */
-export const toKeywordDisplayNames = (
-  entries: readonly KeywordEntry[]
-): Map<string, string> => {
+export const toKeywordDisplayNames = (entries: readonly KeywordEntry[]): Map<string, string> => {
   const spellings = new Map<string, Map<string, number>>();
   for (const entry of entries) {
     for (const original of entry.tags ?? []) {
@@ -243,7 +241,9 @@ export const toKeywordDisplayNames = (
       spellings.set(key, bySpelling);
     }
   }
-  return new Map([...spellings].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)]));
+  return new Map(
+    [...spellings].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)])
+  );
 };
 
 /**

@@ -7,7 +7,12 @@
 import { badRequest, conflict, notFound } from '@hapi/boom';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { MemoryPage } from '../../common/memory';
-import { MAX_PAGE_SIZE, MAX_TAG_FILTER_TERMS, MAX_TAG_TERM_LENGTH, MemoryVersionConflictError } from '../memory/page_store';
+import {
+  MAX_PAGE_SIZE,
+  MAX_TAG_FILTER_TERMS,
+  MAX_TAG_TERM_LENGTH,
+  MemoryVersionConflictError,
+} from '../memory/page_store';
 import { archiveMemoryPageRoute } from './archive_memory_page';
 import { deleteMemoryPageRoute } from './delete_memory_page';
 import { getMemoryAvailabilityRoute } from './get_memory_availability';
@@ -197,10 +202,10 @@ describe('memory route request bounds', () => {
   it.each([
     ['an empty tag term', ['']],
     ['an over-long tag term', ['t'.repeat(MAX_TAG_TERM_LENGTH + 1)]],
-    ['more terms than the tag bound', Array.from(
-      { length: MAX_TAG_FILTER_TERMS + 1 },
-      (_, i) => `t${i}`
-    )],
+    [
+      'more terms than the tag bound',
+      Array.from({ length: MAX_TAG_FILTER_TERMS + 1 }, (_, i) => `t${i}`),
+    ],
   ])('rejects %s on the list route', (_label, tags) => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
     expect(params.safeParse({ query: { tags } }).success).toBe(false);

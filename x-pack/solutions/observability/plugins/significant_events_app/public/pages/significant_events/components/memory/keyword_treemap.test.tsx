@@ -59,7 +59,7 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     usefulness: 0.9,
     confidence: 0.9,
     ...overrides,
-  }) as MemorySummary;
+  } as MemorySummary);
 
 /** Three memories that give the graph a hub, a satellite, and one spelling clash. */
 const PAGES = [
@@ -132,12 +132,11 @@ describe('MemoryKeywordTreemap', () => {
     expect(layer().groupByRollup(partition().data[0])).toBe(partition().data[0].keyword);
     // `Cart Cache` and `agent builder` fold onto the same keywords as their
     // hyphenated spellings, so the graph has five keywords, not seven.
-    expect(partition().data.map((cell) => cell.keyword).sort()).toEqual([
-      'agent-builder',
-      'cart-cache',
-      'redis',
-      'traces-*',
-    ]);
+    expect(
+      partition()
+        .data.map((cell) => cell.keyword)
+        .sort()
+    ).toEqual(['agent-builder', 'cart-cache', 'redis', 'traces-*']);
     expect(layer().nodeLabel!('agent-builder')).toBe('agent-builder');
     expect(layer().nodeLabel!('cart-cache')).toBe('Cart Cache');
   });
@@ -192,9 +191,9 @@ describe('MemoryKeywordTreemap', () => {
   it('leaves a click that landed on no cell to the caller', () => {
     const { onToggleKeyword } = renderTreemap();
 
-    settings().onElementClick!([
-      [{ type: 'primitive' }],
-    ] as unknown as Parameters<NonNullable<SettingsProps['onElementClick']>>[0]);
+    settings().onElementClick!([[{ type: 'primitive' }]] as unknown as Parameters<
+      NonNullable<SettingsProps['onElementClick']>
+    >[0]);
 
     expect(onToggleKeyword).not.toHaveBeenCalled();
   });

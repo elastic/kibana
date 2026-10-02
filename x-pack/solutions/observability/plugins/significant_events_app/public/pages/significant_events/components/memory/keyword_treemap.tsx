@@ -86,14 +86,19 @@ export function MemoryKeywordTreemap({
   // loaded rows, so it runs on render rather than in the query. 200 memories ×
   // 25 tags is measured at well under a frame's budget (see the timing test).
   const entries: KeywordEntry[] = useMemo(
-    () => pages.map((page) => ({ tags: page.tags, usefulness: page.usefulness, confidence: page.confidence })),
+    () =>
+      pages.map((page) => ({
+        tags: page.tags,
+        usefulness: page.usefulness,
+        confidence: page.confidence,
+      })),
     [pages]
   );
-  const cells = useMemo(() => toKeywordCells(entries, selectedKeywords), [entries, selectedKeywords]);
-  const cellsByKeyword = useMemo(
-    () => new Map(cells.map((cell) => [cell.keyword, cell])),
-    [cells]
+  const cells = useMemo(
+    () => toKeywordCells(entries, selectedKeywords),
+    [entries, selectedKeywords]
   );
+  const cellsByKeyword = useMemo(() => new Map(cells.map((cell) => [cell.keyword, cell])), [cells]);
   // The chips label a keyword that the chart has dropped, so the spellings come
   // from every loaded memory rather than from the cells.
   const displayNames = useMemo(() => toKeywordDisplayNames(entries), [entries]);

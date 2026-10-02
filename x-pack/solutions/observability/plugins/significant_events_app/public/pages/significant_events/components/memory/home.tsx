@@ -64,7 +64,9 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
 
   const recentlyUpdated = useMemo(
     () =>
-      [...filteredPages].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, RECENT_COUNT),
+      [...filteredPages]
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+        .slice(0, RECENT_COUNT),
     [filteredPages]
   );
 

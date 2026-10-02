@@ -8,11 +8,7 @@
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MEMORY_FILTERS } from '../../common/memory';
-import {
-  MAX_PAGE_SIZE,
-  MAX_TAG_FILTER_TERMS,
-  MAX_TAG_TERM_LENGTH,
-} from '../memory/page_store';
+import { MAX_PAGE_SIZE, MAX_TAG_FILTER_TERMS, MAX_TAG_TERM_LENGTH } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({

@@ -33,7 +33,7 @@ const storeOfSize = (pages: number, tagsPerPage: number): KeywordEntry[] =>
         // Every page shares these, so they are the hub the ranking should find.
         'agent-builder',
         'traces',
-        ...Array.from({ length: tagsPerPage - 3 }, (_, i) => `topic-${page}-${i}`),
+        ...Array.from({ length: tagsPerPage - 3 }, (_unused, index) => `topic-${page}-${index}`),
       ],
       usefulness: (page % 10) / 10,
       confidence: (page % 7) / 7,
@@ -98,9 +98,7 @@ describe('computeKeywordPageRank', () => {
   it('still creates edges for an entry with no usefulness signal at all', () => {
     // usefulness 0 × confidence 0 is zero, and a graph built from zero edges
     // would rank nothing at all — which is what MIN_EDGE_WEIGHT is for.
-    const silent: KeywordEntry[] = [
-      entry({ tags: ['foo', 'bar'], usefulness: 0, confidence: 0 }),
-    ];
+    const silent: KeywordEntry[] = [entry({ tags: ['foo', 'bar'], usefulness: 0, confidence: 0 })];
     const { scores } = computeKeywordPageRank(silent);
 
     expect(Object.keys(scores).sort()).toEqual(['bar', 'foo']);
@@ -123,9 +121,7 @@ describe('computeKeywordPageRank', () => {
   });
 
   it('keeps a duplicate tag in one entry from becoming a keyword of its own', () => {
-    const { scores } = computeKeywordPageRank([
-      entry({ tags: ['foo', 'foo', 'bar'] }),
-    ]);
+    const { scores } = computeKeywordPageRank([entry({ tags: ['foo', 'foo', 'bar'] })]);
 
     expect(Object.keys(scores).sort()).toEqual(['bar', 'foo']);
   });
@@ -157,11 +153,7 @@ describe('computeKeywordPageRank', () => {
       entry({ tags: ['traces-*', 'ES|QL'] }),
     ]);
 
-    expect(Object.keys(scores).sort()).toEqual([
-      'es|ql',
-      'gen_ai.conversation.id',
-      'traces-*',
-    ]);
+    expect(Object.keys(scores).sort()).toEqual(['es|ql', 'gen_ai.conversation.id', 'traces-*']);
   });
 
   it('excludes the internal marker tag, which says nothing about the topic', () => {
@@ -180,8 +172,8 @@ describe('computeKeywordPageRank', () => {
     const started = performance.now();
     const { scores } = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
     const elapsed = performance.now() - started;
-    // Reported in the PR: this is the number that says a worker is not needed.
-    console.log(`pagerank: 200 pages x 25 tags in ${elapsed.toFixed(1)} ms`);
+    // The measured number is reported in the PR; this is the bound it has to
+    // stay under for the ranking to run on the render path with no worker.
 
     expect(Object.keys(scores).length).toBeGreaterThan(0);
     expect(elapsed).toBeLessThan(50);

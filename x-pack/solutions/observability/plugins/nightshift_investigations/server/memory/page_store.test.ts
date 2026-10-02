@@ -486,8 +486,8 @@ describe('createMemoryPageStore', () => {
       (_, i) => `keyword ${i}`
     );
     await store.list({ tags: tooManyKeywords });
-    const many = (search.mock.calls[0][0] as { query: { bool: { filter: unknown[] } } }).query
-      .bool.filter;
+    const many = (search.mock.calls[0][0] as { query: { bool: { filter: unknown[] } } }).query.bool
+      .filter;
     expect(many).toHaveLength(MAX_TAG_FILTER_KEYWORDS + 2);
 
     // Too many spellings of one keyword: the surplus is dropped, not kept. Each

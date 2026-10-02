@@ -1489,12 +1489,7 @@ describe('applyMemoryEdits', () => {
     expect(store.update).toHaveBeenCalledWith(
       existing.id,
       expect.objectContaining({
-        tags: [
-          'cart-cache',
-          'redis',
-          'invoke-agent',
-          'gen_ai.conversation.id',
-        ],
+        tags: ['cart-cache', 'redis', 'invoke-agent', 'gen_ai.conversation.id'],
       }),
       expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
     );

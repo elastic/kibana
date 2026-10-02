@@ -930,10 +930,7 @@ const mergeMemoryGroup = async ({
       // Merges union every source page's tags, so the list grows with each merge
       // and the same tag arrives spelled differently each time. Canonicalizing
       // after the union is what collapses those into one tag again.
-      tags: canonicalizeTags([
-        ...currentSources.flatMap((page) => page.tags),
-        ...extract.tags,
-      ])
+      tags: canonicalizeTags([...currentSources.flatMap((page) => page.tags), ...extract.tags])
         .filter((tag) => tag !== 'memory')
         .slice(0, MAX_MEMORY_TAGS_PER_PAGE),
       categories: unionStrings(currentSources.flatMap((page) => page.categories)),

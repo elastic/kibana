@@ -183,14 +183,13 @@ describe('useMemoryKeywordPages', () => {
   });
 
   it('refetches when the selection changes, rather than reusing the stale set', async () => {
-    // eslint-disable-next-line
     fetchMock.mockResolvedValue(listResult([]));
     const { wrapper } = createWrapper();
 
-    const { rerender } = renderHook(
-      ({ tags }: { tags: string[] }) => useMemoryKeywordPages(tags),
-      { wrapper, initialProps: { tags: [] as string[] } }
-    );
+    const { rerender } = renderHook(({ tags }: { tags: string[] }) => useMemoryKeywordPages(tags), {
+      wrapper,
+      initialProps: { tags: [] as string[] },
+    });
     await waitFor(() => expect(listQueries()).toHaveLength(1));
 
     rerender({ tags: ['kafka'] });

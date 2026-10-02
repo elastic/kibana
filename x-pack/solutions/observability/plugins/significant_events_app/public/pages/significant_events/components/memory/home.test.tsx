@@ -56,7 +56,7 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     usefulness: 0.9,
     confidence: 0.9,
     ...overrides,
-  }) as MemorySummary;
+  } as MemorySummary);
 
 const PAGES = [
   summary({ id: 'memory_a', title: 'Kafka and Redis', tags: ['memory', 'kafka', 'redis'] }),
@@ -101,9 +101,9 @@ const clickCell = (keyword: string) => {
   const onElementClick = settingsProps.mock.calls.at(-1)?.[0]
     .onElementClick as SettingsProps['onElementClick'];
   act(() => {
-    onElementClick!([
-      [{ type: 'layerValue', groupByRollup: keyword }],
-    ] as unknown as Parameters<NonNullable<SettingsProps['onElementClick']>>[0]);
+    onElementClick!([[{ type: 'layerValue', groupByRollup: keyword }]] as unknown as Parameters<
+      NonNullable<SettingsProps['onElementClick']>
+    >[0]);
   });
 };
 
@@ -118,9 +118,12 @@ const renderHome = () =>
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockUseMemoryKeywordPages.mockImplementation((tags: readonly string[] = []) => ({
-    data: { pages: serverFilter(PAGES, tags), total: PAGES.length, stats },
-  } as unknown as ReturnType<typeof useMemoryKeywordPages>));
+  mockUseMemoryKeywordPages.mockImplementation(
+    (tags: readonly string[] = []) =>
+      ({
+        data: { pages: serverFilter(PAGES, tags), total: PAGES.length, stats },
+      } as unknown as ReturnType<typeof useMemoryKeywordPages>)
+  );
 });
 
 describe('MemoryHome keyword filtering', () => {
