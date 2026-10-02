@@ -17,6 +17,7 @@ import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/commo
 import { refreshSavedObjectIndices } from '../../refresh_index';
 import { retryFleetRequest } from './retry_fleet_request';
 
+const TOTAL_TIMEOUT = 6 * 60_000;
 // Fleet rate limits package uploads
 const FLEET_UPLOAD_RATE_LIMIT_DELAY = 10_000;
 
@@ -59,7 +60,7 @@ export const installFleetPackage = async ({
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
         .send({ force }),
-    { description: installFleetPackage.name }
+    { description: installFleetPackage.name, timeout: 30_000 }
   );
   const fleetResponse = body as InstallPackageResponse;
 
@@ -101,7 +102,11 @@ export const installFleetPackageByUpload = async ({
         .set('elastic-api-version', '2023-10-31')
         .type('application/zip')
         .send(packageBuffer),
-    { description: installFleetPackageByUpload.name, retryDelay: FLEET_UPLOAD_RATE_LIMIT_DELAY }
+    {
+      description: installFleetPackageByUpload.name,
+      timeout: 20_000,
+      retryDelay: FLEET_UPLOAD_RATE_LIMIT_DELAY,
+    }
   );
   const fleetResponse = body as InstallPackageResponse;
 
@@ -176,7 +181,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
         .send({ force: true }),
-    { description: installPrebuiltRulesPackageViaFleetAPI.name }
+    { description: installPrebuiltRulesPackageViaFleetAPI.name, timeout: TOTAL_TIMEOUT }
   );
   const fleetResponse = body as InstallPackageResponse;
 
@@ -213,7 +218,7 @@ export const installPrebuiltRulesPackageByVersion = async (
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
         .send({ force: true }),
-    { description: installPrebuiltRulesPackageByVersion.name }
+    { description: installPrebuiltRulesPackageByVersion.name, timeout: TOTAL_TIMEOUT }
   );
   const fleetResponse = body as InstallPackageResponse;
 

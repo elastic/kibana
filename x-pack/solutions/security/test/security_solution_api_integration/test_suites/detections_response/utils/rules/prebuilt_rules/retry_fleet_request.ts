@@ -18,20 +18,21 @@ export const isTransientFleetStatus = (statusCode: number): boolean =>
 
 interface RetryFleetRequestOptions {
   description: string;
+  timeout?: number;
   retryDelay?: number;
   isTransient?: (response: Response) => boolean;
   isSuccess?: (response: Response) => boolean;
 }
 
 /**
- * Sends a Fleet API request, retrying network errors and transient responses until
- * `timeouts.try` expires, and failing immediately on any other unsuccessful response.
+ * Sends a Fleet API request, retrying transient failures until the supplied or configured timeout expires.
  */
 export const retryFleetRequest = async (
   retryService: RetryService,
   sendRequest: () => Promise<Response>,
   {
     description,
+    timeout,
     retryDelay = DEFAULT_RETRY_DELAY,
     isTransient = ({ status }) => isTransientFleetStatus(status),
     isSuccess = ({ status }) => status === 200,
@@ -48,7 +49,7 @@ export const retryFleetRequest = async (
       }
       return attempt;
     },
-    { description, retryDelay }
+    { description, timeout, retryDelay }
   );
 
   if (!isSuccess(response)) {

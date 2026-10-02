@@ -19,6 +19,8 @@ import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 import { isTransientFleetStatus, retryFleetRequest } from './retry_fleet_request';
 
+const TOTAL_TIMEOUT = 6 * 60_000;
+
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
  * create real `security-rule` asset saved objects from the package.
@@ -51,7 +53,7 @@ export const installPrebuiltRulesFleetPackage = async ({
           .send({
             force: overrideExistingPackage,
           }),
-      { description: installPrebuiltRulesFleetPackage.name }
+      { description: installPrebuiltRulesFleetPackage.name, timeout: TOTAL_TIMEOUT }
     );
     const response = body as InstallPackageResponse;
 
@@ -76,6 +78,7 @@ export const installPrebuiltRulesFleetPackage = async ({
           }),
       {
         description: installPrebuiltRulesFleetPackage.name,
+        timeout: TOTAL_TIMEOUT,
         // Bulk install reports per-package failures within a 200 response
         isTransient: ({ status, body: bulkBody }) =>
           isTransientFleetStatus(status) ||

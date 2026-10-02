@@ -65,6 +65,7 @@ async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void>
         .send({ force: true }),
     {
       description: `deleteFleetPackage ${packageName}`,
+      timeout: 3 * 60_000,
       isSuccess: ({ status, body }) =>
         status === 200 || (status === 400 && body.message === `${packageName} is not installed`),
     }
