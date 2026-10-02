@@ -6,10 +6,11 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import { encode } from '@kbn/rison';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { buildRulesPageUrl } from './security_urls';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { toRuleDescriptor } from './to_flyout_descriptor';
 import { useFlyoutPill } from './use_flyout_pill';
 import { LinkPill } from './attachment_pill';
@@ -53,9 +54,12 @@ export const RulePill = memo(
       return <>{pill}</>;
     }
 
-    // No rule id — link to the rules management page (filtered by name when available)
     const ruleName = parseRuleName(attachment);
-    const href = buildRulesPageUrl({ ruleName, application });
+    const query = ruleName ? `?rulesTable=${encode({ searchTerm: ruleName })}` : '';
+    const href = application.getUrlForApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: `/management${query}`,
+    });
     return <LinkPill label={label} href={href} />;
   }
 );

@@ -6,16 +6,19 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import { encode } from '@kbn/rison';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { EntityAttachment } from '../entity_attachment/types';
 import { normaliseEntityAttachment } from '../entity_attachment/payload';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { buildEntitiesPageUrl } from './security_urls';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { toEntityDescriptor } from './to_flyout_descriptor';
 import { useFlyoutPill } from './use_flyout_pill';
 import { LinkPill } from './attachment_pill';
 import { CONVERSATION_DETAILS_LABELS } from './translations';
+
+const escapeKqlPhrase = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 interface EntityPillProps {
   attachment: UnknownAttachment;
@@ -69,7 +72,14 @@ export const EntityPill = memo(
     }
 
     const terms = entities.map((e) => e.entityStoreId ?? e.identifier);
-    const href = buildEntitiesPageUrl({ terms, application });
+    const kql = terms
+      .map((t) => `entity.id: "${escapeKqlPhrase(t)}" or entity.name: "${escapeKqlPhrase(t)}"`)
+      .join(' or ');
+    const cspq = encode({ filters: [], pageIndex: 0, query: { language: 'kuery', query: kql } });
+    const href = application.getUrlForApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.entityAnalyticsHomePage,
+      path: `?cspq=${cspq}`,
+    });
     return <LinkPill label={label} href={href} />;
   }
 );

@@ -6,17 +6,51 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import { encode } from '@kbn/rison';
 import { lastValueFrom } from 'rxjs';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { buildAlertsPageUrl } from './security_urls';
 import { useFlyoutPill } from './use_flyout_pill';
 import { LinkPill } from './attachment_pill';
 import { CONVERSATION_DETAILS_LABELS } from './translations';
+
+const buildIdsFilter = (ids: readonly string[]) => ({
+  /* eslint-disable @typescript-eslint/naming-convention */
+  $state: { store: 'appState' },
+  meta: {
+    alias: null,
+    disabled: false,
+    key: '_id',
+    negate: false,
+    params: ids.length === 1 ? { query: ids[0] } : [...ids],
+    type: ids.length === 1 ? 'phrase' : 'phrases',
+  },
+  query: { ids: { values: [...ids] } },
+});
+
+const buildTimerange = (createdAt: string) => {
+  const from = new Date(new Date(createdAt).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const to = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  return encode({
+    global: { linkTo: [], timerange: { from, kind: 'absolute', to } },
+    timeline: { linkTo: [], timerange: { from, kind: 'absolute', to } },
+  });
+};
+
+const ALL_STATUSES_PAGE_FILTER = encode(
+  formatPageFilterSearchParam([
+    {
+      field_name: 'kibana.alert.workflow_status',
+      title: 'Status',
+      selected_options: ['open', 'acknowledged', 'in-progress', 'closed'],
+    },
+  ])
+);
 
 interface AlertsPillProps {
   attachment: UnknownAttachment;
@@ -68,7 +102,7 @@ AlertsSinglePill.displayName = 'AlertsSinglePill';
 /**
  * Pill for `security.alerts` attachments.
  * - 1 alert → opens the alert flyout (resolves index via search)
- * - N alerts → opens the alerts page with an _id filter
+ * - N alerts → opens the Alerts page filtered by `_id`
  */
 export const AlertsPill = memo(
   ({
@@ -101,11 +135,11 @@ export const AlertsPill = memo(
       );
     }
 
-    const href = buildAlertsPageUrl({
-      ids: alertIds,
-      createdAt,
-      updatedAt: createdAt,
-      application,
+    const href = application.getUrlForApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: `?filters=${encode([buildIdsFilter(alertIds)])}&timerange=${buildTimerange(
+        createdAt
+      )}&pageFilters=${ALL_STATUSES_PAGE_FILTER}`,
     });
     return <LinkPill label={label} href={href} />;
   }
