@@ -208,6 +208,14 @@ describe('fetchBranchStats', () => {
       },
       {
         test_id: 'j1',
+        branch: '8.19',
+        builds: 6,
+        failed_builds: 1,
+        last_failed_at: '2026-09-04T00:00:00.000Z',
+        ...latest('skipped', '2026-09-06T08:00:00.000Z', null, '2026-09-06T07:55:00.000Z'),
+      },
+      {
+        test_id: 'j1',
         branch: '9.4',
         builds: 5,
         failed_builds: 0,
@@ -236,7 +244,11 @@ describe('fetchBranchStats', () => {
         latest_job_id: 'job-1',
       },
     ];
-    const setupRows = [{ test_id: 'j1', branch: 'main', setups: 2, skipped_setups: 2 }];
+    const setupRows = [
+      { test_id: 'j1', branch: 'main', setups: 2, skipped_setups: 2 },
+      // one of its two setups still runs it
+      { test_id: 'j1', branch: '8.19', setups: 2, skipped_setups: 1 },
+    ];
     esql.mockImplementation(({ query }: { query: string }) => {
       const playwright = query.includes('"playwright"');
       const rows = query.includes('skipped_setups')
@@ -297,6 +309,21 @@ describe('fetchBranchStats', () => {
           buildUrl: 'https://b/9',
         },
         skipped: true,
+      },
+      {
+        branch: '8.19',
+        builds: 6,
+        failedBuilds: 1,
+        buildFailRate: 1 / 6,
+        lastFailedAt: new Date('2026-09-04T00:00:00.000Z'),
+        latestExecutionAt: new Date('2026-09-06T07:55:00.000Z'),
+        latestRun: {
+          status: 'skipped',
+          timestamp: new Date('2026-09-06T08:00:00.000Z'),
+          buildUrl: undefined,
+        },
+        // its newest run is a skip, but one of its setups still runs it
+        skipped: false,
       },
       {
         branch: '9.4',
