@@ -478,16 +478,6 @@ export const createMemoryPageStore = ({
   };
 
   /**
-   * The scope the archived count is computed over: this Space, and the selected
-   * keywords when the caller sent tag terms. The list filter is deliberately not
-   * part of it — see `aggregateStats`.
-   */
-  const scopeClause = (tags?: readonly string[]): object[] => [
-    ...spaceAndTagFilter,
-    ...tagFilterClauses(tags),
-  ];
-
-  /**
    * `active` is "not archived", where archived is `ARCHIVED_CLAUSE` — the same
    * definition the read path applies, so a legacy `status: 'archived'` document
    * with no reason is not offered as active.
@@ -531,15 +521,16 @@ export const createMemoryPageStore = ({
    * Counts over the whole filtered set, independent of the page slice.
    *
    * `total` is the listing's own scope, so the header cannot drift from the rows.
-   * `archived` is every archived memory in scope — the Space, plus the selected
-   * keywords when the caller sent tag terms — whatever the listing filter is. The
-   * header's "N archived" describes the Archived list, and that list is not
-   * narrowed by the Active/Archived/All choice the listing made, so counting
-   * inside the active listing (which excludes archived pages by definition)
-   * reported zero for every Space that has any.
+   * `archived` is the Space's own count: neither the listing filter nor the
+   * selected keywords narrow it. The header's "N archived" describes the
+   * sidebar's Archived list, which the client does not filter by keyword and
+   * would not narrow by the Active/Archived/All choice, so a count that followed
+   * either would describe a list nobody is looking at. Counting inside the active
+   * listing (which excludes archived pages by definition) reported zero for every
+   * Space that had any.
    *
    * An aggregation only ever sees the documents its own query matched, so the
-   * archived count hangs off a `global` aggregation and filters the scope
+   * archived count hangs off a `global` aggregation and filters the Space
    * itself: nested under the listing query it would be filtered twice, and the
    * active listing matches no archived document at all.
    */
@@ -559,7 +550,7 @@ export const createMemoryPageStore = ({
               global: {},
               aggs: {
                 inScope: {
-                  filter: { bool: { filter: [...scopeClause(tags), ARCHIVED_CLAUSE] } },
+                  filter: { bool: { filter: [...spaceAndTagFilter, ARCHIVED_CLAUSE] } },
                 },
               },
             },

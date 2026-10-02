@@ -274,6 +274,13 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
       // And so does the unfiltered listing, which has no reason to differ.
       const all = await store.listPaginated({ filter: 'all' });
       expect(all.stats).toMatchObject({ total: 1, archived: 1 });
+
+      // A keyword narrows the listing but not the archived number. The header's
+      // "N archived" describes the Space's Archived list, which the client does
+      // not filter by keyword, so a keyword-scoped count would describe nothing
+      // anybody is looking at.
+      const byKeyword = await store.listPaginated({ filter: 'active', tags: ['checkout'] });
+      expect(byKeyword.stats).toMatchObject({ total: 0, archived: 1 });
     } finally {
       await esClient.delete({ index: MEMORY_INDEX, id: storedId, refresh: 'wait_for' });
     }
