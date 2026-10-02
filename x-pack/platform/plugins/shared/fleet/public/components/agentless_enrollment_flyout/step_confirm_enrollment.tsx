@@ -13,7 +13,10 @@ import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 import { useStartServices } from '../../hooks';
-import { AgentlessComponentHealth } from '../agentless_status_details_flyout/component_health';
+import {
+  AgentlessComponentHealth,
+  getComponentAlertLevel,
+} from '../agentless_status_details_flyout/component_health';
 import { AgentDetailsIntegrations } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integrations';
 
 export const AgentlessStepConfirmEnrollment = ({
@@ -34,14 +37,19 @@ export const AgentlessStepConfirmEnrollment = ({
 
   // Calculate overall UI state from agent status
   useEffect(() => {
-    if (agent && agent.status === 'online') {
+    const hasFailedComponents =
+      !!agent && !!packagePolicy && getComponentAlertLevel(agent, packagePolicy) === 'failed';
+    if (agent && agent.status === 'online' && !hasFailedComponents) {
       setOverallState('success');
-    } else if (agent && (agent.status === 'error' || agent.status === 'degraded')) {
+    } else if (
+      agent &&
+      (agent.status === 'online' || agent.status === 'error' || agent.status === 'degraded')
+    ) {
       setOverallState('failure');
     } else {
       setOverallState('pending');
     }
-  }, [agent]);
+  }, [agent, packagePolicy]);
 
   if (overallState === 'success') {
     return (

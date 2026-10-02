@@ -34,6 +34,7 @@ import {
 import { getDashboardsCount, buildDashboardsListLink } from '../../services';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
+import { getComponentAlertLevel } from '../agentless_status_details_flyout/component_health';
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
@@ -122,6 +123,10 @@ export const AgentlessEnrollmentFlyout = ({
     }
   }, [agentOnline, agentData]);
 
+  // An online agent with a failed component is not a successful deployment.
+  const hasFailedComponents =
+    !!agentData && !!packagePolicy && getComponentAlertLevel(agentData, packagePolicy) === 'failed';
+
   // Activate the "View dashboards" step as soon as data is confirmed
   useEffect(() => {
     if (confirmDataStatus === 'complete') {
@@ -202,7 +207,7 @@ export const AgentlessEnrollmentFlyout = ({
                   integrationTitle={integrationTitle}
                 />
               ),
-              status: confirmEnrollmentStatus,
+              status: hasFailedComponents ? 'danger' : confirmEnrollmentStatus,
             },
             {
               title: isConnector

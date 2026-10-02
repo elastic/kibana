@@ -146,7 +146,7 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
     });
 
-    it('shows component health details when the agent is online but a component is failed', async () => {
+    it('shows the failure state with component details when the agent is online but a component is failed', async () => {
       mockUseGetAgentsQuery.mockReturnValue({
         data: {
           data: {
@@ -168,7 +168,7 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
 
       const renderer = createIntegrationsTestRendererMock();
-      const { getByText, getByTestId } = renderer.render(
+      const { getByText, queryByText, getByTestId } = renderer.render(
         <AgentlessEnrollmentFlyout
           {...baseProps}
           agentPolicy={{ id: 'ap1', name: 'AP', package_policies: [] } as any}
@@ -177,8 +177,12 @@ describe('AgentlessEnrollmentFlyout', () => {
       );
 
       await waitFor(() => {
+        expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
+        expect(getByText('Step 1 has errors')).toBeInTheDocument();
+        expect(
+          queryByText('Managed integration deployment was successful')
+        ).not.toBeInTheDocument();
         expect(getByText('Confirm incoming data')).toBeInTheDocument();
-        expect(getByText('One or more components are in a failed state')).toBeInTheDocument();
         expect(getByTestId('agentDetailsIntegration')).toBeInTheDocument();
       });
     });
