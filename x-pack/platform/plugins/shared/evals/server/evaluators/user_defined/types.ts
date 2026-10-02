@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { JudgeScore, LlmJudgeConfig } from '@kbn/evals-common';
+import type { Direction, JudgeScore, LlmJudgeConfig } from '@kbn/evals-common';
 
 export type { LlmJudgeConfig };
 
 /** One score a judge reports, as declared by its definition. */
 export type JudgeScoreDefinition = JudgeScore;
+
+/**
+ * A score's direction, defaulting to `maximize`: every version written before scores could
+ * declare one was read as higher-is-better, and must keep reading that way.
+ */
+export const getScoreDirection = ({ direction }: Pick<JudgeScore, 'direction'>): Direction =>
+  direction ?? 'maximize';
 
 /**
  * A piece of the normalized evidence round a judge can be shown. Declaring one

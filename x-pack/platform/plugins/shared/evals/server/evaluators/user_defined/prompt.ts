@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { Direction } from '@kbn/evals-common';
 import { createPrompt } from '@kbn/inference-common';
 import type { Prompt, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import type { EvidenceRound } from '../evidence/types';
 import {
   JUDGE_EVIDENCE_TEMPLATE_VARIABLES,
+  getScoreDirection,
   type JudgeScoreDefinition,
   type LlmJudgeConfig,
 } from './types';
@@ -50,6 +52,17 @@ export const buildJudgeInput = ({
   return input;
 };
 
+/**
+ * The judge is told which end of the range is good, so a lower-is-better score is not
+ * reported on an inverted scale. The `maximize` wording predates per-score direction and is
+ * kept verbatim, so existing judges are prompted exactly as before.
+ */
+const NUMERIC_SCORE_DESCRIPTIONS: Record<Direction, string> = {
+  maximize: 'A score between 0 and 1, where 1 is the best possible outcome.',
+  minimize: 'A score between 0 and 1, where 0 is the best possible outcome.',
+  neutral: 'A score between 0 and 1.',
+};
+
 const buildScoreProperty = (score: JudgeScoreDefinition): ToolSchemaType => {
   const judgement: ToolSchemaType =
     score.type === 'categorical'
@@ -60,7 +73,7 @@ const buildScoreProperty = (score: JudgeScoreDefinition): ToolSchemaType => {
         }
       : {
           type: 'number',
-          description: 'A score between 0 and 1, where 1 is the best possible outcome.',
+          description: NUMERIC_SCORE_DESCRIPTIONS[getScoreDirection(score)],
         };
 
   const judgementKey = score.type === 'categorical' ? 'label' : 'score';

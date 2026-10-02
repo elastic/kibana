@@ -8,3 +8,8 @@
 export { parseLabels } from './parse_labels';
 export { toFieldErrorKey, toFieldErrors, FIELD_ERROR_MESSAGES } from './field_errors';
 export type { FieldErrorKey, FieldErrors } from './field_errors';
+export {
+  DEFAULT_SCORE_DIRECTION,
+  SCORE_DIRECTION_LABELS,
+  SCORE_DIRECTION_OPTIONS,
+} from './score_direction';

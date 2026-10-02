@@ -9,7 +9,12 @@ import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition, EvaluatorResult } from '../types';
 import { JUDGE_TOOL_NAME, buildJudgeInput, buildJudgePrompt } from './prompt';
 import { buildEvidenceSchema, buildReferenceDataSchema } from './schemas';
-import type { EvaluatorDefinitionDocument, JudgeScoreDefinition, LlmJudgeConfig } from './types';
+import {
+  getScoreDirection,
+  type EvaluatorDefinitionDocument,
+  type JudgeScoreDefinition,
+  type LlmJudgeConfig,
+} from './types';
 
 interface JudgeScoreOutput {
   score?: unknown;
@@ -69,6 +74,7 @@ export const mapJudgeOutput = (judge: LlmJudgeConfig, output: JudgeOutput): Eval
       ...(label !== undefined ? { label } : {}),
       explanation,
       metadata: { judge: scoreOutput },
+      direction: getScoreDirection(definition),
     };
   }),
 });

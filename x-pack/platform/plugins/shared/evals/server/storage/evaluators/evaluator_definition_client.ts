@@ -17,9 +17,10 @@ import {
   buildSpaceFilter,
   getEvaluatorDefinitionId,
 } from '@kbn/evals-common';
-import type {
-  EvaluatorDefinitionDocument,
-  LlmJudgeConfig,
+import {
+  getScoreDirection,
+  type EvaluatorDefinitionDocument,
+  type LlmJudgeConfig,
 } from '../../evaluators/user_defined/types';
 import { validateJudgeConfig } from '../../evaluators/user_defined/validate_config';
 import { EvaluatorAlreadyExistsError } from './evaluator_already_exists_error';
@@ -43,10 +44,12 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
     reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
     output: {
       ...judge.output,
-      // Order is kept: it is the order a reader sees. Only a blank description is
-      // normalized, since the form omits one and the API accepts an empty string.
+      // Order is kept: it is the order a reader sees. A blank description is normalized,
+      // since the form omits one and the API accepts an empty string, and so is an absent
+      // direction, which a version written before scores declared one reads as `maximize`.
       scores: judge.output.scores.map(({ description, ...score }) => ({
         ...score,
+        direction: getScoreDirection(score),
         ...(description?.trim() ? { description: description.trim() } : {}),
       })),
     },
@@ -57,16 +60,17 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
 
 /**
  * The part of a judge that decides whether two runs can be compared: which scores come back,
- * on what scale, and which inputs an example has to supply. Compared as sets, so reordering
- * is a presentational change rather than a contract change.
+ * on what scale, which way each one improves, and which inputs an example has to supply.
+ * Compared as sets, so reordering is a presentational change rather than a contract change.
  */
 const comparabilityContract = (judge: LlmJudgeConfig) => ({
   evidence: [...judge.evidence].sort(),
   reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
   scores: [...judge.output.scores]
-    .map(({ name, type, labels }) => ({
+    .map(({ name, type, labels, direction }) => ({
       name,
       type,
+      direction: getScoreDirection({ direction }),
       labels: [...(labels ?? [])].map(({ value, score }) => `${value}=${score}`).sort(),
     }))
     .sort((a, b) => a.name.localeCompare(b.name)),
@@ -77,7 +81,8 @@ const comparabilityContract = (judge: LlmJudgeConfig) => ({
  * claim the author has to make honestly — a distinction that matters for a judge, where a
  * one-word rubric change can move every score.
  *
- * - `major`: the scores or required inputs changed, so earlier runs no longer line up.
+ * - `major`: the scores, which way they improve, or the required inputs changed, so earlier
+ *   runs no longer line up.
  * - `minor`: the judge's instructions changed, so scores may shift but still compare.
  * - `patch`: only the catalog description changed, which the judge never sees.
  *
