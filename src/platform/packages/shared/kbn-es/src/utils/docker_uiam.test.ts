@@ -83,9 +83,9 @@ describe(`#runUiamContainer()`, () => {
             "--net",
             "elastic",
             "--memory",
-            "1g",
+            "3g",
             "--memory-swap",
-            "1g",
+            "3g",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
@@ -364,33 +364,37 @@ describe(`#runUiamContainer()`, () => {
   test('fails if container never becomes healthy', async () => {
     const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
 
-    // 1. Check Cosmos DB container.
-    execa
-      .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
-      .mockResolvedValue({ stdout: ` running ` });
+    // Resolve `docker` calls by subcommand, so the memory diagnostics in the thrown
+    // error read realistically instead of echoing the health status back.
+    execa.mockImplementation((_command: string, args: string[]) => {
+      if (args[0] === 'stats') {
+        return Promise.resolve({ stdout: `2.994GiB / 3GiB` });
+      }
+      if (args.includes('{{.State.OOMKilled}}')) {
+        return Promise.resolve({ stdout: ` false ` });
+      }
+      return Promise.resolve({ stdout: ` running ` });
+    });
 
+    // 1. Check Cosmos DB container.
     await expect(
       runUiamContainer(new ToolingLog(), cosmosDbContainer)
     ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
+      `[Error: The "uiam-cosmosdb" container failed to start within 180 seconds. Last known status: running. Memory: 2.994GiB / 3GiB (OOMKilled: false). Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(91);
+    expect(execa.mock.calls.slice(1)).toHaveLength(93);
 
     execa.mockClear();
 
     // 2. Check UIAM container.
-    execa
-      .mockResolvedValueOnce({ stdout: `name-${uiamContainer.name}` })
-      .mockResolvedValue({ stdout: ` running ` });
-
     await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
+      `[Error: The "uiam" container failed to start within 180 seconds. Last known status: running. Memory: 2.994GiB / 3GiB (OOMKilled: false). Check the logs with [1mdocker logs -f uiam[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(91);
+    expect(execa.mock.calls.slice(1)).toHaveLength(93);
   });
 });
 

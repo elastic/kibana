@@ -103,11 +103,13 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       'elastic',
 
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // when total stack RSS approaches Docker VM limit. Keep the cap above the
+      // emulator's startup peak — it boots PostgreSQL, six extensions, a Rust
+      // gateway and a Node UI at once, and 1g got PostgreSQL OOM-killed.
       '--memory',
-      '1g',
+      '3g',
       '--memory-swap',
-      '1g',
+      '3g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -430,11 +432,12 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
 
     readyCheckRetries++;
     if (readyCheckRetries >= MAX_CONTAINER_READY_CHECK_RETRIES) {
+      const memoryUsage = await describeContainerMemory(container.name);
       await tryExportLogs(container.name, log);
       throw new Error(
         `The "${container.name}" container failed to start within ${
           CONTAINER_STARTUP_TIMEOUT_MS / 1000
-        } seconds. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
+        } seconds. Last known status: ${currentStatus}.${memoryUsage} Check the logs with ${chalk.bold(
           `docker logs -f ${container.name}`
         )}`
       );
@@ -545,6 +548,23 @@ export async function initializeUiamContainers(log: ToolingLog) {
       `Cosmos DB (${MOCK_IDP_UIAM_COSMOS_DB_URL}/${MOCK_IDP_UIAM_COSMOS_DB_NAME}) has been successfully initialized.`
     )
   );
+}
+
+/**
+ * Best-effort memory usage for a container, so a cgroup memory limit hit reads as such
+ * instead of as a generic startup timeout. Returns an empty string when unavailable.
+ */
+async function describeContainerMemory(containerName: string): Promise<string> {
+  try {
+    const [{ stdout: memoryUsage }, { stdout: wasOomKilled }] = await Promise.all([
+      execa('docker', ['stats', '--no-stream', '--format', '{{.MemUsage}}', containerName]),
+      execa('docker', ['inspect', '-f', '{{.State.OOMKilled}}', containerName]),
+    ]);
+
+    return ` Memory: ${memoryUsage.trim() || 'unknown'} (OOMKilled: ${wasOomKilled.trim()}).`;
+  } catch {
+    return '';
+  }
 }
 
 async function tryExportLogs(containerName: string, log: ToolingLog) {
