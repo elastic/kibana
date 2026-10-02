@@ -271,7 +271,7 @@ steps:
           # chunks re-tagged.
           # `continue: true` sits on each SetAlertTags step, next to its retry, like
           # attach_alert_chunk does in the Worker: on the foreach it would leave the whole loop at
-          # the first failure and skip the remaining chunks and record_retag_failure.
+          # the first failure and skip the remaining chunks and the shortfall counters.
           - name: retag_dismissed_alerts
             type: foreach
             foreach: "${{ inputs.fp_candidate_ids | chunk: 500 | json }}"
@@ -291,16 +291,24 @@ steps:
                     tags_to_add:
                       - "{{ variables.dismissed_tag }}"
 
-              # The call above retries, then continues past a persistent failure, so this
-              # chunk keeps its old tag and the loop moves on to the next chunk. Counted per
-              # alert (the size of the chunk), not failed loudly, so
-              # post_comment_outcome_dismissed can report the shortfall instead of
-              # unconditionally claiming every FP candidate was re-tagged.
-              - name: record_retag_failure
+              # The call above retries, then continues past a persistent failure. SetAlertTags
+              # returns the raw Elasticsearch update-by-query body on HTTP 200, which can list
+              # `failures` and an `updated` count below the chunk size without setting `.error`.
+              # Checking only the step error would report every candidate as re-tagged while
+              # some still carry az:false_positive. Count HTTP failures as the whole chunk, and
+              # soft UBQ shortfalls as `size - updated`, so the outcome comment reports the
+              # actual shortfall.
+              - name: record_retag_step_failure
                 type: data.set
                 if: "${{ steps.retag_dismissed_chunk.error != blank }}"
                 with:
                   failed_retag_count: "${{ variables.failed_retag_count | plus: foreach.item.size }}"
+
+              - name: record_retag_partial_failure
+                type: data.set
+                if: "${{ steps.retag_dismissed_chunk.error == blank and (steps.retag_dismissed_chunk.output.updated | default: 0) != foreach.item.size }}"
+                with:
+                  failed_retag_count: "${{ variables.failed_retag_count | plus: foreach.item.size | minus: (steps.retag_dismissed_chunk.output.updated | default: 0) }}"
 
           # Same failure tolerance as close_investigation_after_approval: the decision has
           # landed, so a failed bookkeeping patch must not fail the run.

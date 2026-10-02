@@ -373,7 +373,7 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
   });
 
   // `continue: true` on a foreach exits the whole loop at the first inner failure, so the
-  // remaining candidates would never be re-tagged and record_retag_failure would never run.
+  // remaining candidates would never be re-tagged and the shortfall counters would never run.
   it('does not put continue on the loop itself, which would abandon the remaining candidates', () => {
     const loop = stepByName('retag_dismissed_alerts');
 
@@ -381,11 +381,11 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
   });
 
   it('increments the counter when the tag call recorded an error', () => {
-    const recordFailure = stepByName('record_retag_failure');
+    const recordFailure = stepByName('record_retag_step_failure');
     expect(recordFailure?.type).toBe('data.set');
     expect(recordFailure?.if).toBe('${{ steps.retag_dismissed_chunk.error != blank }}');
 
-    const noError = { steps: { retag_dismissed_chunk: {} } };
+    const noError = { steps: { retag_dismissed_chunk: { output: { updated: 1 } } } };
     const failed = { steps: { retag_dismissed_chunk: { error: { message: 'x' } } } };
 
     expect(evalExpr(recordFailure!.if!, noError)).toBe(false);
@@ -399,14 +399,60 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
     ).toBe(2);
   });
 
+  it('increments the counter when update-by-query succeeds but updates fewer alerts than requested', () => {
+    const recordPartial = stepByName('record_retag_partial_failure');
+    expect(recordPartial?.type).toBe('data.set');
+
+    const partial = {
+      steps: {
+        retag_dismissed_chunk: {
+          output: { updated: 3, failures: [{ id: 'd' }], version_conflicts: 0 },
+        },
+      },
+      foreach: { item: ['a', 'b', 'c', 'd'] },
+    };
+    const full = {
+      steps: { retag_dismissed_chunk: { output: { updated: 4, failures: [] } } },
+      foreach: { item: ['a', 'b', 'c', 'd'] },
+    };
+    const stepError = {
+      steps: { retag_dismissed_chunk: { error: { message: 'x' }, output: { updated: 2 } } },
+      foreach: { item: ['a', 'b', 'c', 'd'] },
+    };
+
+    expect(evalExpr(recordPartial!.if!, partial)).toBe(true);
+    expect(evalExpr(recordPartial!.if!, full)).toBe(false);
+    // HTTP error is owned by record_retag_step_failure — do not double-count via a stale updated.
+    expect(evalExpr(recordPartial!.if!, stepError)).toBe(false);
+
+    // Accumulator 2 + (4 requested - 3 updated) = 3.
+    expect(
+      evalExpr(recordPartial!.with!.failed_retag_count as string, {
+        variables: { failed_retag_count: 2 },
+        ...partial,
+      })
+    ).toBe(3);
+  });
+
   it('counts every alert of a failed chunk, so the comment reports alerts rather than calls', () => {
-    const recordFailure = stepByName('record_retag_failure');
+    const recordFailure = stepByName('record_retag_step_failure');
     expect(
       evalExpr(recordFailure?.with?.failed_retag_count as string, {
         variables: { failed_retag_count: 3 },
         foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
       })
     ).toBe(503);
+  });
+
+  it('counts only the shortfall when some alerts in the chunk updated', () => {
+    const recordPartial = stepByName('record_retag_partial_failure');
+    expect(
+      evalExpr(recordPartial?.with?.failed_retag_count as string, {
+        variables: { failed_retag_count: 0 },
+        foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
+        steps: { retag_dismissed_chunk: { output: { updated: 497, failures: [{}] } } },
+      })
+    ).toBe(3);
   });
 });
 
