@@ -9,7 +9,9 @@ enabled: true
 settings:
   # Longer than the investigation's own timeout, since this run waits for it.
   timeout: '65m'
-  # One run per thread at a time, in arrival order, so replies build on each other.
+  # One run per thread at a time, in arrival order, so replies build on each other. The
+  # investigation rejects a second concurrent run (409), so this queue is what makes a reply wait
+  # rather than fail. Anything else that runs this thread's investigation must use the same key.
   concurrency:
     key: 'nightshift-slack-thread-{{ event.connectorId }}-{{ event.channel }}-{{ event.threadId | default: event.messageId }}'
     strategy: queue

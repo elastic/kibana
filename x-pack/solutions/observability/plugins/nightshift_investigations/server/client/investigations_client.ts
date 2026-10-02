@@ -133,6 +133,16 @@ const DEFAULT_SLACK_THREAD_TITLE = 'Slack investigation';
 /** A thread write that lost a race is retried this many times against the fresh record. */
 const MAX_THREAD_WRITE_ATTEMPTS = 3;
 
+/** A continuing run that lost the claim race re-checks the fresh record this many times. */
+const MAX_CLAIM_ATTEMPTS = 3;
+
+/**
+ * The run that owns a running investigation: the run that last continued it, otherwise the run it
+ * is named after. Only one run may own an investigation at a time.
+ */
+const getOwningExecutionId = (record: InvestigationRecord): string | undefined =>
+  record.status === 'running' ? record.execution_id ?? record.id : undefined;
+
 /** Response of POST /internal/nightshift/investigations/_slack_thread. */
 export interface SlackThreadInvestigation {
   investigation_id: string;
@@ -603,9 +613,9 @@ export class NightshiftInvestigationsClient {
    * Ensures the investigation record exists and is running. Called by the workflow's
    * persist_investigation_started step. If a pending record exists (created by start()), transitions
    * it to running. If no record exists (workflow triggered without start()), creates one as running
-   * from the execution document. Already-running records are left untouched. A settled record
-   * (completed, failed, or cancelled) throws so the persist step fails the run rather than
-   * continuing through the agent.
+   * from the execution document. A record this run already has running is left untouched. A
+   * settled record (completed, failed, or cancelled), or one a continuing run has taken over,
+   * throws so the persist step fails the run rather than continuing through the agent.
    *
    * Both write paths read the execution document, so `started_at` and `executed_by` mean the same
    * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
@@ -628,6 +638,9 @@ export class NightshiftInvestigationsClient {
       throw InvestigationConflictError.settled(investigationId, existing.status);
     }
     if (existing && existing.status !== 'pending') {
+      if (getOwningExecutionId(existing) !== investigationId) {
+        throw InvestigationConflictError.runInProgress(investigationId);
+      }
       return;
     }
 
@@ -649,12 +662,23 @@ export class NightshiftInvestigationsClient {
     const startedAt = execution.startedAt ?? new Date().toISOString();
 
     if (existing) {
-      await this.transitionToRunning({
-        investigationId,
-        version: existing.version,
-        startedAt,
-        executedBy: execution.executedBy,
-      });
+      try {
+        await this.transitionToRunning({
+          investigationId,
+          version: existing.version,
+          startedAt,
+          executedBy: execution.executedBy,
+        });
+      } catch (error) {
+        if (!(error instanceof InvestigationStaleWriteError)) {
+          throw error;
+        }
+        // Losing the race is fine only to another ensure of this same run.
+        const fresh = await this.investigationRepository.get(investigationId);
+        if (!fresh || getOwningExecutionId(fresh) !== investigationId) {
+          throw InvestigationConflictError.runInProgress(investigationId);
+        }
+      }
       return;
     }
 
@@ -692,6 +716,10 @@ export class NightshiftInvestigationsClient {
    * reopen an investigation without a run to settle it. The record then points at the run's
    * execution, which is what the reconciliation task settles it from. Resolves to the
    * investigation's conversation.
+   *
+   * One run owns an investigation at a time. A run may claim one that is settled, or pending with
+   * no run of its own on the way; while another run owns it, this throws a conflict before the
+   * run's agent starts, so callers must serialize the runs they start for one investigation.
    */
   private async continueInvestigation(
     investigationId: string,
@@ -705,12 +733,12 @@ export class NightshiftInvestigationsClient {
     if (!this.workflowsManagement) {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
+    const { management } = this.workflowsManagement;
 
-    const execution = await this.workflowsManagement.management.getWorkflowExecution(
-      executionId,
-      this.getSpaceId(),
-      { includeOutput: false, request: this.request }
-    );
+    const execution = await management.getWorkflowExecution(executionId, this.getSpaceId(), {
+      includeOutput: false,
+      request: this.request,
+    });
     const context = execution?.context;
     const inputs =
       isPlainObject(context) && isPlainObject(context.inputs) ? context.inputs : undefined;
@@ -724,15 +752,61 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    await this.transitionToRunning({
-      investigationId,
-      version: existing.version,
-      startedAt: execution.startedAt ?? new Date().toISOString(),
-      executedBy: execution.executedBy,
-      executionId,
-      reopen: isTerminalStatus(existing.status),
+    let current: InvestigationRecord = existing;
+    for (let attempt = 1; ; attempt++) {
+      // A retried ensure of the run that already owns it.
+      if (getOwningExecutionId(current) === executionId) {
+        return current.conversation_id;
+      }
+      if (!(await this.isClaimable(current, management))) {
+        throw InvestigationConflictError.runInProgress(investigationId);
+      }
+
+      try {
+        await this.transitionToRunning({
+          investigationId,
+          version: current.version,
+          startedAt: execution.startedAt ?? new Date().toISOString(),
+          executedBy: execution.executedBy,
+          executionId,
+          reopen: isTerminalStatus(current.status),
+        });
+        return current.conversation_id;
+      } catch (error) {
+        if (!(error instanceof InvestigationStaleWriteError)) {
+          throw error;
+        }
+        if (attempt >= MAX_CLAIM_ATTEMPTS) {
+          throw InvestigationConflictError.concurrentlyModified(investigationId);
+        }
+        const fresh = await this.investigationRepository.get(investigationId);
+        if (!fresh) {
+          throw new InvestigationNotFoundError(investigationId);
+        }
+        current = fresh;
+      }
+    }
+  }
+
+  /**
+   * Whether a continuing run may take the investigation over. A pending record named after a live
+   * run belongs to that run, which has not reached its own ensure step yet.
+   */
+  private async isClaimable(
+    record: InvestigationRecord,
+    management: WorkflowsServerPluginSetup['management']
+  ): Promise<boolean> {
+    if (isTerminalStatus(record.status)) {
+      return true;
+    }
+    if (record.status !== 'pending') {
+      return false;
+    }
+    const namedRun = await management.getWorkflowExecution(record.id, this.getSpaceId(), {
+      includeOutput: false,
+      request: this.request,
     });
-    return existing.conversation_id;
+    return !namedRun || TerminalExecutionStatuses.includes(namedRun.status);
   }
 
   /**
@@ -863,24 +937,17 @@ export class NightshiftInvestigationsClient {
     executionId?: string;
     reopen?: boolean;
   }): Promise<void> {
-    try {
-      await this.investigationRepository.update({
-        id: investigationId,
-        patch: {
-          status: 'running',
-          started_at: startedAt,
-          ...(executedBy && { executed_by: executedBy }),
-          ...(executionId && { execution_id: executionId }),
-          ...(reopen && { completed_at: null, error: null }),
-        },
-        version,
-      });
-    } catch (error) {
-      if (error instanceof InvestigationStaleWriteError) {
-        return;
-      }
-      throw error;
-    }
+    await this.investigationRepository.update({
+      id: investigationId,
+      patch: {
+        status: 'running',
+        started_at: startedAt,
+        ...(executedBy && { executed_by: executedBy }),
+        ...(executionId && { execution_id: executionId }),
+        ...(reopen && { completed_at: null, error: null }),
+      },
+      version,
+    });
   }
 
   private async createIgnoringConflict({

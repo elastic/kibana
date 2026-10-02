@@ -1302,17 +1302,60 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('treats a lost pending-to-running race as a no-op', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { status: 'pending', completed_at: undefined },
-        { id: EXECUTION_ID, version: 'v1' }
+  it('treats losing the pending-to-running race to its own retried ensure as a no-op', async () => {
+    repository.get
+      .mockResolvedValueOnce(
+        makeRecord(
+          { status: 'pending', completed_at: undefined },
+          { id: EXECUTION_ID, version: 'v1' }
+        )
       )
-    );
+      .mockResolvedValueOnce(
+        makeRecord(
+          { status: 'running', completed_at: undefined },
+          { id: EXECUTION_ID, version: 'v2' }
+        )
+      );
     mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
     repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+  });
+
+  it('throws InvestigationConflictError when it loses the pending-to-running race to another run', async () => {
+    repository.get
+      .mockResolvedValueOnce(
+        makeRecord(
+          { status: 'pending', completed_at: undefined },
+          { id: EXECUTION_ID, version: 'v1' }
+        )
+      )
+      .mockResolvedValueOnce(
+        makeRecord(
+          { status: 'running', completed_at: undefined, execution_id: 'exec-follow-up' },
+          { id: EXECUTION_ID, version: 'v2' }
+        )
+      );
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
+    repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationConflictError
+    );
+  });
+
+  it('throws InvestigationConflictError when a continuing run already owns the record', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'running', completed_at: undefined, execution_id: 'exec-follow-up' },
+        { id: EXECUTION_ID }
+      )
+    );
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationNotFoundError when a pending record has no readable execution', async () => {
@@ -1644,6 +1687,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     context: { inputs: { investigation_id: INVESTIGATION_ID, ...inputs } },
   });
 
+  const mockExecutions = (executions: Record<string, unknown>) =>
+    mockManagement.getWorkflowExecution.mockImplementation(
+      async (id: string) => executions[id] ?? null
+    );
+
   it.each<[InvestigationStatus, Record<string, unknown>]>([
     ['pending', {}],
     ['completed', { completed_at: null, error: null }],
@@ -1652,7 +1700,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     repository.get.mockResolvedValue(
       makeRecord({ status, conversation_id: 'conv-slack' }, { id: INVESTIGATION_ID, version: 'v2' })
     );
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeFollowUpExecution());
+    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
 
     await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
       'conv-slack'
@@ -1674,6 +1722,86 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
       },
       version: 'v2',
     });
+  });
+
+  it.each<[string, Partial<InvestigationAttributes>]>([
+    ['another continuing run', { status: 'running', execution_id: 'exec-other' }],
+    ['the run it is named after', { status: 'running' }],
+  ])('rejects the run while %s owns the investigation', async (_, attributes) => {
+    repository.get.mockResolvedValue(makeRecord(attributes, { id: INVESTIGATION_ID }));
+    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects the run while the pending investigation still awaits the live run it is named after', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'pending' }, { id: INVESTIGATION_ID }));
+    mockExecutions({
+      [EXECUTION_ID]: makeFollowUpExecution(),
+      [INVESTIGATION_ID]: { ...makeFollowUpExecution(), id: INVESTIGATION_ID },
+    });
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('returns the conversation without writing when the run already owns the investigation', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'running', execution_id: EXECUTION_ID, conversation_id: 'conv-slack' },
+        { id: INVESTIGATION_ID }
+      )
+    );
+    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
+      'conv-slack'
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects the run that loses the claim to a concurrent continuation', async () => {
+    repository.get
+      .mockResolvedValueOnce(makeRecord({ status: 'completed' }, { id: INVESTIGATION_ID }))
+      .mockResolvedValueOnce(
+        makeRecord({ status: 'running', execution_id: 'exec-other' }, { id: INVESTIGATION_ID })
+      );
+    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+    repository.update.mockRejectedValue(new InvestigationStaleWriteError(INVESTIGATION_ID));
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('claims the investigation again when the write it lost to left it unowned', async () => {
+    repository.get
+      .mockResolvedValueOnce(
+        makeRecord({ status: 'completed' }, { id: INVESTIGATION_ID, version: 'v1' })
+      )
+      .mockResolvedValueOnce(
+        makeRecord(
+          { status: 'completed', conversation_id: 'conv-slack' },
+          { id: INVESTIGATION_ID, version: 'v2' }
+        )
+      );
+    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+    repository.update
+      .mockRejectedValueOnce(new InvestigationStaleWriteError(INVESTIGATION_ID))
+      .mockResolvedValueOnce(undefined);
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
+      'conv-slack'
+    );
+    expect(repository.update).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: INVESTIGATION_ID, version: 'v2' })
+    );
   });
 
   it('reports a reopened investigation without its previous completion or error', async () => {
@@ -1780,13 +1908,17 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     const created = await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
     const { id, attributes } = repository.create.mock.calls[0][0];
     repository.get.mockResolvedValue(makeRecord(attributes, { id }));
-    mockManagement.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-slack',
-      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-      status: ExecutionStatus.RUNNING,
-      startedAt: '2024-01-02T00:00:00Z',
-      context: { inputs: { investigation_id: created?.investigation_id } },
-    });
+    mockManagement.getWorkflowExecution.mockImplementation(async (executionId: string) =>
+      executionId === 'exec-slack'
+        ? {
+            id: 'exec-slack',
+            workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+            status: ExecutionStatus.RUNNING,
+            startedAt: '2024-01-02T00:00:00Z',
+            context: { inputs: { investigation_id: created?.investigation_id } },
+          }
+        : null
+    );
 
     await expect(makeClient().ensureOrCreate(id, 'exec-slack')).resolves.toBe(
       attributes.conversation_id

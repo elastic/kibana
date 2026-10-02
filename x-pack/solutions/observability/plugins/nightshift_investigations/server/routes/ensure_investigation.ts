@@ -20,7 +20,9 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
       'Called by the investigation workflow (after ensuring the agent exists) so every run is ' +
       'tracked regardless of how it was triggered. All attributes derive from the execution document, ' +
       'never from the request. A live run whose execution_id differs from the investigation ID ' +
-      'continues an existing investigation instead and gets back its conversation_id.',
+      'continues an existing investigation instead and gets back its conversation_id. One run ' +
+      'owns an investigation at a time: while another run owns it, this responds 409, so callers ' +
+      'must serialize the runs they start for one investigation.',
   },
   security: {
     authz: {
