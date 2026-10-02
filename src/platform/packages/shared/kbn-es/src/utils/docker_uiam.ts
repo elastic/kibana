@@ -102,12 +102,13 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--net',
       'elastic',
 
-      // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // Sized above the emulator's startup peak: it bundles PostgreSQL
+      // (citus/postgis/pgcosmos), a Rust gateway and a Node UI, and at 1g the
+      // cgroup OOM-killer killed PostgreSQL mid `create extension`.
       '--memory',
-      '1g',
+      '4g',
       '--memory-swap',
-      '1g',
+      '4g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -547,13 +548,29 @@ export async function initializeUiamContainers(log: ToolingLog) {
   );
 }
 
+// Distinguishes a cgroup OOM-kill from a genuinely slow start, which `docker logs` alone cannot show.
+const inspectState = async (containerName: string) => {
+  try {
+    const { stdout } = await execa('docker', [
+      'inspect',
+      '-f',
+      'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}} Status={{.State.Status}} MemoryLimitBytes={{.HostConfig.Memory}}',
+      containerName,
+    ]);
+    return stdout.trim();
+  } catch (err) {
+    return `Failed to inspect container state: ${err}`;
+  }
+};
+
 async function tryExportLogs(containerName: string, log: ToolingLog) {
   try {
     const { stdout: logs } = await execa('docker', ['logs', containerName]);
+    const state = await inspectState(containerName);
     await mkdir(join(REPO_ROOT, '.es'), {
       recursive: true,
     });
-    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), `${state}\n${logs}`);
   } catch (err) {
     log.error(`Failed to export logs for container ${containerName}: ${err}`);
   }
