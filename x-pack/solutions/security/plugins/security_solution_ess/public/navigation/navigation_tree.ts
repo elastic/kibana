@@ -217,7 +217,7 @@ export const createNavigationTree = (
                   ]),
             ],
           },
-          ...getAlertingV2ManagementNavPanel(services),
+          ...getAlertingV2ManagementNavPanel(),
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [

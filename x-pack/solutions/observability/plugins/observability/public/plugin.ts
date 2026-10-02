@@ -84,7 +84,7 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
-import { isAlertingV2Enabled, shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
+import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
@@ -538,11 +538,8 @@ export class Plugin
     const { application } = coreStart;
     const config = this.initContext.config.get();
     setInvestigationsClient(pluginsStart.nightshiftInvestigations?.investigationsClient);
-    const alertingV2Enabled = isAlertingV2Enabled(coreStart);
     const deepLinks = this.deepLinks.map((link) =>
-      link.id === 'alerts'
-        ? { ...link, title: getObservabilityAlertsLinkTitle(alertingV2Enabled) }
-        : link
+      link.id === 'alerts' ? { ...link, title: getObservabilityAlertsLinkTitle(true) } : link
     );
 
     pluginsStart.observabilityShared.updateGlobalNavigation({

@@ -166,7 +166,6 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     );
 
     await page.gotoApp('rules');
-    await page.testSubj.click('rulesTab');
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
     await page.testSubj.locator('ruleSearchField').fill(ruleName);
     await expect(page.testSubj.locator('rulesTableCell-name')).toHaveCount(1);
@@ -210,7 +209,6 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     );
 
     await page.gotoApp('rules');
-    await page.testSubj.click('rulesTab');
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
     await page.testSubj.locator('ruleSearchField').fill(ruleName);
     await expect(page.testSubj.locator('rulesTableCell-name')).toHaveCount(1);

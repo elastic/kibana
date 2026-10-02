@@ -7,14 +7,14 @@
 
 export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
+  canAccessAlertingV2Rules,
   hasAlertingV2Capability,
-  isAlertingV2Enabled,
+  hasAlertingV2RulesReadCapability,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowV1ObservabilityAlertsTable,
-  canAccessAlertingV2Rules,
   type AlertingV2CapabilityFeature,
   type AlertingV2CapabilityLevel,
-} from './is_alerting_v2_enabled';
+} from './alerting_v2_access';
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';

@@ -33,8 +33,8 @@ import { registerAlertingAdvancedSettings } from '../settings/advanced_settings'
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
- * capabilities, UI settings, the action policy event log, workflow extensions,
- * and usage collection).
+ * capabilities, the action policy event log, workflow extensions, and usage
+ * collection).
  *
  * Larger / optional concerns live in their own setup modules: task definitions
  * in `bind_tasks` and Agent Builder in `bind_agent_builder`. `OnSetup` is a

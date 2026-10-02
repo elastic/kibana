@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -93,13 +92,7 @@ export const ExecutionHistoryPage = () => {
 
   return (
     <div data-test-subj="executionHistoryPage" css={pageCss}>
-      <AppHeader
-        sticky={false}
-        title={EXECUTION_HISTORY_PAGE_TITLE}
-        badges={[experimentalBadge]}
-        spacing="bleed"
-        tabs={tabs}
-      />
+      <AppHeader sticky={false} title={EXECUTION_HISTORY_PAGE_TITLE} spacing="bleed" tabs={tabs} />
       <EuiSpacer size="m" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />

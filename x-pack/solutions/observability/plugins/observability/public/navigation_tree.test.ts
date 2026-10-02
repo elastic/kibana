@@ -38,21 +38,8 @@ const getStackManagementSectionLinks = async (
 };
 
 describe('Observability solution navigation tree', () => {
-  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', async () => {
-    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', false);
-
-    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
-    expect(alertsLinks).toEqual(
-      expect.arrayContaining([
-        'management:triggersActions',
-        'management:triggersActionsConnectors',
-        'management:maintenanceWindows',
-      ])
-    );
-  });
-
-  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', async () => {
-    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', true);
+  it('hides Stack Alerts and Stack Rules', async () => {
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights');
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
     expect(alertsLinks).not.toContain('management:triggersActions');

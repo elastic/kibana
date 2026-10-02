@@ -54,7 +54,6 @@ const buildToAttachmentContext = () => ({
 
 describe('createRuleSmlType', () => {
   let getRule: jest.Mock;
-  let getIsAlertingV2Enabled: jest.Mock;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let rulesClient: RulesClient;
 
@@ -74,7 +73,6 @@ describe('createRuleSmlType', () => {
 
   beforeEach(() => {
     getRule = jest.fn();
-    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
     soClient = savedObjectsClientMock.create();
     rulesClient = { getRule } as unknown as RulesClient;
   });
@@ -82,7 +80,6 @@ describe('createRuleSmlType', () => {
   const buildDefinition = () =>
     createRuleSmlType({
       getScopedRulesClient: () => rulesClient,
-      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
@@ -170,15 +167,6 @@ describe('createRuleSmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
-
-    it('yields nothing and never opens a PIT finder when alerting v2 is disabled', async () => {
-      getIsAlertingV2Enabled.mockResolvedValue(false);
-
-      const items = await drainList();
-
-      expect(items).toEqual([]);
-      expect(soClient.createPointInTimeFinder).not.toHaveBeenCalled();
-    });
   });
 
   describe('getSmlEntry', () => {
@@ -233,15 +221,6 @@ describe('createRuleSmlType', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML rule: failed to get data for 'rule-missing'")
       );
-    });
-
-    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
-      getIsAlertingV2Enabled.mockResolvedValue(false);
-
-      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
-
-      expect(result).toBeUndefined();
-      expect(soClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -317,18 +296,6 @@ describe('createRuleSmlType', () => {
       );
 
       expect(result).toBeUndefined();
-    });
-
-    it('returns undefined without calling the rules client when alerting v2 is disabled', async () => {
-      getIsAlertingV2Enabled.mockResolvedValue(false);
-
-      const result = await buildDefinition().toAttachment(
-        buildSmlDocument(),
-        buildToAttachmentContext()
-      );
-
-      expect(result).toBeUndefined();
-      expect(getRule).not.toHaveBeenCalled();
     });
   });
 });

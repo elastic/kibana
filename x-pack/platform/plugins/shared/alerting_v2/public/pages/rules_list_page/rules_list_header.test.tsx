@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -99,13 +98,6 @@ describe('RulesListHeader', () => {
     };
   });
 
-  it('renders the page title and experimental badge', () => {
-    renderHeader();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('renders V1 rules and V2 rules tabs with V2 selected', async () => {
     renderHeader();
 
@@ -157,6 +149,14 @@ describe('RulesListHeader', () => {
     expect(screen.getByTestId('v1RulesTab')).toBeInTheDocument();
     expect(screen.getByTestId('v2RulesTab')).toBeInTheDocument();
     expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+  });
+
+  it('hides experimental create actions when Alerting V2 experimental features are disabled', () => {
+    mockExperimentalFeaturesEnabled = false;
+    renderHeader();
+
+    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
   });
 
   it('renders host-provided tabs instead of management hrefs', async () => {

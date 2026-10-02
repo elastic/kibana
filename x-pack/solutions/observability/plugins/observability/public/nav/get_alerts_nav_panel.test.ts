@@ -29,7 +29,6 @@ const FULL_V2_CAPABILITIES = {
 };
 
 const enableV2 = (core: CoreStart) => {
-  core.settings.globalClient.get = <T>(_key: string) => true as T;
   core.settings.client.get = <T>(_key: string) => false as T;
 };
 
@@ -77,28 +76,10 @@ describe('getAlertsNavPanel', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
     core.settings.client.get = <T>(_key: string) => false as T;
   });
 
-  it('returns the classic Alerts link when alerting v2 is disabled', () => {
-    const result = getAlertsNavPanel(core);
-
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual(
-      expect.objectContaining({
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-        title: 'Alerts',
-      })
-    );
-    expect(result[0]).not.toHaveProperty('renderAs');
-  });
-
-  it('includes Stack Management Rules only while alerting v2 is disabled', () => {
-    expect(shouldIncludeStackManagementRules(core)).toBe(true);
-
-    enableV2(core);
+  it('hides Stack Management Rules', () => {
     expect(shouldIncludeStackManagementRules(core)).toBe(false);
   });
 
@@ -157,7 +138,7 @@ describe('getAlertsNavPanel', () => {
     ]);
   });
 
-  it('returns an empty array when alerting v2 is enabled but the user has no capabilities', () => {
+  it('returns an empty array when the user has no capabilities', () => {
     enableV2(core);
 
     expect(getAlertsNavPanel(core)).toEqual([]);

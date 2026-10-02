@@ -56,18 +56,18 @@ describe('registerFeaturePrivileges', () => {
     });
   });
 
-  it('describes access for every experimental feature', () => {
+  it('describes access for every feature', () => {
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.rules.id).description).toBe(
-      'Experimental. Controls access to rules in the experimental alerting system.'
+      'Controls access to rules in the alerting system.'
     );
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id).description).toBe(
-      'Experimental. Controls access to alerts in the experimental alerting system.'
+      'Controls access to alerts in the alerting system.'
     );
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id).description).toBe(
-      'Experimental. Controls access to action policies in the experimental alerting system.'
+      'Controls access to action policies in the alerting system.'
     );
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id).description).toBe(
-      'Experimental. Controls access to execution history in the experimental alerting system.'
+      'Controls access to execution history in the alerting system.'
     );
 
     for (const feature of Object.values(ALERTING_V2_FEATURES)) {

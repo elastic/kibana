@@ -55,6 +55,8 @@ export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
 // Alerting v2 settings
+export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
+  'alerting:v1:showV1ObservabilityAlertsTable';
 export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experimentalFeatures';
 
 // Agent builder settings
@@ -78,11 +80,6 @@ export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
 export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
 export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
-
-// Alerting settings
-export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
-export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
-  'alerting:v1:showV1ObservabilityAlertsTable';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';

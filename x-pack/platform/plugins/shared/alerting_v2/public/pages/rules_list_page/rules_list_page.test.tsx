@@ -230,13 +230,6 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('renders the experimental badge in the page header', async () => {
-    renderPage();
-    await waitForRules();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('marks the sequence builder entry point as experimental', async () => {
     renderPage();
     await waitForRules();

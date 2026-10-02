@@ -10,39 +10,52 @@ import { coreMock } from '@kbn/core/public/mocks';
 import {
   canAccessAlertingV2Rules,
   hasAlertingV2Capability,
-  isAlertingV2Enabled,
+  hasAlertingV2RulesReadCapability,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowV1ObservabilityAlertsTable,
-} from './is_alerting_v2_enabled';
+} from './alerting_v2_access';
 
-describe('isAlertingV2Enabled', () => {
+describe('hasAlertingV2RulesReadCapability', () => {
   let core: CoreStart;
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
   });
 
-  it('returns true when alerting v2 is enabled', () => {
-    expect(isAlertingV2Enabled(core)).toBe(true);
+  it('returns true when the user has the read capability', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { read: true },
+    };
+
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(true);
   });
 
-  it('returns false when alerting v2 is disabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
+  it('returns true when the user has the write capability without read', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { all: true },
+    };
 
-    expect(isAlertingV2Enabled(core)).toBe(false);
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(true);
   });
 
-  it('returns false when alerting v2 is not set', () => {
-    core.settings.globalClient.get = <T>(_key: string) => undefined as T;
+  it('returns false when alerting v2 rules capabilities are unavailable', () => {
+    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+      core.application.capabilities;
 
-    expect(isAlertingV2Enabled(core)).toBe(false);
+    core.application.capabilities = capabilitiesWithoutRules;
+
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(false);
   });
 
-  it('returns false for non-boolean truthy values', () => {
-    core.settings.globalClient.get = <T>(_key: string) => 'true' as T;
+  it('returns false when the capability object is present but empty', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {},
+    };
 
-    expect(isAlertingV2Enabled(core)).toBe(false);
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(false);
   });
 });
 
@@ -51,25 +64,20 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.application.capabilities = {
       ...core.application.capabilities,
-      alerting_v2_rules: {
-        all: true,
-      },
+      alerting_v2_rules: { all: true },
     };
   });
 
-  it('returns true when alerting v2 is enabled and the user can write rules', () => {
+  it('returns true when the user can write rules', () => {
     expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(true);
   });
 
-  it('returns false when the user lacks alerting v2 rules write capability', () => {
+  it('returns false when the user has only the read capability', () => {
     core.application.capabilities = {
       ...core.application.capabilities,
-      alerting_v2_rules: {
-        read: true,
-      },
+      alerting_v2_rules: { read: true },
     };
 
     expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(false);
@@ -80,12 +88,6 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
       core.application.capabilities;
 
     core.application.capabilities = capabilitiesWithoutRules;
-
-    expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(false);
-  });
-
-  it('returns false when alerting v2 is disabled by the advanced setting', () => {
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(false);
   });
@@ -137,24 +139,6 @@ describe('hasAlertingV2Capability', () => {
   it('returns false when the feature capability is missing', () => {
     expect(hasAlertingV2Capability(core, 'actionPolicies')).toBe(false);
   });
-
-  it('returns false when the feature capability is not granted', () => {
-    core.application.capabilities = {
-      ...core.application.capabilities,
-      alerting_v2_execution_history: { read: false, all: false },
-    };
-
-    expect(hasAlertingV2Capability(core, 'executionHistory')).toBe(false);
-  });
-
-  it('returns false when the capability object is present but empty', () => {
-    core.application.capabilities = {
-      ...core.application.capabilities,
-      alerting_v2_rules: {},
-    };
-
-    expect(hasAlertingV2Capability(core, 'rules')).toBe(false);
-  });
 });
 
 describe('shouldShowV1ObservabilityAlertsTable', () => {
@@ -162,29 +146,20 @@ describe('shouldShowV1ObservabilityAlertsTable', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
     core.settings.client.get = <T>(_key: string) => false as T;
   });
 
-  it('returns true when alerting v2 is disabled', () => {
-    expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(true);
-  });
-
-  it('returns false when alerting v2 is enabled and the space setting is off', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('returns false when the space setting is off', () => {
     expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(false);
   });
 
-  it('returns true when alerting v2 is enabled and the space setting is on', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
+  it('returns true when the space setting is on', () => {
     core.settings.client.get = <T>(_key: string) => true as T;
 
     expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(true);
   });
 
-  it('returns false when alerting v2 is enabled and the space setting is unset', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
+  it('returns false when the space setting is unset', () => {
     core.settings.client.get = <T>(_key: string) => undefined as T;
 
     expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(false);
@@ -196,7 +171,6 @@ describe('canAccessAlertingV2Rules', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.application.capabilities = {
       ...core.application.capabilities,
       alerting_v2_rules: {
@@ -205,7 +179,7 @@ describe('canAccessAlertingV2Rules', () => {
     };
   });
 
-  it('returns true when alerting v2 is enabled and the user can read rules', () => {
+  it('returns true when the user can read rules', () => {
     expect(canAccessAlertingV2Rules(core)).toBe(true);
   });
 
@@ -225,12 +199,6 @@ describe('canAccessAlertingV2Rules', () => {
       core.application.capabilities;
 
     core.application.capabilities = capabilitiesWithoutRules;
-
-    expect(canAccessAlertingV2Rules(core)).toBe(false);
-  });
-
-  it('returns false when alerting v2 is disabled by the advanced setting', () => {
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(canAccessAlertingV2Rules(core)).toBe(false);
   });

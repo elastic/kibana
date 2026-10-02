@@ -115,24 +115,6 @@ describe('rulesPage', () => {
     expect(history.location.pathname).toBe('/');
   });
 
-  it('shows the correct number of tabs', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-    renderRulesPage(history);
-
-    expect(await screen.findAllByRole('tab')).toHaveLength(2);
-  });
-
-  it('hides the logs tab if the read rules privilege is missing', async () => {
-    useGetRuleTypesPermissions.mockReturnValue({
-      authorizedToReadAnyRules: false,
-    });
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-
-    renderRulesPage(history);
-
-    expect(await screen.findAllByRole('tab')).toHaveLength(1);
-  });
-
   it('omits the list back button when hideListBackButton is set', async () => {
     useKibanaMock().services.hideListBackButton = true;
     const history = createMemoryHistory({ initialEntries: ['/'] });
@@ -152,20 +134,6 @@ describe('rulesPage', () => {
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
       'Back to Alerts'
     );
-  });
-
-  it('keeps classic Logs on the Rules heading with a back button to Alerts', async () => {
-    useKibanaMock().services.application.getUrlForApp = jest.fn(
-      () => '/app/observability-overview/alerts'
-    );
-    const history = createMemoryHistory({ initialEntries: ['/logs'] });
-    renderRulesPage(history);
-
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(await screen.findAllByRole('tab')).toHaveLength(2);
-    const back = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
-    expect(back).toHaveAccessibleName('Back to Alerts');
-    expect(back).toHaveAttribute('href', '/app/observability-overview/alerts');
   });
 
   describe('setHeaderActions', () => {
@@ -238,11 +206,7 @@ describe('rulesPage', () => {
     });
   });
 
-  describe('when alerting v2 is enabled', () => {
-    beforeEach(() => {
-      (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
-    });
-
+  describe('Alerting V2 Rules capability', () => {
     describe('and the user can read v2 rules', () => {
       beforeEach(() => {
         useKibanaMock().services.application.capabilities = {
@@ -363,9 +327,10 @@ describe('rulesPage', () => {
 
     describe('and the user cannot read v2 rules', () => {
       beforeEach(() => {
-        const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutV2 } =
-          useKibanaMock().services.application.capabilities;
-        useKibanaMock().services.application.capabilities = capabilitiesWithoutV2;
+        useKibanaMock().services.application.capabilities = {
+          ...useKibanaMock().services.application.capabilities,
+          alerting_v2_rules: {},
+        };
       });
 
       it('hides heading tabs rather than keeping Rules/Logs', async () => {
