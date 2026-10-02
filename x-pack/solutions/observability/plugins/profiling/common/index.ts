@@ -6,14 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PROFILING_EVENTS_INDEX_BY_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
 
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
-export const INDEX_EVENTS = 'profiling-events-all';
-export const INDEX_TRACES = 'profiling-stacktraces';
-export const INDEX_FRAMES = 'profiling-stackframes';
-export const INDEX_EXECUTABLES = 'profiling-executables';
+export const INDEX_EVENTS = PROFILING_EVENTS_INDEX_BY_SCHEMA[ProfilingSchema.ECS];
 
 const BASE_ROUTE_PATH = '/internal/profiling';
 const PUBLIC_BASE_ROUTE_PATH = '/api/profiling';
