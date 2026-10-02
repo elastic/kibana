@@ -11,6 +11,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { VisIconType } from '@kbn/chart-icons';
+import { IconCircle, IconTriangle } from '@kbn/chart-icons';
 import type { IconSet } from './components';
 import type { AnnotationReferenceLineIcons, SharedSetOfIcons } from './types';
 
@@ -130,6 +131,7 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
         defaultMessage: 'Circle',
       }
     ),
+    icon: IconCircle,
   },
   {
     value: 'pinFilled',
@@ -157,6 +159,7 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
         defaultMessage: 'Triangle',
       }
     ),
+    icon: IconTriangle,
     shouldRotate: true,
   },
 ];

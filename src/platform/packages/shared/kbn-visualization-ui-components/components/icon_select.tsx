@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -27,6 +28,7 @@ export function hasIcon(icon: string | undefined): icon is string {
 export type IconSet<T extends VisIconType> = Array<{
   value: T;
   label: string;
+  icon?: IconType;
   shouldRotate?: boolean;
 }>;
 

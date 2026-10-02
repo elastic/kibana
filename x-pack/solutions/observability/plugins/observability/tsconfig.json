@@ -52,6 +52,7 @@
     "@kbn/grouping",
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",
+    "@kbn/event-annotation-components",
     "@kbn/slo-schema",
     "@kbn/event-annotation-common",
     "@kbn/react-kibana-mount",
@@ -167,8 +168,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/global-search-plugin",
     "@kbn/nightshift-investigations-plugin",
-    "@kbn/ui-callout",
-    "@kbn/chart-icons"
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
