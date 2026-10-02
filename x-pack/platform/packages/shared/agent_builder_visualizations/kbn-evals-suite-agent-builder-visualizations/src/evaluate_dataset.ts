@@ -11,6 +11,7 @@ import {
   getStringMeta,
   type AgentBuilderClient,
   type DefaultEvaluators,
+  type EvalConnector,
   type EvalsExecutorClient,
   type EvaluationDataset,
   type Evaluator,
@@ -30,7 +31,7 @@ import {
   createChartIntentJudge,
   createChartTypeVsIntentEvaluator,
 } from './evaluators/chart_type_vs_intent';
-import { skipRefusalExamples, withLowScoreLogging } from './evaluator_utils';
+import { buildJudgeModel, skipRefusalExamples, withLowScoreLogging } from './evaluator_utils';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createEsqlQueryRunner } from './evaluators/esql_query_runner';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
@@ -136,6 +137,7 @@ export function createEvaluateDataset({
   evaluators,
   executorClient,
   inferenceClient,
+  judgeConnector,
   esClient,
   log,
 }: {
@@ -143,10 +145,14 @@ export function createEvaluateDataset({
   agentId: string;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
+  /** Bound to `judgeConnector`; used only by the LLM judges. */
   inferenceClient: BoundInferenceClient;
+  judgeConnector: EvalConnector;
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
+  const judgeModel = buildJudgeModel(judgeConnector);
+
   const buildEvaluators = () => {
     const visualizationExtractor = (output: VisualizationAgentTaskOutput) =>
       output.visualizations ?? extractVisualizations(output);
@@ -177,6 +183,7 @@ export function createEvaluateDataset({
       log,
       predictionExtractor: (output) => output.esql ?? '',
       groundTruthExtractor: (expected) => extractGoldQuery(expected),
+      judgeModel,
     });
 
     const esqlResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator<
@@ -197,6 +204,7 @@ export function createEvaluateDataset({
       questionExtractor: describeRequest,
       expectedChartFormExtractor: (expected) => extractGoldChartForm(expected),
       judge: createChartIntentJudge({ inferenceClient, log }),
+      judgeModel,
     });
 
     const rendererVsIntentEvaluator = createRendererVsIntentEvaluator<

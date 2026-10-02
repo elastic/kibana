@@ -13,7 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod/v4';
 import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { isRecord, skippedResult } from '../evaluator_utils';
+import { isRecord, skippedResult, type JudgeModel } from '../evaluator_utils';
 import type { GoldChartForm } from './gold_visualization_config';
 
 export const CHART_TYPE_VS_INTENT_EVALUATOR_NAME = 'Chart Type vs Intent';
@@ -240,6 +240,7 @@ export function createChartTypeVsIntentEvaluator<
   questionExtractor: (input: TExample['input']) => string;
   expectedChartFormExtractor: (expected: TExample['output']) => GoldChartForm | undefined;
   judge: ChartIntentJudge;
+  judgeModel?: JudgeModel;
   name?: string;
 }): Evaluator<TExample, TTaskOutput> {
   const {
@@ -247,6 +248,7 @@ export function createChartTypeVsIntentEvaluator<
     questionExtractor,
     expectedChartFormExtractor,
     judge,
+    judgeModel,
     name = CHART_TYPE_VS_INTENT_EVALUATOR_NAME,
   } = config;
 
@@ -254,6 +256,7 @@ export function createChartTypeVsIntentEvaluator<
     name,
     kind: 'LLM',
     direction: 'maximize',
+    getModel: () => judgeModel,
     evaluate: async ({ input, output, expected }): Promise<EvaluationResult> => {
       const gold = expectedChartFormExtractor(expected);
       if (!gold) {

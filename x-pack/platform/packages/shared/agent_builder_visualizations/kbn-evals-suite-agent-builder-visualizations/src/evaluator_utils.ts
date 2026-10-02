@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
+import {
+  buildModelFromConnector,
+  type EvalConnector,
+  type EvaluationResult,
+  type Evaluator,
+  type Example,
+  type TaskOutput,
+} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ExtractedVisualization } from './extract_visualization';
 
@@ -19,6 +26,14 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
  * column name the field refers to.
  */
 export const unescapeVegaField = (field: string): string => field.replace(/\\([.[\]])/g, '$1');
+
+export type JudgeModel = NonNullable<ReturnType<NonNullable<Evaluator['getModel']>>>;
+
+/** Model an LLM evaluator judges with, used by the framework to attribute its scores. */
+export const buildJudgeModel = (connector: EvalConnector): JudgeModel | undefined => {
+  const { id, family, provider } = buildModelFromConnector(connector);
+  return id ? { id, ...(family && { family }), ...(provider && { provider }) } : undefined;
+};
 
 /** Shared result for evaluators with nothing to check; `null` keeps them out of averages. */
 export const skippedResult = (explanation: string): EvaluationResult => ({

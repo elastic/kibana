@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type {
   AgentBuilderClient,
   DefaultEvaluators,
+  EvalConnector,
   EvalsExecutorClient,
   Evaluator,
 } from '@kbn/evals';
@@ -66,6 +67,12 @@ const buildDeps = () => {
       } as unknown as DefaultEvaluators,
       executorClient: { runExperiment } as unknown as EvalsExecutorClient,
       inferenceClient: {} as unknown as BoundInferenceClient,
+      judgeConnector: {
+        id: 'judge',
+        name: 'Judge',
+        actionTypeId: '.gen-ai',
+        config: {},
+      } as unknown as EvalConnector,
       esClient: {} as unknown as EsClient,
       log: { warning: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as ToolingLog,
     },

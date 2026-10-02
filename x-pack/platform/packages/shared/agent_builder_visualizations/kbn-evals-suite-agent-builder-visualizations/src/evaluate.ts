@@ -37,6 +37,7 @@ export const evaluate = evalsBase.extend<
           executorClient,
           // LLM judges run on the --judge connector, not the model under test.
           inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
+          judgeConnector: evaluationConnector,
           esClient,
           log,
         })
