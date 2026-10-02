@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
@@ -58,6 +59,9 @@ import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertz
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerStepDefinitions } from './step_types';
+import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
+import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
   implements
@@ -89,6 +93,8 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
   private huntServices?: HuntServices;
+  private fleetAgentService?: AgentService;
+  private coreStart?: CoreStart;
   private scanFailuresService?: ScanFailuresService;
 
   /**
@@ -153,6 +159,20 @@ export class AlertZeroPlugin
     }
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
+    // Steps register during setup but only run after start; deps resolve lazily.
+    const stepsLogger = this.logger.get('steps');
+    registerStepDefinitions({
+      workflowsExtensions,
+      getActionsService: () => this.requireActionsService(),
+      getConversations: () => this.requireAgentBuilderConversations(),
+      getHuntServices: () => this.requireHuntServices(),
+      getResolveHostEnrollment: makeScopedResolveHostEnrollment(
+        () => this.fleetAgentService,
+        stepsLogger
+      ),
+      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      logger: stepsLogger,
+    });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,
@@ -220,6 +240,8 @@ export class AlertZeroPlugin
 
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.coreStart = core;
+    this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
@@ -348,6 +370,10 @@ export class AlertZeroPlugin
 
   private requireHuntServices(): HuntServices {
     return this.requireStarted(this.huntServices, 'Hunt services');
+  }
+
+  private requireCoreStart(): CoreStart {
+    return this.requireStarted(this.coreStart, 'CoreStart');
   }
 
   private requireScanFailuresService(): ScanFailuresService {
