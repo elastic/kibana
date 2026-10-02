@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/286620
+issues:
+- https://github.com/elastic/kibana/issues/286567
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- AI and machine Learning
+title: "Make Agent Builder connectors available as a technical preview"
+description: "Shows the **Connectors** pages and the `execute_connector_sub_action` tool in Agent Builder without the experimental features setting. The pages carry a **Technical preview** badge."
