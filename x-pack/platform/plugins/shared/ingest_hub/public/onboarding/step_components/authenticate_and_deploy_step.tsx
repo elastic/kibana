@@ -9,13 +9,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -27,6 +28,7 @@ import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
+import { getIncompleteInstances } from './service_settings_step/use_service_settings';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
@@ -135,6 +137,44 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
     });
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
+
+  // ── Settings collected for ECF vs. the selected method ───────────────────────
+  // Step 2 collects only the trigger ARN for services ECF can deploy. Under agent-based those
+  // services need the package's own vars, so what Step 2 showed is out of date. `awsServicesMap`
+  // already carries the agent-based view here, so the required set below is the agent-based one.
+  const ecfCapableServiceIds = useMemo(
+    () =>
+      new Set(
+        selectedServiceIds.filter((id) => {
+          const entry = awsServicesMap?.get(id);
+          return !!entry?.ecfSettings && !entry.ecfOnly;
+        })
+      ),
+    [selectedServiceIds, awsServicesMap]
+  );
+  const settingsOutOfDateServiceNames = useMemo(
+    () =>
+      isAgentBased && serviceSettings?.settingsMethod !== 'agent_based'
+        ? [...ecfCapableServiceIds].map((id) => awsServicesMap?.get(id)?.name ?? id)
+        : [],
+    [isAgentBased, serviceSettings?.settingsMethod, ecfCapableServiceIds, awsServicesMap]
+  );
+  const incompleteAgentSettingsCount = useMemo(
+    () =>
+      isAgentBased
+        ? getIncompleteInstances(
+            ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
+            serviceVars,
+            awsServicesMap
+          ).length
+        : 0,
+    [isAgentBased, ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
+  );
+  // Warning while required agent-based settings are missing (Next is blocked), info otherwise.
+  const SettingsChangedCallout =
+    incompleteAgentSettingsCount > 0 ? KbnWarningCallout : KbnInfoCallout;
+  const showSettingsChangedCallout =
+    settingsOutOfDateServiceNames.length > 0 || incompleteAgentSettingsCount > 0;
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const {
@@ -531,6 +571,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (showMiSection && !isMiDone) ||
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
+    incompleteAgentSettingsCount > 0 ||
     (showAgentSection && isAgentDeploying) ||
     (showAgentSection && !isAgentDone && !isAgentNextReady);
 
@@ -546,7 +587,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {hasSelectedManifestError && (
         <>
           <EuiHorizontalRule margin="l" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -554,35 +595,33 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="Could not load service details"
               />
             }
-            iconType="warning"
-            color="danger"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.body"
+                  defaultMessage="One or more integration packages could not be loaded. Retry to continue."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: refetchAwsServiceMatrix,
+                'data-test-subj': 'authenticateAndDeployStep-manifestRetryButton',
+              },
+            }}
             data-test-subj="authenticateAndDeployStep-manifestErrorCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.body"
-                defaultMessage="One or more integration packages could not be loaded. Retry to continue."
-              />
-            </p>
-            <EuiButton
-              size="s"
-              color="danger"
-              onClick={refetchAwsServiceMatrix}
-              data-test-subj="authenticateAndDeployStep-manifestRetryButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.retryButton"
-                defaultMessage="Retry"
-              />
-            </EuiButton>
-          </EuiCallOut>
+          />
         </>
       )}
 
       {isAgentBased && allAgentBasedOnly && (
         <>
           <EuiHorizontalRule margin="l" />
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -590,17 +629,63 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="Self-managed Elastic Agent required"
               />
             }
-            iconType="info"
-            color="primary"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
+                  defaultMessage="After completing this step, enroll an Elastic Agent that has access to your AWS environment to start collecting data."
+                />
+              </p>
+            }
             data-test-subj="authenticateAndDeployStep-agentBasedOnlyCallout"
-          >
-            <p>
+          />
+        </>
+      )}
+
+      {showSettingsChangedCallout && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <SettingsChangedCallout
+            announceOnMount
+            title={
               <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
-                defaultMessage="After completing this step, enroll an Elastic Agent that has access to your AWS environment to start collecting data."
+                id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.title"
+                defaultMessage="Service settings have changed"
               />
-            </p>
-          </EuiCallOut>
+            }
+            data-test-subj="authenticateAndDeployStep-settingsChangedCallout"
+            text={
+              <p>
+                {incompleteAgentSettingsCount > 0 ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.incompleteBody"
+                    defaultMessage="Agent-based deployment requires more settings than managed deployment. Complete the required settings in Service Settings for {services} to continue."
+                    values={{ services: settingsOutOfDateServiceNames.join(', ') }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.body"
+                    defaultMessage="Agent-based deployment uses different settings than managed deployment. Review the settings in Service Settings for {services}."
+                    values={{ services: settingsOutOfDateServiceNames.join(', ') }}
+                  />
+                )}
+              </p>
+            }
+            actionProps={
+              onBack
+                ? {
+                    primary: {
+                      children: i18n.translate(
+                        'xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.backButton',
+                        { defaultMessage: 'Review service settings' }
+                      ),
+                      onClick: onBack,
+                      'data-test-subj': 'authenticateAndDeployStep-settingsChangedBackButton',
+                    },
+                  }
+                : undefined
+            }
+          />
         </>
       )}
 

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
+import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
@@ -409,10 +410,21 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const {
-    matrix: awsServiceMatrix,
+    matrix: rawAwsServiceMatrix,
     isError: awsServiceMatrixError,
     refetch: refetchAwsServiceMatrix,
   } = useAwsServiceMatrix();
+
+  const deploymentMethod: DeploymentMethod =
+    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+
+  // Service settings depend on the selected deployment method: ECF needs only the trigger ARN,
+  // agent-based needs the package's own vars. Every step reads the matrix through the context, so
+  // applying the method view here keeps Step 2, the Step 3 gates and the deploy builders consistent.
+  const awsServiceMatrix = useMemo(
+    () => rawAwsServiceMatrix?.map((s) => applyDeploymentMethodView(s, deploymentMethod)),
+    [rawAwsServiceMatrix, deploymentMethod]
+  );
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
     [awsServiceMatrix]
@@ -439,9 +451,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     () => ({ selectedServiceIds, dataFormat }),
     [selectedServiceIds, dataFormat]
   );
-
-  const deploymentMethod: DeploymentMethod =
-    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
 
   const setDeploymentMethod = useCallback(
     (method: DeploymentMethod) => {

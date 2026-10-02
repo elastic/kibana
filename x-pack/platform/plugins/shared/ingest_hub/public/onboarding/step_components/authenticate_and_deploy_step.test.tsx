@@ -1064,4 +1064,112 @@ describe('AuthenticateAndDeployStep', () => {
       expect(mockRefetch).toHaveBeenCalledTimes(1);
     });
   });
+  describe('settings changed callout — switching an ECF service to agent-based', () => {
+    const def = (name: string) => ({
+      name,
+      type: 'text',
+      required: true,
+      show_user: true,
+    });
+    // Agent-based view of an ECF-capable service: full manifest vars, `ecfSettings` retained.
+    const ecfCapableService: AwsServiceMatrixEntry = {
+      ...ecfService,
+      dataStreams: ['cloudtrail'],
+      inputs: ['aws-s3'],
+      requiredConfig: ['bucket_arn', 'queue_url'],
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: def('bucket_arn'), queue_url: def('queue_url') } as any,
+      },
+      ecfSettings: {
+        requiredConfig: ['bucket_arn'],
+        dataStreams: ['cloudtrail'],
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: [],
+      },
+    };
+
+    const arrange = ({
+      queueUrl,
+      settingsMethod,
+      service = ecfCapableService,
+    }: {
+      queueUrl?: string;
+      settingsMethod?: 'agent_based' | 'managed_integration';
+      service?: AwsServiceMatrixEntry;
+    }) => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'ecs' },
+        awsServicesMap: new Map([['cloudtrail', service]]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        refetchAwsServiceMatrix: jest.fn(),
+      });
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          settingsMethod,
+          instances: [
+            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'x', isDuplicate: false },
+          ],
+          serviceVars: {
+            cloudtrail: {
+              enabledDataStreams: ['cloudtrail'],
+              varsByDataStream: {
+                cloudtrail: {
+                  enabledInputs: ['aws-s3'],
+                  varsByInput: {
+                    'aws-s3': { bucket_arn: 'arn:aws:s3:::b', queue_url: queueUrl ?? '' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        jest.fn(),
+      ]);
+    };
+
+    it('shows the callout and blocks Next while required agent-based settings are missing', () => {
+      arrange({ settingsMethod: 'managed_integration' });
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout')).toBeVisible();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('navigates back to Step 2 from the callout', () => {
+      arrange({ settingsMethod: 'managed_integration' });
+      const onBack = jest.fn();
+      renderStep(jest.fn(), onBack);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-settingsChangedBackButton'));
+      expect(onBack).toHaveBeenCalledTimes(1);
+    });
+
+    it('still shows an advisory callout, without blocking Next, when settings are complete', () => {
+      arrange({ settingsMethod: 'managed_integration', queueUrl: 'https://sqs/queue' });
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout')).toBeVisible();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+
+    it('hides the callout once Step 2 was continued under agent-based and is complete', () => {
+      arrange({ settingsMethod: 'agent_based', queueUrl: 'https://sqs/queue' });
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not show the callout for ecfOnly services (OTel twins keep the ECF view)', () => {
+      arrange({
+        settingsMethod: 'managed_integration',
+        service: { ...ecfCapableService, ecfOnly: true },
+      });
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
+      ).not.toBeInTheDocument();
+    });
+  });
 });

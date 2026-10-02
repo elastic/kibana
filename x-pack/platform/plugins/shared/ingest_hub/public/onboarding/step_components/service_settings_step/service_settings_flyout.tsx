@@ -22,6 +22,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
+import { shouldDefaultCollectS3Logs } from './field_config';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
 import {
@@ -43,6 +45,25 @@ function getDefaultDsInputs(
     return serviceDefaultEnabledInputs?.length ? serviceDefaultEnabledInputs : dsInfo?.inputs ?? [];
   }
   return dsInfo?.defaultEnabledInputs ?? [];
+}
+
+/** Persist `collect_s3_logs: true` for S3 inputs given a bucket ARN, so the switch shows the real behaviour. */
+function withCollectS3Defaults(
+  service: AwsServiceMatrixEntry,
+  draftByDs: Record<string, ServiceDataStreamVars>
+): Record<string, ServiceDataStreamVars> {
+  const result: Record<string, ServiceDataStreamVars> = {};
+  for (const [dsId, dsVars] of Object.entries(draftByDs)) {
+    const dsView = makeDsView(service, dsId);
+    const varsByInput = { ...dsVars.varsByInput };
+    for (const input of dsVars.enabledInputs) {
+      if (shouldDefaultCollectS3Logs(dsView, input, varsByInput[input])) {
+        varsByInput[input] = { ...varsByInput[input], collect_s3_logs: 'true' };
+      }
+    }
+    result[dsId] = { ...dsVars, varsByInput };
+  }
+  return result;
 }
 
 interface ServiceSettingsFlyoutProps {
@@ -89,7 +110,7 @@ export function ServiceSettingsFlyout({
         ).length > 0
       );
     });
-    onApply(draftByDs, enabledDataStreams, namespace);
+    onApply(withCollectS3Defaults(service, draftByDs), enabledDataStreams, namespace);
   };
 
   return (

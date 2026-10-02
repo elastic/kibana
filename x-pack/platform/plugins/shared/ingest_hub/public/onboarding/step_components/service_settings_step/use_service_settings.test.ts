@@ -15,7 +15,7 @@ jest.mock('../../onboarding_flow_context', () => ({
 }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { useServiceSettings } from './use_service_settings';
+import { getIncompleteInstances, useServiceSettings } from './use_service_settings';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
@@ -381,5 +381,56 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
     expect(call.serviceVars).toHaveProperty('svc_a');
     expect(call.serviceVars).toHaveProperty('svc_b');
     expect(call.serviceVars).not.toHaveProperty('svc_stale');
+  });
+});
+
+describe('getIncompleteInstances — required set follows the matrix view', () => {
+  const def = (name: string) => ({ name, type: 'text', required: true, show_user: true } as any);
+  const base = {
+    id: 'cloudtrail',
+    name: 'CloudTrail',
+    dataStreams: ['cloudtrail'],
+    inputs: ['aws-s3'],
+    varDefsByInput: { 'aws-s3': { bucket_arn: def('bucket_arn'), queue_url: def('queue_url') } },
+  } as unknown as AwsServiceMatrixEntry;
+  const ecfView = { ...base, requiredConfig: ['bucket_arn'], settingsScope: 'ecf' as const };
+  const agentView = { ...base, requiredConfig: ['bucket_arn', 'queue_url'] };
+  const instances = [
+    { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CloudTrail', isDuplicate: false },
+  ];
+  const serviceVars = {
+    cloudtrail: {
+      enabledDataStreams: ['cloudtrail'],
+      varsByDataStream: {
+        cloudtrail: {
+          enabledInputs: ['aws-s3'],
+          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::b' } },
+        },
+      },
+    },
+  };
+
+  it('is complete with only the ARN under the ECF view', () => {
+    expect(
+      getIncompleteInstances(instances, serviceVars, new Map([['cloudtrail', ecfView]]))
+    ).toEqual([]);
+  });
+
+  it('is incomplete under the agent-based view until the extra required var is filled', () => {
+    const map = new Map([['cloudtrail', agentView]]);
+    expect(getIncompleteInstances(instances, serviceVars, map)).toHaveLength(1);
+
+    const filled = {
+      cloudtrail: {
+        ...serviceVars.cloudtrail,
+        varsByDataStream: {
+          cloudtrail: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::b', queue_url: 'https://q' } },
+          },
+        },
+      },
+    };
+    expect(getIncompleteInstances(instances, filled, map)).toEqual([]);
   });
 });

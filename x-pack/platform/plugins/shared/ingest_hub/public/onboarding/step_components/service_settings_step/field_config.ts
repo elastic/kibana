@@ -76,6 +76,27 @@ export function resolveFieldMeta(
 }
 
 /**
+ * `bucket_arn` and `queue_url` are alternatives gated by `collect_s3_logs`: an S3 input given only
+ * a bucket ARN silently polls SQS unless the toggle is on. Returns true when the toggle should
+ * default to on: the input declares it, the user left it unset, and a bucket ARN is present.
+ * Not applied to ECF-scoped services, which never read the toggle.
+ */
+export function shouldDefaultCollectS3Logs(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[] | boolean> | undefined
+): boolean {
+  if (service.settingsScope === 'ecf') return false;
+  if (!service.varDefsByInput?.[input]?.collect_s3_logs) return false;
+  if (vars?.collect_s3_logs !== undefined) return false;
+  const arn = vars?.bucket_arn;
+  const hasArn = Array.isArray(arn)
+    ? arn.some((a) => a.trim() !== '')
+    : typeof arn === 'string' && arn.trim() !== '';
+  return hasArn;
+}
+
+/**
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
