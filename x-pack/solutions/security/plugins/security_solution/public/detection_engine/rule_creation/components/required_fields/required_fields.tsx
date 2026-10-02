@@ -16,7 +16,7 @@ import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { RequiredFieldRow } from './required_fields_row';
-import type { RequiredFieldWarnings } from './required_fields_row';
+import type { RequiredFieldRowView, RequiredFieldWarnings } from './required_fields_row';
 import { getFlattenedArrayFieldNames } from '../utils';
 import * as i18n from './translations';
 
@@ -162,13 +162,14 @@ const RequiredFieldsList = ({
   /*
     Rendering a row is expensive (two comboboxes per row), so long lists are folded.
     Folded rows are still mounted as form fields to keep their values in the form.
+    Unfolded rows beyond the first ones render compact until the user focuses them.
   */
   const [isExpanded, setIsExpanded] = useState(false);
   const expand = useCallback(() => setIsExpanded(true), []);
   const toggleExpanded = useCallback(() => setIsExpanded((value) => !value), []);
   const foldedRowsCount = isExpanded
     ? 0
-    : items.filter((item, index) => isRowFolded({ item, index, isExpanded })).length;
+    : items.filter((item, index) => getRowView({ item, index, isExpanded }) === 'folded').length;
 
   const hasWarnings = fieldValue.some((value) => {
     const { nameWarning, typeWarning } = getWarnings(value);
@@ -220,7 +221,7 @@ const RequiredFieldsList = ({
             <RequiredFieldRow
               key={item.id}
               item={item}
-              isFolded={isRowFolded({ item, index, isExpanded })}
+              view={getRowView({ item, index, isExpanded })}
               onFoldedRowError={expand}
               removeItem={removeItem}
               getWarnings={getWarnings}
@@ -263,8 +264,8 @@ export const RequiredFields = React.memo(RequiredFieldsComponent);
 
 const MAX_UNFOLDED_ROWS = 15;
 
-/* Newly added rows are never folded so the user can fill them in */
-const isRowFolded = ({
+/* Newly added rows are always fully rendered so the user can fill them in */
+const getRowView = ({
   item,
   index,
   isExpanded,
@@ -272,7 +273,13 @@ const isRowFolded = ({
   item: ArrayItem;
   index: number;
   isExpanded: boolean;
-}): boolean => !isExpanded && index >= MAX_UNFOLDED_ROWS && !item.isNew;
+}): RequiredFieldRowView => {
+  if (index < MAX_UNFOLDED_ROWS || item.isNew) {
+    return 'full';
+  }
+
+  return isExpanded ? 'compact' : 'folded';
+};
 
 const NO_WARNINGS: RequiredFieldWarnings = { nameWarning: '', typeWarning: '' };
 

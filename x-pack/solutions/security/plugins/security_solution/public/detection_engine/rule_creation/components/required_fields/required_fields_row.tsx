@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiTextColor,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
 import { NameComboBox } from './name_combobox';
@@ -31,9 +34,18 @@ export interface RequiredFieldWarnings {
   typeWarning: string;
 }
 
+/*
+  - "full" renders comboboxes
+  - "compact" renders cheap text inputs until the user focuses the row
+  - "folded" renders nothing but keeps the row registered in the form
+*/
+export type RequiredFieldRowView = 'full' | 'compact' | 'folded';
+
+type RequiredFieldInputKey = keyof RequiredFieldInput;
+
 interface RequiredFieldRowProps {
   item: ArrayItem;
-  isFolded: boolean;
+  view: RequiredFieldRowView;
   onFoldedRowError: () => void;
   removeItem: (id: number) => void;
   typesByFieldName: Record<string, string[] | undefined>;
@@ -48,7 +60,7 @@ interface RequiredFieldRowProps {
 */
 export const RequiredFieldRow = React.memo(function RequiredFieldRow({
   item,
-  isFolded,
+  view,
   onFoldedRowError,
   removeItem,
   typesByFieldName,
@@ -71,7 +83,7 @@ export const RequiredFieldRow = React.memo(function RequiredFieldRow({
     () => ({
       onError: onFoldedRowError,
       itemId: item.id,
-      autoFocus: item.isNew,
+      autoFocus: item.isNew ? 'name' : undefined,
       onRemove: handleRemove,
       typesByFieldName,
       getWarnings,
@@ -93,7 +105,7 @@ export const RequiredFieldRow = React.memo(function RequiredFieldRow({
       key={item.id}
       path={item.path}
       config={rowFieldConfig}
-      component={isFolded ? FoldedRequiredFieldField : RequiredFieldField}
+      component={ROW_VIEW_COMPONENTS[view]}
       readDefaultValueOnForm={!item.isNew}
       componentProps={componentProps}
     />
@@ -103,7 +115,7 @@ export const RequiredFieldRow = React.memo(function RequiredFieldRow({
 interface RequiredFieldFieldProps {
   field: FieldHook<RequiredFieldInput>;
   onRemove: () => void;
-  autoFocus?: boolean;
+  autoFocus?: RequiredFieldInputKey;
   typesByFieldName: Record<string, string[] | undefined>;
   getAvailableFieldNames: () => string[];
   getWarnings: (value: RequiredFieldInput) => RequiredFieldWarnings;
@@ -138,13 +150,7 @@ const RequiredFieldField = React.memo(function RequiredFieldField({
       error={errorMessage}
       helpText={
         warningMessage && !hasError ? (
-          <EuiTextColor
-            color="warning"
-            id={`warningText-${itemId}`}
-            data-test-subj={`${field.value.name}-warningText`}
-          >
-            {warningMessage}
-          </EuiTextColor>
+          <WarningText itemId={itemId} name={field.value.name} message={warningMessage} />
         ) : (
           ''
         )
@@ -156,7 +162,7 @@ const RequiredFieldField = React.memo(function RequiredFieldField({
           <NameComboBox
             field={field}
             itemId={itemId}
-            autoFocus={autoFocus}
+            autoFocus={autoFocus === 'name'}
             getAvailableFieldNames={getAvailableFieldNames}
             typesByFieldName={typesByFieldName}
             nameWarning={nameWarning}
@@ -167,24 +173,87 @@ const RequiredFieldField = React.memo(function RequiredFieldField({
           <TypeComboBox
             field={field}
             itemId={itemId}
+            autoFocus={autoFocus === 'type'}
             typesByFieldName={typesByFieldName}
             typeWarning={typeWarning}
             typeError={typeError}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              onClick={onRemove}
-              aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
-              data-test-subj={`removeRequiredFieldButton-${field.value.name}`}
-            />
-          </EuiToolTip>
+          <RemoveButton name={field.value.name} onRemove={onRemove} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+});
+
+/*
+  Renders plain text inputs instead of comboboxes, since mounting comboboxes for hundreds of rows is slow.
+  Switches to comboboxes for good once the user focuses an input or the row becomes invalid.
+*/
+const CompactRequiredFieldField = React.memo(function CompactRequiredFieldField(
+  props: RequiredFieldFieldProps
+) {
+  const { field, onRemove, getWarnings, itemId } = props;
+  const [isActive, setIsActive] = useState(false);
+  const [autoFocus, setAutoFocus] = useState<RequiredFieldInputKey>();
+  const hasErrors = field.errors.length > 0;
+
+  const activateName = useCallback(() => {
+    setAutoFocus('name');
+    setIsActive(true);
+  }, []);
+
+  const activateType = useCallback(() => {
+    setAutoFocus('type');
+    setIsActive(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasErrors) {
+      setIsActive(true);
+    }
+  }, [hasErrors]);
+
+  if (isActive || hasErrors) {
+    return <RequiredFieldField {...props} autoFocus={autoFocus} />;
+  }
+
+  const { name, type } = field.value;
+  const { nameWarning, typeWarning } = getWarnings(field.value);
+  const warningMessage = nameWarning || typeWarning;
+
+  return (
+    <EuiFormRow
+      fullWidth
+      helpText={
+        warningMessage ? <WarningText itemId={itemId} name={name} message={warningMessage} /> : ''
+      }
+      color="warning"
+    >
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow>
+          <EuiFieldText
+            value={name}
+            onFocus={activateName}
+            onChange={activateName}
+            aria-label={i18n.FIELD_NAME}
+            prepend={nameWarning ? <WarningIcon itemId={itemId} /> : undefined}
+            data-test-subj={`requiredFieldNameCompact-${name || 'empty'}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiFieldText
+            value={type}
+            onFocus={activateType}
+            onChange={activateType}
+            aria-label={i18n.FIELD_TYPE}
+            prepend={typeWarning ? <WarningIcon itemId={itemId} /> : undefined}
+            data-test-subj={`requiredFieldTypeCompact-${type || 'empty'}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RemoveButton name={name} onRemove={onRemove} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
@@ -208,3 +277,52 @@ const FoldedRequiredFieldField = ({ field, onError }: FoldedRequiredFieldFieldPr
 
   return null;
 };
+
+const ROW_VIEW_COMPONENTS = {
+  full: RequiredFieldField,
+  compact: CompactRequiredFieldField,
+  folded: FoldedRequiredFieldField,
+} as const;
+
+interface WarningTextProps {
+  itemId: string;
+  name: string;
+  message: string;
+}
+
+const WarningText = ({ itemId, name, message }: WarningTextProps) => (
+  <EuiTextColor color="warning" id={`warningText-${itemId}`} data-test-subj={`${name}-warningText`}>
+    {message}
+  </EuiTextColor>
+);
+
+const WarningIcon = ({ itemId }: { itemId: string }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiIcon
+      size="s"
+      type="warning"
+      color={euiTheme.colors.textWarning}
+      data-test-subj="warningIcon"
+      aria-labelledby={`warningText-${itemId}`}
+    />
+  );
+};
+
+interface RemoveButtonProps {
+  name: string;
+  onRemove: () => void;
+}
+
+const RemoveButton = ({ name, onRemove }: RemoveButtonProps) => (
+  <EuiToolTip content={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+    <EuiButtonIcon
+      color="danger"
+      iconType="trash"
+      onClick={onRemove}
+      aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+      data-test-subj={`removeRequiredFieldButton-${name}`}
+    />
+  </EuiToolTip>
+);

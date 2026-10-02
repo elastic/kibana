@@ -561,6 +561,90 @@ describe('RequiredFields form part', () => {
       });
 
       expect(screen.getByDisplayValue('field19')).toBeVisible();
+      expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
+    });
+
+    it('renders unfolded rows beyond the first 15 as compact rows', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.getByTestId('requiredFieldNameSelect-field14')).toBeVisible();
+      expect(screen.getByTestId('requiredFieldNameCompact-field15')).toHaveValue('field15');
+      expect(screen.queryByTestId('requiredFieldNameSelect-field15')).not.toBeInTheDocument();
+    });
+
+    it('switches a compact row to comboboxes when its name is focused', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      await act(async () => {
+        fireEvent.focus(screen.getByTestId('requiredFieldNameCompact-field19'));
+      });
+
+      expect(screen.queryByTestId('requiredFieldNameCompact-field19')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('requiredFieldNameSelect-field19').querySelector('input')
+      ).toHaveFocus();
+    });
+
+    it('switches a compact row to comboboxes when its type is focused', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      await act(async () => {
+        fireEvent.focus(screen.getAllByTestId('requiredFieldTypeCompact-keyword')[0]);
+      });
+
+      expect(screen.getByTestId('requiredFieldNameSelect-field15')).toBeVisible();
+      expect(
+        screen.getAllByTestId('requiredFieldTypeSelect-keyword')[15].querySelector('input')
+      ).toHaveFocus();
+    });
+
+    it('submits a required field updated in a compact row', async () => {
+      const handleSubmit = jest.fn();
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({ name: 'field20', esTypes: ['keyword'] }),
+      ];
+
+      render(
+        <TestForm
+          initialState={longInitialState}
+          indexPatternFields={indexPatternFields}
+          onSubmit={handleSubmit}
+        />
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      await act(async () => {
+        fireEvent.focus(screen.getByTestId('requiredFieldNameCompact-field19'));
+      });
+
+      await selectEuiComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('field19'),
+        optionText: 'field20',
+      });
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: [...longInitialState.slice(0, 19), { name: 'field20', type: 'keyword' }],
+          isValid: true,
+        });
+      });
     });
   });
 
