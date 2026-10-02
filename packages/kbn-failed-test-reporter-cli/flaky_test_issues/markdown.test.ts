@@ -16,7 +16,7 @@ import {
   formatFullFailureMessage,
   targetEnvironment,
   formatFailureMessage,
-  formatBranchRates,
+  formatQualifyingBranch,
   formatPercent,
   testDashboardUrl,
   testsTable,
@@ -59,29 +59,28 @@ describe('branchesByFailedBuilds', () => {
   });
 });
 
-describe('formatBranchRates', () => {
-  const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 };
-  const test = flakyTest({
-    byBranch: [
-      { branch: 'main', builds: 547, failedBuilds: 0, buildFailRate: 0 },
-      { branch: '9.5', builds: 122, failedBuilds: 4, buildFailRate: 4 / 122 },
-      { branch: '9.4', builds: 100, failedBuilds: 2, buildFailRate: 0.02 },
-      // a high rate on too few builds or failures does not qualify a branch
-      { branch: 'feature', builds: 1, failedBuilds: 1, buildFailRate: 1 },
-      { branch: '8.19', builds: 50, failedBuilds: 1, buildFailRate: 0.02 },
-    ],
+describe('formatQualifyingBranch', () => {
+  it('shows the branch the test qualified on, not the one with the highest raw rate, in bold', () => {
+    const test = flakyTest({
+      byBranch: [
+        { branch: 'main', builds: 547, failedBuilds: 2, buildFailRate: 2 / 547 },
+        { branch: 'feature', builds: 1, failedBuilds: 1, buildFailRate: 1 },
+      ],
+      flakiestBranch: {
+        pipeline: 'kibana-on-merge',
+        branch: '9.5',
+        builds: 122,
+        failedBuilds: 4,
+        buildFailRate: 4 / 122,
+        episodes: 3,
+      },
+    });
+
+    expect(formatQualifyingBranch(test)).toBe('**`9.5` 3% (4 / 122)**');
   });
 
-  it('lists only the branches clearing every threshold, highest rate first, in bold', () => {
-    expect(formatBranchRates(test, thresholds)).toBe('**`9.5` 3% (4 / 122)**');
-    expect(formatBranchRates(test, { ...thresholds, minFailRate: 0.02 })).toBe(
-      '**`9.5` 3% (4 / 122)**<br>**`9.4` 2% (2 / 100)**'
-    );
-  });
-
-  it('shows a dash when no branch qualifies', () => {
-    expect(formatBranchRates(flakyTest({ byBranch: [] }), thresholds)).toBe('-');
-    expect(formatBranchRates(test, { ...thresholds, minFailRate: 0.5 })).toBe('-');
+  it('shows a dash when the test did not qualify on a branch', () => {
+    expect(formatQualifyingBranch(flakyTest({ flakiestBranch: undefined }))).toBe('-');
   });
 });
 
@@ -100,11 +99,7 @@ describe('testsTable', () => {
     const tests = Array.from({ length: 4 }, (_, index) =>
       flakyTest({ testId: `t${index}`, title: `test | ${index}` })
     );
-    const rendered = testsTable(tests, {
-      withDashboardLinks: true,
-      maxRows: 2,
-      thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 },
-    });
+    const rendered = testsTable(tests, { withDashboardLinks: true, maxRows: 2 });
 
     expect(rendered.split('\n')).toHaveLength(6);
     expect(rendered).toContain('| Test | Flaky branches | Dashboard |');
@@ -112,13 +107,9 @@ describe('testsTable', () => {
       `| test \\| 0 | **\`main\` 10% (49 / 509)** | [dashboard](${testDashboardUrl('t0')}) |`
     );
     expect(rendered).toContain('and 2 more flaky tests in this file.');
-    expect(
-      testsTable(tests, {
-        withDashboardLinks: false,
-        maxRows: 10,
-        thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 },
-      })
-    ).not.toContain('Dashboard');
+    expect(testsTable(tests, { withDashboardLinks: false, maxRows: 10 })).not.toContain(
+      'Dashboard'
+    );
   });
 });
 

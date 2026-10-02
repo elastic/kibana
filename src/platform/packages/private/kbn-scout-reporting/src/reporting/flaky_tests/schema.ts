@@ -13,15 +13,15 @@ import { z } from '@kbn/zod/v4';
  * Bump whenever a change to the schemas below would break a consumer reading a previously
  * written report.
  */
-export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
+export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 2;
 
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
 export type TestFramework = z.infer<typeof TestFrameworkSchema>;
 
 /**
- * `flaky`: failed in some builds and passed in others. `consistently-failing`: never had a
- * clean pass in the window.
+ * `flaky`: recurring episodes or retry recoveries in one execution context.
+ * `consistently-failing`: its latest runs there failed without passing on a retry.
  */
 export const FLAKY_TEST_CLASSIFICATIONS = ['flaky', 'consistently-failing'] as const;
 export const FlakyTestClassificationSchema = z.enum(FLAKY_TEST_CLASSIFICATIONS);
@@ -132,18 +132,56 @@ export const FlakyTestTargetStatsSchema = z.object({
 export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
 
 /**
- * The branch that qualified a test: the one with the highest build failure rate among the
- * branches that clear every threshold on their own, so that a clean branch cannot dilute a
- * flaky one.
+ * The context that qualified a test, judged independently of other pipelines, branches, configs
+ * and targets. Counts cover its qualifying window, including suspected incidents.
  */
 export const FlakyTestFlakiestBranchSchema = z.object({
+  pipeline: z.string(),
   branch: z.string(),
+  configPath: z.optional(z.string()),
+  targetMode: z.optional(z.string()),
+  targetType: z.optional(z.string()),
   builds: z.int(),
   failedBuilds: z.int(),
   /** `failedBuilds / builds` on this branch. */
   buildFailRate: z.number(),
+  /** Runs of consecutive failed builds, each separated from the next by a pass. */
+  episodes: z.int(),
 });
 export type FlakyTestFlakiestBranch = z.infer<typeof FlakyTestFlakiestBranchSchema>;
+
+export const FlakyTestQualificationSchema = z.object({
+  classification: FlakyTestClassificationSchema,
+  flakiestBranch: FlakyTestFlakiestBranchSchema,
+  reasons: z
+    .array(
+      z.enum([
+        'separate-episodes',
+        'repeated-retry-recovery',
+        'consecutive-terminal-failures',
+        'historical-recurrence',
+      ])
+    )
+    .min(1),
+  windowDays: z.int(),
+  recentEpisodes: z.int(),
+  retryRecoveredBuilds: z.int(),
+  trailingHardFailures: z.int(),
+  historicalEpisodes: z.int(),
+  historicalFailureDays: z.int(),
+  lastFailedAt: z.coerce.date(),
+  latestExecutionAt: z.coerce.date(),
+  freshFailure: z.boolean(),
+  suspectedIncidentBuilds: z.int(),
+});
+export type FlakyTestQualification = z.infer<typeof FlakyTestQualificationSchema>;
+
+export const FlakyTestIncidentSchema = z.object({
+  jobId: z.string(),
+  failedTests: z.int(),
+  testIds: z.array(z.string()),
+});
+export type FlakyTestIncident = z.infer<typeof FlakyTestIncidentSchema>;
 
 /**
  * One test aggregated over the report window. Counts are per execution (one per test run;
@@ -190,10 +228,12 @@ export const FlakyTestEntrySchema = z.object({
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
   /**
-   * The branch on which the test cleared the thresholds; the top-level rate above is diluted
-   * by the other branches. Absent in reports written before thresholds applied per branch.
+   * The context in which the test cleared the thresholds; the top-level rate above is
+   * diluted by the other branches. Absent in reports written before thresholds applied per branch.
    */
   flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
+  /** Every qualifying context; a test may be flaky here and consistently failing elsewhere. */
+  qualifications: z.array(FlakyTestQualificationSchema).default([]),
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
@@ -243,22 +283,18 @@ export const FlakyTestFileStatsSchema = z.object({
 });
 export type FlakyTestFileStats = z.infer<typeof FlakyTestFileStatsSchema>;
 
-/**
- * A test qualifies when a single branch clears all three build thresholds on its own: a test
- * flaky on `9.5` but clean on `main` is judged on its `9.5` numbers, not on the diluted total.
- */
+/** Thresholds apply independently to each pipeline, branch, config and deployment target. */
 export const FlakyTestReportThresholdsSchema = z.object({
-  /** Branches on which the test was seen in fewer builds than this cannot qualify it. */
-  minBuilds: z.int().min(1),
-  /** Branches on which the test failed in fewer builds than this cannot qualify it. */
-  minFailedBuilds: z.int().min(1),
-  /**
-   * Branches on which `failedBuilds / builds` is below this fraction cannot qualify the test
-   * (`0.03` for 3%); `0` keeps every test that clears the build counts. The schema default is
-   * `0` only so that reports written before the field existed, without a rate gate, still parse.
-   */
-  minFailRate: z.number().min(0).max(1).default(0),
-  /** Maximum number of tests kept per list. */
+  minEpisodes: z.int().min(2),
+  minRetryRecoveries: z.int().min(2).default(2),
+  minConsecutiveFailures: z.int().min(2).default(2),
+  recentDays: z.int().min(1).default(14),
+  maxRuns: z.int().min(2),
+  minHistoricalEpisodes: z.int().min(2).default(3),
+  minHistoricalFailureDays: z.int().min(2).default(3),
+  freshFailureHours: z.int().min(1).default(24),
+  /** Flag jobs with this many failing tests as suspected incidents; retain their evidence. */
+  incidentFailures: z.int().min(1),
   maxTests: z.int().min(1),
 });
 export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholdsSchema>;
@@ -277,15 +313,21 @@ export interface FlakyTestReportOptions {
 }
 
 export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
-  lookbackDays: 7,
+  lookbackDays: 28,
   pipelines: ['kibana-on-merge'],
   branches: [],
   frameworks: [...TEST_FRAMEWORKS],
   classifications: [...FLAKY_TEST_CLASSIFICATIONS],
   thresholds: {
-    minBuilds: 10,
-    minFailedBuilds: 2,
-    minFailRate: 0.03,
+    minEpisodes: 2,
+    minRetryRecoveries: 2,
+    minConsecutiveFailures: 2,
+    recentDays: 14,
+    minHistoricalEpisodes: 3,
+    minHistoricalFailureDays: 3,
+    freshFailureHours: 24,
+    maxRuns: 200,
+    incidentFailures: 10,
     maxTests: 200,
   },
   samplesPerTest: 3,
@@ -323,10 +365,12 @@ export const FlakyTestReportSchema = z.object({
      */
     flakyByBranch: z.record(z.string(), z.int()).default({}),
   }),
-  /** Tests that failed in some builds and passed in others, ranked by failed builds. */
+  /** Tests with recurring failures or retry recoveries in at least one context. */
   flaky: z.array(FlakyTestEntrySchema),
-  /** Tests that never had a clean pass in the window; broken rather than flaky. */
+  /** Tests whose latest runs in at least one context all failed without recovery. */
   consistentlyFailing: z.array(FlakyTestEntrySchema),
+  /** Broad job failures are retained even when no individual test qualifies. */
+  suspectedIncidents: z.array(FlakyTestIncidentSchema).default([]),
   /**
    * Per-file, per-pipeline breakdown for the tests of both lists. Defaults so that reports
    * written before the field existed still parse.

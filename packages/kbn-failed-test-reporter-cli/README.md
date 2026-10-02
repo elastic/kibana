@@ -63,12 +63,25 @@ that could be about it. The matching rules then decide which suite an issue is r
 - `moved`: same test and file name at another location, i.e. the file moved since;
 - `file`: it only names the same file, for another test; it never counts as tracking the suite.
 
-A test counts as flaky when, within the report window, a single branch ran it in at least
-`minBuilds` builds (default 10), failed it in at least `minFailedBuilds` of them (default 2) and
-in at least `minFailRate` of them (default 3%), and it passed at least once or recovered on an
-in-run retry anywhere in the window. Thresholds apply per branch so that a clean branch cannot
-dilute a flaky one; the branch a test qualified on is recorded as `flakiestBranch`. Tests that
-never passed in the window are consistently failing rather than flaky and are not reported.
+Qualification is evaluated independently for each test, pipeline, branch, config and deployment
+target. The default rules are:
+
+- **Recent flakiness:** at least 2 failure episodes separated by a clean build, or 2 builds that
+  failed and then recovered on retry. Both use the latest 200 builds within 14 days.
+- **Historical recurrence:** at least 3 episodes starting on 3 distinct UTC dates within 28 days,
+  without the 200-build cap.
+- **Consistently failing:** the latest 2 builds failed without recovery. This takes precedence
+  over flakiness in that context; another context can still qualify the same test as flaky.
+
+The JSON preserves all qualifying contexts, reasons and timestamps. A failure in the last 24 hours
+sets `freshFailure`; older evidence remains visible. Jobs with at least 10 distinct failing tests
+are annotated as suspected incidents, including their affected test IDs; their executions remain
+in the evidence. This does not establish an infrastructure cause.
+
+The report includes both classifications by default. This command creates issues only for the
+`flaky` list; incident flags and freshness do not yet gate issue creation or AI fixes. Urgent
+persistent-failure issues and faster pipeline scheduling are separate follow-ups. The preferred
+context for each classification remains available as `flakiestBranch` for existing consumers.
 
 ```bash
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge --lookbackDays 7 --classifications flaky

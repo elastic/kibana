@@ -589,11 +589,7 @@ export const renderFlakySuiteIssueBody = (
 ): string => {
   const sections = [
     opening(suite),
-    testsTable(suite.tests, {
-      withDashboardLinks: true,
-      maxRows: MAX_TEST_ROWS,
-      thresholds: ctx.report.thresholds,
-    }),
+    testsTable(suite.tests, { withDashboardLinks: true, maxRows: MAX_TEST_ROWS }),
     skippedNote(suite),
     '### Suite',
     suiteDetails(suite),

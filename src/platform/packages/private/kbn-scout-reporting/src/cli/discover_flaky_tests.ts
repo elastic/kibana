@@ -28,9 +28,9 @@ import {
 } from '../reporting/flaky_tests';
 import { DEFAULT_TERMINAL_WIDTH, displaySummary, terminalWidth } from './flaky_tests_summary';
 
-// The per-framework aggregations scan hundreds of millions of documents; the client default of
-// 60s is not enough for them.
-const ES_REQUEST_TIMEOUT_MS = 300_000;
+// The 28-day history and detail queries scan hundreds of millions of documents and can exceed
+// five minutes; keep requests bounded within the pipeline's 30-minute step budget.
+const ES_REQUEST_TIMEOUT_MS = 600_000;
 
 const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 
@@ -39,9 +39,9 @@ const DEFAULT_LOOKBACK_DAYS = defaults.lookbackDays;
 const DEFAULT_PIPELINES = defaults.pipelines.join(',');
 const ALL_FRAMEWORKS = TEST_FRAMEWORKS.join(',');
 const ALL_CLASSIFICATIONS = FLAKY_TEST_CLASSIFICATIONS.join(',');
-const DEFAULT_MIN_BUILDS = defaults.thresholds.minBuilds;
-const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
-const DEFAULT_MIN_FAIL_RATE = defaults.thresholds.minFailRate;
+const DEFAULT_MIN_EPISODES = defaults.thresholds.minEpisodes;
+const DEFAULT_MAX_RUNS = defaults.thresholds.maxRuns;
+const DEFAULT_INCIDENT_FAILURES = defaults.thresholds.incidentFailures;
 const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
 const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
 // Only affects the printed summary; the JSON report is bounded by --maxTests
@@ -88,15 +88,16 @@ export const discoverFlakyTests: Command<void> = {
   Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
-  The build thresholds apply per branch: a test qualifies when one branch clears all of them
-  on its own, so a clean branch cannot dilute a flaky one.
+  Qualify each pipeline, branch, config and target independently. Recent episodes, repeated
+  retry recovery and historical recurrence identify flakiness; consecutive terminal failures
+  identify persistent breakage. The JSON retains all qualifying contexts and suspected incidents.
 
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
     node scripts/scout discover-flaky-tests
 
-    # Include PR builds and widen the window
-    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14
+    # Include the Elastic Cloud pipelines, judged on the same number of runs despite running less often
+    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-scout-tests
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
@@ -117,9 +118,15 @@ export const discoverFlakyTests: Command<void> = {
       'branches',
       'frameworks',
       'classifications',
-      'minBuilds',
-      'minFailedBuilds',
-      'minFailRate',
+      'minEpisodes',
+      'minRetryRecoveries',
+      'minConsecutiveFailures',
+      'recentDays',
+      'minHistoricalEpisodes',
+      'minHistoricalFailureDays',
+      'freshFailureHours',
+      'maxRuns',
+      'incidentFailures',
       'maxTests',
       'samplesPerTest',
       'outputPath',
@@ -135,9 +142,15 @@ export const discoverFlakyTests: Command<void> = {
       lookbackDays: String(DEFAULT_LOOKBACK_DAYS),
       pipelines: DEFAULT_PIPELINES,
       classifications: ALL_CLASSIFICATIONS,
-      minBuilds: String(DEFAULT_MIN_BUILDS),
-      minFailedBuilds: String(DEFAULT_MIN_FAILED_BUILDS),
-      minFailRate: String(DEFAULT_MIN_FAIL_RATE),
+      minEpisodes: String(DEFAULT_MIN_EPISODES),
+      minRetryRecoveries: String(defaults.thresholds.minRetryRecoveries),
+      minConsecutiveFailures: String(defaults.thresholds.minConsecutiveFailures),
+      recentDays: String(defaults.thresholds.recentDays),
+      minHistoricalEpisodes: String(defaults.thresholds.minHistoricalEpisodes),
+      minHistoricalFailureDays: String(defaults.thresholds.minHistoricalFailureDays),
+      freshFailureHours: String(defaults.thresholds.freshFailureHours),
+      maxRuns: String(DEFAULT_MAX_RUNS),
+      incidentFailures: String(DEFAULT_INCIDENT_FAILURES),
       maxTests: String(DEFAULT_MAX_TESTS),
       samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
@@ -153,9 +166,15 @@ export const discoverFlakyTests: Command<void> = {
     --branches           (optional)  Comma-separated branches; no filter when omitted
     --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
     --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
-    --minBuilds          (optional)  Builds a branch must have run the test in to qualify it [default: ${DEFAULT_MIN_BUILDS}]
-    --minFailedBuilds    (optional)  Builds a branch must have failed the test in to qualify it [default: ${DEFAULT_MIN_FAILED_BUILDS}]
-    --minFailRate        (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it; 0 disables [default: ${DEFAULT_MIN_FAIL_RATE}, i.e. 3%]
+    --minRetryRecoveries (optional)  Recovered builds in the recent window [default: ${defaults.thresholds.minRetryRecoveries}]
+    --minConsecutiveFailures (optional) Consecutive terminal failures [default: ${defaults.thresholds.minConsecutiveFailures}]
+    --recentDays         (optional)  Recent qualification window in days [default: ${defaults.thresholds.recentDays}]
+    --minHistoricalEpisodes (optional) Episodes across the full lookback [default: ${defaults.thresholds.minHistoricalEpisodes}]
+    --minHistoricalFailureDays (optional) Distinct UTC episode-start days [default: ${defaults.thresholds.minHistoricalFailureDays}]
+    --freshFailureHours  (optional)  Freshness annotation; does not discard history [default: ${defaults.thresholds.freshFailureHours}]
+    --minEpisodes        (optional)  Separate failure episodes an execution context must have to qualify a test as flaky [default: ${DEFAULT_MIN_EPISODES}]
+    --maxRuns            (optional)  Latest runs per context the thresholds are checked against [default: ${DEFAULT_MAX_RUNS}]
+    --incidentFailures   (optional)  Failed tests that flag a suspected incident; executions remain in the report [default: ${DEFAULT_INCIDENT_FAILURES}]
     --maxTests           (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
     --samplesPerTest     (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
     --outputPath         (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
@@ -178,10 +197,6 @@ export const discoverFlakyTests: Command<void> = {
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
     if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
       throw createFlagError('--lookbackDays must be a positive integer');
-    }
-    const minFailRate = flagsReader.requiredNumber('minFailRate');
-    if (!(minFailRate >= 0 && minFailRate <= 1)) {
-      throw createFlagError('--minFailRate must be a number between 0 and 1');
     }
     const summaryLimit = flagsReader.requiredNumber('summaryLimit');
     if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
@@ -213,9 +228,15 @@ export const discoverFlakyTests: Command<void> = {
         frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
         classifications,
         thresholds: {
-          minBuilds: flagsReader.requiredNumber('minBuilds'),
-          minFailedBuilds: flagsReader.requiredNumber('minFailedBuilds'),
-          minFailRate,
+          minEpisodes: flagsReader.requiredNumber('minEpisodes'),
+          minRetryRecoveries: flagsReader.requiredNumber('minRetryRecoveries'),
+          minConsecutiveFailures: flagsReader.requiredNumber('minConsecutiveFailures'),
+          recentDays: flagsReader.requiredNumber('recentDays'),
+          minHistoricalEpisodes: flagsReader.requiredNumber('minHistoricalEpisodes'),
+          minHistoricalFailureDays: flagsReader.requiredNumber('minHistoricalFailureDays'),
+          freshFailureHours: flagsReader.requiredNumber('freshFailureHours'),
+          maxRuns: flagsReader.requiredNumber('maxRuns'),
+          incidentFailures: flagsReader.requiredNumber('incidentFailures'),
           maxTests: flagsReader.requiredNumber('maxTests'),
         },
         samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),

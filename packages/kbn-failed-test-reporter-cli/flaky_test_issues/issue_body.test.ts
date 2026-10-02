@@ -82,6 +82,14 @@ const multiTestReport = () => {
         },
         { branch: '9.1', builds: 58, failedBuilds: 0, buildFailRate: 0 },
       ],
+      flakiestBranch: {
+        pipeline: 'kibana-on-merge',
+        branch: 'main',
+        builds: 200,
+        failedBuilds: 20,
+        buildFailRate: 0.1,
+        episodes: 14,
+      },
       latestRun: {
         branch: 'main',
         status: 'skipped',

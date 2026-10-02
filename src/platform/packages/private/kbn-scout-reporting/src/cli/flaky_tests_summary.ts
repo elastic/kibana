@@ -113,35 +113,20 @@ export const formatAge = (from: Date, to: Date): string => {
 const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
 
 /**
- * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
- * count when no branch has enough, so one failure on a barely exercised branch does not win.
- * Only checks `minBuilds`, so it is just the fallback for reports written before the branch a
- * test qualified on was recorded; see `qualifyingBranch`.
- */
-export const flakiestBranch = (
-  byBranch: FlakyTestEntry['byBranch'],
-  minBuilds: number
-): FlakyTestBranchStats | undefined => {
-  const exercised = byBranch.filter((stats) => stats.builds >= minBuilds);
-  return [...(exercised.length > 0 ? exercised : byBranch)].sort(
-    (a, b) => b.buildFailRate - a.buildFailRate
-  )[0];
-};
-
-/**
  * Stats of the branch the test qualified on, which is what the thresholds were checked against.
  * The per-branch row carries the latest run; should it be missing, the recorded counts are shown
- * on their own. Reports written before `flakiestBranch` existed fall back to `flakiestBranch()`.
+ * on their own.
  */
 export const qualifyingBranch = (
-  entry: Pick<FlakyTestEntry, 'byBranch' | 'flakiestBranch'>,
-  minBuilds: number
+  entry: Pick<FlakyTestEntry, 'byBranch' | 'flakiestBranch'>
 ): FlakyTestBranchStats | undefined => {
   if (!entry.flakiestBranch) {
-    return flakiestBranch(entry.byBranch, minBuilds);
+    return undefined;
   }
   const { branch } = entry.flakiestBranch;
-  return entry.byBranch.find((stats) => stats.branch === branch) ?? entry.flakiestBranch;
+  const details = entry.byBranch.find((stats) => stats.branch === branch);
+  // Use qualified context counts; branch totals mix other pipelines and targets.
+  return { ...details, ...entry.flakiestBranch };
 };
 
 const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
@@ -203,7 +188,6 @@ export const classifiedEntries = (
 export const buildTopFailingTable = (
   top: readonly ClassifiedEntry[],
   all: readonly ClassifiedEntry[],
-  minBuilds: number,
   now: Date,
   widths: FlexColumnWidths = flexColumnWidths(terminalWidth())
 ): CliTable3.Table => {
@@ -240,7 +224,7 @@ export const buildTopFailingTable = (
 
     entries.forEach(({ entry, classification }, index) => {
       rank += 1;
-      const flakiest = qualifyingBranch(entry, minBuilds);
+      const flakiest = qualifyingBranch(entry);
       table.push([
         colorize(classification, rank),
         entry.framework,
@@ -295,15 +279,17 @@ export const displaySummary = (
     ],
     [
       dedent(`\
-        Thresholds (per branch: one branch must clear all three on its own)
-          Min builds        : ${thresholds.minBuilds} (builds the branch ran the test in)
-          Min failed builds : ${thresholds.minFailedBuilds} (builds the branch failed the test in)
-          Min fail rate     : ${formatRate(
-            thresholds.minFailRate
-          )} (failed / all builds on the branch)
+        Thresholds (per pipeline, branch, config and target: each context qualifies independently)
+          Min episodes      : ${thresholds.minEpisodes} (separate failure episodes, passes in between)
+          Max runs          : ${thresholds.maxRuns} (latest runs per context in the recent window)
+          Incident failures : ${thresholds.incidentFailures} (failed tests flagging a suspected incident; retained)
           Max tests         : ${thresholds.maxTests} per list
-          Flaky                = qualifying test with at least one pass or in-run retry recovery
-          Consistently failing = qualifying test that never passed in the window
+          Recent days       : ${thresholds.recentDays}; retry recoveries: ${thresholds.minRetryRecoveries}
+          Historical        : ${thresholds.minHistoricalEpisodes} episodes on ${thresholds.minHistoricalFailureDays} UTC days
+          Fresh failure     : within ${thresholds.freshFailureHours} hours (annotation only)
+          Suspected incidents: ${report.suspectedIncidents.length} jobs retained in JSON
+          Flaky                = recent episodes, retry recovery, or historical recurrence
+          Consistently failing = latest ${thresholds.minConsecutiveFailures} runs failed without passing on a retry
           Ranking              = failed builds, then fail rate on the flakiest branch, then latest failure
         `),
     ],
@@ -330,7 +316,6 @@ export const displaySummary = (
       `Top ${top.length} failing tests by failed builds (${legend})\n${buildTopFailingTable(
         top,
         all,
-        report.thresholds.minBuilds,
         report.generatedAt,
         flexColumnWidths(width)
       ).toString()}`,

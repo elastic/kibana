@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_FLAKY_TEST_REPORT_OPTIONS } from '../reporting/flaky_tests';
 import stripAnsi from 'strip-ansi';
 import { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -19,7 +20,6 @@ import {
   classifiedEntries,
   DEFAULT_TERMINAL_WIDTH,
   displaySummary,
-  flakiestBranch,
   flexColumnWidths,
   formatAge,
   groupByFile,
@@ -69,7 +69,16 @@ const entry = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEntry => ({
   byTarget: [],
   firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
   lastFailedAt: new Date('2026-09-02T00:00:00.000Z'),
+  flakiestBranch: {
+    pipeline: 'kibana-on-merge',
+    branch: 'main',
+    builds: 10,
+    failedBuilds: 2,
+    buildFailRate: 0.2,
+    episodes: 2,
+  },
   latestRun: { status: 'passed', timestamp: new Date('2026-09-07T09:00:00.000Z'), branch: 'main' },
+  qualifications: [],
   sampleFailures: [],
   errors: [],
   ...overrides,
@@ -109,62 +118,36 @@ describe('formatAge', () => {
   });
 });
 
-describe('flakiestBranch', () => {
-  it('returns undefined when there are no branches', () => {
-    expect(flakiestBranch([], 10)).toBeUndefined();
-  });
-
-  it('prefers the highest fail rate among branches with enough builds', () => {
-    const picked = flakiestBranch(
-      [
-        branch({ branch: 'main', builds: 50, buildFailRate: 0.1 }),
-        branch({ branch: '9.2', builds: 20, buildFailRate: 0.3 }),
-        branch({ branch: 'feature', builds: 1, buildFailRate: 1 }),
-      ],
-      10
-    );
-    expect(picked?.branch).toBe('9.2');
-  });
-
-  it('falls back to all branches when none has enough builds', () => {
-    const picked = flakiestBranch(
-      [
-        branch({ branch: 'main', builds: 3, buildFailRate: 0.33 }),
-        branch({ branch: '9.2', builds: 2, buildFailRate: 0.5 }),
-      ],
-      10
-    );
-    expect(picked?.branch).toBe('9.2');
-  });
-});
-
 describe('qualifyingBranch', () => {
   // 9.2 has the highest raw rate but, with a single failed build, is not what qualified the test
   const byBranch = [
-    branch({ branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 }),
+    branch({ branch: 'main', builds: 1000, failedBuilds: 3, buildFailRate: 0.003 }),
     branch({ branch: '9.2', builds: 10, failedBuilds: 1, buildFailRate: 0.1 }),
   ];
   const flakiestBranchOnMain = {
+    pipeline: 'kibana-on-merge',
     branch: 'main',
     builds: 100,
     failedBuilds: 3,
     buildFailRate: 0.03,
+    episodes: 3,
   };
 
-  it('returns the per-branch stats of the branch the test qualified on', () => {
-    expect(qualifyingBranch({ byBranch, flakiestBranch: flakiestBranchOnMain }, 10)).toBe(
-      byBranch[0]
-    );
+  it('uses qualifying context counts while retaining branch details', () => {
+    expect(qualifyingBranch({ byBranch, flakiestBranch: flakiestBranchOnMain })).toEqual({
+      ...byBranch[0],
+      ...flakiestBranchOnMain,
+    });
   });
 
   it('shows the recorded counts when the per-branch stats lack that branch', () => {
-    expect(qualifyingBranch({ byBranch: [], flakiestBranch: flakiestBranchOnMain }, 10)).toBe(
+    expect(qualifyingBranch({ byBranch: [], flakiestBranch: flakiestBranchOnMain })).toEqual(
       flakiestBranchOnMain
     );
   });
 
-  it('falls back to the highest fail rate for reports without a qualifying branch', () => {
-    expect(qualifyingBranch({ byBranch }, 10)?.branch).toBe('9.2');
+  it('is undefined for a test that did not qualify on a branch', () => {
+    expect(qualifyingBranch({ byBranch })).toBeUndefined();
   });
 });
 
@@ -242,7 +225,7 @@ describe('buildTopFailingTable', () => {
   it('renders one row per test with a shared file cell and the flakiest branch', () => {
     const first = flaky({ testId: 't1', title: 'first test' });
     const second = flaky({ testId: 't2', title: 'second test' });
-    const rendered = render(buildTopFailingTable([first, second], [first, second], 10, now));
+    const rendered = render(buildTopFailingTable([first, second], [first, second], now));
 
     expect(rendered).toContain('first test');
     expect(rendered).toContain('second test');
@@ -258,7 +241,7 @@ describe('buildTopFailingTable', () => {
   it('mentions qualifying tests of the same file that did not make the top list', () => {
     const shown = flaky({ testId: 't1' });
     const hidden = [flaky({ testId: 't2' }), broken({ testId: 't3' })];
-    const rendered = render(buildTopFailingTable([shown], [shown, ...hidden], 10, now));
+    const rendered = render(buildTopFailingTable([shown], [shown, ...hidden], now));
 
     expect(rendered).toContain('(+2 more in this file)');
   });
@@ -271,7 +254,6 @@ describe('buildTopFailingTable', () => {
           flaky({ testId: 'f1', title: 'sometimes' }),
         ],
         [],
-        10,
         now
       )
     );
@@ -306,7 +288,14 @@ describe('buildTopFailingTable', () => {
                 latestRun: { status: 'failed', timestamp: new Date('2026-09-05T12:00:00.000Z') },
               }),
             ],
-            flakiestBranch: { branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 },
+            flakiestBranch: {
+              pipeline: 'kibana-on-merge',
+              branch: 'main',
+              builds: 100,
+              failedBuilds: 3,
+              buildFailRate: 0.03,
+              episodes: 3,
+            },
             latestRun: {
               status: 'passed',
               timestamp: new Date('2026-09-07T11:00:00.000Z'),
@@ -315,7 +304,6 @@ describe('buildTopFailingTable', () => {
           }),
         ],
         [],
-        10,
         now
       )
     );
@@ -326,44 +314,13 @@ describe('buildTopFailingTable', () => {
     expect(rendered).toContain('2d ago');
   });
 
-  it('falls back to the highest fail rate among exercised branches for reports without a qualifying branch', () => {
-    const rendered = render(
-      buildTopFailingTable(
-        [
-          flaky({
-            byBranch: [
-              branch({
-                branch: 'main',
-                buildFailRate: 0.1,
-                latestRun: { status: 'passed', timestamp: new Date('2026-09-07T11:00:00.000Z') },
-              }),
-              branch({
-                branch: '9.2',
-                buildFailRate: 0.5,
-                latestRun: { status: 'failed', timestamp: new Date('2026-09-06T12:00:00.000Z') },
-              }),
-            ],
-            latestRun: {
-              status: 'passed',
-              timestamp: new Date('2026-09-07T11:00:00.000Z'),
-              branch: 'main',
-            },
-          }),
-        ],
-        [],
-        10,
-        now
-      )
-    );
-
-    expect(rendered).toContain('9.2 (50.0%)');
-    expect(rendered).toContain('failed');
-    expect(rendered).toContain('1d ago');
-  });
-
   it('shows placeholders when owners and branch stats are missing', () => {
     const rendered = render(
-      buildTopFailingTable([flaky({ owners: [], byBranch: [], latestRun: undefined })], [], 10, now)
+      buildTopFailingTable(
+        [flaky({ owners: [], byBranch: [], flakiestBranch: undefined, latestRun: undefined })],
+        [],
+        now
+      )
     );
 
     // owners, flakiest branch and latest run all fall back to a dash; adjacent cells share a
@@ -374,7 +331,8 @@ describe('buildTopFailingTable', () => {
 
 describe('displaySummary', () => {
   const report: FlakyTestReport = {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    suspectedIncidents: [],
     generatedAt: now,
     window: {
       lookbackDays: 7,
@@ -388,9 +346,10 @@ describe('displaySummary', () => {
       classifications: ['flaky', 'consistently-failing'],
     },
     thresholds: {
-      minBuilds: 10,
-      minFailedBuilds: 2,
-      minFailRate: 0,
+      ...DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds,
+      minEpisodes: 2,
+      maxRuns: 200,
+      incidentFailures: 10,
       maxTests: 200,
     },
     summary: {
@@ -457,11 +416,13 @@ describe('displaySummary', () => {
     expect(output).toContain('Branches        : any');
     expect(output).toContain('Frameworks      : jest, playwright');
     expect(output).toContain('Classifications : flaky, consistently-failing');
-    expect(output).toContain('Min builds        : 10');
-    expect(output).toContain('Min failed builds : 2');
-    expect(output).toContain('Min fail rate     : 0.0%');
+    expect(output).toContain('Min episodes      : 2');
+    expect(output).toContain('Max runs          : 200');
+    expect(output).toContain('Incident failures : 10');
     expect(output).toContain('Max tests         : 200 per list');
-    expect(output).toContain('Consistently failing = qualifying test that never passed');
+    expect(output).toContain(
+      'Consistently failing = latest 2 runs failed without passing on a retry'
+    );
     expect(output).toContain('Flaky                : 2 (jest: 2)');
     expect(output).toContain(
       'Flaky by branch      : main: 1, 9.5: 1 (branch each test qualified on)'

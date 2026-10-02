@@ -15,8 +15,8 @@ source .buildkite/scripts/common/util.sh
 cd "${KIBANA_DIR:-$(pwd)}"
 
 FLAKY_TESTS_PIPELINES="${FLAKY_TESTS_PIPELINES:-kibana-on-merge}"
-FLAKY_TESTS_LOOKBACK_DAYS="${FLAKY_TESTS_LOOKBACK_DAYS:-7}"
-FLAKY_TESTS_CLASSIFICATIONS="${FLAKY_TESTS_CLASSIFICATIONS:-flaky}"
+FLAKY_TESTS_LOOKBACK_DAYS="${FLAKY_TESTS_LOOKBACK_DAYS:-28}"
+FLAKY_TESTS_CLASSIFICATIONS="${FLAKY_TESTS_CLASSIFICATIONS:-flaky,consistently-failing}"
 # Optional; no filter when empty
 FLAKY_TESTS_BRANCHES="${FLAKY_TESTS_BRANCHES:-}"
 FLAKY_TESTS_FRAMEWORKS="${FLAKY_TESTS_FRAMEWORKS:-}"
@@ -73,6 +73,9 @@ fi
 
 {
   echo "${counts} tests on \`${FLAKY_TESTS_PIPELINES}\` over the last ${FLAKY_TESTS_LOOKBACK_DAYS} days."
+  echo
+  echo "**$(jq -r '.suspectedIncidents | length' "$REPORT_PATH")** suspected incident jobs retained in the report."
+  echo "Persistent failures are included in this report; GitHub issue creation still handles flaky suites only."
   echo
   echo "Report: <a href=\"artifact://${REPORT_PATH}\">${REPORT_PATH}</a>"
 } | buildkite-agent annotate --style info --context flaky-test-report

@@ -12,18 +12,25 @@ import path from 'node:path';
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ESQL_ROW_LIMIT } from './esql';
+import { qualifyTest, type Qualification } from './qualification';
+export {
+  countEpisodes,
+  countTrailingHardFailures,
+  qualifyBranch,
+  qualifyTest,
+} from './qualification';
 import {
-  fetchBranchCounts,
+  fetchBranchRuns,
   fetchBranchStats,
   fetchFailingFiles,
   fetchFilePipelineStats,
+  fetchIncidentJobs,
   fetchSampleFailures,
   fetchTargetStats,
   fetchTestErrors,
   fetchTestMetadata,
   fetchTestStats,
   fileStatsKey,
-  type BranchCountsRow,
   type FlakyTestQueryScope,
   type TestMetadataRow,
   type TestStatsRow,
@@ -32,6 +39,7 @@ import {
   FLAKY_TEST_CLASSIFICATIONS,
   FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
+  FlakyTestReportThresholdsSchema,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
@@ -43,7 +51,7 @@ import {
   type FlakyTestReport,
   type FlakyTestSampleFailure,
   type FlakyTestReportOptions,
-  type FlakyTestReportThresholds,
+  type FlakyTestIncident,
   type FlakyTestTargetStats,
   type TestFramework,
 } from './schema';
@@ -59,53 +67,6 @@ export const latestRunAcrossBranches = (
     }
   }
   return latest;
-};
-
-type BuildThresholds = Pick<
-  FlakyTestReportThresholds,
-  'minBuilds' | 'minFailedBuilds' | 'minFailRate'
->;
-
-/**
- * Whether the totals could clear the thresholds. A branch never has more builds or failed builds
- * than the total, so this is a cheap pre-check before the per-branch counts are fetched; the
- * failure rate is left out on purpose, as a flaky branch can be diluted by clean ones.
- */
-export const mayQualify = (
-  stats: Pick<TestStatsRow, 'builds' | 'failedBuilds'>,
-  thresholds: Pick<BuildThresholds, 'minBuilds' | 'minFailedBuilds'>
-): boolean =>
-  stats.builds >= thresholds.minBuilds && stats.failedBuilds >= thresholds.minFailedBuilds;
-
-/**
- * The branch that qualifies the test: among the branches clearing every threshold on their
- * own, the one with the highest build failure rate (ties broken by failed builds). Thresholds
- * apply per branch so that a test flaky on one branch is not hidden by clean runs on another.
- */
-export const flakiestQualifyingBranch = (
-  byBranch: ReadonlyArray<Pick<BranchCountsRow, 'branch' | 'builds' | 'failedBuilds'>>,
-  thresholds: BuildThresholds
-): FlakyTestFlakiestBranch | undefined =>
-  byBranch
-    .filter((row) => mayQualify(row, thresholds))
-    .map((row) => ({
-      branch: row.branch,
-      builds: row.builds,
-      failedBuilds: row.failedBuilds,
-      buildFailRate: row.failedBuilds / row.builds,
-    }))
-    .filter((row) => row.buildFailRate >= thresholds.minFailRate)
-    .sort((a, b) => b.buildFailRate - a.buildFailRate || b.failedBuilds - a.failedBuilds)[0];
-
-/**
- * A qualifying test is flaky when it had at least one clean pass or recovered on an in-run
- * retry anywhere in the window; otherwise it is simply broken.
- */
-export const classifyTest = (
-  stats: Pick<TestStatsRow, 'runs' | 'fails' | 'retryFlakes'>
-): FlakyTestClassification => {
-  const passes = stats.runs - stats.fails;
-  return passes > 0 || stats.retryFlakes > 0 ? 'flaky' : 'consistently-failing';
 };
 
 type Rankable = Pick<FlakyTestEntry, 'failedBuilds' | 'buildFailRate' | 'lastFailedAt'> &
@@ -130,7 +91,7 @@ export const rankTests = <T extends Rankable>(entries: readonly T[]): T[] =>
 /** An entry before the per-test lookups (latest run, branch and target stats, failures) are attached. */
 type AggregatedEntry = Omit<
   FlakyTestEntry,
-  'latestRun' | 'byBranch' | 'byTarget' | 'sampleFailures' | 'errors'
+  'latestRun' | 'byBranch' | 'byTarget' | 'sampleFailures' | 'errors' | 'qualifications'
 >;
 
 const toEntry = (
@@ -212,7 +173,18 @@ const buildReport = async (
     );
   }
 
-  const { thresholds, frameworks } = options;
+  const { frameworks } = options;
+  const thresholds = FlakyTestReportThresholdsSchema.parse(options.thresholds);
+  if (
+    thresholds.maxRuns <
+    Math.max(
+      thresholds.minEpisodes,
+      thresholds.minRetryRecoveries,
+      thresholds.minConsecutiveFailures
+    )
+  ) {
+    throw new Error('maxRuns must be at least each recent qualification threshold');
+  }
   const classifications = new Set<FlakyTestClassification>(options.classifications);
   const to = options.now ?? new Date();
   const from = new Date(to.getTime() - options.lookbackDays * 24 * 60 * 60 * 1000);
@@ -252,35 +224,55 @@ const buildReport = async (
     stats.push(...rows);
   }
 
-  // Totals are a cheap first cut: a branch never has more builds than the total
-  const candidates = stats.filter((row) => {
-    const classification = classifyTest(row);
-    return mayQualify(row, thresholds) && classifications.has(classification);
-  });
+  // Totals are a cheap first cut: a branch never has more failed builds than the total, and a
+  // test needs as many to show episodes, retry recoveries or terminal failures
+  const minFailedBuilds = Math.min(
+    thresholds.minEpisodes,
+    thresholds.minRetryRecoveries,
+    thresholds.minConsecutiveFailures,
+    thresholds.minHistoricalEpisodes
+  );
+  const candidates = stats.filter((row) => row.failedBuilds >= minFailedBuilds);
 
-  // The thresholds proper apply per branch, before ranking, so the caps are filled with tests
-  // that are flaky on at least one branch rather than only in the diluted total
-  const qualified: Array<{ row: TestStatsRow; flakiestBranch: FlakyTestFlakiestBranch }> = [];
+  // The thresholds apply per execution context, before ranking, so the caps are filled
+  // with tests that qualify on one of them rather than only in the diluted total
+  const qualified: Array<{ row: TestStatsRow; qualifications: Qualification[] }> = [];
+  const suspectedIncidents: FlakyTestIncident[] = await fetchIncidentJobs(
+    es,
+    scope,
+    frameworks,
+    thresholds.incidentFailures
+  );
   if (candidates.length > 0) {
     startedAt = performance.now();
-    const branchCounts = await fetchBranchCounts(es, scope, candidates, thresholds);
+    const branchRuns = await fetchBranchRuns(
+      es,
+      scope,
+      candidates,
+      suspectedIncidents.map(({ jobId }) => jobId)
+    );
     let belowThresholds = 0;
     for (const row of candidates) {
-      const flakiestBranch = flakiestQualifyingBranch(
-        branchCounts.get(row.testId) ?? [],
-        thresholds
+      const qualifications = qualifyTest(
+        branchRuns.get(row.testId) ?? [],
+        thresholds,
+        to,
+        options.lookbackDays
       );
-      if (!flakiestBranch) {
+      if (qualifications.length === 0) {
         belowThresholds += 1;
-      } else {
-        qualified.push({ row, flakiestBranch });
+      } else if (qualifications.some(({ classification }) => classifications.has(classification))) {
+        qualified.push({ row, qualifications });
       }
     }
-    const qualifiedByBranch = countByFlakiestBranch(qualified);
+    const qualifiedByBranch = countByFlakiestBranch(
+      qualified.flatMap(({ qualifications }) => qualifications)
+    );
     log.info(
-      `Checked ${candidates.length} tests branch by branch in ${elapsed(startedAt)}: ` +
-        `${qualified.length} qualify (${formatCounts(qualifiedByBranch) || 'none'}), ` +
-        `${belowThresholds} clear the thresholds on no single branch`
+      `Checked ${candidates.length} tests context by context in ${elapsed(startedAt)}, retaining ` +
+        `${suspectedIncidents.length} suspected incident jobs: ${qualified.length} qualify ` +
+        `(${formatCounts(qualifiedByBranch) || 'none'}), ` +
+        `${belowThresholds} clear the thresholds in no single execution context`
     );
   }
 
@@ -292,17 +284,29 @@ const buildReport = async (
     log.info(`Fetched metadata for ${metadata.size} failing tests in ${elapsed(startedAt)}`);
   }
 
-  const flaky: AggregatedEntry[] = [];
-  const consistentlyFailing: AggregatedEntry[] = [];
-  for (const { row, flakiestBranch } of qualified) {
-    const entry = toEntry(row, flakiestBranch, metadata.get(row.testId));
-    (classifyTest(row) === 'flaky' ? flaky : consistentlyFailing).push(entry);
+  const flaky: Array<AggregatedEntry & { qualifications: Qualification[] }> = [];
+  const consistentlyFailing: typeof flaky = [];
+  for (const { row, qualifications } of qualified) {
+    for (const classification of classifications) {
+      const preferred = qualifications.find((entry) => entry.classification === classification);
+      if (!preferred) continue;
+      const entry = {
+        ...toEntry(row, preferred.flakiestBranch, metadata.get(row.testId)),
+        qualifications,
+      };
+      (classification === 'flaky' ? flaky : consistentlyFailing).push(entry);
+    }
   }
 
-  const cap = (entries: readonly AggregatedEntry[]) => entries.slice(0, thresholds.maxTests);
+  const cap = <T extends AggregatedEntry>(entries: readonly T[]) =>
+    entries.slice(0, thresholds.maxTests);
   const rankedFlaky = cap(rankTests(flaky));
   const rankedConsistentlyFailing = cap(rankTests(consistentlyFailing));
-  const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
+  const admitted = [
+    ...new Map(
+      [...rankedFlaky, ...rankedConsistentlyFailing].map((entry) => [entry.testId, entry])
+    ).values(),
+  ];
 
   // The per-test lookups are independent, so they run concurrently and each logs its own time
   const timed = async <T>(label: string, lookup: Promise<T>): Promise<T> => {
@@ -335,7 +339,9 @@ const buildReport = async (
     ]);
   }
 
-  const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
+  const decorate = (
+    entry: AggregatedEntry & { qualifications: Qualification[] }
+  ): FlakyTestEntry => ({
     ...entry,
     latestRun: latestRunAcrossBranches(branchStats.get(entry.testId)),
     byBranch: branchStats.get(entry.testId) ?? [],
@@ -365,7 +371,7 @@ const buildReport = async (
 
   return FlakyTestReportSchema.parse({
     schemaVersion: FLAKY_TEST_REPORT_SCHEMA_VERSION,
-    generatedAt: new Date(),
+    generatedAt: to,
     window: { lookbackDays: options.lookbackDays, from, to },
     scope: {
       pipelines: options.pipelines,
@@ -382,6 +388,7 @@ const buildReport = async (
     },
     flaky: rankedFlaky.map(decorate),
     consistentlyFailing: rankedConsistentlyFailing.map(decorate),
+    suspectedIncidents,
     files: [...files.values()],
   });
 };

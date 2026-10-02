@@ -12,116 +12,159 @@ import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
-  classifyTest,
-  flakiestQualifyingBranch,
+  countEpisodes,
+  countTrailingHardFailures,
   latestRunAcrossBranches,
-  mayQualify,
+  qualifyBranch as qualifyBranchAt,
+  qualifyTest as qualifyTestAt,
   rankTests,
   ScoutFlakyTests,
 } from './report';
 import {
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
+  FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
   type FlakyTestBranchStats,
 } from './schema';
 import * as queries from './queries';
 
-const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0 };
+const thresholds = DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds;
+const now = new Date('2026-09-07T00:00:00.000Z');
+const qualifyBranch = (context: queries.BranchRuns, values = thresholds) =>
+  qualifyBranchAt(context, values, now, 28);
+const qualifyTest = (contexts: readonly queries.BranchRuns[], values = thresholds) =>
+  qualifyTestAt(contexts, values, now, 28);
+
+/** Runs from a pattern, oldest first: `.` passed, `f` failed then passed on a retry, `F` failed. */
+const runs = (pattern: string): queries.BranchRun[] =>
+  [...pattern].map((char, index) => ({
+    build: index + 1,
+    timestamp: new Date(now.getTime() - (pattern.length - index) * 60_000),
+    suspectedIncident: false,
+    failed: char !== '.',
+    hard: char === 'F',
+  }));
+
+const branchRuns = (
+  pattern: string,
+  branch = 'main',
+  pipeline = 'kibana-on-merge'
+): queries.BranchRuns => ({
+  pipeline,
+  branch,
+  configPath: 'config.ts',
+  targetMode: 'unknown',
+  targetType: 'unknown',
+  runs: runs(pattern),
+});
 
 describe('DEFAULT_FLAKY_TEST_REPORT_OPTIONS', () => {
-  it('requires a 3% build failure rate on a branch by default', () => {
-    expect(DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds.minFailRate).toBe(0.03);
+  it('counts separate failure episodes over the latest 200 runs of a branch by default', () => {
+    expect(DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds).toMatchObject(thresholds);
   });
 });
 
-describe('mayQualify', () => {
-  it('needs enough builds and failed builds in total, ignoring the failure rate', () => {
-    expect(mayQualify({ builds: 9, failedBuilds: 5 }, thresholds)).toBe(false);
-    expect(mayQualify({ builds: 50, failedBuilds: 1 }, thresholds)).toBe(false);
-    expect(mayQualify({ builds: 10, failedBuilds: 2 }, thresholds)).toBe(true);
-    // a 0.4% total may still hide a branch above any rate threshold
-    const strict = { ...thresholds, minFailRate: 0.5 };
-    expect(mayQualify({ builds: 500, failedBuilds: 2 }, strict)).toBe(true);
+describe('countEpisodes', () => {
+  it('counts runs of consecutive failed builds rather than failed builds', () => {
+    expect(countEpisodes(runs('..FF..f.'))).toBe(2);
+    expect(countEpisodes(runs('FFFFF'))).toBe(1);
+    expect(countEpisodes(runs('f.f.f'))).toBe(3);
+    expect(countEpisodes(runs('....'))).toBe(0);
+    expect(countEpisodes([])).toBe(0);
   });
 });
 
-describe('flakiestQualifyingBranch', () => {
-  const branch = (name: string, builds: number, failedBuilds: number) => ({
-    branch: name,
-    builds,
-    failedBuilds,
+describe('countTrailingHardFailures', () => {
+  it('counts the latest runs that failed without passing on a retry', () => {
+    expect(countTrailingHardFailures(runs('..FFF'))).toBe(3);
+    expect(countTrailingHardFailures(runs('FFF'))).toBe(3);
+    // the latest run passed on a retry, or passed outright
+    expect(countTrailingHardFailures(runs('FFf'))).toBe(0);
+    expect(countTrailingHardFailures(runs('FF.'))).toBe(0);
+    expect(countTrailingHardFailures([])).toBe(0);
   });
+});
 
-  it('picks the branch with the highest failure rate among those clearing every threshold', () => {
-    expect(
-      flakiestQualifyingBranch(
-        [branch('main', 500, 10), branch('9.5', 100, 8), branch('9.4', 50, 2)],
-        thresholds
-      )
-    ).toEqual({ branch: '9.5', builds: 100, failedBuilds: 8, buildFailRate: 0.08 });
-  });
-
-  it('is not diluted: a branch qualifies on its own numbers even when the total would not', () => {
-    // 10 of 610 in total is 1.6%; 9.5 alone is 8%
-    const byBranch = [branch('main', 500, 2), branch('9.5', 100, 8), branch('9.4', 10, 0)];
-    expect(flakiestQualifyingBranch(byBranch, { ...thresholds, minFailRate: 0.05 })).toEqual({
-      branch: '9.5',
-      builds: 100,
-      failedBuilds: 8,
-      buildFailRate: 0.08,
+describe('qualifyBranch', () => {
+  it('is flaky once the failures came in separate episodes', () => {
+    expect(qualifyBranch(branchRuns('..f...F..'), thresholds)).toMatchObject({
+      classification: 'flaky',
+      flakiestBranch: {
+        pipeline: 'kibana-on-merge',
+        branch: 'main',
+        builds: 9,
+        failedBuilds: 2,
+        buildFailRate: 2 / 9,
+        episodes: 2,
+      },
     });
   });
 
-  it('ignores branches with too few builds or failed builds, whatever their rate', () => {
-    expect(
-      flakiestQualifyingBranch(
-        // 9.4 is at 100% but on a single build; 9.5 failed once
-        [branch('main', 500, 5), branch('9.5', 100, 1), branch('9.4', 1, 1)],
-        thresholds
-      )
-    ).toEqual({ branch: 'main', builds: 500, failedBuilds: 5, buildFailRate: 0.01 });
+  it('distinguishes a resolved breakage from repeated retry recovery', () => {
+    expect(qualifyBranch(branchRuns('...FFFFFF...'), thresholds)).toBeUndefined();
+    expect(qualifyBranch(branchRuns('..ffff..'), thresholds)?.reasons).toContain(
+      'repeated-retry-recovery'
+    );
   });
 
-  it('is undefined when no branch clears the thresholds on its own', () => {
-    // 4 failed builds in total, but 2 per branch on branches of 500 builds: 0.4% < 1%
-    expect(
-      flakiestQualifyingBranch([branch('main', 500, 2), branch('9.5', 500, 2)], {
-        ...thresholds,
-        minFailRate: 0.01,
-      })
-    ).toBeUndefined();
-    expect(flakiestQualifyingBranch([branch('main', 9, 5)], thresholds)).toBeUndefined();
-    expect(flakiestQualifyingBranch([], thresholds)).toBeUndefined();
+  it('is consistently failing while its latest runs failed without passing on a retry', () => {
+    // flaky before, broken now
+    expect(qualifyBranch(branchRuns('.f..f..FFF'), thresholds)?.classification).toBe(
+      'consistently-failing'
+    );
+    // failures that passed on a retry are flakes, however many in a row
+    expect(qualifyBranch(branchRuns('.f..fff'), thresholds)?.classification).toBe('flaky');
+    // Two terminal failures qualify with the default urgent threshold.
+    expect(qualifyBranch(branchRuns('.....FF'), thresholds)?.classification).toBe(
+      'consistently-failing'
+    );
   });
 
-  it('breaks rate ties by failed builds', () => {
-    expect(
-      flakiestQualifyingBranch([branch('main', 100, 10), branch('9.5', 20, 2)], thresholds)?.branch
-    ).toBe('main');
+  it('only judges the latest `maxRuns` runs', () => {
+    expect(qualifyBranch(branchRuns('f....f...'), thresholds)?.classification).toBe('flaky');
+    // the first episode is older than the latest 5 runs
+    expect(qualifyBranch(branchRuns('f....f...'), { ...thresholds, maxRuns: 5 })).toBeUndefined();
   });
 });
 
-describe('classifyTest', () => {
-  it('is flaky when the test also passed cleanly', () => {
-    expect(classifyTest({ runs: 50, fails: 5, retryFlakes: 0 })).toBe('flaky');
+describe('qualifyTest', () => {
+  it('judges each pipeline and branch on its own, so single episodes spread over them do not add up', () => {
+    expect(
+      qualifyTest(
+        [
+          branchRuns('..f..'),
+          branchRuns('.f...', '9.5'),
+          branchRuns('F....', 'main', 'appex-qa-serverless-kibana-scout-tests'),
+        ],
+        thresholds
+      )
+    ).toEqual([]);
+    expect(qualifyTest([], thresholds)).toEqual([]);
   });
 
-  it('is flaky when every execution failed but some recovered on an in-run retry', () => {
-    expect(classifyTest({ runs: 20, fails: 20, retryFlakes: 18 })).toBe('flaky');
-  });
-
-  it('is consistently failing when it never passed', () => {
-    expect(classifyTest({ runs: 20, fails: 20, retryFlakes: 0 })).toBe('consistently-failing');
+  it('retains persistent failures alongside flaky contexts and filters each independently', () => {
+    const results = qualifyTest([
+      branchRuns('FFF', 'main', 'cloud'),
+      branchRuns('f.f', 'main', 'on-merge'),
+      branchRuns('f.f', '9.5', 'on-merge'),
+    ]);
+    expect(results).toHaveLength(3);
+    expect(
+      results.filter(({ classification }) => classification === 'consistently-failing')
+    ).toHaveLength(1);
+    expect(results.filter(({ classification }) => classification === 'flaky')).toHaveLength(2);
   });
 });
 
 describe('rankTests', () => {
   it('orders by failed builds, then failure rate on the flakiest branch, then most recent failure', () => {
     const flakiest = (buildFailRate: number) => ({
+      pipeline: 'kibana-on-merge',
       branch: 'main',
       builds: 100,
       failedBuilds: 2,
       buildFailRate,
+      episodes: 2,
     });
     const entries = [
       { id: 'a', failedBuilds: 2, buildFailRate: 0.5, lastFailedAt: new Date('2026-09-01') },
@@ -208,25 +251,21 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   const activeBranchStats = (testIds: string[]) =>
     new Map(testIds.map((testId) => [testId, [activeBranch()]]));
 
-  /** Counts on `main` that clear the thresholds. */
-  const mainCounts = (
-    overrides: Partial<queries.BranchCountsRow> = {}
-  ): queries.BranchCountsRow => ({
-    branch: 'main',
-    builds: 100,
-    failedBuilds: 10,
-    ...overrides,
-  });
-  const qualifyingFlakiestBranch = {
-    branch: 'main',
-    builds: 100,
-    failedBuilds: 10,
-    buildFailRate: 0.1,
-  };
+  /** Runs on `main` with two separate episodes, so the test qualifies there as flaky. */
+  const flakyOnMain = branchRuns('.f...f....');
+  /** Runs on `main` whose latest three failed, so the test qualifies there as consistently failing. */
+  const brokenOnMain = branchRuns('.....FFF');
 
-  /** Branch counts where every test in `testIds` qualifies on `main`. */
-  const activeCounts = (testIds: string[]) =>
-    new Map(testIds.map((testId) => [testId, [mainCounts()]]));
+  /** Runs where every test in `testIds` qualifies as flaky on `main`. */
+  const flakyRuns = (testIds: string[]) =>
+    new Map(testIds.map((testId) => [testId, [flakyOnMain]]));
+
+  let fetchIncidentJobs: jest.SpyInstance;
+  beforeEach(() => {
+    fetchIncidentJobs = jest
+      .spyOn(queries, 'fetchIncidentJobs')
+      .mockResolvedValue([{ jobId: 'incident', failedTests: 10, testIds: ['t'] }]);
+  });
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -247,6 +286,31 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     ).rejects.toThrow('classifications must include at least one of');
   });
 
+  it('rejects invalid thresholds before querying test events', async () => {
+    const fetchFailingFiles = jest.spyOn(queries, 'fetchFailingFiles');
+    await expect(
+      ScoutFlakyTests.fromElasticsearch(
+        es,
+        {
+          ...options,
+          thresholds: { ...thresholds, minConsecutiveFailures: 0 },
+        },
+        log
+      )
+    ).rejects.toThrow();
+    await expect(
+      ScoutFlakyTests.fromElasticsearch(
+        es,
+        {
+          ...options,
+          thresholds: { ...thresholds, maxRuns: 2, minEpisodes: 3 },
+        },
+        log
+      )
+    ).rejects.toThrow('maxRuns must be at least each recent qualification threshold');
+    expect(fetchFailingFiles).not.toHaveBeenCalled();
+  });
+
   it('drops tests of an excluded classification before the per-test lookups', async () => {
     jest
       .spyOn(queries, 'fetchFailingFiles')
@@ -257,9 +321,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         statsRow({ testId: 'jest-flaky', failedBuilds: 3 }),
         statsRow({ testId: 'jest-broken', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
       ]);
-    const fetchBranchCounts = jest
-      .spyOn(queries, 'fetchBranchCounts')
-      .mockResolvedValue(activeCounts(['jest-flaky']));
+    const fetchBranchRuns = jest.spyOn(queries, 'fetchBranchRuns').mockResolvedValue(
+      new Map([
+        ['jest-flaky', [flakyOnMain]],
+        ['jest-broken', [brokenOnMain]],
+      ])
+    );
     jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
     const fetchBranchStats = jest
       .spyOn(queries, 'fetchBranchStats')
@@ -286,12 +353,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       flakyByFramework: { jest: 1 },
       flakyByBranch: { main: 1 },
     });
-    // the excluded classification never reaches the per-branch check either
-    expect(fetchBranchCounts).toHaveBeenCalledWith(
+    // the per-branch check is what tells the two apart; the broken one goes no further
+    expect(fetchBranchRuns).toHaveBeenCalledWith(
       es,
       expect.anything(),
-      [expect.objectContaining({ testId: 'jest-flaky' })],
-      options.thresholds
+      ['jest-flaky', 'jest-broken'].map((testId) => expect.objectContaining({ testId })),
+      ['incident']
     );
     expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
       expect.objectContaining({ testId: 'jest-flaky' }),
@@ -303,6 +370,64 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       options.samplesPerTest
     );
   });
+
+  it.each([['flaky', 'consistently-failing'], ['consistently-failing']] as const)(
+    'retains mixed contexts when requesting %s',
+    async (...classifications) => {
+      jest
+        .spyOn(queries, 'fetchFailingFiles')
+        .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
+      jest.spyOn(queries, 'fetchTestStats').mockResolvedValue([statsRow({ testId: 'mixed' })]);
+      jest
+        .spyOn(queries, 'fetchBranchRuns')
+        .mockResolvedValue(
+          new Map([
+            [
+              'mixed',
+              [flakyOnMain, { ...branchRuns('FF'), pipeline: 'cloud', targetType: 'cloud' }],
+            ],
+          ])
+        );
+      jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
+      const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(new Map());
+      jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
+      jest.spyOn(queries, 'fetchTestErrors').mockResolvedValue(new Map());
+      const fetchSampleFailures = jest
+        .spyOn(queries, 'fetchSampleFailures')
+        .mockResolvedValue(new Map());
+      jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
+
+      const { data: report } = await ScoutFlakyTests.fromElasticsearch(
+        es,
+        { ...options, classifications: [...classifications] },
+        log
+      );
+      expect(report.consistentlyFailing).toHaveLength(1);
+      expect(report.consistentlyFailing[0].flakiestBranch).toMatchObject({
+        pipeline: 'cloud',
+        targetType: 'cloud',
+      });
+      expect(report.consistentlyFailing[0].qualifications).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ classification: 'flaky' }),
+          expect.objectContaining({ classification: 'consistently-failing' }),
+        ])
+      );
+      expect(report.flaky).toHaveLength(
+        classifications.some((classification) => classification === 'flaky') ? 1 : 0
+      );
+      expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
+        expect.objectContaining({ testId: 'mixed' }),
+      ]);
+      expect(fetchSampleFailures).toHaveBeenCalledWith(
+        es,
+        expect.anything(),
+        ['mixed'],
+        options.samplesPerTest
+      );
+      expect(report.files.flatMap(({ testIds }) => testIds)).toEqual(['mixed']);
+    }
+  );
 
   it('aggregates per framework, classifies, ranks, caps and decorates the result', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
@@ -328,21 +453,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
             ]
           : [statsRow({ testId: 'pw-flaky', framework: 'playwright', failedBuilds: 5 })]
       );
-    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
+    const fetchBranchRuns = jest.spyOn(queries, 'fetchBranchRuns').mockResolvedValue(
       new Map([
-        ...activeCounts(['jest-flaky-low', 'jest-broken', 'pw-flaky']),
-        [
-          'jest-flaky-high',
-          [
-            mainCounts({ builds: 90, failedBuilds: 30 }),
-            // 9.5 never failed it
-            mainCounts({
-              branch: '9.5',
-              builds: 10,
-              failedBuilds: 0,
-            }),
-          ],
-        ],
+        ...flakyRuns(['jest-flaky-low', 'pw-flaky']),
+        ['jest-broken', [brokenOnMain]],
+        // 9.5 never failed it
+        ['jest-flaky-high', [branchRuns('.fff.f..ff'), branchRuns('....', '9.5')]],
       ])
     );
     jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(
@@ -454,8 +570,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(fetchTestStats).toHaveBeenCalledWith(es, expect.anything(), 'playwright', ['c.spec.ts']);
 
     expect(report.window).toEqual({
-      lookbackDays: 7,
-      from: new Date('2026-08-31T00:00:00.000Z'),
+      lookbackDays: 28,
+      from: new Date('2026-08-10T00:00:00.000Z'),
       to: new Date('2026-09-07T00:00:00.000Z'),
     });
     expect(report.summary).toEqual({
@@ -478,7 +594,14 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       passes: 90,
       buildFailRate: 0.3,
       // the branch it qualified on, at its own undiluted rate
-      flakiestBranch: { branch: 'main', builds: 90, failedBuilds: 30, buildFailRate: 30 / 90 },
+      flakiestBranch: {
+        pipeline: 'kibana-on-merge',
+        branch: 'main',
+        builds: 10,
+        failedBuilds: 6,
+        buildFailRate: 0.6,
+        episodes: 3,
+      },
       // the newest run across branches
       latestRun: { status: 'skipped', branch: '9.5' },
       byBranch: [
@@ -495,7 +618,14 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       title: '(unknown)',
       filePath: '(unknown)',
       owners: [],
-      flakiestBranch: qualifyingFlakiestBranch,
+      flakiestBranch: {
+        pipeline: 'kibana-on-merge',
+        branch: 'main',
+        builds: 8,
+        failedBuilds: 3,
+        buildFailRate: 3 / 8,
+        episodes: 1,
+      },
       byTarget: [],
       sampleFailures: [],
       errors: [],
@@ -513,15 +643,21 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       { filePath: '(unknown)', framework: 'jest', testIds: ['jest-broken'], byPipeline: [] },
     ]);
 
-    // the per-branch check runs for every test whose totals may qualify, before the cap;
-    // `jest-rare` failed in a single build and is out already
-    expect(fetchBranchCounts).toHaveBeenCalledWith(
+    // the per-branch check runs for every test whose totals may qualify, before the cap, leaving
+    // incident annotations; `jest-rare` failed in a single build and is out already
+    expect(fetchIncidentJobs).toHaveBeenCalledWith(
+      es,
+      expect.anything(),
+      options.frameworks,
+      options.thresholds.incidentFailures
+    );
+    expect(fetchBranchRuns).toHaveBeenCalledWith(
       es,
       expect.anything(),
       ['jest-flaky-low', 'jest-flaky-high', 'jest-broken', 'pw-flaky'].map((testId) =>
         expect.objectContaining({ testId })
       ),
-      options.thresholds
+      ['incident']
     );
 
     // per-test lookups only run for admitted tests
@@ -547,32 +683,20 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       { framework: 'jest', filePath: 'b.test.ts' },
     ]);
     jest.spyOn(queries, 'fetchTestStats').mockResolvedValue([
-      // 12 of 1000 in total is 1.2%, above the 1% required, but spread thin over two branches
-      statsRow({ testId: 'diluted', builds: 1000, failedBuilds: 12 }),
-      // 6 of 600 in total is 1%; on 9.5 alone it is 5 of 100
-      statsRow({ testId: 'flaky-on-9.5', builds: 600, failedBuilds: 6 }),
+      // 12 failed builds in two episodes, but one on each branch
+      statsRow({ testId: 'spread-thin', builds: 1000, failedBuilds: 12 }),
+      // 5 failed builds; three separate episodes on 9.5 alone
+      statsRow({ testId: 'flaky-on-9.5', builds: 500, failedBuilds: 5 }),
       statsRow({ testId: 'still-running', failedBuilds: 20 }),
     ]);
-    // `diluted` outranks `flaky-on-9.5` and would have taken a slot had the check happened after the cap
-    const fetchBranchCounts = jest
-      .spyOn(queries, 'fetchBranchCounts')
+    // `spread-thin` outranks `flaky-on-9.5` and would have taken a slot had the check happened after the cap
+    const fetchBranchRuns = jest
+      .spyOn(queries, 'fetchBranchRuns')
       .mockResolvedValue(
         new Map([
-          [
-            'diluted',
-            [
-              mainCounts({ builds: 500, failedBuilds: 4 }),
-              mainCounts({ branch: '9.5', builds: 500, failedBuilds: 8 }),
-            ],
-          ],
-          [
-            'flaky-on-9.5',
-            [
-              mainCounts({ builds: 500, failedBuilds: 1 }),
-              mainCounts({ branch: '9.5', builds: 100, failedBuilds: 5 }),
-            ],
-          ],
-          ...activeCounts(['still-running']),
+          ['spread-thin', [branchRuns('..FFFFFF..'), branchRuns('.FFFFFF...', '9.5')]],
+          ['flaky-on-9.5', [branchRuns('.....f....'), branchRuns('.f..ff..f.', '9.5')]],
+          ...flakyRuns(['still-running']),
         ])
       );
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
@@ -588,23 +712,29 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(
       es,
-      { ...options, thresholds: { ...thresholds, minFailRate: 0.02, maxTests: 2 } },
+      { ...options, thresholds: { ...thresholds, maxTests: 2 } },
       log
     );
 
-    expect(fetchBranchCounts).toHaveBeenCalledWith(
+    expect(fetchBranchRuns).toHaveBeenCalledWith(
       es,
       expect.anything(),
-      ['diluted', 'flaky-on-9.5', 'still-running'].map((testId) =>
+      ['spread-thin', 'flaky-on-9.5', 'still-running'].map((testId) =>
         expect.objectContaining({ testId })
       ),
-      { ...thresholds, minFailRate: 0.02, maxTests: 2 }
+      ['incident']
     );
     // `still-running` failed in more builds; `flaky-on-9.5` qualifies on 9.5 despite its 1% total
     expect(report.flaky.map((entry) => entry.testId)).toEqual(['still-running', 'flaky-on-9.5']);
     expect(report.flaky[1]).toMatchObject({
       buildFailRate: 0.01,
-      flakiestBranch: { branch: '9.5', builds: 100, failedBuilds: 5, buildFailRate: 0.05 },
+      flakiestBranch: {
+        branch: '9.5',
+        builds: 10,
+        failedBuilds: 4,
+        buildFailRate: 0.4,
+        episodes: 3,
+      },
     });
     expect(report.summary.totalFlaky).toBe(2);
     expect(report.files.map((file) => file.testIds)).toEqual([['still-running', 'flaky-on-9.5']]);
@@ -629,7 +759,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     jest
       .spyOn(queries, 'fetchTestStats')
       .mockResolvedValue([statsRow({ testId: 'skipped-since', failedBuilds: 30 })]);
-    jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchBranchRuns').mockResolvedValue(new Map());
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
     const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
@@ -646,7 +776,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   it('skips metadata, branch stats and sample queries when nothing qualifies', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
     const fetchTestStats = jest.spyOn(queries, 'fetchTestStats');
-    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts');
+    const fetchBranchRuns = jest.spyOn(queries, 'fetchBranchRuns');
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
     const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
@@ -659,8 +789,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(report.flaky).toEqual([]);
     expect(report.consistentlyFailing).toEqual([]);
     expect(report.files).toEqual([]);
+    expect(report.suspectedIncidents).toEqual([
+      { jobId: 'incident', failedTests: 10, testIds: ['t'] },
+    ]);
     expect(fetchTestStats).not.toHaveBeenCalled();
-    expect(fetchBranchCounts).not.toHaveBeenCalled();
+    expect(fetchIncidentJobs).toHaveBeenCalled();
+    expect(fetchBranchRuns).not.toHaveBeenCalled();
     expect(fetchTestMetadata).not.toHaveBeenCalled();
     expect(fetchBranchStats).not.toHaveBeenCalled();
     expect(fetchTargetStats).not.toHaveBeenCalled();
@@ -690,11 +824,11 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
 
   it('round-trips a report through JSON, creating parent directories', () => {
     const report = FlakyTestReportSchema.parse({
-      schemaVersion: 1,
+      schemaVersion: FLAKY_TEST_REPORT_SCHEMA_VERSION,
       generatedAt: '2026-09-07T00:00:00.000Z',
       window: { lookbackDays: 7, from: '2026-08-31T00:00:00.000Z', to: '2026-09-07T00:00:00.000Z' },
       scope: { pipelines: ['kibana-on-merge'], branches: [], frameworks: ['jest'] },
-      thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
+      thresholds: { minEpisodes: 2, maxRuns: 200, incidentFailures: 10, maxTests: 200 },
       summary: { totalFlaky: 1, totalConsistentlyFailing: 0, flakyByFramework: { jest: 1 } },
       flaky: [
         {

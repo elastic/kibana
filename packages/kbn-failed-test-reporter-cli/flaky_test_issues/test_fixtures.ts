@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_FLAKY_TEST_REPORT_OPTIONS } from '@kbn/scout-reporting';
 import type {
   FlakyTestEntry,
   FlakyTestFileStats,
@@ -39,7 +40,15 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   failedBuilds: 49,
   buildFailRate: 49 / 509,
   failedBranches: 1,
-  flakiestBranch: { branch: 'main', builds: 509, failedBuilds: 49, buildFailRate: 49 / 509 },
+  qualifications: [],
+  flakiestBranch: {
+    pipeline: 'kibana-on-merge',
+    branch: 'main',
+    builds: 509,
+    failedBuilds: 49,
+    buildFailRate: 49 / 509,
+    episodes: 41,
+  },
   byBranch: [
     {
       branch: 'main',
@@ -134,7 +143,8 @@ export const flakyReport = (
   flaky: FlakyTestEntry[],
   files: FlakyTestFileStats[] = []
 ): FlakyTestReport => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
+  suspectedIncidents: [],
   generatedAt: GENERATED_AT,
   window: {
     lookbackDays: 7,
@@ -147,7 +157,7 @@ export const flakyReport = (
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],
   },
-  thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03, maxTests: 200 },
+  thresholds: { ...DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds },
   summary: {
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,
