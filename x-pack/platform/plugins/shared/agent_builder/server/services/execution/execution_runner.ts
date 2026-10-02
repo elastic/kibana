@@ -76,7 +76,7 @@ import {
   type ConversationWithOperation,
 } from './utils';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
+import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -244,10 +244,19 @@ const handleConversationExecution = async ({
   // resolution moved inside this guard too, so a run that fails to resolve one still gets a
   // terminal recorded next to the message that was already persisted.
   try {
+    // Captured once, before the first model call, so every EIS call in this round (including
+    // the title-generation and default-connector lookups below, which run ahead of the
+    // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
+    // active when the model-provider's (memoized) telemetry metadata was first resolved.
+    const roundTraceId = getCurrentTraceId();
+    const roundTelemetryMetadata = roundTraceId
+      ? { ...telemetryMetadata, traceId: roundTraceId }
+      : telemetryMetadata;
+
     const { modelProvider, selectedConnectorId } = await resolveServices({
       agentId,
       connectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       request,
       ...deps,
     });
@@ -265,7 +274,7 @@ const handleConversationExecution = async ({
       abortSignal,
       conversation,
       defaultConnectorId: selectedConnectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
       reasoningLevel,
       runAgent,
@@ -635,10 +644,17 @@ const handleStandaloneExecution = async ({
   const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
     execution.agentParams;
 
+  // See the matching comment in handleConversationExecution: captured once, ahead of the first
+  // model call, so every EIS call in this execution reports the same trace id.
+  const roundTraceId = getCurrentTraceId();
+  const roundTelemetryMetadata = roundTraceId
+    ? { ...telemetryMetadata, traceId: roundTraceId }
+    : telemetryMetadata;
+
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
   });
@@ -651,7 +667,7 @@ const handleStandaloneExecution = async ({
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
     reasoningLevel,
     runAgent,
