@@ -40,11 +40,17 @@ const MAX_TEST_ROWS = 15;
 const MAX_ERRORS = 4;
 /** GitHub rejects longer issue titles with a 422. */
 const MAX_TITLE_LENGTH = 256;
+/** Report snapshots kept in the metadata, about a month of daily reports. */
+const MAX_REPORT_HISTORY = 30;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
+  /** Metadata of the issue being refreshed, merged into the new one; absent for a new issue. */
+  previous?: RecordedFlakySuiteIssueMetadata;
+  /** The refresh comes with a comment, so this report notified the owners. */
+  notifies?: boolean;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -76,7 +82,19 @@ export interface FlakySuiteIssueMetadata {
   'report.count': number;
   /** One snapshot per report that found the suite flaky, oldest first. */
   'report.history': FlakySuiteReportSnapshot[];
+  /**
+   * Newest report that notified the owners: the one that filed the issue, whose team label gets
+   * them pinged, or the latest that commented. Refreshes comment at most every few days from it.
+   */
+  'report.notifiedAt'?: string;
 }
+
+/** What an issue body records; older issues lack some of it. */
+export type RecordedFlakySuiteIssueMetadata = Pick<
+  FlakySuiteIssueMetadata,
+  'suite.filePath' | 'report.history'
+> &
+  Partial<FlakySuiteIssueMetadata>;
 
 const metadataValue = (body: string, key: keyof FlakySuiteIssueMetadata): unknown =>
   getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
@@ -96,10 +114,7 @@ const stringsOf = (value: unknown): string[] | undefined =>
 /** Suite metadata recorded in an issue body, if the body was written by this reporter. */
 export const readFlakySuiteIssueMetadata = (
   body: string
-):
-  | (Pick<FlakySuiteIssueMetadata, 'suite.filePath' | 'report.history'> &
-      Partial<FlakySuiteIssueMetadata>)
-  | undefined => {
+): RecordedFlakySuiteIssueMetadata | undefined => {
   const filePath = metadataValue(body, 'suite.filePath');
   if (typeof filePath !== 'string') {
     return undefined;
@@ -109,6 +124,7 @@ export const readFlakySuiteIssueMetadata = (
   const generatedAt = metadataValue(body, 'report.generatedAt');
   const count = metadataValue(body, 'report.count');
   const history = metadataValue(body, 'report.history');
+  const notifiedAt = metadataValue(body, 'report.notifiedAt');
   return {
     'suite.filePath': filePath,
     'suite.title': typeof title === 'string' ? title : undefined,
@@ -119,8 +135,16 @@ export const readFlakySuiteIssueMetadata = (
     'report.generatedAt': typeof generatedAt === 'string' ? generatedAt : undefined,
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
+    'report.notifiedAt': typeof notifiedAt === 'string' ? notifiedAt : undefined,
   };
 };
+
+/**
+ * When the owners were last told about the suite; for issues filed before it was recorded, the
+ * oldest report kept, which is the one that filed them until the history is capped.
+ */
+export const lastNotifiedAt = (metadata: RecordedFlakySuiteIssueMetadata): string | undefined =>
+  metadata['report.notifiedAt'] ?? metadata['report.history'][0]?.generatedAt;
 
 const snapshot = (suite: FlakySuite, report: FlakyTestReport): FlakySuiteReportSnapshot => ({
   generatedAt: report.generatedAt.toISOString(),
@@ -160,21 +184,48 @@ const failedPipelines = (suite: FlakySuite, { scope }: FlakyTestReport): string[
     )
     .map(({ pipeline }) => pipeline);
 
-/** Metadata of a freshly filed issue. */
+/** `current` followed by the values only `previous` has. */
+const union = (current: readonly string[], previous: readonly string[] = []): string[] => [
+  ...new Set([...current, ...previous]),
+];
+
+/**
+ * Metadata of a freshly filed issue, or of a refreshed one when `previous` is given: the test ids
+ * and branches it recorded are kept, so `/skip` still covers a branch the suite stopped failing on
+ * this week, and pipelines it no longer fails on move first, keeping the latest failure last.
+ */
 export const flakySuiteIssueMetadata = (
   suite: FlakySuite,
-  report: FlakyTestReport
-): FlakySuiteIssueMetadata => ({
-  'suite.filePath': suite.filePath,
-  ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
-  'suite.framework': suite.framework,
-  'suite.testIds': suite.tests.map((test) => test.testId),
-  'suite.branches': failedBranches(suite),
-  'suite.pipelines': failedPipelines(suite, report),
-  'report.generatedAt': report.generatedAt.toISOString(),
-  'report.count': 1,
-  'report.history': [snapshot(suite, report)],
-});
+  report: FlakyTestReport,
+  previous?: RecordedFlakySuiteIssueMetadata,
+  notifies = false
+): FlakySuiteIssueMetadata => {
+  const pipelines = failedPipelines(suite, report);
+  const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
+  const notifiedAt =
+    !previous || notifies ? report.generatedAt.toISOString() : lastNotifiedAt(previous);
+  return {
+    'suite.filePath': suite.filePath,
+    ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
+    'suite.framework': suite.framework,
+    'suite.testIds': union(
+      suite.tests.map((test) => test.testId),
+      previous?.['suite.testIds']
+    ),
+    'suite.branches': union(failedBranches(suite), previous?.['suite.branches']),
+    'suite.pipelines': [
+      ...(previous?.['suite.pipelines'] ?? []).filter((pipeline) => !pipelines.includes(pipeline)),
+      ...pipelines,
+    ],
+    'report.generatedAt': report.generatedAt.toISOString(),
+    // Issues filed before the count was recorded had one report per snapshot
+    'report.count': previous
+      ? (previous['report.count'] ?? Math.max(previous['report.history'].length, 1)) + 1
+      : 1,
+    'report.history': history.slice(-MAX_REPORT_HISTORY),
+    ...(notifiedAt ? { 'report.notifiedAt': notifiedAt } : {}),
+  };
+};
 
 /**
  * What the title says between the framework and "suite": `UI` or `API` for Scout and FTR,
@@ -606,7 +657,23 @@ export const renderFlakySuiteIssueBody = (
   ];
   return updateIssueMetadata(
     sections.filter((section) => section !== undefined).join('\n\n'),
-    flakySuiteIssueMetadata(suite, ctx.report),
+    flakySuiteIssueMetadata(suite, ctx.report, ctx.previous, ctx.notifies),
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 };
+
+/**
+ * The comment of a refresh that found new failures, saying how to skip the suite; the numbers are
+ * in the body. A `kibanamachine` comment is what turns into a Slack notification
+ * (elastic/kibana-operations `triage/`), so the body has to be updated first: the notification
+ * reads its metadata.
+ */
+export const renderFlakySuiteIssueComment = ({ reopened }: { reopened: boolean }): string =>
+  [
+    reopened
+      ? 'This test suite appears to be flaky again after this issue was closed.'
+      : 'This test suite still appears to be flaky.',
+    '> [!TIP]\n' +
+      "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
+      'to `/skip` it, or skip the test case manually.',
+  ].join('\n\n');

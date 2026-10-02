@@ -26,19 +26,40 @@ was last seen in, and breakdowns by branch, by Scout target (deployment mode and
 suites that recorded one) and by pipeline naming the branches each failed on; issues that merely
 mention the file are linked as possibly related. A suite is
 skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
-per-test one or one about the suite or its file; commenting on and reopening
-those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
-of suites that drop out of the report.
+per-test one or one about the suite or its file.
+
+A suite whose issue is its own, one this command filed for that `describe` block rather than for
+the whole file, has it refreshed instead (`--no-update-issues` turns this off):
+
+- the body is rewritten with the report's numbers, and its metadata keeps the test ids and branches
+  recorded before, so `/skip` still covers a branch the suite stopped failing on this week;
+- a comment is posted when the suite failed since the owners were last notified, saying it still
+  appears to be flaky and how to skip it, at most every `--comment-interval-days` (default 3). The
+  last notification is recorded as `report.notifiedAt`: the report that filed the issue, whose team
+  label gets the owners pinged, or the latest one that commented, so failures in between are
+  covered by the next comment. Comments by `kibanamachine` are what the Slack notifications of
+  `triage/` react to, so the body is written first: the notification reads `report.count` from
+  it to tell a new failure from an existing one;
+- a closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
+  closed when the suite has not failed since, as the report window can still hold the failures
+  from before a fix, and when it was closed as a duplicate;
+- an issue that already has the report, as on a retried build, is left alone.
+
+Editing a body or reopening an issue sends no Slack notification, only the comment does; a
+reopen does start the `failed-test-investigator` workflow again. The stale
+`failed-test` sweep closes the issues of suites that drop out of the report, as nothing refreshes
+them any more.
 
 The body ends with hidden `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's
 file, title, framework and test ids, the branches a test of the suite failed on (`suite.branches`,
-pull requests left out) and the pipelines its file failed on (`suite.pipelines`). Besides the
+pull requests left out) and the pipelines its file failed on (`suite.pipelines`), and the reports
+that found it flaky (`report.count`, with the last 30 in `report.history`). Besides the
 matching below, `/skip` and the Slack notifications of `elastic/kibana-operations` (`triage/`)
 read it to find the `describe` block to skip and the branches to skip it on.
 
 A GitHub write that fails is logged and recorded, the run goes on with the next suite and exits
-non-zero at the end. `--dry-run` reads the real issues and logs what would be filed without
-writing anything.
+non-zero at the end. `--dry-run` reads the real issues and logs what would be filed or updated
+without writing anything.
 
 Open and closed `failed-test` issues both count. The command lists every open `failed-test` issue
 and the closed ones updated in the last `--closed-since-days` (default 365) through the issues

@@ -12,7 +12,10 @@ set -euo pipefail
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
 # FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite. At most
-# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run.
+# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. Unless FLAKY_TESTS_UPDATE_ISSUES is
+# 'false', a suite that has an issue of its own gets it refreshed with the report's numbers,
+# a comment when it failed since the owners were last notified (at most every
+# FLAKY_TESTS_COMMENT_INTERVAL_DAYS days), and a reopen when it failed after the close.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
@@ -23,6 +26,8 @@ cd "${KIBANA_DIR:-$(pwd)}"
 FLAKY_TESTS_GITHUB_REPO="${FLAKY_TESTS_GITHUB_REPO:-}"
 FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
+FLAKY_TESTS_UPDATE_ISSUES="${FLAKY_TESTS_UPDATE_ISSUES:-true}"
+FLAKY_TESTS_COMMENT_INTERVAL_DAYS="${FLAKY_TESTS_COMMENT_INTERVAL_DAYS:-3}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO-elastic/kibana}"
 
 REPORT_DIR="target/flaky_tests"
@@ -56,6 +61,7 @@ echo "+++ Report flaky suites to GitHub ($MODE)"
 echo "    Repository          : $GITHUB_REPO"
 echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
+echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES (comments every $FLAKY_TESTS_COMMENT_INTERVAL_DAYS days at most)"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
   echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
@@ -67,9 +73,13 @@ args=(
   --closed-since-days "$FLAKY_TESTS_CLOSED_ISSUES_DAYS"
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
   --tracking-repo "$FLAKY_TESTS_TRACKING_REPO"
+  --comment-interval-days "$FLAKY_TESTS_COMMENT_INTERVAL_DAYS"
 )
 if [[ ${#DRY_RUN_ARGS[@]} -gt 0 ]]; then
   args+=("${DRY_RUN_ARGS[@]}")
+fi
+if [[ "$FLAKY_TESTS_UPDATE_ISSUES" == "false" ]]; then
+  args+=(--no-update-issues)
 fi
 
 # A failed GitHub write makes the CLI exit non-zero after handling every suite; annotate first,
@@ -88,7 +98,7 @@ echo "--- Annotate build"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
 issues="$(jq -r '.issues | "\(.open) open and \(.closed) closed since \(.closedSince[:10])"
   + (if .tracking then ", plus \(.tracking.open) open and \(.tracking.closed) closed in `\(.tracking.repo)`" else "" end)' "$SUMMARY_PATH")"
-counts="$(jq -r '.counts | "**\(.created)** created, \(.skipped) skipped, \(.failed) failed"' "$SUMMARY_PATH")"
+counts="$(jq -r '.counts | "**\(.created)** created, \(.updated) updated, \(.skipped) skipped, \(.failed) failed"' "$SUMMARY_PATH")"
 
 # Markdown section with one bullet per suite the given action applies to, linking the issue
 # (qualified by its repository when it is not the target one); collapsed when it is likely to
@@ -112,6 +122,7 @@ section() {
       + (if .suiteTitle then " · \(.suiteTitle)" else "" end)
       + (if .issue then " [\(.issue.repo // "")#\(.issue.number)](\(.issue.url))" else "" end)
       + (if .issue and .issue.state == "closed" then " (closed)" else "" end)
+      + (if .reopened then " (reopened)" elif .commented then " (commented)" else "" end)
       + (if .match then " (\(.match))" else "" end)
       + (if .reason then ": \(.reason)" else "" end)
       + (if .error then ": \(.error)" else "" end)' "$SUMMARY_PATH"
@@ -135,6 +146,7 @@ fi
 {
   echo "$headline"
   section created "Created" false
+  section updated "Updated" true
   section failed "Failed" false
   section skipped "Skipped" true
   echo
