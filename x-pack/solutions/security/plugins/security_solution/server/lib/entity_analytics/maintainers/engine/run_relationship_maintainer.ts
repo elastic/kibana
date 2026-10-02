@@ -371,12 +371,18 @@ async function runIntegration(
             })
           : actorFiltered;
         const pageMetadata = await runStage('Metadata write', () =>
-          writeRelationshipMetadatas(entityMetadataClient, logger, metadataRecords, {
-            scanId: metadataContext.scanId,
-            lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-            entitySource: config.id,
-            observedAt: metadataContext.observedAt,
-          })
+          writeRelationshipMetadatas(
+            entityMetadataClient,
+            logger,
+            metadataRecords,
+            {
+              scanId: metadataContext.scanId,
+              lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+              entitySource: config.id,
+              observedAt: metadataContext.observedAt,
+            },
+            logPrefix
+          )
         );
 
         totalMetadataResult = {

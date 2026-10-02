@@ -1707,6 +1707,41 @@ describe('runRelationshipMaintainer', () => {
       expect(messages).not.toContainEqual(expect.stringContaining('Entity write failed'));
     });
 
+    it('prefixes the metadata failure log with the integration when bulk items fail without throwing', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
+      const logger = loggerMock.create();
+
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+      bulkAppend.mockResolvedValueOnce({ successful: 0, failed: 1 });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        relationshipsClient,
+        integrations: [baseConfig],
+        maintainerName: 'communicates_with',
+      });
+
+      const messages = logger.error.mock.calls.map(([m]) => m);
+      expect(messages).toContainEqual(
+        expect.stringMatching(/^\[communicates_with\]\[elastic_defend\] Failed to append 1 of /)
+      );
+    });
+
     it('logs a prefixed error identifying the actor fetch as the failing stage', async () => {
       const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
