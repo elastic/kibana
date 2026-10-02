@@ -71,15 +71,16 @@ const modelsByFileFromSpecs = (specModelGroups) => {
   return modelsByFile;
 };
 
-const modelsForFile = (file, modelsByFile, suiteWeeklyModelGroups, requestedModelGroups) => {
-  const own = modelsByFile.get(file);
-  if (Array.isArray(own) && own.length > 0) {
-    return own;
+// Resolve every batch file's model list once: its own `specModelGroups` entry, else `fallback`
+// (the suite weekly list, or the requested universe when the suite has none).
+const resolveBatchModels = (batches, overrides, fallback) => {
+  const modelsByFile = new Map();
+  for (const batch of batches) {
+    for (const file of Array.isArray(batch.specFiles) ? batch.specFiles : []) {
+      modelsByFile.set(file, overrides.get(file) ?? fallback);
+    }
   }
-  if (suiteWeeklyModelGroups.length > 0) {
-    return suiteWeeklyModelGroups;
-  }
-  return requestedModelGroups;
+  return modelsByFile;
 };
 
 const assertListedModelsHaveConnectors = (connectors, groups) => {
@@ -144,7 +145,6 @@ function buildFanoutMatrix({
   }
 
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
-  const modelsByFile = modelsByFileFromSpecs(specModelGroups);
   const batches =
     configuredShards.length > 0
       ? configuredShards
@@ -157,20 +157,12 @@ function buildFanoutMatrix({
           },
         ];
 
-  const usedModelGroups = new Set();
-  for (const batch of batches) {
-    for (const file of Array.isArray(batch.specFiles) ? batch.specFiles : []) {
-      for (const group of modelsForFile(
-        file,
-        modelsByFile,
-        suiteWeeklyModelGroups,
-        requestedModelGroups
-      )) {
-        usedModelGroups.add(group);
-      }
-    }
-  }
-  assertListedModelsHaveConnectors(connectors, [...usedModelGroups]);
+  const modelsByFile = resolveBatchModels(
+    batches,
+    modelsByFileFromSpecs(specModelGroups),
+    suiteWeeklyModelGroups.length > 0 ? suiteWeeklyModelGroups : requestedModelGroups
+  );
+  assertListedModelsHaveConnectors(connectors, [...new Set([...modelsByFile.values()].flat())]);
 
   const rows = [];
   for (const batch of batches) {
@@ -178,15 +170,11 @@ function buildFanoutMatrix({
     const batchFiles = Array.isArray(batch.specFiles) ? batch.specFiles : [];
     for (const connectorId of connectorIds) {
       const connector = connectors[connectorId];
-      const specFiles = batchFiles.filter((file) => {
-        const groups = modelsForFile(
-          file,
-          modelsByFile,
-          suiteWeeklyModelGroups,
-          requestedModelGroups
-        );
-        return groups.some((group) => connectorMatchesModelGroup(connectorId, connector, group));
-      });
+      const specFiles = batchFiles.filter((file) =>
+        modelsByFile
+          .get(file)
+          .some((group) => connectorMatchesModelGroup(connectorId, connector, group))
+      );
       if (specFiles.length > 0) {
         rows.push({ connectorId, shardId, specFiles });
       }
