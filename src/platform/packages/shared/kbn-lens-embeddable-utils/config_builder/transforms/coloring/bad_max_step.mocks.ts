@@ -54,7 +54,6 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'all',
-    maxSteps: 5,
   },
 };
 
@@ -99,7 +98,6 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'above',
-    maxSteps: 5,
   },
 };
 
@@ -143,6 +141,5 @@ export const upperAndLowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'none',
-    maxSteps: 5,
   },
 };

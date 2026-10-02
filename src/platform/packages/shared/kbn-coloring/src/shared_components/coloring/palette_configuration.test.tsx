@@ -339,4 +339,25 @@ describe('palette panel', () => {
       ).toEqual(true);
     });
   });
+
+  describe('maxSteps', () => {
+    beforeEach(() => {
+      props = {
+        activePalette: { type: 'palette', name: 'positive' },
+        palettes: paletteRegistry,
+        setPalette: jest.fn(),
+        dataBounds: { min: 0, max: 100 },
+      };
+    });
+
+    it('forwards the maxSteps prop to ColorRanges', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} maxSteps={5} />);
+      expect(instance.find('ColorRanges').prop('maxSteps')).toBe(5);
+    });
+
+    it('leaves maxSteps undefined when not provided', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      expect(instance.find('ColorRanges').prop('maxSteps')).toBeUndefined();
+    });
+  });
 });

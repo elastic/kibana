@@ -59,7 +59,6 @@ describe('Color util transforms', () => {
           continuity: 'all',
           reverse: false,
           steps: 3,
-          maxSteps: 5,
           // @ts-expect-error - This can be null
           rangeMax: null,
           // @ts-expect-error - This can be null
@@ -102,7 +101,6 @@ describe('Color util transforms', () => {
           progression: 'fixed',
           reverse: false,
           steps: 2,
-          maxSteps: 5,
           rangeMin: 10,
           rangeMax: 90,
           stops: [
@@ -184,7 +182,6 @@ describe('Color util transforms', () => {
             rangeType: 'percent',
             continuity: 'all',
             steps: DEFAULT_COLOR_STEPS,
-            maxSteps: DEFAULT_COLOR_STEPS,
           },
         } satisfies PaletteOutput<CustomPaletteParams>);
       });
@@ -198,8 +195,6 @@ describe('Color util transforms', () => {
         const result = fromColorByValueAPIToLensState(colorByValue, 3);
 
         expect(result?.params?.steps).toBe(3);
-        // maxSteps never drops below the shared default
-        expect(result?.params?.maxSteps).toBe(DEFAULT_COLOR_STEPS);
       });
 
       it('should use numeric range type when useNumericRange is true', () => {
@@ -242,7 +237,6 @@ describe('Color util transforms', () => {
             // default continuity for distributed palettes
             continuity: 'all',
             steps: 3,
-            maxSteps: DEFAULT_COLOR_STEPS,
           },
         } satisfies PaletteOutput<CustomPaletteParams>);
       });
@@ -295,7 +289,6 @@ describe('Color util transforms', () => {
             rangeType: 'percent', // default range type for distributed palettes
             continuity: 'all', // default continuity for distributed palettes
             steps: 4, // the number of bands defined as argument
-            maxSteps: DEFAULT_COLOR_STEPS,
           },
         } satisfies PaletteOutput<CustomPaletteParams>);
       });
@@ -1086,7 +1079,6 @@ describe('Color util transforms', () => {
             { color: 'red', stop: null },
           ],
           steps: 1,
-          maxSteps: 5,
         },
       };
 

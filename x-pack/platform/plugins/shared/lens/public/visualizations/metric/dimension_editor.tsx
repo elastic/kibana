@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import {
   CustomizablePalette,
+  DEFAULT_COLOR_STEPS,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
   applyPaletteParams,
@@ -1248,6 +1249,7 @@ export function DimensionEditorAdditionalSection({
                   activePalette={activePalette}
                   dataBounds={currentMinMax}
                   showRangeTypeSelector={supportsPercentPalette}
+                  maxSteps={DEFAULT_COLOR_STEPS}
                   setPalette={(newPalette) => {
                     setState({
                       ...state,

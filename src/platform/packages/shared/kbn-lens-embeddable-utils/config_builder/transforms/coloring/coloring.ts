@@ -133,7 +133,6 @@ function buildNamedPaletteLensState({
       // values outside the range are still colored.
       continuity: 'all',
       steps: numberOfBands,
-      maxSteps: Math.max(DEFAULT_COLOR_STEPS, numberOfBands),
     },
   };
 }
@@ -220,7 +219,6 @@ export function fromColorByValueAPIToLensState(
       colorStops,
       continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
-      maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }

@@ -36,6 +36,7 @@ export interface CustomizablePaletteProps {
   showRangeTypeSelector?: boolean;
   disableSwitchingContinuity?: boolean;
   showExtraActions?: boolean;
+  maxSteps?: number;
 }
 
 function shouldSyncPaletteState(
@@ -61,6 +62,7 @@ export const CustomizablePalette = ({
   showExtraActions = true,
   showRangeTypeSelector = true,
   disableSwitchingContinuity = false,
+  maxSteps,
 }: CustomizablePaletteProps) => {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
   const colorRangesToShow = useMemo(() => {
@@ -243,6 +245,7 @@ export const CustomizablePalette = ({
             paletteConfiguration={localState.activePalette?.params}
             colorRanges={localState.colorRanges}
             dispatch={dispatch}
+            maxSteps={maxSteps}
           />
         </ColorRangesContext.Provider>
       </EuiFormRow>
