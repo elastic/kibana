@@ -64,9 +64,14 @@ export {
   INVESTIGATION_CLOSE_PREVIEW_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
+  INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
+export type {
+  InvestigationsPrivilegesResponse,
+  ReadManagePrivileges,
+} from './investigations/privileges';
 
 export {
   setInvestigationStatusRequestSchema,

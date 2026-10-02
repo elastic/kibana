@@ -20,7 +20,10 @@ import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
-import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from './investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
@@ -119,13 +122,14 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('leaves impact off the base privileges until it needs its own', () => {
+    it('grants the investigations read API privilege with both base privileges', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
 
-      expect(privileges.all.api).toEqual([]);
+      expect(INVESTIGATIONS_API_PRIVILEGE_READ).toBe('read_investigations');
+      expect(privileges.all.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
       expect(privileges.all.ui).toEqual([]);
-      expect(privileges.read.api).toEqual([]);
+      expect(privileges.read.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
       expect(privileges.read.ui).toEqual([]);
     });
 

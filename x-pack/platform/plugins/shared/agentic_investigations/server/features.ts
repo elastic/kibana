@@ -21,7 +21,10 @@ import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
-import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from './investigations/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -36,15 +39,15 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        // Impact has no privilege of its own yet. Reads and writes use the
+        // Reading investigations comes with both base privileges. Writes use the
         // investigations sub-feature below, which `includeIn: 'all'` joins here.
-        api: [],
+        api: [INVESTIGATIONS_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
         ui: [],
       },
       read: {
         app: [],
-        api: [],
+        api: [INVESTIGATIONS_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
         ui: [],
       },
