@@ -6,13 +6,17 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getErrorMessage } from '../utils';
 import { getDestinationInfo } from './reindex';
 
+type Properties = Record<string, MappingProperty>;
+
 /**
- * Creates each destination data stream and copies the restored indices' mappings onto it, so field
- * types that only the original writer knew (TSDB counters, histograms) survive the reindex.
+ * Creates each destination data stream and copies the time-series metric fields of its restored
+ * indices onto it. Reindexing re-derives every other field type from the documents, but whether a
+ * number is a counter, a gauge or a histogram was declared by the original writer and is not in the data.
  */
 export async function copySourceMappings({
   esClient,
@@ -37,21 +41,12 @@ export async function copySourceMappings({
   for (const [dataStream, sources] of sourcesByDestination) {
     await ensureDataStream({ esClient, log, dataStream });
     for (const source of sources) {
-      // An empty write index has constant_keyword fields without values, which conflict with populated ones.
-      const { count } = await esClient.count({ index: source });
-      if (count === 0) {
-        continue;
-      }
       const response = await esClient.indices.getMapping({ index: source });
-      const properties = response[source]?.mappings?.properties;
-      if (!properties || Object.keys(properties).length === 0) {
+      const properties = metricProperties(response[source]?.mappings?.properties ?? {});
+      if (Object.keys(properties).length === 0) {
         continue;
       }
-      log.debug(
-        `Copying ${
-          Object.keys(properties).length
-        } top-level mappings from ${source} to ${dataStream}`
-      );
+      log.debug(`Copying metric mappings from ${source} to ${dataStream}`);
       try {
         await esClient.indices.putMapping({ index: dataStream, properties });
       } catch (error) {
@@ -61,6 +56,22 @@ export async function copySourceMappings({
       }
     }
   }
+}
+
+/** Fields with a `time_series_metric` declaration, kept inside their parent objects. */
+export function metricProperties(properties: Properties): Properties {
+  const kept: Properties = {};
+  for (const [name, property] of Object.entries(properties)) {
+    if ('properties' in property && property.properties) {
+      const nested = metricProperties(property.properties as Properties);
+      if (Object.keys(nested).length > 0) {
+        kept[name] = { ...property, properties: nested } as MappingProperty;
+      }
+    } else if ('time_series_metric' in property) {
+      kept[name] = property;
+    }
+  }
+  return kept;
 }
 
 async function ensureDataStream({

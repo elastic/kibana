@@ -203,7 +203,6 @@ describe('replaySnapshot', () => {
         created: 5,
         failures: [],
       }),
-      count: jest.fn().mockResolvedValue({ count: 5 }),
       esql: {
         query: jest.fn().mockResolvedValue({ columns: [], values: [['2024-01-15T12:00:00.000Z']] }),
       },
