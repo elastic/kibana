@@ -649,7 +649,7 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
-  const isComingFromDashboardView =
+  const isSaveAndReturnMode =
     isSaveAndReturn(incomingState) && incomingState?.originatingApp !== 'visualize';
 
   const appMenuConfig = useMemo<AppMenuConfig>(() => {
@@ -662,7 +662,7 @@ export const LensTopNavMenu = ({
       initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) && isComingFromDashboardView;
+      !(showReplaceInDashboard || showReplaceInCanvas) && isSaveAndReturnMode;
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -955,7 +955,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isComingFromDashboardView),
+          visible: Boolean(isSaveAndReturnMode),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -1029,7 +1029,7 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput?.ref_id,
 
-    isComingFromDashboardView,
+    isSaveAndReturnMode,
     activeData,
     isSaveable,
     application,
@@ -1355,7 +1355,7 @@ export const LensTopNavMenu = ({
 
   // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
   const back = useMemo<AppHeaderBack | undefined>(() => {
-    if (!isComingFromDashboardView || !redirectToOrigin || !incomingState?.originatingApp) {
+    if (!isSaveAndReturnMode || !redirectToOrigin || !incomingState?.originatingApp) {
       return undefined;
     }
 
@@ -1370,7 +1370,7 @@ export const LensTopNavMenu = ({
       label: getOriginatingAppName() ?? incomingState.originatingApp,
     };
   }, [
-    isComingFromDashboardView,
+    isSaveAndReturnMode,
     redirectToOrigin,
     incomingState?.originatingApp,
     incomingState?.originatingPath,
