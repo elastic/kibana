@@ -24,72 +24,53 @@ import { attachEventInvestigationToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
   platformSignificantEventsTools.attachInvestigation;
 
-const eventInvestigationAttachSchema = z
-  .object({
-    event_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe(
-        i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
-          {
-            defaultMessage:
-              'Stable event_id slug of the significant event to attach the investigation to (e.g. "checkout-latency-slo-breach"). Read from the Event ID field, not the Event UUID.',
-          }
-        )
-      )
-      .optional(),
-    event_uuid: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe(
-        i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventUuidDeprecated',
-          {
-            defaultMessage:
-              'Deprecated. Use event_id instead. Accepted during the transition period for in-flight calls that still send the legacy event_uuid.',
-          }
-        )
-      )
-      .optional(),
-    workflow_execution_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe(
-        i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
-          {
-            defaultMessage:
-              'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
-          }
-        )
-      ),
-    started_at: z.iso.datetime({ offset: true }).describe(
+const eventInvestigationAttachSchema = z.object({
+  event_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
       i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
         {
           defaultMessage:
-            'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
+            'Stable event_id slug of the significant event to attach the investigation to (e.g. "checkout-latency-slo-breach"). Read from the Event ID field.',
         }
       )
     ),
-    completed_at: z.iso
-      .datetime({ offset: true })
-      .optional()
-      .describe(
-        i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
-          {
-            defaultMessage:
-              'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
-          }
-        )
-      ),
-  })
-  .refine((data) => data.event_id !== undefined || data.event_uuid !== undefined, {
-    message: 'Either event_id or event_uuid must be provided',
-    path: ['event_id'],
-  });
+  workflow_execution_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
+        {
+          defaultMessage:
+            'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
+        }
+      )
+    ),
+  started_at: z.iso.datetime({ offset: true }).describe(
+    i18n.translate(
+      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
+      {
+        defaultMessage:
+          'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
+      }
+    )
+  ),
+  completed_at: z.iso
+    .datetime({ offset: true })
+    .optional()
+    .describe(
+      i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
+        {
+          defaultMessage:
+            'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
+        }
+      )
+    ),
+});
 
 export const createEventInvestigationAttachTool = ({
   getScopedClients,
@@ -136,24 +117,10 @@ export const createEventInvestigationAttachTool = ({
 
         const eventClient = await getEventClient();
 
-        // Resolve stable event_id from a legacy event_uuid when event_id is not provided.
-        // The schema refine guarantees that at least one identifier is present.
-        let resolvedEventId: string;
-        if (toolParams.event_id !== undefined) {
-          resolvedEventId = toolParams.event_id;
-        } else {
-          const legacyUuid = toolParams.event_uuid!;
-          const { hits } = await eventClient.findByEventUuid(legacyUuid);
-          if (hits.length === 0) {
-            throw new Error(`Significant event with UUID "${legacyUuid}" not found`);
-          }
-          resolvedEventId = hits[0].event_id;
-        }
-
         const data = await attachEventInvestigationToolHandler({
           eventClient,
           eventSearchClient: await getEventSearchClient(),
-          eventId: resolvedEventId,
+          eventId: toolParams.event_id,
           workflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
@@ -163,7 +130,7 @@ export const createEventInvestigationAttachTool = ({
 
         telemetry.trackAgentToolEventInvestigationAttach({
           success: true,
-          event_id: resolvedEventId,
+          event_id: toolParams.event_id,
           workflow_execution_id: toolParams.workflow_execution_id,
         });
 
@@ -174,7 +141,6 @@ export const createEventInvestigationAttachTool = ({
         telemetry.trackAgentToolEventInvestigationAttach({
           success: false,
           event_id: toolParams.event_id,
-          event_uuid: toolParams.event_uuid,
           workflow_execution_id: toolParams.workflow_execution_id,
           error_message: message,
         });
