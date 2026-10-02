@@ -36,6 +36,7 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   state: 'paused',
   settingsRevision: 1,
   workflowId: null,
+  blockingReasons: [],
   settings: {
     workerId: TRIAGE,
     autonomy: 'manual',

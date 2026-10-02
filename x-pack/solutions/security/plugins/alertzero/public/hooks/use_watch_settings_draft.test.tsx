@@ -28,6 +28,7 @@ const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>):
   state: 'paused',
   settingsRevision: 1,
   workflowId: null,
+  blockingReasons: [],
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',

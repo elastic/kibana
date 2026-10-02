@@ -21,6 +21,7 @@ import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
+import type { HasSpaceModel } from './space_model_availability';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -213,14 +214,15 @@ const createPersistentHarness = () => {
     managedWorkflows,
     scheduledTasks,
     updateWorkflow,
-    createService: (agentBuilder?: AgentBuilderPluginStart) => {
+    createService: (agentBuilder?: AgentBuilderPluginStart, hasSpaceModel?: HasSpaceModel) => {
       const attachmentService = makeAttachmentService();
       return new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         { agentBuilder },
-        { getAttachmentService: async () => attachmentService }
+        { getAttachmentService: async () => attachmentService },
+        hasSpaceModel
       );
     },
   };
@@ -1167,6 +1169,103 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('updated');
       if (result.outcome !== 'updated') throw new Error();
       expect(result.response.worker.enabled).toBe(false);
+    });
+  });
+
+  describe('no-model block', () => {
+    /** Flip `model.available` to simulate adding or removing the space's last connector. */
+    const createModelSwitch = (available: boolean) => {
+      const model = { available };
+      const hasSpaceModel: HasSpaceModel = jest.fn(async () => model.available);
+      return { model, hasSpaceModel };
+    };
+
+    it('reports no_model on every Worker when the space has no model', async () => {
+      const { hasSpaceModel } = createModelSwitch(false);
+      const { workers } = await createPersistentHarness()
+        .createService(undefined, hasSpaceModel)
+        .list(request, SPACE);
+
+      expect(workers.map(({ blockingReasons }) => blockingReasons)).toEqual(
+        WORKERS_WITHOUT_FORENSIC_SKILL.map(() => ['no_model'])
+      );
+    });
+
+    it('reports no reasons when the space has a model', async () => {
+      const { hasSpaceModel } = createModelSwitch(true);
+      const service = createPersistentHarness().createService(undefined, hasSpaceModel);
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.every(({ blockingReasons }) => blockingReasons.length === 0)).toBe(true);
+      expect((await service.get(TRIAGE, request, SPACE))?.blockingReasons).toEqual([]);
+    });
+
+    it('refuses enabling without installing or writing anything', async () => {
+      const { hasSpaceModel } = createModelSwitch(false);
+      const harness = createPersistentHarness();
+
+      const result = await harness
+        .createService(undefined, hasSpaceModel)
+        .update(
+          TRIAGE,
+          { enabled: true, settings: { autonomy: 'assisted' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result).toEqual({ outcome: 'no-model' });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(false);
+    });
+
+    it('still accepts disabling and settings-only saves while blocked', async () => {
+      const { hasSpaceModel } = createModelSwitch(false);
+      const service = createPersistentHarness().createService(undefined, hasSpaceModel);
+
+      const saved = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { scheduleInterval: '12h' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      expect(saved.outcome).toBe('updated');
+      if (saved.outcome !== 'updated') throw new Error('Expected settings save to succeed');
+      expect(saved.response.worker.blockingReasons).toEqual(['no_model']);
+
+      const disabled = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+      expect(disabled.outcome).toBe('updated');
+    });
+
+    it('keeps the stored enabled value across the block and accepts enabling once a model exists', async () => {
+      const { model, hasSpaceModel } = createModelSwitch(true);
+      const harness = createPersistentHarness();
+      const service = harness.createService(undefined, hasSpaceModel);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+      model.available = false;
+      const blocked = await service.list(request, SPACE);
+      expect(blocked.workers.find(({ id }) => id === TRIAGE)).toMatchObject({
+        enabled: true,
+        blockingReasons: ['no_model'],
+      });
+      expect(await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'no-model',
+      });
+      expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(true);
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
+
+      model.available = true;
+      const reopened = await service.list(request, SPACE);
+      expect(reopened.workers.find(({ id }) => id === ATTACK_DISCOVERY)).toMatchObject({
+        enabled: false,
+        blockingReasons: [],
+      });
+      const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+      expect(enabled.outcome).toBe('updated');
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(true);
     });
   });
 

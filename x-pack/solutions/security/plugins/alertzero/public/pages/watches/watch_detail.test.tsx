@@ -126,6 +126,7 @@ const createWorker = (
   state: 'paused',
   settingsRevision: null,
   workflowId: null,
+  blockingReasons: [],
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',

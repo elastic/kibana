@@ -37,7 +37,9 @@ paths:
                   type: boolean
                   description: >-
                     Enables or disables the Worker. Enabling an uninstalled Worker first installs
-                    its per-space managed document with defaults.
+                    its per-space managed document with defaults. `true` is refused with a 400,
+                    and nothing in the patch is applied, while the Worker's `blockingReasons`
+                    include `no_model`.
                 settingsRevision:
                   type: integer
                   format: int64
@@ -77,6 +79,8 @@ paths:
         '409':
           description: The settings changed before this request began applying its patch
         '400':
-          description: The settings patch is unsupported or omitted its revision
+          description: >-
+            The settings patch is unsupported or omitted its revision, or it enables a Worker in a
+            space with no AI model
         '404':
           description: Unknown Worker

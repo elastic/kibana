@@ -143,6 +143,16 @@ export const registerUpdateWorkerRoute = ({
                   ),
                 },
               });
+            case 'no-model':
+              return response.badRequest({
+                body: {
+                  message: i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
+                    defaultMessage:
+                      'Worker "{workerId}" cannot be enabled because this space has no AI model configured. Check Feature settings.',
+                    values: { workerId },
+                  }),
+                },
+              });
             case 'unavailable':
               return response.customError({
                 statusCode: 503,

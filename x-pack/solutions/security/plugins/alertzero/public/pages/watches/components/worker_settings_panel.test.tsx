@@ -29,6 +29,7 @@ const createWorker = (workflowId: string | null): Worker => ({
   state: 'ok',
   settingsRevision: 1,
   workflowId,
+  blockingReasons: [],
   settings: {
     workerId: WORKER_ID,
     autonomy: 'manual',

@@ -115,6 +115,33 @@ describe('registerUpdateWorkerRoute', () => {
     });
   });
 
+  it('maps no-model to 400 naming Feature settings', async () => {
+    const update = jest.fn().mockResolvedValue({ outcome: 'no-model' });
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { enabled: true },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: `Worker "${TRIAGE}" cannot be enabled because this space has no AI model configured. Check Feature settings.`,
+      },
+    });
+  });
+
   it('returns 403 when enabling a worker without managed-update privileges', async () => {
     const update = jest.fn();
     const { handler } = setupRoute(update);

@@ -33,13 +33,13 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
   z
     .object({
       /**
-       * Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.
+       * Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults. `true` is refused with a 400, and nothing in the patch is applied, while the Worker's `blockingReasons` include `no_model`.
        */
       enabled: z
         .boolean()
         .optional()
         .describe(
-          'Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.'
+          "Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults. `true` is refused with a 400, and nothing in the patch is applied, while the Worker's `blockingReasons` include `no_model`."
         ),
       /**
        * Revision returned by list/GET. Required when settings is present; null asserts that the per-space managed Worker has not been installed yet.

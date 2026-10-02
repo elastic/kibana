@@ -111,6 +111,7 @@ export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,

@@ -15,6 +15,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
   type Worker,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -55,6 +56,7 @@ interface AlertTriageOpts {
    */
   isAlertAnalysisRuntimeEnabled?: (request: KibanaRequest) => Promise<boolean>;
 }
+import { getSpaceBlockingReasons, type HasSpaceModel } from './space_model_availability';
 
 /**
  * Workers hidden until the named skill is registered. These skills may be
@@ -98,6 +100,7 @@ export type WorkerUpdateResult =
   | { outcome: 'blocked'; reason: AlertTriageEnableBlockedReason }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
+  | { outcome: 'no-model' }
   | { outcome: 'unavailable' }
   | { outcome: 'failed' };
 
@@ -117,7 +120,8 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: AlertTriageOpts = {}
+    private readonly alertTriageOpts: AlertTriageOpts = {},
+    private readonly hasSpaceModel: HasSpaceModel = async () => true
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -178,16 +182,25 @@ export class WorkersService {
     }
   }
 
+  private async blockingReasons(request: KibanaRequest): Promise<WorkerBlockingReason[]> {
+    return getSpaceBlockingReasons(await this.hasSpaceModel(request));
+  }
+
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
-    const agentLookup = await this.buildAgentLookup(request);
-    const hiddenWorkerIds = await this.hiddenWorkerIds(request);
+    const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.hiddenWorkerIds(request),
+      this.blockingReasons(request),
+    ]);
     const workers = await Promise.all(
       workerRegistry
         .list()
         .filter((registration) => !hiddenWorkerIds.has(registration.id))
-        .map((registration) => this.projectWorker(registration, spaceId, request, agentLookup))
+        .map((registration) =>
+          this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup)
+        )
     );
     return ListWorkersResponse.parse({ workers });
   }
@@ -206,8 +219,11 @@ export class WorkersService {
       return undefined;
     }
 
-    const agentLookup = await this.buildAgentLookup(request);
-    return this.projectWorker(registration, spaceId, request, agentLookup);
+    const [agentLookup, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.blockingReasons(request),
+    ]);
+    return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
   }
 
   async update(
@@ -222,6 +238,11 @@ export class WorkersService {
     }
     if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return { outcome: 'not-found' };
+    }
+    // Refused before any write, so the whole patch is rejected and the stored value is untouched.
+    const blockingReasons = await this.blockingReasons(request);
+    if (patch.enabled === true && blockingReasons.includes('no_model')) {
+      return { outcome: 'no-model' };
     }
 
     const touchesSettings = touchesWorkerSettings(patch);
@@ -401,7 +422,13 @@ export class WorkersService {
     }
 
     const agentLookup = await this.buildAgentLookup(request);
-    const worker = await this.projectWorker(registration, spaceId, request, agentLookup);
+    const worker = await this.projectWorker(
+      registration,
+      spaceId,
+      request,
+      blockingReasons,
+      agentLookup
+    );
     return {
       outcome: 'updated',
       response: { worker, ...(skippedRuleCount > 0 ? { skippedRuleCount } : {}) },
@@ -487,6 +514,7 @@ export class WorkersService {
     registration: WorkerRegistration,
     spaceId: string,
     request: KibanaRequest,
+    blockingReasons: WorkerBlockingReason[],
     agentLookupCallback?: AgentLookup
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -560,6 +588,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      blockingReasons,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

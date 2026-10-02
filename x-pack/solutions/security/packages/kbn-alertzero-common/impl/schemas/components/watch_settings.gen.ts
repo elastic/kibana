@@ -46,6 +46,12 @@ export type WorkerRunStateEnum = typeof WorkerRunState.enum;
 export const WorkerRunStateEnum = WorkerRunState.enum;
 
 /**
+ * Why a Worker can't run in this space. `no_model`: the space has no AI model to run on (no LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no default set). It applies to every Worker in the space alike, and while it holds the Worker can't be enabled.
+ */
+export const WorkerBlockingReason = lazySchema(() => z.literal('no_model'));
+export type WorkerBlockingReason = z.infer<typeof WorkerBlockingReason>;
+
+/**
  * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
  */
 export const WorkerSettingsExtras = lazySchema(() => z.object({}).catchall(z.unknown()));
@@ -128,6 +134,14 @@ export const Worker = lazySchema(() =>
       .nullable()
       .describe(
         "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
+      ),
+    /**
+     * Why this Worker can't run, hardest first; empty when nothing blocks it. A blocking reason never changes the stored `enabled` value.
+     */
+    blockingReasons: z
+      .array(WorkerBlockingReason)
+      .describe(
+        "Why this Worker can't run, hardest first; empty when nothing blocks it. A blocking reason never changes the stored `enabled` value."
       ),
     skills: z.array(WatchCallableRef).optional(),
   })
