@@ -59,7 +59,6 @@ export const showNewVisModalFromDashboard = async (
   path: string
 ) => {
   try {
-    console.log('window.location.hash', window.location.hash);
     const currentApp = await firstValueFrom(coreStart.application.currentAppId$);
     const embeddableState = currentApp
       ? {
