@@ -156,6 +156,9 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.security}.agent`,
   'deductive.ai',
   `${internalNamespaces.platformContextEngine}.setup`,
+
+  // Platform - Discover
+  'discover-activity-investigation',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -346,6 +349,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.activity_investigation',
 
   // Platform – Workflows
   'workflow.yaml',

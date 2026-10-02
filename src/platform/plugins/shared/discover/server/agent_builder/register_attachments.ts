@@ -12,7 +12,9 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { CoreSetup } from '@kbn/core/server';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
+import { createActivityInvestigationAttachmentType } from './activity_investigation_attachment';
 
 const columnSchema = z.object({
   name: z.string(),
@@ -133,6 +135,20 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
   return lines.join('\n');
 };
 
-export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
+export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup, core: CoreSetup) => {
   agentBuilder.attachments.registerType(createEsqlQueryResultsAttachmentType());
+  agentBuilder.attachments.registerType(
+    createActivityInvestigationAttachmentType({
+      getEsClient: async (request, projectRouting) => {
+        const [coreStart] = await core.getStartServices();
+        if (projectRouting === undefined) {
+          return coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+        }
+        return coreStart.elasticsearch.client.asScoped(request, {
+          projectRouting: 'expression',
+          value: projectRouting,
+        }).asCurrentUser;
+      },
+    })
+  );
 };

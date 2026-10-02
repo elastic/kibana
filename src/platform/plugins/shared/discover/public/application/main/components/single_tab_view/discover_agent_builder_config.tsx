@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
@@ -26,6 +27,7 @@ import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
+import { activityInvestigationChatActive$ } from '../activity_investigation/activity_investigation_chat';
 import {
   useProfileAccessor,
   type DeepAnalysisPlaybookExtension,
@@ -154,6 +156,10 @@ export const buildEsqlResultsAttachment = (
 
 export const DiscoverAgentBuilderConfig = () => {
   const { agentBuilder } = useDiscoverServices();
+  const investigationChatActive = useObservable(
+    activityInvestigationChatActive$,
+    activityInvestigationChatActive$.getValue()
+  );
   const dispatch = useInternalStateDispatch();
   const dataView = useCurrentDataView();
   const [columns, dataSource, query] = useAppStateSelector((state) => [
@@ -201,7 +207,7 @@ export const DiscoverAgentBuilderConfig = () => {
   );
 
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder || activityInvestigationChatActive$.getValue()) {
       return;
     }
 
@@ -250,6 +256,7 @@ export const DiscoverAgentBuilderConfig = () => {
     };
   }, [
     agentBuilder,
+    investigationChatActive,
     browserApiTools,
     columns,
     dataSource?.type,

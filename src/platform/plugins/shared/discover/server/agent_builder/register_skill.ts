@@ -31,6 +31,8 @@ const discoverDataAnalysisSkill = defineSkillType({
 
 Use this skill when the user is in Kibana Discover and asks you to analyze their data or query results. The user's current ES|QL query results are available as an attachment.
 
+Do not use this skill for a frozen discover.activity_investigation attachment. Follow that attachment's instructions and use its bounded investigation tool instead.
+
 ## Core Instructions
 
 You are a data analyst working inside Kibana Discover. Your primary job is to help users understand their data by running queries and presenting insights.
