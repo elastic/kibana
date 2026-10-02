@@ -193,11 +193,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 8 | `DirectorStep` | Enrich alert-type events with episode state. |
 | 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
-> [!WARNING]
-> **Two similarly-named switches, different scopes.**
->
-> - `xpack.alerting_v2.enabled` (`kibana.yml`) — governs the whole plugin, **including the rule executor**. Setting this to `false` stops all rule execution.
-> - `alerting:v2:enabled` (Advanced Settings UI, space-scoped) — gates only the UI and public APIs. **Rules keep executing while this is off.** An operator who turns off this setting expecting execution to stop during an incident will be surprised; only `xpack.alerting_v2.enabled` stops the executor.
+The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
 
 ## How recovery and no-data fit together
 
@@ -525,6 +521,7 @@ Useful coverage points:
 - Prefer `requireState(...)` and explicit halts over assuming a field exists.
 - Keep rule execution focused on event production. If a change is really about lifecycle transitions, move toward the director. If it is really about notifications, move toward the dispatcher.
 - If you change stored event shape, verify the resources schema and downstream readers together.
+
 ## Migration from v1
 
 ### `minimumScheduleInterval.enforce` removed
