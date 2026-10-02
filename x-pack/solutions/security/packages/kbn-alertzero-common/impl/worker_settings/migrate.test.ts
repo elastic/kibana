@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ENDPOINT_ANALYSIS_SETTINGS } from './forensics_watch';
 import { ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
-import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 import { migrateStoredTemplateValues, renameStoredField } from './migrate';
 import type { WorkerSettingsDeclaration } from './types';
 
@@ -73,7 +73,7 @@ describe('migrateStoredTemplateValues', () => {
 
   it('drops a schedule interval from a worker that no longer declares one', () => {
     expect(
-      migrateStoredTemplateValues(CONTINUOUS_THREAT_HUNT_SETTINGS, {
+      migrateStoredTemplateValues(ENDPOINT_ANALYSIS_SETTINGS, {
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '30m',

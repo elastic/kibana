@@ -89,5 +89,6 @@ export {
 } from './detection_watch';
 export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
 export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
+export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 export { migrateStoredTemplateValues, renameStoredField } from './migrate';
 export type { WorkerSettingsDeclaration, WorkerSettingsMigration } from './types';
