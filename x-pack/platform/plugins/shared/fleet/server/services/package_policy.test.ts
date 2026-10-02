@@ -3425,9 +3425,11 @@ describe('Package policy service', () => {
         ]);
         (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
 
-        return (savedObjectsClient.bulkUpdate.mock.calls[0][0] as Array<{
-          attributes: Record<string, unknown>;
-        }>)[0].attributes;
+        return (
+          savedObjectsClient.bulkUpdate.mock.calls[0][0] as Array<{
+            attributes: Record<string, unknown>;
+          }>
+        )[0].attributes;
       };
 
       it('should store the condition from the target package version', async () => {
