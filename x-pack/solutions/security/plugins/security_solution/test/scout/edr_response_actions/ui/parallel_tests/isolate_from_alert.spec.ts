@@ -11,6 +11,7 @@ import { spaceTest, tags } from '../fixtures';
 import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpoint_hosts';
 import { completeHostAction, waitForHostIsolation } from '../../common/complete_host_action';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
+import { openAlertFlyoutForRule } from '../fixtures/open_alert_flyout';
 
 const AGENT_STATUS_CELL = 'securitySolutionFlyoutHighlightedFieldsAgentStatusCell';
 
@@ -52,38 +53,12 @@ spaceTest.describe(
         }
         const host = seededHost;
 
-        const { alertsTablePage, documentFlyout, hostIsolation } = pageObjects;
+        const { documentFlyout, hostIsolation } = pageObjects;
         const isolateComment = `Isolating ${host.hostname}`;
         const releaseComment = `Releasing ${host.hostname}`;
         const agentStatus = page.testSubj.locator(AGENT_STATUS_CELL);
 
-        const openAlertFlyout = async () => {
-          // Endpoint Security alerts land in the same table and push this row out of
-          // the virtualized grid. A rule-name filter leaves a single row.
-          await page.gotoApp('security/alerts', {
-            params: {
-              query: `(language:kuery,query:'kibana.alert.rule.name: "${host.ruleName}"')`,
-            },
-          });
-          // The charts header mounts after navigation. Collapsing it gives the events
-          // table a height; until then the rule cell is not in the DOM.
-          const chartsToggle = page.testSubj
-            .locator('alerts-charts-panel')
-            .getByTestId('query-toggle-header')
-            .and(page.locator('[aria-label="Charts"]'));
-          // The alerts view can still be on its loading spinner well after navigation.
-          await chartsToggle.waitFor({ state: 'visible', timeout: 60_000 });
-          const expandedChartsToggle = chartsToggle.and(page.locator('[aria-expanded="true"]'));
-          if (await expandedChartsToggle.isVisible()) {
-            await expandedChartsToggle.click();
-          }
-          await chartsToggle
-            .and(page.locator('[aria-expanded="false"]'))
-            .waitFor({ state: 'visible', timeout: 60_000 });
-          await alertsTablePage.waitForRuleAlert(host.ruleName);
-          await alertsTablePage.expandAlertDetailsFlyout(host.ruleName);
-          await documentFlyout.waitForAlertFlyout();
-        };
+        const openAlertFlyout = () => openAlertFlyoutForRule(page, pageObjects, host.ruleName);
 
         await spaceTest.step('isolate the host from the alert flyout', async () => {
           await openAlertFlyout();

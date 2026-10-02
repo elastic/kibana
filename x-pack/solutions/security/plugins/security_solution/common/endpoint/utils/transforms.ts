@@ -252,24 +252,30 @@ async function waitForMetadataDocs({
   extraFilters?: QueryDslQueryContainer[];
 }): Promise<void> {
   const size = agentIds.length;
+  let lastDistinctAgents = 0;
   const areDocsReady = async (): Promise<boolean> => {
-    const totalHits = (
-      await esClient.search({
-        index,
-        query: {
-          bool: {
-            filter: [{ terms: { [agentIdField]: agentIds } }, ...extraFilters],
-          },
+    // Count distinct agents, not documents. A restarted transform can write a
+    // second doc for the same agent, and an exact document count then never matches.
+    const response = await esClient.search({
+      index,
+      query: {
+        bool: {
+          filter: [{ terms: { [agentIdField]: agentIds } }, ...extraFilters],
         },
-        size: 0,
-        rest_total_hits_as_int: true,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      })
-    ).hits.total;
-    const total = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+      },
+      size: 0,
+      aggs: {
+        agents: {
+          cardinality: { field: agentIdField },
+        },
+      },
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    lastDistinctAgents =
+      (response.aggregations as { agents?: { value?: number } } | undefined)?.agents?.value ?? 0;
 
-    if (total === size) {
+    if (lastDistinctAgents >= size) {
       return true;
     }
 
@@ -278,10 +284,14 @@ async function waitForMetadataDocs({
     return false;
   };
 
-  const isReady = await waitFor(areDocsReady);
+  // Poll every 5s for 3 minutes. A 20s gap lets another worker's stop consume
+  // most of the deadline before this suite starts the transform again.
+  const isReady = await waitFor(areDocsReady, 5_000, 36);
   if (!isReady) {
     throw new Error(
-      `Timed out waiting for ${size} ${label} docs for agent ids [${agentIds.join(', ')}]`
+      `Timed out waiting for ${size} ${label} docs for agent ids [${agentIds.join(
+        ', '
+      )}] (last distinct agent count: ${lastDistinctAgents})`
     );
   }
 }

@@ -29,7 +29,10 @@ const createEsClient = (startTransform: jest.Mock): Client =>
       }),
       startTransform,
     },
-    search: jest.fn().mockResolvedValue({ hits: { total: 1 } }),
+    search: jest.fn().mockResolvedValue({
+      hits: { total: 1 },
+      aggregations: { agents: { value: 1 } },
+    }),
   } as unknown as Client);
 
 describe('startMetadataTransforms', () => {
