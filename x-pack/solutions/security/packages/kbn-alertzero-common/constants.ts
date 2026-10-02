@@ -48,11 +48,21 @@ export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as cons
 export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
   `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
 
+/** Failed managed scans in the trailing 24 hours, folded onto Workers. */
+export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
+
+export interface ScanFailureWorker {
+  workerId: string;
+  watchId: string;
+}
+
+export interface ScanFailuresResponse {
+  workers: ScanFailureWorker[];
+  unknown: boolean;
+}
+
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
-
-/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
-export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -91,8 +101,6 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
  * never leave these declarations behind.
  */
 export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
-
-export const WATCH_AUTONOMY_MANUAL = ['manual'] as const;
 
 /**
  * Presentation metadata for the managed watch catalog.
@@ -168,15 +176,15 @@ export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
-export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
-  'system-security-detection-rule-creation' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID =
+  'system-security-detection-rule-coverage' as const;
 
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
 
@@ -210,8 +218,8 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_DETECTION_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-    name: 'Rule Creation',
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    name: 'Rule Coverage',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
   },

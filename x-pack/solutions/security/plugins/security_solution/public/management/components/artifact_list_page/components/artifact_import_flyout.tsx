@@ -218,6 +218,8 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
         <EuiSpacer size="m" />
 
         <EuiFilePicker
+          aria-label={labels.importFlyoutFilePickerLabel}
+          initialPromptText={labels.importFlyoutFilePickerLabel}
           onChange={handleOnFileChange}
           disabled={isLoading}
           data-test-subj={getTestId('filePicker')}

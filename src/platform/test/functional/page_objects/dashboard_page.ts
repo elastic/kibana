@@ -363,16 +363,21 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
 
-    await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
+    // The top nav stays disabled for a moment after a save, and a click on it is silently dropped.
+    await this.appMenu.clickMenuItem('dashboardViewOnlyMode', { waitForEnabled: true });
 
-    if (accept) {
-      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
-        timeout: 2000,
-      });
-      if (confirmation) {
-        await this.common.clickConfirmOnModal();
-      }
+    if (!accept) return;
+
+    const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+      timeout: 2000,
+    });
+    if (confirmation) {
+      await this.common.clickConfirmOnModal();
     }
+
+    await this.retry.waitFor('the dashboard to be in view mode', async () => {
+      return this.appMenu.menuItemExists('dashboardEditMode');
+    });
   }
 
   public async clickDiscardChanges(accept = true) {

@@ -30,7 +30,7 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
     gap: ${euiTheme.size.s};
     width: 100%;
     padding: 6px ${euiTheme.size.s};
-    border-radius: ${euiTheme.border.radius.small};
+    border-radius: ${euiTheme.border.radius.control};
     text-decoration: none;
     color: ${euiTheme.components.buttons.textColorText};
 

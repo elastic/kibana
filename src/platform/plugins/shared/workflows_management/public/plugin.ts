@@ -225,7 +225,7 @@ export class WorkflowsPlugin
     const deepLinksFlags$: Observable<DeepLinksParams> = combineLatest({
       libraryEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
-        false
+        true
       ),
       executionsViewEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
@@ -314,6 +314,7 @@ export class WorkflowsPlugin
     return {
       ...coreStart,
       ...depsStart,
+      security: coreStart.security,
       ...additionalServices,
     };
   }

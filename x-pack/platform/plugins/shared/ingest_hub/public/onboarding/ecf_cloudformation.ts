@@ -16,7 +16,6 @@
  * Three template families are supported, each producing its own Launch button:
  *   - Unified ECS (multi-signal): ecs_logs-cloudformation.yaml   → ECS data streams
  *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams
- *                                                                   (uses `S3SourceBuckets` instead of `S3Buckets`)
  *   - CrowdStrike FDR (dedicated): crowdstrike_fdr_cloudformation.yaml
  *
  * Reference templates:
@@ -32,7 +31,7 @@ import type {
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
-} from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_template_version';
 
 // ── Template filenames ────────────────────────────────────────────────────────
 
@@ -154,6 +153,32 @@ export const getEcfServiceConfigs = (
 const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
 
 /**
+ * Appends the default port (443 for https, 80 for http) to an OTLP endpoint URL when no
+ * explicit port is present. Required by the OTel ECF CloudFormation exporter configuration.
+ */
+export const ensureOtlpPort = (endpoint: string): string => {
+  try {
+    const parsed = new URL(endpoint);
+    // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
+    // Handles bracketed IPv6 ([::1]) and case-insensitive schemes (HTTPS://).
+    if (/^https?:\/\/(?:\[[^\]]+\]|[^/:[]+):\d+/i.test(endpoint)) return endpoint;
+    const port = parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    if (!port) return endpoint;
+    // URL.hostname is lowercased; use the original authority string to preserve casing.
+    // Stop at /, ?, or # so a bare query (e.g. ?token=abc) is not included in the authority.
+    const schemeEnd = endpoint.indexOf('://') + 3;
+    const afterScheme = endpoint.slice(schemeEnd);
+    const authorityEnd = afterScheme.search(/[/?#]/);
+    const originalAuthority =
+      authorityEnd === -1 ? afterScheme : afterScheme.slice(0, authorityEnd);
+    const rest = authorityEnd === -1 ? '' : afterScheme.slice(authorityEnd);
+    return `${endpoint.slice(0, schemeEnd)}${originalAuthority}:${port}${rest}`;
+  } catch {
+    return endpoint;
+  }
+};
+
+/**
  * Builds a CloudFormation Quick Create URL for the unified multi-signal ECF template.
  *
  * The URL pre-fills:
@@ -263,9 +288,8 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
 /**
  * Builds a CloudFormation Quick Create URL for the OTel multi-signal ECF template.
  *
- * The OTel template uses `S3SourceBuckets` instead of `S3Buckets` (unlike the ECS unified
- * template). All other parameters — `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share
- * the same names and semantics.
+ * Parameters — `S3Buckets`, `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share the same
+ * names and semantics as the unified template.
  *
  * `ElasticAPIKey` is intentionally NOT pre-filled for the same security reasons as the unified
  * template: it must not appear in browser history or URL logs.
@@ -304,11 +328,10 @@ export const buildEcfOtelCloudFormationUrl = ({
   hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
-    hashParams.set('param_OTLPEndpoint', otlpEndpoint);
+    hashParams.set('param_OTLPEndpoint', ensureOtlpPort(otlpEndpoint));
   }
-  // OTel template uses S3SourceBuckets, not S3Buckets
   if (s3BucketArns.length > 0) {
-    hashParams.set('param_S3SourceBuckets', s3BucketArns.join(','));
+    hashParams.set('param_S3Buckets', s3BucketArns.join(','));
   }
   if (logGroupArns.length > 0) {
     hashParams.set('param_CloudWatchLogGroups', logGroupArns.join(','));
