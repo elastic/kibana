@@ -11,6 +11,7 @@ import { userSchema } from '../user';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
+  MAX_SLACK_SEEN_EVENT_IDS,
   MAX_SUBJECT_ID_LENGTH,
   MAX_SUBJECTS_PER_REQUEST,
 } from './constants';
@@ -80,6 +81,14 @@ export const slackThreadSubjectSchema = z.object({
   permalink: z
     .url({ protocol: /^https$/ })
     .max(MAX_URL_LENGTH)
+    .optional(),
+  /**
+   * Slack event ids the writer already handled for this thread, newest last, so an event that is
+   * delivered again can be recognised. A writer sends the whole list; it replaces the stored one.
+   */
+  seen_event_ids: z
+    .array(z.string().min(1).max(MAX_ID_LENGTH))
+    .max(MAX_SLACK_SEEN_EVENT_IDS)
     .optional(),
 });
 export type SlackThreadSubject = z.infer<typeof slackThreadSubjectSchema>;

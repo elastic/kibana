@@ -41,3 +41,6 @@ export const MAX_SUBJECTS_PER_REQUEST = 50;
 
 /** Bound on subjects one investigation holds, follow-ups included. */
 export const MAX_SUBJECTS_PER_CONVERSATION = 100;
+
+/** Bound on the delivered Slack event ids a `slack_thread` subject remembers, newest last. */
+export const MAX_SLACK_SEEN_EVENT_IDS = 50;
