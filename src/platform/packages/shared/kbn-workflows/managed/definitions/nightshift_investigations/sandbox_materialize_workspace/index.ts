@@ -36,7 +36,7 @@ export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID =
 export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   id: NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 4,
+  version: 5,
   billable: false,
   yaml: SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_YAML,
   management: {

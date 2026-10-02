@@ -37,7 +37,7 @@ export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-agent-op
 export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW = {
   id: NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: AGENT_OPTIMIZE_WORKFLOW_YAML,
   management: {

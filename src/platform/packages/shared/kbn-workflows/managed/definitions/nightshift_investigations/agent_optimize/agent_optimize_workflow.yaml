@@ -91,7 +91,11 @@ steps:
   - name: optimize_workspaces
     type: parallel
     mode: settled
-    timeout: 120s
+    # `timeout` bounds the whole parallel, `branch-timeout` bounds one optimizer. They must not be
+    # equal: the engine measures the step timeout over the parallel, so with both at 120s the zone
+    # trips in the same tick that kills the branch and the parallel step fails outright — `settled`
+    # never reports the branch and the reinforcement tail below never runs.
+    timeout: 150s
     branch-timeout: 120s
     branches:
       - name: cortex

@@ -138,7 +138,7 @@ describe('nightshift agent optimize workflow', () => {
         type: 'ai.agent',
       }),
     ]);
-    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(2);
+    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(3);
   });
 
   // A parallel branch has no per-branch timeout: it inherits `branch-timeout`. Reinforcement
@@ -154,10 +154,11 @@ describe('nightshift agent optimize workflow', () => {
     // The agent's own 900s budget, and no branch-timeout anywhere near it.
     expect(workflow.steps[reinforceIndex].timeout).toBe('900s');
 
-    // Nothing about the existing optimizer budget changed.
+    // Each optimizer still gets 120s, and the parallel's own budget is strictly above it so a
+    // branch killed by `branch-timeout` is reported by `settled` instead of failing the step.
     const parallel = workflow.steps[parallelIndex];
-    expect(parallel.timeout).toBe('120s');
     expect(parallel['branch-timeout']).toBe('120s');
+    expect(parallel.timeout).toBe('150s');
   });
 
   // Liquid `{{ }}` stringifies the array as "[object Object]…", the step's preprocess then
@@ -201,14 +202,14 @@ describe('nightshift agent optimize workflow', () => {
       .filter((node): node is NonNullable<typeof node> => Boolean(node));
 
     // The agent's own 900s budget survives compilation as a step-level timeout zone,
-    // and the existing optimizer budget is untouched at 120s.
+    // and the optimizer fan-out keeps its own, above the per-branch 120s.
     const timeoutFor = (stepId: string) =>
       nodes.find((node) => node.type === 'enter-timeout-zone' && node.stepId === stepId) as
         | { timeout: string }
         | undefined;
 
     expect(timeoutFor('reinforce_decision_trees')?.timeout).toBe('900s');
-    expect(timeoutFor('optimize_workspaces')?.timeout).toBe('120s');
+    expect(timeoutFor('optimize_workspaces')?.timeout).toBe('150s');
     expect(timeoutFor('obtain_sandbox')?.timeout).toBe('60s');
 
     // The agent compiles as a top-level atomic step, reached after the parallel. Were it

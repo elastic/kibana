@@ -52,7 +52,12 @@ steps:
     # <system_update> line naming its own directory; compose_prompt covers the
     # branch-timeout case, where the branch produced no output to report it with.
     mode: settled
-    timeout: 45s
+    # `timeout` must stay strictly above `branch-timeout`. The engine measures the step timeout
+    # over the whole parallel, so with both at 45s the zone trips in the same tick that kills the
+    # branch, the parallel step itself fails, and `settled` never gets to report the branch —
+    # compose_prompt is then never reached and the round aborts, which is what this shape exists
+    # to prevent. Executed end to end in the nightshift plugin's integration tests.
+    timeout: 60s
     branch-timeout: 45s
     branches:
       - name: cortex
