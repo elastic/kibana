@@ -106,15 +106,14 @@ export {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
-  type EsqlViewsClient,
-} from './utils/esql_views_client';
-export {
+  getViewEsqlQuery,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_NAME_LENGTH,
+  resolveViewColumnToIndexField,
   validateEsqlViewName,
   type EsqlViewNameValidationError,
-} from './utils/esql_view_validation';
-export { getViewEsqlQuery } from './utils/get_view_esql_query';
+  type EsqlViewsClient,
+} from './utils/views';
 export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
@@ -122,7 +121,6 @@ export {
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
-export { resolveViewColumnToIndexField } from './utils/resolve_view_column_to_index_field';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';

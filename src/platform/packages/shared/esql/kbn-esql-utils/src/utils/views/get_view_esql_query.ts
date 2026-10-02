@@ -8,7 +8,7 @@
  */
 
 import { shouldBeQuotedSource } from '@kbn/esql-language';
-import { escapeStringValue } from './append_to_query/utils';
+import { escapeStringValue } from '../append_to_query/utils';
 
 /** Builds a `FROM` query for a view, quoting the name when the ES|QL lexer cannot read it unquoted. */
 export const getViewEsqlQuery = (viewName: string): string => {
