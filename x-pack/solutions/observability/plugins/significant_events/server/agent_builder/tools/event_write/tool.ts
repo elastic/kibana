@@ -65,6 +65,9 @@ export const eventsWriteItemSchema = significantEventSchema
       .describe(
         dedent`
           ID of an existing event to append a new version to (continuation/snapshot mode).
+          Never compose, shorten or guess an event_id. For Discovery, copy it
+          character-for-character from an active event returned by event_search in this run. The
+          Discovery handler rejects unknown IDs.
 
           Omit to trigger find-or-create. When the item has confirmed rules, the handler scans
           all currently-active events for one that confirms every submitted confirmed rule and
@@ -288,7 +291,10 @@ export function createEventsWriteTool({
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Do not retry a populated payload rejected for
-      ownership or field validation.
+      ownership or field validation. If a completed item returns \`unknown_event_id\`,
+      resend only that item once. Never reuse any \`event_id\` rejected in the first call.
+      Use a different active \`event_id\` copied exactly from \`event_search\` in this run, or
+      omit \`event_id\` so the handler runs find-or-create.
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 

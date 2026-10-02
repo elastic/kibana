@@ -730,13 +730,13 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(results[0]).toEqual({
       index: 0,
       event_id: 'unknown-event-id',
-      status: 'open',
+      status: 'active',
       written: false,
       reason: 'unknown_event_id',
       error: {
         type: 'validation_error',
         reason:
-          'event_id "unknown-event-id" does not exist. Do not resend this id. Resend the item once with the exact event_id of a different open event returned by event_search, or with no event_id to find-or-create.',
+          'event_id "unknown-event-id" does not exist. Do not resend this id. Resend the item once with the exact event_id of a different active event returned by event_search, or with no event_id to find-or-create.',
         status: 404,
       },
     });
@@ -748,8 +748,11 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   it('accepts canonical lineage when the flag-aware read store has not refreshed yet', async () => {
     const eventId = 'known-canonical-event';
+    const canonicalInvestigations = [
+      { workflow_execution_id: 'wf-canonical', started_at: '2024-01-01T00:00:00.000Z' },
+    ] as SignificantEvent['investigations'];
     const canonicalEvent = makeStoredEvent(eventId, {
-      event_uuid: 'canonical-event-uuid',
+      investigations: canonicalInvestigations,
       severity: '40-medium',
     });
     const eventSearchClient = makeEventSearchClient({
@@ -769,8 +772,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(result).toMatchObject({ event_id: eventId, written: true });
     expect(eventSearchClient.findByEventId).toHaveBeenCalledWith(eventId);
     expect(eventClient.findByEventId).toHaveBeenCalledWith(eventId);
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].previous_event_uuid).toBe(
-      'canonical-event-uuid'
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].investigations).toEqual(
+      canonicalInvestigations
     );
   });
 

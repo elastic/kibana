@@ -594,7 +594,7 @@ export async function eventsWriteBulkHandler({
           type: 'validation_error',
           reason: `event_id ${JSON.stringify(
             candidate.eventId
-          )} does not exist. Do not resend this id. Resend the item once with the exact event_id of a different open event returned by event_search, or with no event_id to find-or-create.`,
+          )} does not exist. Do not resend this id. Resend the item once with the exact event_id of a different active event returned by event_search, or with no event_id to find-or-create.`,
           status: 404,
         },
       };
