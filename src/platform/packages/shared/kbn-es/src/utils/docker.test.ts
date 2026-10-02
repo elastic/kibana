@@ -1120,6 +1120,21 @@ describe('runServerlessCluster()', () => {
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
     expect(onReady).not.toHaveBeenCalled();
   });
+
+  test('should tear down already started containers when startup fails', async () => {
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    execa.commandSync.mockImplementation(() => ({ stdout: 'es01\nes02\n' }));
+    runUiamContainerMock.mockRejectedValue(new Error('uiam-cosmosdb failed to start'));
+
+    await expect(
+      runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
+    ).rejects.toThrow('uiam-cosmosdb failed to start');
+
+    expect(execa.commandSync.mock.calls[1][0]).toEqual('docker kill es01 es02');
+  });
 });
 
 describe('stopServerlessCluster()', () => {
