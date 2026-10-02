@@ -195,6 +195,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await lens.closeDimensionEditor();
 
+      await lens.waitForVisualization();
+
       // Two Y axes that are both valid
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
