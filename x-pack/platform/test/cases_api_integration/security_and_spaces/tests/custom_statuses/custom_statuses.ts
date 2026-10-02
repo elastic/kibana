@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { CaseStatusesConfiguration } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../common/lib/mock';
 import {
@@ -17,6 +18,7 @@ import {
   deleteConfiguration,
   findCases,
   findCaseUserActions,
+  getCaseMetrics,
   getConfigurationRequest,
   updateCase,
   updateConfiguration,
@@ -64,6 +66,16 @@ const statuses: CaseStatusesConfiguration = [
   }),
   status({ key: 'resolved', label: 'Resolved', category: CaseStatuses.closed, order: 5 }),
 ];
+
+const onHold = status({
+  key: 'on_hold',
+  label: 'On hold',
+  category: CaseStatuses['in-progress'],
+  order: 6,
+  pausesTimeTracking: true,
+});
+const pausingStatuses: CaseStatusesConfiguration = [...statuses, onHold];
+const pauseReasons = ['Awaiting customer', 'Awaiting vendor'];
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -288,6 +300,272 @@ export default ({ getService }: FtrProviderContext): void => {
         const byDefaultKey = await findCases({ supertest, query: { status_key: ['open'] } });
         expect(byDefaultKey.cases.map((item) => item.id)).to.eql([open.id]);
         expect(byDefaultKey.count_in_progress_cases).to.be(1);
+      });
+    });
+
+    describe('pausing', () => {
+      describe('configuration', () => {
+        it('stores statuses that pause time tracking and the pause reasons', async () => {
+          const configuration = await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: { statuses: pausingStatuses, pauseReasons },
+            })
+          );
+
+          expect(configuration.statuses).to.eql(pausingStatuses);
+          expect(configuration.pauseReasons).to.eql(pauseReasons);
+        });
+
+        it('rejects pausing on a closed status or on a category default', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                statuses: [...statuses, { ...onHold, category: CaseStatuses.closed }],
+                pauseReasons,
+              },
+            }),
+            400
+          );
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                statuses: statuses.map((item) =>
+                  item.key === 'in-progress' ? { ...item, pausesTimeTracking: true } : item
+                ),
+                pauseReasons,
+              },
+            }),
+            400
+          );
+        });
+
+        it('rejects an empty or duplicated list of reasons while a status pauses', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: { statuses: pausingStatuses, pauseReasons: [] },
+            }),
+            400
+          );
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                statuses: pausingStatuses,
+                pauseReasons: ['Awaiting customer', 'awaiting customer'],
+              },
+            }),
+            400
+          );
+        });
+      });
+
+      describe('cases', () => {
+        beforeEach(async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({ overrides: { statuses: pausingStatuses, pauseReasons } })
+          );
+        });
+
+        const pause = (theCase: { id: string; version: string }, reason = 'Awaiting customer') =>
+          updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: theCase.id,
+                  version: theCase.version,
+                  status_key: 'on_hold',
+                  pause_reason: reason,
+                },
+              ],
+            },
+          });
+
+        it('requires one of the configured reasons to pause', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [{ id: theCase.id, version: theCase.version, status_key: 'on_hold' }],
+            },
+            expectedHttpCode: 400,
+          });
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: theCase.id,
+                  version: theCase.version,
+                  status_key: 'on_hold',
+                  pause_reason: 'Lunch',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('rejects a reason when the target status does not pause', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: theCase.id,
+                  version: theCase.version,
+                  status_key: 'awaiting_customer',
+                  pause_reason: 'Awaiting customer',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('pauses the case, remembers where it came from, and records the reason', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          const [paused] = await pause(theCase);
+
+          expect(paused.status).to.be(CaseStatuses['in-progress']);
+          expect(paused.status_key).to.be('on_hold');
+          expect(paused.paused_at).to.be.a('string');
+          expect(paused.pause_reason).to.be('Awaiting customer');
+          expect(paused.resume_to_status_key).to.be('open');
+          expect(paused.time_paused).to.be(0);
+
+          const { userActions } = await findCaseUserActions({ supertest, caseID: theCase.id });
+          const statusActions = userActions.filter(
+            (action) => action.type === UserActionTypes.status
+          );
+          expect(statusActions).to.have.length(1);
+          expect(statusActions[0].payload).to.eql({
+            status: CaseStatuses['in-progress'],
+            status_key: 'on_hold',
+            pause_reason: 'Awaiting customer',
+          });
+        });
+
+        it('adds the paused time and clears the pause on resume', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          const [paused] = await pause(theCase);
+          const [resumed] = await updateCase({
+            supertest,
+            params: {
+              cases: [{ id: paused.id, version: paused.version, status_key: 'awaiting_customer' }],
+            },
+          });
+
+          expect(resumed.status_key).to.be('awaiting_customer');
+          expect(resumed.paused_at).to.be(null);
+          expect(resumed.pause_reason).to.be(null);
+          expect(resumed.resume_to_status_key).to.be(null);
+          expect(resumed.time_paused).to.be.a('number');
+        });
+
+        it('closes a paused case and leaves the paused time out of its metrics', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          const [paused] = await pause(theCase);
+          const [closed] = await updateCase({
+            supertest,
+            params: {
+              cases: [{ id: paused.id, version: paused.version, status: CaseStatuses.closed }],
+            },
+          });
+
+          expect(closed.status).to.be(CaseStatuses.closed);
+          expect(closed.paused_at).to.be(null);
+          expect(closed.time_paused).to.be.a('number');
+          expect(closed.duration).to.be.a('number');
+          expect(closed.time_to_resolve).to.be.a('number');
+
+          const elapsed = Math.floor(
+            (new Date(closed.closed_at as string).getTime() -
+              new Date(closed.created_at).getTime()) /
+              1000
+          );
+          expect(closed.duration).to.be.lessThan(elapsed - (closed.time_paused ?? 0) + 1);
+        });
+
+        it('starts over with no paused time when a closed case is reopened', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          const [paused] = await pause(theCase);
+          const [closed] = await updateCase({
+            supertest,
+            params: {
+              cases: [{ id: paused.id, version: paused.version, status: CaseStatuses.closed }],
+            },
+          });
+          const [reopened] = await updateCase({
+            supertest,
+            params: {
+              cases: [{ id: closed.id, version: closed.version, status: CaseStatuses.open }],
+            },
+          });
+
+          expect(reopened.time_paused).to.be(0);
+          expect(reopened.paused_at).to.be(null);
+        });
+
+        it('pauses several cases in one request and counts them when searching', async () => {
+          const first = await createCase(supertest, postCaseReq);
+          const second = await createCase(supertest, postCaseReq);
+          const active = await createCase(supertest, postCaseReq);
+
+          const patched = await updateCase({
+            supertest,
+            params: {
+              cases: [first, second].map((item) => ({
+                id: item.id,
+                version: item.version,
+                status_key: 'on_hold',
+                pause_reason: 'Awaiting vendor',
+              })),
+            },
+          });
+          expect(patched.map((item) => item.pause_reason)).to.eql([
+            'Awaiting vendor',
+            'Awaiting vendor',
+          ]);
+
+          const found = await findCases({ supertest });
+          expect(found.count_paused_cases).to.be(2);
+          expect(found.cases.map((item) => item.id).sort()).to.eql(
+            [first.id, second.id, active.id].sort()
+          );
+
+          const paused = await findCases({ supertest, query: { status_key: 'on_hold' } });
+          expect(paused.cases.map((item) => item.id).sort()).to.eql([first.id, second.id].sort());
+        });
+
+        it('reports the paused duration in the lifespan metrics', async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          await pause(theCase);
+
+          const metrics = await getCaseMetrics({
+            supertest,
+            caseId: theCase.id,
+            features: [CaseMetricsFeature.LIFESPAN],
+          });
+
+          expect(metrics.lifespan?.statusInfo.pausedDuration).to.be.a('number');
+        });
+      });
+
+      it('does not count paused cases when no status pauses time tracking', async () => {
+        await createConfiguration(supertest, getConfigurationRequest({ overrides: { statuses } }));
+        await createCase(supertest, postCaseReq);
+
+        const found = await findCases({ supertest });
+        expect(found.count_paused_cases).to.be(undefined);
       });
     });
 

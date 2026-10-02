@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const browser = getService('browser');
   const header = getPageObject('header');
 
   describe('Configure - custom statuses', function () {
@@ -58,6 +59,59 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(await testSubjects.getAttribute('case-status-key-readonly', 'value')).to.be(
         'awaiting_customer'
       );
+      await testSubjects.click('common-flyout-cancel');
+    });
+
+    it('suggests an On hold status and seeds the pause reasons when added', async () => {
+      await testSubjects.existOrFail('case-statuses-on-hold-callout');
+      await testSubjects.missingOrFail('case-pause-reasons');
+
+      await testSubjects.click('case-statuses-add-on-hold');
+      await toasts.dismissAll();
+      await header.waitUntilLoadingHasFinished();
+
+      await testSubjects.existOrFail('case-status-row-on_hold');
+      await testSubjects.existOrFail('case-status-on_hold-pausing-badge');
+      await testSubjects.missingOrFail('case-statuses-on-hold-callout');
+      await testSubjects.existOrFail('case-pause-reasons');
+      await testSubjects.existOrFail('case-pause-reason-row-Awaiting customer');
+    });
+
+    it('adds a pause reason and does not let the last one go', async () => {
+      await testSubjects.click('case-pause-reasons-add');
+      await testSubjects.existOrFail('common-flyout');
+      await testSubjects.setValue('case-pause-reason-input', 'Waiting on legal');
+      await testSubjects.click('common-flyout-save');
+      await toasts.dismissAll();
+      await header.waitUntilLoadingHasFinished();
+
+      await testSubjects.existOrFail('case-pause-reason-row-Waiting on legal');
+
+      for (const reason of [
+        'Awaiting vendor',
+        'Awaiting another team',
+        'Scheduled work',
+        'Waiting on legal',
+      ]) {
+        await testSubjects.click(`case-pause-reason-${reason}-actions`);
+        await testSubjects.click(`case-pause-reason-${reason}-remove`);
+        await toasts.dismissAll();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail(`case-pause-reason-row-${reason}`);
+      }
+
+      await testSubjects.click('case-pause-reason-Awaiting customer-actions');
+      expect(await testSubjects.isEnabled('case-pause-reason-Awaiting customer-remove')).to.be(
+        false
+      );
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('keeps the pausing switch off the category default', async () => {
+      await testSubjects.click('case-status-in-progress-actions');
+      await testSubjects.click('case-status-in-progress-edit');
+      await testSubjects.existOrFail('common-flyout');
+      expect(await testSubjects.isEnabled('case-status-pauses-time-tracking')).to.be(false);
       await testSubjects.click('common-flyout-cancel');
     });
 
