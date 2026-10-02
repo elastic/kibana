@@ -102,26 +102,14 @@ export const getPocToastClearAllMotionClassName = () =>
 export const pocToastAnchorStyles = (euiTheme: UseEuiTheme) => css`
   position: fixed;
   top: 16px;
-  left: calc(
-    var(--kbn-layout--navigation-width, 0px) +
-      (
-        100vw - var(--kbn-layout--navigation-width, 0px) -
-          var(--kbn-layout--sidebar-width, 0px)
-      ) / 2
-  );
+  left: 50%;
   transform: translateX(-50%);
   z-index: ${Number(euiTheme.euiTheme.levels.toast ?? 9000) + 1};
   display: flex;
   flex-direction: column;
   align-items: center;
   width: max-content;
-  max-width: min(
-    calc(
-      100vw - var(--kbn-layout--navigation-width, 0px) - var(--kbn-layout--sidebar-width, 0px) -
-        ${euiTheme.euiTheme.size.l}
-    ),
-    ${POC_TOAST_MAX_CARD_WIDTH}px
-  );
+  max-width: min(calc(100vw - ${euiTheme.euiTheme.size.l}), ${POC_TOAST_MAX_CARD_WIDTH}px);
   pointer-events: none;
 `;
 
