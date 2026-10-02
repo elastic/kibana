@@ -183,6 +183,27 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
     });
 
+    it('shows per-integration details when the agent is in error and a package policy is provided', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: { data: { items: [{ status: 'error', last_checkin_message: 'boom' }] } },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, getByTestId } = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          // minimal agent policy, as synthesized by the managed integrations table
+          agentPolicy={{ id: 'ap1', name: 'AP' } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
+        expect(getByTestId('agentDetailsIntegration')).toBeInTheDocument();
+      });
+    });
+
     it('does not reset completed steps when a subsequent poll returns no data', async () => {
       // First render with agent online, then simulate a failed refetch returning no items
       mockUseGetAgentsQuery

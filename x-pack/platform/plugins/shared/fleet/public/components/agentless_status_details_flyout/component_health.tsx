@@ -26,6 +26,8 @@ export interface AgentlessComponentHealthProps {
   /** Must include `package_policies` so the per-integration accordion can render. */
   agentPolicy?: AgentPolicy;
   packagePolicy: PackagePolicy;
+  /** Set to false when the caller already shows its own failure callout. */
+  showCallout?: boolean;
 }
 
 /**
@@ -37,6 +39,7 @@ export const AgentlessComponentHealth: React.FunctionComponent<AgentlessComponen
   agent,
   agentPolicy,
   packagePolicy,
+  showCallout = true,
 }) => {
   const { docLinks } = useStartServices();
 
@@ -59,7 +62,7 @@ export const AgentlessComponentHealth: React.FunctionComponent<AgentlessComponen
 
   return (
     <>
-      {componentAlertLevel && (
+      {showCallout && componentAlertLevel && (
         <>
           <CalloutComponent
             announceOnMount

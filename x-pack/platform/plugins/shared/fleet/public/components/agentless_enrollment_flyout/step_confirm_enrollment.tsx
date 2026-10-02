@@ -113,11 +113,29 @@ export const AgentlessStepConfirmEnrollment = ({
             />
           </p>
         </EuiText>
-        {agent && agentPolicy && (
+        {agent && packagePolicy ? (
           <>
             <EuiSpacer size="m" />
-            <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} linkToLogs={false} />
+            <AgentlessComponentHealth
+              policyName={policyName}
+              agent={agent}
+              agentPolicy={agentPolicy}
+              packagePolicy={packagePolicy}
+              showCallout={false}
+            />
           </>
+        ) : (
+          agent &&
+          agentPolicy && (
+            <>
+              <EuiSpacer size="m" />
+              <AgentDetailsIntegrations
+                agent={agent}
+                agentPolicy={agentPolicy}
+                linkToLogs={false}
+              />
+            </>
+          )
         )}
       </>
     );
