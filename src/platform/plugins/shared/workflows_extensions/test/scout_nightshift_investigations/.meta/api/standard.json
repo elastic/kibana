@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_extensions/test/scout_workflows_extensions/api/tests/trigger_definitions_approval.spec.ts",
+        "file": "src/platform/plugins/shared/workflows_extensions/test/scout_nightshift_investigations/api/tests/trigger_definitions_approval.spec.ts",
         "line": 24,
         "column": 50
       }
