@@ -72,7 +72,10 @@ const SEPARATOR_JOINED = /^[A-Za-z0-9]+([._-][A-Za-z0-9]+)+$/;
  * (`WIN-ANALYST01`, `GHOST-HOST99`) rather than leading with them, so number-first is a safe
  * signal — and it stays narrow on purpose: a hostname with its digits in their own segment
  * anywhere else (`ghost-host-99`, `server-01`, three or more segments) still falls through to
- * the broad digit check below, rather than being swept into the same exemption.
+ * the broad digit check below, rather than being swept into the same exemption. Checked only
+ * once the uppercase case is already ruled out: a quantity phrase's unit word is plain
+ * English prose, never all-caps, so an all-uppercase number-prefixed token (`99-GHOST`) is
+ * never actually a quantity and must not be exempted just because it leads with a number.
  */
 const isNumericQuantityPhrase = (segments: string[]): boolean =>
   segments.length === 2 && /^\d+$/.test(segments[0]) && /^[A-Za-z]+$/.test(segments[1]);
@@ -80,9 +83,10 @@ const isNumericQuantityPhrase = (segments: string[]): boolean =>
 const looksLikeEntity = (token: string): boolean => {
   if (!SEPARATOR_JOINED.test(token)) return false;
   const segments = token.split(/[._-]/);
-  if (isNumericQuantityPhrase(segments)) return false;
   const bare = segments.join('');
-  return /\d/.test(bare) || bare === bare.toUpperCase();
+  if (bare === bare.toUpperCase()) return true;
+  if (isNumericQuantityPhrase(segments)) return false;
+  return /\d/.test(bare);
 };
 
 /**

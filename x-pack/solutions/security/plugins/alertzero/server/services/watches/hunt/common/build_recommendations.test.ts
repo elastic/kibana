@@ -276,6 +276,36 @@ describe('generateRecommendations', () => {
     expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
   });
 
+  it('drops an uppercase, number-prefixed hostname the quantity exemption must not cover either', async () => {
+    // Libra P3 (second follow-up): the quantity exemption ran before the uppercase
+    // check, so an all-caps number-prefixed token ("99-GHOST") was short-circuited as
+    // a quantity before ever reaching the uppercase rule that used to catch it. A
+    // quantity phrase's unit word is plain English prose, never all-caps, so the
+    // uppercase check now runs first.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for WIN-ANALYST01.',
+          entities_referenced: ['WIN-ANALYST01'],
+        },
+        {
+          text: 'Isolate 99-GHOST immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
+  });
+
   it('drops a hallucinated entity wrapped in Markdown code formatting', async () => {
     // Libra P2: backticks/asterisks were never stripped, so a formatted name reached
     // `looksLikeEntity` with the wrapping still attached and failed to match — the same
