@@ -74,6 +74,9 @@ const SCHEMA_RESOLUTION_OPTIONS: SchemaResolutionOption[] = [
   },
 ];
 
+export const getSchemaResolutionDisplayLabel = (value: string): string =>
+  SCHEMA_RESOLUTION_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: boolean }) => {
   const { control } = useFormContext<CreateDatasetFormValues>();
   const { field: schemaResolutionField } = useController({

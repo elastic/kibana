@@ -142,7 +142,25 @@ function VarField({
           <LazyPackagePolicyInputVarField
             varDef={varDef}
             value={value}
-            onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
+            onChange={(next) => {
+              // DatasetComponent calls onChange with { dataset, package } — an object, not a
+              // string. toDraft() would produce "[object Object]"; extract the dataset name.
+              const raw =
+                fieldName === 'data_stream.dataset' &&
+                next !== null &&
+                typeof next === 'object' &&
+                !Array.isArray(next)
+                  ? (next as { dataset?: unknown }).dataset ?? ''
+                  : next;
+              const nextDraft = toDraft(raw);
+              // Compare against the effective displayed value (toTyped materializes manifest
+              // defaults for untouched fields). Using draft[activeInput]?.[fieldName] here
+              // would be undefined for untouched fields, making toDraft() return '' and
+              // silently swallowing a clear-to-empty action on a field whose default is non-empty.
+              if (nextDraft !== toDraft(value)) {
+                onFieldChange(activeInput, fieldName, nextDraft);
+              }
+            }}
             errors={errors}
             forceShowErrors={forceShowErrors}
             packageName={service.packageName}
