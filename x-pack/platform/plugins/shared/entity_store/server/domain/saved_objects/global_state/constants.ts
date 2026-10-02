@@ -117,29 +117,50 @@ export const NonPriorityLogExtractionTypeOverride = lazySchema(() =>
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 
+/**
+ * Current defaults as a plain object. Source of truth for `LogExtractionConfig` field defaults;
+ * kept as data (not derived via `.parse({})`) so the lazy schema is not materialized at module load.
+ * Typed against `LogExtractionObj` rather than `LogExtractionConfig` to avoid a circular type reference.
+ */
+export const LATEST_LOG_EXTRACTION_DEFAULTS = {
+  additionalIndexPatterns: [],
+  excludedIndexPatterns: [],
+  fieldHistoryLength: 10,
+  lookbackPeriod: LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+  delay: LOG_EXTRACTION_DELAY_DEFAULT,
+  docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  timeout: LOG_EXTRACTION_TIMEOUT_DEFAULT,
+  frequency: LOG_EXTRACTION_FREQUENCY_DEFAULT,
+  maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
+  maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+} satisfies z.infer<typeof LogExtractionObj>;
+
 // schema for defaults
 export const LogExtractionConfig = lazySchema(() => {
   const base = LogExtractionObj.shape;
+  const defaults = LATEST_LOG_EXTRACTION_DEFAULTS;
 
   return z.object({
-    additionalIndexPatterns: base.additionalIndexPatterns.default([]),
-    excludedIndexPatterns: base.excludedIndexPatterns.default([]),
-    fieldHistoryLength: base.fieldHistoryLength.default(10),
-    lookbackPeriod: base.lookbackPeriod.default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
-    delay: base.delay.default(LOG_EXTRACTION_DELAY_DEFAULT),
-    docsLimit: base.docsLimit.default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
-    maxLogsPerPage: base.maxLogsPerPage.default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
-    timeout: base.timeout.default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
-    frequency: base.frequency.default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
-    maxTimeWindowSize: base.maxTimeWindowSize.default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
-    maxLogsPerWindow: base.maxLogsPerWindow.default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
+    additionalIndexPatterns: base.additionalIndexPatterns.default([
+      ...defaults.additionalIndexPatterns,
+    ]),
+    excludedIndexPatterns: base.excludedIndexPatterns.default([...defaults.excludedIndexPatterns]),
+    fieldHistoryLength: base.fieldHistoryLength.default(defaults.fieldHistoryLength),
+    lookbackPeriod: base.lookbackPeriod.default(defaults.lookbackPeriod),
+    delay: base.delay.default(defaults.delay),
+    docsLimit: base.docsLimit.default(defaults.docsLimit),
+    maxLogsPerPage: base.maxLogsPerPage.default(defaults.maxLogsPerPage),
+    timeout: base.timeout.default(defaults.timeout),
+    frequency: base.frequency.default(defaults.frequency),
+    maxTimeWindowSize: base.maxTimeWindowSize.default(defaults.maxTimeWindowSize),
+    maxLogsPerWindow: base.maxLogsPerWindow.default(defaults.maxLogsPerWindow),
     maxLogsPerWindowCapBehavior: base.maxLogsPerWindowCapBehavior.default(
-      LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT
+      defaults.maxLogsPerWindowCapBehavior
     ),
   });
 });
-
-export const LATEST_LOG_EXTRACTION_DEFAULTS: LogExtractionConfig = LogExtractionConfig.parse({});
 
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = lazySchema(() => z.enum(['started', 'stopped']));
