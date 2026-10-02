@@ -31,6 +31,7 @@ import {
   ALERTZERO_FEATURE_ID,
   resolveWatchAccent,
   SYSTEM_SECURITY_WATCH_CATALOG,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_CATALOG,
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
@@ -38,7 +39,6 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { workerScheduleCadenceLabel } from '../watches/components/worker_trigger_cadence';
 import { workerName } from '../watches/workers/translations';
@@ -65,8 +65,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
-
-  const currentUserEmail = useCurrentUser();
 
   // Intersect the server-returned worker list with the catalog so skill-gated workers
   // absent from the response are not shown as toggles (or counted toward the minimum).
@@ -201,7 +199,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                   <React.Fragment key={id}>
                     {index > 0 && <EuiHorizontalRule margin="none" />}
                     <EuiFlexGroup
-                      alignItems="center"
+                      alignItems="flexStart"
                       gutterSize="m"
                       responsive={false}
                       css={css`
@@ -241,6 +239,19 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                             <p id={`alertZeroOnboardingWorkerDescription-${id}`}>{description}</p>
                           </EuiText>
                         ) : null}
+                        {id === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID ? (
+                          <>
+                            <EuiSpacer size="s" />
+                            <EuiCallOut
+                              announceOnMount
+                              size="s"
+                              iconType="info"
+                              data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
+                            >
+                              <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
+                            </EuiCallOut>
+                          </>
+                        ) : null}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
@@ -274,24 +285,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
             </>
           )}
         </EuiPanel>
-
-        <EuiSpacer size="m" />
-
-        <EuiCallOut
-          color="warning"
-          iconType="warning"
-          title={i18n.BEFORE_YOU_ENABLE_TITLE}
-          data-test-subj="alertZeroOnboardingBeforeYouEnable"
-        >
-          <ul>
-            <li>{i18n.beforeYouEnableRunsAs(currentUserEmail)}</li>
-            <li>{i18n.BEFORE_YOU_ENABLE_LLM}</li>
-            <li>
-              <em>{i18n.BEFORE_YOU_ENABLE_PRIVILEGE}</em>
-            </li>
-            <li>{i18n.BEFORE_YOU_ENABLE_AUTONOMY}</li>
-          </ul>
-        </EuiCallOut>
       </div>
 
       <OnboardingEnableFooter
@@ -300,7 +293,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         isSaving={isSaving}
         isEnableDisabled={availableWorkerIds.length === 0 || enabledCount === 0}
         onEnable={handleEnableAndContinue}
-        onNotNow={() => application.navigateToApp(SECURITY_APP_ID)}
+        onBack={() => application.navigateToApp(SECURITY_APP_ID)}
       />
     </AlertZeroPageSection>
   );

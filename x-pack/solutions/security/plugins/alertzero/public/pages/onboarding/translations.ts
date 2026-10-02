@@ -51,43 +51,6 @@ export const ONBOARDING_NO_WORKERS_AVAILABLE = i18n.translate(
   }
 );
 
-export const BEFORE_YOU_ENABLE_TITLE = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.title',
-  { defaultMessage: 'Before you enable' }
-);
-
-export const beforeYouEnableRunsAs = (email: string | undefined) =>
-  i18n.translate('xpack.alertzero.onboarding.beforeYouEnable.runsAs', {
-    defaultMessage:
-      'Workers run as you{emailSuffix}. Anything they do is attributed to this account.',
-    values: {
-      emailSuffix: email ? ` ( ${email} )` : '',
-    },
-  });
-
-export const BEFORE_YOU_ENABLE_LLM = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.llm',
-  {
-    defaultMessage:
-      'Workers use your configured LLM connector. Usage scales with the number of workers and data volume.',
-  }
-);
-
-export const BEFORE_YOU_ENABLE_PRIVILEGE = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.privilege',
-  {
-    defaultMessage: 'Requires the manage AlertZero privilege.',
-  }
-);
-
-export const BEFORE_YOU_ENABLE_AUTONOMY = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.autonomy',
-  {
-    defaultMessage:
-      'Workers keep their existing autonomy settings. New workers default to the lowest level — investigates and proposes only; nothing runs without your approval. Adjust any time on Watches.',
-  }
-);
-
 export const ENABLE_AND_RUN = i18n.translate('xpack.alertzero.onboarding.enableAndRun', {
   defaultMessage: 'Enable and run',
 });
@@ -102,9 +65,16 @@ export const workersSelectedCount = (selected: number, total: number) =>
     values: { selected, total },
   });
 
-export const NOT_NOW = i18n.translate('xpack.alertzero.onboarding.notNow', {
-  defaultMessage: 'Not now — explore Security without AlertZero',
+export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
+  defaultMessage: 'Back',
 });
+
+export const ATTACK_DISCOVERY_WORKFLOWS_NOTE = i18n.translate(
+  'xpack.alertzero.onboarding.attackDiscoveryWorkflowsNote',
+  {
+    defaultMessage: 'Turning this on also enables the Attack Discovery workflows in Settings.',
+  }
+);
 
 export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
   defaultMessage:

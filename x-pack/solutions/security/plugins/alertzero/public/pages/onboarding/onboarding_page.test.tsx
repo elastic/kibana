@@ -58,14 +58,12 @@ const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   serverWorkers = ALL_WORKERS_RESPONSE,
-  security,
 }: {
   canWrite?: boolean;
   httpPatch?: jest.Mock;
   serverWorkers?: {
     workers: Array<{ id: string; enabled: boolean; settings?: { scheduleInterval?: string } }>;
   };
-  security?: { authc: { getCurrentUser: jest.Mock } };
 } = {}) => {
   const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
@@ -78,7 +76,6 @@ const renderPage = ({
   const core = {
     ...coreStart,
     http: { ...coreStart.http, get: httpGet, patch: httpPatch },
-    ...(security ? { security } : {}),
   };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
@@ -183,21 +180,16 @@ describe('OnboardingPage', () => {
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
-    it('renders the Before you enable callout', () => {
+    it('shows the Attack Discovery workflows note', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText('Before you enable')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingAttackDiscoveryNote')).toHaveTextContent(
+        'Turning this on also enables the Attack Discovery workflows in Settings.'
+      );
     });
 
-    it('shows the current user email in the runs-as callout when security is wired up', async () => {
-      const getCurrentUser = jest
-        .fn()
-        .mockResolvedValue({ email: 'test@example.com', username: 'testuser' });
-      renderPage({
-        canWrite: true,
-        security: { authc: { getCurrentUser } },
-      });
-
-      await waitFor(() => expect(screen.getByText(/test@example\.com/)).toBeInTheDocument());
+    it('does not render the Before you enable panel', () => {
+      renderPage({ canWrite: true });
+      expect(screen.queryByText('Before you enable')).not.toBeInTheDocument();
     });
 
     it('calls the API for all workers and navigates to /watches when Enable and run is clicked', async () => {
@@ -258,22 +250,22 @@ describe('OnboardingPage', () => {
       expect(history.location.pathname).toBe('/');
     });
 
-    it('renders the Not now link', () => {
+    it('renders the Back button', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/Not now/)).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingBackButton')).toBeInTheDocument();
     });
 
-    it('navigates to Security and does not send PATCHes when Not now is clicked', () => {
+    it('navigates to Security and does not send PATCHes when Back is clicked', () => {
       const httpPatch = jest.fn();
       const { application } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByTestId('alertZeroOnboardingNotNowLink'));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingBackButton'));
 
       expect(application.navigateToApp).toHaveBeenCalledWith(SECURITY_APP_ID);
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
-    it('disables the Not now link while save is in-flight so the user cannot navigate away mid-PATCH', async () => {
+    it('disables the Back button while save is in-flight so the user cannot navigate away mid-PATCH', async () => {
       const resolvers: Array<() => void> = [];
       const httpPatch = jest.fn().mockImplementation(
         () =>
@@ -285,17 +277,17 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      // While PATCHes are pending the Not now link must be disabled.
+      // While PATCHes are pending the Back button must be disabled.
       await waitFor(() =>
-        expect(screen.getByTestId('alertZeroOnboardingNotNowLink')).toHaveAttribute('disabled')
+        expect(screen.getByTestId('alertZeroOnboardingBackButton')).toHaveAttribute('disabled')
       );
-      fireEvent.click(screen.getByTestId('alertZeroOnboardingNotNowLink'));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingBackButton'));
       expect(application.navigateToApp).not.toHaveBeenCalled();
 
-      // After all PATCHes settle the link re-enables.
+      // After all PATCHes settle the button re-enables.
       resolvers.forEach((r) => r());
       await waitFor(() =>
-        expect(screen.getByTestId('alertZeroOnboardingNotNowLink')).not.toHaveAttribute('disabled')
+        expect(screen.getByTestId('alertZeroOnboardingBackButton')).not.toHaveAttribute('disabled')
       );
     });
 

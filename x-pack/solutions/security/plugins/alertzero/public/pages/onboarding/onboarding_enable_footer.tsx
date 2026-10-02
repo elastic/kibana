@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import * as i18n from './translations';
@@ -17,7 +24,7 @@ interface Props {
   isSaving: boolean;
   isEnableDisabled: boolean;
   onEnable: () => void;
-  onNotNow: () => void;
+  onBack: () => void;
 }
 
 export const OnboardingEnableFooter: React.FC<Props> = ({
@@ -26,7 +33,7 @@ export const OnboardingEnableFooter: React.FC<Props> = ({
   isSaving,
   isEnableDisabled,
   onEnable,
-  onNotNow,
+  onBack,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -50,15 +57,18 @@ export const OnboardingEnableFooter: React.FC<Props> = ({
           margin-inline: auto;
         `}
       >
-        <EuiFlexItem>
-          <EuiLink
-            onClick={isSaving ? undefined : onNotNow}
-            disabled={isSaving}
-            data-test-subj="alertZeroOnboardingNotNowLink"
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            iconType="chevronSingleLeft"
+            onClick={onBack}
+            isDisabled={isSaving}
+            data-test-subj="alertZeroOnboardingBackButton"
           >
-            {i18n.NOT_NOW} &rarr;
-          </EuiLink>
+            {i18n.BACK}
+          </EuiButtonEmpty>
         </EuiFlexItem>
+        <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued" data-test-subj="alertZeroOnboardingSelectedCount">
             {i18n.workersSelectedCount(selectedCount, totalCount)}

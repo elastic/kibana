@@ -46,9 +46,6 @@ jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
-jest.mock('../hooks/use_current_user', () => ({
-  useCurrentUser: jest.fn().mockReturnValue(undefined),
-}));
 
 const mockUseWorkers = useWorkers as jest.Mock;
 const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
