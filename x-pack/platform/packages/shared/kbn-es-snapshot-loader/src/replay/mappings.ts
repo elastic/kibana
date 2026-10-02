@@ -17,7 +17,7 @@ type Properties = Record<string, MappingProperty>;
  * Creates each destination data stream and copies the time-series metric fields of its restored
  * indices onto it. Reindexing re-derives every other field type from the documents, but whether a
  * number is a counter, a gauge or a histogram was declared by the original writer and is not in the data.
- * A stream that cannot be created or updated is reported and left to the reindex, which then maps it
+ * A stream this does not succeed for is reported and left to the reindex, which then maps it
  * dynamically as before.
  */
 export async function copySourceMappings({
@@ -41,30 +41,41 @@ export async function copySourceMappings({
   });
 
   for (const [dataStream, sources] of sourcesByDestination) {
-    if (!(await ensureDataStream({ esClient, log, dataStream }))) {
+    try {
+      await copyMetricMappings({ esClient, log, dataStream, sources });
+    } catch (error) {
+      log.warning(
+        `Could not copy metric mappings to ${dataStream}; its metric fields will be mapped dynamically: ${getErrorMessage(
+          error
+        )}`
+      );
+    }
+  }
+}
+
+async function copyMetricMappings({
+  esClient,
+  log,
+  dataStream,
+  sources,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  dataStream: string;
+  sources: string[];
+}): Promise<void> {
+  await ensureDataStream(esClient, dataStream);
+  const applied = new Set<string>();
+  for (const source of sources) {
+    const response = await esClient.indices.getMapping({ index: source });
+    const properties = metricProperties(response[source]?.mappings?.properties ?? {});
+    const key = JSON.stringify(properties);
+    if (Object.keys(properties).length === 0 || applied.has(key)) {
       continue;
     }
-    const applied = new Set<string>();
-    for (const source of sources) {
-      const response = await esClient.indices.getMapping({ index: source });
-      const properties = metricProperties(response[source]?.mappings?.properties ?? {});
-      const key = JSON.stringify(properties);
-      if (Object.keys(properties).length === 0 || applied.has(key)) {
-        continue;
-      }
-      applied.add(key);
-      log.debug(`Copying metric mappings from ${source} to ${dataStream}`);
-      try {
-        await esClient.indices.putMapping({ index: dataStream, properties });
-      } catch (error) {
-        log.warning(
-          `Could not copy metric mappings from ${source} to ${dataStream}; its metric fields will be mapped dynamically: ${getErrorMessage(
-            error
-          )}`
-        );
-        break;
-      }
-    }
+    applied.add(key);
+    log.debug(`Copying metric mappings from ${source} to ${dataStream}`);
+    await esClient.indices.putMapping({ index: dataStream, properties });
   }
 }
 
@@ -92,28 +103,12 @@ export function metricProperties(properties: Properties): Properties {
   return kept;
 }
 
-/** True when the data stream exists or was created; false (with a warning) when the cluster has no template for it. */
-async function ensureDataStream({
-  esClient,
-  log,
-  dataStream,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-  dataStream: string;
-}): Promise<boolean> {
+async function ensureDataStream(esClient: Client, dataStream: string): Promise<void> {
   try {
     await esClient.indices.createDataStream({ name: dataStream });
-    log.debug(`Created data stream ${dataStream}`);
-    return true;
   } catch (error) {
-    const message = getErrorMessage(error);
-    if (message.includes('resource_already_exists_exception')) {
-      return true;
+    if (!getErrorMessage(error).includes('resource_already_exists_exception')) {
+      throw error;
     }
-    log.warning(
-      `Could not create data stream ${dataStream}; replay will reindex without it: ${message}`
-    );
-    return false;
   }
 }

@@ -157,4 +157,33 @@ describe('copySourceMappings', () => {
       properties: keptMapping,
     });
   });
+
+  it('continues with the other streams when a source mapping cannot be read', async () => {
+    const esClient = createMockEsClient({
+      [metricsSource('000001')]: sourceMapping,
+      'snapshot-loader-temp-.ds-metrics-other.otel-default-2026.04.19-000001': sourceMapping,
+    });
+    (esClient.indices.getMapping as jest.Mock).mockRejectedValueOnce(
+      new Error('Request timed out')
+    );
+
+    await copySourceMappings({
+      esClient,
+      log,
+      restoredIndices: [
+        metricsSource('000001'),
+        'snapshot-loader-temp-.ds-metrics-other.otel-default-2026.04.19-000001',
+      ],
+      originalIndices: [
+        metricsOriginal('000001'),
+        '.ds-metrics-other.otel-default-2026.04.19-000001',
+      ],
+    });
+
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: 'metrics-other.otel-default',
+      properties: keptMapping,
+    });
+  });
 });
