@@ -118,7 +118,7 @@ export const ConsoleLang: LangModuleType = {
       triggerCharacters: [...CONSOLE_TRIGGER_CHARS, ...ESQL_AUTOCOMPLETE_TRIGGER_CHARS],
       provideCompletionItems: (async (model, position, context, token) => {
         try {
-          return handleInterruptibleMonacoOperation(async () => {
+          const result = await handleInterruptibleMonacoOperation(async () => {
             // NOTE: Materializing the full editor content (e.g. via `model.getValue()`) can be very
             // expensive for large inputs (like pasted JSON with huge string fields). The anchored
             // range below is bounded by the request-line lookback caps.
@@ -162,6 +162,8 @@ export const ConsoleLang: LangModuleType = {
             }
             return delegateToActionsProvider();
           }, token);
+
+          return result;
         } catch (e) {
           if (isCancellationError(e)) {
             return {
