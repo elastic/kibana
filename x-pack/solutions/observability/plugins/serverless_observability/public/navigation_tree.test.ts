@@ -176,6 +176,7 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         icon: 'warning',
+        title: 'Alerts',
       })
     );
     expect(flatAlerts).not.toHaveProperty('renderAs');
