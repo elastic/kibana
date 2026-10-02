@@ -1074,6 +1074,7 @@ paths:
                         - shared
                         - private
                       type: string
+                      x-state: Generally available
                   required:
                     - access_mode
                 avatar_color:
@@ -1608,6 +1609,7 @@ paths:
                         - shared
                         - private
                       type: string
+                      x-state: Generally available
                   required:
                     - access_mode
                 avatar_color:
