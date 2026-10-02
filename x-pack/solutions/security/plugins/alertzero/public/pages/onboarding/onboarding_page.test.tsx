@@ -137,6 +137,17 @@ describe('OnboardingPage', () => {
       expect(screen.getByText('Named-pipe backdoor — eng-ws-19')).toBeInTheDocument();
     });
 
+    it('moves between preview sections with the arrow keys', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      const firstTab = screen.getAllByRole('tab')[0];
+      fireEvent.keyDown(firstTab, { key: 'ArrowRight' });
+
+      const [, secondTab] = screen.getAllByRole('tab');
+      expect(secondTab).toHaveAttribute('aria-selected', 'true');
+      expect(secondTab).toHaveFocus();
+    });
+
     it('links Read more to the placeholder destination', () => {
       renderPage({ canWrite: true, skipIntro: false });
 

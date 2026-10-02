@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -16,10 +16,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { OnboardingPreviewTabs } from './onboarding_preview_tabs';
+import { useAutoAdvanceIndex } from './use_auto_advance_index';
 import * as i18n from './translations';
 
 const AUTO_ADVANCE_MS = 6000;
@@ -41,17 +42,10 @@ const ROW_ACTION_ICONS = ['plusCircle', 'productAgent', 'boxesVertical'] as cons
  */
 export const OnboardingUiPreview: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [autoAdvance, setAutoAdvance] = useState(true);
-
-  useEffect(() => {
-    if (!autoAdvance) return;
-    const timer = setInterval(
-      () => setActiveIndex((index) => (index + 1) % i18n.PREVIEW_SLIDES.length),
-      AUTO_ADVANCE_MS
-    );
-    return () => clearInterval(timer);
-  }, [autoAdvance]);
+  const rowPaddingCss = css`
+    padding: ${euiTheme.size.base};
+  `;
+  const { activeIndex, select } = useAutoAdvanceIndex(i18n.PREVIEW_SLIDES.length, AUTO_ADVANCE_MS);
 
   const { label, subtitle, count, badgeColor, items } = i18n.PREVIEW_SLIDES[activeIndex];
 
@@ -88,47 +82,12 @@ export const OnboardingUiPreview: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div role="tablist" aria-label={i18n.PREVIEW_TABLIST_LABEL}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {i18n.PREVIEW_SLIDES.map((slide, index) => {
-                const selected = index === activeIndex;
-                return (
-                  <EuiFlexItem grow={false} key={slide.id}>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      aria-label={slide.label}
-                      tabIndex={selected ? 0 : -1}
-                      data-test-subj={`alertZeroOnboardingPreviewDot-${slide.id}`}
-                      onClick={() => {
-                        setAutoAdvance(false);
-                        setActiveIndex(index);
-                      }}
-                      css={css`
-                        block-size: ${euiTheme.size.s};
-                        inline-size: ${selected ? euiTheme.size.l : euiTheme.size.s};
-                        transition: inline-size 0.25s cubic-bezier(0.32, 0.72, 0, 1),
-                          background-color 0.25s cubic-bezier(0.32, 0.72, 0, 1);
-                        border-radius: ${euiTheme.size.s};
-                        border: none;
-                        padding: 0;
-                        cursor: pointer;
-                        background-color: ${selected
-                          ? euiTheme.colors.primary
-                          : transparentize(euiTheme.colors.primary, 0.2)};
-                      `}
-                    />
-                  </EuiFlexItem>
-                );
-              })}
-            </EuiFlexGroup>
-          </div>
+          <OnboardingPreviewTabs activeIndex={activeIndex} onSelect={select} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder hasShadow={false} paddingSize="none" aria-hidden="true">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ padding: 16 }}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={rowPaddingCss}>
           <EuiFlexItem grow={false}>
             <EuiIcon type="chevronSingleDown" aria-hidden={true} />
           </EuiFlexItem>
@@ -148,7 +107,7 @@ export const OnboardingUiPreview: React.FC = () => {
               gutterSize="m"
               alignItems="flexStart"
               responsive={false}
-              css={{ padding: 16 }}
+              css={rowPaddingCss}
             >
               <EuiFlexItem
                 css={css`

@@ -8,3 +8,5 @@
 // TODO(https://github.com/elastic/security-team/issues/19809): placeholder until the "Read more"
 // destination (docs or marketing page) is confirmed. Replace with the real URL or a docLinks entry.
 export const ONBOARDING_READ_MORE_URL_PLACEHOLDER = 'https://www.elastic.co/security';
+
+export const ONBOARDING_CONTENT_MAX_WIDTH = '1000px';
