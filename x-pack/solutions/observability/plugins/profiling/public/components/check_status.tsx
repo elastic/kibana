@@ -18,9 +18,12 @@ import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';
 
+const ADD_DATA_INSTRUCTIONS_PATHNAME = '/add-data-instructions';
+const PROFILING_NOT_ENABLED_PATHNAME = '/profiling-not-enabled';
+
 // Pages that can be opened without any profiling data. The profiling router is not used to match
 // them because, at this point, the current route might not have all of its required params.
-const UTILITY_PATHNAMES = ['/add-data-instructions', '/profiling-not-enabled'];
+const UTILITY_PATHNAMES = [ADD_DATA_INSTRUCTIONS_PATHNAME, PROFILING_NOT_ENABLED_PATHNAME];
 
 export function CheckStatus({ children }: { children: React.ReactElement }) {
   const { status, data, error, refresh } = useProfilingStatus();
@@ -65,18 +68,18 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
   }
 
   if (!data.isEnabled) {
-    if (pathname !== '/profiling-not-enabled') {
-      router.push('/profiling-not-enabled', { path: {}, query: {} });
+    if (pathname !== PROFILING_NOT_ENABLED_PATHNAME) {
+      router.push(PROFILING_NOT_ENABLED_PATHNAME, { path: {}, query: {} });
       return null;
     }
     return children;
   }
 
   if (data.universalProfiling.hasLegacyData) {
-    if (pathname !== '/add-data-instructions') {
+    if (pathname !== ADD_DATA_INSTRUCTIONS_PATHNAME) {
       // If the cluster still has data from before 8.9.1, redirect to the add data page,
       // which shows the instructions to delete it
-      router.push('/add-data-instructions', {
+      router.push(ADD_DATA_INSTRUCTIONS_PATHNAME, {
         path: {},
         query: { selectedTab: AddDataTabs.Kubernetes },
       });
@@ -92,7 +95,7 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  router.push('/add-data-instructions', {
+  router.push(ADD_DATA_INSTRUCTIONS_PATHNAME, {
     path: {},
     query: { selectedTab: AddDataTabs.Kubernetes },
   });
