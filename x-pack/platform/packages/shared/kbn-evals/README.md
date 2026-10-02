@@ -209,42 +209,50 @@ results and triage.
 
 #### Per-spec model groups
 
-By default every model in a suite's list runs against every spec. A suite can instead pin a model
-list per spec with `specModelGroups` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json).
-Each entry lists spec `files` (paths relative to the suite config directory) and the `models` those
-specs run against. `specModelGroups` (model config) and `shards` (CI batching) are independent: a
-spec's models come from `specModelGroups`, its CI step from `shards`, and either can be absent.
+The weekly run normally runs every model in a suite against every spec. To run a spec against
+fewer models, list it under `specModelGroups` in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json):
 
 ```jsonc
 {
   "id": "significant-events",
-  "weeklyEisModelGroups": [
-    /* suite fallback + provisioning universe */
-  ],
+  "weeklyEisModelGroups": ["eis/openai-gpt-5.4", "eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4-mini"],
   "specModelGroups": [
-    {
-      "files": ["evals/discovery/discovery.spec.ts"],
-      "models": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"]
-    },
-    {
-      "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
-      "models": ["eis/openai-gpt-5.4-mini"]
-    }
-  ],
-  "shards": [
-    /* optional; batching only, purely about CI step timeouts */
+    { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/openai-gpt-5.4"] },
+    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
   ]
 }
 ```
 
-A spec resolves its models in this order: its own `specModelGroups` list, then the suite's
-`weeklyEisModelGroups`, then the requested `EVAL_MODEL_GROUPS`. `models` is optional (omit it to use
-the weekly list), and each model must be within `weeklyEisModelGroups` (the list CI provisions
-connectors for). The specs to run come from `specModelGroups[].files` plus `shards[].specFiles` in
-`evals.suites.json` (the single source of truth), so per-spec model config works with or without
-shards. Per-spec resolution applies only to the weekly run (`KBN_EVALS_WEEKLY` in `llm_evals.yml`);
-an explicit `models:<model-group>` selection overrides it and runs that set against every spec.
-Suites without `specModelGroups` overrides fan out unchanged.
+- `files` are paths relative to the suite's config directory.
+- A spec without an entry (or without `models`) runs against the whole `weeklyEisModelGroups` list.
+- Every model in `specModelGroups` must also be in `weeklyEisModelGroups`. CI provisions only that list.
+- `shards` are unrelated. They decide which specs share a CI step, not which models run.
+- Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
+  model against every spec.
+
+`spec_model_groups.test.js` fails PR CI if an entry points at a missing file, lists a file twice,
+names a model outside the weekly list, or leaves a spec on disk unlisted.
+
+**Preview the fanout locally.** `get_fanout_matrix.js` prints one `{ connectorId, shardId,
+specFiles }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
+suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
+
+```bash
+CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
+export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
+  | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })
+  | from_entries' <<<"$EVAL_SUITE_INFO")"
+KBN_EVALS_WEEKLY=1 node $CI/get_fanout_matrix.js
+```
+
+**Run it on real agents.** Start an [on-demand build](#13-on-demand-evals-buildkite) with
+`KBN_EVALS_WEEKLY=1` in the build environment. `KBN_EVALS_WEEKLY` also makes the notify step post
+to the suite's team Slack channel, so build from a branch name in `elastic/kibana` (not
+`refs/pull/<N>/head`) and leave `EVAL_SLACK_NOTIFICATION_CHANNEL` unset. Then no notify step is
+created.
 
 ---
 
