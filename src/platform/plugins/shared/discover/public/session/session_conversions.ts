@@ -21,7 +21,8 @@ import {
   applySessionTabTypeState,
   toStoredSessionSettings,
   pinnedFiltersToAppFilters,
-  fromStoredSessionSettings,
+  fromStoredClassicSessionSettings,
+  fromStoredEsqlSessionSettings,
 } from '../../common/session/session_tab_mapping';
 import {
   fromStoredSearchAndTable,
@@ -118,13 +119,16 @@ const fromDiscoverTabToApiTab = (tab: DiscoverSessionTab): DiscoverSessionClient
     ? tab.serializedSearchSource
     : pinnedFiltersToAppFilters(tab.serializedSearchSource);
   const searchAndTableFields = fromStoredSearchAndTable(tab, searchSource);
+  const sessionSettings = isDiscoverSessionEsqlTab(searchAndTableFields)
+    ? fromStoredEsqlSessionSettings(tab)
+    : fromStoredClassicSessionSettings(tab);
 
   const apiTab = applySessionTabTypeState(
     {
       id: tab.id,
       label: tab.label,
       ...searchAndTableFields,
-      ...fromStoredSessionSettings(tab),
+      ...sessionSettings,
     },
     tab.tabTypeState
   );

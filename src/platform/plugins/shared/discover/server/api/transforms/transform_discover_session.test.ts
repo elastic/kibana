@@ -29,7 +29,7 @@ import { fromStoredSearchEmbeddableByValue } from '../../../common/embeddable/tr
 import { toByValuePanelState } from '../../../common/embeddable/transform_utils.fixtures';
 import {
   fromStoredSessionSearchAndTable,
-  fromStoredSessionSettings,
+  fromStoredClassicSessionSettings,
 } from '../../../common/session/session_tab_mapping';
 import {
   transformDiscoverSessionIn,
@@ -277,7 +277,7 @@ describe('discover session API transforms', () => {
       tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
     );
     const searchAndTableFields = fromStoredSessionSearchAndTable(tab.attributes, searchSource);
-    const sessionFields = fromStoredSessionSettings(tab.attributes);
+    const sessionFields = fromStoredClassicSessionSettings(tab.attributes);
     expect(searchAndTableFields).not.toHaveProperty('hide_chart');
     expect(sessionFields).not.toHaveProperty('data_source');
     expect({
@@ -540,6 +540,31 @@ describe('discover session API transforms', () => {
       expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
+    it.each([
+      { name: 'public', transform: transformDiscoverSessionOut },
+      { name: 'internal', transform: transformInternalDiscoverSessionOut },
+    ])(
+      'omits unused ES|QL fields from the $name session response and preserves the panel sample size',
+      ({ transform }) => {
+        const [, esqlTab] = discoverSessionAttributes.tabs;
+        const { sessionState } = transform({
+          ...discoverSessionAttributes,
+          tabs: [esqlTab],
+        });
+        const panel = fromStoredSearchEmbeddableByValue(toByValuePanelState(esqlTab.attributes));
+
+        expect(esqlTab.attributes).toMatchObject({
+          sampleSize: 100,
+          hideAggregatedPreview: false,
+          chartInterval: 'h',
+        });
+        expect(sessionState.tabs[0]).not.toHaveProperty('sample_size');
+        expect(sessionState.tabs[0]).not.toHaveProperty('hide_aggregated_preview');
+        expect(sessionState.tabs[0]).not.toHaveProperty('chart_interval');
+        expect(panel.tabs[0]).toHaveProperty('sample_size', 100);
+      }
+    );
+
     it('converts legacy flat tab sort to API sort objects', () => {
       const attributes = {
         ...discoverSessionAttributes,
@@ -636,7 +661,6 @@ describe('discover session API transforms', () => {
                 searchSourceJSON:
                   '{"query":{"esql":"FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value"}}',
               },
-              hideAggregatedPreview: false,
               rowHeight: 1,
               headerRowHeight: 1,
               timeRestore: true,
@@ -649,9 +673,7 @@ describe('discover session API transforms', () => {
                 pause: false,
               },
               rowsPerPage: 25,
-              sampleSize: 100,
               breakdownField: 'transaction.id',
-              chartInterval: 'h',
               density: 'compact',
               documentsDisplayMode: 'json',
               jsonModeSettings: {
@@ -1226,7 +1248,7 @@ describe('discover session API transforms', () => {
           ],
         })
       ).toThrow(
-        `Metrics tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
+        `Tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
       );
     });
 
