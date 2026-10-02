@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewSource } from '@kbn/data-source';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -849,7 +850,7 @@ describe('LensVisService attributes', () => {
     const onVisContextChanged = jest.fn();
     lensService.update({
       queryParams: {
-        dataView: dataViewWithAtTimefieldMock,
+        dataSource: new DataViewSource(dataViewWithAtTimefieldMock),
         query: queryEsql,
         filters: [],
         timeRange,
