@@ -10,7 +10,7 @@ import { ActionsContextMenu, type ActionGroups } from '../../actions_context_men
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { DependencyOperation } from '@kbn/apm-api-shared';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   asMillisecondDuration,
   asPercent,
@@ -43,6 +43,10 @@ export function RequestFlyoutOperations() {
   } = useRequestFlyoutContext();
 
   const { items, isLoading, resolvedDependencyName } = useRequestFlyoutOperations();
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const currentItems = items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 
   // Discover link — built per-row using the pure getESQLQuery function.
   const { indexSettings = [] } = useApmIndexSettingsContext();
@@ -194,7 +198,7 @@ export function RequestFlyoutOperations() {
     <section data-test-subj="requestFlyoutSection-operations">
       <EuiBasicTable
         columns={columns}
-        items={items}
+        items={currentItems}
         loading={isLoading}
         noItemsMessage={
           isLoading
@@ -205,6 +209,18 @@ export function RequestFlyoutOperations() {
                 defaultMessage: 'No operations found for this connection.',
               })
         }
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount: items.length,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        onChange={({ page }: { page?: { index: number; size: number } }) => {
+          if (page) {
+            setPageIndex(page.index);
+            setPageSize(page.size);
+          }
+        }}
         data-test-subj="requestFlyoutOperationsTable"
       />
     </section>

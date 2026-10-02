@@ -16,7 +16,7 @@ import {
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -51,6 +51,10 @@ export function RequestFlyoutAffectedEndpoints({
     filters: { environment, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
   const { items, isLoading, isMaxTransactionsReached } = useRequestFlyoutTransactions();
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const currentItems = items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 
   // Discover link helpers — called at component level so hooks stay at top-level.
   // getESQLQuery is a pure function, safe to call per-row inside the href callback.
@@ -207,7 +211,7 @@ export function RequestFlyoutAffectedEndpoints({
       <section data-test-subj="requestFlyoutSection-affectedEndpoints">
         <EuiBasicTable
           columns={columns}
-          items={items}
+          items={currentItems}
           loading={isLoading}
           noItemsMessage={
             isLoading
@@ -218,6 +222,18 @@ export function RequestFlyoutAffectedEndpoints({
                   defaultMessage: 'No transactions found between these services.',
                 })
           }
+          pagination={{
+            pageIndex,
+            pageSize,
+            totalItemCount: items.length,
+            pageSizeOptions: [10, 25, 50],
+          }}
+          onChange={({ page }: { page?: { index: number; size: number } }) => {
+            if (page) {
+              setPageIndex(page.index);
+              setPageSize(page.size);
+            }
+          }}
           rowProps={(item) => ({
             'data-test-subj': `affectedEndpointRow-${item.name}`,
           })}
