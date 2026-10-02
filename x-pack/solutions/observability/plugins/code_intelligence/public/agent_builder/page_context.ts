@@ -106,7 +106,8 @@ export const pageContextData = (context: PageContext): Record<string, string> =>
 /**
  * A hidden `text` attachment rather than `screen_context`: on later messages Agent Builder
  * writes its generic app, URL, and time range over the first `screen_context` attachment in
- * the conversation, which would be this one.
+ * the conversation, which would be this one. The description stays static because later
+ * messages update the content but keep the first description.
  */
 export const buildPageContextAttachment = (context: PageContext, url: string): AttachmentInput => ({
   id: PAGE_CONTEXT_ATTACHMENT_ID,

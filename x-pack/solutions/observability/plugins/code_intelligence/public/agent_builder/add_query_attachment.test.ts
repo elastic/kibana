@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-
 import type { CatalogItem } from '../api';
 import {
   addQueryAttachment,
   buildQueryAttachment,
   describeQueryEntry,
-  type AddQueryDependencies,
 } from './add_query_attachment';
-import { AGENT_BUILDER_SESSION_TAG } from './page_context';
 
 const entry: CatalogItem = {
   id: 'entry-1',
@@ -23,23 +19,6 @@ const entry: CatalogItem = {
   title: 'Upstream request failed',
   description: 'Logged when the gateway cannot reach the inference service.',
   query: 'FROM logs-* | LIMIT 10',
-};
-
-const pageContext: AttachmentInput = {
-  id: 'code-intelligence-page-context',
-  type: 'text',
-  hidden: true,
-  data: { content: 'page' },
-};
-
-const createDependencies = (open: boolean) => {
-  const dependencies = {
-    agentBuilder: { openChat: jest.fn(), addAttachment: jest.fn() },
-    sidebar: { isOpen: () => open },
-    toasts: { addSuccess: jest.fn() },
-    pageContext,
-  };
-  return dependencies as typeof dependencies & AddQueryDependencies;
 };
 
 describe('buildQueryAttachment', () => {
@@ -66,35 +45,21 @@ describe('buildQueryAttachment', () => {
 });
 
 describe('addQueryAttachment', () => {
-  it('opens a closed sidebar with the page context and the query', () => {
-    const dependencies = createDependencies(false);
+  it('stages the query and confirms with a toast', () => {
+    const dependencies = { stager: { addQuery: jest.fn() }, toasts: { addSuccess: jest.fn() } };
     addQueryAttachment(dependencies, entry);
 
-    expect(dependencies.agentBuilder.openChat).toHaveBeenCalledWith({
-      sessionTag: AGENT_BUILDER_SESSION_TAG,
-      attachments: [pageContext, buildQueryAttachment(entry)],
-    });
-    expect(dependencies.agentBuilder.addAttachment).not.toHaveBeenCalled();
+    expect(dependencies.stager.addQuery).toHaveBeenCalledWith(buildQueryAttachment(entry));
     expect(dependencies.toasts.addSuccess).toHaveBeenCalledWith(
       'Added "Upstream request failed" to the AI Agent'
     );
   });
 
-  it('adds the query to an open sidebar without replacing what is staged', () => {
-    const dependencies = createDependencies(true);
-    addQueryAttachment(dependencies, entry);
-
-    expect(dependencies.agentBuilder.addAttachment).toHaveBeenCalledWith(
-      buildQueryAttachment(entry)
-    );
-    expect(dependencies.agentBuilder.openChat).not.toHaveBeenCalled();
-  });
-
   it('does nothing for an entry without a query', () => {
-    const dependencies = createDependencies(true);
+    const dependencies = { stager: { addQuery: jest.fn() }, toasts: { addSuccess: jest.fn() } };
     addQueryAttachment(dependencies, { ...entry, query: undefined });
 
-    expect(dependencies.agentBuilder.addAttachment).not.toHaveBeenCalled();
+    expect(dependencies.stager.addQuery).not.toHaveBeenCalled();
     expect(dependencies.toasts.addSuccess).not.toHaveBeenCalled();
   });
 });
