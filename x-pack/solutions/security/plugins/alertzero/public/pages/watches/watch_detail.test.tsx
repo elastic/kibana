@@ -193,7 +193,7 @@ const detectionWorkers: Worker[] = [
   }),
 ];
 
-const renderWatch = (watchId: string, workers: Worker[]) => {
+const renderWatch = (watchId: string, workers: Worker[], canModifyWorkers?: boolean) => {
   mockUseWatch.mockReturnValue({
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
     isLoading: false,
@@ -201,7 +201,10 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     refetch: jest.fn(),
   } as never);
   mockUseWorkers.mockReturnValue({
-    data: { workers },
+    data: {
+      workers,
+      ...(canModifyWorkers === undefined ? {} : { canModifyWorkers }),
+    },
     isLoading: false,
     error: null,
     refetch: jest.fn(),
@@ -942,6 +945,18 @@ describe('WatchDetailPage', () => {
         settingsRevision: null,
       },
     });
+  });
+
+  it('locks worker settings when the caller lacks manage_security', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers, false);
+
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
   });
 
   it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
