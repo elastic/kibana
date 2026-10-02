@@ -94,6 +94,8 @@ apiTest.describe(
         await testNowMonitor(apiClient, editorHeaders, secondMonitorId);
         expect(await getSyntheticsPackagePolicies(apiClient, adminHeaders)).toHaveLength(3);
 
+        // a later call without `disable` turns the daily clean up back on and runs it
+        await triggerPrivateLocationCleanup(apiClient, editorHeaders, { disable: true });
         await triggerPrivateLocationCleanup(apiClient, editorHeaders);
 
         await tryForTime(30_000, async () => {

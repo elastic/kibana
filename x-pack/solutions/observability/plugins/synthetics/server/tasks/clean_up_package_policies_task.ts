@@ -15,7 +15,7 @@ import { getPrivateLocations } from '../synthetics_service/get_private_locations
 import type { SyntheticsServerSetup } from '../types';
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import {
-  DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+  PACKAGE_POLICY_SCAN_PAGE_SIZE,
   deletePackagePolicies,
   findLeftoverPackagePolicies,
 } from './clean_up_duplicate_policies';
@@ -56,9 +56,15 @@ export const registerCleanUpTask = (
   });
 };
 
+export interface CleanUpTaskState extends Record<string, unknown> {
+  /** Set through the private location cleanup API; expired Test Now policies are still removed. */
+  leftoverCleanUpDisabled?: boolean;
+}
+
 /**
  * One-shot instances carry the package policies a Test Now run created; the
- * recurring singleton has no params and does the daily sweep. Neither keeps state.
+ * recurring singleton has no params and does the daily sweep. Only the opt-out
+ * is kept between runs.
  */
 export async function runCleanUpTask(
   server: SyntheticsServerSetup,
@@ -76,25 +82,37 @@ export async function runCleanUpTask(
     return { state: {} };
   }
 
+  const leftoverCleanUpDisabled =
+    (taskInstance.state as CleanUpTaskState)?.leftoverCleanUpDisabled === true;
   try {
     const expiredTestNowIds = await findExpiredTestNowPolicyIds(server, soClient);
-    const { leftoverIds, missingLocationIds } = await findLeftoverPackagePolicies(server, soClient);
-    await deletePackagePolicies(
-      [...expiredTestNowIds, ...leftoverIds],
-      soClient,
-      esClient,
-      server,
-      signal
-    );
-    if (missingLocationIds.length > 0) {
-      await recreateAtLocations(server, soClient, missingLocationIds);
+    if (leftoverCleanUpDisabled) {
+      server.logger.info(
+        '[PrivateLocationCleanUpTask] Leftover private location package policy clean up is disabled, skipping it'
+      );
+      await deletePackagePolicies(expiredTestNowIds, soClient, esClient, server, signal);
+    } else {
+      const { leftoverIds, missingLocationIds } = await findLeftoverPackagePolicies(
+        server,
+        soClient
+      );
+      await deletePackagePolicies(
+        [...expiredTestNowIds, ...leftoverIds],
+        soClient,
+        esClient,
+        server,
+        signal
+      );
+      if (missingLocationIds.length > 0) {
+        await recreateAtLocations(server, soClient, missingLocationIds);
+      }
     }
   } catch (e) {
     server.logger.error(e);
   }
-  // Nothing to carry over: whatever this run did not finish, the next daily scan
-  // finds again.
-  return { state: {}, schedule: { interval: DAILY_INTERVAL } };
+  // Whatever this run did not finish, the next daily scan finds again.
+  const state: CleanUpTaskState = leftoverCleanUpDisabled ? { leftoverCleanUpDisabled } : {};
+  return { state, schedule: { interval: DAILY_INTERVAL } };
 }
 
 /**
@@ -111,7 +129,7 @@ const findExpiredTestNowPolicyIds = async (
   const pages = await server.pluginsStart.fleet.packagePolicyService.fetchAllItemIds(soClient, {
     kuery: `${getFilterForTestNowRun()} and ingest-package-policies.created_at < "${cutoff}"`,
     spaceIds: ['*'],
-    perPage: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+    perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
   });
   const ids: string[] = [];
   for await (const page of pages) {
@@ -173,6 +191,26 @@ export async function ensureCleanUpTaskScheduled(server: SyntheticsServerSetup) 
     state: {},
     scope: ['uptime'],
   });
+}
+
+/** Turns the daily removal of leftover private location package policies off or back on. */
+export async function setLeftoverCleanUpDisabled(
+  server: SyntheticsServerSetup,
+  leftoverCleanUpDisabled: boolean
+) {
+  await ensureCleanUpTaskScheduled(server);
+  const { errors } = await server.pluginsStart.taskManager.bulkUpdateState(
+    [SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID],
+    (state) => ({ ...state, leftoverCleanUpDisabled })
+  );
+  // bulkUpdateState reports failures instead of throwing them
+  if (errors.length > 0) {
+    throw new Error(
+      `Task ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID} state could not be updated: ${errors
+        .map(({ error }) => ('message' in error ? error.message : error.reason))
+        .join(', ')}`
+    );
+  }
 }
 
 /** Runs the daily clean up now, for the private location cleanup API. */

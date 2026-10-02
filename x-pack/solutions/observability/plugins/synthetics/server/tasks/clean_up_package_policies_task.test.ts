@@ -22,12 +22,13 @@ import {
   runCleanUpTask,
   runCleanUpTaskNow,
   scheduleTestNowCleanUp,
+  setLeftoverCleanUpDisabled,
 } from './clean_up_package_policies_task';
 
 // No requireActual: the real module imports back into the task through
 // synthetics_private_location, which would bind the task to the unmocked functions.
 jest.mock('./clean_up_duplicate_policies', () => ({
-  DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE: 500,
+  PACKAGE_POLICY_SCAN_PAGE_SIZE: 5000,
   findLeftoverPackagePolicies: jest.fn(),
   deletePackagePolicies: jest.fn(),
 }));
@@ -112,6 +113,7 @@ describe('clean up package policies task', () => {
       schedule: { interval: '24h' },
     } as any);
     taskManager.runSoon.mockResolvedValue({ id: SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID } as any);
+    taskManager.bulkUpdateState.mockResolvedValue({ tasks: [], errors: [] });
   });
 
   it('registers the task with a validated package policy id param', () => {
@@ -235,6 +237,35 @@ describe('clean up package policies task', () => {
       expect(result).toEqual({ state: {}, schedule: { interval: '24h' } });
     });
 
+    describe('when leftover clean up is disabled', () => {
+      const disabledInstance = () => taskInstance({ state: { leftoverCleanUpDisabled: true } });
+
+      it('still deletes expired Test Now policies but leaves leftovers alone', async () => {
+        expiredTestNowIds(['tn-old']);
+
+        await runCleanUpTask(server, disabledInstance() as any, signal);
+
+        expect(findLeftoverPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(runTaskPerPrivateLocationMock).not.toHaveBeenCalled();
+        expect(deletePackagePoliciesMock).toHaveBeenCalledWith(
+          ['tn-old'],
+          soClient,
+          esClient,
+          server,
+          signal
+        );
+      });
+
+      it('keeps the opt-out for the next daily run', async () => {
+        const result = await runCleanUpTask(server, disabledInstance() as any, signal);
+
+        expect(result).toEqual({
+          state: { leftoverCleanUpDisabled: true },
+          schedule: { interval: '24h' },
+        });
+      });
+    });
+
     it('still reschedules daily when the run fails', async () => {
       findLeftoverPackagePoliciesMock.mockRejectedValue(new Error('scan failed'));
 
@@ -297,6 +328,39 @@ describe('clean up package policies task', () => {
 
     expect(taskManager.ensureScheduled).toHaveBeenCalled();
     expect(taskManager.runSoon).toHaveBeenCalledWith(SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID);
+  });
+
+  describe('setLeftoverCleanUpDisabled', () => {
+    it.each([true, false])(
+      'stores leftoverCleanUpDisabled=%s on the daily task, keeping the rest of its state',
+      async (leftoverCleanUpDisabled) => {
+        await setLeftoverCleanUpDisabled(server, leftoverCleanUpDisabled);
+
+        expect(taskManager.ensureScheduled).toHaveBeenCalled();
+        const [ids, mapState] = taskManager.bulkUpdateState.mock.calls[0];
+        expect(ids).toEqual([SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID]);
+        expect(mapState({ other: 'x' }, SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID)).toEqual({
+          other: 'x',
+          leftoverCleanUpDisabled,
+        });
+        expect(taskManager.runSoon).not.toHaveBeenCalled();
+      }
+    );
+
+    it('throws when the state update fails', async () => {
+      taskManager.bulkUpdateState.mockResolvedValue({
+        tasks: [],
+        errors: [
+          {
+            type: 'task',
+            id: SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await expect(setLeftoverCleanUpDisabled(server, true)).rejects.toThrow(/version conflict/);
+    });
   });
 
   it('runCleanUpTaskNow throws when runSoon reports a conflict', async () => {
