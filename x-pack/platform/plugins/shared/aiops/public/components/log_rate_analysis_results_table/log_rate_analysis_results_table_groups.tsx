@@ -314,15 +314,17 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         pageSize,
         totalItemCount: itemCount,
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+        showPerPageOptions: isInteractive,
       },
       sorting: {
         sort: {
           field: sortField,
           direction: sortDirection,
         },
+        ...(!isInteractive && { readOnly: true }),
       },
     };
-  }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
+  }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems, isInteractive]);
 
   useEffect(() => {
     // If no row is hovered or pinned or the user switched to a new page,

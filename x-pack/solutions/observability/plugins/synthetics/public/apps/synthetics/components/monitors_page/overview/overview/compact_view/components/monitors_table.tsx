@@ -180,8 +180,9 @@ export const MonitorsTable = ({
         field: sortColumn as keyof OverviewStatusMetaData,
         direction: sortOrder ?? 'asc',
       },
+      ...(!isInteractive && { readOnly: true }),
     };
-  }, [sortField, sortOrder]);
+  }, [sortField, sortOrder, isInteractive]);
 
   const onTableChange = useCallback(
     (criteria: Criteria<OverviewStatusMetaData>) => {
@@ -251,7 +252,7 @@ export const MonitorsTable = ({
       columns={columns}
       loading={isLoading}
       pagination={pagination ? { ...pagination, showPerPageOptions: isInteractive } : undefined}
-      sorting={isInteractive ? sorting : undefined}
+      sorting={sorting}
       onChange={onTableChange}
       rowProps={getRowProps}
       noItemsMessage={

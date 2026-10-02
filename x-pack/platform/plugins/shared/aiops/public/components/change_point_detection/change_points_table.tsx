@@ -337,7 +337,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       pagination={
         pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
       }
-      sorting={isInteractive ? sorting : undefined}
+      sorting={{ ...sorting, ...(!isInteractive && { readOnly: true }) }}
       onTableChange={onTableChange}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,

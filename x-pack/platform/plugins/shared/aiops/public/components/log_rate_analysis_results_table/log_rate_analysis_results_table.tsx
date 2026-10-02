@@ -162,15 +162,17 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         pageSize,
         totalItemCount: itemCount,
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+        showPerPageOptions: isInteractive,
       },
       sorting: {
         sort: {
           field: sortField,
           direction: sortDirection,
         },
+        ...(!isInteractive && { readOnly: true }),
       },
     };
-  }, [pageIndex, pageSize, sortField, sortDirection, significantItems]);
+  }, [pageIndex, pageSize, sortField, sortDirection, significantItems, isInteractive]);
 
   useEffect(() => {
     // If no row is hovered or pinned or the user switched to a new page,
@@ -260,7 +262,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       items={pageOfItems}
       columns={columns}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
-      sorting={isInteractive ? (sorting as EuiTableSortingType<SignificantItem>) : undefined}
+      sorting={sorting as EuiTableSortingType<SignificantItem>}
       loading={false}
       onChange={onChange}
       rowProps={(significantItem) => {

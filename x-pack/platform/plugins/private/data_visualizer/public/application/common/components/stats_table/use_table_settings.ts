@@ -21,7 +21,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 interface UseTableSettingsReturnValue<T extends object> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
-  sorting?: { sort: PropertySort };
+  sorting?: { sort: PropertySort; readOnly?: boolean };
 }
 
 export function useTableSettings<TypeOfItem extends object>(
@@ -60,15 +60,13 @@ export function useTableSettings<TypeOfItem extends object>(
   );
 
   const sorting = useMemo(
-    () =>
-      !isInteractive
-        ? undefined
-        : {
-            sort: {
-              field: sortField as string,
-              direction: sortDirection as Direction,
-            },
-          },
+    () => ({
+      sort: {
+        field: sortField as string,
+        direction: sortDirection as Direction,
+      },
+      ...(!isInteractive && { readOnly: true }),
+    }),
     [sortField, sortDirection, isInteractive]
   );
 
