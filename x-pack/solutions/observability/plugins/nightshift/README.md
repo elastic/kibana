@@ -20,6 +20,31 @@ Significant Events can run, aggregating the rollout flag
 plugins. When it reports unavailable the app is hidden from navigation and direct visits
 redirect to the Observability overview.
 
+## Seeding investigations for local development
+
+`scripts/seed_nightshift_investigations.ts` fills the landing page with 14 investigations: every
+severity, open and closed, investigations without findings yet, and alert, significant event,
+question, and Slack thread subjects. Run it from the repo root against a running stack with
+`agenticInvestigations`, `proposals`, and `nightshiftInvestigations` enabled:
+
+```sh
+node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift/scripts/seed_nightshift_investigations.ts \
+  --es-url http://localhost:9200 --kibana-url http://localhost:5601
+```
+
+Each scenario is written as a shared agentic investigation, the way a real run leaves it: an
+Agent Builder conversation on the `investigation` template (agent `nightshift.investigation`,
+public, owned by the `--auth` user) with its title and `status` / `severity` / `summary` /
+`verdict` metadata; its subject, impact, and hypotheses documents in the agentic investigations
+side indexes, attached to the conversation by reference; and its proposed actions, created through
+the proposals gate workflow that `proposals.create` runs. Kibana APIs do the writes where a route
+exists. The side-index documents and the conversation timestamps have none, so they are written to
+Elasticsearch as `kibana_system` (`--kibana-system-auth`). No AI connector or investigation run is
+needed.
+
+The conversation ids are derived from the scenarios, so a re-run replaces the earlier seeds.
+`--clean` only removes them. `--help` lists the connection flags.
+
 ## Turning `nightshift.enabled` off and on
 
 Flipping `nightshift.enabled` from on to off at runtime pauses Significant Events
