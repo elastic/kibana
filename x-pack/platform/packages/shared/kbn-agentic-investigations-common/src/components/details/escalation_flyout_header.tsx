@@ -22,6 +22,11 @@ export interface EscalationFlyoutHeaderProps {
   createdAt: string;
   /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
   assigneesNode?: React.ReactNode;
+  /**
+   * Optional pre-rendered interactive status widget from the consuming plugin (e.g. a toggle).
+   * Falls back to a read-only badge when absent.
+   */
+  statusNode?: React.ReactNode;
   /** Status string parsed from `conversation.metadata.status`. */
   status?: string;
   /** Assignee uid list parsed from `conversation.metadata.assignees`. */
@@ -39,6 +44,7 @@ export const EscalationFlyoutHeader = ({
   title,
   createdAt,
   assigneesNode,
+  statusNode,
   status,
   assigneeUids = [],
 }: EscalationFlyoutHeaderProps) => {
@@ -68,6 +74,7 @@ export const EscalationFlyoutHeader = ({
       <EuiSpacer size="m" />
       <ConversationHeaderBlocks
         status={status}
+        statusNode={statusNode}
         assigneesNode={assigneesNode}
         assigneeUids={assigneeUids}
         data-test-subj="escalationHeaderBlocks"

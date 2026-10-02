@@ -461,6 +461,20 @@
       "serverConfigSet": "evals_detection_watch_rule_creation"
     },
     {
+      "id": "security-attack-discovery-fp-tp",
+      "name": "Attack Discovery FP/TP Analysis",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-attack-discovery-fp-tp"
+      ],
+      "serverConfigSet": "evals_attack_discovery_fp_tp"
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",

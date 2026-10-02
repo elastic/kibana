@@ -121,7 +121,12 @@ describe('registerConnectorEventTriggers', () => {
     );
     expect(registered).toContain('inboundWebhook.received');
     expect(registered).toHaveLength(
-      Object.values(connectorsSpecs).filter(connectorSpecHasEvents).length
+      Object.values(connectorsSpecs).reduce((count, spec) => {
+        if (!connectorSpecHasEvents(spec) || spec.events === undefined) {
+          return count;
+        }
+        return count + Object.keys(spec.events.definitions).length;
+      }, 0)
     );
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "b00ef84b916792c2fce650173b6da674ba9f8836",
+  "sha1": "ded364362069fa7941fd1184257b8e147b8e7dfb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 275,
+        "line": 269,
         "column": 47
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 287,
+        "line": 281,
         "column": 7
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 423,
+        "line": 417,
         "column": 31
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 502,
+        "line": 496,
         "column": 27
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 601,
+        "line": 595,
         "column": 30
       }
     },
@@ -84,8 +84,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 892,
+        "line": 886,
         "column": 26
+      }
+    },
+    {
+      "id": "bf3ddf78696d2df-8e42f31ee1f6a78",
+      "title": "Dispatcher does not carry an ack from a previous episode of the series over to the current episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1050,
+        "column": 19
       }
     },
     {
@@ -98,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1051,
+        "line": 1094,
         "column": 7
       }
     },
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1125,
-        "column": 7
+        "line": 1169,
+        "column": 17
       }
     },
     {
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1231,
-        "column": 19
+        "line": 1277,
+        "column": 9
       }
     },
     {
@@ -140,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1280,
+        "line": 1326,
         "column": 25
       }
     },
@@ -154,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1341,
-        "column": 26
+        "line": 1387,
+        "column": 27
       }
     },
     {
@@ -168,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1415,
-        "column": 17
+        "line": 1459,
+        "column": 9
       }
     },
     {
@@ -182,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1468,
-        "column": 7
+        "line": 1516,
+        "column": 28
       }
     },
     {
@@ -196,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1573,
-        "column": 7
+        "line": 1616,
+        "column": 27
       }
     },
     {
@@ -210,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1679,
+        "line": 1724,
         "column": 22
       }
     },
@@ -224,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1736,
-        "column": 17
+        "line": 1782,
+        "column": 23
       }
     },
     {
@@ -238,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1791,
-        "column": 29
+        "line": 1837,
+        "column": 7
       }
     },
     {
@@ -252,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1816,
-        "column": 26
+        "line": 1860,
+        "column": 24
       }
     },
     {
@@ -266,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1857,
-        "column": 29
+        "line": 1901,
+        "column": 14
       }
     },
     {
@@ -280,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1895,
+        "line": 1936,
         "column": 7
       }
     },
@@ -294,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1727,
+        "line": 1796,
         "column": 27
       }
     },
@@ -308,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1763,
+        "line": 1832,
         "column": 27
       }
     }

@@ -38,12 +38,17 @@ import type {
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
-import { useSignificantEventsUrlState } from './use_significant_events_url_state';
+import {
+  DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
+  DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER,
+  useSignificantEventsUrlState,
+} from './use_significant_events_url_state';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
@@ -59,8 +64,6 @@ import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investiga
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DismissEventModal } from './dismiss_event_modal';
-
-export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.runInvestigationButton.ariaLabel',
@@ -118,7 +121,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
         aria-label={RUN_ARIA_LABEL}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
-          if (!isTriggering) triggerInvestigation(event.event_uuid);
+          if (!isTriggering) triggerInvestigation(event.event_id);
         }}
         isDisabled={isTriggering || blocksActivity}
         isLoading={isTriggering}
@@ -152,7 +155,7 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
         aria-label={CLOSE_EVENT_ARIA_LABEL}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
-          if (!isUpdating) updateEventStatus({ eventUuid: event.event_uuid, status: 'closed' });
+          if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
         }}
         isDisabled={isUpdating}
         isLoading={isUpdating}
@@ -195,10 +198,7 @@ const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
         />
       </EuiToolTip>
       {isDismissModalOpen && (
-        <DismissEventModal
-          eventUuid={event.event_uuid}
-          onClose={() => setIsDismissModalOpen(false)}
-        />
+        <DismissEventModal eventId={event.event_id} onClose={() => setIsDismissModalOpen(false)} />
       )}
     </>
   );
@@ -367,6 +367,14 @@ export const getSignificantEventTableColumns = ({
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
+    field: '@timestamp',
+    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.lastUpdatedColumn', {
+      defaultMessage: 'Last updated',
+    }),
+    width: '200px',
+    render: (timestamp: string) => formatTimestamp(timestamp),
+  },
+  {
     name: '',
     width: '112px',
     align: 'right' as const,
@@ -402,12 +410,16 @@ const buildSelectableOptions = <T extends string>({
   values: readonly T[];
   selected: T[];
   getLabel?: (value: T) => string;
-}): EuiSelectableOption[] =>
-  values.map((v) => ({
+}): EuiSelectableOption[] => {
+  // Selected values missing from the options (stale URL id, options still loading) stay listed so
+  // the user can uncheck them instead of being stuck until "Reset filters".
+  const missing = selected.filter((v) => !values.includes(v));
+  return [...values, ...missing].map((v) => ({
     label: getLabel(v),
     key: v,
     checked: selected.includes(v) ? ('on' as const) : undefined,
   }));
+};
 
 export const SignificantEventsTab = () => {
   const { euiTheme } = useEuiTheme();
@@ -415,16 +427,25 @@ export const SignificantEventsTab = () => {
   const { updateTimeRange } = useTimeRangeUpdate();
 
   const { data: streamsData } = useFetchStreams();
-  // Closed events are hidden by default; users can opt back in via the Status filter.
-  const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
-    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
-  );
-  const [severityFilter, setSeverityFilter] = useState<Severity[]>(() => [
-    ...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
-  ]);
-  const [streamFilter, setStreamFilter] = useState<string[]>([]);
-  const { selectedEventId, openEventId, toggleEvent, closeEvent, clearSelectedEvent } =
-    useSignificantEventsUrlState();
+  const { data: featuresData } = useFetchFeatures();
+  /**
+   * Filters live in the URL so they survive a reload. Closed events are hidden by default;
+   * users can opt back in via the Status filter. `serviceFilter` holds service KI feature ids,
+   * matched server-side against `causal_features` and `blast_radius`.
+   */
+  const {
+    selectedEventId,
+    openEventId,
+    statusFilter,
+    severityFilter,
+    streamFilter,
+    serviceFilter,
+    setFilters,
+    resetFilters,
+    toggleEvent,
+    closeEvent,
+    clearSelectedEvent,
+  } = useSignificantEventsUrlState();
 
   // Pre-fill the search bar with the deep-linked event_id so the user can see what's active
   // and clear it naturally by clearing the search.
@@ -450,6 +471,24 @@ export const SignificantEventsTab = () => {
     [streamsData]
   );
 
+  const serviceFeatures = useMemo(
+    () =>
+      (featuresData?.features ?? [])
+        .filter((f) => f.type === 'entity' && f.subtype === 'service' && !f.excluded)
+        .sort((a, b) => (a.title ?? a.id).localeCompare(b.title ?? b.id)),
+    [featuresData]
+  );
+  // `id` is the stream-local slug stored in `causal_features` / `blast_radius`, so the same
+  // service seen in several streams collapses into one option.
+  const serviceOptions = useMemo(
+    () => [...new Set(serviceFeatures.map((f) => f.id))],
+    [serviceFeatures]
+  );
+  const serviceLabels = useMemo(
+    () => new Map(serviceFeatures.map((f) => [f.id, f.title ?? f.id])),
+    [serviceFeatures]
+  );
+
   const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
@@ -462,6 +501,7 @@ export const SignificantEventsTab = () => {
       status: statusFilter.length > 0 ? statusFilter : undefined,
       severity: severityFilter.length > 0 ? severityFilter : undefined,
       stream: streamFilter.length > 0 ? streamFilter : undefined,
+      topologyFeatureIds: serviceFilter.length > 0 ? serviceFilter : undefined,
       search: debouncedSearch || undefined,
       eventId: selectedEventId,
     });
@@ -518,9 +558,16 @@ export const SignificantEventsTab = () => {
     const resolvedCreatedAt = resolvedSelectedEvent.created_at;
     const resolvedLatestAt = resolvedSelectedEvent['@timestamp'];
 
-    setStatusFilter([resolvedSelectedEvent.status]);
-    setSeverityFilter([resolvedSelectedEvent.severity]);
-    setStreamFilter(resolvedStreamNames ? resolvedStreamNames.split(',') : []);
+    // A stale service filter could hide the linked event; its own topology is shown in the flyout.
+    setFilters(
+      {
+        status: [resolvedSelectedEvent.status],
+        severity: [resolvedSelectedEvent.severity],
+        stream: resolvedStreamNames ? resolvedStreamNames.split(',') : [],
+        service: [],
+      },
+      { keepSelectedEvent: true }
+    );
 
     if (!resolvedCreatedAt || !resolvedLatestAt) {
       return;
@@ -534,7 +581,14 @@ export const SignificantEventsTab = () => {
     }
 
     updateTimeRange({ from: resolvedCreatedAt, to: resolvedLatestAt });
-  }, [resolvedSelectedEvent, resolvedStreamNames, timeState.start, timeState.end, updateTimeRange]);
+  }, [
+    resolvedSelectedEvent,
+    resolvedStreamNames,
+    setFilters,
+    timeState.start,
+    timeState.end,
+    updateTimeRange,
+  ]);
 
   const columns = useMemo(
     () =>
@@ -546,48 +600,44 @@ export const SignificantEventsTab = () => {
   );
 
   const handleResetFilters = useCallback(() => {
-    setStatusFilter(SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((s) => s === 'open'));
-    setSeverityFilter([...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER]);
-    setStreamFilter([]);
-    clearSelectedEvent();
+    resetFilters();
     if (priorTimeRangeRef.current) {
       updateTimeRange(priorTimeRangeRef.current);
       priorTimeRangeRef.current = null;
     }
-  }, [clearSelectedEvent, updateTimeRange]);
+  }, [resetFilters, updateTimeRange]);
 
   const areFiltersAtDefault = useMemo(
     () =>
-      statusFilter.length === 1 &&
-      statusFilter[0] === 'open' &&
+      statusFilter.length === DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER.length &&
+      DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER.every((s) => statusFilter.includes(s)) &&
       severityFilter.length === DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.length &&
       DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.every((s) => severityFilter.includes(s)) &&
-      streamFilter.length === 0,
-    [statusFilter, severityFilter, streamFilter]
+      streamFilter.length === 0 &&
+      serviceFilter.length === 0,
+    [statusFilter, severityFilter, streamFilter, serviceFilter]
   );
 
   const onStatusChange = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      setStatusFilter(extractCheckedKeys(opts).filter(isSignificantEventStatus));
-      clearSelectedEvent();
-    },
-    [clearSelectedEvent]
+    (opts: EuiSelectableOption[]) =>
+      setFilters({ status: extractCheckedKeys(opts).filter(isSignificantEventStatus) }),
+    [setFilters]
   );
 
   const onStreamChange = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      setStreamFilter(extractCheckedKeys(opts));
-      clearSelectedEvent();
-    },
-    [clearSelectedEvent]
+    (opts: EuiSelectableOption[]) => setFilters({ stream: extractCheckedKeys(opts) }),
+    [setFilters]
+  );
+
+  const onServiceChange = useCallback(
+    (opts: EuiSelectableOption[]) => setFilters({ service: extractCheckedKeys(opts) }),
+    [setFilters]
   );
 
   const onSeverityChange = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      setSeverityFilter(extractCheckedKeys(opts).filter(isSeverity));
-      clearSelectedEvent();
-    },
-    [clearSelectedEvent]
+    (opts: EuiSelectableOption[]) =>
+      setFilters({ severity: extractCheckedKeys(opts).filter(isSeverity) }),
+    [setFilters]
   );
 
   const filters = useMemo(
@@ -648,15 +698,38 @@ export const SignificantEventsTab = () => {
         numActiveFilters: streamFilter.length,
         onChange: onStreamChange,
       },
+      {
+        label: i18n.translate('xpack.significantEventsApp.significantEventsTab.filter.service', {
+          defaultMessage: 'Service',
+        }),
+        ariaLabel: i18n.translate(
+          'xpack.significantEventsApp.significantEventsTab.filter.serviceAriaLabel',
+          {
+            defaultMessage: 'Filter by impacted service',
+          }
+        ),
+        options: buildSelectableOptions({
+          values: serviceOptions,
+          selected: serviceFilter,
+          getLabel: (id) => serviceLabels.get(id) ?? id,
+        }),
+        numFilters: serviceOptions.length,
+        numActiveFilters: serviceFilter.length,
+        onChange: onServiceChange,
+      },
     ],
     [
       statusFilter,
       severityFilter,
       streamFilter,
       streamOptions,
+      serviceFilter,
+      serviceOptions,
+      serviceLabels,
       onStatusChange,
       onSeverityChange,
       onStreamChange,
+      onServiceChange,
     ]
   );
 

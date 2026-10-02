@@ -9,12 +9,16 @@
 
 import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { asCodeIdSchema, getMeta } from '@kbn/as-code-shared-schemas';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
+import type { RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiResponse } from './schema';
+import {
+  createStoredDiscoverSession,
+  getStoredDiscoverSession,
+  updateStoredDiscoverSession,
+} from './stored_session';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
+import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
 export const upsertDiscoverSession = async (
   requestContext: RequestHandlerContext,
@@ -24,44 +28,34 @@ export const upsertDiscoverSession = async (
   body: DiscoverSessionApiResponse;
   operation: 'create' | 'update';
 }> => {
-  const { core } = await requestContext.resolve(['core']);
   const { attributes, references } = transformDiscoverSessionIn(data);
 
   // Check the exact ID; legacy URL aliases are resolved on read, not on write.
-  try {
-    await core.savedObjects.client.get<DiscoverSessionAttributes>(SavedSearchType, id);
-  } catch (error) {
-    // Only a missing session indicates creation; propagate all other lookup errors.
-    if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      throw error;
-    }
+  const existing = await getStoredDiscoverSession(requestContext, id);
 
+  if (!existing) {
     // Creating a session with an invalid legacy ID returns a 400 response.
     asCodeIdSchema.parse(id);
+
+    const created = await createStoredDiscoverSession(
+      requestContext,
+      { attributes: assignStoredInlineDataViewIds(attributes), references },
+      id
+    );
+
+    return { body: toApiResponse(created), operation: 'create' };
   }
 
-  const updateResponse = await core.savedObjects.client.update<DiscoverSessionAttributes>(
-    SavedSearchType,
-    id,
-    attributes,
-    {
-      upsert: attributes,
-      references,
-      mergeAttributes: false,
-    }
-  );
+  const updated = await updateStoredDiscoverSession(requestContext, id, {
+    attributes: assignStoredInlineDataViewIds(attributes, existing.attributes),
+    references,
+  });
 
-  const updated = await core.savedObjects.client.get<DiscoverSessionAttributes>(
-    SavedSearchType,
-    updateResponse.id
-  );
-
-  return {
-    body: {
-      id: updated.id,
-      data: transformDiscoverSessionOut(updated.attributes, updated.references).sessionState,
-      meta: getMeta(updated),
-    },
-    operation: updateResponse.created_at ? 'create' : 'update',
-  };
+  return { body: toApiResponse(updated), operation: 'update' };
 };
+
+const toApiResponse = (savedObject: SavedObject<DiscoverSessionAttributes>) => ({
+  id: savedObject.id,
+  data: transformDiscoverSessionOut(savedObject.attributes, savedObject.references).sessionState,
+  meta: getMeta(savedObject),
+});

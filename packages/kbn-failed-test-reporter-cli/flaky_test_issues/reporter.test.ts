@@ -81,7 +81,7 @@ const suiteIssue = (number: number, overrides: Partial<GithubIssue> = {}) => {
   const [suite] = groupIntoSuites(report.flaky);
   return githubIssue({
     number,
-    title: 'Flaky Scout suite: Default status alert',
+    title: 'Flaky Scout UI suite: Default status alert',
     body: renderFlakySuiteIssueBody(suite, {
       report: { ...report, generatedAt: new Date('2026-09-01T09:00:00.000Z') },
     }),
@@ -159,7 +159,7 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(1);
       const [title, body, labels] = github.createIssue.mock.calls[0];
-      expect(title).toBe('Flaky Scout suite: Default status alert');
+      expect(title).toBe('Flaky Scout UI suite: Default status alert');
       expect(body).toContain('Possibly related: #7.');
       expect(readFlakySuiteIssueMetadata(body)?.['suite.filePath']).toBe(SUITE_PATH);
       expect(labels).toEqual(['failed-test']);
@@ -190,8 +190,8 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(2);
       expect(github.createIssue.mock.calls.map(([title]) => title)).toEqual([
-        'Flaky Scout suite: second describe',
-        'Flaky Scout suite: first describe',
+        'Flaky Scout UI suite: second describe',
+        'Flaky Scout UI suite: first describe',
       ]);
       expect(summary.actions.map(({ suiteTitle }) => suiteTitle)).toEqual([
         'second describe',

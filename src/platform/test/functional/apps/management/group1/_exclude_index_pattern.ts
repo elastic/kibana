@@ -10,6 +10,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. The inclusion/exclusion expression is validated
+ * through the Data Views UI against real index mappings, which is the right end-to-end boundary.
+ * The serverless FTR duplicate at x-pack/platform/test/serverless/functional/test_suites/
+ * management/data_views/_exclude_index_pattern.ts is not independent coverage: migrate this once
+ * with deployment tags, then delete both FTR copies after parity.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings']);
   const es = getService('es');

@@ -58,13 +58,13 @@ windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
 windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)
 ```
 
-The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` stamped with `now` (after the settle buffer).
+The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer).
 
 `eventWatermark` is a **content-addressed** progress marker — it advances only after episodes in the window have received `.alert-actions` records, never based on wall-clock alone:
 
 | Tick outcome                                    | `nextWatermark`                                     |
 | ----------------------------------------------- | --------------------------------------------------- |
-| Truncated (`EPISODE_QUERY_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
+| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
 | `no_episodes` or `no_actions` halt              | `windowEnd`                                         |
 | Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
@@ -168,13 +168,13 @@ An empty matcher is a catch-all.
 | Task schedule               | `5s`                           | [`schedule_task.ts`](schedule_task.ts)                                                                                                                                                                                                  |
 | Task timeout                | `1m`                           | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts)                                                                                                                                                                             |
 | Soft deadline               | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window                                                                                                                       |
-| Episode query cap           | `10 000` rows                  | `EPISODE_QUERY_LIMIT` in [`queries.ts`](queries.ts) — a truncated tick advances the watermark to the last returned row, not to `now`                                                                                                    |
+| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated episode scan advances the watermark to the last returned row, not to `now`                                                        |
 | Overlap re-read             | `10` minutes                   | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free                                                                                                                |
 | Max scan window             | `15` minutes                   | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES`                                                                                                                                               |
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
 | Stuck-tick limit            | `10` ticks (~50 s)             | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires                                                                                                                                                                 |
 | Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known episodes and lag exceeds this, skip the unread window                                                                                                               |
-| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with `getWorkflowsByIds` (one call per space) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
+| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
 
 ## Important pipeline state
@@ -203,7 +203,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | --- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
 | 1   | `WaitForResourcesStep`       | Block the run until the dispatcher's required plugin resources are ready.                        |
 | 2   | `FetchEpisodesStep`          | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result.         |
-| 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions.                                        |
+| 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions (see [Suppression queries](#suppression-queries)). |
 | 4   | `ApplySuppressionStep`       | Mark each episode as dispatchable or suppressed, preserving reasons.                             |
 | 5   | `HydrateEpisodeDataStep`     | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
 | 6   | `FetchRulesStep`             | Load rule metadata for the remaining dispatchable set.                                           |
@@ -215,6 +215,19 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
 | 13  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
 | 14  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
+
+### Suppression queries
+
+`FetchSuppressionsStep` reads `.alert-actions` with two scope-specific queries, run in parallel and merged into one `SuppressionIndex`:
+
+| Query                           | Scope   | Actions                                        | Filter                                  | Grouped by                          |
+| ------------------------------- | ------- | ---------------------------------------------- | --------------------------------------- | ----------------------------------- |
+| `getEpisodeSuppressionsQueries` | episode | `ack` / `unack`, `deactivate` / `activate`     | `episode_id IN (<batch episode ids>)`   | `subject`, `group_hash`, `episode_id` |
+| `getSeriesSuppressionsQueries`  | series  | `snooze` / `unsnooze`                          | `(rule_id \| source, group_hash)` pairs of the batch, `episode_id IS NULL` | `subject`, `group_hash`             |
+
+Neither query has a time bound: an indefinite snooze or an ack stays in effect however old it is. Each query returns at most one row per literal of its `IN` chunk, so result size is bounded by the batch, not by how much history `.alert-actions` has accumulated. Episode ids are chunked up to `ESQL_QUERY_ROW_LIMIT` per request; series pairs are chunked by `SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES` to stay under the ES|QL statement size cap. Reaching the row limit on any chunk logs `FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED`, which indicates that invariant broke.
+
+When both an episode-level and a series-level record suppress an episode, `SuppressionIndex` reports the episode-level reason: an acked episode on a snoozed series reports `ack`.
 
 ## Halt reasons
 
@@ -265,7 +278,7 @@ Episodes in the skipped window are **not dispatched** (accepted data loss). Once
 - Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
-- The episode query is capped at `EPISODE_QUERY_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- The episode query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.
 
@@ -399,7 +412,9 @@ If you are not adding a new pipeline phase, but instead want to support a new de
 - `steps/dispatch_step.ts` to add the new dispatch branch
 - any saved object / route validation that defines allowed destinations
 
-Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIds`, and schedules them through `bulkScheduleWorkflow` on the workflows management plugin.
+Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIdsForRequests`, and schedules them through `bulkScheduleWorkflow` on the request-scoped workflows management client (`getClient(request)`).
+
+Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which `StoreExecutionHistoryStep` emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
 
 ## Testing
 

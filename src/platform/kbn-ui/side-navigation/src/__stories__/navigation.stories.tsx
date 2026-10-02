@@ -12,6 +12,7 @@ import type { ComponentProps } from 'react';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   ChromeLayout,
@@ -330,6 +331,81 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
           ],
         },
       ],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+// Mirrors a user who hid most items: the More menu overflows the popover max height,
+// and Customize navigation stays pinned below the scrolling list.
+export const WithCustomizeNavigation: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Customize Navigation',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    items: {
+      primaryItems: PRIMARY_MENU_ITEMS.slice(0, 1),
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [
+        ...PRIMARY_MENU_ITEMS.slice(1),
+        ...Array.from({ length: 12 }, (_, index) => ({
+          id: `hidden_item_${index + 1}`,
+          label: `Hidden Item ${index + 1}`,
+          iconType: 'empty',
+          href: `/hidden-${index + 1}`,
+        })),
+      ],
+    },
+    onCustomizeNavigation: action('onCustomizeNavigation'),
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const scrollableSecondaryItem = {
+  id: 'scrollable-secondary',
+  label: 'Dashboards',
+  iconType: 'dashboardApp',
+  href: '/scrollable-secondary',
+  sections: ['Recently viewed', 'Favorites', 'Shared with me'].map(
+    (sectionLabel, sectionIndex) => ({
+      id: `scrollable-section-${sectionIndex + 1}`,
+      label: sectionLabel,
+      items: Array.from({ length: 15 }, (_, itemIndex) => ({
+        id: `scrollable-section-${sectionIndex + 1}-item-${itemIndex + 1}`,
+        label: `${sectionLabel} dashboard ${itemIndex + 1}`,
+        href: `/scrollable-secondary/${sectionIndex + 1}/${itemIndex + 1}`,
+      })),
+    })
+  ),
+};
+
+// The secondary menu overflows the side panel (expanded) and the popover (collapsed)
+export const WithScrollableSecondaryMenu: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Scrollable Secondary Menu',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    activeItemId: 'scrollable-section-1-item-1',
+    items: {
+      primaryItems: [scrollableSecondaryItem, ...PRIMARY_MENU_ITEMS.slice(1)],
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
     },
   },
   render: (args) => <ControlledNavigation {...args} />,

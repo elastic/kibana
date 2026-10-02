@@ -17,8 +17,8 @@ export type RuleSummaryData = Pick<
   | 'time_field'
   | 'grouping'
   | 'state_transition'
-  | 'recovery_strategy'
-  | 'no_data_strategy'
+  | 'recovery'
+  | 'no_data'
   | 'artifacts'
 >;
 

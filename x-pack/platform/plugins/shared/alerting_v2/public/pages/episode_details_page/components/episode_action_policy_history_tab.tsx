@@ -24,7 +24,7 @@ import {
 const DEFAULT_PER_PAGE = 10;
 const DEFAULT_OUTCOME: PolicyOutcomeFilter = 'all';
 
-const toOutcomeParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
+const toOutcomesParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
   filter === 'all' ? undefined : [filter];
 
 interface Props {
@@ -44,13 +44,13 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
 
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
-  const outcomeParam = toOutcomeParam(outcome);
+  const outcomesParam = toOutcomesParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
     search: searchParam,
-    outcome: outcomeParam,
+    outcomes: outcomesParam,
     episodeIds: [episodeId],
     from: episodeStart,
   });
@@ -72,7 +72,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
   }, []);
 
   const items = data?.items ?? [];
-  const totalEvents = data?.total ?? 0;
+  const total = data?.total ?? 0;
   const isFiltered = searchParam !== undefined || outcome !== DEFAULT_OUTCOME;
 
   return (
@@ -110,7 +110,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
             loading={isFetching}
             page={page}
             perPage={perPage}
-            total={totalEvents}
+            total={total}
             onChangePage={onChangePage}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onPolicyClick={setPolicyToViewId}
