@@ -82,7 +82,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
         <p
           data-test-subj="alertZeroAutonomyCardWho"
           css={css`
-            margin: 0 0 6px;
+            margin: 0 0 ${euiTheme.size.m};
           `}
         >
           {card.who}
@@ -100,6 +100,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
           row-gap: 2px;
           align-items: baseline;
           margin: 0;
+          padding-top: ${euiTheme.size.m};
         `}
       >
         {card.facts.map((fact) => (
