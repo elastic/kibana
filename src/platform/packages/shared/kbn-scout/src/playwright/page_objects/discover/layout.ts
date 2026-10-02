@@ -9,20 +9,14 @@
 
 import type { Locator } from '../../../..';
 import { expect } from '../..';
-import { resolveSelector } from '../../utils';
-import { euiSelectors } from '../../eui_components';
 import { type DataViewOptions } from './base';
-import { SaveMixin } from './save';
+import { DiscoverSave } from './save';
 
-/**
- * Layout controls — data-view switcher, field editor, sidebar, histogram, document table,
- * and other visual/interaction helpers that belong to Discover's own UI surface.
- * Will be progressively carved out to owner page objects in later PRs.
- */
-export abstract class LayoutMixin extends SaveMixin {
+/** Data-view switcher, field editor, ES|QL controls, sidebar field list, and histogram. */
+export abstract class DiscoverLayout extends DiscoverSave {
   // ── Data view switcher ─────────────────────────────────────────────────────
 
-  private async getVisibleDataViewSwitch() {
+  protected async getVisibleDataViewSwitch() {
     const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
     const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
 
@@ -52,7 +46,7 @@ export abstract class LayoutMixin extends SaveMixin {
     await dataViewSwitch.click();
   }
 
-  private async getDataViewSwitchName(dataViewSwitch: Locator): Promise<string> {
+  protected async getDataViewSwitchName(dataViewSwitch: Locator): Promise<string> {
     return (await dataViewSwitch.getByTestId('fullText').innerText()).trim();
   }
 
@@ -93,13 +87,6 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.page.testSubj
       .locator('discover-dataView-switch-link')
       .or(this.page.testSubj.locator('dataView-switch-link'));
-  }
-
-  /**
-   * Returns the trimmed display name of the currently selected data view.
-   */
-  async getSelectedDataViewName(): Promise<string> {
-    return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
   private async fillAndSubmitDataViewEditor({
@@ -201,7 +188,7 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   async isCurrentDataViewAdHoc(): Promise<boolean> {
-    const dataViewTitle = await this.getSelectedDataViewName();
+    const dataViewTitle = await this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
 
     await this.openDataViewSwitcher();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
@@ -281,9 +268,10 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.waitUntilTabIsLoaded();
   }
 
-  // ── Runtime field / field editor helpers ───────────────────────────────────
 
   /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  // ── Runtime field / field editor helpers ──────────────────────────────────
+
   async openAddFieldEditorFromSidebar() {
     await this.page.testSubj.click('dataView-add-field_btn');
     await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
@@ -425,13 +413,14 @@ export abstract class LayoutMixin extends SaveMixin {
     await fieldEditor.waitFor({ state: 'hidden' });
   }
 
-  // ── ES|QL controls ─────────────────────────────────────────────────────────
 
   /**
    * Creates an ES|QL control from the editor: types a query ending in a variable position,
    * picks "Create control" from the suggestion widget and saves the flyout. Returns once
    * the control group is rendered.
    */
+  // ── ES|QL controls ────────────────────────────────────────────────────────
+
   async createEsqlControl(
     query: string,
     {
@@ -479,7 +468,8 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
 
-  // ── Sidebar ────────────────────────────────────────────────────────────────
+
+  // ── Sidebar ───────────────────────────────────────────────────────────────
 
   async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
@@ -521,49 +511,6 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
-  async openSidebar() {
-    await this.page.testSubj.locator('dscShowSidebarButton').click();
-    await this.waitUntilFieldListHasCountOfFields();
-  }
-
-  async closeSidebar() {
-    await this.page.testSubj.locator('dscHideSidebarButton').click();
-    await this.page.testSubj.locator('fieldList').waitFor({ state: 'hidden' });
-  }
-
-  async isSidebarPanelOpen(): Promise<boolean> {
-    return this.page.testSubj
-      .locator('fieldList')
-      .waitFor({ state: 'visible', timeout: 1_000 })
-      .then(() => true)
-      .catch(() => false);
-  }
-
-  async getSidebarWidth(): Promise<number> {
-    const sidebar = this.page.testSubj.locator('discover-sidebar');
-    await sidebar.waitFor({ state: 'visible' });
-    const box = await sidebar.boundingBox();
-    if (!box) {
-      throw new Error('Unable to measure Discover sidebar width');
-    }
-    return Math.round(box.width);
-  }
-
-  async resizeSidebarBy(distance: number) {
-    const resizeButton = this.page.testSubj.locator('discoverLayoutResizableButton');
-    await resizeButton.waitFor({ state: 'visible' });
-    const box = await resizeButton.boundingBox();
-    if (!box) {
-      throw new Error('Unable to find Discover sidebar resize handle');
-    }
-    const startX = box.x + box.width / 2;
-    const startY = box.y + box.height / 2;
-    await this.page.mouse.move(startX, startY);
-    await this.page.mouse.down();
-    await this.page.mouse.move(startX + distance, startY, { steps: 10 });
-    await this.page.mouse.up();
-  }
-
   private async waitUntilFieldPopoverIsLoaded() {
     await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
     await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
@@ -593,7 +540,8 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.waitUntilSearchingHasFinished();
   }
 
-  // ── Histogram ──────────────────────────────────────────────────────────────
+
+  // ── Histogram ─────────────────────────────────────────────────────────────
 
   async waitForHistogramRendered() {
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
@@ -835,17 +783,8 @@ export abstract class LayoutMixin extends SaveMixin {
     await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
   }
 
-  // ── Document table ─────────────────────────────────────────────────────────
 
-  async showTable() {
-    await this.page.testSubj.click('dscShowTableButton');
-    await this.waitUntilTabIsLoaded();
-  }
-
-  async hideTable() {
-    await this.page.testSubj.click('dscHideTableButton');
-    await this.waitUntilTabIsLoaded();
-  }
+  // ── Document table ────────────────────────────────────────────────────────
 
   getHitCountLocator(): Locator {
     return this.page.testSubj.locator('discoverQueryHits');
@@ -854,222 +793,5 @@ export abstract class LayoutMixin extends SaveMixin {
   async getHitCountInt(): Promise<number> {
     const hitCount = await this.getHitCountLocator().innerText();
     return parseInt(hitCount.replace(/,/g, ''), 10);
-  }
-
-  async getHitCount(): Promise<string> {
-    return this.getHitCountLocator().innerText();
-  }
-
-  getQueryInEsqlButton(): Locator {
-    return this.page.testSubj.locator('queryInEsqlButton');
-  }
-
-  getQuerySubmitButton(): Locator {
-    return this.page.testSubj.locator('querySubmitButton');
-  }
-
-  getQueryCancelButton(): Locator {
-    return this.page.testSubj.locator('queryCancelButton');
-  }
-
-  getSearchResponseWarningsEmptyPrompt(): Locator {
-    return this.page.testSubj.locator('searchResponseWarningsEmptyPrompt');
-  }
-
-  async getSearchFetchCount(): Promise<number> {
-    const fetchCounter = this.page.locator('[data-fetch-counter]');
-    await fetchCounter.waitFor({ state: 'attached' });
-    return Number(await fetchCounter.getAttribute('data-fetch-counter'));
-  }
-
-  getErrorCalloutTitle(): Locator {
-    return this.page.testSubj.locator('discoverErrorCalloutTitle');
-  }
-
-  getErrorCalloutMessage(): Locator {
-    return this.page.testSubj.locator('discoverErrorCalloutMessage');
-  }
-
-  async getDocTableIndex(index: number): Promise<string> {
-    const rowIndex = index - 1; // Convert to 0-based index
-    const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
-    return await row.innerText();
-  }
-
-  getSearchTermHighlights(): Locator {
-    return this.page.testSubj.locator('docTable').locator('mark');
-  }
-
-  async getDocTableField(index: number): Promise<string> {
-    const rowIndex = index - 1;
-    await this.page.testSubj.click('dataGridFullScreenButton');
-    const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
-    const text = await row.innerText();
-    await this.page.testSubj.click('dataGridFullScreenButton');
-    return text.trim();
-  }
-
-  getDocHeaderLabels(): Locator {
-    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
-    return this.page.locator(
-      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
-    );
-  }
-
-  async getDocHeader(): Promise<string[]> {
-    const headers = await this.getDocHeaderLabels().allInnerTexts();
-    return headers.map((h) => h.trim());
-  }
-
-  /**
-   * Returns structured row data from the data grid, excluding control columns.
-   * Each inner array contains the visible text of each data cell in that row.
-   * When `isAnchorRow` is true, only the highlighted anchor row (context view) is returned.
-   */
-  async getDataGridRows(options?: { isAnchorRow?: boolean }): Promise<string[][]> {
-    const cellSelector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
-      : '.euiDataGridRowCell';
-
-    await this.page.locator(`${cellSelector} >> nth=0`).waitFor({
-      state: 'visible',
-      timeout: 30_000,
-    });
-
-    return this.page.evaluate((sel: string) => {
-      const cells = document.querySelectorAll(sel);
-      const rows: string[][] = [];
-      let rowIdx = -1;
-      let prevVisibleRowIndex = -1;
-
-      cells.forEach((cell) => {
-        const visibleRowIndex = Number(cell.getAttribute('data-gridcell-visible-row-index'));
-        if (prevVisibleRowIndex !== visibleRowIndex) {
-          rowIdx++;
-          rows[rowIdx] = [];
-          prevVisibleRowIndex = visibleRowIndex;
-        }
-        if (!cell.classList.contains('euiDataGridRowCell--controlColumn')) {
-          const content =
-            cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ??
-            (cell as HTMLElement);
-          rows[rowIdx].push(content.innerText.trim());
-        }
-      });
-
-      return rows;
-    }, cellSelector);
-  }
-
-  async moveColumn(fieldName: string, direction: 'left' | 'right') {
-    await this.dataGrid.openColumnMenuByField(fieldName);
-    await this.page.getByText(`Move ${direction}`).click();
-  }
-
-  async dragFieldToGrid(fieldName: string[]) {
-    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
-    for (const field of fieldName) {
-      // Fields can appear in both "Popular fields" and the full field list.
-      await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
-    }
-  }
-
-  /**
-   * Drags a sidebar field onto the grid using the keyboard, mirroring the FTR
-   * `dragFieldWithKeyboardToTable` implementation.
-   */
-  async dragFieldToGridWithKeyboard(fieldName: string) {
-    const keyboardHandler = this.page.locator(
-      `[data-attr-field="${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
-    );
-    await keyboardHandler.focus();
-    await this.page.keyboard.press('Enter'); // enter DnD mode
-    // domDroppable_overlay renders when DnD is active — use it as a sync point
-    await this.page.testSubj.locator('domDroppable_overlay').waitFor({ state: 'visible' });
-    await this.page.keyboard.press('ArrowRight'); // move to first drop target (the grid)
-    await this.page.keyboard.press('Enter'); // drop
-  }
-
-  /**
-   * Scrolls through the virtualized doc table grid to assert that the given
-   * text exists somewhere in the rendered rows. Necessary because virtual
-   * scrolling only keeps a subset of rows in the DOM at any time.
-   */
-  async expectDocTableToContainText(text: string) {
-    // 200px per step × 50 steps = 10 000px of total scroll coverage,
-    // enough for grids with hundreds of rows at default row height (~34px).
-    const SCROLL_STEP_PX = 200;
-    const MAX_SCROLL_STEPS = 50;
-    // Per-position timeout: long enough for Playwright to retry through
-    // transient re-renders, short enough to not stall at positions where
-    // the text genuinely isn't in the DOM.
-    const PER_POSITION_TIMEOUT_MS = 500;
-
-    await this.waitUntilSearchingHasFinished();
-    const docTable = this.page.testSubj.locator('discoverDocTable');
-    await expect(docTable).toBeVisible();
-
-    const grid = docTable.locator('.euiDataGrid__virtualized');
-    await grid.evaluate((el) => el.scrollTo(0, 0));
-
-    for (let i = 0; i < MAX_SCROLL_STEPS; i++) {
-      try {
-        await expect(docTable).toContainText(text, { timeout: PER_POSITION_TIMEOUT_MS });
-        return;
-      } catch {
-        // Text not found at this scroll position, continue scrolling
-      }
-
-      const atBottom = await grid.evaluate((el, step) => {
-        if (el.scrollTop + el.clientHeight >= el.scrollHeight) return true;
-        el.scrollBy(0, step);
-        return false;
-      }, SCROLL_STEP_PX);
-      if (atBottom) break;
-    }
-
-    await expect(docTable).toContainText(text);
-  }
-
-  // ── Misc view helpers ──────────────────────────────────────────────────────
-
-  async isShowingDocViewer(): Promise<boolean> {
-    try {
-      await this.page.testSubj
-        .locator('kbnDocViewer')
-        .waitFor({ state: 'visible', timeout: 30_000 });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /** Switches to the Field statistics view and waits for its content to mount. */
-  async selectFieldStatisticsView() {
-    await this.page.testSubj.click('dscViewModeToggleButton');
-    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
-    await this.page.testSubj.click('dscViewModeFieldStatsOption');
-    // The Documents view stays mounted until the stats table renders, so callers
-    // need this gate to avoid acting on the previous view.
-    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
-  }
-
-  async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {
-    const viewButtons: Locator[] = await this.page.testSubj
-      .locator('dataVisualizerActionViewInLensButton')
-      .all();
-    await expect(viewButtons[0]).toBeVisible();
-    return viewButtons[0];
-  }
-
-  async expandTimeRangeAsSuggestedInNoResultsMessage() {
-    const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
-    await button.click();
-    await this.waitUntilSearchingHasFinished();
-  }
-
-  async getTheColumnFromGrid(): Promise<string[]> {
-    const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
-    return await Promise.all(columnLocators.map((locator) => locator.innerText()));
   }
 }

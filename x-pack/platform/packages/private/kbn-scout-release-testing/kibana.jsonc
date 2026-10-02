@@ -6,5 +6,8 @@
   ],
   "group": "platform",
   "visibility": "private",
-  "devOnly": true
+  "devOnly": true,
+  "kbn_references": [
+    "@kbn/discover-plugin"
+  ]
 }

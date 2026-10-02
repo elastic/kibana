@@ -4,5 +4,8 @@
   "owner": "@elastic/appex-qa",
   "group": "observability",
   "visibility": "private",
-  "devOnly": true
+  "devOnly": true,
+  "kbn_references": [
+    "@kbn/discover-plugin"
+  ]
 }
