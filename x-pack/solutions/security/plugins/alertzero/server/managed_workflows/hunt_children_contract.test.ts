@@ -214,22 +214,59 @@ describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
     expect(workflow.settings?.timeout).toBe('176h');
   });
 
-  // Both requeries swallow their own failure, so every settlement count has to fall
-  // back to the earlier read. Reading the retry alone means a transient failure on
-  // the second call discards a first call that succeeded, collapses created_count to
-  // 0, and leaves the Investigation open forever with every Proposal already decided.
-  it('falls back to the first requery for every settlement count', () => {
+  // Each count is read from its own status-scoped pair (elastic/security-team#19773: a
+  // single unfiltered page undercounted past 100 Proposals on an Investigation, since
+  // `total` -- not the returned array -- is the accurate count at any volume, and getting
+  // it per status needs a per-status query). Every pair still swallows its own failure, so
+  // every count has to fall back to its own earlier read -- reading the retry alone means a
+  // transient failure on the second call discards a first call that succeeded.
+  it('falls back to its own first requery for every settlement count', () => {
     const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
     const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
 
-    for (const count of ['created_count', 'pending_count', 'executing_count']) {
+    const countToRequeryPrefix: Record<string, string> = {
+      created_count: 'created',
+      pending_count: 'pending',
+      executing_count: 'executing',
+    };
+
+    for (const [count, prefix] of Object.entries(countToRequeryPrefix)) {
       expect(counts[count]).toEqual(
-        expect.stringContaining('steps.requery_proposals_retry.output')
+        expect.stringContaining(`steps.requery_${prefix}_retry.output`)
       );
       expect(counts[count]).toEqual(
-        expect.stringContaining('default: steps.requery_proposals.output')
+        expect.stringContaining(`default: steps.requery_${prefix}.output`)
       );
     }
+  });
+
+  // pending_count/executing_count gate on being *zero*, so a failed pair must never
+  // collapse to literal `0` (indistinguishable from "nothing outstanding") -- `1` is the
+  // fail-closed sentinel instead. created_count's own `default: 0` is left alone: a 0
+  // created count essentially never clears `>= expectedProposalCount`, so it is already
+  // fail-safe on its own.
+  it('fails closed on pending/executing, not just created, when both reads for a status fail', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+    const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
+
+    expect(counts.created_count).toEqual(expect.stringContaining('default: 0'));
+    expect(counts.pending_count).toEqual(expect.stringContaining('default: 1'));
+    expect(counts.executing_count).toEqual(expect.stringContaining('default: 1'));
+  });
+
+  // The requery for pending/executing has to actually filter by status server-side --
+  // otherwise it is just the unfiltered requery again under a different name, and the
+  // fix above doesn't scope anything.
+  it.each([
+    ['requery_pending', 'pending'],
+    ['requery_pending_retry', 'pending'],
+    ['requery_executing', 'executing'],
+    ['requery_executing_retry', 'executing'],
+  ])('%s filters the requery by status: %s', (stepName, status) => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+    const query = stepNamed(workflow, stepName).with?.query as Record<string, unknown>;
+
+    expect(query.status).toBe(status);
   });
 });
 
