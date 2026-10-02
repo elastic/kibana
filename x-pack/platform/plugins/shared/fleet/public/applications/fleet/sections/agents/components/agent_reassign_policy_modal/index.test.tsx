@@ -13,7 +13,6 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import {
   sendPostAgentReassign,
-  sendPostBulkAgentReassign,
   useGetAgentPolicies,
   useStartServices,
 } from '../../../../hooks';
@@ -43,7 +42,6 @@ jest.mock('../../../../components', () => ({
 }));
 
 const mockSendPostAgentReassign = sendPostAgentReassign as jest.Mock;
-const mockSendPostBulkAgentReassign = sendPostBulkAgentReassign as jest.Mock;
 const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
 const mockUseStartServices = useStartServices as jest.Mock;
 
