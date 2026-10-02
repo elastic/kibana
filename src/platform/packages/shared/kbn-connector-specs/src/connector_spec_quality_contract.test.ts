@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { z } from '@kbn/zod/v4';
 import * as connectorsSpecs from './all_specs';
 import type { ConnectorSpec } from './connector_spec';
+import { inputMaxBytesRegistry, withMaxBytes } from './with_max_bytes';
 
 type JsonSchema = Record<string, unknown>;
 
@@ -36,6 +37,50 @@ const WORKFLOW_USE_CLAIM =
 const INTERNAL_VOCABULARY =
   /\b(custom connectors?|MCP-native|connector specs?|stack connectors?)\b/gi;
 const UNION_KEYS = ['anyOf', 'oneOf', 'allOf'] as const;
+// Specs whose record, free-form, or recursive inputs are not yet wrapped in `withMaxBytes`.
+// Owning teams remove their entries as they bound them; delete this set once it is empty.
+const PENDING_BOUNDED_INPUT_SPECS: ReadonlySet<string> = new Set([
+  // workflows-eng
+  'AwsCloudwatch',
+  'AwsEks',
+  'AwsLambdaConnector',
+  'Elasticsearch',
+  'GcpCloudFunctionsConnector',
+  'GcpSecretManager',
+  'GoogleGke',
+  'Jenkins',
+  'OpensearchAwsOpensearchService',
+  'ThreatQ',
+
+  // workchat-eng
+  'Box',
+  'Databricks',
+  'Dropbox',
+  'GithubConnector',
+  'GoogleDocsConnector',
+  'GraphQLConnector',
+  'MondayCom',
+  'MongoDBConnector',
+  'PagerdutyConnector',
+  'ServicenowSearch',
+  'SharepointOnline',
+  'SharepointServer',
+  'Snowflake',
+  'TavilyConnector',
+
+  // nightshift-context-and-research-team
+  'AnsibleControllerConnector',
+  'ArgocdConnector',
+  'AzureFunctions',
+  'Buildkite',
+  'Dynatrace',
+  'GoogleCloudMonitoring',
+  'KubernetesConnector',
+  'PostHog',
+  'Prometheus',
+  'Rootly',
+  'Sentry',
+]);
 
 const isJsonSchema = (value: unknown): value is JsonSchema =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -68,14 +113,46 @@ const getAvailability = ({ metadata }: ConnectorSpec): Availability | undefined 
   return workflows ? 'workflowsOnly' : undefined;
 };
 
+const MAX_BYTES_KEY = 'x-max-bytes';
+
 const toInputJsonSchema = (schema: z.ZodType): JsonSchema =>
-  z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' }) as JsonSchema;
+  z.toJSONSchema(schema, {
+    io: 'input',
+    unrepresentable: 'any',
+    override: ({ zodSchema, jsonSchema }) => {
+      const meta = inputMaxBytesRegistry.get(zodSchema);
+      if (meta) {
+        (jsonSchema as JsonSchema)[MAX_BYTES_KEY] = meta.maxBytes;
+      }
+    },
+  }) as JsonSchema;
 
 interface InputSchemaViolations {
   unboundedStrings: string[];
   unboundedArrays: string[];
+  unboundedRecords: string[];
+  freeFormValues: string[];
+  unboundedRecursion: string[];
   undescribedParams: string[];
 }
+
+const createEmptyViolations = (): InputSchemaViolations => ({
+  unboundedStrings: [],
+  unboundedArrays: [],
+  unboundedRecords: [],
+  freeFormValues: [],
+  unboundedRecursion: [],
+  undescribedParams: [],
+});
+
+const isFreeForm = (schema: JsonSchema): boolean =>
+  schema.type === undefined &&
+  schema.enum === undefined &&
+  schema.const === undefined &&
+  UNION_KEYS.every((key) => schema[key] === undefined);
+
+const hasEnumKeys = ({ propertyNames }: JsonSchema): boolean =>
+  isJsonSchema(propertyNames) && Array.isArray(propertyNames.enum);
 
 interface WalkContext {
   root: JsonSchema;
@@ -111,11 +188,27 @@ const walkInputSchema = (
   if (isParam && typeof schema.description !== 'string') {
     violations.undescribedParams.push(schemaPath);
   }
+  // `withMaxBytes` bounds the whole subtree by its serialized size.
+  if (schema[MAX_BYTES_KEY] !== undefined) {
+    return;
+  }
   if (typeof $ref === 'string') {
     if (context.seenRefs.has($ref)) {
+      violations.unboundedRecursion.push(schemaPath);
       return;
     }
     context = { ...context, seenRefs: new Set([...context.seenRefs, $ref]) };
+  }
+  if (isFreeForm(schema)) {
+    violations.freeFormValues.push(schemaPath);
+  }
+  if (
+    schema.type === 'object' &&
+    schema.additionalProperties !== undefined &&
+    schema.additionalProperties !== false &&
+    !hasEnumKeys(schema)
+  ) {
+    violations.unboundedRecords.push(schemaPath);
   }
   if (
     schema.type === 'string' &&
@@ -160,28 +253,25 @@ const walkInputSchema = (
 /** Walks an action input schema, following `$ref`s, and reports unbounded and undescribed fields. */
 const collectInputViolations = (schema: z.ZodType, actionName: string): InputSchemaViolations => {
   const root = toInputJsonSchema(schema);
-  const violations: InputSchemaViolations = {
-    unboundedStrings: [],
-    unboundedArrays: [],
-    undescribedParams: [],
-  };
+  const violations = createEmptyViolations();
   walkInputSchema(root, actionName, false, { root, violations, seenRefs: new Set(['#']) });
   return violations;
 };
 
 const getInputViolations = (spec: ConnectorSpec): InputSchemaViolations => {
-  const violations: InputSchemaViolations = {
-    unboundedStrings: [],
-    unboundedArrays: [],
-    undescribedParams: [],
-  };
+  const violations = createEmptyViolations();
   for (const [actionName, action] of Object.entries(spec.actions)) {
     const actionViolations = collectInputViolations(action.input, actionName);
-    violations.unboundedStrings.push(...actionViolations.unboundedStrings);
-    violations.unboundedArrays.push(...actionViolations.unboundedArrays);
-    violations.undescribedParams.push(...actionViolations.undescribedParams);
+    for (const key of Object.keys(violations) as Array<keyof InputSchemaViolations>) {
+      violations[key].push(...actionViolations[key]);
+    }
   }
   return violations;
+};
+
+const getUnboundedJsonViolations = (spec: ConnectorSpec): string[] => {
+  const { unboundedRecords, freeFormValues, unboundedRecursion } = getInputViolations(spec);
+  return [...unboundedRecords, ...freeFormValues, ...unboundedRecursion];
 };
 
 const getLinkedDocs = (filePath: string, linkPattern: RegExp, baseDir: string): string[] =>
@@ -341,6 +431,25 @@ describe('connector spec quality contracts', () => {
     it.each(allSpecs)('%s bounds every action input array', (_exportName, spec) => {
       expect(getInputViolations(spec).unboundedArrays).toEqual([]);
     });
+
+    it.each(allSpecs.filter(([exportName]) => !PENDING_BOUNDED_INPUT_SPECS.has(exportName)))(
+      '%s wraps every record, free-form, and recursive action input in withMaxBytes',
+      (_exportName, spec) => {
+        expect(getUnboundedJsonViolations(spec)).toEqual([]);
+      }
+    );
+
+    it('lists only specs that still have unbounded record, free-form, or recursive inputs as pending', () => {
+      const resolved = allSpecs
+        .filter(([exportName]) => PENDING_BOUNDED_INPUT_SPECS.has(exportName))
+        .filter(([, spec]) => getUnboundedJsonViolations(spec).length === 0)
+        .map(([exportName]) => exportName);
+      const unknown = [...PENDING_BOUNDED_INPUT_SPECS].filter(
+        (exportName) => !allSpecs.some(([name]) => name === exportName)
+      );
+
+      expect({ resolved, unknown }).toEqual({ resolved: [], unknown: [] });
+    });
   });
 
   describe('input schema walker', () => {
@@ -367,8 +476,55 @@ describe('connector spec quality contracts', () => {
           'action.preprocessed',
         ],
         unboundedArrays: ['action.tags'],
+        unboundedRecords: ['action.labels'],
+        freeFormValues: [],
+        unboundedRecursion: [],
         undescribedParams: ['action.free', 'action.nested.id'],
       });
+    });
+
+    it('reports records, free-form values, and recursion unless wrapped in withMaxBytes', () => {
+      const node = z.object({
+        name: z.string().max(5).describe('name'),
+        get children() {
+          return z.array(node).max(5).describe('children');
+        },
+      });
+      const schema = z.object({
+        labels: z.record(z.string().max(5), z.string().max(5)).describe('labels'),
+        keyed: z.record(z.enum(['a', 'b']), z.string().max(5)).describe('keyed'),
+        loose: z
+          .object({ id: z.string().max(5).describe('id') })
+          .loose()
+          .describe('loose'),
+        payload: z.unknown().describe('payload'),
+        tree: node.describe('tree'),
+        boundedPayload: withMaxBytes(z.unknown(), 100).describe('bounded payload'),
+        boundedRecord: withMaxBytes(z.record(z.string().max(5), z.unknown()))
+          .optional()
+          .describe('bounded record'),
+        boundedTree: withMaxBytes(node, 100).describe('bounded tree'),
+      });
+
+      const { unboundedRecords, freeFormValues, unboundedRecursion } = collectInputViolations(
+        schema,
+        'action'
+      );
+      expect({ unboundedRecords, freeFormValues, unboundedRecursion }).toEqual({
+        unboundedRecords: ['action.labels', 'action.loose'],
+        freeFormValues: ['action.loose{value}', 'action.payload'],
+        unboundedRecursion: ['action.tree.children[].children'],
+      });
+    });
+
+    it('marks only the withMaxBytes copy of a shared schema as bounded', () => {
+      const shared = z.unknown();
+      const schema = z.object({
+        bounded: withMaxBytes(shared).describe('bounded'),
+        unbounded: shared.describe('unbounded'),
+      });
+
+      expect(collectInputViolations(schema, 'action').freeFormValues).toEqual(['action.unbounded']);
     });
 
     it('follows $ref into shared and recursive definitions', () => {
@@ -393,6 +549,9 @@ describe('connector spec quality contracts', () => {
           'action.tree.children[].name',
         ],
         unboundedArrays: ['action.tree.children'],
+        unboundedRecords: [],
+        freeFormValues: [],
+        unboundedRecursion: ['action.tree.children[].children'],
         undescribedParams: [
           'action.first.code',
           'action.second.code',

@@ -16,6 +16,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { withMaxBytes } from '../../with_max_bytes';
 
 const JINA_READER_TITLE = 'Jina Reader';
 const JINA_READER_CONNECTOR_ID = '.jina';
@@ -45,6 +46,12 @@ const base64FileField = () =>
       message: `File must not exceed ${MAX_FILE_BYTES} bytes once decoded`,
     })
     .describe('Base64-encoded file content');
+
+// Jina documents no size limit for these request options.
+const advancedOptionsField = () =>
+  withMaxBytes(z.record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any()))
+    .optional()
+    .describe('Additional advanced options');
 
 function mapPluginReturnFormatToReaderReturnFormat(returnFormat?: RETURN_FORMAT): string {
   switch (returnFormat) {
@@ -146,10 +153,7 @@ export const JinaReaderConnector: ConnectorSpec = {
             ])
             .optional()
             .describe('Desired return format'),
-          options: z
-            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
-            .optional()
-            .describe('Additional advanced options'),
+          options: advancedOptionsField(),
         })
       ),
       handler: async (ctx, input) => {
@@ -188,10 +192,7 @@ export const JinaReaderConnector: ConnectorSpec = {
             .enum([RETURN_FORMAT.MARKDOWN, RETURN_FORMAT.FULL_MARKDOWN, RETURN_FORMAT.PLAIN_TEXT])
             .optional()
             .describe('Desired return format'),
-          options: z
-            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
-            .optional()
-            .describe('Additional advanced options'),
+          options: advancedOptionsField(),
         })
       ),
       handler: async (ctx, input) => {
@@ -228,10 +229,7 @@ export const JinaReaderConnector: ConnectorSpec = {
         z.object({
           file: base64FileField(),
           filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
-          options: z
-            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
-            .optional()
-            .describe('Additional advanced options'),
+          options: advancedOptionsField(),
         })
       ),
       handler: async (ctx, input) => {
@@ -274,10 +272,7 @@ export const JinaReaderConnector: ConnectorSpec = {
             .min(1)
             .optional()
             .describe('Page number to render (starting from 1)'),
-          options: z
-            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
-            .optional()
-            .describe('Additional advanced options'),
+          options: advancedOptionsField(),
         })
       ),
       handler: async (ctx, input) => {
