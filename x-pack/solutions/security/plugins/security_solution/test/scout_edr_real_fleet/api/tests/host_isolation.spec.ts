@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-security';
+import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
@@ -66,6 +66,94 @@ const actionDetailsPath = (actionId: string): string =>
 const hostMetadataPath = (agentId: string): string =>
   HOST_METADATA_GET_ROUTE.replace('{id}', encodeURIComponent(agentId));
 
+const ACTION_ROUTES = {
+  isolate: ISOLATE_HOST_ROUTE_V2,
+  unisolate: UNISOLATE_HOST_ROUTE_V2,
+} as const;
+
+const readIsolation = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentId: string
+): Promise<boolean | string> => {
+  const response = await apiClient.get(hostMetadataPath(agentId), {
+    headers,
+    responseType: 'json',
+  });
+  if (response.statusCode !== 200) {
+    return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+  }
+
+  return (response.body as HostMetadataBody).metadata.Endpoint.state?.isolation === true;
+};
+
+const waitForIsolation = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentId: string,
+  isolated: boolean
+): Promise<void> => {
+  await expect
+    .poll(() => readIsolation(apiClient, headers, agentId), {
+      timeout: METADATA_TIMEOUT_MS,
+      intervals: [2_000],
+    })
+    .toBe(isolated);
+};
+
+const waitForSuccessfulAction = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  actionId: string
+): Promise<void> => {
+  await expect
+    .poll(
+      async () => {
+        const response = await apiClient.get(actionDetailsPath(actionId), {
+          headers,
+          responseType: 'json',
+        });
+        if (response.statusCode !== 200) {
+          return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+        }
+
+        const action = (response.body as ActionDetailsBody).data;
+        if (action.isCompleted && action.status !== 'successful') {
+          throw new Error(
+            `Action ${actionId} completed with status ${action.status}: ${JSON.stringify(action)}`
+          );
+        }
+
+        return action.status;
+      },
+      { timeout: ACTION_TIMEOUT_MS, intervals: [2_000] }
+    )
+    .toBe('successful');
+};
+
+const sendAction = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentId: string,
+  command: 'isolate' | 'unisolate'
+): Promise<string> => {
+  const response = await apiClient.post(ACTION_ROUTES[command], {
+    headers,
+    responseType: 'json',
+    body: {
+      endpoint_ids: [agentId],
+      agent_type: 'endpoint',
+    },
+  });
+
+  expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+  const action = (response.body as ActionDetailsBody).data;
+  expect(action.command).toBe(command);
+  expect(action.agents).toContain(agentId);
+
+  return action.id;
+};
+
 apiTest.describe('Real agent host isolation', { tag: ['@local-stateful-classic'] }, () => {
   let requestHeaders: Record<string, string>;
 
@@ -87,82 +175,15 @@ apiTest.describe('Real agent host isolation', { tag: ['@local-stateful-classic']
       apiTest.setTimeout(TEST_TIMEOUT_MS);
       const { agentId } = enrolledEndpoint;
 
-      const readIsolation = async (): Promise<boolean | string> => {
-        const response = await apiClient.get(hostMetadataPath(agentId), {
-          headers: requestHeaders,
-          responseType: 'json',
-        });
-        if (response.statusCode !== 200) {
-          return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
-        }
+      await waitForIsolation(apiClient, requestHeaders, agentId, false);
 
-        return (response.body as HostMetadataBody).metadata.Endpoint.state?.isolation === true;
-      };
+      const isolateActionId = await sendAction(apiClient, requestHeaders, agentId, 'isolate');
+      await waitForSuccessfulAction(apiClient, requestHeaders, isolateActionId);
+      await waitForIsolation(apiClient, requestHeaders, agentId, true);
 
-      const waitForIsolation = async (isolated: boolean): Promise<void> => {
-        await expect
-          .poll(readIsolation, { timeout: METADATA_TIMEOUT_MS, intervals: [2_000] })
-          .toBe(isolated);
-      };
-
-      const waitForSuccessfulAction = async (actionId: string): Promise<void> => {
-        await expect
-          .poll(
-            async () => {
-              const response = await apiClient.get(actionDetailsPath(actionId), {
-                headers: requestHeaders,
-                responseType: 'json',
-              });
-              if (response.statusCode !== 200) {
-                return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
-              }
-
-              const action = (response.body as ActionDetailsBody).data;
-              if (action.isCompleted && action.status !== 'successful') {
-                throw new Error(
-                  `Action ${actionId} completed with status ${action.status}: ${JSON.stringify(
-                    action
-                  )}`
-                );
-              }
-
-              return action.status;
-            },
-            { timeout: ACTION_TIMEOUT_MS, intervals: [2_000] }
-          )
-          .toBe('successful');
-      };
-
-      const sendAction = async (command: 'isolate' | 'unisolate'): Promise<string> => {
-        const response = await apiClient.post(
-          command === 'isolate' ? ISOLATE_HOST_ROUTE_V2 : UNISOLATE_HOST_ROUTE_V2,
-          {
-            headers: requestHeaders,
-            responseType: 'json',
-            body: {
-              endpoint_ids: [agentId],
-              agent_type: 'endpoint',
-            },
-          }
-        );
-
-        expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-        const action = (response.body as ActionDetailsBody).data;
-        expect(action.command).toBe(command);
-        expect(action.agents).toContain(agentId);
-
-        return action.id;
-      };
-
-      await waitForIsolation(false);
-
-      const isolateActionId = await sendAction('isolate');
-      await waitForSuccessfulAction(isolateActionId);
-      await waitForIsolation(true);
-
-      const unisolateActionId = await sendAction('unisolate');
-      await waitForSuccessfulAction(unisolateActionId);
-      await waitForIsolation(false);
+      const unisolateActionId = await sendAction(apiClient, requestHeaders, agentId, 'unisolate');
+      await waitForSuccessfulAction(apiClient, requestHeaders, unisolateActionId);
+      await waitForIsolation(apiClient, requestHeaders, agentId, false);
     }
   );
 });
