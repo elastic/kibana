@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -411,22 +412,28 @@ const DiffOptionSwitch = ({
   ['data-test-subj']: string;
   itemCss?: EuiContextMenuItemProps['css'];
 }) => {
-  return (
-    <EuiContextMenuItem
+  const switchControl = (
+    <EuiSwitch
+      label={label}
+      checked={checked}
+      compressed
       disabled={disabled}
-      toolTipContent={disabled ? enableShowDiffTooltip : undefined}
-      css={itemCss}
-    >
+      onChange={onChange}
+      data-test-subj={`unifiedDataTableDiffOptionSwitch-${dataTestSubj}`}
+    />
+  );
+
+  return (
+    <EuiContextMenuItem disabled={disabled} css={itemCss}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={label}
-            checked={checked}
-            compressed
-            disabled={disabled}
-            onChange={onChange}
-            data-test-subj={`unifiedDataTableDiffOptionSwitch-${dataTestSubj}`}
-          />
+          {disabled ? (
+            <EuiToolTip content={enableShowDiffTooltip} position="right">
+              {switchControl}
+            </EuiToolTip>
+          ) : (
+            switchControl
+          )}
         </EuiFlexItem>
         {description && (
           <EuiFlexItem grow={false} css={{ lineHeight: 0 }}>

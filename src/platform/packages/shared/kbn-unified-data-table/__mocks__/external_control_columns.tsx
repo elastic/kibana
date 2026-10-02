@@ -87,27 +87,41 @@ const TestTrailingColumn = () => {
     >
       <EuiPopoverTitle id={popoverTitleId}>{'Actions'}</EuiPopoverTitle>
       <div style={{ width: 150 }}>
-        <button type="button" onClick={() => {}}>
-          <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content="Pin selected items" disableScreenReaderOutput>
-                <EuiButtonIcon aria-label="Pin selected items" iconType="pin" color="text" />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>{'Pin'}</EuiFlexItem>
-          </EuiFlexGroup>
-        </button>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Pin selected items" disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label="Pin selected items"
+                iconType="pin"
+                color="text"
+                onClick={() => {}}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <button type="button" onClick={() => {}}>
+              {'Pin'}
+            </button>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <button type="button" onClick={() => {}}>
-          <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content="Delete selected items" disableScreenReaderOutput>
-                <EuiButtonIcon aria-label="Delete selected items" iconType="trash" color="text" />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>{'Delete'}</EuiFlexItem>
-          </EuiFlexGroup>
-        </button>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Delete selected items" disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label="Delete selected items"
+                iconType="trash"
+                color="text"
+                onClick={() => {}}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <button type="button" onClick={() => {}}>
+              {'Delete'}
+            </button>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     </EuiPopover>
   );
