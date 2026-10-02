@@ -16,7 +16,7 @@ import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
 } from '@kbn/esql-utils';
-import { SaveAsViewModal } from './save_as_view_modal';
+import { CreateViewModal } from './create_view_modal';
 
 jest.mock('@kbn/esql-utils', () => {
   const actual = jest.requireActual('@kbn/esql-utils');
@@ -33,15 +33,18 @@ const renderModal = (onClose = jest.fn(), onSaved = jest.fn()) => {
   const core = coreMock.createStart();
   render(
     <KibanaContextProvider services={{ core }}>
-      <SaveAsViewModal query={query} onClose={onClose} onSaved={onSaved} />
+      <CreateViewModal query={query} onClose={onClose} onSaved={onSaved} />
     </KibanaContextProvider>
   );
   return { core, onClose, onSaved };
 };
 
 const submitForm = () => {
-  const button = screen.getByTestId('saveAsViewSubmitButton') as HTMLButtonElement;
-  fireEvent.submit(button.form ?? button);
+  const form = document.querySelector('form');
+  if (!form) {
+    throw new Error('Create view form was not rendered');
+  }
+  fireEvent.submit(form);
 };
 
 const submitView = (name: string, description?: string) => {
@@ -54,7 +57,7 @@ const submitView = (name: string, description?: string) => {
   submitForm();
 };
 
-describe('SaveAsViewModal', () => {
+describe('CreateViewModal', () => {
   beforeEach(() => {
     createView.mockReset();
     createView.mockResolvedValue({});
@@ -164,7 +167,7 @@ describe('SaveAsViewModal', () => {
 
     await waitFor(() => {
       expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'View "sales" was saved.',
+        title: 'View "sales" was created.',
       });
       expect(onSaved).toHaveBeenCalledWith('sales');
       expect(onClose).toHaveBeenCalled();

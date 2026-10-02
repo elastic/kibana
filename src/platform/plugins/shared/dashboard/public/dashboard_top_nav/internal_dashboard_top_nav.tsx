@@ -549,6 +549,7 @@ export function InternalDashboardTopNav({
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
           }
+          enableCreateView={viewMode === 'edit'}
           esqlApproximation={{
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,

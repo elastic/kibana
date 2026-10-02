@@ -309,7 +309,7 @@ describe('Starred and History queries components', () => {
       });
     });
 
-    it('opens save as view for the selected history query', () => {
+    it('opens create view for the selected history query', () => {
       render(
         <KibanaContextProvider services={services}>
           <HistoryAndStarredQueriesTabs
@@ -319,6 +319,7 @@ describe('Starred and History queries components', () => {
             onClose={jest.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
+            enableCreateView
           />
         </KibanaContextProvider>
       );
@@ -327,9 +328,9 @@ describe('Starred and History queries components', () => {
       const query = 'FROM logs | WHERE status = "error"';
       const row = historyTable.getByText(query).closest('tr');
       expect(row).not.toBeNull();
-      fireEvent.click(within(row as HTMLElement).getByRole('button', { name: 'Save as view' }));
+      fireEvent.click(within(row as HTMLElement).getByRole('button', { name: 'Create view' }));
 
-      const dialog = screen.getByRole('dialog', { name: 'Save as view' });
+      const dialog = screen.getByRole('dialog', { name: 'Create view' });
       expect(within(dialog).getByTestId('saveAsViewQueryPreview')).toHaveTextContent(query);
     });
 

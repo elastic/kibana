@@ -41,12 +41,8 @@ import {
 } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
 
-export const saveAsViewLabel = i18n.translate('esqlEditor.saveAsView.openModalTooltip', {
-  defaultMessage: 'Save as view',
-});
-
-const modalTitle = i18n.translate('esqlEditor.saveAsView.modalTitle', {
-  defaultMessage: 'Save as view',
+export const createViewLabel = i18n.translate('esqlEditor.createView.openModalTooltip', {
+  defaultMessage: 'Create view',
 });
 
 const nameLabel = i18n.translate('esqlEditor.saveAsView.nameLabel', {
@@ -82,8 +78,8 @@ const cancelButtonLabel = i18n.translate('esqlEditor.saveAsView.cancelButtonLabe
   defaultMessage: 'Cancel',
 });
 
-const saveButtonLabel = i18n.translate('esqlEditor.saveAsView.saveButtonLabel', {
-  defaultMessage: 'Save',
+const createButtonLabel = i18n.translate('esqlEditor.createView.createButtonLabel', {
+  defaultMessage: 'Create',
 });
 
 const nameRequiredErrorMessage = i18n.translate('esqlEditor.saveAsView.nameRequiredErrorMessage', {
@@ -124,13 +120,13 @@ const errorDetailsAriaLabel = i18n.translate('esqlEditor.saveAsView.errorDetails
   defaultMessage: 'Show Elasticsearch error details',
 });
 
-const saveErrorTitle = i18n.translate('esqlEditor.saveAsView.saveErrorTitle', {
-  defaultMessage: 'Unable to save ES|QL view',
+const createErrorTitle = i18n.translate('esqlEditor.createView.createErrorTitle', {
+  defaultMessage: 'Unable to create ES|QL view',
 });
 
-const saveSuccessTitle = (name: string) =>
-  i18n.translate('esqlEditor.saveAsView.saveSuccessTitle', {
-    defaultMessage: 'View "{name}" was saved.',
+const createSuccessTitle = (name: string) =>
+  i18n.translate('esqlEditor.createView.createSuccessTitle', {
+    defaultMessage: 'View "{name}" was created.',
     values: { name },
   });
 
@@ -151,13 +147,13 @@ const getNameValidationMessage = (
 
 type NameConflict = { type: 'existingView' } | { type: 'otherResource'; details: string };
 
-export interface SaveAsViewModalProps {
+export interface CreateViewModalProps {
   query: string;
   onClose: () => void;
   onSaved?: (viewName: string) => void | Promise<void>;
 }
 
-export const SaveAsViewModal: FunctionComponent<SaveAsViewModalProps> = ({
+export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
   query,
   onClose,
   onSaved,
@@ -225,7 +221,7 @@ export const SaveAsViewModal: FunctionComponent<SaveAsViewModalProps> = ({
         query,
         description: description.trim().length > 0 ? description : undefined,
       });
-      core.notifications.toasts.addSuccess({ title: saveSuccessTitle(name) });
+      core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
       await onSaved?.(name);
       onClose();
     } catch (error) {
@@ -248,7 +244,7 @@ export const SaveAsViewModal: FunctionComponent<SaveAsViewModalProps> = ({
   return (
     <EuiModal aria-labelledby={modalTitleId} data-test-subj="saveAsViewModal" onClose={handleClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{createViewLabel}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -259,7 +255,7 @@ export const SaveAsViewModal: FunctionComponent<SaveAsViewModalProps> = ({
               data-test-subj="saveAsViewSaveError"
               size="s"
               text={<p>{saveError}</p>}
-              title={saveErrorTitle}
+              title={createErrorTitle}
             />
             <EuiSpacer size="l" />
           </>
@@ -314,9 +310,8 @@ export const SaveAsViewModal: FunctionComponent<SaveAsViewModalProps> = ({
             <EuiCodeBlock
               data-test-subj="saveAsViewQueryPreview"
               fontSize="s"
-              isCopyable={false}
+              isCopyable
               language="esql"
-              overflowHeight={120}
               paddingSize="s"
             >
               {query}
@@ -344,7 +339,7 @@ export const SaveAsViewModal: FunctionComponent<SaveAsViewModalProps> = ({
               isLoading={isSaving}
               type="submit"
             >
-              {saveButtonLabel}
+              {createButtonLabel}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

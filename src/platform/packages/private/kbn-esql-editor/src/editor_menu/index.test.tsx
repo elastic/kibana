@@ -86,26 +86,33 @@ describe('ESQLMenu', () => {
     );
   });
 
-  it('disables save as view when the query is empty', async () => {
-    await renderMenu();
-    expect(screen.getByRole('button', { name: 'Save as view' })).toBeDisabled();
-    expect(screen.getByTestId('ESQLEditor-save-as-view-new-dot')).toBeInTheDocument();
+  it('hides create view unless the host opts in', async () => {
+    await renderMenu({}, { currentQuery: 'FROM logs-*' });
+    expect(screen.queryByRole('button', { name: 'Create view' })).not.toBeInTheDocument();
   });
 
-  it('opens the save as view modal for the current query', async () => {
-    await renderMenu({}, { currentQuery: 'FROM logs-*' });
-    const saveButton = screen.getByRole('button', { name: 'Save as view' });
-    expect(saveButton).toBeEnabled();
+  it('disables create view when the query is empty', async () => {
+    await renderMenu({ enableCreateView: true });
+    expect(screen.getByRole('button', { name: 'Create view' })).toBeDisabled();
+  });
 
-    fireEvent.click(saveButton);
+  it('opens the create view modal for the current query', async () => {
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+    const createButton = screen.getByRole('button', { name: 'Create view' });
+    expect(createButton).toBeEnabled();
 
-    const dialog = await screen.findByRole('dialog', { name: 'Save as view' });
+    fireEvent.click(createButton);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Create view' });
     expect(dialog).toHaveTextContent('FROM logs-*');
   });
 
-  it('keeps save as view available when history is hidden', async () => {
-    await renderMenu({ hideHistory: true }, { currentQuery: 'FROM logs-*' });
-    expect(screen.getByRole('button', { name: 'Save as view' })).toBeEnabled();
+  it('keeps create view available when history is hidden', async () => {
+    await renderMenu(
+      { hideHistory: true, enableCreateView: true },
+      { currentQuery: 'FROM logs-*' }
+    );
+    expect(screen.getByRole('button', { name: 'Create view' })).toBeEnabled();
     expect(screen.queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
   });
 });

@@ -551,6 +551,7 @@ function InnerESQLEditor({
               : undefined
           }
           editorIsInline
+          enableCreateView={parentApi !== undefined}
           onTextLangQuerySubmit={async (q, a) => {
             // do not run the suggestions if the query is the same as the previous one
             if (q && !isEqual(q, prevQuery.current)) {

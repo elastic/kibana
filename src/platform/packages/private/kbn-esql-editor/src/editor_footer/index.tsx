@@ -52,6 +52,7 @@ interface EditorFooterProps {
   queryStats?: QueryStats;
   hideQueryHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  enableCreateView?: boolean;
 }
 
 const openDocumentationLabel = i18n.translate('esqlEditor.query.documentationAriaLabel', {
@@ -80,6 +81,7 @@ export const EditorFooter = memo(function EditorFooter({
   queryStats,
   hideQueryHistory,
   onESQLDocsFlyoutVisibilityChanged,
+  enableCreateView,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -149,6 +151,7 @@ export const EditorFooter = memo(function EditorFooter({
                 hideHistory={hideQueryHistory}
                 onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
                 onPrettifyQuery={onPrettifyQuery}
+                enableCreateView={enableCreateView}
               />
               {displayDocumentationAsFlyout && (
                 <>
@@ -188,6 +191,7 @@ export const EditorFooter = memo(function EditorFooter({
             height={resizableContainerHeight}
             isSpaceReduced={isSpaceReduced}
             starredQueriesService={starredQueriesService}
+            enableCreateView={enableCreateView}
           />
         </EuiFlexItem>
       )}
