@@ -53,11 +53,7 @@ export async function copySourceMappings({
         } top-level mappings from ${source} to ${dataStream}`
       );
       try {
-        await esClient.indices.putMapping({
-          index: dataStream,
-          properties,
-          write_index_only: true,
-        });
+        await esClient.indices.putMapping({ index: dataStream, properties });
       } catch (error) {
         throw new Error(
           `Failed to copy mappings from ${source} to ${dataStream}: ${getErrorMessage(error)}`

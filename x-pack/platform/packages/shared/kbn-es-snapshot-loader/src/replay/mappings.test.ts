@@ -62,7 +62,6 @@ describe('copySourceMappings', () => {
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'metrics-app.otel-2026-04-19',
       properties: { metrics: { properties: { errors_total: counterMapping } } },
-      write_index_only: true,
     });
   });
 
