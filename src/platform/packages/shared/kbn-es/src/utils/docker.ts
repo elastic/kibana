@@ -1007,6 +1007,21 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
+  try {
+    return await startServerlessCluster(log, options);
+  } catch (error) {
+    // Containers started before the failure would otherwise keep the published ES port bound.
+    try {
+      teardownServerlessClusterSync(log, options);
+    } catch {
+      log.warning('Failed to clean up containers of a serverless ES cluster that never started.');
+    }
+
+    throw error;
+  }
+}
+
+async function startServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
   const startTime = Date.now();
   const elapsed = () => `${((Date.now() - startTime) / 1000).toFixed(1)}s`;
 

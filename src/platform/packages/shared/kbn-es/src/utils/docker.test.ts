@@ -1120,6 +1120,42 @@ describe('runServerlessCluster()', () => {
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
     expect(onReady).not.toHaveBeenCalled();
   });
+
+  test('should kill the started containers when a UIAM container never turns healthy', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    execa.commandSync.mockImplementation(() => ({ stdout: 'es01\nes02\nuiam-cosmosdb' }));
+    const startupError = new Error('The "uiam-cosmosdb" container failed to start');
+    runUiamContainerMock.mockRejectedValue(startupError);
+
+    await expect(
+      runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
+    ).rejects.toThrow(startupError);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toContain('docker ps --filter status=running');
+    expect(execa.commandSync.mock.calls[1][0]).toEqual('docker kill es01 es02 uiam-cosmosdb');
+  });
+
+  test('should not mask the startup error when the cleanup itself fails', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    execa.commandSync.mockImplementation(() => {
+      throw new Error('docker: command not found');
+    });
+    const startupError = new Error('The "uiam-cosmosdb" container failed to start');
+    runUiamContainerMock.mockRejectedValue(startupError);
+
+    await expect(
+      runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
+    ).rejects.toThrow(startupError);
+  });
 });
 
 describe('stopServerlessCluster()', () => {
