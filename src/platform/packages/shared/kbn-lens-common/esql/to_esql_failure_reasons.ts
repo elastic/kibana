@@ -37,22 +37,6 @@ export type EsqlConversionFailureReason =
   | 'unsupported_settings'
   | 'unknown';
 
-/** Top values reasons whose tooltip body is a sentence under a shared title. */
-const TERMS_FAILURE_REASONS = new Set<EsqlConversionFailureReason>([
-  'terms_date_histogram_not_supported',
-  'terms_multi_level_not_supported',
-  'terms_multiple_fields_not_supported',
-  'terms_accuracy_mode_not_supported',
-  'terms_include_exclude_not_supported',
-  'terms_other_bucket_not_supported',
-  'terms_order_by_not_supported',
-  'terms_custom_order_by_not_supported',
-  'terms_rank_metric_not_supported',
-]);
-
-export const isTermsEsqlConversionFailureReason = (reason: EsqlConversionFailureReason): boolean =>
-  TERMS_FAILURE_REASONS.has(reason);
-
 export const esqlConversionFailureTitle = i18n.translate(
   'xpack.lens.config.cannotConvertToEsqlTitle',
   {
@@ -61,51 +45,43 @@ export const esqlConversionFailureTitle = i18n.translate(
 );
 
 /**
- * Full tooltip strings for non-Top-values reasons, and sentence-only bodies for
- * Top values reasons (paired with {@link esqlConversionFailureTitle}).
+ * Sentence-only tooltip bodies for each conversion failure reason.
  */
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
-    defaultMessage:
-      'Cannot convert to ES|QL: Formula operations will be supported in an upcoming update.',
+    defaultMessage: 'Formula operations will be supported in an upcoming update.',
   }),
   time_shift_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Time shift will be supported in an upcoming update.',
+      defaultMessage: 'Time shift will be supported in an upcoming update.',
     }
   ),
   runtime_field_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Runtime fields will be supported in an upcoming update.',
+      defaultMessage: 'Runtime fields will be supported in an upcoming update.',
     }
   ),
   reduced_time_range_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlReducedTimeRangeTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Reduced time range will be supported in an upcoming update.',
+      defaultMessage: 'Reduced time range will be supported in an upcoming update.',
     }
   ),
   function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperationTooltip', {
-    defaultMessage:
-      'Cannot convert to ES|QL: Support for one or more functions used will be coming in an upcoming update.',
+    defaultMessage: 'Support for one or more functions used will be coming in an upcoming update.',
   }),
   drop_partials_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlDropPartialsTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: "Drop partial buckets" will be supported in an upcoming update.',
+      defaultMessage: '"Drop partial buckets" will be supported in an upcoming update.',
     }
   ),
   include_empty_rows_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: "Include empty rows" will be supported in an upcoming update.',
+      defaultMessage: '"Include empty rows" will be supported in an upcoming update.',
     }
   ),
   terms_date_histogram_not_supported: i18n.translate(
@@ -169,75 +145,57 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
   saved_to_library_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertSavedToLibraryTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
+      defaultMessage: 'Charts saved to library will be supported in an upcoming update.',
     }
   ),
   query_annotations_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Query-based annotations will be supported in an upcoming update.',
+      defaultMessage: 'Query-based annotations will be supported in an upcoming update.',
     }
   ),
   reference_line_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlReferenceLineTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Only static value reference lines are supported for conversion.',
+      defaultMessage: 'Only static value reference lines are supported for conversion.',
     }
   ),
   trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {
     defaultMessage:
-      'Cannot convert to ES|QL: The trendline layer uses a configuration that is not yet supported for conversion.',
+      'The trendline layer uses a configuration that is not yet supported for conversion.',
   }),
   unsupported_settings: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip',
     {
-      defaultMessage:
-        'Cannot convert to ES|QL: Some settings used will be supported in an upcoming update.',
+      defaultMessage: 'Some settings used will be supported in an upcoming update.',
     }
   ),
   unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknownTooltip', {
-    defaultMessage:
-      'Cannot convert to ES|QL: This visualization will be supported in an upcoming update.',
+    defaultMessage: 'This visualization will be supported in an upcoming update.',
   }),
 };
 
 export interface EsqlFailureTooltip {
-  title?: string;
+  title: string;
   message: string;
 }
 
-const resolveMessage = (reason: EsqlConversionFailureReason): string =>
-  esqlConversionFailureReasonMessages[reason] ??
-  esqlConversionFailureReasonMessages.unsupported_settings;
-
 /**
- * Builds tooltip content for a conversion failure. Top values reasons use a shared
- * title plus a sentence-only body; other reasons keep a single full message.
+ * Builds tooltip content for a conversion failure: shared title plus the reason body.
  */
 export const getFailureTooltip = (
   reason: EsqlConversionFailureReason | undefined
-): EsqlFailureTooltip => {
-  const resolvedReason = reason ?? 'unknown';
-
-  if (isTermsEsqlConversionFailureReason(resolvedReason)) {
-    return {
-      title: esqlConversionFailureTitle,
-      message: resolveMessage(resolvedReason),
-    };
-  }
-
-  return {
-    message: resolveMessage(resolvedReason),
-  };
-};
+): EsqlFailureTooltip => ({
+  title: esqlConversionFailureTitle,
+  message:
+    esqlConversionFailureReasonMessages[reason ?? 'unknown'] ??
+    esqlConversionFailureReasonMessages.unsupported_settings,
+});
 
 /** Plain-text form of {@link getFailureTooltip} for aria-labels and string-only call sites. */
 export const getFailureTooltipPlainText = (
   reason: EsqlConversionFailureReason | undefined
 ): string => {
   const { title, message } = getFailureTooltip(reason);
-  return title ? `${title}: ${message}` : message;
+  return `${title}: ${message}`;
 };

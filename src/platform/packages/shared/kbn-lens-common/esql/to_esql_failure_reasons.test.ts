@@ -15,8 +15,9 @@ import {
 } from './to_esql_failure_reasons';
 
 describe('getFailureTooltip', () => {
-  it('returns the full message and no title for non-Top-values reasons', () => {
+  it('returns the shared title plus reason body', () => {
     expect(getFailureTooltip('formula_not_supported')).toEqual({
+      title: esqlConversionFailureTitle,
       message: esqlConversionFailureReasonMessages.formula_not_supported,
     });
   });
@@ -30,21 +31,19 @@ describe('getFailureTooltip', () => {
 
   it('falls back to unknown when reason is missing', () => {
     expect(getFailureTooltip(undefined)).toEqual({
+      title: esqlConversionFailureTitle,
       message: esqlConversionFailureReasonMessages.unknown,
     });
   });
 });
 
 describe('getFailureTooltipPlainText', () => {
-  it('joins title and a Top values message', () => {
+  it('joins title and message', () => {
     expect(getFailureTooltipPlainText('terms_other_bucket_not_supported')).toBe(
       `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages.terms_other_bucket_not_supported}`
     );
-  });
-
-  it('returns the legacy full string for non-Top-values reasons', () => {
     expect(getFailureTooltipPlainText('formula_not_supported')).toBe(
-      esqlConversionFailureReasonMessages.formula_not_supported
+      `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages.formula_not_supported}`
     );
   });
 });

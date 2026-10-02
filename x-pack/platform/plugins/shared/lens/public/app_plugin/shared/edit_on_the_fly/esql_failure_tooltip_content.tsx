@@ -11,15 +11,9 @@ import type { ReactNode } from 'react';
 import type { EsqlFailureTooltip } from '@kbn/lens-common';
 
 /** Renders title + message for Convert-to-ES|QL failure tooltips. */
-export const renderEsqlFailureTooltipContent = (tooltip: EsqlFailureTooltip): ReactNode => {
-  if (!tooltip.title) {
-    return tooltip.message;
-  }
-
-  return (
-    <>
-      <div>{tooltip.title}</div>
-      <div>{tooltip.message}</div>
-    </>
-  );
-};
+export const renderEsqlFailureTooltipContent = (tooltip: EsqlFailureTooltip): ReactNode => (
+  <>
+    <div>{tooltip.title}</div>
+    <div>{tooltip.message}</div>
+  </>
+);

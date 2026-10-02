@@ -37,9 +37,9 @@ describe('getTermsConversionFailure', () => {
   });
 
   it('returns terms_multi_level_not_supported beyond two terms buckets', () => {
-    expect(
-      getTermsConversionFailure(createTermsColumn(), context({ termsBucketCount: 3 }))
-    ).toBe('terms_multi_level_not_supported');
+    expect(getTermsConversionFailure(createTermsColumn(), context({ termsBucketCount: 3 }))).toBe(
+      'terms_multi_level_not_supported'
+    );
   });
 
   it('returns terms_multiple_fields_not_supported for multi-terms secondary fields', () => {
@@ -49,21 +49,21 @@ describe('getTermsConversionFailure', () => {
   });
 
   it('returns terms_accuracy_mode_not_supported when accuracy mode is enabled', () => {
-    expect(
-      getTermsConversionFailure(createTermsColumn({ accuracyMode: true }), context())
-    ).toBe('terms_accuracy_mode_not_supported');
+    expect(getTermsConversionFailure(createTermsColumn({ accuracyMode: true }), context())).toBe(
+      'terms_accuracy_mode_not_supported'
+    );
   });
 
   it('returns terms_include_exclude_not_supported when include filters are set', () => {
-    expect(
-      getTermsConversionFailure(createTermsColumn({ include: ['host-a'] }), context())
-    ).toBe('terms_include_exclude_not_supported');
+    expect(getTermsConversionFailure(createTermsColumn({ include: ['host-a'] }), context())).toBe(
+      'terms_include_exclude_not_supported'
+    );
   });
 
   it('returns terms_include_exclude_not_supported when exclude filters are set', () => {
-    expect(
-      getTermsConversionFailure(createTermsColumn({ exclude: ['host-b'] }), context())
-    ).toBe('terms_include_exclude_not_supported');
+    expect(getTermsConversionFailure(createTermsColumn({ exclude: ['host-b'] }), context())).toBe(
+      'terms_include_exclude_not_supported'
+    );
   });
 
   it('returns terms_other_bucket_not_supported when other bucket is enabled', () => {
@@ -114,10 +114,7 @@ describe('getTermsConversionFailure', () => {
       )
     ).toBeUndefined();
     expect(
-      getTermsConversionFailure(
-        createTermsColumn({ orderBy: { type: 'alphabetical' } }),
-        context()
-      )
+      getTermsConversionFailure(createTermsColumn({ orderBy: { type: 'alphabetical' } }), context())
     ).toBeUndefined();
   });
 });

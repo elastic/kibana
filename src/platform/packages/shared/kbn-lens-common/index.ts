@@ -477,7 +477,6 @@ export {
   esqlConversionFailureTitle,
   getFailureTooltip,
   getFailureTooltipPlainText,
-  isTermsEsqlConversionFailureReason,
 } from './esql/to_esql_failure_reasons';
 export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
 export type { GetDefaultLabelFn } from './esql/operations';
