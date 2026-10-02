@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
+import { fromKueryExpression, KQLSyntaxError, toKqlExpression } from '@kbn/es-query';
 
 import { ALERTING_ERROR_CODES } from './errors/error_codes';
 
@@ -112,11 +112,24 @@ export const createSoFilterBuilder = ({
     }
   };
 
+  const parseFilter = (apiFilter: string): KueryNode => {
+    try {
+      return fromKueryExpression(apiFilter);
+    } catch (error) {
+      if (error instanceof KQLSyntaxError) {
+        throw Boom.badRequest(`Invalid filter syntax: ${error.message}`, {
+          code: ALERTING_ERROR_CODES.INVALID_FILTER_SYNTAX,
+        });
+      }
+      throw error;
+    }
+  };
+
   return (apiFilter: string): string => {
     if (!apiFilter) {
       return apiFilter;
     }
 
-    return toKqlExpression(rewriteNode(fromKueryExpression(apiFilter)));
+    return toKqlExpression(rewriteNode(parseFilter(apiFilter)));
   };
 };

@@ -36,6 +36,19 @@ describe('buildActionPolicySoFilter', () => {
     );
   });
 
+  it.each(['enabled:', 'name: "unterminated', '(enabled: true'])(
+    'rejects the malformed KQL %s with INVALID_FILTER_SYNTAX',
+    (apiFilter) => {
+      expect(() => buildActionPolicySoFilter(apiFilter)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: { code: 'INVALID_FILTER_SYNTAX' },
+        })
+      );
+    }
+  );
+
   it.each([
     'tags: "prod"',
     'destinations: "wf-1"',

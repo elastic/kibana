@@ -45,6 +45,9 @@ const createActionPolicies = async (apiServices: AlertingApiServicesFixture) => 
   return { alpha, beta, gamma };
 };
 
+const scopeFilterToPolicies = (policies: Array<{ id: string }>, filter: string): string =>
+  `(${policies.map(({ id }) => `id: "${id}"`).join(' OR ')}) AND (${filter})`;
+
 apiTest.describe('List action policies API', { tag: '@local-stateful-classic' }, () => {
   let readerHeaders: Record<string, string>;
 
@@ -201,11 +204,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   );
 
   apiTest('filter: by enabled: true and enabled: false', async ({ apiClient, apiServices }) => {
-    const { alpha } = await createActionPolicies(apiServices);
+    const { alpha, beta, gamma } = await createActionPolicies(apiServices);
     await apiServices.alertingV2.actionPolicies.disable(alpha.id);
+    const policies = [alpha, beta, gamma];
 
     const enabledResponse = await apiClient.get(
-      getListActionPoliciesUrl({ filter: 'enabled: true' }),
+      getListActionPoliciesUrl({ filter: scopeFilterToPolicies(policies, 'enabled: true') }),
       { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
     );
     expect(enabledResponse).toHaveStatusCode(200);
@@ -214,7 +218,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(enabledNames).not.toContain('Alpha Policy');
 
     const disabledResponse = await apiClient.get(
-      getListActionPoliciesUrl({ filter: 'enabled: false' }),
+      getListActionPoliciesUrl({ filter: scopeFilterToPolicies(policies, 'enabled: false') }),
       { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
     );
     expect(disabledResponse).toHaveStatusCode(200);
@@ -236,11 +240,14 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'filter: supports compound expressions with AND/NOT',
     async ({ apiClient, apiServices }) => {
-      await createActionPolicies(apiServices);
+      const { alpha, beta, gamma } = await createActionPolicies(apiServices);
 
       const response = await apiClient.get(
         getListActionPoliciesUrl({
-          filter: 'description: "monitors" AND NOT name: "Alpha Policy"',
+          filter: scopeFilterToPolicies(
+            [alpha, beta, gamma],
+            'description: "monitors" AND NOT name: "Alpha Policy"'
+          ),
         }),
         { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
       );
@@ -251,11 +258,14 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   );
 
   apiTest('combined: filter + search', async ({ apiClient, apiServices }) => {
-    const { alpha } = await createActionPolicies(apiServices);
+    const { alpha, beta, gamma } = await createActionPolicies(apiServices);
     await apiServices.alertingV2.actionPolicies.disable(alpha.id);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ filter: 'enabled: true', search: 'Monitors' }),
+      getListActionPoliciesUrl({
+        filter: scopeFilterToPolicies([alpha, beta, gamma], 'enabled: true'),
+        search: 'Monitors',
+      }),
       { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
     );
     expect(response).toHaveStatusCode(200);
@@ -275,6 +285,14 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       expect(response.body.code).toBe('INVALID_FILTER_FIELD');
     }
   );
+
+  apiTest('filter: rejects malformed KQL with a 400', async ({ apiClient }) => {
+    const response = await apiClient.get(getListActionPoliciesUrl({ filter: 'enabled:' }), {
+      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('INVALID_FILTER_SYNTAX');
+  });
 
   apiTest('sort: by name ascending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
