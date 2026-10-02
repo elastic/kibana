@@ -59,6 +59,7 @@ const createActionsConfigMock = () => {
     getInboundEventsMaxBodyBytes: jest.fn().mockReturnValue(1024 * 1024),
     getInboundEventsMaxEmitted: jest.fn().mockReturnValue(25),
     isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
+    getServerMaxPayloadBytes: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

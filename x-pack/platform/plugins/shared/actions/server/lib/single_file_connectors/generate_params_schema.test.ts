@@ -8,6 +8,7 @@
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { generateParamsSchema } from './generate_params_schema';
 import { z } from '@kbn/zod/v4';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 describe('generateParamsSchema', () => {
   const mockActions: ConnectorSpec['actions'] = {
@@ -183,6 +184,45 @@ describe('generateParamsSchema', () => {
           fetchOptions: { unknown: true },
         })
       ).toThrow(/unknown|Unrecognized/);
+    });
+  });
+
+  describe('server.maxPayload check', () => {
+    const params = { subAction: 'action1', subActionParams: { message: 'hello', foobar: 42 } };
+    const paramsBytes = Buffer.byteLength(JSON.stringify(params.subActionParams), 'utf8');
+
+    const validate = (maxPayloadBytes: number | undefined) => {
+      const configurationUtilities = actionsConfigMock.create();
+      configurationUtilities.getServerMaxPayloadBytes.mockReturnValue(maxPayloadBytes);
+      const { customValidator } = generateParamsSchema(mockActions);
+      return () => customValidator?.(params, { configurationUtilities });
+    };
+
+    it('skips the check when server.maxPayload is not provided', () => {
+      expect(validate(undefined)).not.toThrow();
+    });
+
+    it('accepts subActionParams at exactly server.maxPayload bytes', () => {
+      expect(validate(paramsBytes)).not.toThrow();
+    });
+
+    it('rejects subActionParams larger than server.maxPayload', () => {
+      expect(validate(paramsBytes - 1)).toThrow(
+        `subActionParams is ${paramsBytes} bytes, which exceeds server.maxPayload (${
+          paramsBytes - 1
+        } bytes)`
+      );
+    });
+
+    it('measures multi-byte characters in bytes', () => {
+      const subActionParams = { message: 'ééé', foobar: 1 };
+      const json = JSON.stringify(subActionParams);
+      const configurationUtilities = actionsConfigMock.create();
+      configurationUtilities.getServerMaxPayloadBytes.mockReturnValue(json.length);
+      const { customValidator } = generateParamsSchema(mockActions);
+      expect(() =>
+        customValidator?.({ subAction: 'action1', subActionParams }, { configurationUtilities })
+      ).toThrow(`subActionParams is ${json.length + 3} bytes`);
     });
   });
 });

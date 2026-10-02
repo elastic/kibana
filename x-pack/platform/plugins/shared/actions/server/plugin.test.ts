@@ -635,6 +635,21 @@ describe('Actions Plugin', () => {
       );
     });
 
+    it('exposes the configured server.maxPayload through the configuration utilities', async () => {
+      coreSetup.http.getServerInfo.mockReturnValue({
+        name: 'kibana',
+        hostname: 'localhost',
+        port: 5601,
+        protocol: 'http',
+        maxPayload: 5 * 1024 * 1024,
+      });
+      const pluginSetup = await plugin.setup(coreSetup, pluginsSetup);
+
+      expect(pluginSetup.getActionsConfigurationUtilities().getServerMaxPayloadBytes()).toBe(
+        5 * 1024 * 1024
+      );
+    });
+
     describe('getActionsClientWithRequest()', () => {
       it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {

@@ -40,5 +40,17 @@ export const generateParamsSchema = (
       actionParamSchemas[0],
       ...actionParamSchemas.slice(1),
     ]),
+    // In-process callers (Agent Builder, Workflows, alerting) never pass through the HTTP body limit.
+    customValidator: ({ subActionParams }, { configurationUtilities }) => {
+      const maxBytes = configurationUtilities.getServerMaxPayloadBytes();
+      if (maxBytes === undefined) return;
+
+      const size = Buffer.byteLength(JSON.stringify(subActionParams ?? null), 'utf8');
+      if (size > maxBytes) {
+        throw new Error(
+          `subActionParams is ${size} bytes, which exceeds server.maxPayload (${maxBytes} bytes)`
+        );
+      }
+    },
   };
 };

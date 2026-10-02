@@ -296,6 +296,7 @@ export class ActionsPlugin
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
   private securityStart?: SecurityPluginStart;
+  private serverMaxPayloadBytes?: number;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
@@ -353,7 +354,10 @@ export class ActionsPlugin
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
-    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
+    this.serverMaxPayloadBytes = core.http.getServerInfo().maxPayload;
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig, {
+      serverMaxPayloadBytes: this.serverMaxPayloadBytes,
+    });
     this.relayClient = this.actionsConfig.relay
       ? new RelayClient({
           baseUrl: this.actionsConfig.relay.url,
@@ -624,7 +628,9 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
 
-    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig, {
+      serverMaxPayloadBytes: this.serverMaxPayloadBytes,
+    });
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
