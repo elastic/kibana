@@ -29,15 +29,6 @@ const {
 
 const isTruthy = (value) => /^(1|true)$/i.test(String(value || '').trim());
 
-const hasSpecModelOverrides = (specModelGroups) =>
-  specModelGroups.some(
-    (spec) =>
-      Array.isArray(spec?.files) &&
-      spec.files.length > 0 &&
-      Array.isArray(spec?.models) &&
-      spec.models.length > 0
-  );
-
 const noConnectorMatchError = (groups, connectors) =>
   new Error(
     `No connectors matched EVAL_MODEL_GROUPS="${groups.join(',')}". ` +
@@ -56,6 +47,7 @@ const assertRequestedConnectors = (connectors, requestedModelGroups) => {
   return connectorIds;
 };
 
+// `specModelGroups[].files` -> `models`, for entries that set a non-empty model list.
 const modelsByFileFromSpecs = (specModelGroups) => {
   const modelsByFile = new Map();
   for (const spec of specModelGroups) {
@@ -137,7 +129,8 @@ function buildFanoutMatrix({
     : [];
   const configuredShards = Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [];
 
-  const perSpec = perSpecFlag && !grepOverride && hasSpecModelOverrides(specModelGroups);
+  const overrides = modelsByFileFromSpecs(specModelGroups);
+  const perSpec = perSpecFlag && !grepOverride && overrides.size > 0;
 
   if (!perSpec) {
     const shards = grepOverride ? [] : configuredShards;
@@ -159,7 +152,7 @@ function buildFanoutMatrix({
 
   const modelsByFile = resolveBatchModels(
     batches,
-    modelsByFileFromSpecs(specModelGroups),
+    overrides,
     suiteWeeklyModelGroups.length > 0 ? suiteWeeklyModelGroups : requestedModelGroups
   );
   assertListedModelsHaveConnectors(connectors, [...new Set([...modelsByFile.values()].flat())]);
