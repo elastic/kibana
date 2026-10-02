@@ -46,11 +46,12 @@ const STATUS_PRIORITY: Record<string, number> = Object.fromEntries(
   STATUS_ORDER.map((s, i) => [s, i])
 );
 
-const RECT_Y0 = 0.4;
-const RECT_Y1 = 0.6;
-const TRANSITION_POINT_RADIUS_PX = 3;
+const RECT_Y0 = 0.375;
+const RECT_Y1 = 0.625;
+const TRANSITION_POINT_RADIUS_PX = 4.5;
 const TRANSITION_POINT_STROKE_WIDTH_PX = 2;
-const CHART_LEFT_PADDING_PX = TRANSITION_POINT_RADIUS_PX + TRANSITION_POINT_STROKE_WIDTH_PX / 2;
+const CHART_HORIZONTAL_PADDING_PX =
+  TRANSITION_POINT_RADIUS_PX + TRANSITION_POINT_STROKE_WIDTH_PX / 2;
 
 interface SegmentDetails {
   kind: 'segment';
@@ -82,21 +83,22 @@ interface TooltipPanelProps {
   euiTheme: EuiThemeComputed;
   status: AlertEpisodeStatus;
   episodeId: string;
+  showEpisodeId: boolean;
   listItems: Array<{
     title: NonNullable<React.ReactNode>;
     description: NonNullable<React.ReactNode>;
   }>;
 }
 
-const TooltipPanel: React.FC<TooltipPanelProps> = ({ euiTheme, status, episodeId, listItems }) => {
+const TooltipPanel: React.FC<TooltipPanelProps> = ({
+  euiTheme,
+  status,
+  episodeId,
+  showEpisodeId,
+  listItems,
+}) => {
   return (
-    <EuiPanel
-      paddingSize="none"
-      hasBorder
-      hasShadow={false}
-      color="plain"
-      style={{ maxWidth: 280 }}
-    >
+    <EuiPanel paddingSize="none" hasShadow={false} color="plain" style={{ maxWidth: 280 }}>
       <EuiText size="xs">
         <div
           css={css`
@@ -119,15 +121,20 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({ euiTheme, status, episodeId
             type="column"
             compressed
             rowGutterSize="s"
-            listItems={[
-              ...listItems,
-              {
-                title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.episodeIdLabel', {
-                  defaultMessage: 'Episode ID',
-                }),
-                description: episodeId,
-              },
-            ]}
+            listItems={
+              showEpisodeId
+                ? [
+                    ...listItems,
+                    {
+                      title: i18n.translate(
+                        'xpack.alertingV2.alertTimeline.tooltip.episodeIdLabel',
+                        { defaultMessage: 'Episode ID' }
+                      ),
+                      description: episodeId,
+                    },
+                  ]
+                : listItems
+            }
           />
         </div>
       </EuiText>
@@ -144,6 +151,7 @@ export interface AlertTimelineRowProps {
   timeZone?: string;
   onEpisodeClick?: (episodeId: string) => void;
   getEpisodeHref?: (episodeId: string) => string;
+  showEpisodeId?: boolean;
 }
 
 export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
@@ -155,6 +163,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
   timeZone,
   onEpisodeClick,
   getEpisodeHref,
+  showEpisodeId = true,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -225,7 +234,12 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
           onElementClick={onEpisodeClick ? handleElementClick : undefined}
           theme={{
             chartMargins: { top: 0, right: 0, bottom: 0, left: 0 },
-            chartPaddings: { top: 0, right: 0, bottom: 0, left: CHART_LEFT_PADDING_PX },
+            chartPaddings: {
+              top: 0,
+              right: CHART_HORIZONTAL_PADDING_PX,
+              bottom: 0,
+              left: CHART_HORIZONTAL_PADDING_PX,
+            },
           }}
         />
         <Tooltip
@@ -238,6 +252,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                 euiTheme={euiTheme}
                 status={datum.status}
                 episodeId={datum.episodeId}
+                showEpisodeId={showEpisodeId}
                 listItems={[
                   {
                     title: i18n.translate(
@@ -314,6 +329,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                     euiTheme={euiTheme}
                     status={d.status}
                     episodeId={d.episodeId}
+                    showEpisodeId={showEpisodeId}
                     listItems={listItems}
                   />
                 );
