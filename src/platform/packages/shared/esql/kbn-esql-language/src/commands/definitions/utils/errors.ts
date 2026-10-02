@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   ESQLAstAllCommands,
   ESQLColumn,
+  ESQLCommand,
   ESQLFunction,
   ESQLIdentifier,
   ESQLLocation,
@@ -732,7 +733,7 @@ export const errors = {
   invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation): ESQLMessage =>
     errors.byId('invalidInlineCast', location, { castType, valueType }),
 
-  tooManyForks: (command: ESQLAstAllCommands): ESQLMessage =>
+  tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
 
   nestedAggFunction: (fn: ESQLFunction, parentName: string): ESQLMessage =>

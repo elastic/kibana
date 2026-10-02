@@ -66,26 +66,6 @@ describe('FORK Validation', () => {
     );
   });
 
-  test('allows FORK when the query contains subqueries', () => {
-    forkExpectErrors(
-      `FROM index, (FROM index | WHERE keywordField != "")
-| FORK
-    (WHERE keywordField != "" | LIMIT 100)
-    (SORT doubleField ASC NULLS LAST)`,
-      []
-    );
-  });
-
-  test('allows a FORK inside a subquery beside a FORK in the main query', () => {
-    forkExpectErrors(
-      `FROM index, (FROM index | FORK (WHERE keywordField != "") (LIMIT 10))
-| FORK
-    (WHERE keywordField != "")
-    (LIMIT 1)`,
-      []
-    );
-  });
-
   describe('_fork field', () => {
     test('DOES recognize _fork field AFTER FORK', () => {
       forkExpectErrors(
@@ -110,14 +90,13 @@ describe('FORK Validation', () => {
       );
     });
 
-    // A FORK nested in a branch is rejected by Elasticsearch, not here.
-    test('does not flag a FORK inside a branch', () => {
+    test('forwards syntax errors', () => {
       forkExpectErrors(
         `FROM index
 | FORK
     (EVAL TO_UPPER(keywordField) | LIMIT 100)
     (FORK (WHERE 1) (WHERE 2))`,
-        []
+        ['[FORK] a query cannot have more than one FORK command.']
       );
     });
 

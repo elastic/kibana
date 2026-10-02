@@ -11,6 +11,15 @@ import type { Setup } from './helpers';
 
 export const runSubqueriesValidationSuite = (setup: Setup) => {
   describe('Subqueries Validation', () => {
+    it.each([
+      'FROM (FROM index | FORK (LIMIT 1) (LIMIT 2) | FORK (LIMIT 3) (LIMIT 4))',
+      'FROM index | WHERE keywordField IN (FROM other_index | FORK (LIMIT 1) (LIMIT 2) | FORK (LIMIT 3) (LIMIT 4) | KEEP keywordField)',
+    ])('rejects multiple FORKs in the same pipeline: %s', async (query) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(query, ['[FORK] a query cannot have more than one FORK command.']);
+    });
+
     describe('FROM subqueries', () => {
       it('should validate commands inside subqueries', async () => {
         const { expectErrors } = await setup();
@@ -71,25 +80,33 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         await expectErrors('FROM (TS a_index | STATS col0 = AVG(AVG_OVER_TIME(doubleField)))', []);
       });
 
-      it('should validate commands inside the branches of a FORK in a subquery', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors('FROM index, (FROM other_index | FORK (KEEP missingField) (LIMIT 10))', [
-          'Unknown column "missingField"',
-        ]);
-      });
-
       it('accepts a FORK inside a subquery and another FORK after it', async () => {
         const { expectErrors } = await setup();
 
         await expectErrors(
-          'FROM index, (FROM other_index | FORK (WHERE integerField > 1) (LIMIT 10)) | FORK (WHERE integerField > 2) (LIMIT 5)',
+          'FROM index, (FROM other_index | FORK (LIMIT 1) (LIMIT 2)) | FORK (LIMIT 3) (LIMIT 4)',
           []
         );
       });
     });
 
     describe('WHERE IN subqueries', () => {
+      it('accepts a FORK in an IN subquery inside a FORK branch', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          `FROM index
+          | FORK
+              (WHERE keywordField IN (
+                FROM other_index
+                | FORK (LIMIT 1) (LIMIT 2)
+                | KEEP keywordField
+              ))
+              (LIMIT 3)`,
+          []
+        );
+      });
+
       it('accepts a valid IN subquery with no errors', async () => {
         const { expectErrors } = await setup();
 

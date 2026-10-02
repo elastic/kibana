@@ -100,23 +100,13 @@ function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
  * WHERE / EVAL / STATS / INLINE STATS IN subqueries use the same expansion.
  */
 function getCommandPrefixesForQuery(subquery: ESQLAstQueryExpression): ESQLCommand[][] {
-  const { commands } = subquery;
-
-  return commands.flatMap((currentCommand, k) => {
+  return subquery.commands.flatMap((currentCommand, k) => {
     const results: ESQLCommand[][] = [];
     const nestedSubqueries = getSubqueries(currentCommand).flatMap(getCommandPrefixesForQuery);
     results.push(...nestedSubqueries);
 
-    // A FORK inside a subquery owns its branches, same as a FORK in the main query
-    if (currentCommand.name.toLowerCase() === 'fork') {
-      const branchSubqueries = getForkBranchSubqueries(currentCommand as ESQLAstForkCommand);
-      for (const branch of branchSubqueries) {
-        results.push([...commands.slice(0, k), ...branch]);
-      }
-    }
-
     // Always add the partial query (includes current command and all previous ones)
-    results.push(commands.slice(0, k + 1));
+    results.push(subquery.commands.slice(0, k + 1));
 
     return results;
   });
