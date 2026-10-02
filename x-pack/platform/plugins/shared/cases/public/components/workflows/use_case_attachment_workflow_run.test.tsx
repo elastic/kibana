@@ -131,6 +131,56 @@ describe('useCaseAttachmentWorkflowRun', () => {
     });
   });
 
+  describe('fallback telemetry', () => {
+    const fallbackTelemetry = { origin: 'alert', itemCount: 1, owner: 'securitySolution' };
+
+    it('reports the fallback telemetry outside the attachment provider', () => {
+      const { result } = renderHook(() =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.alert',
+          target: { attachmentId: 'alert-1' },
+          fallbackTelemetry,
+        })
+      );
+
+      expect(result.current.telemetry).toBe(fallbackTelemetry);
+    });
+
+    it('reports the fallback telemetry when the user cannot run workflows through Cases', () => {
+      mockUseCanRunCaseWorkflow.mockReturnValue(false);
+      const { result } = renderHook(
+        () =>
+          useCaseAttachmentWorkflowRun({
+            attachmentType: 'security.alert',
+            target: { attachmentId: 'alert-1' },
+            fallbackTelemetry,
+          }),
+        { wrapper }
+      );
+
+      expect(result.current.telemetry).toBe(fallbackTelemetry);
+    });
+
+    it('reports the case attachment origin instead of the fallback telemetry inside a case', () => {
+      const { result } = renderHook(
+        () =>
+          useCaseAttachmentWorkflowRun({
+            attachmentType: 'security.alert',
+            target: { attachmentId: 'alert-1' },
+            fallbackTelemetry,
+          }),
+        { wrapper }
+      );
+
+      expect(result.current.telemetry).toEqual({
+        origin: 'cases.attachment',
+        attachmentType: 'security.alert',
+        itemCount: 1,
+        owner: 'securitySolution',
+      });
+    });
+  });
+
   it('posts a singular attachment origin', async () => {
     const { result } = renderHook(
       () =>

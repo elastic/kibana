@@ -189,10 +189,12 @@ describe('useRunDocumentWorkflowPanel', () => {
         result.current.runDocumentWorkflowPanel
       );
       await waitFor(() => {
-        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
-          attachmentType: 'security.event',
-          target: { attachmentId: 'event-123' },
-        });
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.event',
+            target: { attachmentId: 'event-123' },
+          })
+        );
       });
     });
 
@@ -213,10 +215,12 @@ describe('useRunDocumentWorkflowPanel', () => {
         result.current.runDocumentWorkflowPanel
       );
       await waitFor(() => {
-        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
-          attachmentType: 'security.event',
-          target: { attachmentIds: ['doc-1', 'doc-2'] },
-        });
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.event',
+            target: { attachmentIds: ['doc-1', 'doc-2'] },
+          })
+        );
       });
     });
 
@@ -258,6 +262,14 @@ describe('useRunDocumentWorkflowPanel', () => {
   });
 
   describe('run telemetry', () => {
+    beforeEach(() => {
+      // Outside a case the hook reports the fallback telemetry.
+      mockUseCaseAttachmentWorkflowRun.mockImplementation(({ fallbackTelemetry }) => ({
+        ...OUTSIDE_CASE_RUN_PROPS,
+        telemetry: fallbackTelemetry,
+      }));
+    });
+
     const renderPanel = (props: Partial<UseRunDocumentWorkflowPanelProps> = {}) => {
       const { result } = renderHook(
         () => useRunDocumentWorkflowPanel({ ...defaultProps, ...props }),
@@ -286,8 +298,8 @@ describe('useRunDocumentWorkflowPanel', () => {
       );
     });
 
-    it('reports the origin supplied by a bulk action over the selected documents', async () => {
-      renderPanel({ documents: twoDocuments, telemetryOrigin: 'document_bulk' });
+    it('reports a bulk action as a bulk document run over the selected documents', async () => {
+      renderPanel({ documents: twoDocuments, isBulk: true });
 
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
@@ -298,7 +310,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       );
     });
 
-    it('reports the case attachment context when the run is routed through Cases', async () => {
+    it('reports the telemetry returned by Cases when the run is routed through Cases', async () => {
       const caseTelemetry = {
         origin: 'cases.attachments',
         attachmentType: 'security.event',
@@ -311,7 +323,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         telemetry: caseTelemetry,
       });
 
-      renderPanel({ documents: twoDocuments, telemetryOrigin: 'document_bulk' });
+      renderPanel({ documents: twoDocuments, isBulk: true });
 
       await waitFor(() => expect(lastPanelProps()?.telemetry).toEqual(caseTelemetry));
     });
