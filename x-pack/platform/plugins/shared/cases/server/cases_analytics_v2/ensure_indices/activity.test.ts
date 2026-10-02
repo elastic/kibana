@@ -8,6 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ACTIVITY_INDEX_NAME } from '../constants';
+import { ACTIVITY_INDEX_MAPPING } from '../mappings/activity';
 import { ensureActivityIndex } from './activity';
 
 const buildDeps = () => ({
@@ -53,15 +54,20 @@ describe('ensureActivityIndex', () => {
     expect(call.settings['index.auto_expand_replicas']).toBe('0-1');
   });
 
-  it('skips creation and logs debug when the index already exists', async () => {
+  it('applies an additive mapping sync (no create) when the index already exists', async () => {
     const { esClient, logger } = buildDeps();
     (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.putMapping as unknown as jest.Mock).mockResolvedValue({});
 
     await ensureActivityIndex({ esClient, logger });
 
     expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    const call = (esClient.indices.putMapping as unknown as jest.Mock).mock.calls[0][0];
+    expect(call.index).toBe(ACTIVITY_INDEX_NAME);
+    expect(call.properties).toEqual(ACTIVITY_INDEX_MAPPING.properties);
     expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('already exists; skipping bootstrap')
+      expect.stringContaining('applied additive mapping sync')
     );
   });
 

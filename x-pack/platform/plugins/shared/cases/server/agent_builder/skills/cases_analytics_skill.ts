@@ -58,8 +58,10 @@ The indices are named \`.cases\` / \`.cases-activity\` / \`.cases-attachments\` 
 | Index | Grain | Key fields |
 |-------|-------|-----------|
 | \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.assignees.username\`, \`case.assignees.full_name\`, \`case.assignees.email\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\`, \`case.template.id\`, \`case.template.version\` |
-| \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
+| \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`source.type\`, \`source.id\`, \`source.name\`, \`source.run_id\`, \`@timestamp\` |
 | \`.cases-attachments\` | one doc per comment/attachment | \`case.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
+
+On \`.cases-activity\`, \`source.*\` is where the action came from (\`source.type\`: \`agent\`, \`workflow\`, \`rule\`, \`attack\`, \`api\`, \`user\`), not ECS network source. It is \`null\` for actions recorded before source tracking.
 
 All three carry \`case.id\`, \`owner\`, and \`space_id\`. \`.cases\` is lookup-mode, so the fact indices enrich with current case fields via:
 

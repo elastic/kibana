@@ -10,10 +10,12 @@ import { ACTIVITY_INDEX_NAME } from '../constants';
 import { ACTIVITY_INDEX_MAPPING } from '../mappings/activity';
 
 /**
- * Idempotently creates `.cases-activity` if it doesn't already exist.
- * Safe to call from multiple Kibana nodes concurrently — the second
- * caller hits an `already_exists` exception and short-circuits. Mirrors
- * `ensureCaseIndex` for the `.cases` surface.
+ * Idempotently creates `.cases-activity` if it doesn't already exist, or
+ * applies an additive mapping sync when it does. Safe to call from
+ * multiple Kibana nodes concurrently — the second caller hits an
+ * `already_exists` exception and short-circuits; the putMapping is
+ * idempotent for already-present fields. Mirrors `ensureCaseIndex` for
+ * the `.cases` surface.
  *
  * Settings:
  *   - `index.hidden: true` — not surfaced by default in `_cat/indices`
@@ -43,7 +45,14 @@ export async function ensureActivityIndex({
   try {
     const exists = await esClient.indices.exists({ index: ACTIVITY_INDEX_NAME });
     if (exists) {
-      logger.debug(`${ACTIVITY_INDEX_NAME} already exists; skipping bootstrap`);
+      // `indices.create` only runs on first bootstrap, and the index is
+      // `dynamic: 'strict'`, so fields later added to ACTIVITY_INDEX_MAPPING
+      // must be synced before any writer emits them.
+      await esClient.indices.putMapping({
+        index: ACTIVITY_INDEX_NAME,
+        properties: ACTIVITY_INDEX_MAPPING.properties,
+      });
+      logger.debug(`${ACTIVITY_INDEX_NAME} already exists; applied additive mapping sync`);
       return;
     }
 
