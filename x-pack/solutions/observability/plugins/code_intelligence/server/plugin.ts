@@ -14,6 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -40,6 +41,7 @@ import {
   sandboxGitSourceSessionFactory,
 } from './adapters/sandbox_git/sandbox_git';
 import { SkippedQueryValidator } from './adapters/workflows/skipped_query_validator';
+import { registerAgentBuilder } from './agent_builder/register_agent_builder';
 import type { CodeIntelligenceConfig } from './config';
 import { ExtractionService } from './extraction_service';
 import { registerRoutes, type RouteServices } from './routes';
@@ -51,6 +53,7 @@ const SANDBOX_UNAVAILABLE_MESSAGE =
   'Code Intelligence extraction uses the sandbox source, but the sandbox is not available in this deployment. Set `xpack.sandbox.enabled: true`, `xpack.sandbox.api_key`, and `xpack.sandbox.host`/`xpack.sandbox.port`, or set `xpack.code_intelligence.source: local_git`.';
 
 interface SetupDependencies {
+  agentBuilder?: AgentBuilderPluginSetup;
   sandbox?: SandboxPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
@@ -97,16 +100,23 @@ export class CodeIntelligencePlugin
     plugins.workflowsExtensions.registerManagedWorkflowOwner(managedWorkflowOwner);
     this.workflowsManagement = plugins.workflowsManagement.management;
     this.lockManager = new LockManagerService(core, this.logger);
+    const getServices = (): RouteServices => {
+      if (this.services === undefined) {
+        throw new Error('Code Intelligence server has not started.');
+      }
+      return this.services;
+    };
     registerRoutes({
       catalogIndex: this.config.catalogIndex,
       settingsIndex: this.config.settingsIndex,
-      getServices: () => {
-        if (this.services === undefined) {
-          throw new Error('Code Intelligence server has not started.');
-        }
-        return this.services;
-      },
+      getServices,
       router: core.http.createRouter(),
+    });
+    registerAgentBuilder({
+      agentBuilder: plugins.agentBuilder,
+      catalogIndex: this.config.catalogIndex,
+      settingsIndex: this.config.settingsIndex,
+      getServices,
     });
   }
 

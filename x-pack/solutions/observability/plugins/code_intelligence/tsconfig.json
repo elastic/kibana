@@ -6,6 +6,8 @@
   "include": ["common/**/*", "server/**/*", "public/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-plugins-server",
@@ -16,6 +18,7 @@
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
-    "@kbn/workflows-management-plugin"
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod"
   ]
 }
