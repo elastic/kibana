@@ -11,7 +11,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { AsyncLocalStorage } from 'async_hooks';
 import type { TrackUserActionParams, UserActivityEventType } from '@kbn/core-user-activity-server';
 import {
@@ -70,9 +70,12 @@ export class UserActivityService
     const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
 
     // presence of `xpack.cloud.id` marks Elastic Cloud
-    const isElasticCloud$ = this.coreContext.configService
-      .getConfig$()
-      .pipe(map((rawConfig) => Boolean(rawConfig.get(['xpack', 'cloud', 'id']))));
+    const isElasticCloud$ = this.coreContext.configService.getConfig$().pipe(
+      map((rawConfig) => Boolean(rawConfig.get(['xpack', 'cloud', 'id']))),
+      // dedupe: raw config re-emits on every dynamic config override, and re-emitting here
+      // would needlessly reconfigure the user_activity logging context on unrelated changes
+      distinctUntilChanged()
+    );
 
     logging.configure(
       ['user_activity'],
