@@ -6,6 +6,9 @@
  */
 
 export { createThreatReport } from './create_threat_report';
+export { writeAttributionEvidence } from './write_attribution_evidence';
+export { persistReportFields } from './persist_report_fields';
+export { ingestThreatReport } from './ingest_threat_report';
 export { extractIocs } from './extract_iocs';
 export { enrichReportCore } from './enrich_report_core';
 export { extractDiamond } from './extract_diamond';

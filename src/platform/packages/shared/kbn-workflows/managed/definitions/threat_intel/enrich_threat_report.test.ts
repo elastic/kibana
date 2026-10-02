@@ -106,24 +106,31 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     const step = findStepByName(workflow.steps, 'persist_extractions') as {
       if?: string;
       with?: {
-        doc?: {
-          extracted?: {
-            iocs?: string;
-            ioc_set_hash?: string;
-            core?: { adjudication?: { deferred_unreviewed?: string } };
+        path?: string;
+        body?: {
+          doc?: {
+            extracted?: {
+              iocs?: string;
+              ioc_set_hash?: string;
+              core?: { adjudication?: { deferred_unreviewed?: string } };
+            };
           };
         };
       };
     };
 
     expect(step.if).toContain('steps.enrich_report_core.error == null');
-    expect(step.with?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
-    expect(step.with?.doc?.extracted).not.toHaveProperty('anchor_iocs');
+    // Internal route, not a direct elasticsearch step: `.kibana-threat-reports` is
+    // plugin-owned and hidden, so a plain `elasticsearch.update` here would run as
+    // whichever identity enabled the workflow and 403 for every non-superuser.
+    expect(step.with?.path).toBe('/internal/threat_intel/persist_report_fields');
+    expect(step.with?.body?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    expect(step.with?.body?.doc?.extracted).not.toHaveProperty('anchor_iocs');
     // Correlation hash stays on extract_iocs so boost:5 matches pre-adjudication docs.
-    expect(step.with?.doc?.extracted?.ioc_set_hash).toContain(
+    expect(step.with?.body?.doc?.extracted?.ioc_set_hash).toContain(
       'steps.extract_iocs.output.ioc_set_hash'
     );
-    expect(step.with?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
+    expect(step.with?.body?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
       'steps.enrich_report_core.output.adjudication.deferred_unreviewed'
     );
   });

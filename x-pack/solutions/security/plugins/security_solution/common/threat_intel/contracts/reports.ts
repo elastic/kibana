@@ -6,7 +6,12 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { MAX_URL_LENGTH, SEVERITY_LEVELS, THREAT_CATEGORIES } from '../constants';
+import {
+  MAX_URL_LENGTH,
+  SEVERITY_LEVELS,
+  THREAT_CATEGORIES,
+  THREAT_REPORTS_INDEX,
+} from '../constants';
 
 const stringOrStringArray = (maxLength: number, maxSize: number) =>
   schema.maybe(
@@ -55,6 +60,90 @@ export const createThreatReportResponseSchema = schema.object({
 });
 
 export type CreateThreatReportResponse = TypeOf<typeof createThreatReportResponseSchema>;
+
+// ── attribute_alerts_evidence ───────────────────────────────────────────────
+
+/**
+ * Concrete index, not the alias/pattern: the Update API rejects wildcards, and the caller
+ * (`attribute_alerts_to_reports.yaml`) already has the concrete `_index` from its own search hit.
+ */
+export const attributeAlertsEvidenceBodySchema = schema.object({
+  index: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    validate: (value) =>
+      value.startsWith(THREAT_REPORTS_INDEX) ? undefined : `must target ${THREAT_REPORTS_INDEX}`,
+  }),
+  id: schema.string({ minLength: 1, maxLength: 512 }),
+  window: schema.string({ minLength: 1, maxLength: 32 }),
+  computedAt: schema.string({ minLength: 1, maxLength: 64 }),
+  iocMatchHits: schema.number({ min: 0 }),
+  techniqueOverlapHits: schema.number({ min: 0 }),
+  alertHitsTotal: schema.number({ min: 0 }),
+});
+
+export const attributeAlertsEvidenceResponseSchema = schema.object({
+  acknowledged: schema.boolean(),
+});
+
+export type AttributeAlertsEvidenceResponse = TypeOf<typeof attributeAlertsEvidenceResponseSchema>;
+
+// Matches the other threat_intel routes' cap even though this body is small and bounded;
+// none of them size-tune this value to their own payload either.
+export const ATTRIBUTE_ALERTS_EVIDENCE_MAX_BODY_BYTES = CREATE_THREAT_REPORT_MAX_BODY_BYTES;
+
+// ── persist_report_fields ────────────────────────────────────────────────────
+
+// Matches create_threat_report's cap: LLM-derived `doc` payloads (iocs, behaviors, artifacts)
+// can be large, and Kibana's default body cap is 1 MiB.
+export const PERSIST_REPORT_FIELDS_MAX_BODY_BYTES = CREATE_THREAT_REPORT_MAX_BODY_BYTES;
+
+/**
+ * `doc` stays an open object rather than a per-field schema: the four call sites
+ * (`enrich_threat_report.yaml`'s `persist_gate_rejection` / `persist_diamond_fields` /
+ * `persist_extractions` / `persist_classified_severity`) write genuinely different, partly
+ * LLM-shaped payloads (arrays of IOCs, behaviors, artifacts), and the `elasticsearch.update` steps
+ * they replace had no schema validation of their own either -- Elasticsearch's own mapping was the
+ * only check. Tightening that is a separate concern from the identity fix this route exists for.
+ * Same reasoning as `getThreatReportResponseSchema`'s `unknowns: 'allow'`.
+ *
+ * The top level itself defaults to `forbid`: every field this route accepts merges into the
+ * document via `doc`, so a sibling key at this level (e.g. a misnested `rank_score`) is never
+ * ES's `dynamic: 'strict'` mapping catching a typo -- it is silently dropped here instead.
+ */
+export const persistReportFieldsBodySchema = schema.object({
+  index: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    validate: (value) =>
+      value.startsWith(THREAT_REPORTS_INDEX) ? undefined : `must target ${THREAT_REPORTS_INDEX}`,
+  }),
+  id: schema.string({ minLength: 1, maxLength: 512 }),
+  doc: schema.object({}, { unknowns: 'allow' }),
+});
+
+// ── ingest_threat_report ─────────────────────────────────────────────────────
+
+/**
+ * `document` stays an open object, same reasoning as `persistReportFieldsBodySchema`'s `doc`:
+ * the shape comes from whichever adapter (RSS, text indicator list, ...) fetched it, and the
+ * `elasticsearch.index` step this replaces had no schema validation of its own either.
+ */
+export const ingestThreatReportBodySchema = schema.object({
+  document: schema.object({}, { unknowns: 'allow' }),
+});
+
+export const ingestThreatReportResponseSchema = schema.object({
+  reportId: schema.string(),
+});
+
+export type IngestThreatReportResponse = TypeOf<typeof ingestThreatReportResponseSchema>;
+
+export const persistReportFieldsResponseSchema = schema.object({
+  acknowledged: schema.boolean(),
+});
+
+export type PersistReportFieldsResponse = TypeOf<typeof persistReportFieldsResponseSchema>;
 
 // ── get_threat_report ───────────────────────────────────────────────────────
 
