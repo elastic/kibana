@@ -26,6 +26,13 @@ const isBoundedString = (value: unknown, maxBytes: number): value is string =>
   typeof value === 'string' && value.length > 0 && Buffer.byteLength(value, 'utf8') <= maxBytes;
 
 /**
+ * An `_index` must name one target: an index, alias, or data stream. Wildcards, lists, `_all`, and
+ * exclusions would let a single pair reach documents in targets the caller never named.
+ */
+const isMultiTargetExpression = (index: string): boolean =>
+  index === '_all' || index.startsWith('-') || index.includes('*') || index.includes(',');
+
+/**
  * Validates `event.documentIds` before anything reaches Elasticsearch. The run routes accept
  * `inputs` as an open record, so this is the only place the selection's shape is checked.
  */
@@ -46,6 +53,11 @@ const parseDocumentSelections = (documentIds: unknown): DocumentSelection[] => {
     ) {
       throw new WorkflowTriggerInputError(
         'Every inputs.event.documentIds entry must be an object with non-empty string "_id" and "_index" properties.'
+      );
+    }
+    if (isMultiTargetExpression(_index)) {
+      throw new WorkflowTriggerInputError(
+        `inputs.event.documentIds "_index" must name a single index, alias, or data stream (received "${_index}").`
       );
     }
     return { _id, _index };
