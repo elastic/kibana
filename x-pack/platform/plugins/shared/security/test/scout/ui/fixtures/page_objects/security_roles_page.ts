@@ -70,15 +70,14 @@ export class SecurityRolesPage {
   }
 
   async clickCloneRole(roleName: string) {
-    await this.page.testSubj.locator(`clone-role-action-${roleName}`).click();
+    const row = await this.findRoleRow(roleName);
+    await row.locator(`[data-test-subj="clone-role-action-${roleName}"]`).click();
     await this.roleFormNameInput.waitFor({ state: 'visible' });
   }
 
   async clickEditRole(roleName: string) {
-    await this.searchRolesInput.fill(roleName);
-    await this.searchRolesInput.press('Enter');
-    await this.page.testSubj.locator('rolesTableLoading').waitFor({ state: 'hidden' });
-    await this.page.getByRole('link', { name: roleName, exact: true }).click();
+    const row = await this.findRoleRow(roleName);
+    await row.getByRole('link', { name: roleName, exact: true }).click();
     await this.roleFormNameInput.waitFor({ state: 'visible' });
   }
 
@@ -199,28 +198,58 @@ export class SecurityRolesPage {
     await this.saveRole();
   }
 
-  async getAllRoles(): Promise<RoleRowData[]> {
-    const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
-    await paginationButton.click();
-    await this.page.testSubj.locator('tablePagination-100-rows').click();
-    await this.page.testSubj.locator('rolesTableLoading').waitFor({ state: 'hidden' });
-    const rows = await this.page.testSubj.locator('roleRow').all();
-    return Promise.all(
-      rows.map(async (row) => {
-        const rolename = await row.locator('[data-test-subj="roleRowName"]').innerText();
-        const reserved = (await row.locator('[data-test-subj="roleReserved"]').count()) > 0;
-        const deprecated = (await row.locator('[data-test-subj="roleDeprecated"]').count()) > 0;
-        return { rolename, reserved, deprecated };
-      })
+  private async updateResults(action: () => Promise<void>) {
+    const responsePromise = this.page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname.endsWith('/api/security/role/_query') &&
+        response.request().method() === 'POST'
+    );
+    await action();
+    const response = await responsePromise;
+    expect(response.ok()).toBe(true);
+    const { roles }: { roles: Array<{ name: string }> } = await response.json();
+    await expect(this.page.testSubj.locator('rolesTable')).toBeVisible();
+    await expect(this.page.testSubj.locator('roleRowName')).toHaveText(
+      roles.map(({ name }) => name)
     );
   }
 
-  roleRow(roleName: string): Locator {
-    return this.page.testSubj.locator(`roleRow`).filter({ hasText: roleName });
+  async findRoleRow(roleName: string): Promise<Locator> {
+    await this.goto();
+    await this.searchRolesInput.fill(roleName);
+    await this.updateResults(() => this.searchRolesInput.press('Enter'));
+    const row = this.page.testSubj.locator('roleRow').filter({
+      has: this.page.getByRole('link', { name: roleName, exact: true }),
+    });
+    const nextPage = this.page.testSubj.locator('pagination-button-next');
+    while (
+      !(await row.isVisible()) &&
+      (await nextPage.isVisible()) &&
+      (await nextPage.isEnabled())
+    ) {
+      await this.updateResults(() => nextPage.click());
+    }
+    await expect(this.page.testSubj.locator('rolesTableTooManyResultsLabel')).toBeHidden();
+    return row;
+  }
+
+  async getRole(roleName: string): Promise<RoleRowData> {
+    const row = await this.findRoleRow(roleName);
+    await expect(row).toBeVisible();
+    return {
+      rolename: await row.locator('[data-test-subj="roleRowName"]').innerText(),
+      reserved: (await row.locator('[data-test-subj="roleReserved"]').count()) > 0,
+      deprecated: (await row.locator('[data-test-subj="roleDeprecated"]').count()) > 0,
+    };
+  }
+
+  async expectRoleAbsent(roleName: string) {
+    await expect(await this.findRoleRow(roleName)).toHaveCount(0);
   }
 
   async deleteRole(roleName: string) {
-    await this.page.testSubj.locator(`checkboxSelectRow-${roleName}`).click();
+    const row = await this.findRoleRow(roleName);
+    await row.locator(`[data-test-subj="checkboxSelectRow-${roleName}"]`).click();
     await this.deleteRoleButton.click();
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
     await this.page.testSubj.locator('confirmModalConfirmButton').waitFor({ state: 'hidden' });

@@ -48,8 +48,7 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
 
   test('can read the role from the roles listing', async ({ pageObjects }) => {
     await pageObjects.securityRoles.goto();
-    const roles = await pageObjects.securityRoles.getAllRoles();
-    expect(roles.some((r) => r.rolename === roleName)).toBe(true);
+    expect((await pageObjects.securityRoles.getRole(roleName)).rolename).toBe(roleName);
   });
 
   test('can update a role and preserves its data source privileges', async ({
@@ -64,21 +63,16 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
     await page.testSubj.locator('roleFormDescriptionInput').fill(updatedRoleDescription);
     await pageObjects.securityRoles.saveRole();
 
-    const columnDescription = page.testSubj.locator(`roleRowDescription-${roleName}`);
+    const row = await pageObjects.securityRoles.findRoleRow(roleName);
+    const columnDescription = row.locator(`[data-test-subj="roleRowDescription-${roleName}"]`);
     await expect(columnDescription).toHaveText(updatedRoleDescription);
 
     const updatedRole = await esClient.security.getRole({ name: roleName });
     expect(updatedRole[roleName]?.global?.data_source).toStrictEqual(expectedDataSourcePrivileges);
   });
 
-  test('can delete a role with data source privileges', async ({ pageObjects, page }) => {
-    await pageObjects.securityRoles.goto();
-    await page.testSubj.locator(`checkboxSelectRow-${roleName}`).click();
-    await pageObjects.securityRoles.deleteRoleButton.click();
-    await page.testSubj.locator('confirmModalConfirmButton').click();
-    await page.testSubj.locator('confirmModalConfirmButton').waitFor({ state: 'hidden' });
-
-    const roles = await pageObjects.securityRoles.getAllRoles();
-    expect(roles.some((r) => r.rolename === roleName)).toBe(false);
+  test('can delete a role with data source privileges', async ({ pageObjects }) => {
+    await pageObjects.securityRoles.deleteRole(roleName);
+    await pageObjects.securityRoles.expectRoleAbsent(roleName);
   });
 });

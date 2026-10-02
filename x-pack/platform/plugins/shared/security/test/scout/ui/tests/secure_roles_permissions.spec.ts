@@ -5,25 +5,39 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
-const roleName = 'logstash_reader_perm_test';
-const username = 'Rashmi';
+const roleName = `logstash_reader_perm_test-${randomUUID()}`;
+const username = `Rashmi-${randomUUID()}`;
 
 test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, () => {
   let defaultIndex: string | undefined;
+  let importedObjects: Array<{ type: string; id: string }> = [];
+  let savedSearchId: string;
 
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     const previousDefaultIndex = await kbnClient.uiSettings.getDefaultIndex();
     defaultIndex = typeof previousDefaultIndex === 'string' ? previousDefaultIndex : undefined;
     await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/logstash_functional');
-    await kbnClient.importExport.load(
-      'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
+    const response = await kbnClient.importExport.load(
+      'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover',
+      { createNewCopies: true }
     );
-    await kbnClient.uiSettings.update({ defaultIndex: 'logstash-*' });
+    importedObjects = (
+      response.successResults as Array<{ type: string; destinationId: string }>
+    ).map(({ type, destinationId }) => ({ type, id: destinationId }));
+    const dataView = importedObjects.find(({ type }) => type === 'index-pattern');
+    const savedSearch = importedObjects.find(({ type }) => type === 'search');
+    if (!dataView || !savedSearch) {
+      throw new Error('Expected the data view and saved search to be imported');
+    }
+    savedSearchId = savedSearch.id;
+    await kbnClient.uiSettings.update({ defaultIndex: dataView.id });
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {
@@ -32,11 +46,11 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
     } else {
       await kbnClient.uiSettings.update({ defaultIndex });
     }
-    await kbnClient.importExport.unload(
-      'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
-    );
-    await esClient.security.deleteUser({ username });
-    await esClient.security.deleteRole({ name: roleName });
+    if (importedObjects.length > 0) {
+      await kbnClient.savedObjects.bulkDelete({ objects: importedObjects });
+    }
+    await esClient.security.deleteUser({ username }, { ignore: [404] });
+    await esClient.security.deleteRole({ name: roleName }, { ignore: [404] });
   });
 
   test('UI-created user can export a saved search but cannot manage users', async ({
@@ -54,8 +68,7 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
         indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
       },
     });
-    const roles = await pageObjects.securityRoles.getAllRoles();
-    expect(roles.some((role) => role.rolename === roleName)).toBe(true);
+    expect((await pageObjects.securityRoles.getRole(roleName)).rolename).toBe(roleName);
 
     await pageObjects.securityUsers.createUser({
       username,
@@ -65,11 +78,10 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
       email: 'rashmi@myEmail.com',
       roles: [roleName],
     });
-    const users = await pageObjects.securityUsers.getAllUsers();
-    const user = users.find((entry) => entry.username === username);
-    expect(user?.roles).toStrictEqual([roleName]);
-    expect(user?.fullname).toBe('RashmiFirst RashmiLast');
-    expect(user?.reserved).toBe(false);
+    const user = await pageObjects.securityUsers.getUser(username);
+    expect(user.roles).toStrictEqual([roleName]);
+    expect(user.fullname).toBe('RashmiFirst RashmiLast');
+    expect(user.reserved).toBe(false);
 
     await page.context().clearCookies();
     await pageObjects.login.loginWithUsernamePassword(username, 'changeme');
@@ -82,8 +94,7 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
     ).toBeVisible();
     await expect(page.testSubj.locator('users')).toBeHidden();
 
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.loadSavedSearch('A Saved Search');
+    await pageObjects.discover.goto({ queryMode: 'classic', savedSearchId });
     await pageObjects.discover.clickAppMenuItem('exportTopNavButton');
     await expect(page.testSubj.locator('exportPopoverPanel')).toBeVisible();
   });

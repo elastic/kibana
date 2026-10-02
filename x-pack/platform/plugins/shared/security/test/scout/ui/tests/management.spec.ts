@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -48,39 +50,35 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
     page,
     esClient,
   }) => {
-    await pageObjects.securityUsers.goto();
-    await pageObjects.securityUsers.clickCreateNewUser();
-    await pageObjects.securityUsers.fillUserForm({
-      username: 'new-user-mgmt',
-      password: '123456',
-      confirm_password: '123456',
-      full_name: 'Full User Name',
-      email: 'example@example.com',
-    });
-    await pageObjects.securityUsers.submitCreateUser();
-
+    const username = `new-user-mgmt-${randomUUID()}`;
     try {
+      await pageObjects.securityUsers.goto();
+      await pageObjects.securityUsers.clickCreateNewUser();
+      await pageObjects.securityUsers.fillUserForm({
+        username,
+        password: '123456',
+        confirm_password: '123456',
+        full_name: 'Full User Name',
+        email: 'example@example.com',
+      });
+      await pageObjects.securityUsers.submitCreateUser();
       await expect(page).toHaveURL(new RegExp(USERS_PATH));
       await expect(page).not.toHaveURL(new RegExp(CREATE_USERS_PATH));
     } finally {
-      await esClient.security.deleteUser({ username: 'new-user-mgmt' }).catch(() => {});
+      await esClient.security.deleteUser({ username }, { ignore: [404] });
     }
   });
 
   test('Can navigate to edit user section', async ({ pageObjects, page, esClient }) => {
-    await esClient.security.putUser({
-      username: 'nav-test-user',
-      password: '123456',
-      roles: ['kibana_admin'],
-    });
-
+    const username = `nav-test-user-${randomUUID()}`;
     try {
+      await esClient.security.putUser({ username, password: '123456', roles: ['kibana_admin'] });
       await pageObjects.securityUsers.goto();
-      await pageObjects.securityUsers.clickUserByName('nav-test-user');
+      await pageObjects.securityUsers.clickUserByName(username);
       await expect(page).toHaveURL(new RegExp(EDIT_USERS_PATH));
-      await expect(page.testSubj.locator('userFormUserNameInput')).toHaveValue('nav-test-user');
+      await expect(page.testSubj.locator('userFormUserNameInput')).toHaveValue(username);
     } finally {
-      await esClient.security.deleteUser({ username: 'nav-test-user' }).catch(() => {});
+      await esClient.security.deleteUser({ username }, { ignore: [404] });
     }
   });
 
@@ -112,49 +110,41 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
     page,
     esClient,
   }) => {
-    await pageObjects.securityRoles.goto();
-    await pageObjects.securityRoles.clickCreateNewRole();
-    await pageObjects.securityRoles.roleFormNameInput.fill('a-my-new-role-mgmt');
-    await pageObjects.securityRoles.saveRole();
-
+    const name = `a-my-new-role-mgmt-${randomUUID()}`;
     try {
+      await pageObjects.securityRoles.goto();
+      await pageObjects.securityRoles.clickCreateNewRole();
+      await pageObjects.securityRoles.roleFormNameInput.fill(name);
+      await pageObjects.securityRoles.saveRole();
       await expect(page).toHaveURL(new RegExp(ROLES_PATH));
       await expect(page).not.toHaveURL(new RegExp(EDIT_ROLES_PATH));
     } finally {
-      await esClient.security.deleteRole({ name: 'a-my-new-role-mgmt' }).catch(() => {});
+      await esClient.security.deleteRole({ name }, { ignore: [404] });
     }
   });
 
   test('Can navigate to edit role section', async ({ pageObjects, page, esClient }) => {
-    await esClient.security.putRole({
-      name: 'nav-test-role',
-      cluster: [],
-      indices: [],
-    });
-
+    const name = `nav-test-role-${randomUUID()}`;
     try {
+      await esClient.security.putRole({ name, cluster: [], indices: [] });
       await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.clickEditRole('nav-test-role');
+      await pageObjects.securityRoles.clickEditRole(name);
       await expect(page).toHaveURL(new RegExp(EDIT_ROLES_PATH));
-      await expect(pageObjects.securityRoles.roleFormNameInput).toHaveValue('nav-test-role');
+      await expect(pageObjects.securityRoles.roleFormNameInput).toHaveValue(name);
     } finally {
-      await esClient.security.deleteRole({ name: 'nav-test-role' }).catch(() => {});
+      await esClient.security.deleteRole({ name }, { ignore: [404] });
     }
   });
 
   test('Can navigate to clone role section', async ({ pageObjects, page, esClient }) => {
-    await esClient.security.putRole({
-      name: 'clone-source-role',
-      cluster: [],
-      indices: [],
-    });
-
+    const name = `clone-source-role-${randomUUID()}`;
     try {
+      await esClient.security.putRole({ name, cluster: [], indices: [] });
       await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.clickCloneRole('clone-source-role');
+      await pageObjects.securityRoles.clickCloneRole(name);
       await expect(page).toHaveURL(new RegExp(CLONE_ROLES_PATH));
     } finally {
-      await esClient.security.deleteRole({ name: 'clone-source-role' }).catch(() => {});
+      await esClient.security.deleteRole({ name }, { ignore: [404] });
     }
   });
 
@@ -163,27 +153,18 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
     page,
     esClient,
   }) => {
-    await esClient.security.putRole({
-      name: 'link-test-role',
-      cluster: [],
-      indices: [],
-    });
-    await esClient.security.putUser({
-      username: 'link-test-dashuser',
-      password: '123456',
-      roles: ['link-test-role'],
-    });
-
+    const name = `link-test-role-${randomUUID()}`;
+    const username = `link-test-dashuser-${randomUUID()}`;
     try {
+      await esClient.security.putRole({ name, cluster: [], indices: [] });
+      await esClient.security.putUser({ username, password: '123456', roles: [name] });
       await pageObjects.securityUsers.goto();
-      const userRow = page.testSubj
-        .locator('userRow')
-        .filter({ has: page.getByRole('link', { name: 'link-test-dashuser', exact: true }) });
-      await userRow.getByRole('button', { name: 'link-test-role', exact: true }).click();
+      const userRow = await pageObjects.securityUsers.findUserRow(username);
+      await userRow.getByRole('button', { name, exact: true }).click();
       await expect(page).toHaveURL(new RegExp(EDIT_ROLES_PATH));
     } finally {
-      await esClient.security.deleteUser({ username: 'link-test-dashuser' }).catch(() => {});
-      await esClient.security.deleteRole({ name: 'link-test-role' }).catch(() => {});
+      await esClient.security.deleteUser({ username }, { ignore: [404] });
+      await esClient.security.deleteRole({ name }, { ignore: [404] });
     }
   });
 });

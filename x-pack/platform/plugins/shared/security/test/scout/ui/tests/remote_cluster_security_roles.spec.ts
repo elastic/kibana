@@ -47,9 +47,9 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
       },
     });
 
-    const roles = await pageObjects.securityRoles.getAllRoles();
-    expect(roles.some((r) => r.rolename === customRole)).toBe(true);
-    expect(roles.find((r) => r.rolename === customRole)?.reserved).toBe(false);
+    const role = await pageObjects.securityRoles.getRole(customRole);
+    expect(role.rolename).toBe(customRole);
+    expect(role.reserved).toBe(false);
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.clickEditRole(customRole);
 

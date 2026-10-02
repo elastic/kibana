@@ -30,7 +30,10 @@ test.describe('Role Description', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('roleFormDescriptionInput').fill('role description');
     await pageObjects.securityRoles.saveRole();
 
-    const columnDescription = page.testSubj.locator('roleRowDescription-a-role-with-description');
+    const row = await pageObjects.securityRoles.findRoleRow('a-role-with-description');
+    const columnDescription = row.locator(
+      '[data-test-subj="roleRowDescription-a-role-with-description"]'
+    );
     await expect(columnDescription).toHaveText('role description');
 
     await pageObjects.securityRoles.clickEditRole('a-role-with-description');
@@ -100,7 +103,8 @@ test.describe('Role Description', { tag: tags.stateful.classic }, () => {
 
     try {
       await pageObjects.securityRoles.goto();
-      await page.testSubj.locator('checkboxSelectRow-a11y-test-role').click();
+      const row = await pageObjects.securityRoles.findRoleRow('a11y-test-role');
+      await row.locator('[data-test-subj="checkboxSelectRow-a11y-test-role"]').click();
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
 

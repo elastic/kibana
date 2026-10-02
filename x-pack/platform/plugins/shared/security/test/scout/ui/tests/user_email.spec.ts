@@ -40,13 +40,11 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
       roles: testUser.roles,
     });
 
-    const users = await pageObjects.securityUsers.getAllUsers();
-    const user = users.find((u) => u.username === testUser.username);
-    expect(user).toBeDefined();
-    expect(user!.roles).toStrictEqual(testUser.roles);
-    expect(user!.fullname).toBe(testUser.full_name);
-    expect(user!.email).toBe(testUser.email);
-    expect(user!.reserved).toBe(false);
+    const user = await pageObjects.securityUsers.getUser(testUser.username);
+    expect(user.roles).toStrictEqual(testUser.roles);
+    expect(user.fullname).toBe(testUser.full_name);
+    expect(user.email).toBe(testUser.email);
+    expect(user.reserved).toBe(false);
   });
 
   test('login as new user and verify account settings', async ({ pageObjects, page, esClient }) => {

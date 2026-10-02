@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export interface UserFormValues {
   username?: string;
@@ -93,11 +94,32 @@ export class SecurityUsersPage {
     await this.submitCreateUser();
   }
 
-  async clickUserByName(username: string) {
+  async findUserRow(username: string): Promise<Locator> {
+    await this.createUserButton.waitFor({ state: 'visible' });
     await this.searchUsersInput.fill(username);
     await this.searchUsersInput.press('Enter');
-    await this.page.waitForURL((url) => url.searchParams.get('q') === username);
-    await this.page.getByRole('link', { name: username, exact: true }).click();
+    await this.page.waitForURL(
+      (url) => url.searchParams.get('q') === username && !url.searchParams.has('page')
+    );
+    const row = this.page.testSubj.locator('userRow').filter({
+      has: this.page.getByRole('link', { name: username, exact: true }),
+    });
+    const nextPage = this.page.testSubj.locator('pagination-button-next');
+    while (
+      !(await row.isVisible()) &&
+      (await nextPage.isVisible()) &&
+      (await nextPage.isEnabled())
+    ) {
+      const currentPage = new URL(this.page.url()).searchParams.get('page');
+      await nextPage.click();
+      await this.page.waitForURL((url) => url.searchParams.get('page') !== currentPage);
+    }
+    return row;
+  }
+
+  async clickUserByName(username: string) {
+    const row = await this.findUserRow(username);
+    await row.getByRole('link', { name: username, exact: true }).click();
     await this.page.testSubj.locator('userFormUserNameInput').waitFor({ state: 'visible' });
   }
 
@@ -161,14 +183,6 @@ export class SecurityUsersPage {
     await this.backToUsersList();
   }
 
-  async getUserRows(): Promise<Locator[]> {
-    const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
-    await paginationButton.waitFor({ state: 'visible' });
-    await paginationButton.click();
-    await this.page.testSubj.locator('tablePagination-100-rows').click();
-    return this.page.testSubj.locator('userRow').all();
-  }
-
   async getUserRowData(row: Locator): Promise<UserRowData> {
     const username = await row.locator('[data-test-subj="userRowUserName"]').innerText();
     const fullname = await row.locator('[data-test-subj="userRowFullName"]').innerText();
@@ -184,9 +198,15 @@ export class SecurityUsersPage {
     return { username, fullname, email, roles, reserved, deprecated, enabled };
   }
 
-  async getAllUsers(): Promise<UserRowData[]> {
+  async getUser(username: string): Promise<UserRowData> {
     await this.goto();
-    const rows = await this.getUserRows();
-    return Promise.all(rows.map((row) => this.getUserRowData(row)));
+    const row = await this.findUserRow(username);
+    await expect(row).toBeVisible();
+    return this.getUserRowData(row);
+  }
+
+  async expectUserAbsent(username: string) {
+    await this.goto();
+    await expect(await this.findUserRow(username)).toHaveCount(0);
   }
 }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -28,10 +30,10 @@ const cases = [
   },
 ];
 
-const caseSensitiveRole = 'a_casesenstive_fields_role';
-
 test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
   let defaultIndex: string | undefined;
+  let dataViewId: string | undefined;
+  const dataViewName = `flstest-${randomUUID()}`;
 
   test.beforeAll(async ({ esArchiver, kbnClient, apiServices }) => {
     const previousDefaultIndex = await kbnClient.uiSettings.getDefaultIndex();
@@ -39,10 +41,12 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     await esArchiver.loadIfNeeded(
       'x-pack/platform/test/fixtures/es_archives/security/flstest/data'
     );
-    await kbnClient.importExport.load(
-      'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
-    );
-    const dataViewId = await apiServices.dataViews.getIdByTitle('flstest');
+    const { data: dataView } = await apiServices.dataViews.create({
+      id: dataViewName,
+      name: dataViewName,
+      title: 'flstest',
+    });
+    dataViewId = dataView.id;
     await kbnClient.uiSettings.update({ defaultIndex: dataViewId });
   });
 
@@ -53,70 +57,67 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test.afterEach(async ({ esClient }) => {
-    for (const { role, username } of cases) {
-      await esClient.security.deleteUser({ username }, { ignore: [404] });
-      await esClient.security.deleteRole({ name: role }, { ignore: [404] });
-    }
-    await esClient.security.deleteRole({ name: caseSensitiveRole }, { ignore: [404] });
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
+  test.afterAll(async ({ kbnClient, apiServices }) => {
     if (defaultIndex === undefined) {
       await kbnClient.uiSettings.unset('defaultIndex');
     } else {
       await kbnClient.uiSettings.update({ defaultIndex });
     }
-    await kbnClient.importExport.unload(
-      'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
-    );
+    if (dataViewId) {
+      await apiServices.dataViews.delete(dataViewId);
+    }
   });
 
-  for (const { role, username, fullName, fields, seesSsn } of cases) {
-    test(`UI-created user ${username} ${seesSsn ? 'sees' : 'cannot see'} SSN in Discover`, async ({
-      pageObjects,
-      page,
-    }) => {
-      await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.createRole(role, {
-        elasticsearch: {
-          indices: [
-            {
-              names: ['flstest'],
-              privileges: ['read', 'view_index_metadata'],
-              field_security: { grant: fields },
-            },
-          ],
-        },
-      });
-      const roles = await pageObjects.securityRoles.getAllRoles();
-      expect(roles.find((entry) => entry.rolename === role)?.reserved).toBe(false);
+  for (const scenario of cases) {
+    test(`UI-created user ${scenario.username} ${
+      scenario.seesSsn ? 'sees' : 'cannot see'
+    } SSN in Discover`, async ({ pageObjects, page, esClient }) => {
+      const role = `${scenario.role}-${randomUUID()}`;
+      const username = `${scenario.username}-${randomUUID()}`;
+      try {
+        await pageObjects.securityRoles.goto();
+        await pageObjects.securityRoles.createRole(role, {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['flstest'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: scenario.fields },
+              },
+            ],
+          },
+        });
+        expect((await pageObjects.securityRoles.getRole(role)).reserved).toBe(false);
 
-      await pageObjects.securityUsers.createUser({
-        username,
-        password: 'changeme',
-        confirm_password: 'changeme',
-        full_name: fullName,
-        email: 'flstest@elastic.com',
-        roles: ['kibana_admin', role],
-      });
-      const users = await pageObjects.securityUsers.getAllUsers();
-      expect(users.find((user) => user.username === username)?.roles).toStrictEqual([
-        'kibana_admin',
-        role,
-      ]);
+        await pageObjects.securityUsers.createUser({
+          username,
+          password: 'changeme',
+          confirm_password: 'changeme',
+          full_name: scenario.fullName,
+          email: 'flstest@elastic.com',
+          roles: ['kibana_admin', role],
+        });
+        expect((await pageObjects.securityUsers.getUser(username)).roles).toStrictEqual([
+          'kibana_admin',
+          role,
+        ]);
 
-      await page.context().clearCookies();
-      await pageObjects.login.loginWithUsernamePassword(username, 'changeme');
-      await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.discover.selectDataView('flstest', { createAdHocIfMissing: false });
-      await expect(pageObjects.discover.getHitCountLocator()).toHaveText('2');
-      const rowData = await pageObjects.discover.getDocTableIndex(1);
-      expect(rowData.includes('ssn')).toBe(seesSsn);
+        await page.context().clearCookies();
+        await pageObjects.login.loginWithUsernamePassword(username, 'changeme');
+        await pageObjects.discover.goto({ queryMode: 'classic' });
+        await pageObjects.discover.selectDataView(dataViewName, { createAdHocIfMissing: false });
+        await expect(pageObjects.discover.getHitCountLocator()).toHaveText('2');
+        const rowData = await pageObjects.discover.getDocTableIndex(1);
+        expect(rowData.includes('ssn')).toBe(scenario.seesSsn);
+      } finally {
+        await esClient.security.deleteUser({ username }, { ignore: [404] });
+        await esClient.security.deleteRole({ name: role }, { ignore: [404] });
+      }
     });
   }
 
-  test('should support case-sensitive fields', async ({ pageObjects, kbnClient }) => {
+  test('should support case-sensitive fields', async ({ pageObjects, kbnClient, esClient }) => {
+    const caseSensitiveRole = `a_casesensitive_fields_role-${randomUUID()}`;
     const indices = [
       {
         names: ['flstest'],
@@ -127,25 +128,29 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
         },
       },
     ];
-    await pageObjects.securityRoles.goto();
-    await pageObjects.securityRoles.createRole(caseSensitiveRole, { elasticsearch: { indices } });
+    try {
+      await pageObjects.securityRoles.goto();
+      await pageObjects.securityRoles.createRole(caseSensitiveRole, { elasticsearch: { indices } });
 
-    const { data: role } = await kbnClient.request<Role>({
-      method: 'GET',
-      path: `/api/security/role/${caseSensitiveRole}`,
-    });
-    expect(role).toStrictEqual({
-      _transform_error: [],
-      _unrecognized_applications: [],
-      elasticsearch: {
-        cluster: [],
-        indices: indices.map((index) => ({ ...index, allow_restricted_indices: false })),
-        run_as: [],
-      },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-      metadata: {},
-      name: caseSensitiveRole,
-      transient_metadata: { enabled: true },
-    });
+      const { data: role } = await kbnClient.request<Role>({
+        method: 'GET',
+        path: `/api/security/role/${caseSensitiveRole}`,
+      });
+      expect(role).toStrictEqual({
+        _transform_error: [],
+        _unrecognized_applications: [],
+        elasticsearch: {
+          cluster: [],
+          indices: indices.map((index) => ({ ...index, allow_restricted_indices: false })),
+          run_as: [],
+        },
+        kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+        metadata: {},
+        name: caseSensitiveRole,
+        transient_metadata: { enabled: true },
+      });
+    } finally {
+      await esClient.security.deleteRole({ name: caseSensitiveRole }, { ignore: [404] });
+    }
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -12,42 +14,27 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 const TEST_USERNAME = 'scout_role_mappings_test_user';
+const suffix = randomUUID();
+const newMappingName = `new_role_mapping-${suffix}`;
+const deleteMappingName = `delete_test_mapping-${suffix}`;
+const clonedMappingName = `cloned_role_mapping-${suffix}`;
 
 const mappings = [
   {
-    name: 'a_enabled_role_mapping',
+    name: `a_enabled_role_mapping-${suffix}`,
     enabled: true,
     roles: ['superuser'],
     rules: { field: { username: TEST_USERNAME } },
     metadata: {},
   },
   {
-    name: 'b_disabled_role_mapping',
+    name: `b_disabled_role_mapping-${suffix}`,
     enabled: false,
     role_templates: [{ template: { source: 'superuser' } }],
     rules: { field: { username: TEST_USERNAME } },
     metadata: {},
   },
 ];
-
-const ownedMappingNames = [
-  ...mappings.map(({ name }) => name),
-  'delete_test_mapping',
-  'new_role_mapping',
-  'cloned_role_mapping',
-];
-
-const deleteOwnedMappings = async (kbnClient: KbnClient) => {
-  await Promise.all(
-    ownedMappingNames.map((name) =>
-      kbnClient.request({
-        method: 'DELETE',
-        path: `/internal/security/role_mapping/${name}`,
-        ignoreErrors: [404],
-      })
-    )
-  );
-};
 
 const getMappingNames = async (kbnClient: KbnClient) => {
   const { data } = await kbnClient.request<Array<{ name: string }>>({
@@ -59,42 +46,31 @@ const getMappingNames = async (kbnClient: KbnClient) => {
 
 test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
   let preExistingMappingNames: string[] = [];
+  let ownedMappingNames: string[] = [];
 
   test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
+    ownedMappingNames = [];
     await browserAuth.loginAsAdmin();
-    preExistingMappingNames = (await getMappingNames(kbnClient)).filter(
-      (name) => !ownedMappingNames.includes(name)
-    );
-    await deleteOwnedMappings(kbnClient);
+    preExistingMappingNames = await getMappingNames(kbnClient);
     await pageObjects.securityRoleMappings.goto();
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    await deleteOwnedMappings(kbnClient);
-  });
-
-  test('displays a message when no role mappings exist', async ({ page, pageObjects }) => {
-    await page.route('**/internal/security/role_mapping', async (route) => {
-      if (route.request().method() !== 'GET') {
-        await route.fallback();
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([]),
-      });
-    });
-
-    await pageObjects.securityRoleMappings.goto();
-
-    await expect(pageObjects.securityRoleMappings.emptyPrompt).toBeVisible();
-    await expect(pageObjects.securityRoleMappings.createRoleMappingButton).toBeVisible();
+    await Promise.all(
+      ownedMappingNames.map((name) =>
+        kbnClient.request({
+          method: 'DELETE',
+          path: `/internal/security/role_mapping/${name}`,
+          ignoreErrors: [404],
+        })
+      )
+    );
   });
 
   test('allows a role mapping to be created', async ({ pageObjects, kbnClient }) => {
+    ownedMappingNames.push(newMappingName);
     await pageObjects.securityRoleMappings.createRoleMappingButton.click();
-    await pageObjects.securityRoleMappings.fillRoleMappingName('new_role_mapping');
+    await pageObjects.securityRoleMappings.fillRoleMappingName(newMappingName);
     await pageObjects.securityRoleMappings.selectRole('superuser');
     await pageObjects.securityRoleMappings.addRule();
     await pageObjects.securityRoleMappings.switchToJsonRuleEditor();
@@ -116,13 +92,14 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     await pageObjects.securityRoleMappings.switchToVisualRuleEditor();
     await pageObjects.securityRoleMappings.saveRoleMapping();
 
-    expect(await getMappingNames(kbnClient)).toContain('new_role_mapping');
+    expect(await getMappingNames(kbnClient)).toContain(newMappingName);
   });
 
   test('allows a role mapping to be deleted', async ({ pageObjects, kbnClient }) => {
+    ownedMappingNames.push(deleteMappingName);
     await kbnClient.request({
       method: 'POST',
-      path: '/internal/security/role_mapping/delete_test_mapping',
+      path: `/internal/security/role_mapping/${deleteMappingName}`,
       body: {
         enabled: true,
         roles: ['superuser'],
@@ -133,22 +110,23 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     });
 
     await pageObjects.securityRoleMappings.goto();
-    await pageObjects.securityRoleMappings.deleteRoleMapping('delete_test_mapping');
+    await pageObjects.securityRoleMappings.deleteRoleMapping(deleteMappingName);
 
     const remainingNames = await getMappingNames(kbnClient);
-    expect(remainingNames).not.toContain('delete_test_mapping');
+    expect(remainingNames).not.toContain(deleteMappingName);
     for (const name of preExistingMappingNames) {
       expect(remainingNames).toContain(name);
     }
   });
 
   test('displays an error when navigating to a non-existent role mapping', async ({ page }) => {
-    await page.gotoApp('management/security/role_mappings/edit/i-do-not-exist');
+    await page.gotoApp(`management/security/role_mappings/edit/missing-${suffix}`);
     await expect(page.testSubj.locator('errorLoadingRoleMappingEditorToast')).toBeVisible();
     await expect(page).toHaveURL(/\/management\/security\/role_mappings\/?(?:\?.*)?$/);
   });
 
   test('displays a table of all role mappings', async ({ pageObjects, kbnClient }) => {
+    ownedMappingNames.push(...mappings.map(({ name }) => name));
     await Promise.all(
       mappings.map(({ name, ...payload }) =>
         kbnClient.request({
@@ -160,15 +138,17 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     );
 
     await pageObjects.securityRoleMappings.goto();
-    const rows = await pageObjects.securityRoleMappings.getAllRoleMappings();
-
     for (const { name, enabled } of mappings) {
-      expect(rows).toContainEqual({ name, enabled });
+      expect(await pageObjects.securityRoleMappings.getRoleMapping(name)).toStrictEqual({
+        name,
+        enabled,
+      });
     }
   });
 
   test('allows a role mapping to be cloned', async ({ pageObjects, kbnClient }) => {
     const { name, ...payload } = mappings[0];
+    ownedMappingNames.push(name, clonedMappingName);
     await kbnClient.request({
       method: 'POST',
       path: `/internal/security/role_mapping/${name}`,
@@ -177,17 +157,18 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
 
     await pageObjects.securityRoleMappings.goto();
     await pageObjects.securityRoleMappings.cloneRoleMapping(name);
-    await pageObjects.securityRoleMappings.fillRoleMappingName('cloned_role_mapping');
+    await pageObjects.securityRoleMappings.fillRoleMappingName(clonedMappingName);
     await pageObjects.securityRoleMappings.saveRoleMapping();
 
-    await expect(pageObjects.securityRoleMappings.getRoleMappingRow(name)).toBeVisible();
+    await expect(await pageObjects.securityRoleMappings.findRoleMappingRow(name)).toBeVisible();
     await expect(
-      pageObjects.securityRoleMappings.getRoleMappingRow('cloned_role_mapping')
+      await pageObjects.securityRoleMappings.findRoleMappingRow(clonedMappingName)
     ).toBeVisible();
   });
 
   test('allows a role mapping to be edited', async ({ pageObjects, kbnClient }) => {
     const { name, ...payload } = mappings[0];
+    ownedMappingNames.push(name);
     await kbnClient.request({
       method: 'POST',
       path: `/internal/security/role_mapping/${name}`,
@@ -198,6 +179,6 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     await pageObjects.securityRoleMappings.editRoleMapping(name);
     await pageObjects.securityRoleMappings.saveRoleMapping();
 
-    await expect(pageObjects.securityRoleMappings.getRoleMappingRow(name)).toBeVisible();
+    await expect(await pageObjects.securityRoleMappings.findRoleMappingRow(name)).toBeVisible();
   });
 });

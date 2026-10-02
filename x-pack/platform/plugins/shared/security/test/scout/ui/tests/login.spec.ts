@@ -62,8 +62,8 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('displays message if login fails', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/login'));
+  test('displays message if login fails', async ({ page, pageObjects }) => {
+    await pageObjects.login.goto();
     await page.testSubj.locator('loginUsername').fill('wrong-user');
     await page.testSubj.locator('loginPassword').fill('wrong-password');
     await page.testSubj.locator('loginSubmit').click();
@@ -73,8 +73,8 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     );
   });
 
-  test('login page has no accessibility violations', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/login'));
+  test('login page has no accessibility violations', async ({ page, pageObjects }) => {
+    await pageObjects.login.goto();
     await page.testSubj.locator('loginSubmit').waitFor({ state: 'visible' });
     const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
     expect(violations).toStrictEqual([]);
@@ -90,8 +90,8 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     expect(violations).toStrictEqual([]);
   });
 
-  test('login error state has no accessibility violations', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/login'));
+  test('login error state has no accessibility violations', async ({ page, pageObjects }) => {
+    await pageObjects.login.goto();
     await page.testSubj.locator('loginUsername').fill('wrong-user');
     await page.testSubj.locator('loginPassword').fill('wrong-password');
     await page.testSubj.locator('loginSubmit').click();

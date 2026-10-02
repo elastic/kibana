@@ -1,5 +1,5 @@
 {
-  "sha1": "6cd79dd655356d83b8442faeeff547cd958effad",
+  "sha1": "27875146946ce1dfd314b1d1528babf162dca408",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_create.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 23
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_create.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 5
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_delete.spec.ts",
-        "line": 24,
+        "line": 25,
         "column": 23
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/api_keys_delete.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 69
       }
     },
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
-        "line": 65,
-        "column": 16
+        "line": 72,
+        "column": 23
       }
     },
     {
@@ -238,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 79,
-        "column": 11
+        "line": 76,
+        "column": 27
       }
     },
     {
@@ -252,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 79,
-        "column": 11
+        "line": 76,
+        "column": 27
       }
     },
     {
@@ -266,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 131,
-        "column": 84
+        "line": 133,
+        "column": 96
       }
     },
     {
@@ -351,7 +351,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
         "line": 66,
-        "column": 21
+        "column": 23
       }
     },
     {
@@ -378,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 28,
+        "line": 30,
         "column": 80
       }
     },
@@ -392,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 8
       }
     },
@@ -406,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 42,
+        "line": 44,
         "column": 11
       }
     },
@@ -420,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 64,
-        "column": 13
+        "line": 68,
+        "column": 56
       }
     },
     {
@@ -434,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 79,
-        "column": 24
+        "line": 81,
+        "column": 56
       }
     },
     {
@@ -448,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 83,
-        "column": 54
+        "line": 85,
+        "column": 8
       }
     },
     {
@@ -462,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 87,
-        "column": 50
+        "line": 88,
+        "column": 11
       }
     },
     {
@@ -477,7 +477,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
         "line": 93,
-        "column": 67
+        "column": 23
       }
     },
     {
@@ -490,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 106,
-        "column": 11
+        "line": 114,
+        "column": 9
       }
     },
     {
@@ -504,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 124,
-        "column": 50
+        "line": 129,
+        "column": 22
       }
     },
     {
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 137,
-        "column": 24
+        "line": 139,
+        "column": 89
       }
     },
     {
@@ -560,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
-        "line": 41,
+        "line": 44,
         "column": 23
       }
     },
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
-        "line": 50,
+        "line": 53,
         "column": 23
       }
     },
@@ -588,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
-        "line": 59,
+        "line": 62,
         "column": 23
       }
     },
@@ -602,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 78
       }
     },
@@ -616,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
-        "line": 73,
+        "line": 76,
         "column": 5
       }
     },
@@ -630,22 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_description.spec.ts",
-        "line": 78,
+        "line": 81,
         "column": 81
-      }
-    },
-    {
-      "id": "5dfb377f451a07b-837d46768a7afdb",
-      "title": "Role Mappings displays a message when no role mappings exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 74,
-        "column": 5
       }
     },
     {
@@ -658,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 89,
-        "column": 23
+        "line": 63,
+        "column": 17
       }
     },
     {
@@ -672,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 122,
+        "line": 98,
         "column": 8
       }
     },
@@ -686,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 143,
+        "line": 120,
         "column": 5
       }
     },
@@ -700,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 147,
+        "line": 124,
         "column": 11
       }
     },
@@ -714,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 162,
-        "column": 23
+        "line": 134,
+        "column": 17
       }
     },
     {
@@ -728,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/role_mappings.spec.ts",
-        "line": 170,
-        "column": 68
+        "line": 149,
+        "column": 66
       }
     },
     {
@@ -743,7 +729,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/roles_data_source_privileges_crud.spec.ts",
         "line": 52,
-        "column": 12
+        "column": 5
       }
     },
     {
@@ -756,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/roles_data_source_privileges_crud.spec.ts",
-        "line": 58,
+        "line": 57,
         "column": 5
       }
     },
@@ -784,7 +770,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
-        "line": 34,
+        "line": 51,
         "column": 5
       }
     },
@@ -812,7 +798,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_email.spec.ts",
-        "line": 52,
+        "line": 50,
         "column": 83
       }
     },
@@ -826,7 +812,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/user_email.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 11
       }
     },
@@ -910,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 33,
-        "column": 19
+        "line": 35,
+        "column": 23
       }
     },
     {
@@ -924,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 59,
-        "column": 24
+        "line": 57,
+        "column": 16
       }
     },
     {
@@ -938,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 82,
-        "column": 54
+        "line": 79,
+        "column": 79
       }
     },
     {
@@ -952,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 93,
+        "column": 24
       }
     },
     {
@@ -966,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 116,
-        "column": 5
+        "line": 120,
+        "column": 9
       }
     },
     {
@@ -980,7 +966,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 143,
+        "line": 140,
         "column": 14
       }
     },
@@ -995,7 +981,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
         "line": 168,
-        "column": 9
+        "column": 18
       }
     },
     {
@@ -1008,8 +994,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 189,
-        "column": 24
+        "line": 199,
+        "column": 11
       }
     },
     {
@@ -1022,8 +1008,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 220,
-        "column": 7
+        "line": 229,
+        "column": 15
       }
     },
     {
@@ -1036,8 +1022,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 235,
-        "column": 17
+        "line": 243,
+        "column": 24
       }
     },
     {
@@ -1050,8 +1036,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 255,
-        "column": 9
+        "line": 265,
+        "column": 24
       }
     },
     {
@@ -1064,8 +1050,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 273,
-        "column": 5
+        "line": 277,
+        "column": 12
       }
     },
     {
@@ -1078,8 +1064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 278,
-        "column": 39
+        "line": 283,
+        "column": 13
       }
     },
     {
@@ -1092,7 +1078,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 284,
+        "line": 291,
         "column": 23
       }
     },
@@ -1106,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 294,
-        "column": 23
+        "line": 298,
+        "column": 81
       }
     },
     {
@@ -1120,8 +1106,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 298,
-        "column": 5
+        "line": 302,
+        "column": 12
       }
     },
     {
@@ -1134,8 +1120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 321,
-        "column": 83
+        "line": 327,
+        "column": 5
       }
     }
   ]

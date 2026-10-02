@@ -63,7 +63,7 @@ export class SecurityRoleMappingsPage {
   }
 
   async deleteRoleMapping(name: string) {
-    const row = this.getRoleMappingRow(name);
+    const row = await this.findRoleMappingRow(name);
     await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.page.testSubj.locator(`deleteRoleMappingButton-${name}`).click();
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
@@ -74,11 +74,22 @@ export class SecurityRoleMappingsPage {
   }
 
   async cloneRoleMapping(name: string) {
-    await this.page.testSubj.locator(`cloneRoleMappingButton-${name}`).click();
+    const row = await this.findRoleMappingRow(name);
+    await row.locator(`[data-test-subj="cloneRoleMappingButton-${name}"]`).click();
   }
 
   async editRoleMapping(name: string) {
-    await this.getRoleMappingRow(name).locator('[data-test-subj="roleMappingName"]').click();
+    const row = await this.findRoleMappingRow(name);
+    await row.locator('[data-test-subj="roleMappingName"]').click();
+  }
+
+  async findRoleMappingRow(name: string): Promise<Locator> {
+    const search = this.page.getByPlaceholder('Search...');
+    await search.fill(`name=${JSON.stringify(name)}`);
+    await search.press('Enter');
+    const row = this.getRoleMappingRow(name);
+    await row.waitFor({ state: 'visible' });
+    return row;
   }
 
   getRoleMappingRow(name: string): Locator {
@@ -87,18 +98,13 @@ export class SecurityRoleMappingsPage {
       .filter({ has: this.page.locator(`[data-test-subj="roleMappingName"]:text-is("${name}")`) });
   }
 
-  async getRoleMappingRows(): Promise<Locator[]> {
-    return this.page.testSubj.locator('roleMappingRow').all();
-  }
-
   async getRoleMappingRowData(row: Locator): Promise<RoleMappingRowData> {
     const name = await row.locator('[data-test-subj="roleMappingName"]').innerText();
     const enabledText = await row.locator('[data-test-subj="roleMappingEnabled"]').innerText();
     return { name, enabled: enabledText === 'Enabled' };
   }
 
-  async getAllRoleMappings(): Promise<RoleMappingRowData[]> {
-    const rows = await this.getRoleMappingRows();
-    return Promise.all(rows.map((row) => this.getRoleMappingRowData(row)));
+  async getRoleMapping(name: string): Promise<RoleMappingRowData> {
+    return this.getRoleMappingRowData(await this.findRoleMappingRow(name));
   }
 }
