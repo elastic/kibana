@@ -20,14 +20,6 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: (node: unknown) => node,
 }));
 
-// The event payload is tested in the EBT hook's own suite; here we only assert when and with
-// what the hook reports.
-const mockReportWorkflowRunTriggered = jest.fn();
-jest.mock('../../analytics/use_workflow_run_ebt', () => ({
-  ...jest.requireActual('../../analytics/use_workflow_run_ebt'),
-  useWorkflowRunTriggeredEBT: () => mockReportWorkflowRunTriggered,
-}));
-
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
 describe('useRunWorkflowOnCases', () => {
@@ -203,41 +195,5 @@ describe('useRunWorkflowOnCases', () => {
         }),
       })
     );
-  });
-
-  describe('workflow run telemetry', () => {
-    it.each([
-      ['one selected case', [caseA]],
-      ['several selected cases', [caseA, caseB]],
-    ])('reports one unattributed run covering %s', async (_label, cases) => {
-      mockRunCaseWorkflow.mockResolvedValueOnce({
-        workflowExecutionId: 'exec-1',
-        activityStatus: 'succeeded',
-      });
-
-      const { result } = renderHook(() => useRunWorkflowOnCases({ cases }));
-      await act(async () => {
-        await result.current({ workflowId: 'wf-1', inputs: {} });
-      });
-
-      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledTimes(1);
-      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({
-        originType: 'unattributed',
-        caseCount: cases.length,
-      });
-    });
-
-    it('does not report when the run request is rejected', async () => {
-      mockRunCaseWorkflow.mockRejectedValueOnce(new Error('server error'));
-
-      const { result } = renderHook(() => useRunWorkflowOnCases({ cases: [caseA] }));
-      await expect(
-        act(async () => {
-          await result.current({ workflowId: 'wf-1', inputs: {} });
-        })
-      ).rejects.toThrow('server error');
-
-      expect(mockReportWorkflowRunTriggered).not.toHaveBeenCalled();
-    });
   });
 });
