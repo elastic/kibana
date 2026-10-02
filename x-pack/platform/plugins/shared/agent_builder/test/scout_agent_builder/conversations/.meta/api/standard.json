@@ -1,9 +1,23 @@
 {
-  "sha1": "6b2d63d2443d001db241a56ea876647d8a373e78",
+  "sha1": "87af4037f76372574a7b0c820598a27010d4caf7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "eb2db8f66b0ef76-0e4666c4e2b44c6",
+      "title": "Agent Builder — ai.conversation.updated workflow trigger runs on matching writes to conversations of the subscribed template only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversation_updated_trigger_api.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
     {
       "id": "82fdabaac554eba-15831800091ed82",
       "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
