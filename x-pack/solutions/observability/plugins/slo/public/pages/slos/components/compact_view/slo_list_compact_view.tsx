@@ -323,7 +323,7 @@ export function SloListCompactView({ sloList, loading, error, isInteractive = tr
         <>
           <SloRulesBadge
             rules={rulesBySlo?.[slo.id]}
-            onClick={() => setSloToAddRule(slo)}
+            onClick={isInteractive ? () => setSloToAddRule(slo) : undefined}
             isRemote={!!slo.remote}
           />
           <SloActiveAlertsBadge

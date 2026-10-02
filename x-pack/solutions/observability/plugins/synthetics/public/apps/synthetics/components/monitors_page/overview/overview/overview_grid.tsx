@@ -64,7 +64,7 @@ export const OverviewGrid = memo(
 
     // Display no monitors found when down, up, or disabled filter produces no results
     if (status && !monitorsSortedByStatus.length && isInitialized) {
-      return <NoMonitorsFound />;
+      return <NoMonitorsFound isInteractive={isInteractive} />;
     }
 
     return (

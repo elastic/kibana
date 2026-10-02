@@ -178,7 +178,6 @@ export function LensRenderer({
       maybeId={id}
       getParentApi={() =>
         ({
-          ...(typeof parentApi === 'object' ? parentApi : {}),
           // forward the Lens components to the embeddable
           ...props,
           // forward the unified search context
@@ -197,6 +196,8 @@ export function LensRenderer({
           isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
+          // valeus provided by the parent take precedence, if provided
+          ...(typeof parentApi === 'object' ? parentApi : {}),
         } satisfies LensParentApi)
       }
       onApiAvailable={handleApiAvailable}

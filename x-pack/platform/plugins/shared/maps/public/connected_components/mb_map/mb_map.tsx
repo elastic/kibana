@@ -455,10 +455,12 @@ export class MbMap extends Component<Props> {
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
           mbMap={this.props.mapApi}
-          addFilters={this.props.addFilters}
-          getFilterActions={this.props.getFilterActions}
-          getActionContext={this.props.getActionContext}
-          onSingleValueTrigger={this.props.onSingleValueTrigger}
+          addFilters={this.props.isInteractive ? this.props.addFilters : null}
+          getFilterActions={this.props.isInteractive ? this.props.getFilterActions : undefined}
+          getActionContext={this.props.isInteractive ? this.props.getActionContext : undefined}
+          onSingleValueTrigger={
+            this.props.isInteractive ? this.props.onSingleValueTrigger : undefined
+          }
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
@@ -483,10 +485,10 @@ export class MbMap extends Component<Props> {
             {drawFeatureControl}
             {keydownScrollZoomControl}
             {scaleControl}
-            {tooltipControl}
-            {tileStatusTrackerControl}
           </>
         )}
+        {tooltipControl}
+        {tileStatusTrackerControl}
       </div>
     );
   }

@@ -69,7 +69,6 @@ export function initializeViewModeManager({
   });
 
   function setViewMode(viewMode: ViewMode) {
-    if (creationOptionsViewMode === 'non-interactive') return;
     // block the Dashboard from entering edit mode if this Dashboard is managed.
     if (isManaged && viewMode?.toLowerCase() === 'edit') {
       return;

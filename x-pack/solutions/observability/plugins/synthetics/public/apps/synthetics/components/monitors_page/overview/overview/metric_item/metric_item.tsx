@@ -333,12 +333,13 @@ export const MetricItem = ({
             />
           </div>
         )}
-        {configIdByLocation && isInteractive && (
+        {configIdByLocation && (
           <MetricItemIcon
             monitor={monitor}
             status={status}
             timestamp={timestamp}
             configIdByLocation={configIdByLocation}
+            isInteractive={isInteractive}
           />
         )}
       </EuiPanel>
