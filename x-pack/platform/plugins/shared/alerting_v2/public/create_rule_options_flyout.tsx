@@ -202,12 +202,12 @@ const CreateRuleOptionsFlyoutInner = ({
     setStep({ type: 'selector' });
   }, []);
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
-  const [closeGeneration, setCloseGeneration] = useState(0);
+  const closeRequestRef = useRef<(() => void) | null>(null);
   const isAuthoringStep = step.type === 'esql' || step.type === 'threshold';
 
   const handlePickerClose = useCallback(() => {
     if (isAuthoringStep) {
-      setCloseGeneration((generation) => generation + 1);
+      closeRequestRef.current?.();
       return;
     }
     onClose();
@@ -286,6 +286,7 @@ const CreateRuleOptionsFlyoutInner = ({
     <Context.Provider value={services.container}>
       <RuleCreateOptionsFlyout
         historyKey={historyKey}
+        retainOnCascade={isAuthoringStep}
         onClose={handlePickerClose}
         onCreateEsqlRule={() => setStep({ type: 'esql' })}
         onCreateWithAgent={navigateToAgentBuilder}
@@ -299,7 +300,8 @@ const CreateRuleOptionsFlyoutInner = ({
           mode="create"
           onClose={onClose}
           onHistoryBack={handleHistoryBack}
-          closeGeneration={closeGeneration}
+          closeRequestRef={closeRequestRef}
+          stackedOnPicker
           services={services}
           builderType={step.type === 'threshold' ? 'threshold' : undefined}
           onCreateRule={handleCreateRule}

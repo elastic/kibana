@@ -8,15 +8,20 @@
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 import type { BuilderState } from './types';
 
+/** `origin: 'init'` marks a programmatic seed. Dirty-tracking callers must not treat it as a user edit. */
+export interface BuilderStateUpdateOptions {
+  origin?: 'init';
+}
+
 interface BuilderStateContextValue {
   builderState: BuilderState;
-  setBuilderState: (state: BuilderState) => void;
+  setBuilderState: (state: BuilderState, options?: BuilderStateUpdateOptions) => void;
   initBuilderState: (state: BuilderState) => void;
 }
 
 interface BuilderStateProviderProps {
   builderState: BuilderState;
-  setBuilderState: (state: BuilderState) => void;
+  setBuilderState: (state: BuilderState, options?: BuilderStateUpdateOptions) => void;
   /**
    * Seeds builder state without the caller's dirty-tracking wrapper.
    * Defaults to `setBuilderState` when the caller does not track dirty state.
@@ -43,7 +48,7 @@ export const BuilderStateProvider: React.FC<PropsWithChildren<BuilderStateProvid
 
 export const useBuilderState = <T,>(): {
   state: T;
-  setState: (s: T) => void;
+  setState: (s: T, options?: BuilderStateUpdateOptions) => void;
   /**
    * Seeds builder state without marking the flyout dirty. Call only from a
    * mount-time effect — user edits must use `setState`.
@@ -56,7 +61,7 @@ export const useBuilderState = <T,>(): {
   }
   return {
     state: ctx.builderState as T,
-    setState: ctx.setBuilderState as (s: T) => void,
+    setState: ctx.setBuilderState as (s: T, options?: BuilderStateUpdateOptions) => void,
     initStateOnMount: ctx.initBuilderState as (s: T) => void,
   };
 };

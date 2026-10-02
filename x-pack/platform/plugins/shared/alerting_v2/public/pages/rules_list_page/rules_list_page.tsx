@@ -54,7 +54,7 @@ export const RulesListPage = () => {
     isOpen: isAuthoringFlyoutOpen,
     requestClose: requestAuthoringClose,
   } = useComposeDiscoverFlyout({
-    historyKey: createSessionHistoryKey,
+    historyKey: isCreateOptionsFlyoutOpen ? createSessionHistoryKey : undefined,
     onDismiss: closeCreateOptionsFlyout,
   });
 
@@ -183,6 +183,7 @@ export const RulesListPage = () => {
       {isCreateOptionsFlyoutOpen ? (
         <RuleCreateOptionsFlyout
           historyKey={createSessionHistoryKey}
+          retainOnCascade={isAuthoringFlyoutOpen}
           onClose={handlePickerClose}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}

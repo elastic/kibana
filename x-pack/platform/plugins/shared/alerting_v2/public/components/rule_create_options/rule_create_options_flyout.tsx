@@ -44,6 +44,12 @@ export interface RuleCreateOptionsFlyoutProps {
    * create session (`overlay` + `session="start"`) so Back from the authoring flyout returns here.
    */
   historyKey?: EuiFlyoutProps['historyKey'];
+  /**
+   * When the authoring form is stacked on this picker, EUI cascades (and the menu close,
+   * which unregisters this flyout first) must remount it so the form can still confirm.
+   * Cascades while the form is not open dismiss the picker.
+   */
+  retainOnCascade?: boolean;
 }
 
 export const RuleCreateOptionsFlyout = ({
@@ -53,24 +59,37 @@ export const RuleCreateOptionsFlyout = ({
   onCreateThresholdRule,
   legacyRuleTypes,
   historyKey,
+  retainOnCascade = false,
 }: RuleCreateOptionsFlyoutProps) => {
   const isStacked = historyKey !== undefined;
   const { flyoutKey, reregister } = useEuiFlyoutReregister();
 
   const handleFlyoutClose: EuiFlyoutProps['onClose'] = useCallback(
     (_event, meta) => {
-      if (isStacked && meta?.reason === 'navigation-cascade') {
+      const retain = isStacked && retainOnCascade;
+      if (meta?.reason === 'navigation-cascade') {
         /*
-         * The stacked form shares this historyKey and session="start", so its X/ESC
-         * closeAllFlyouts() unregisters the picker too. Stay mounted and re-register
-         * so the form can stack on top again while it confirms unsaved changes.
+         * The form's X calls closeAllFlyouts() before it decides to confirm, which
+         * unregisters this picker. Stay mounted only while that form is still open.
+         * Any other cascade dismisses the picker.
          */
-        reregister();
+        if (retain) {
+          reregister();
+          return;
+        }
+        onClose();
         return;
+      }
+      /*
+       * Menu close already unregistered this flyout. Remount when the form is open
+       * so it can confirm, then let the parent run that confirm.
+       */
+      if (retain) {
+        reregister();
       }
       onClose();
     },
-    [isStacked, onClose, reregister]
+    [isStacked, onClose, retainOnCascade, reregister]
   );
 
   return (
@@ -82,36 +101,37 @@ export const RuleCreateOptionsFlyout = ({
       session={isStacked ? 'start' : undefined}
       historyKey={historyKey}
       flyoutMenuProps={
-        isStacked
-          ? { title: CREATE_RULE_TITLE, titleId: FLYOUT_TITLE_ID, hideCloseButton: true }
-          : undefined
+        isStacked ? { title: CREATE_RULE_TITLE, titleId: FLYOUT_TITLE_ID } : undefined
       }
       ownFocus
-      hideCloseButton
+      hideCloseButton={!isStacked}
       onClose={handleFlyoutClose}
       aria-labelledby={FLYOUT_TITLE_ID}
       data-test-subj="ruleCreateOptionsFlyout"
+      data-flyout-key={flyoutKey}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>{CREATE_RULE_TITLE}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={CLOSE_LABEL} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={CLOSE_LABEL}
-                data-test-subj="ruleCreateOptionsFlyoutCloseButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+      {isStacked ? null : (
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+                <h2>{CREATE_RULE_TITLE}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={CLOSE_LABEL} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  color="text"
+                  onClick={onClose}
+                  aria-label={CLOSE_LABEL}
+                  data-test-subj="ruleCreateOptionsFlyoutCloseButton"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutBody>
         <RuleCreateOptionsPanel
           layout="vertical"

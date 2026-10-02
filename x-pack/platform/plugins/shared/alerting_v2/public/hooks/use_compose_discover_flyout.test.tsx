@@ -294,3 +294,62 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
     expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
   });
 });
+
+describe('useComposeDiscoverFlyout — session history', () => {
+  const sharedKey = Symbol('picker');
+
+  const SessionHarness = ({ historyKey }: { historyKey?: symbol }) => {
+    const api = useComposeDiscoverFlyout({ historyKey });
+    hookApi = api;
+    return <>{api.flyout}</>;
+  };
+
+  beforeEach(() => {
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('uses the shared key only when one is provided at open', () => {
+    render(<SessionHarness historyKey={sharedKey} />);
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+
+    expect(capturedFlyoutProps.historyKey).toBe(sharedKey);
+    expect(capturedFlyoutProps.stackedOnPicker).toBe(true);
+  });
+
+  it('keeps a private key when the picker opens after the form', () => {
+    const view = render(<SessionHarness />);
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    const keyWhilePickerClosed = capturedFlyoutProps.historyKey;
+    expect(keyWhilePickerClosed).not.toBe(sharedKey);
+    expect(capturedFlyoutProps.stackedOnPicker).toBe(false);
+
+    view.rerender(<SessionHarness historyKey={sharedKey} />);
+
+    expect(capturedFlyoutProps.historyKey).toBe(keyWhilePickerClosed);
+    expect(capturedFlyoutProps.stackedOnPicker).toBe(false);
+  });
+
+  it('clears the previous builder seed when opening ES|QL', () => {
+    render(<SessionHarness />);
+
+    act(() => {
+      hookApi!.openCreateBuilderFlyout('threshold');
+    });
+    expect(capturedFlyoutProps.builderType).toBe('threshold');
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBeUndefined();
+    expect(capturedFlyoutProps.initialBuilderState).toBeUndefined();
+    expect(capturedFlyoutProps.rule).toBeUndefined();
+  });
+});

@@ -47,6 +47,7 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
   } = useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<FormValues>();
   const initializedRef = useRef(false);
+  const recoverySyncStartedRef = useRef(false);
 
   const seedRecoveryOnMount = useStableCallback(() => {
     const currentBuilderState = builderState;
@@ -88,6 +89,11 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
 
   const recoveryConfig = builderState.recovery;
 
+  /*
+   * `buildRecoveryBlock` reads only the recovery conditions. Time-field
+   * resolution updates `timeField` and leaves this config reference unchanged,
+   * so it does not run the sync below or mark the form dirty.
+   */
   const generatedRecoveryBlock = useMemo(
     () =>
       recoveryConfig
@@ -98,6 +104,13 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
 
   useEffect(() => {
     if (!recoveryConfig || !generatedRecoveryBlock) return;
+    /*
+     * The first sync normalises the persisted segment. Later syncs follow builder
+     * edits that do not go through this step (group-by, threshold, aggregation),
+     * and those must mark the form dirty.
+     */
+    const shouldDirty = recoverySyncStartedRef.current;
+    recoverySyncStartedRef.current = true;
     const current = getValues('recovery');
     if (current?.segment === generatedRecoveryBlock) return;
     setValue(
@@ -106,7 +119,7 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
         strategy: recoveryStrategy.condition,
         segment: generatedRecoveryBlock,
       },
-      { shouldDirty: true }
+      { shouldDirty }
     );
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
 

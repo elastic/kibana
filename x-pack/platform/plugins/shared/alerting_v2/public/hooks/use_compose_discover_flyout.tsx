@@ -22,7 +22,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
@@ -46,8 +46,9 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
   /**
-   * Shared EUI flyout history key. When provided (rules-list create session), the
-   * authoring flyout joins the option picker's history so Back returns to the picker.
+   * Shared EUI flyout history key. Pass it only while the option picker is open.
+   * Create-mode flyouts opened without a picker (header ES|QL, empty state, templates)
+   * get a fresh key so they do not join a later picker session.
    */
   historyKey?: symbol;
   /**
@@ -85,19 +86,17 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const [flyoutGeneration, setFlyoutGeneration] = useState(0);
-  const [closeGeneration, setCloseGeneration] = useState(0);
-  const generatedHistoryKey = useMemo(() => Symbol('ruleAuthoring'), []);
-  /*
-   * All create-mode flyouts join the picker session when a shared key is provided,
-   * including template-seeded creates that carry a synthetic `targetRule`.
-   * Edit/clone keep a private key so they do not stack on the picker.
-   */
-  const historyKey =
-    flyoutMode === 'create' && sharedHistoryKey !== undefined
-      ? sharedHistoryKey
-      : generatedHistoryKey;
+  const [sessionHistoryKey, setSessionHistoryKey] = useState<symbol>(() => Symbol('ruleAuthoring'));
+  const [stackedOnPicker, setStackedOnPicker] = useState(false);
+  const sharedHistoryKeyRef = useRef(sharedHistoryKey);
+  sharedHistoryKeyRef.current = sharedHistoryKey;
+  const closeRequestRef = useRef<(() => void) | null>(null);
 
-  const showFlyout = useCallback(() => {
+  const openSession = useCallback((mode: ComposeDiscoverMode) => {
+    const shared = sharedHistoryKeyRef.current;
+    const stacked = mode === 'create' && shared !== undefined;
+    setSessionHistoryKey(stacked ? shared : Symbol('ruleAuthoring'));
+    setStackedOnPicker(stacked);
     setFlyoutGeneration((generation) => generation + 1);
     setFlyoutOpen(true);
   }, []);
@@ -107,11 +106,10 @@ export const useComposeDiscoverFlyout = ({
     setTargetRule(null);
     setBuilderType(null);
     setInitialBuilderState(undefined);
-    setCloseGeneration(0);
   }, []);
 
   const requestClose = useCallback(() => {
-    setCloseGeneration((generation) => generation + 1);
+    closeRequestRef.current?.();
   }, []);
 
   const dismissFlyout = useCallback(() => {
@@ -132,9 +130,9 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode(mode);
       setBuilderType(null);
       setInitialBuilderState(undefined);
-      showFlyout();
+      openSession(mode);
     },
-    [showFlyout]
+    [openSession]
   );
 
   const handleConfirmSwitch = useCallback(() => {
@@ -189,8 +187,9 @@ export const useComposeDiscoverFlyout = ({
     setTargetRule(null);
     setFlyoutMode('create');
     setBuilderType(null);
-    showFlyout();
-  }, [showFlyout]);
+    setInitialBuilderState(undefined);
+    openSession('create');
+  }, [openSession]);
 
   const openCreateBuilderFlyout = useCallback(
     (type: string) => {
@@ -211,9 +210,9 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode('create');
       setBuilderType(type);
       setInitialBuilderState(undefined);
-      showFlyout();
+      openSession('create');
     },
-    [notifications.toasts, openCreateFlyout, showFlyout]
+    [notifications.toasts, openCreateFlyout, openSession]
   );
 
   const openRuleFlyout = useCallback(
@@ -228,10 +227,10 @@ export const useComposeDiscoverFlyout = ({
         setFlyoutMode(mode);
         setBuilderType(result.builderType);
         setInitialBuilderState(result.initialBuilderState);
-        showFlyout();
+        openSession(mode);
       }
     },
-    [resolveBuilderMode, openInEsql, requestEsqlFallback, showFlyout]
+    [resolveBuilderMode, openInEsql, requestEsqlFallback, openSession]
   );
 
   const openEditFlyout = useCallback(
@@ -253,24 +252,25 @@ export const useComposeDiscoverFlyout = ({
         setFlyoutMode('create');
         setBuilderType(result.builderType);
         setInitialBuilderState(result.initialBuilderState);
-        showFlyout();
+        openSession('create');
       } else {
         openInEsql(syntheticRule, 'create');
       }
     },
-    [resolveBuilderMode, openInEsql, showFlyout]
+    [resolveBuilderMode, openInEsql, openSession]
   );
 
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       key={flyoutGeneration}
-      historyKey={historyKey}
+      historyKey={sessionHistoryKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
       onClose={dismissFlyout}
       onHistoryBack={hideFlyout}
-      closeGeneration={closeGeneration}
+      closeRequestRef={closeRequestRef}
+      stackedOnPicker={stackedOnPicker}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}

@@ -99,19 +99,23 @@ jest.mock('@kbn/alerting-v2-rule-form', () => {
       onCreateRule,
       onClose,
       onHistoryBack,
-      closeGeneration,
+      closeRequestRef,
     }: {
       onCreateRule: (payload: unknown) => void;
       onClose: () => void;
       onHistoryBack: () => void;
-      closeGeneration?: number;
+      closeRequestRef?: { current: (() => void) | null };
     }) => {
       latestComposeHistoryBack = onHistoryBack;
       ReactActual.useEffect(() => {
-        if (closeGeneration) {
-          onClose();
+        if (!closeRequestRef) {
+          return;
         }
-      }, [closeGeneration, onClose]);
+        closeRequestRef.current = onClose;
+        return () => {
+          closeRequestRef.current = null;
+        };
+      }, [closeRequestRef, onClose]);
       return ReactActual.createElement(
         'button',
         { 'data-test-subj': 'composeDiscoverFlyout', onClick: () => onCreateRule({}) },
@@ -652,7 +656,7 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
@@ -735,7 +739,7 @@ describe('RulesListPage', () => {
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
