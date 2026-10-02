@@ -35,6 +35,7 @@ import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/options/recommended_queries/utils';
+import { useEffectiveProjectRouting } from '../hooks/use_effective_project_routing';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { reportEsqlError } from '../report_error';
 import type { ESQLEditorDeps } from '../types';
@@ -59,6 +60,7 @@ export const HelpPopover: React.FC<{
   const actions = useEsqlEditorActions();
   const currentQueryRef = useRef<string>('');
   currentQueryRef.current = actions?.currentQuery ?? '';
+  const projectRouting = useEffectiveProjectRouting(actions?.currentQuery ?? '');
 
   const activeSolutionNavId = useObservable(chrome.getActiveSolutionNavId$());
   const activeSolutionId = activeSolutionNavId ?? ESQL_CLASSIC_SOLUTION_ID;
@@ -111,7 +113,7 @@ export const HelpPopover: React.FC<{
         return;
       }
       try {
-        const source = await EsqlSource.create({ query: sourceQuery, http });
+        const source = await EsqlSource.create({ query: sourceQuery, http, projectRouting });
         if (!isMounted) return;
         const columns = source.getColumns();
         const textFields = columns.filter(({ type }) => type === 'string');
@@ -135,7 +137,7 @@ export const HelpPopover: React.FC<{
     return () => {
       isMounted = false;
     };
-  }, [http, isESQLMenuPopoverOpen, hideRecommendedQueries]);
+  }, [http, projectRouting, isESQLMenuPopoverOpen, hideRecommendedQueries]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField, dataviewName } =
     dataviewDerived;

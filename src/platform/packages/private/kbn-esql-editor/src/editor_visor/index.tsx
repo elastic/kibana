@@ -21,6 +21,7 @@ import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/ui-ai-components';
+import { useEffectiveProjectRouting } from '../hooks/use_effective_project_routing';
 import { SubmitButton } from './submit_button';
 import { VisorMode } from './visor_mode';
 import { useNlGeneration } from './use_nl_generation';
@@ -97,6 +98,7 @@ export function QuickSearchVisor({
 
   const sourcesKey = useMemo(() => getIndexPatternFromESQLQuery(query), [query]);
   const sourceQuery = useMemo(() => getSourceCommandQueryFromESQLQuery(query), [query]);
+  const projectRouting = useEffectiveProjectRouting(query);
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);
@@ -150,7 +152,7 @@ export function QuickSearchVisor({
       return;
     }
     let cancelled = false;
-    EsqlSource.create({ query: sourceQuery, http: core.http })
+    EsqlSource.create({ query: sourceQuery, http: core.http, projectRouting })
       .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
       .then(
         (dataView) => !cancelled && setAdHocDataView(dataView),
@@ -159,7 +161,7 @@ export function QuickSearchVisor({
     return () => {
       cancelled = true;
     };
-  }, [isVisible, sourceQuery, data.dataViews, core.http]);
+  }, [isVisible, sourceQuery, projectRouting, data.dataViews, core.http]);
 
   const isKqlMode = visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);

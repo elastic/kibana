@@ -133,8 +133,9 @@ export function getSourceCommandFromESQLQuery(
 }
 
 /**
- * Returns the query reduced to its FROM or TS command (keeping SET headers and METADATA),
- * whose columns are the schema of the queried dataset. Empty string if there is none.
+ * Returns the FROM or TS command alone (with METADATA), whose columns are the schema of the
+ * queried dataset. `SET project_routing` is left out, so the text matches the ES|QL editor's
+ * fields query; pass the routing separately. Empty string if there is no such command.
  */
 export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): string {
   if (!esql?.trim()) {
@@ -145,11 +146,8 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
   const sourceCommand = root.commands.find(({ name }) =>
     INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
   );
-  if (!sourceCommand) {
-    return '';
-  }
 
-  return BasicPrettyPrinter.print({ ...root, commands: [sourceCommand] });
+  return sourceCommand ? BasicPrettyPrinter.command(sourceCommand) : '';
 }
 
 /**

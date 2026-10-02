@@ -22,7 +22,19 @@ export interface ESQLSourceInfo {
   columns: ESQLSourceInfoColumn[];
 }
 
-const sourceInfoCache = new LRUCache<string, Promise<ESQLSourceInfo>>({ max: 100 });
+/** A shared request, aborted only once every caller waiting on it has aborted. */
+interface SourceInfoRequest {
+  promise: Promise<ESQLSourceInfo>;
+  controller: AbortController;
+  waiters: number;
+  settled: boolean;
+}
+
+// Expires like the ES|QL editor's fields cache, so mapping changes show up without a reload.
+const sourceInfoCache = new LRUCache<string, SourceInfoRequest>({
+  max: 100,
+  ttl: 10 * 60 * 1000,
+});
 
 /**
  * Strips the client-only `meta` field from ES|QL control variables and returns
@@ -54,6 +66,7 @@ export async function getESQLSourceInfo({
   timeRange,
   timeFieldName,
   esqlVariables,
+  signal,
 }: {
   query: string;
   http: HttpStart;
@@ -61,6 +74,8 @@ export async function getESQLSourceInfo({
   timeRange?: { from: string; to: string };
   timeFieldName?: string;
   esqlVariables?: ESQLControlVariable[];
+  /** Stops waiting; the request itself is aborted once all callers sharing it have aborted. */
+  signal?: AbortSignal;
 }): Promise<ESQLSourceInfo> {
   const { cacheKey, cleanVariables } = buildEsqlSourceCacheKey(
     query,
@@ -68,13 +83,10 @@ export async function getESQLSourceInfo({
     esqlVariables
   );
 
-  const cached = sourceInfoCache.get(cacheKey);
-  if (cached !== undefined) {
-    return cached;
-  }
-
-  const pending = http
-    .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
+  let request = sourceInfoCache.get(cacheKey);
+  if (!request) {
+    const controller = new AbortController();
+    const promise = http.post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
       body: JSON.stringify({
         query,
         projectRouting,
@@ -82,12 +94,66 @@ export async function getESQLSourceInfo({
         timeFieldName,
         esqlVariables: cleanVariables,
       }),
-    })
-    .catch((error) => {
-      sourceInfoCache.delete(cacheKey);
-      throw error;
+      signal: controller.signal,
     });
+    const newRequest: SourceInfoRequest = { promise, controller, waiters: 0, settled: false };
+    promise.then(
+      () => {
+        newRequest.settled = true;
+      },
+      () => {
+        newRequest.settled = true;
+        if (sourceInfoCache.get(cacheKey) === newRequest) {
+          sourceInfoCache.delete(cacheKey);
+        }
+      }
+    );
+    sourceInfoCache.set(cacheKey, newRequest);
+    request = newRequest;
+  }
 
-  sourceInfoCache.set(cacheKey, pending);
-  return pending;
+  return waitForRequest(request, cacheKey, signal);
+}
+
+function waitForRequest(
+  request: SourceInfoRequest,
+  cacheKey: string,
+  signal: AbortSignal | undefined
+): Promise<ESQLSourceInfo> {
+  request.waiters++;
+  if (!signal) {
+    return request.promise;
+  }
+
+  const release = () => {
+    request.waiters--;
+    if (request.waiters === 0 && !request.settled) {
+      request.controller.abort();
+      if (sourceInfoCache.get(cacheKey) === request) {
+        sourceInfoCache.delete(cacheKey);
+      }
+    }
+  };
+
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      release();
+      reject(new DOMException('The request was aborted', 'AbortError'));
+    };
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+    signal.addEventListener('abort', onAbort, { once: true });
+    request.promise.then(
+      (info) => {
+        signal.removeEventListener('abort', onAbort);
+        resolve(info);
+      },
+      (error) => {
+        signal.removeEventListener('abort', onAbort);
+        reject(error);
+      }
+    );
+  });
 }

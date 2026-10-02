@@ -68,6 +68,7 @@ export {
   getFieldParamDefinition,
   getESQLSources,
   getEsqlColumns,
+  getEsqlSourceColumns,
   getEsqlPolicies,
   getJoinIndices,
   getTimeseriesIndices,

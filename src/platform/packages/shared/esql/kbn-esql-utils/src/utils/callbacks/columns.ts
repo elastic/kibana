@@ -8,8 +8,26 @@
  */
 import type { TimeRange } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { HttpStart } from '@kbn/core/public';
 import type { ESQLControlVariable, EsqlFieldType, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { getESQLQueryColumnsRaw } from '../run_query';
+import { getESQLSourceInfo } from '../get_source_info';
+import { getESQLQueryVariables } from '../query_parsing_helpers';
+
+const toFieldWithMetadata = (
+  name: string,
+  type: string,
+  originalTypes: string[] | undefined
+): ESQLFieldWithMetadata => {
+  const hasConflict = type === 'unsupported' && (originalTypes?.length ?? 0) > 1;
+  return {
+    name,
+    type: type as EsqlFieldType,
+    hasConflict,
+    originalTypes: hasConflict ? originalTypes : undefined,
+    userDefined: false,
+  };
+};
 
 /**
  * Gets the columns of an ESQL query, formatted as ESQLFieldWithMetadata
@@ -43,20 +61,55 @@ export const getEsqlColumns = async ({
         signal,
         timeRange,
       });
-      return columns.map(({ name, type, original_types: originalTypes }) => {
-        const hasConflict = type === 'unsupported' && (originalTypes?.length ?? 0) > 1;
-        return {
-          name,
-          type: type as EsqlFieldType,
-          hasConflict,
-          originalTypes: hasConflict ? originalTypes : undefined,
-          userDefined: false,
-        };
-      });
+      return columns.map(({ name, type, original_types: originalTypes }) =>
+        toFieldWithMetadata(name, type, originalTypes)
+      );
     } catch (error) {
       // Handle error
       return [];
     }
   }
   return [];
+};
+
+/**
+ * Same result as {@link getEsqlColumns}, fetched through the source info route whose cache
+ * `EsqlSource` shares, so a `FROM x | LIMIT 0` is requested once per page.
+ */
+export const getEsqlSourceColumns = async ({
+  esqlQuery,
+  http,
+  projectRouting,
+  variables,
+  timeRange,
+  signal,
+}: {
+  esqlQuery?: string;
+  http: HttpStart;
+  projectRouting?: string;
+  variables?: ESQLControlVariable[];
+  timeRange?: TimeRange;
+  signal?: AbortSignal;
+}): Promise<ESQLFieldWithMetadata[]> => {
+  if (!esqlQuery) {
+    return [];
+  }
+  // Only the referenced variables, so the cache key doesn't change with unrelated controls.
+  const usedVariableNames = new Set(getESQLQueryVariables(esqlQuery));
+  const usedVariables = variables?.filter(({ key }) => usedVariableNames.has(key));
+  try {
+    const { columns } = await getESQLSourceInfo({
+      query: esqlQuery,
+      http,
+      projectRouting,
+      timeRange: timeRange && { from: timeRange.from, to: timeRange.to },
+      esqlVariables: usedVariables?.length ? usedVariables : undefined,
+      signal,
+    });
+    return columns.map(({ name, esType, originalTypes }) =>
+      toFieldWithMetadata(name, esType, originalTypes)
+    );
+  } catch (error) {
+    return [];
+  }
 };

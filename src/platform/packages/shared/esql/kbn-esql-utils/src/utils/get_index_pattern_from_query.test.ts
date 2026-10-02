@@ -169,12 +169,12 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
     );
   });
 
-  it('keeps SET headers', () => {
+  it('leaves out SET headers, whose routing is passed separately', () => {
     expect(
       getSourceCommandQueryFromESQLQuery(
         'SET project_routing = "_alias:*"; FROM logs-* | STATS count()'
       )
-    ).toBe('SET project_routing = "_alias:*"; FROM logs-*');
+    ).toBe('FROM logs-*');
   });
 
   it('returns an empty string without a FROM or TS command', () => {
