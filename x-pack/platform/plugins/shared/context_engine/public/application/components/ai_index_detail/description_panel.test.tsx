@@ -48,7 +48,7 @@ const renderWithProviders = (
 
 const EMPTY_PROMPT = /No description configured/;
 const ADD_ONE_HINT =
-  /Add a description to shape suggested automations and help agents decide when this AI index is relevant/;
+  /Shape suggested automations and help agents decide when this AI index is relevant/;
 
 describe('DescriptionPanel', () => {
   it('renders the provided description when not loading', () => {
