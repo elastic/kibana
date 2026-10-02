@@ -27,6 +27,8 @@ export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
 
 export const ALERTING_V2_RULE_API_PATH = '/api/alerting/v2/rules' as const;
 export const ALERTING_V2_INTERNAL_RULE_API_PATH = '/internal/alerting/v2/rules' as const;
+export const ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH =
+  `${ALERTING_V2_INTERNAL_RULE_API_PATH}/_match` as const;
 export const ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH =
   '/internal/alerting/v2/change_history/rules' as const;
 export const ALERTING_V2_INTERNAL_SERIES_API_PATH = '/internal/alerting/v2/series' as const;

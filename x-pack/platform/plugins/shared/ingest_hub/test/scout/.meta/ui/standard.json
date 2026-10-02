@@ -1,5 +1,5 @@
 {
-  "sha1": "5694f83dfb6848b49e83362cb2c90570107bec19",
+  "sha1": "4f4b8255393deb31464752bb090da89a4eecf7db",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -407,7 +407,21 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
         "line": 514,
-        "column": 100
+        "column": 93
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-adcc1c2a7e5b675",
+      "title": "Onboarding Service Settings step duplicate keeps its own namespace across reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 553,
+        "column": 11
       }
     },
     {
@@ -420,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 548,
-        "column": 24
+        "line": 593,
+        "column": 20
       }
     },
     {
@@ -434,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 576,
-        "column": 17
+        "line": 622,
+        "column": 7
       }
     },
     {
@@ -448,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 640,
-        "column": 11
+        "line": 687,
+        "column": 24
       }
     },
     {
@@ -462,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 715,
+        "line": 758,
         "column": 24
       }
     },
@@ -476,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 743,
+        "line": 786,
         "column": 24
       }
     },
