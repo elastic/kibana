@@ -119,7 +119,10 @@ const labels = {
   }),
   emptyBody: i18n.translate('xpack.nightshift.automations.emptyBody', {
     defaultMessage:
-      'Create an automation to start a Nightshift investigation automatically when an alert changes status.',
+      'When something happens in Slack, PagerDuty, or your stack, Nightshift can investigate and respond automatically.',
+  }),
+  createCustom: i18n.translate('xpack.nightshift.automations.createCustomButton', {
+    defaultMessage: 'Create custom automation',
   }),
   filteredEmptyTitle: i18n.translate('xpack.nightshift.automations.filteredEmptyTitle', {
     defaultMessage: 'No matching automations',
@@ -182,6 +185,14 @@ const SPARKLINE_WIDTH = 72;
 const SPARKLINE_HEIGHT = 16;
 const SPARKLINE_BUCKETS = 12;
 const FAILED_RUN_STATUSES = new Set(['failed', 'cancelled', 'timed_out']);
+const RUNNING_RUN_STATUSES = new Set([
+  'pending',
+  'waiting',
+  'waiting_for_input',
+  'waiting_for_child',
+  'running',
+  'queued',
+]);
 
 const toSparklinePath = (values: number[], max: number): string => {
   const step = SPARKLINE_WIDTH / (values.length - 1);
@@ -222,7 +233,7 @@ const RunsSparkline = ({
     },
     {
       color: euiTheme.colors.vis.euiColorVis1,
-      matches: (status: string) => status !== 'completed' && !FAILED_RUN_STATUSES.has(status),
+      matches: (status: string) => RUNNING_RUN_STATUSES.has(status),
     },
   ].map(({ color, matches }) => {
     const buckets = new Array<number>(SPARKLINE_BUCKETS).fill(0);
@@ -636,111 +647,117 @@ export const AutomationsPage = (): React.ReactElement => {
       : []),
   ];
 
+  const isEmpty = !isInitialLoading && !error && automations.length === 0;
+
   return (
     <>
-      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem grow={true} css={css({ minWidth: 240 })}>
-          <EuiFieldSearch
-            placeholder={labels.search}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            isClearable
-            fullWidth
-            data-test-subj="automationsSearch"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <AutomationFilter
-              label={labels.status}
-              options={statuses}
-              selected={selectedStatus}
-              onChange={setSelectedStatus}
-              testSubject="automationStatusFilter"
-            />
-            <AutomationFilter
-              label={labels.tag}
-              options={tags}
-              searchPlaceholder={labels.findTag}
-              selected={selectedTags}
-              onChange={setSelectedTags}
-              testSubject="automationTagFilter"
-            />
-            <AutomationFilter
-              label={labels.author}
-              options={authors}
-              searchPlaceholder={labels.findAuthor}
-              selected={selectedAuthors}
-              onChange={setSelectedAuthors}
-              testSubject="automationAuthorFilter"
-            />
-            <AutomationFilter
-              label={labels.trigger}
-              options={triggers}
-              selected={selectedTriggers}
-              onChange={setSelectedTriggers}
-              testSubject="automationTriggerFilter"
-            />
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            start={range.start}
-            end={range.end}
-            showUpdateButton={false}
-            width="auto"
-            commonlyUsedRanges={[
-              { start: 'now-48h', end: 'now', label: labels.last48Hours },
-              { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-              { start: 'now-7d', end: 'now', label: 'Last 7 days' },
-              { start: 'now-30d', end: 'now', label: 'Last 30 days' },
-            ]}
-            onTimeChange={({ start, end }) => setRange({ start, end })}
-            onRefresh={({ start, end }) => setRange({ start, end })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {canManage && (
-            <EuiButton
-              data-test-subj="nightshiftAutomationsPageButton"
-              fill
-              iconType="plus"
-              onClick={() => setIsCreateFlyoutOpen(true)}
-            >
-              {labels.create}
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.nightshift.automations.showingCount', {
-              defaultMessage: 'Showing {count} automations',
-              values: { count: visibleAutomations.length },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        {hasFilters && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="nightshiftAutomationsPageButton"
-              size="xs"
-              onClick={() => {
-                setSearch('');
-                setSelectedStatus([]);
-                setSelectedTags([]);
-                setSelectedAuthors([]);
-                setSelectedTriggers([]);
-              }}
-            >
-              {labels.clearFilters}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      {!isEmpty && (
+        <>
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={true} css={css({ minWidth: 240 })}>
+              <EuiFieldSearch
+                placeholder={labels.search}
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                isClearable
+                fullWidth
+                data-test-subj="automationsSearch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <AutomationFilter
+                  label={labels.status}
+                  options={statuses}
+                  selected={selectedStatus}
+                  onChange={setSelectedStatus}
+                  testSubject="automationStatusFilter"
+                />
+                <AutomationFilter
+                  label={labels.tag}
+                  options={tags}
+                  searchPlaceholder={labels.findTag}
+                  selected={selectedTags}
+                  onChange={setSelectedTags}
+                  testSubject="automationTagFilter"
+                />
+                <AutomationFilter
+                  label={labels.author}
+                  options={authors}
+                  searchPlaceholder={labels.findAuthor}
+                  selected={selectedAuthors}
+                  onChange={setSelectedAuthors}
+                  testSubject="automationAuthorFilter"
+                />
+                <AutomationFilter
+                  label={labels.trigger}
+                  options={triggers}
+                  selected={selectedTriggers}
+                  onChange={setSelectedTriggers}
+                  testSubject="automationTriggerFilter"
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSuperDatePicker
+                start={range.start}
+                end={range.end}
+                showUpdateButton={false}
+                width="auto"
+                commonlyUsedRanges={[
+                  { start: 'now-48h', end: 'now', label: labels.last48Hours },
+                  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+                  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+                  { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+                ]}
+                onTimeChange={({ start, end }) => setRange({ start, end })}
+                onRefresh={({ start, end }) => setRange({ start, end })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {canManage && (
+                <EuiButton
+                  data-test-subj="nightshiftAutomationsPageButton"
+                  fill
+                  iconType="plus"
+                  onClick={() => setIsCreateFlyoutOpen(true)}
+                >
+                  {labels.create}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.nightshift.automations.showingCount', {
+                  defaultMessage: 'Showing {count} automations',
+                  values: { count: visibleAutomations.length },
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            {hasFilters && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="nightshiftAutomationsPageButton"
+                  size="xs"
+                  onClick={() => {
+                    setSearch('');
+                    setSelectedStatus([]);
+                    setSelectedTags([]);
+                    setSelectedAuthors([]);
+                    setSelectedTriggers([]);
+                  }}
+                >
+                  {labels.clearFilters}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
       {isInitialLoading ? (
         <EuiLoadingSpinner size="l" />
       ) : error && !data ? (
@@ -778,19 +795,22 @@ export const AutomationsPage = (): React.ReactElement => {
           />
         ) : (
           <EuiEmptyPrompt
-            title={<h2>{labels.emptyTitle}</h2>}
+            titleSize="xs"
+            paddingSize="m"
+            title={<h3>{labels.emptyTitle}</h3>}
             body={<p>{labels.emptyBody}</p>}
             actions={
               canManage ? (
                 <EuiButton
-                  data-test-subj="nightshiftAutomationsPageButton"
-                  fill
+                  data-test-subj="automationsCreateCustom"
+                  size="s"
                   onClick={() => setIsCreateFlyoutOpen(true)}
                 >
-                  {labels.create}
+                  {labels.createCustom}
                 </EuiButton>
               ) : undefined
             }
+            data-test-subj="automationsEmptyState"
           />
         )
       ) : (

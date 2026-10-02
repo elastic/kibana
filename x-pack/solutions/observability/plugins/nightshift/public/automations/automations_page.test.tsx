@@ -64,7 +64,9 @@ describe('AutomationsPage', () => {
     );
 
     expect(screen.getByText('Automations run on triggers you define')).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Create automation' })).toHaveLength(2);
+    expect(screen.queryByTestId('automationsSearch')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Create custom automation' }));
+    expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
   });
 
   it('filters automations by name and clears filters', () => {
@@ -149,7 +151,7 @@ describe('AutomationsPage', () => {
         name: 'Triage incoming alerts',
         tags: ['triage', 'alerts'],
         runtime: { dailyDispatchLimit: 20 },
-        author: { username: 'Rakesh Kumar' },
+        author: { username: 'Emily Clarke' },
       }),
       buildAutomation({
         id: 'report',
@@ -157,7 +159,7 @@ describe('AutomationsPage', () => {
         isEnabled: false,
         trigger: { rows: [{ kind: 'schedule' }] },
         runtime: { dailyDispatchLimit: 5 },
-        author: { username: 'Artemis Chen' },
+        author: { username: 'Daniel Hughes' },
       }),
     ];
     const totals: Record<string, { range: number; today: number }> = {
@@ -213,7 +215,7 @@ describe('AutomationsPage', () => {
       expect(within(triageRow).getByTestId('automationRuns')).toHaveTextContent('28');
       expect(within(triageRow).getByTestId('automationUsage')).toHaveTextContent('27 / 20');
       expect(within(triageRow).getByTestId('automationLimitReached')).toBeInTheDocument();
-      expect(within(triageRow).getByText('Rakesh Kumar')).toBeInTheDocument();
+      expect(within(triageRow).getByText('Emily Clarke')).toBeInTheDocument();
 
       const reportRow = rowOf('Daily report');
       expect(within(reportRow).queryByTestId('automationTags')).not.toBeInTheDocument();
