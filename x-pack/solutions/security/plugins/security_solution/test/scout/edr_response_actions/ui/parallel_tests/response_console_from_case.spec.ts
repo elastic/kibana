@@ -23,12 +23,7 @@ const requireSeededCase = (
 
 spaceTest.describe(
   'Response console from a case',
-  {
-    // Cypress ran on ESS and local serverless (`@ess`, `@serverless`) and skipped
-    // serverless MKI. Indexing the Fleet agent uses a system-indices client that
-    // Cloud serverless cannot provision.
-    tag: [...tags.stateful.classic, '@local-serverless-security_complete'],
-  },
+  { tag: [...tags.stateful.classic, '@local-serverless-security_complete'] },
   () => {
     let seeded: SeededResponseConsoleCase | undefined;
 
@@ -57,12 +52,10 @@ spaceTest.describe(
       'opens the console from the case alert and keeps the history date picker usable',
       async ({ page, pageObjects }) => {
         const { caseId, commentId } = requireSeededCase(seeded);
-        const { documentFlyout, responseConsole } = pageObjects;
+        const { caseView, documentFlyout, responseConsole } = pageObjects;
 
         await spaceTest.step('open the attached endpoint alert', async () => {
-          await page.gotoApp(`security/cases/${caseId}`);
-          await page.testSubj.locator('case-view-tabs').waitFor({ state: 'visible' });
-          await page.testSubj.locator(`comment-action-show-alert-${commentId}`).click();
+          await caseView.openAttachedAlert(caseId, commentId);
           await documentFlyout.waitForAlertFlyout();
         });
 

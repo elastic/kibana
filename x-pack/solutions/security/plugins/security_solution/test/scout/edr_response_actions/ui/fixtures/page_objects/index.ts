@@ -7,11 +7,13 @@
 
 import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 import { createLazyPageObject } from '@kbn/scout-security';
+import { CaseViewPage } from './case_view_page';
 import { ResponseActionsHistoryPage } from './response_actions_history_page';
 import { ResponseConsolePage } from './response_console_page';
 import { RuleResponseActionsFormPage } from './rule_response_actions_form';
 
 export interface ResponseActionsPageObjects extends SecurityPageObjects {
+  caseView: CaseViewPage;
   responseActionsHistory: ResponseActionsHistoryPage;
   responseConsole: ResponseConsolePage;
   ruleResponseActionsForm: RuleResponseActionsFormPage;
@@ -22,6 +24,7 @@ export const extendPageObjects = (
   page: ScoutPage
 ): ResponseActionsPageObjects => ({
   ...pageObjects,
+  caseView: createLazyPageObject(CaseViewPage, page),
   responseActionsHistory: createLazyPageObject(ResponseActionsHistoryPage, page),
   responseConsole: createLazyPageObject(ResponseConsolePage, page),
   ruleResponseActionsForm: createLazyPageObject(RuleResponseActionsFormPage, page),
