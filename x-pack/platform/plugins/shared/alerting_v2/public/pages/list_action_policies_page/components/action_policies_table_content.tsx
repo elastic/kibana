@@ -206,8 +206,8 @@ export const ActionPoliciesTableContent = ({
                         }
                       )
                     : isEnableBlockedByLicense
-                    ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
-                    : undefined
+                      ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
+                      : undefined
                 }
                 onChange={() => {
                   if (policy.enabled) {

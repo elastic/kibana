@@ -174,9 +174,8 @@ export const getApmCpsManager = (): ICPSManager | undefined => cpsManager$.getVa
  * Emits the published CPS manager, so consumers that rendered before the CPS flag resolved
  * resubscribe to it instead of caching its absence for their whole lifetime.
  */
-export const apmCpsManager$: Observable<ICPSManager | undefined> = cpsManager$.pipe(
-  distinctUntilChanged()
-);
+export const apmCpsManager$: Observable<ICPSManager | undefined> =
+  cpsManager$.pipe(distinctUntilChanged());
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;

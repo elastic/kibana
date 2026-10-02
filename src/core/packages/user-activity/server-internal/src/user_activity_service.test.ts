@@ -491,7 +491,7 @@ describe('UserActivityService', () => {
       userActivityService.setup({ logging: loggingService });
       const typeRegistry = typeRegistryMock.create();
       typeRegistry.getAllTypes.mockReturnValue(
-        registeredTypeNames.map((name) => ({ name } as SavedObjectsType))
+        registeredTypeNames.map((name) => ({ name }) as SavedObjectsType)
       );
       return userActivityService.start({ typeRegistry });
     };

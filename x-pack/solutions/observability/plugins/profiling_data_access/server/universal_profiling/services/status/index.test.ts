@@ -28,7 +28,7 @@ describe('createGetStatusService', () => {
         debug: jest.fn(),
       },
       deps: { cloud: { isCloudEnabled } },
-    } as unknown as RegisterServicesParams);
+    }) as unknown as RegisterServicesParams;
 
   const soClient = {} as SavedObjectsClientContract;
   const esClient = {} as IScopedClusterClient;

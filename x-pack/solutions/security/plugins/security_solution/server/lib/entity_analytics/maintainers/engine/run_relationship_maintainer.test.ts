@@ -117,7 +117,7 @@ const successResponse = (
  * to repopulate from", which is what allows the reset to proceed.
  */
 const sourcePresenceResponse = (total: number): SearchResponse =>
-  ({ hits: { total: { value: total, relation: 'eq' }, hits: [] } } as unknown as SearchResponse);
+  ({ hits: { total: { value: total, relation: 'eq' }, hits: [] } }) as unknown as SearchResponse;
 
 const indexNotFoundError = () =>
   new esErrors.ResponseError({

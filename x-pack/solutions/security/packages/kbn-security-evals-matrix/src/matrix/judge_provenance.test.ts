@@ -198,7 +198,7 @@ const model = (modelId: string, judges: Array<string | undefined>): AggregatedMo
       judgeModelId,
       datasets: [],
     })),
-  } as unknown as AggregatedModelScores);
+  }) as unknown as AggregatedModelScores;
 
 describe('deriveJudgeProvenance', () => {
   it('reports the bare id only when every admitted run shares one judge', () => {

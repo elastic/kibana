@@ -94,7 +94,7 @@ const connector = (attributes: Partial<CloudConnectorSOAttributes>) =>
     type: 'fleet-cloud-connector',
     references: [],
     attributes: { name: 'c', cloudProvider: 'aws', vars: {}, ...attributes },
-  } as any);
+  }) as any;
 
 describe('getIacKeyOutcome', () => {
   const selections = [

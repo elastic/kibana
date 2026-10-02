@@ -66,7 +66,7 @@ const standaloneMessage = (id: string): ProcessedTimelineEvent =>
     created_at: new Date(0).toISOString(),
     actor: { type: EventActorType.user, id: 'u1', username: 'user1' },
     data: { message: 'standalone', attachments: [] },
-  } as unknown as ProcessedTimelineEvent);
+  }) as unknown as ProcessedTimelineEvent;
 
 const conversationOf = (timeline: ProcessedTimelineEvent[]): ProcessedConversation =>
   ({
@@ -74,7 +74,7 @@ const conversationOf = (timeline: ProcessedTimelineEvent[]): ProcessedConversati
     nextInput: { message: 'next', attachments: [] },
     attachments: [],
     attachmentTypes: [],
-  } as unknown as ProcessedConversation);
+  }) as unknown as ProcessedConversation;
 
 const input = (message: string) => ({ message, attachments: [] });
 
@@ -241,12 +241,12 @@ describe('listVisibleUnits', () => {
     unit.kind === 'message'
       ? 'message'
       : unit.kind === 'custom_event'
-      ? `event:${unit.entry.event.id}`
-      : unit.kind === 'round_cycle'
-      ? `${unit.round.id}:${unit.range?.start ?? '-'}:${unit.first ? 'first' : ''}${
-          unit.last ? 'last' : ''
-        }`
-      : `current:${unit.range.start}`;
+        ? `event:${unit.entry.event.id}`
+        : unit.kind === 'round_cycle'
+          ? `${unit.round.id}:${unit.range?.start ?? '-'}:${unit.first ? 'first' : ''}${
+              unit.last ? 'last' : ''
+            }`
+          : `current:${unit.range.start}`;
 
   it('lists history cycles, standalone messages and current cycles in render order', () => {
     const { entries } = fixture();

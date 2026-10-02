@@ -445,7 +445,7 @@ describe('matchExistingTargetIds', () => {
             })),
           },
         })),
-      } as unknown as ElasticsearchClient);
+      }) as unknown as ElasticsearchClient;
 
     it('never asks a single search for more hits than index.max_result_window allows', async () => {
       const esClient = makeEchoEsClient();

@@ -75,8 +75,8 @@ jest.mock('@kbn/core-di-browser', () => {
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
               : id === 'alerting:v2:experimentalFeatures'
-              ? mockAlertingV2ExperimentalFeaturesEnabled
-              : undefined,
+                ? mockAlertingV2ExperimentalFeaturesEnabled
+                : undefined,
         };
       }
       if (token === 'userProfile') {

@@ -520,7 +520,7 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams);
+    }) as unknown as GenerateHandlerParams;
 
   it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
     const parsed = strictGenerateParams.safeParse({

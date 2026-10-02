@@ -311,7 +311,7 @@ export const createAdManageJobStateTool = (
             }
 
             const progressLabel =
-              progressPct !== undefined ? `${progressPct}%` : datafeedState ?? 'unknown';
+              progressPct !== undefined ? `${progressPct}%` : (datafeedState ?? 'unknown');
             events?.reportProgress(`Waiting for batch datafeed to complete (${progressLabel})`, {
               metadata: {
                 datafeed_state: datafeedState ?? 'unknown',

@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useMinimumConfidenceScoreDraft } from './use_minimum_confidence_score_draft';
 
 const changeEvent = (value: string) =>
-  ({ target: { value } } as React.ChangeEvent<HTMLInputElement>);
+  ({ target: { value } }) as React.ChangeEvent<HTMLInputElement>;
 
 describe('useMinimumConfidenceScoreDraft', () => {
   it('displays the value as a 0–100 percentage integer', () => {

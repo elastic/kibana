@@ -25,7 +25,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: jest.fn() }) as unknown as InferenceServerStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -70,7 +70,7 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
         task_traces: { buckets: taskTraceIds.map((traceId) => ({ key: { trace_id: traceId } })) },
         evaluator_traces: { buckets: evaluatorTraces.map((key) => ({ key })) },
       },
-    } as any);
+    }) as any;
 
   const spanHit = (traceId: string, spanId: string, timestamp: string, durationNs: number) => ({
     _id: spanId,

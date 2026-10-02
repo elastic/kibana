@@ -320,7 +320,7 @@ describe('config set audit, pure parts', () => {
       elasticsearch: {},
       other: {},
       ...extra,
-    } as ConfigSetOverrides);
+    }) as ConfigSetOverrides;
 
   it('parses --key=value and key=value args, joins repeated keys, masks timestamps', () => {
     expect(parseServerArgs(['--a.b=1', 'c=x', 'c=y', 'not-an-arg'])).toEqual({

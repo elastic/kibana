@@ -22,7 +22,7 @@ import { upsertDatasetTool } from './upsert_dataset';
 import { MAX_RETURNED_DATASET_EXAMPLES } from './tool_utils';
 
 const createContext = (spaceId = 'default'): ToolHandlerContext =>
-  ({ request: httpServerMock.createKibanaRequest(), spaceId } as unknown as ToolHandlerContext);
+  ({ request: httpServerMock.createKibanaRequest(), spaceId }) as unknown as ToolHandlerContext;
 
 interface FirstResult {
   type: string;
@@ -100,7 +100,7 @@ const securityWith = (hasAllRequested: boolean, datasetClient?: DatasetClientMoc
         }),
       },
     },
-  } as unknown as Awaited<ReturnType<EvalDatasetManagementToolDeps['getStartDependencies']>>);
+  }) as unknown as Awaited<ReturnType<EvalDatasetManagementToolDeps['getStartDependencies']>>;
 
 const alreadyExistsError = (name: string) => {
   const error = new Error(`Dataset with name "${name}" already exists`);

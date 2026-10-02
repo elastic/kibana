@@ -1319,8 +1319,8 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
         refresh: workflowExecution.workflowDefinition?.settings?.run_as
           ? options.refresh || 'wait_for'
           : workflowExecution.concurrencyGroupKey
-          ? options.refresh
-          : false,
+            ? options.refresh
+            : false,
       });
 
       await ensureBoundExecutionAdmitted(
@@ -1561,7 +1561,7 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
         ({ access_control }) => access_control?.access_mode === 'private'
       );
       const profileId = hasPrivateWorkflows
-        ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
+        ? ((await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined)
         : undefined;
 
       interface PreparedItem {

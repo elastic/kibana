@@ -36,4 +36,4 @@ export const createRootStateChunkEvent = (
             }
           : chunk,
     },
-  } as LangchainStreamEvent);
+  }) as LangchainStreamEvent;

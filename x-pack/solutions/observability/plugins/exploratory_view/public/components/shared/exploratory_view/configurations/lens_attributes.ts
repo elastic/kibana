@@ -1158,15 +1158,13 @@ export class LensAttributes {
   }
 
   getAnnotationLayers(): XYVisualizationState['layers'] {
-    return this.annotationLayers.map(
-      (layer, index): XYAnnotationLayerConfig => ({
-        layerId: `annotation-layer-${index}`,
-        layerType: 'annotations',
-        annotations: layer.annotations,
-        indexPatternId: layer.dataView.id!,
-        ignoreGlobalFilters: layer.ignoreGlobalFilters ?? true,
-      })
-    );
+    return this.annotationLayers.map((layer, index): XYAnnotationLayerConfig => ({
+      layerId: `annotation-layer-${index}`,
+      layerType: 'annotations',
+      annotations: layer.annotations,
+      indexPatternId: layer.dataView.id!,
+      ignoreGlobalFilters: layer.ignoreGlobalFilters ?? true,
+    }));
   }
 
   addThresholdLayer(fieldName: string, layerId: string, { seriesConfig, dataView }: LayerConfig) {

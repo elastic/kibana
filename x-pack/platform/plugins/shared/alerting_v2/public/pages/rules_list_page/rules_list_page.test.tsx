@@ -66,8 +66,8 @@ jest.mock('@kbn/core-di-browser', () => {
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
               : id === 'alerting:v2:experimentalFeatures'
-              ? mockAlertingV2ExperimentalFeaturesEnabled
-              : undefined,
+                ? mockAlertingV2ExperimentalFeaturesEnabled
+                : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },

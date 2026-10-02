@@ -14,7 +14,7 @@ describe('verdict scoring when the server strips evaluator.metadata', () => {
       example: { id: 'alert-analysis-a', index: 0 },
       task: { model: { id: 'anthropic-claude-4.8-opus' } },
       evaluator: { name: evaluatorName, score },
-    } as never);
+    }) as never;
 
   it('does not count a stripped ladder doc as an unmapped verdict', () => {
     let counts: { unmappedVerdict: number } | undefined;

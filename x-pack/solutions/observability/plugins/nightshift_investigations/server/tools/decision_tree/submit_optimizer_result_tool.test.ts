@@ -49,7 +49,7 @@ const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeSto
     listVersions: jest.fn().mockResolvedValue([]),
     getVersion: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn(),
-  } as jest.Mocked<DecisionTreeStore>);
+  }) as jest.Mocked<DecisionTreeStore>;
 
 const createSandboxStart = (markdown: string) => {
   const session = {

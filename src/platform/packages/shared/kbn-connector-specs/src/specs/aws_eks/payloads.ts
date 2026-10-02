@@ -80,12 +80,12 @@ const mergeUpdateConfig = (input: UpdateNodegroupConfigInput, current: EksNodegr
     input.maxUnavailable !== undefined
       ? { maxUnavailable: input.maxUnavailable }
       : input.maxUnavailablePercentage !== undefined
-      ? { maxUnavailablePercentage: input.maxUnavailablePercentage }
-      : withoutUndefined({
-          maxUnavailable: existing.maxUnavailable,
-          maxUnavailablePercentage:
-            existing.maxUnavailable === undefined ? existing.maxUnavailablePercentage : undefined,
-        });
+        ? { maxUnavailablePercentage: input.maxUnavailablePercentage }
+        : withoutUndefined({
+            maxUnavailable: existing.maxUnavailable,
+            maxUnavailablePercentage:
+              existing.maxUnavailable === undefined ? existing.maxUnavailablePercentage : undefined,
+          });
   return withoutUndefined({
     ...limit,
     updateStrategy: input.updateStrategy ?? existing.updateStrategy,

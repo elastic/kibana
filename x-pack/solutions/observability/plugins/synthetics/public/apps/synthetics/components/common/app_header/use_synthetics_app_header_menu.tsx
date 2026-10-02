@@ -300,8 +300,8 @@ export function useSyntheticsAppHeaderMenu(
         tooltipContent: !canEditSynthetics
           ? CANNOT_PERFORM_ACTION_SYNTHETICS
           : !canManagePrivateLocations
-          ? NEED_PERMISSIONS_PRIVATE_LOCATIONS
-          : undefined,
+            ? NEED_PERMISSIONS_PRIVATE_LOCATIONS
+            : undefined,
         run: () => {
           if (canOpenDiagnostics) {
             setIsDiagnosticsOpen(true);

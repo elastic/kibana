@@ -151,7 +151,7 @@ describe('createCaseWorkflowFilter', () => {
       enabled: true,
       valid: true,
       definition: { tags },
-    } as unknown as WorkflowListItemDto);
+    }) as unknown as WorkflowListItemDto;
 
   it('passes all workflows when the configured tag list is empty', () => {
     const filter = createCaseWorkflowFilter([]);
@@ -189,7 +189,7 @@ describe('createCaseWorkflowComparator', () => {
         tags,
         triggers: triggerTypes.map((type) => ({ type })),
       },
-    } as unknown as WorkflowListItemDto);
+    }) as unknown as WorkflowListItemDto;
 
   it('sorts workflows with a configured tag before those without', () => {
     const compare = createCaseWorkflowComparator(['cases']);

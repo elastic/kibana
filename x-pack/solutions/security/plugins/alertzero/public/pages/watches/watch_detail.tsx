@@ -133,7 +133,7 @@ export const WatchDetailPage: React.FC = () => {
     const enabledAfterSave: WorkerEnabledById = new Map(
       [...enabledSavedFrom].map(([workerId, enabled]) => [
         workerId,
-        savedIds.has(workerId) ? enabled : storedEnabledById.get(workerId) ?? enabled,
+        savedIds.has(workerId) ? enabled : (storedEnabledById.get(workerId) ?? enabled),
       ])
     );
     setBlockedNoticeQueue(

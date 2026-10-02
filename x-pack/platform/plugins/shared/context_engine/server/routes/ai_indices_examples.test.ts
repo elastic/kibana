@@ -89,7 +89,9 @@ const examplesOf = ({ content }: ExampleMediaType) =>
 
 const codeSampleBody = ({ lang, source }: CodeSample) =>
   JSON.parse(
-    lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
+    lang === 'curl'
+      ? (/-d '([\s\S]*)'/.exec(source)?.[1] ?? '')
+      : source.slice(source.indexOf('\n'))
   );
 
 describe('AI index route examples', () => {

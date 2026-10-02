@@ -112,7 +112,7 @@ export const resolveUpdateInboundEventsEnabled = ({
 };
 
 export const attachInboundEventsEnabled = <
-  T extends { id: string; actionTypeId: string; isPreconfigured?: boolean }
+  T extends { id: string; actionTypeId: string; isPreconfigured?: boolean },
 >({
   connectors,
   connectorIdsWithIdentity,

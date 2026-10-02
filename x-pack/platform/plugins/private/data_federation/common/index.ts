@@ -142,8 +142,8 @@ export const isCsvQuotingEnabled = ({
   const defaults = effectiveMode
     ? QUOTING_AND_ESCAPING_BY_MODE[effectiveMode]
     : format
-    ? CSV_CHARACTER_DEFAULTS_BY_FORMAT[format]
-    : undefined;
+      ? CSV_CHARACTER_DEFAULTS_BY_FORMAT[format]
+      : undefined;
   return defaults?.quoting ?? false;
 };
 

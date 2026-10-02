@@ -16,11 +16,11 @@ const buildManagementApi = (): ManagementApi =>
     getWorkflow: jest.fn().mockResolvedValue({ id: 'workflow-1' }),
     runWorkflow: jest.fn().mockResolvedValue('inline-run-id'),
     scheduleWorkflow: jest.fn().mockResolvedValue('scheduled-run-id'),
-  } as unknown as ManagementApi);
+  }) as unknown as ManagementApi;
 
-const buildWorkflow = () => ({ id: 'w1' } as Parameters<ManagementApi['runWorkflow']>[0]);
+const buildWorkflow = () => ({ id: 'w1' }) as Parameters<ManagementApi['runWorkflow']>[0];
 
-const buildRequest = () => ({} as Parameters<ManagementApi['runWorkflow']>[3]);
+const buildRequest = () => ({}) as Parameters<ManagementApi['runWorkflow']>[3];
 
 describe('scheduleSubWorkflows', () => {
   beforeEach(() => {

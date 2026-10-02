@@ -23,8 +23,9 @@ jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
 
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
-const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)!
-  .matcher!;
+const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(
+  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+)!.matcher!;
 
 const createInitialState = (overrides: Partial<PerRuleState> = {}): PerRuleState => ({
   lastProcessedTimestamp: null,

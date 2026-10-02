@@ -36,7 +36,7 @@ const makeAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const makeLogger = (): jest.Mocked<Logger> =>
   ({
@@ -44,7 +44,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 /** @param hits - results returned for the single findByEventId esql query. */
 const createEventClient = (hits: SignificantEvent[]) => {

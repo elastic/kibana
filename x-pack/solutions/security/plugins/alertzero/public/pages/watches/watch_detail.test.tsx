@@ -1329,7 +1329,7 @@ describe('WatchDetailPage', () => {
           isLoading: false,
           error: null,
           refetch: jest.fn(),
-        } as never);
+        }) as never;
       mockUseWatch.mockReturnValue(watchQuery(SYSTEM_SECURITY_WATCH_DETECTION_ID));
       const history = createMemoryHistory({
         initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`],

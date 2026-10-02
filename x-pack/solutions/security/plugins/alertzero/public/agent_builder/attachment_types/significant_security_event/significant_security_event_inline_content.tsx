@@ -73,8 +73,7 @@ import type {
   TimelineEntry,
 } from './view_model';
 
-export interface SignificantSecurityEventInlineContentProps
-  extends AttachmentRenderProps<SignificantSecurityEventAttachment> {
+export interface SignificantSecurityEventInlineContentProps extends AttachmentRenderProps<SignificantSecurityEventAttachment> {
   navigation: AttachmentNavigationDeps;
 }
 

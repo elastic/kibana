@@ -40,7 +40,7 @@ jest.mock('./routes/register_routes', () => ({
 const createContext = () =>
   ({
     logger: { get: () => loggerMock.create() },
-  } as unknown as ConstructorParameters<typeof ProposalsPlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof ProposalsPlugin>[0];
 
 const setupPlugin = () => {
   const plugin = new ProposalsPlugin(createContext());

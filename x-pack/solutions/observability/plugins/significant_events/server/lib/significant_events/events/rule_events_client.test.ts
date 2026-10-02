@@ -26,13 +26,13 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
       row.dataJson,
       ...(row.createdAt !== undefined ? [row.createdAt] : []),
     ]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const dataDoc = {
   event_id: 'agent-event-1',

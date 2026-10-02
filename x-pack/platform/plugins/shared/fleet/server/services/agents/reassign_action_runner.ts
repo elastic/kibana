@@ -104,7 +104,7 @@ export async function reassignBatch(
   // spaces. ALL_SPACES_ID ('*') in space_ids is valid here: Fleet's action query filter
   // (query_namespaces_filtering.ts) includes '*' in every per-space terms query, so an action
   // with namespaces: ['*'] surfaces in all spaces.
-  const namespaces = spaceId && spaceId !== '*' ? [spaceId] : newAgentPolicy?.space_ids ?? [];
+  const namespaces = spaceId && spaceId !== '*' ? [spaceId] : (newAgentPolicy?.space_ids ?? []);
 
   await createAgentAction(esClient, soClient, {
     id: actionId,

@@ -298,7 +298,7 @@ describe('adCreateJobTool', () => {
         undefined,
         undefined,
         undefined,
-        () => ({ previewDatafeed } as any)
+        () => ({ previewDatafeed }) as any
       );
 
       const result = await tool.handler(

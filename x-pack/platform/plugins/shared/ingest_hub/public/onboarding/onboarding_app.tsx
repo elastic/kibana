@@ -108,8 +108,8 @@ export async function hydrateOnboardingSession(
             agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined),
           })
         : item.connectorId
-        ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
-        : JSON.stringify({ authMethod: 'static_keys' })
+          ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
+          : JSON.stringify({ authMethod: 'static_keys' })
     );
     // Seed policyIdsByInstance from packagePolicyIds so isAlreadyDeployed evaluates correctly
     // on resume. Without this, Back→Next would re-run deployToExistingAgentPolicies and create

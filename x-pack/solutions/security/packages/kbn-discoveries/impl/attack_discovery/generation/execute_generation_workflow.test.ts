@@ -1712,7 +1712,7 @@ describe('executeGenerationWorkflow', () => {
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
         getEventLogger: async () =>
-          ({ logEvent: jest.fn() } as unknown as jest.Mocked<IEventLogger>),
+          ({ logEvent: jest.fn() }) as unknown as jest.Mocked<IEventLogger>,
         getStartServices: (async () => ({
           coreStart: coreStartMock,
           pluginsStart: {},

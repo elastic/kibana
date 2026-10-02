@@ -563,9 +563,8 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('applies the update from the first run of a new conversation', async () => {
-      const { embeddable, emit, activeConversation$, getChatEvents$ } = await renderGeneratingPanel(
-        true
-      );
+      const { embeddable, emit, activeConversation$, getChatEvents$ } =
+        await renderGeneratingPanel(true);
       expect(getChatEvents$).not.toHaveBeenCalled();
 
       // The chat creates the conversation before sending, so its id is published before the run streams

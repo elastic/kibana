@@ -88,7 +88,7 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
             defaultMessage="ran {name} on {count, plural, =0 {an attachment} one {# attachment} other {# attachments}}"
             values={{
               name: workflowNameNode,
-              count: origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE ? origin.count ?? 1 : 0,
+              count: origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE ? (origin.count ?? 1) : 0,
             }}
           />
         );

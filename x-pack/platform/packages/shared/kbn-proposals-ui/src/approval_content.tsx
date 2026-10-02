@@ -218,7 +218,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       }
     }, []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = decision ? decision.status : (isSubmitting ?? 'pending');
 
     const badge = getApprovalOutcomeBadge(approvalPhase);
     const banner = getApprovalOutcomeBanner(approvalPhase);

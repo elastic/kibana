@@ -433,7 +433,7 @@ describe('renderCurrentRun', () => {
     };
     const renderedIds = (messages: Awaited<ReturnType<typeof current>>) =>
       messages.flatMap((m) =>
-        m.getType() === 'ai' ? (m as AIMessage).tool_calls?.map((c) => c.id) ?? [] : []
+        m.getType() === 'ai' ? ((m as AIMessage).tool_calls?.map((c) => c.id) ?? []) : []
       );
 
     it('renders only the steps from the range start', async () => {

@@ -120,8 +120,8 @@ function buildDispatcherForUrl(
           bodyTimeout: requestClass === 'persistent' ? 0 : timeout,
         }
       : requestClass === 'persistent'
-      ? { bodyTimeout: 0 }
-      : {};
+        ? { bodyTimeout: 0 }
+        : {};
 
   const sizeOptions =
     requestClass === 'finite' && maxContentLength > 0 ? { maxResponseSize: maxContentLength } : {};

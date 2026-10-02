@@ -149,7 +149,7 @@ export const createFormSerializer = (
       syncAlerts: syncAlerts ?? false,
       extractObservables: isObservablesExtractionBlocked(currentConfiguration.owner)
         ? false
-        : extractObservables ?? getSpaceExtractObservables(currentConfiguration),
+        : (extractObservables ?? getSpaceExtractObservables(currentConfiguration)),
     },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,

@@ -25,7 +25,7 @@ const doc = (over: {
       model: { id: over.judge ?? 'eis-anthropic-claude-4.6-sonnet' },
       metadata: over.metadata,
     },
-  } as unknown as EvaluationScoreDocument);
+  }) as unknown as EvaluationScoreDocument;
 
 const grounded = (verdict: string) => ({
   groundednessAnalysis: { summary_verdict: verdict },

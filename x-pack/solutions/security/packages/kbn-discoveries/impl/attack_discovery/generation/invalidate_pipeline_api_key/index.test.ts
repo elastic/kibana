@@ -20,7 +20,7 @@ const createCoreStart = (): CoreStart =>
         },
       },
     },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 const createLogger = (): Logger =>
   ({
@@ -28,7 +28,7 @@ const createLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('invalidatePipelineApiKey', () => {
   beforeEach(() => {

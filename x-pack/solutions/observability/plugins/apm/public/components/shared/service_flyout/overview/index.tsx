@@ -361,8 +361,8 @@ export function ServiceFlyoutOverview() {
 
   const isFiltersPending = Boolean(
     selectedTransaction &&
-      !selectedTransaction.isFiltersStale &&
-      !isSameListFilters(selectedTransaction.filters, liveTransactionFilters)
+    !selectedTransaction.isFiltersStale &&
+    !isSameListFilters(selectedTransaction.filters, liveTransactionFilters)
   );
 
   const onTransactionClick = useCallback(

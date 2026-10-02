@@ -89,7 +89,7 @@ export const AlertEpisodeGroupingSection = ({
     );
   }
 
-  const groupingFields = isRuleLoaded(ruleState) ? ruleState.rule.grouping?.fields ?? [] : [];
+  const groupingFields = isRuleLoaded(ruleState) ? (ruleState.rule.grouping?.fields ?? []) : [];
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
 
   // The badges render nothing when no grouping field holds a value, which would

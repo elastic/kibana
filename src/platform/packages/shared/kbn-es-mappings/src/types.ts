@@ -81,19 +81,19 @@ export type MappingProperty =
 type AppearsInSource<P> = [P] extends [{ type: 'alias' }]
   ? false
   : [P] extends [{ type: 'object'; properties: infer SubProps }]
-  ? keyof SubProps extends never
-    ? true
-    : true extends { [K in keyof SubProps]: AppearsInSource<SubProps[K]> }[keyof SubProps]
-    ? true
-    : false
-  : true;
+    ? keyof SubProps extends never
+      ? true
+      : true extends { [K in keyof SubProps]: AppearsInSource<SubProps[K]> }[keyof SubProps]
+        ? true
+        : false
+    : true;
 
 export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
   : {
-      [K in keyof O['properties'] as AppearsInSource<O['properties'][K]> extends true
-        ? K
-        : never]: {} extends O['properties'][K]
+      [
+        K in keyof O['properties'] as AppearsInSource<O['properties'][K]> extends true ? K : never
+      ]: {} extends O['properties'][K]
         ? never
         : O['properties'][K] extends { type: infer T }
           ? T extends 'keyword'

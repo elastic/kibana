@@ -23,8 +23,9 @@ export interface AccessControlEntryInput<Role extends string = string> {
   role: Role;
 }
 
-export interface AccessControlEntry<Role extends string = string>
-  extends AccessControlEntryInput<Role> {
+export interface AccessControlEntry<
+  Role extends string = string,
+> extends AccessControlEntryInput<Role> {
   added_at: string;
 }
 
@@ -109,9 +110,9 @@ export const hasEntityAccess = <Role extends string>({
   }
   return Boolean(
     profileId &&
-      accessControl.entries.some(
-        ({ type, id, role }) => type === 'user' && id === profileId && roles.includes(role)
-      )
+    accessControl.entries.some(
+      ({ type, id, role }) => type === 'user' && id === profileId && roles.includes(role)
+    )
   );
 };
 

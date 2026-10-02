@@ -1172,7 +1172,7 @@ describe('LayerPanel', () => {
     const makeTextBasedAttributes = (layers: Record<string, unknown>) =>
       ({
         state: { datasourceStates: { textBased: { layers } } },
-      } as unknown as LayerPanelProps['attributes']);
+      }) as unknown as LayerPanelProps['attributes'];
 
     it('renders the editor for the selected text-based layer', () => {
       mockVisualization.getLayerIds.mockReturnValue(['data', 'annotation']);
