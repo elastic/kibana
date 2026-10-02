@@ -28,7 +28,10 @@ import type { KibanaFramework } from '../framework/kibana_framework_adapter';
 const SOURCE_STATUS_REQUEST_TIMEOUT = '30s';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
-  constructor(private readonly framework: KibanaFramework) {}
+  constructor(
+    private readonly framework: KibanaFramework,
+    private readonly isServerless: boolean = false
+  ) {}
 
   public async getIndexNames(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {
     const indexMaps = await Promise.all([
@@ -64,6 +67,15 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     request?: KibanaRequest
   ): Promise<boolean> {
     /**
+     * `_resolve/cluster` is not exposed in serverless Elasticsearch — it
+     * answers `api_not_available_exception` there — so don't spend a
+     * guaranteed-failing round trip on it.
+     */
+    if (this.isServerless) {
+      return this.hasIndicesViaSearch(requestContext, indexNames, request);
+    }
+
+    /**
      * Use `_resolve/cluster` to answer "do any indices match?" from cluster
      * state, with no shard fan-out. This is the same approach Kibana core
      * uses in `data_views/server/rest_api_routes/internal/has_es_data.ts`.
@@ -73,11 +85,6 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
      *   is reported as not-connected rather than failing the whole call.
      * - `requestTimeout` — a transport-level backstop so the Kibana → ES
      *   connection itself cannot hang indefinitely.
-     *
-     * Privilege note: `_resolve/cluster` requires `view_index_metadata`,
-     * whereas `_search` needs only `read`. If the caller holds only `read`, a
-     * `security_exception` is caught and we fall back to the search-based
-     * probe so read-only users keep the same answer as before.
      */
     try {
       const response = await this.framework.callWithRequest(
@@ -96,28 +103,28 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
 
       return Object.values(response).some((cluster) => cluster.matching_indices === true);
     } catch (err) {
-      if (err.status === 403) {
-        // The caller holds only `read`, not `view_index_metadata`. Fall back to
-        // the search-based probe so read-only users keep the same answer.
-        return this.hasIndicesViaSearch(requestContext, indexNames, request);
-      }
-
-      if (err.status === 404) {
-        return false;
-      }
-
+      // A missing remote is a real answer about the source configuration and
+      // must reach the caller, which renders a dedicated callout for it.
       if (isNoSuchRemoteClusterMessage(err.message)) {
         throw new NoSuchRemoteClusterError();
       }
 
-      throw err;
+      /**
+       * Anything else — `security_exception` because `_resolve/cluster` needs
+       * `view_index_metadata` where `_search` needs only `read`, the API being
+       * unavailable on a deployment flavor, a transport failure — must not be
+       * reported as "no metric indices", because the caller turns that into an
+       * onboarding screen. Fall back to the search probe, which is what this
+       * code did before `_resolve/cluster` was introduced.
+       */
+      return this.hasIndicesViaSearch(requestContext, indexNames, request);
     }
   }
 
   /**
-   * Fallback probe used when the caller lacks `view_index_metadata`. Issues
-   * a `size:0, terminate_after:1` search and checks `_shards.total > 0` —
-   * the original implementation before the `_resolve/cluster` switch.
+   * Fallback probe for when `_resolve/cluster` is unusable. Issues a
+   * `size:0, terminate_after:1` search and checks `_shards.total > 0` — the
+   * original implementation before the `_resolve/cluster` switch.
    */
   private async hasIndicesViaSearch(
     requestContext: InfraPluginRequestHandlerContext,
@@ -147,7 +154,9 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
       .then(
         (response) => response._shards.total > 0,
         (err) => {
-          if (err.status === 404) {
+          // `@elastic/transport` exposes `statusCode`; `status` is only present
+          // on errors constructed elsewhere, so accept either.
+          if ((err.statusCode ?? err.status) === 404) {
             return false;
           }
 

@@ -96,8 +96,10 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
       expect(requestArg).toBe(fakeRequest);
     });
 
-    it('returns false when _resolve/cluster throws 404', async () => {
-      const notFoundError = Object.assign(new Error('index_not_found_exception'), { status: 404 });
+    it('returns false when both _resolve/cluster and the fallback search 404', async () => {
+      const notFoundError = Object.assign(new Error('index_not_found_exception'), {
+        statusCode: 404,
+      });
       const callWithRequest = jest.fn().mockRejectedValue(notFoundError);
       const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
 
@@ -119,7 +121,7 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
       ).rejects.toBeInstanceOf(NoSuchRemoteClusterError);
     });
 
-    it('propagates unexpected errors from _resolve/cluster', async () => {
+    it('propagates an error only when the fallback search also fails', async () => {
       const unexpectedError = new Error('cluster unhealthy');
       const callWithRequest = jest.fn().mockRejectedValue(unexpectedError);
       const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
@@ -127,6 +129,63 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
       await expect(
         adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*')
       ).rejects.toThrow('cluster unhealthy');
+      expect(callWithRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('falls back to _search rather than reporting "no indices" on an unexpected error', async () => {
+      // Regression guard: composeSourceStatus turns a throw into
+      // `metricIndicesExist: false`, which renders an onboarding screen. An
+      // unusable `_resolve/cluster` must never produce that on a cluster that
+      // does have indices.
+      const unexpectedError = Object.assign(new Error('cluster_block_exception'), {
+        statusCode: 503,
+      });
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(unexpectedError)
+        .mockResolvedValueOnce({ _shards: { total: 7 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await expect(
+        adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*')
+      ).resolves.toBe(true);
+    });
+  });
+
+  describe('hasIndices — serverless', () => {
+    // `_resolve/cluster` is not exposed in serverless Elasticsearch; calling it
+    // there answers `api_not_available_exception`.
+    const apiNotAvailable = Object.assign(new Error('api_not_available_exception'), {
+      statusCode: 410,
+    });
+
+    it('skips _resolve/cluster entirely and probes with _search', async () => {
+      const callWithRequest = jest
+        .fn()
+        .mockResolvedValue({ _shards: { total: 4 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(
+        createFramework(callWithRequest),
+        true
+      );
+
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      expect(result).toBe(true);
+      expect(callWithRequest).toHaveBeenCalledTimes(1);
+      const [, endpoint] = callWithRequest.mock.calls[0];
+      expect(endpoint).toBe('search');
+    });
+
+    it('still reports indices when a stateful build hits api_not_available_exception', async () => {
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(apiNotAvailable)
+        .mockResolvedValueOnce({ _shards: { total: 4 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await expect(
+        adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*')
+      ).resolves.toBe(true);
     });
   });
 
