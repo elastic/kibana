@@ -27,7 +27,7 @@ This skill commits, pushes, replies to and resolves threads without asking. The 
 | Command | Result |
 |---|---|
 | `pr.sh signals <pr>` | One line per signal, `on` or `off` with a reason, then `mergeable=<MERGEABLE\|CONFLICTING\|UNKNOWN> base=… head=…` |
-| `pr.sh wait <pr> --for <libra,claude,ci> [--sha <sha>] [--timeout <s>]` | Blocks until each listed signal has a result, then prints one line each, such as `libra=findings sha=… detail="…"`. `--timeout 0` polls once and reports `pending` for unfinished signals |
+| `pr.sh wait <pr> --for <libra,claude,ci> [--sha <sha>] [--since <utc>] [--timeout <s>]` | Blocks until each listed signal has a result, then prints one line each, such as `libra=findings sha=… detail="…"`. `--since` makes CI ignore a status from before a retry. `--timeout 0` polls once and reports `pending` for unfinished signals |
 | `pr.sh threads <pr> --reviewer <libra\|claude>` | One JSON object per unresolved thread the reviewer opened and commented on last: `threadId`, `commentId`, `path`, `line`, `isOutdated`, `url`, `body`, `followUp`, `otherReplies`, plus `latestCommentId` and `latestBody` when `followUp` is true |
 | `pr.sh resolve <thread-id>` | Resolves the thread and prints `true` |
 

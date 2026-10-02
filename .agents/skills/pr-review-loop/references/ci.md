@@ -46,10 +46,17 @@ Never skip, disable or delete a test to make CI pass.
 
 ## Retrying flaky failures
 
-Retry each flaky or unrelated failed job once per commit. Retry the job, not the whole build:
+Retry each flaky or unrelated failed job once per commit. Note the time first, then retry the job, not the whole build:
 
 ```bash
+since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 bk job retry <job-id>
 ```
 
-If your token can't retry jobs, comment `/ci` on the PR instead, which rebuilds everything. Then wait with `pr.sh wait <pr> --for ci`. If the same job fails again, stop retrying and list it in the final report with the build link and any tracking issue.
+If your token can't retry jobs, comment `/ci` on the PR instead, which rebuilds everything. Then wait with `--since`:
+
+```bash
+pr.sh wait <pr> --for ci --since "$since"
+```
+
+Until the new attempt reports, the `kibana-ci` status still shows the failure you retried. `--since` makes `wait` ignore it, so the result you get is the retry's. If the same job fails again, stop retrying and list it in the final report with the build link and any tracking issue.

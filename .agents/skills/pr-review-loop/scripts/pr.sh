@@ -3,7 +3,7 @@
 #
 # Usage:
 #   bash .agents/skills/pr-review-loop/scripts/pr.sh signals <pr>
-#   bash .agents/skills/pr-review-loop/scripts/pr.sh wait <pr> --for <libra,claude,ci> [--sha <sha>] [--timeout <seconds>]
+#   bash .agents/skills/pr-review-loop/scripts/pr.sh wait <pr> --for <libra,claude,ci> [--sha <sha>] [--since <utc>] [--timeout <seconds>]
 #   bash .agents/skills/pr-review-loop/scripts/pr.sh threads <pr> --reviewer <libra|claude>
 #   bash .agents/skills/pr-review-loop/scripts/pr.sh resolve <thread-id>
 #
@@ -18,6 +18,8 @@
 #            ci=<passed|failed|none|timeout|pending> sha=<sha> detail="…" [url=<build-url>]
 #          --sha defaults to the newest PR commit not pushed by kibanamachine. It applies to libra and
 #          claude; ci always follows the PR head, because kibanamachine fix-up commits restart CI.
+#          --since (UTC, e.g. 2026-10-02T10:00:00Z) makes ci ignore a status last updated before that time,
+#          so a wait after a retry doesn't return the failure that was retried.
 #          none means no result appeared within the signal's startup window. --timeout <s> caps the wait for
 #          every signal, including one that hasn't started; --timeout 0 polls once and reports pending for
 #          every signal that has no result yet.
@@ -137,14 +139,19 @@ poll_claude() {
 }
 
 poll_ci() {
-  local head="$1" status
+  local head="$1" since="$2" status
   status=$(gh api "repos/$REPO/commits/$head/status?per_page=100" --paginate \
-    --jq '.statuses[] | select(.context == "kibana-ci") | "\(.state)\t\(.target_url // "")"')
+    --jq '.statuses[] | select(.context == "kibana-ci") | "\(.state)\t\(.target_url // "-")\t\(.updated_at)"')
   if [[ -z "$status" ]]; then
     echo "missing"
     return
   fi
-  local state="${status%%$'\t'*}" url="${status#*$'\t'}"
+  local state url updated
+  IFS=$'\t' read -r state url updated <<<"$status"
+  # A retry doesn't clear the old status, so until the new attempt reports, the status still describes the old one.
+  if [[ -n "$since" && "$updated" < "$since" ]]; then
+    return 0
+  fi
   case "$state" in
     success) printf 'passed\t%s\turl=%s\n' "build passed" "$url" ;;
     failure | error) printf 'failed\t%s\turl=%s\n' "build $state" "$url" ;;
@@ -164,11 +171,12 @@ cmd_wait() {
   [[ $# -ge 1 ]] || die "wait requires a PR number"
   local pr="$1"
   shift
-  local sha="" signals="" timeout_override=""
+  local sha="" signals="" timeout_override="" since=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --for) signals="$2"; shift 2 ;;
       --sha) sha="$2"; shift 2 ;;
+      --since) since="$2"; shift 2 ;;
       --timeout) timeout_override="$2"; shift 2 ;;
       *) die "unknown option for wait: $1" ;;
     esac
@@ -248,7 +256,7 @@ cmd_wait() {
     fi
 
     if [[ -z "$ci_done" ]]; then
-      result=$(poll_ci "$ci_head")
+      result=$(poll_ci "$ci_head" "$since")
       if [[ "$result" == "missing" ]] && ((SECONDS - ci_head_since >= ci_startup)); then
         ci_done=$(report ci none "$ci_head" "no kibana-ci status after ${ci_startup}s")
       elif [[ -n "$result" && "$result" != "missing" ]]; then
