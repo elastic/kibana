@@ -17,6 +17,9 @@ import { KibanaCodeEditorWrapper } from '../ui_components';
  */
 const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 
+/** Lens dimension field picker; also stamps `${subj}-optionsList` on its dropdown. */
+const FIELD_PICKER_TEST_SUBJ = 'indexPattern-dimension-field';
+
 interface ChartSwitchPopoverOptions {
   search?: string;
   visType?: string;
@@ -398,11 +401,20 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.page.components
-      .comboBox('indexPattern-dimension-field')
-      .setSelectedOptions([field], {
-        timeout: 10_000,
-      });
+    const fieldPicker = this.page.testSubj.locator(FIELD_PICKER_TEST_SUBJ);
+    const committedField = await fieldPicker.getAttribute('data-selected-field');
+    if (committedField !== field) {
+      await this.page.testSubj.click(`${FIELD_PICKER_TEST_SUBJ} > comboBoxInput`);
+      await this.page.testSubj.fill(`${FIELD_PICKER_TEST_SUBJ} > comboBoxSearchInput`, field);
+      // Lens repaints the options while recomputing field compatibility, so address the
+      // option by its own label rather than by a position read before that repaint.
+      const option = this.page.testSubj
+        .locator(`~${FIELD_PICKER_TEST_SUBJ}-optionsList`)
+        .getByRole('option')
+        .filter({ has: this.page.getByText(field, { exact: true }) });
+      await expect(option).toHaveCount(1);
+      await option.click();
+    }
     // ComboBox can show the typed option before Lens layer state commits.
     // data-selected-field is the committed display name and updates only after
     // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
