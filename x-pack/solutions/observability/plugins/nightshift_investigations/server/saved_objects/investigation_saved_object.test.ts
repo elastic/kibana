@@ -75,43 +75,26 @@ describe('nightshift investigation saved object model version 4', () => {
       })
     ).toThrow();
   });
-});
 
-describe('nightshift investigation saved object model version 5', () => {
-  const modelVersions = nightshiftInvestigationSavedObjectType.modelVersions as unknown as Record<
-    number,
-    SavedObjectsFullModelVersion
-  >;
-  const modelVersion5 = modelVersions[5];
-
-  it("accepts the latest run's execution without data changes", () => {
-    expect(modelVersion5?.changes).toEqual([]);
+  it("accepts the latest run's execution", () => {
     expect(() =>
-      modelVersion5?.schemas?.create?.validate({
-        title: 'Checkout errors',
+      modelVersion4?.schemas?.create?.validate({
+        ...baseAttributes,
         status: 'running',
-        subject_type: 'alert',
-        subject_id: 'alert-1534',
-        trigger_type: 'manual',
-        created_at: '2026-09-28T00:00:00.000Z',
         execution_id: 'exec-follow-up',
       })
     ).not.toThrow();
   });
 
   const threadInvestigation = (thread: Record<string, unknown>) => ({
-    title: 'Checkout errors',
+    ...baseAttributes,
     status: 'pending',
-    subject_type: 'manual',
-    subject_id: 'manual',
-    trigger_type: 'manual',
-    created_at: '2026-09-28T00:00:00.000Z',
     thread,
   });
 
   it('accepts the thread the investigation belongs to', () => {
     expect(() =>
-      modelVersion5?.schemas?.create?.validate(
+      modelVersion4?.schemas?.create?.validate(
         threadInvestigation({
           surface: 'slack',
           workspace: 'T1',
@@ -124,13 +107,10 @@ describe('nightshift investigation saved object model version 5', () => {
     ).not.toThrow();
   });
 
-  it('rejects a thread without its workspace or from another surface', () => {
-    const thread = { surface: 'slack', channel: 'C1', thread_ts: '1700.0001' };
-
-    expect(() => modelVersion5?.schemas?.create?.validate(threadInvestigation(thread))).toThrow();
+  it('rejects a thread from another surface', () => {
     expect(() =>
-      modelVersion5?.schemas?.create?.validate(
-        threadInvestigation({ ...thread, workspace: 'T1', surface: 'teams' })
+      modelVersion4?.schemas?.create?.validate(
+        threadInvestigation({ surface: 'teams', workspace: 'T1', channel: 'C1', thread_ts: '1' })
       )
     ).toThrow();
   });

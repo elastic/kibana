@@ -97,7 +97,8 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
 });
 
 // Adds the impact summary and evidence, makes impact entities optional, and drops blind spots.
-// None of these are queried beyond the existing flattened `impact` mapping.
+// Also adds the run that owns the investigation and the chat thread it belongs to. Records are
+// only looked up by id, so none of these are queried beyond the existing flattened `impact` mapping.
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
   blind_spots: undefined,
   impact: schema.maybe(
@@ -111,16 +112,15 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
       ),
     })
   ),
-});
-
-const investigationAttributesSchemaV5 = investigationAttributesSchemaV4.extends({
   execution_id: optionalKeyword,
+  // Every write sets the thread's surface, workspace, channel and thread_ts. They are optional here
+  // only because an existing model version cannot gain required fields.
   thread: schema.maybe(
     schema.object({
-      surface: enumOf(['slack'] as const),
-      workspace: keyword,
-      channel: keyword,
-      thread_ts: keyword,
+      surface: schema.maybe(enumOf(['slack'] as const)),
+      workspace: optionalKeyword,
+      channel: optionalKeyword,
+      thread_ts: optionalKeyword,
       status_message_ts: optionalKeyword,
       seen_event_ids: schema.maybe(schema.arrayOf(keyword, { maxSize: MAX_THREAD_SEEN_EVENT_IDS })),
     })
@@ -179,13 +179,6 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV4,
         forwardCompatibility: investigationAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
-      },
-    },
-    5: {
-      changes: [],
-      schemas: {
-        create: investigationAttributesSchemaV5,
-        forwardCompatibility: investigationAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
