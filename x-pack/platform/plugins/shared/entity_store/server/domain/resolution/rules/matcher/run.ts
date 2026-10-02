@@ -75,6 +75,10 @@ interface BucketStats {
   failedBuckets: number;
   appliedBuckets: number;
   examinedBuckets: number;
+  oversized101To1000: number;
+  oversized1001To10000: number;
+  oversizedOver10000: number;
+  oversizedLargestGroup: number;
 }
 
 const emptyStats = (): BucketStats => ({
@@ -90,7 +94,25 @@ const emptyStats = (): BucketStats => ({
   failedBuckets: 0,
   appliedBuckets: 0,
   examinedBuckets: 0,
+  oversized101To1000: 0,
+  oversized1001To10000: 0,
+  oversizedOver10000: 0,
+  oversizedLargestGroup: 0,
 });
+
+const recordOversizedGroup = (stats: BucketStats, groupSize: number): void => {
+  stats.skippedOversizedBuckets++;
+  if (groupSize > stats.oversizedLargestGroup) {
+    stats.oversizedLargestGroup = groupSize;
+  }
+  if (groupSize <= 1000) {
+    stats.oversized101To1000++;
+  } else if (groupSize <= 10000) {
+    stats.oversized1001To10000++;
+  } else {
+    stats.oversizedOver10000++;
+  }
+};
 
 export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, signal, telemetry, spec, ruleId } =
@@ -138,6 +160,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
         resolutionClient,
         logger,
         stats,
+        spec,
         ruleId,
         mutatedIds,
       });
@@ -181,6 +204,11 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       { name: 'cascades_blocked', count: stats.cascadesBlocked },
       { name: 'ambiguous_skips', count: stats.skippedAmbiguousBuckets },
       { name: 'oversized_skips', count: stats.skippedOversizedBuckets },
+      { name: 'oversized_101_1000', count: stats.oversized101To1000 },
+      { name: 'oversized_1001_10000', count: stats.oversized1001To10000 },
+      { name: 'oversized_over_10000', count: stats.oversizedOver10000 },
+      // oversized_largest_group is a size (max declined groupSize), not a count of buckets.
+      { name: 'oversized_largest_group', count: stats.oversizedLargestGroup },
       { name: 'noop_skips', count: stats.skippedNoopBuckets },
       { name: 'blocked_skips', count: stats.skippedBlockedBuckets },
       { name: 'stale_overlap_skips', count: stats.skippedStaleOverlapBuckets },
@@ -233,26 +261,28 @@ async function resolveMatchGroup(
     resolutionClient: ResolutionClient;
     logger: Logger;
     stats: BucketStats;
+    spec: EsqlMatchSpec;
     ruleId: string;
     mutatedIds: Set<string>;
   }
 ): Promise<void> {
   const { logger, stats, ruleId, resolutionClient, mutatedIds } = deps;
+  const declineSameNamespaceDuplicates = deps.spec.declineSameNamespaceDuplicates !== false;
   stats.examinedBuckets++;
 
   if (row.groupSize > GROUP_SIZE_CEILING) {
-    stats.skippedOversizedBuckets++;
+    recordOversizedGroup(stats, row.groupSize);
     logger.warn(
       `${ruleId}: declining oversized bucket '${row.matchValue}' with ${row.groupSize} entities (ceiling ${GROUP_SIZE_CEILING})`
     );
     return;
   }
 
-  if (row.unresolvedNamespaces.length < row.unresolvedCount) {
-    // Two unresolved entities in one namespace (including two `local` hosts
-    // sharing an email) decline the whole group, including a clear IDP pair
-    // sitting next to them. Decline-all is intentional: dropping the doubled
-    // namespace can promote a worse target (two ADs + one Okta → Okta wins).
+  // Same-namespace duplicates are declined by default (two AD emails + one Okta
+  // must not make Okta the target). SID rules set this false: a SID names one
+  // account, so duplicates are identifier drift, not a collision. Well-known
+  // SIDs are excluded at query time so LocalSystem never reaches this path.
+  if (declineSameNamespaceDuplicates && row.unresolvedNamespaces.length < row.unresolvedCount) {
     stats.skippedAmbiguousBuckets++;
     logger.warn(
       `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`

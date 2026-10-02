@@ -140,14 +140,16 @@ const makeHook = (
     refresh = jest.fn().mockResolvedValue(undefined),
     canManage = true,
     isReadOnly,
+    buttonIconSize,
   }: {
     assign?: jest.Mock;
     refresh?: jest.Mock;
     canManage?: boolean;
     isReadOnly?: (item: TestItem) => boolean;
+    buttonIconSize?: 's';
   } = {}
 ) => {
-  const opts = { items, assign, refresh, canManage, isReadOnly };
+  const opts = { items, assign, refresh, canManage, isReadOnly, buttonIconSize };
   const hook = (): RenderPicker =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useAssigneePickers({
@@ -159,6 +161,7 @@ const makeHook = (
       refresh: opts.refresh,
       canManage: opts.canManage,
       isReadOnly: opts.isReadOnly,
+      buttonIconSize: opts.buttonIconSize,
       labels: { assignSuccess: 'Assignees updated', assignError: 'Failed to update assignees' },
     });
   return { hook, assign, refresh };

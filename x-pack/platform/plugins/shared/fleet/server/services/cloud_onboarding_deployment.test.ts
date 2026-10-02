@@ -512,23 +512,24 @@ describe('cloudOnboardingDeploymentService', () => {
     });
 
     describe('UC6: agent_based + cloudwatch_metrics', () => {
-      it('creates with agent_based mechanism, no packagePolicyIds, no agentPolicyId initially', async () => {
+      it('creates with agent_based mechanism, authMethod, no packagePolicyIds, no agentPolicyIds initially', async () => {
         const attrs = makeAttributes({
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
+          authMethod: 'assume_role',
           packagePolicyIds: undefined,
-          agentPolicyId: undefined,
+          agentPolicyIds: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', attrs));
         mockGetByType(soClient, 'deploy-uc6', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
-          connectorId: 'conn-6',
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
+          authMethod: 'assume_role',
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -537,35 +538,36 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.mechanisms).toEqual(['agent_based']);
+        expect(result.authMethod).toBe('assume_role');
         expect(result.packagePolicyIds).toBeUndefined();
-        expect(result.agentPolicyId).toBeUndefined();
+        expect(result.agentPolicyIds).toBeUndefined();
       });
 
-      it('stores agentPolicyId after agent policy is selected via update', async () => {
+      it('stores agentPolicyIds after agent policies are selected via update', async () => {
         const updatedAttrs = makeAttributes({
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
-          agentPolicyId: 'agent-policy-123',
-          packagePolicyIds: ['pkg-policy-456'],
+          agentPolicyIds: ['agent-policy-123', 'agent-policy-456'],
+          packagePolicyIds: ['pkg-policy-789'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc6', {
-          agentPolicyId: 'agent-policy-123',
-          packagePolicyIds: ['pkg-policy-456'],
+          agentPolicyIds: ['agent-policy-123', 'agent-policy-456'],
+          packagePolicyIds: ['pkg-policy-789'],
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
           expect.objectContaining({
-            agentPolicyId: 'agent-policy-123',
-            packagePolicyIds: ['pkg-policy-456'],
+            agentPolicyIds: ['agent-policy-123', 'agent-policy-456'],
+            packagePolicyIds: ['pkg-policy-789'],
           }),
           expect.objectContaining({ id: 'deploy-uc6', overwrite: true })
         );
-        expect(result.agentPolicyId).toBe('agent-policy-123');
-        expect(result.packagePolicyIds).toEqual(['pkg-policy-456']);
+        expect(result.agentPolicyIds).toEqual(['agent-policy-123', 'agent-policy-456']);
+        expect(result.packagePolicyIds).toEqual(['pkg-policy-789']);
       });
     });
   });

@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/deeplinks-observability'
   - '@kbn/esql-utils'
+  - '@kbn/data-source'
   - '@kbn/managed-content-badge'
   - '@kbn/deeplinks-analytics'
   - '@kbn/shared-ux-markdown'
@@ -154,6 +155,7 @@ dependsOn:
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/core-saved-objects-server'
   - '@kbn/as-code-filters-constants'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
@@ -173,6 +175,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-session-constants'
+  - '@kbn/field-types'
   - '@kbn/esql-browser'
 tags:
   - plugin

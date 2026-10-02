@@ -10,8 +10,7 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
-import { prepareMessages } from '../utils/to_langchain_messages';
-import { renderCurrentRun } from '../utils/render_steps_to_messages';
+import { renderVisibleContext } from '../utils/visible_context';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { getFileSystemInstructions } from './utils/filestore';
@@ -24,33 +23,30 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { run, processedConversation, resultTransformer, conversationTimestamp, imageResolver } =
-    params;
-
-  // Generate messages from the conversation's rounds, optionally
-  // injecting a compaction summary for older compacted rounds.
-  // The summary is sourced from processedConversation.compactionSummary,
-  // which is set during the compaction phase in the conversation pipeline.
-  const previousRoundsAsMessages = await prepareMessages({
-    conversation: processedConversation,
-    resultTransformer,
-    compactionSummary: processedConversation.compactionSummary,
-    conversationTimestamp,
-  });
-
-  // The current run: the relevant_skills step (if any) is rendered in place by the renderer.
-  const currentRunMessages = await renderCurrentRun({
+  const {
     run,
-    phase: 'research',
-    imageResolver,
+    processedConversation,
     resultTransformer,
-  });
+    resultStore,
+    logger,
+    conversationTimestamp,
+    imageResolver,
+  } = params;
 
-  return [
-    ['system', await getAgentSystemMessage(params)],
-    ...previousRoundsAsMessages,
-    ...currentRunMessages,
-  ];
+  // History (behind the compaction summary, if any), then the current run; the relevant_skills
+  // step (if any) is rendered in place by the renderer.
+  const contextMessages = await renderVisibleContext(
+    {
+      conversation: processedConversation,
+      run,
+      phase: 'research',
+      imageResolver,
+      conversationTimestamp,
+    },
+    { resultStore, resultTransformer, logger }
+  );
+
+  return [['system', await getAgentSystemMessage(params)], ...contextMessages];
 };
 
 const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {

@@ -41,8 +41,8 @@ are in, not of the analysis, and you find out from the tools you were given and 
 attachment or system prompt says:
 
 - **When the run says to apply**, load `ai-index-automations` and author the change through the
-  save path the run gives you. How to sequence that with the user — what to ask, when to show a
-  diff, when to save — comes from the run, not from here.
+  save path you were given. How to sequence that with the user — what to ask, when to show a
+  diff, when to save — comes from the agent's instructions, not from here.
 - **When nothing grants you that**, and always when the run is unattended, the proposal *is* the
   deliverable. Describe the change precisely enough to act on and stop there.
 
@@ -100,6 +100,14 @@ proposed change, is the work.
 A **KI** is a structured fact stored in a searchable AI index or datastream (backing stores match
 `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise). Workflows write KIs through the
 `context-engine` steps using the AI index id — never by indexing into the backing store directly.
+
+Agents retrieve through `platform.context_engine.query_ai_indices`, which returns only current,
+active, unexpired KIs: on a data stream the newest revision per `id`, never one whose
+`governance.lifecycle.status` is `deleted` or whose `expires_at` has passed, and with
+`governance` dropped. Those are the KIs an agent can retrieve. Naming
+`governance.lifecycle.status` or `expires_at` in a query switches off that one filter, and naming
+any `governance.*` field keeps it in the result, so diagnosis can read tombstones, expired KIs and
+provenance through the same tool.
 
 Each KI does two things:
 
@@ -271,9 +279,10 @@ results as evidence lines:
    the document `_id`, reached with `METADATA _id`) or drop the claim. A key populated on one side
    only is a one-way lookup, and the proposal says which way.
 3. **One unit count for a per-unit strategy.** When one KI is about a unit rather than the whole
-   index, count the units the Unit section quotes and the Cost estimate multiplies:
-   `FROM <index> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows: 62,884 sales rows
-   can be 2,517 products.
+   index, count the units the Unit section quotes and the Cost estimate multiplies, with the
+   agreed corpus filter applied so the count is of units the automation will actually process:
+   `FROM <index> <corpus filter> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows:
+   62,884 sales rows can be 2,517 products.
 
 That is the whole budget: a row sample and a row count per source, a populated count per side of
 each claimed join, and one unit count for a per-unit strategy. Do not profile the index
@@ -290,7 +299,8 @@ proposals for the same index read the same way:
 - **Suggested automation** — the strategy by name where a catalog strategy fits (or "custom" with
   the unit named), the template it starts from, and whether it is new or replaces an automation,
   naming which.
-- **Unit** — what one KI is about, and how many units the corpus holds (a count you ran).
+- **Unit** — what one KI is about, and how many units the filtered corpus holds (a count you ran
+  with the corpus filter applied).
 - **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
   figures that separate it from its siblings.
 - **Found and refreshed** — the discovery query, the corpus filter, and whether a unit is
@@ -299,9 +309,9 @@ proposals for the same index read the same way:
   for an existing index the counted findings with their denominators and windows. Every claim the
   proposal makes about the data points at a line here; a proposal with an empty Evidence section
   is not ready.
-- **Cost** — required. The corpus size, how many units one run writes, how many model calls that
-  is (one per unit for the profile templates, one per document for the document template), and,
-  once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
+- **Cost** — required. The corpus size, how many units one run writes (the unit count, or the
+  automation's own KI cap when that is lower), how many model calls that is (one per unit for the
+  profile templates, one per document for the document template), and, once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
   `ai-index-automations` lays out. Before the pilot, say the time is not yet measured rather than
   guessing.
 - **Example questions** — optional. Include it only when you are sure: a question belongs here
@@ -386,12 +396,13 @@ Before proposing a change to something, read it.
   target each is queried through, `platform.context_engine.describe_ai_index` gives one index's
   fields and example queries, and
   `platform.context_engine.query_ai_indices` samples them with the space filter applied
-  server-side; never read an AI index with `platform.core.execute_esql`. On a data-stream
-  destination one KI can be several revisions, so read the newest per `id` as `ki_shapes`
-  describes. Aggregating by `type` and `tags` tells you what the
+  server-side; never read an AI index with `platform.core.execute_esql`. It already reads the
+  newest revision per `id` and hides deleted and expired KIs, as `ki_shapes` describes, so what it
+  returns is what an agent can retrieve. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
   content" or "content that exists under a name the agent did not guess". This is the step signals
-  cannot substitute for.
+  cannot substitute for. `governance.provenance.created_by.uri` on a KI names the automation that
+  wrote it; `KEEP` it to see it, since the tool drops `governance` otherwise.
 - **Sources, and the filter on them.** A coverage gap on data that is not in any source is a source
   problem, and a different fix from anything about generation. `ai-index-sources` covers how to
   tell those apart — an `esql` source is a query you can run, so run it with and without its filter
@@ -553,7 +564,3 @@ calls for — not before, because the filter depends on the unit.
 **No signals, on an index that exists.** Not evidence of health: an index nobody queries and an
 index that works perfectly look the same from here. Say which you can and cannot rule out rather
 than reporting the index as fine.
-
-**A corpus larger than 10,000 documents.** ES|QL caps at 10,000 rows per query, so an automation
-over a larger corpus needs pagination it will not get by default. Note the cap rather than
-proposing something that silently truncates; `ai-index-automations` has the shapes that handle it.

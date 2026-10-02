@@ -73,14 +73,14 @@ test.describe(
           '@timestamp': now,
           rule: { id: SEEDED_RULE_ID, version: 1 },
           group_hash: SEEDED_GROUP_HASH,
-          episode: { id: 'scout-alerts-mgmt-priv-episode', status: 'active' },
+          alert: { id: 'scout-alerts-mgmt-priv-episode', status: 'active' },
         }),
       ]);
       await apiServices.alertingV2.alertActionsEvents.seed([
         {
           '@timestamp': now,
           last_series_event_timestamp: now,
-          actor: null,
+          actor: { type: 'user' },
           action_type: 'tag',
           group_hash: SEEDED_GROUP_HASH,
           rule_id: SEEDED_RULE_ID,
