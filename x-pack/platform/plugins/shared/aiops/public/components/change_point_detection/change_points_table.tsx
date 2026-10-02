@@ -418,7 +418,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
         filters={filters}
         // @ts-ignore
         attributes={attributes}
-        renderMode={'preview'}
+        renderMode={'non-interactive'}
         executionContext={{
           type: 'aiops_change_point_detection_chart',
           name: 'Change point detection',
