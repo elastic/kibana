@@ -68,15 +68,20 @@ export async function copySourceMappings({
   }
 }
 
-/** Fields with a `time_series_metric` declaration, kept inside their parent objects (type and children only). */
+/**
+ * Fields with a `time_series_metric` declaration, kept inside their parent objects. A parent keeps only
+ * its type, its children and, for passthrough objects, the `priority` Elasticsearch requires to create one.
+ */
 export function metricProperties(properties: Properties): Properties {
   const kept: Properties = {};
   for (const [name, property] of Object.entries(properties)) {
     if ('properties' in property && property.properties) {
       const nested = metricProperties(property.properties as Properties);
       if (Object.keys(nested).length > 0) {
+        const { type, priority } = property as { type?: string; priority?: number };
         kept[name] = {
-          ...('type' in property ? { type: property.type } : {}),
+          ...(type ? { type } : {}),
+          ...(priority !== undefined ? { priority } : {}),
           properties: nested,
         } as MappingProperty;
       }

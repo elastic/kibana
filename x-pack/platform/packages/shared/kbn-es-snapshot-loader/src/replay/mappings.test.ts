@@ -31,7 +31,11 @@ const sourceMapping = {
 } as Record<string, MappingProperty>;
 
 const keptMapping = {
-  metrics: { type: 'passthrough', properties: { requests_total: counter, latency: histogram } },
+  metrics: {
+    type: 'passthrough',
+    priority: 10,
+    properties: { requests_total: counter, latency: histogram },
+  },
 };
 
 const createMockEsClient = (mappingsByIndex: Record<string, Record<string, unknown>>): Client =>
@@ -51,7 +55,7 @@ const metricsOriginal = (generation: string) =>
   `.ds-metrics-app.otel-2026-04-19-2026.04.19-${generation}`;
 
 describe('metricProperties', () => {
-  it('keeps only time_series_metric fields, with the parent type and children only', () => {
+  it('keeps only time_series_metric fields, with the parent type, priority and children', () => {
     expect(metricProperties(sourceMapping)).toEqual(keptMapping);
   });
 });
