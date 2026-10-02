@@ -582,6 +582,9 @@ steps:
             kbn-xsrf: string
             Content-Type: application/json
 
+  # Tags are reported as submitted, not written: SetAlertTags returns the update-by-query body on
+  # HTTP 200, so a call whose `updated` is below the chunk size (ids matching no alert) passes
+  # unchecked. Notes are confirmed, since a failed note retries and then fails the run.
   - name: post_comment_alert_updates
     type: ai.conversation.add_user_message
     on-failure:
@@ -589,7 +592,7 @@ steps:
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
-        Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
+        Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
 
   # ---------------------------------------------------------------------------
   # 9. Hand the closure proposal to the review workflow (if any FP candidates).
