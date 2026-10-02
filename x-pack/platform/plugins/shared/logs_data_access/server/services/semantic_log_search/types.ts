@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-export type * from './services/log_sources_service/types';
-export type {
-  LogPattern,
-  TimeRange,
-  SemanticLogSearchParams,
-  SearchDiagnostics,
-  SemanticLogSearchResult,
-  SemanticLogSearchService,
-} from './services/semantic_log_search/types';
+import type { Logger } from '@kbn/logging';
+
+/** Shared dependencies for the semantic log search service. */
+export interface SemanticLogSearchDeps {
+  logger: Logger;
+  rerankInferenceId: string;
+}

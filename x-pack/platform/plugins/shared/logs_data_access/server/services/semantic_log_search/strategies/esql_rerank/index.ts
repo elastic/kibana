@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-export type * from './services/log_sources_service/types';
-export type {
-  LogPattern,
-  TimeRange,
-  SemanticLogSearchParams,
-  SearchDiagnostics,
-  SemanticLogSearchResult,
-  SemanticLogSearchService,
-} from './services/semantic_log_search/types';
+export { searchWithEsqlRerank } from './search';
+export { parseEsqlPatternResponse } from './parse_response';
