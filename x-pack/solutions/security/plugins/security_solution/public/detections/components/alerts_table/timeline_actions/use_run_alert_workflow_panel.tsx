@@ -28,9 +28,8 @@ import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/actio
 import * as i18n from '../translations';
 import {
   getRunWorkflowTelemetry,
-  RUN_WORKFLOW_TELEMETRY_ORIGIN,
-  type RunWorkflowTelemetryOrigin,
-} from './run_workflow_telemetry';
+  type RunWorkflowTelemetrySurface,
+} from '../../../../common/lib/telemetry/run_workflow_telemetry';
 
 // Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
 // analysis workflow). Module-scoped so the object reference is stable across renders.
@@ -70,11 +69,10 @@ export interface AlertWorkflowsPanelProps {
    * attachments and reports that they do not belong to the case.
    */
   attachmentType?: string;
-  /**
-   * Surface reported with the run telemetry. Defaults to `alert` for a row action and
-   * `alert_bulk` otherwise; attack surfaces pass their own.
-   */
-  telemetryOrigin?: RunWorkflowTelemetryOrigin;
+  /** Surface reported with the run telemetry outside a case. Defaults to `alert`. */
+  telemetrySurface?: Extract<RunWorkflowTelemetrySurface, 'alert' | 'attack'>;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
@@ -84,7 +82,8 @@ export const AlertWorkflowsPanel = ({
   onExecute,
   originAlertId,
   attachmentType = SECURITY_ALERT_ATTACHMENT_TYPE,
-  telemetryOrigin,
+  telemetrySurface = 'alert',
+  isBulk = false,
 }: AlertWorkflowsPanelProps) => {
   // When rendered inside a case's attachment surface, route through the Cases API so the run
   // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
@@ -96,26 +95,20 @@ export const AlertWorkflowsPanel = ({
         : { attachmentIds: alertIds.map(({ _id }) => _id) },
     [alertIds, originAlertId]
   );
-  const {
-    runWorkflow,
-    showSuccessToast,
-    telemetry: caseTelemetry,
-  } = useCaseAttachmentWorkflowRun({
+  const fallbackTelemetry = useMemo(
+    () =>
+      getRunWorkflowTelemetry({
+        surface: telemetrySurface,
+        isBulk,
+        itemCount: alertIds.length,
+      }),
+    [alertIds.length, isBulk, telemetrySurface]
+  );
+  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType,
     target,
+    fallbackTelemetry,
   });
-  const telemetry = useMemo(
-    () =>
-      getRunWorkflowTelemetry(
-        caseTelemetry,
-        telemetryOrigin ??
-          (originAlertId !== undefined
-            ? RUN_WORKFLOW_TELEMETRY_ORIGIN.alert
-            : RUN_WORKFLOW_TELEMETRY_ORIGIN.alertBulk),
-        alertIds.length
-      ),
-    [alertIds.length, caseTelemetry, originAlertId, telemetryOrigin]
-  );
 
   const inputs = useMemo(
     () => ({

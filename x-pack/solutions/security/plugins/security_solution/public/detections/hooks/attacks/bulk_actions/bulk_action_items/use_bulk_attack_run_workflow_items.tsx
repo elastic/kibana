@@ -16,7 +16,6 @@ import {
   AlertWorkflowsPanel,
   RUN_WORKFLOW_BULK_PANEL_ID,
 } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
-import { RUN_WORKFLOW_TELEMETRY_ORIGIN } from '../../../../components/alerts_table/timeline_actions/run_workflow_telemetry';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 import { RUN_ATTACK_WORKFLOW_ACTION_ID } from '../../../../../common/constants/action_ids';
@@ -33,8 +32,6 @@ export interface UseBulkAttackRunWorkflowItemsProps {
 
 /**
  * Hook that provides bulk action items and panels for running workflows on attacks.
- * Runs are reported by the shared run workflow panel, as `attack` for one attack and
- * `attack_bulk` for several.
  */
 export const useBulkAttackRunWorkflowItems = ({ originAttackId }: UseBulkAttackRunWorkflowItemsProps = {}): BulkAttackActionItems => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
@@ -58,11 +55,8 @@ export const useBulkAttackRunWorkflowItems = ({ originAttackId }: UseBulkAttackR
           attachmentType={SECURITY_ATTACK_ATTACHMENT_TYPE}
           onClose={closePopoverMenu}
           originAlertId={originAttackId}
-          telemetryOrigin={
-            alertIds.length > 1
-              ? RUN_WORKFLOW_TELEMETRY_ORIGIN.attackBulk
-              : RUN_WORKFLOW_TELEMETRY_ORIGIN.attack
-          }
+          telemetrySurface="attack"
+          isBulk={alertIds.length > 1}
         />
       );
     },
