@@ -2692,7 +2692,6 @@ paths:
 components:
   schemas:
     BlocklistHashEntry:
-      type: object
       properties:
         field:
           description: File hash field
@@ -2722,6 +2721,8 @@ components:
         - type
         - value
         - operator
+      title: Blocklist hash entry
+      type: object
     BlocklistLinuxProperties:
       description: Blocklist list item properties (Linux, code signature not supported).
       type: object
@@ -2789,7 +2790,6 @@ components:
       required:
         - list_id
     BlocklistPathOrFileNameEntry:
-      type: object
       properties:
         field:
           description: File path or file name field (available on all OS)
@@ -2825,8 +2825,9 @@ components:
         - type
         - value
         - operator
-    BlocklistWindowsCodeSignatureEntry:
+      title: Blocklist path or file name entry
       type: object
+    BlocklistWindowsCodeSignatureEntry:
       properties:
         entries:
           description: Nested subject_name entries
@@ -2879,6 +2880,8 @@ components:
         - field
         - type
         - entries
+      title: Blocklist Windows code signature entry
+      type: object
     BlocklistWindowsProperties:
       description: Blocklist list item properties (Windows, supports code signature).
       type: object
