@@ -44,10 +44,17 @@ import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 import { roundToEvents } from './rounds_to_events';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
+import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
+
+jest.mock('../../../workflows/triggers/describe_conversation_write', () => {
+  const actual = jest.requireActual('../../../workflows/triggers/describe_conversation_write');
+  return { ...actual, describeConversationWrite: jest.fn(actual.describeConversationWrite) };
+});
+const describeConversationWriteMock = jest.mocked(describeConversationWrite);
 
 const testSpace = 'default';
 
@@ -3682,12 +3689,14 @@ describe('ConversationClient', () => {
 
     let emitConversationUpdated: jest.Mock;
     let clientWithCb: ConversationClient;
+    let logger: ReturnType<typeof loggerMock.create>;
 
     beforeEach(() => {
       emitConversationUpdated = jest.fn();
+      logger = loggerMock.create();
       clientWithCb = createClient({
         space: testSpace,
-        logger: loggerMock.create(),
+        logger,
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -4016,6 +4025,52 @@ describe('ConversationClient', () => {
           { source: 'execution' }
         )
       ).resolves.toBeDefined();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('listener exploded'));
+    });
+
+    describe('when describing the write throws', () => {
+      beforeEach(() => {
+        describeConversationWriteMock.mockImplementationOnce(() => {
+          throw new Error('malformed event');
+        });
+      });
+
+      it('an update still resolves, logs a warning and emits nothing', async () => {
+        mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+        await expect(
+          clientWithCb.appendEvents(
+            { id: 'conversation-1', events: [userMessage('evt-1')] },
+            { source: 'execution' }
+          )
+        ).resolves.toBeDefined();
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed event'));
+        expect(emitConversationUpdated).not.toHaveBeenCalled();
+      });
+
+      it('create still resolves, logs a warning and emits nothing', async () => {
+        mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+        mockGetReturnsIndexedDocument();
+
+        await expect(
+          clientWithCb.create(
+            {
+              id: 'conversation-1',
+              title: 'New conversation',
+              agent_id: 'agent-1',
+              rounds: [],
+              events: [userMessage('r1::user_message')],
+            },
+            { source: 'execution' }
+          )
+        ).resolves.toBeDefined();
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed event'));
+        expect(emitConversationUpdated).not.toHaveBeenCalled();
+      });
     });
   });
 

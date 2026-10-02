@@ -372,17 +372,24 @@ class ConversationClientImpl implements ConversationClient {
 
   /**
    * Notifies the conversation-updated listener with the description of a successful write.
-   * Best-effort: listener failures are logged and never fail the write.
+   * Best-effort: the event is built lazily inside the guard, so failures to describe the write
+   * or to emit the event are logged and never fail the (already persisted) write.
    */
-  private notifyConversationUpdated(event: ConversationUpdatedTriggerEvent | undefined): void {
-    if (!this.eventEmitter || !event) {
+  private notifyConversationUpdated(
+    conversationId: string,
+    describe: () => ConversationUpdatedTriggerEvent | undefined
+  ): void {
+    if (!this.eventEmitter) {
       return;
     }
     try {
-      this.eventEmitter.emitConversationUpdated(event);
+      const event = describe();
+      if (event) {
+        this.eventEmitter.emitConversationUpdated(event);
+      }
     } catch (error) {
       this.logger.warn(
-        `Failed to notify conversation update for conversation "${event.conversationId}": ${error}`
+        `Failed to notify conversation update for conversation "${conversationId}": ${error}`
       );
     }
   }
@@ -731,15 +738,12 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     this.notifyAttachmentEvents(id, conversation.events ?? []);
-    this.notifyConversationUpdated(
+    const seqNo = indexed._seq_no;
+    const primaryTerm = indexed._primary_term;
+    this.notifyConversationUpdated(id, () =>
       describeConversationWrite({
         after: fromEs(
-          {
-            _id: id,
-            _source: attributes,
-            _seq_no: indexed._seq_no,
-            _primary_term: indexed._primary_term,
-          },
+          { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
           this.getUser()
         ),
         source,
@@ -1453,8 +1457,9 @@ class ConversationClientImpl implements ConversationClient {
       });
 
       if (source && before) {
-        this.notifyConversationUpdated(
-          describeConversationWrite({ before, after: document, source })
+        const previous = before;
+        this.notifyConversationUpdated(conversationId, () =>
+          describeConversationWrite({ before: previous, after: document, source })
         );
       }
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
