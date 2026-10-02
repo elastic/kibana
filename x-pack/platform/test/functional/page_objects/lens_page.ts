@@ -1606,6 +1606,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
 
+    /**
+     * Number of columns the rendered metric grid is laid out with, which reflects the
+     * "Layout columns" (`maxCols`) setting once it has been committed to the Lens state.
+     */
+    async getMetricGridColumnCount() {
+      const grid = await findService.byCssSelector('[data-test-subj="mtrVis"] .echMetricContainer');
+      const columns = await grid.getComputedStyle('grid-template-columns');
+      return columns.trim().split(/\s+/).length;
+    },
+
     async getMetricElementIfExists(
       selector: string,
       container: WebElementWrapper,
