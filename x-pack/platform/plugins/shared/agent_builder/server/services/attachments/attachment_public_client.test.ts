@@ -525,7 +525,7 @@ describe('createAttachmentPublicClient', () => {
   });
 
   describe('access option', () => {
-    it('defaults to "owner" for create', async () => {
+    it('defaults to "converse" for create', async () => {
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
 
@@ -533,7 +533,7 @@ describe('createAttachmentPublicClient', () => {
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'x' } });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'owner' });
+      expect(options).toEqual({ access: 'converse' });
     });
 
     it('forwards "converse" access to appendEvents for create', async () => {
@@ -608,7 +608,7 @@ describe('createAttachmentPublicClient', () => {
       expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('defaults to "owner" access and render_inline: false', async () => {
+    it('defaults to "converse" access and render_inline: false', async () => {
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
 
@@ -619,7 +619,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'owner' });
+      expect(options).toEqual({ access: 'converse' });
       expect(request.events[0].data).toMatchObject({ render_inline: false });
     });
 
