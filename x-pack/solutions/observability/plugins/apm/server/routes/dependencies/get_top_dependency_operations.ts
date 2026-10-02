@@ -192,12 +192,9 @@ export async function getTopDependencyOperations({
       const latencyValue = isFiniteNumber(bucket.latency.value) ? bucket.latency.value : 0;
       const count = isFiniteNumber(bucket.count.value) ? bucket.count.value : 1;
 
-      const spanSubtype = String(
-        (bucket as any).span_subtype?.buckets?.[0]?.key ?? ''
-      ) || undefined;
-      const targetType = String(
-        (bucket as any).target_type?.buckets?.[0]?.key ?? ''
-      ) || undefined;
+      const spanSubtype =
+        String((bucket as any).span_subtype?.buckets?.[0]?.key ?? '') || undefined;
+      const targetType = String((bucket as any).target_type?.buckets?.[0]?.key ?? '') || undefined;
 
       return {
         spanName: bucket.key as string,

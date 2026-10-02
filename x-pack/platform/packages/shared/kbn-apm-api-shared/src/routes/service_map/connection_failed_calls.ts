@@ -60,24 +60,23 @@ export interface ConnectionFailedCallsResponse {
   isSampled: boolean;
 }
 
-export const serviceMapConnectionFailedCallsRoute =
-  defineRoute<ConnectionFailedCallsResponse>()({
-    endpoint: 'GET /internal/apm/service-map/connection/failed_calls',
-    params: lazySchema(() =>
-      z.object({
-        query: z
-          .object({
-            sourceServiceName: z.string(),
-            /**
-             * span.destination.service.resource values for the connection.
-             * Optional — absent for service→service edges.
-             */
-            dependencies: z.union([z.string(), z.array(z.string())]).optional(),
-            /** Set for service→service edges — triggers the parent-span join. */
-            targetServiceName: z.string().optional(),
-          })
-          .merge(environmentSchema)
-          .merge(rangeSchema),
-      })
-    ),
-  });
+export const serviceMapConnectionFailedCallsRoute = defineRoute<ConnectionFailedCallsResponse>()({
+  endpoint: 'GET /internal/apm/service-map/connection/failed_calls',
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          sourceServiceName: z.string(),
+          /**
+           * span.destination.service.resource values for the connection.
+           * Optional — absent for service→service edges.
+           */
+          dependencies: z.union([z.string(), z.array(z.string())]).optional(),
+          /** Set for service→service edges — triggers the parent-span join. */
+          targetServiceName: z.string().optional(),
+        })
+        .merge(environmentSchema)
+        .merge(rangeSchema),
+    })
+  ),
+});

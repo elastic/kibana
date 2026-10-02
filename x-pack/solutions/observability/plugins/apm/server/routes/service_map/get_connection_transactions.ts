@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ConnectionTransactionsResponse } from '@kbn/apm-api-shared';
@@ -128,11 +127,7 @@ export function getConnectionTransactions({
         size: 0,
         query: {
           bool: {
-            filter: [
-              ...scopeFilter,
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-            ],
+            filter: [...scopeFilter, ...rangeQuery(start, end), ...environmentQuery(environment)],
           },
         },
         aggs: {
@@ -178,9 +173,7 @@ export function getConnectionTransactions({
       const avgCallLatency = (bucket as any).avg_call_latency?.value ?? null;
       const totalTime = (bucket as any).total_call_time?.value ?? 0;
       const failedCount = (bucket as any).failed?.doc_count ?? 0;
-      const transactionType = String(
-        (bucket as any).transaction_type?.buckets?.[0]?.key ?? ''
-      );
+      const transactionType = String((bucket as any).transaction_type?.buckets?.[0]?.key ?? '');
 
       return {
         name: String(bucket.key),
@@ -212,39 +205,34 @@ export function getConnectionTransactions({
         const otelCallCount = otelBucket.doc_count;
         const otelFailedCallRate = otelCallCount > 0 ? otelFailedCount / otelCallCount : null;
 
-        const txResponse = await apmEventClient.search(
-          'get_connection_transactions_otel_resolve',
-          {
-            apm: { events: [ProcessorEvent.transaction] },
-            track_total_hits: false,
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { term: { [SERVICE_NAME]: sourceServiceName } },
-                  { terms: { [TRACE_ID]: otelTraceIds } },
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                ],
+        const txResponse = await apmEventClient.search('get_connection_transactions_otel_resolve', {
+          apm: { events: [ProcessorEvent.transaction] },
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { [SERVICE_NAME]: sourceServiceName } },
+                { terms: { [TRACE_ID]: otelTraceIds } },
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
+            },
+          },
+          aggs: {
+            by_tx_name: {
+              terms: { field: TRANSACTION_NAME, size: MAX_TRANSACTION_GROUPS },
+              aggs: {
+                transaction_type: { terms: { field: TRANSACTION_TYPE, size: 1 } },
               },
             },
-            aggs: {
-              by_tx_name: {
-                terms: { field: TRANSACTION_NAME, size: MAX_TRANSACTION_GROUPS },
-                aggs: {
-                  transaction_type: { terms: { field: TRANSACTION_TYPE, size: 1 } },
-                },
-              },
-            },
-          }
-        );
+          },
+        });
 
         const txBuckets = txResponse.aggregations?.by_tx_name.buckets ?? [];
 
         otelGroups = txBuckets.map((bucket) => {
-          const transactionType = String(
-            (bucket as any).transaction_type?.buckets?.[0]?.key ?? ''
-          );
+          const transactionType = String((bucket as any).transaction_type?.buckets?.[0]?.key ?? '');
           const groupCallCount = otelCallCount / (txBuckets.length || 1);
 
           return {
@@ -256,7 +244,9 @@ export function getConnectionTransactions({
             callRate: durationMs > 0 ? groupCallCount / durationMs : null,
             failedCallRate: otelFailedCallRate,
             timeConsumedPct:
-              totalCallTime > 0 ? (otelAvgCallLatency ?? 0) * groupCallCount / totalCallTime : null,
+              totalCallTime > 0
+                ? ((otelAvgCallLatency ?? 0) * groupCallCount) / totalCallTime
+                : null,
             isSampled: isMaxTransactionsReached || otelTraceIds.length >= MAX_IDS,
           };
         });

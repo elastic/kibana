@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ConnectionTransactionGroup } from '@kbn/apm-api-shared';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useRequestFlyoutContext } from '../request_flyout_context';
-import type { ConnectionTransactionGroup } from '@kbn/apm-api-shared';
 
 export type { ConnectionTransactionGroup };
 

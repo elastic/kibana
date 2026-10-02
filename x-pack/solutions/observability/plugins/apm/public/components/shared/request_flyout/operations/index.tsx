@@ -6,11 +6,11 @@
  */
 
 import { EuiBadge, EuiBasicTable, EuiButtonIcon, type EuiBasicTableColumn } from '@elastic/eui';
-import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { DependencyOperation } from '@kbn/apm-api-shared';
 import React, { useCallback, useState } from 'react';
+import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import {
   asMillisecondDuration,
   asPercent,
@@ -82,11 +82,7 @@ export function RequestFlyoutOperations() {
       }),
       width: '100px',
       render: (spanType: string | undefined) =>
-        spanType ? (
-          <EuiBadge color="hollow">{spanType}</EuiBadge>
-        ) : (
-          <span>—</span>
-        ),
+        spanType ? <EuiBadge color="hollow">{spanType}</EuiBadge> : <span>—</span>,
     },
     {
       field: 'spanName',
@@ -121,8 +117,7 @@ export function RequestFlyoutOperations() {
         defaultMessage: 'Avg time',
       }),
       align: 'right' as const,
-      render: (value: number | null) =>
-        value == null ? '—' : asMillisecondDuration(value),
+      render: (value: number | null) => (value == null ? '—' : asMillisecondDuration(value)),
     },
     {
       field: 'throughput',
@@ -162,10 +157,9 @@ export function RequestFlyoutOperations() {
             actions: [
               {
                 id: 'viewInDiscover',
-                name: i18n.translate(
-                  'xpack.apm.requestFlyout.operations.action.viewInDiscover',
-                  { defaultMessage: 'View traces in Discover' }
-                ),
+                name: i18n.translate('xpack.apm.requestFlyout.operations.action.viewInDiscover', {
+                  defaultMessage: 'View traces in Discover',
+                }),
                 icon: 'discoverApp',
                 href: discoverHref,
               },
@@ -180,10 +174,9 @@ export function RequestFlyoutOperations() {
             button={
               <EuiButtonIcon
                 data-test-subj="requestFlyoutOperationActionsButton"
-                aria-label={i18n.translate(
-                  'xpack.apm.requestFlyout.operations.actions.ariaLabel',
-                  { defaultMessage: 'Actions' }
-                )}
+                aria-label={i18n.translate('xpack.apm.requestFlyout.operations.actions.ariaLabel', {
+                  defaultMessage: 'Actions',
+                })}
                 iconType="boxesVertical"
                 color="text"
               />

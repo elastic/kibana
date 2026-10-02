@@ -35,14 +35,16 @@ export function useRequestFlyoutFailedCalls() {
 
   // Stable string key for the dep array. The actual param sent to the API is
   // derived inside the callback where we can safely reconstruct the array.
-  const dependenciesKey = targetServiceName ? dependencies.join(',') : (resolvedDependencyName ?? '');
+  const dependenciesKey = targetServiceName ? dependencies.join(',') : resolvedDependencyName ?? '';
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (sourceServiceName && start && end) {
         // Reconstruct the dependencies array inside the callback only.
         const depsParam: string[] | undefined = targetServiceName
-          ? dependencies.length > 0 ? dependencies : undefined
+          ? dependencies.length > 0
+            ? dependencies
+            : undefined
           : resolvedDependencyName
           ? [resolvedDependencyName]
           : undefined;

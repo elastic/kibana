@@ -163,7 +163,7 @@ describe('useServiceMapEdgeFlyoutProps', () => {
       [SPAN_DESTINATION_SERVICE_RESOURCE]: 'kafka',
       [SPAN_TYPE]: 'messaging',
       'span.subtype': 'kafka',
-    } as unknown as (typeof SOURCE_SERVICE_NODE & typeof TARGET_DEPENDENCY_NODE);
+    } as unknown as typeof SOURCE_SERVICE_NODE & typeof TARGET_DEPENDENCY_NODE;
 
     const edge = makeEdge({
       sourceData: messagingServiceSource,

@@ -8,6 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ConnectionFailedCallsResponse } from '@kbn/apm-api-shared';
+import { ATTRIBUTE_RPC_GRPC_STATUS_CODE, RPC_GRPC_STATUS_CODE } from '@kbn/apm-types';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -22,10 +23,6 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
-import {
-  ATTRIBUTE_RPC_GRPC_STATUS_CODE,
-  RPC_GRPC_STATUS_CODE,
-} from '@kbn/apm-types';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { Environment } from '../../../common/environment_rt';
@@ -87,7 +84,8 @@ function pickTopError({
   grpcCodes: number[];
 }): { topError: string | null; topErrorGroupId: string | null } {
   if (errorDoc) return { topError: errorDoc.message, topErrorGroupId: errorDoc.groupId };
-  if (httpStatuses.length > 0) return { topError: `HTTP ${httpStatuses[0]}`, topErrorGroupId: null };
+  if (httpStatuses.length > 0)
+    return { topError: `HTTP ${httpStatuses[0]}`, topErrorGroupId: null };
   if (grpcCodes.length > 0) return { topError: grpcLabel(grpcCodes[0]), topErrorGroupId: null };
   return { topError: null, topErrorGroupId: null };
 }
@@ -154,42 +152,38 @@ export function getConnectionFailedCalls({
     ];
 
     const [failedSpanResponse, totalCallsResponse] = await Promise.all([
-      apmEventClient.search(
-        'get_connection_failed_calls_failed_spans',
-        {
-          apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
-          track_total_hits: MAX_IDS + 1,
-          size: MAX_IDS,
-          _source: false,
-          fields: [SPAN_ID, TRACE_ID, HTTP_RESPONSE_STATUS_CODE, RPC_GRPC_STATUS_CODE, ATTRIBUTE_RPC_GRPC_STATUS_CODE],
-          query: {
-            bool: {
-              filter: [
-                ...scopeFilter,
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
+      apmEventClient.search('get_connection_failed_calls_failed_spans', {
+        apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+        track_total_hits: MAX_IDS + 1,
+        size: MAX_IDS,
+        _source: false,
+        fields: [
+          SPAN_ID,
+          TRACE_ID,
+          HTTP_RESPONSE_STATUS_CODE,
+          RPC_GRPC_STATUS_CODE,
+          ATTRIBUTE_RPC_GRPC_STATUS_CODE,
+        ],
+        query: {
+          bool: {
+            filter: [...scopeFilter, ...rangeQuery(start, end), ...environmentQuery(environment)],
           },
-        }
-      ),
-      apmEventClient.search(
-        'get_connection_failed_calls_total_count',
-        {
-          apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
-          track_total_hits: true,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...baseScopeFilter,
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
+        },
+      }),
+      apmEventClient.search('get_connection_failed_calls_total_count', {
+        apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+        track_total_hits: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...baseScopeFilter,
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
           },
-        }
-      ),
+        },
+      }),
     ]);
 
     const totalFailed =
@@ -208,8 +202,9 @@ export function getConnectionFailedCalls({
       const fields = (hit as any).fields ?? {};
       const httpStatus = (fields[HTTP_RESPONSE_STATUS_CODE]?.[0] as number | undefined) ?? null;
       const grpcCode =
-        ((fields[ATTRIBUTE_RPC_GRPC_STATUS_CODE]?.[0] ?? fields[RPC_GRPC_STATUS_CODE]?.[0]) as number | undefined) ??
-        null;
+        ((fields[ATTRIBUTE_RPC_GRPC_STATUS_CODE]?.[0] ?? fields[RPC_GRPC_STATUS_CODE]?.[0]) as
+          | number
+          | undefined) ?? null;
       return {
         spanId: String(fields[SPAN_ID]?.[0] ?? ''),
         traceId: (fields[TRACE_ID]?.[0] as string | undefined) ?? null,
@@ -422,32 +417,31 @@ async function getTopErrorForSpans({
   start: number;
   end: number;
 }): Promise<TopErrorDoc | null> {
-  const response = await apmEventClient.search(
-    'get_connection_failed_calls_top_error_spans',
-    {
-      apm: { events: [ProcessorEvent.error] },
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { terms: { [SPAN_ID]: spanIds } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-          ],
-        },
+  const response = await apmEventClient.search('get_connection_failed_calls_top_error_spans', {
+    apm: { events: [ProcessorEvent.error] },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { terms: { [SPAN_ID]: spanIds } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+        ],
       },
-      aggs: {
-        top_group: {
-          terms: { field: ERROR_GROUP_ID, size: 1 },
-          aggs: {
-            sample: { top_hits: { size: 1, _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE] } },
+    },
+    aggs: {
+      top_group: {
+        terms: { field: ERROR_GROUP_ID, size: 1 },
+        aggs: {
+          sample: {
+            top_hits: { size: 1, _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE] },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return extractTopError(response);
 }
@@ -470,37 +464,38 @@ async function getTopErrorForTransactions({
   start: number;
   end: number;
 }): Promise<TopErrorDoc | null> {
-  const response = await apmEventClient.search(
-    'get_connection_failed_calls_top_error_txns',
-    {
-      apm: { events: [ProcessorEvent.error] },
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { terms: { [TRANSACTION_ID]: transactionIds } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-          ],
-        },
+  const response = await apmEventClient.search('get_connection_failed_calls_top_error_txns', {
+    apm: { events: [ProcessorEvent.error] },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { terms: { [TRANSACTION_ID]: transactionIds } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+        ],
       },
-      aggs: {
-        top_group: {
-          terms: { field: ERROR_GROUP_ID, size: 1 },
-          aggs: {
-            sample: { top_hits: { size: 1, _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE] } },
+    },
+    aggs: {
+      top_group: {
+        terms: { field: ERROR_GROUP_ID, size: 1 },
+        aggs: {
+          sample: {
+            top_hits: { size: 1, _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_TYPE] },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return extractTopError(response);
 }
 
-function extractTopError(response: Awaited<ReturnType<APMEventClient['search']>>): TopErrorDoc | null {
+function extractTopError(
+  response: Awaited<ReturnType<APMEventClient['search']>>
+): TopErrorDoc | null {
   const topBucket = (response.aggregations as any)?.top_group?.buckets?.[0];
   if (!topBucket) return null;
   const source = topBucket.sample?.hits?.hits?.[0]?._source;

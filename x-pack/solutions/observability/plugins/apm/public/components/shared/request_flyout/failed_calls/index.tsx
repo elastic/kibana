@@ -18,11 +18,11 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
 import React, { useCallback } from 'react';
+import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -194,10 +194,14 @@ export function RequestFlyoutFailedCalls() {
           const href = errorGroupHref(item.type, item.topErrorGroupId);
           return truncated !== topError ? (
             <EuiToolTip content={topError}>
-              <EuiLink href={href}>{truncated}</EuiLink>
+              <EuiLink data-test-subj="apmColumnsLink" href={href}>
+                {truncated}
+              </EuiLink>
             </EuiToolTip>
           ) : (
-            <EuiLink href={href}>{topError}</EuiLink>
+            <EuiLink data-test-subj="apmColumnsLink" href={href}>
+              {topError}
+            </EuiLink>
           );
         }
         return truncated !== topError ? (
@@ -261,10 +265,9 @@ export function RequestFlyoutFailedCalls() {
                 ? [
                     {
                       id: 'openTrace',
-                      name: i18n.translate(
-                        'xpack.apm.requestFlyout.failedCalls.action.openTrace',
-                        { defaultMessage: 'Open a failed trace' }
-                      ),
+                      name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.openTrace', {
+                        defaultMessage: 'Open a failed trace',
+                      }),
                       icon: 'timeline',
                       href: traceHref,
                     },
@@ -323,10 +326,7 @@ export function RequestFlyoutFailedCalls() {
         </EuiFlexItem>
         {hasFailures && (
           <EuiFlexItem grow={false}>
-            <EuiLink
-              href={seeAllErrorsHref}
-              data-test-subj="requestFlyoutSeeAllErrors"
-            >
+            <EuiLink href={seeAllErrorsHref} data-test-subj="requestFlyoutSeeAllErrors">
               <EuiText size="s">
                 {i18n.translate('xpack.apm.requestFlyout.failedCalls.seeAllErrors', {
                   defaultMessage: 'See all errors',
@@ -350,6 +350,7 @@ export function RequestFlyoutFailedCalls() {
           {isSampled && (
             <>
               <EuiCallOut
+                announceOnMount
                 size="s"
                 color="warning"
                 iconType="warning"

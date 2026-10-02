@@ -194,14 +194,7 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: {
-        sourceServiceName,
-        targetServiceName,
-        dependencies,
-        environment,
-        start,
-        end,
-      },
+      query: { sourceServiceName, targetServiceName, dependencies, environment, start, end },
     } = params;
 
     return getConnectionTransactions({
@@ -209,7 +202,11 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
       sourceServiceName,
       targetServiceName,
       dependencies:
-        dependencies === undefined ? [] : Array.isArray(dependencies) ? dependencies : [dependencies],
+        dependencies === undefined
+          ? []
+          : Array.isArray(dependencies)
+          ? dependencies
+          : [dependencies],
       environment,
       start,
       end,
@@ -234,14 +231,7 @@ const serviceMapConnectionFailedCallsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: {
-        sourceServiceName,
-        targetServiceName,
-        dependencies,
-        environment,
-        start,
-        end,
-      },
+      query: { sourceServiceName, targetServiceName, dependencies, environment, start, end },
     } = params;
 
     return getConnectionFailedCalls({
@@ -249,7 +239,11 @@ const serviceMapConnectionFailedCallsRoute = createApmServerRoute({
       sourceServiceName,
       targetServiceName,
       dependencies:
-        dependencies === undefined ? [] : Array.isArray(dependencies) ? dependencies : [dependencies],
+        dependencies === undefined
+          ? []
+          : Array.isArray(dependencies)
+          ? dependencies
+          : [dependencies],
       environment,
       start,
       end,

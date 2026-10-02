@@ -13,10 +13,10 @@ import {
   EuiSpacer,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
+import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -114,8 +114,7 @@ export function RequestFlyoutAffectedEndpoints({
         defaultMessage: 'Avg time',
       }),
       align: 'right' as const,
-      render: (value: number | null) =>
-        value == null ? '—' : asMillisecondDuration(value),
+      render: (value: number | null) => (value == null ? '—' : asMillisecondDuration(value)),
     },
     {
       field: 'callCount',
@@ -193,6 +192,7 @@ export function RequestFlyoutAffectedEndpoints({
       {isMaxTransactionsReached && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             iconType="warning"

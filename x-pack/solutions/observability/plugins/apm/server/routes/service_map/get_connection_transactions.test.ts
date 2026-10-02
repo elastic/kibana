@@ -66,7 +66,14 @@ function exitSpanAggResponse(
   totalCallTime?: number
 ) {
   const buckets = groups.map(
-    ({ name, docCount = 10, avgCallLatency = 150_000, totalCallTime: groupTotal, failedCount = 1, txType = 'request' }) => ({
+    ({
+      name,
+      docCount = 10,
+      avgCallLatency = 150_000,
+      totalCallTime: groupTotal,
+      failedCount = 1,
+      txType = 'request',
+    }) => ({
       key: name,
       doc_count: docCount,
       avg_call_latency: { value: avgCallLatency },
@@ -79,7 +86,9 @@ function exitSpanAggResponse(
   return {
     aggregations: {
       by_tx_name: { buckets },
-      total_call_time: { value: totalCallTime ?? buckets.reduce((acc, b) => acc + (b.total_call_time.value ?? 0), 0) },
+      total_call_time: {
+        value: totalCallTime ?? buckets.reduce((acc, b) => acc + (b.total_call_time.value ?? 0), 0),
+      },
     },
   };
 }
@@ -88,11 +97,7 @@ function exitSpanAggResponse(
  * Exit span aggregation response containing an OTel "missing" bucket.
  * The sentinel key is __otel_tx_name_missing__.
  */
-function exitSpanOtelResponse(
-  otelDocCount: number,
-  traceIds: string[],
-  avgCallLatency = 100_000
-) {
+function exitSpanOtelResponse(otelDocCount: number, traceIds: string[], avgCallLatency = 100_000) {
   const OTEL_MISSING_KEY = '__otel_tx_name_missing__';
   return {
     aggregations: {
@@ -144,10 +149,7 @@ describe('getConnectionTransactions', () => {
       const search: SearchMock = jest
         .fn()
         // single call: exit span agg with APM-native buckets
-        .mockResolvedValueOnce(exitSpanAggResponse([
-          { name: 'GET /foo' },
-          { name: 'POST /bar' },
-        ]));
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /foo' }, { name: 'POST /bar' }]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
@@ -159,9 +161,7 @@ describe('getConnectionTransactions', () => {
     });
 
     it('returns empty groups when exit span agg has no buckets', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(exitSpanAggResponse([]));
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(exitSpanAggResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
@@ -171,9 +171,7 @@ describe('getConnectionTransactions', () => {
     });
 
     it('sets the correct operation name for the exit span aggregation', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(exitSpanAggResponse([]));
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(exitSpanAggResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       await getConnectionTransactions(makeOptions({ apmEventClient }));
@@ -184,9 +182,18 @@ describe('getConnectionTransactions', () => {
     it('computes APM group metrics from exit span durations', async () => {
       // Window = 15 minutes, call count = 10, avg latency = 150 ms = 150_000 µs
       const search: SearchMock = jest.fn().mockResolvedValueOnce(
-        exitSpanAggResponse([
-          { name: 'GET /foo', docCount: 10, avgCallLatency: 150_000, failedCount: 2, txType: 'request' },
-        ], /* totalCallTime */ 1_500_000)
+        exitSpanAggResponse(
+          [
+            {
+              name: 'GET /foo',
+              docCount: 10,
+              avgCallLatency: 150_000,
+              failedCount: 2,
+              txType: 'request',
+            },
+          ],
+          /* totalCallTime */ 1_500_000
+        )
       );
 
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -235,9 +242,7 @@ describe('getConnectionTransactions', () => {
     });
 
     it('skips Phase 2 when OTel bucket has no trace IDs', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(exitSpanOtelResponse(0, [])); // 0 doc_count, no trace IDs
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(exitSpanOtelResponse(0, [])); // 0 doc_count, no trace IDs
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
@@ -272,9 +277,7 @@ describe('getConnectionTransactions', () => {
     });
 
     it('returns empty and stops after Phase 1a when targetService has no parent IDs', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(parentIdsResponse([]));
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(parentIdsResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(
@@ -288,9 +291,7 @@ describe('getConnectionTransactions', () => {
     });
 
     it('sets the correct operation names', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(parentIdsResponse([]));
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(parentIdsResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       await getConnectionTransactions(
@@ -341,10 +342,7 @@ describe('getConnectionTransactions', () => {
       const search: SearchMock = jest
         .fn()
         .mockResolvedValueOnce(parentIdsResponse(maxParentIds))
-        .mockResolvedValueOnce(exitSpanAggResponse([
-          { name: 'GET /a' },
-          { name: 'POST /b' },
-        ]));
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /a' }, { name: 'POST /b' }]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(

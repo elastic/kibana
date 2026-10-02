@@ -554,8 +554,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
       // ─── Dependency edges from payment-api ──────────────────────────────────
 
       const paymentPgGen = range.ratePerMinute(150).generator((timestamp: number) => {
-        const stmt =
-          paymentPgStatements[Math.floor(Math.random() * paymentPgStatements.length)];
+        const stmt = paymentPgStatements[Math.floor(Math.random() * paymentPgStatements.length)];
         const dur = random(5, 150);
         const isFailed = random(1, 10) === 1;
         const pgSpan = paymentApi
@@ -576,8 +575,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
       });
 
       const paymentRedisGen = range.ratePerMinute(200).generator((timestamp: number) => {
-        const cmd =
-          paymentRedisCommands[Math.floor(Math.random() * paymentRedisCommands.length)];
+        const cmd = paymentRedisCommands[Math.floor(Math.random() * paymentRedisCommands.length)];
         const dur = random(1, 15);
         const isFailed = random(1, 20) === 1;
         const redisSpan = paymentApi
