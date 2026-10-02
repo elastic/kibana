@@ -627,6 +627,26 @@ describe('ActionPoliciesTable', () => {
       expect(mockInstallTemplates).toHaveBeenCalledTimes(1);
     });
 
+    it('refetches the list after the templates are installed', async () => {
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('installActionPolicyTemplatesCard')).toBeInTheDocument()
+      );
+      await user.click(screen.getByTestId('installActionPolicyTemplatesCard'));
+
+      const findItemsCallsBeforeSuccess = mockFindItems.mock.calls.length;
+      const [, { onSuccess }] = mockInstallTemplates.mock.calls[0];
+      await act(async () => {
+        onSuccess();
+      });
+
+      await waitFor(() =>
+        expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
+      );
+    });
+
     it.each([
       {
         scenario: 'the user cannot create workflows',

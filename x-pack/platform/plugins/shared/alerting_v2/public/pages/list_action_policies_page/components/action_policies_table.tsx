@@ -47,6 +47,7 @@ import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_mod
 import {
   ActionPoliciesTableContent,
   ENABLED_FILTER_OPTIONS,
+  RefetchConnector,
 } from './action_policies_table_content';
 
 const enabledFieldDefinition: FieldDefinition = {
@@ -121,6 +122,10 @@ export const ActionPoliciesTable = () => {
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: installTemplates, isLoading: isInstallingTemplates } =
     useInstallActionPolicyTemplates();
+  const installTemplatesAndRefetch = useCallback(
+    () => installTemplates(undefined, { onSuccess: () => refetchRef.current() }),
+    [installTemplates]
+  );
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {
     mutate: enablePolicyMutate,
@@ -216,7 +221,7 @@ export const ActionPoliciesTable = () => {
         iconType: 'copy',
         title: INSTALL_TEMPLATES_OPTION_TITLE,
         description: INSTALL_TEMPLATES_OPTION_DESCRIPTION,
-        onClick: () => installTemplates(),
+        onClick: installTemplatesAndRefetch,
         disabled: installTemplatesDisabledReason !== undefined || isInstallingTemplates,
         tooltipText: installTemplatesDisabledReason,
         'data-test-subj': 'installActionPolicyTemplatesCard',
@@ -253,7 +258,7 @@ export const ActionPoliciesTable = () => {
     [
       navigateToCreate,
       navigateToAgentBuilder,
-      installTemplates,
+      installTemplatesAndRefetch,
       installTemplatesDisabledReason,
       isInstallingTemplates,
       isLicenseValid,
@@ -326,6 +331,7 @@ export const ActionPoliciesTable = () => {
           fields: FEATURES_FIELDS,
         }}
       >
+        <RefetchConnector onReady={onRefetchReady} />
         <ActionPoliciesListHeader
           canWrite={canWrite}
           onCreatePolicy={navigateToCreate}
@@ -345,7 +351,6 @@ export const ActionPoliciesTable = () => {
             isBulkActionInProgress={isBulkActionInProgress}
             isLicenseValid={isLicenseValid}
             bulkAction={bulkAction}
-            onRefetchReady={onRefetchReady}
             onEdit={navigateToEdit}
             onClone={clonePolicy}
             onDelete={setPolicyToDelete}

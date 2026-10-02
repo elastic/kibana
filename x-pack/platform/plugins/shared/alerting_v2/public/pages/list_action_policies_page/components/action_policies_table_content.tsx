@@ -58,7 +58,6 @@ interface Props {
   isBulkActionInProgress: boolean;
   isLicenseValid: boolean;
   bulkAction: BulkActionMutate;
-  onRefetchReady: (refetch: () => void) => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
@@ -112,7 +111,6 @@ export const ActionPoliciesTableContent = ({
   isBulkActionInProgress,
   isLicenseValid,
   bulkAction,
-  onRefetchReady,
   onEdit,
   onClone,
   onDelete,
@@ -143,7 +141,6 @@ export const ActionPoliciesTableContent = ({
 
   return (
     <>
-      <RefetchConnector onReady={onRefetchReady} />
       <ContentListToolbar>
         <ContentListToolbar.Filters>
           <EnabledFilter />
@@ -322,7 +319,8 @@ const DestinationsColumn = createColumn({
   render: (item) => <ActionPolicyDestinationsSummary destinations={toPolicy(item).destinations} />,
 });
 
-const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void }) => {
+/** Exposes the list `refetch` to the parent; must be rendered inside the list provider, outside `ContentList` so it stays mounted while the empty state is displayed. */
+export const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void }) => {
   const { refetch } = useContentListState();
   useEffect(() => {
     onReady(refetch);
