@@ -60,8 +60,8 @@ export const getOptionsListContextMock = () => {
       viewMode$: new BehaviorSubject<ViewMode>('edit'),
       isPartial$: new BehaviorSubject<boolean>(false),
     } as unknown as Required<DSLOptionsListComponentApi>,
-    displaySettings: { isInteractive: true } as OptionsListDisplaySettings & {
-      isInteractive: boolean;
+    displaySettings: {} as OptionsListDisplaySettings & {
+      isInteractive?: boolean;
     },
     testOnlyMethods: {
       setField: (next: DataViewField | undefined) => {

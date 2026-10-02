@@ -80,7 +80,7 @@ export const OptionsListPopoverInvalidSelections = () => {
             </div>
           </EuiScreenReaderOnly>
         ),
-        disabled: !Boolean(displaySettings.isInteractive ?? true),
+        disabled: !(displaySettings.isInteractive ?? true),
       };
     });
     setSelectableOptions(options);

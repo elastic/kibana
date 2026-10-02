@@ -81,7 +81,7 @@ export const OptionsListPopoverFooter = () => {
         >
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              isDisabled={!displaySettings.isInteractive}
+              isDisabled={!(displaySettings.isInteractive ?? true)}
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}

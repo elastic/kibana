@@ -126,7 +126,7 @@ export const OptionsListPopoverSortingButton = ({
         display="empty"
         color="text"
         iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
-        isDisabled={showOnlySelected || !displaySettings.isInteractive}
+        isDisabled={showOnlySelected || !(displaySettings.isInteractive ?? true)}
         className="optionsList__sortButton"
         data-test-subj="optionsListControl__sortingOptionsButton"
         onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}

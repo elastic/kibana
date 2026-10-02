@@ -99,7 +99,7 @@ export const OptionsListPopoverSuggestions = ({
       return;
 
     return {
-      disabled: !displaySettings.isInteractive,
+      disabled: !(displaySettings.isInteractive ?? true),
       key: 'exists-option',
       checked: existsSelected ? 'on' : undefined,
       label: OptionsListStrings.controlAndPopover.getExists(),
@@ -125,7 +125,7 @@ export const OptionsListPopoverSuggestions = ({
       }
 
       return {
-        disabled: !displaySettings.isInteractive,
+        disabled: !(displaySettings.isInteractive ?? true),
         key: String(suggestion.value),
         label: String(fieldFormatter?.(suggestion.value) ?? suggestion.value),
         checked: (selectedOptions ?? []).includes(suggestion.value as string) ? 'on' : undefined,
