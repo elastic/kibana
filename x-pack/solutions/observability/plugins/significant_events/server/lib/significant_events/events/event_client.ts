@@ -17,7 +17,11 @@ import type {
   Severity,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import {
+  SEVERITY_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
+} from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
@@ -139,16 +143,16 @@ const canonicalSeverityToLegacySeverity: Record<Severity, LegacySeverity> = {
   low: '20-low',
 };
 
+const expandWithLegacyStatuses = (
+  statuses: readonly SignificantEventStatus[]
+): Array<SignificantEventStatus | LegacySignificantEventStatus> => [
+  ...new Set(statuses.flatMap((status) => [status, ...canonicalStatusToLegacyStatuses[status]])),
+];
+
 const legacyStatusesFor = (
   statuses: readonly SignificantEventStatus[] | undefined
 ): Array<SignificantEventStatus | LegacySignificantEventStatus> | undefined =>
-  statuses === undefined
-    ? undefined
-    : [
-        ...new Set(
-          statuses.flatMap((status) => [status, ...canonicalStatusToLegacyStatuses[status]])
-        ),
-      ];
+  statuses === undefined ? undefined : expandWithLegacyStatuses(statuses);
 
 const legacySeveritiesFor = (
   severities: readonly Severity[] | undefined
@@ -161,6 +165,40 @@ const legacySeveritiesFor = (
         ),
       ];
 
+const hasOwn = (record: object, key: string): boolean =>
+  Object.prototype.hasOwnProperty.call(record, key);
+
+const isCanonicalSeverity = (value: string): value is Severity =>
+  SEVERITY_OPTIONS.some((option) => option === value);
+
+const isLegacySeverity = (value: string): value is LegacySeverity =>
+  hasOwn(legacySeverityToCanonicalSeverity, value);
+
+const isCanonicalStatus = (value: string): value is SignificantEventStatus =>
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.some((option) => option === value);
+
+const isLegacyStatus = (value: string): value is LegacySignificantEventStatus =>
+  hasOwn(legacyStatusToCanonicalStatus, value);
+
+const toCanonicalSeverity = (severity: string): Severity => {
+  if (isCanonicalSeverity(severity)) return severity;
+  if (isLegacySeverity(severity)) return legacySeverityToCanonicalSeverity[severity];
+  throw new Error(`Significant Event has an unmapped severity: ${severity}`);
+};
+
+const toCanonicalStatus = (status: string): SignificantEventStatus => {
+  if (isCanonicalStatus(status)) return status;
+  if (isLegacyStatus(status)) return legacyStatusToCanonicalStatus[status];
+  throw new Error(`Significant Event has an unmapped status: ${status}`);
+};
+
+/**
+ * Converts a stored event, which may use the old vocabularies, into the current shape. Three
+ * transformations: severity (`80-critical`... -> `critical`...), status (`open`/`closed`/
+ * `dismissed` -> `active`/`inactive`) and `event_id` <- `event_uuid`. Every read path that
+ * returns stored events must go through it; throws when an id, severity or status cannot be mapped.
+ * Bridge removal tracked at https://github.com/elastic/nightshift-program/issues/1493.
+ */
 const normalizeLegacyEvent = (event: LegacyStoredSignificantEvent): SignificantEvent => {
   const { event_id: eventId, event_uuid: eventUuid, severity, status, ...eventFields } = event;
   const stableEventId = eventId ?? eventUuid;
@@ -172,8 +210,8 @@ const normalizeLegacyEvent = (event: LegacyStoredSignificantEvent): SignificantE
   return normalizeLegacyVerification({
     ...eventFields,
     event_id: stableEventId,
-    severity: legacySeverityToCanonicalSeverity[severity as LegacySeverity] ?? severity,
-    status: legacyStatusToCanonicalStatus[status as LegacySignificantEventStatus] ?? status,
+    severity: toCanonicalSeverity(severity),
+    status: toCanonicalStatus(status),
   });
 };
 
@@ -251,7 +289,7 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
-const activeStatuses = legacyStatusesFor(SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS) ?? [];
+const activeStatuses = expandWithLegacyStatuses(SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS);
 const activeStatusWhere = (): ESQLAstExpression =>
   esql.exp`${esql.col('status')} IN (${activeStatuses.map((status) => esql.str(status))})`;
 
@@ -280,6 +318,8 @@ export class EventClient implements SignificantEventsReadClient {
     this.clients.triggerEmitter?.(triggerId, payload);
   }
 
+  // Bridge removal tracked at https://github.com/elastic/nightshift-program/issues/1493: drop the
+  // `event_uuid` coalesce once no pre-`event_id` documents remain.
   private withStableEventId(query: ComposerQuery): ComposerQuery {
     return query.pipe`EVAL ${esql.col(FIELD_EVENT_ID)} = COALESCE(${esql.col(
       FIELD_EVENT_ID
@@ -336,7 +376,7 @@ export class EventClient implements SignificantEventsReadClient {
     query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
     // Free-text search, current state and continuation-candidate filters all run post-latest, so
-    // they match the current version and stale versions cannot make a closed episode appear open.
+    // they match the current version and stale versions cannot make an inactive episode appear active.
     const searchWhere = this.buildWhere({ search: options.search });
     if (searchWhere) {
       query = query.where`${searchWhere}`;
@@ -469,10 +509,10 @@ export class EventClient implements SignificantEventsReadClient {
   }
 
   /**
-   * Returns the latest version per event_id for all active (status "open") events within the
+   * Returns the latest version per event_id for all active (status "active") events within the
    * given time range, optionally narrowed to candidate stream/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. The status and candidate filters
-   * are applied after grouping so a closed/dismissed event is correctly excluded.
+   * are applied after grouping so an inactive event is correctly excluded.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With stream+rule narrowing the result
    * set is proportional to the write batch, so this limit is never approached in practice.

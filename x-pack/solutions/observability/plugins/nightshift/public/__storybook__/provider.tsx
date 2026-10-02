@@ -162,7 +162,6 @@ const createServices = ({
       if (route === 'POST /internal/significant_events/events/{id}/update' && eventId) {
         inactiveEventIds.add(eventId);
         return {
-          found: true,
           event_id: eventId,
           updated: 1,
           ignored: 0,

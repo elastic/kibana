@@ -33,7 +33,7 @@ const eventInvestigationAttachSchema = z.object({
         'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
         {
           defaultMessage:
-            'Stable event_id slug of the significant event to attach the investigation to (e.g. "checkout-latency-slo-breach"). Read from the Event ID field, not the Event UUID.',
+            'Stable event_id slug of the significant event to attach the investigation to (e.g. "checkout-latency-slo-breach"). Read from the Event ID field.',
         }
       )
     ),

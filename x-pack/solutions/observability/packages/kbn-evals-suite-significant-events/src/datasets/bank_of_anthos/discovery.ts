@@ -451,7 +451,7 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 1,
         },
         {
-          id: 'active-active-cascade',
+          id: 'active-cascade',
           text: 'Sets status=active with severity=critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
           score: 3,
         },

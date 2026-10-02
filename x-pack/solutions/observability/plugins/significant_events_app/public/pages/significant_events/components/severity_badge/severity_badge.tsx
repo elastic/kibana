@@ -65,7 +65,7 @@ export const scoreSeverity = (score: number): Severity => {
 };
 
 export function SeverityBadge({ score, severity }: { score?: number; severity?: Severity }) {
-  const normalizedSeverity = severity ?? (score ? scoreSeverity(score) : undefined);
+  const normalizedSeverity = severity ?? (score !== undefined ? scoreSeverity(score) : undefined);
   if (!normalizedSeverity) {
     return (
       <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize="xs">

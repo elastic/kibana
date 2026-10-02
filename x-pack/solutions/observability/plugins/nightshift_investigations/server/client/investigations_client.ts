@@ -13,7 +13,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import { investigationStateSchema, type Severity } from '@kbn/significant-events-schema';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -177,20 +177,6 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
   (typeof LIST_INVESTIGATION_ITEM_FIELDS)[keyof ListInvestigationItem][number]
 >;
 
-const canonicalSeverityByStoredSeverity: Record<string, Severity> = {
-  critical: 'critical',
-  high: 'high',
-  medium: 'medium',
-  low: 'low',
-  '80-critical': 'critical',
-  '60-high': 'high',
-  '40-medium': 'medium',
-  '20-low': 'low',
-};
-
-const canonicalizeInvestigationSeverity = (severity: string | undefined): Severity | undefined =>
-  severity ? canonicalSeverityByStoredSeverity[severity] : undefined;
-
 const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
   title: record.title,
@@ -198,7 +184,7 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
   created_at: record.created_at,
   started_at: record.started_at,
   completed_at: record.completed_at,
-  severity: canonicalizeInvestigationSeverity(record.severity),
+  severity: record.severity,
   concurrency_key: record.concurrency_key,
   executed_by: record.executed_by,
   subject: toSubject({

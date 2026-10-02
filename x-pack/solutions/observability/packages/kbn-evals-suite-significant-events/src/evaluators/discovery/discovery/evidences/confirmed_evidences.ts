@@ -25,7 +25,7 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No active — confirms-signal invariant does not apply',
+        explanation: 'No active events — confirms-signal invariant does not apply',
       });
     }
 

@@ -14,7 +14,9 @@ import {
   type AlertEventSeverity,
 } from '@kbn/alerting-v2-schemas';
 import {
+  SEVERITY_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEvent,
   type SignificantEventResponse,
@@ -44,10 +46,10 @@ import type {
 const GROUP_HASH_FIELD = 'group_hash';
 
 const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
-  status === ALERT_EPISODE_STATUS.ACTIVE || status === ALERT_EPISODE_STATUS.INACTIVE;
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.some((option) => option === status);
 
 const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
-  severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
+  SEVERITY_OPTIONS.some((option) => option === severity);
 
 type RuleEventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
@@ -88,7 +90,12 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
     SignificantEvent,
     '@timestamp' | 'status' | 'severity'
   >;
+  // Sigevents does not model the full alert lifecycle yet: episode states other than
+  // active/inactive (e.g. pending, recovering) are still ongoing, so they map to `active`.
   const episodeStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
+  // Alerting v2 has an extra `info` level below `low` that Significant Events never writes. A row
+  // carrying `info` (or no severity) comes from another rule source, so it falls back to the
+  // neutral `medium` instead of being hidden as `low` or escalated.
   const severity = row.severity ?? 'medium';
   return {
     ...data,
@@ -343,7 +350,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
   }
 
   /**
-   * Returns the latest version per `group_hash` for all active ("open") events within the given
+   * Returns the latest version per `group_hash` for all active events within the given
    * time range, optionally narrowed to candidate stream/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. Mirrors `EventClient`'s
    * `findLatestActive`, but filters on the nested `alert.status` column (via

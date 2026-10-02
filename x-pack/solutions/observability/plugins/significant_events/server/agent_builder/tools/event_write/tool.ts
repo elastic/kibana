@@ -107,7 +107,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+          'A confirms item cannot include not_checked signals; drop each not_checked detection from items; it emits no event.',
       });
     }
     // Continuations inherit prior severity; this cycle's signals may be
@@ -123,7 +123,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or an inactive status.',
+          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or omit the item.',
       });
     }
   });
@@ -289,7 +289,7 @@ export function createEventsWriteTool({
       Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
       investigation makes the stored severity authoritative. It is preserved unless Discovery
-      closes or dismisses the event, reopens a closed or dismissed event, or submits a confirmed
+      marks the event inactive, reactivates an inactive event, or submits a confirmed
       rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 

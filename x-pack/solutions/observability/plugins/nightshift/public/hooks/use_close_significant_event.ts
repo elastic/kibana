@@ -18,22 +18,22 @@ const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.su
   defaultMessage: 'Significant event marked inactive',
 });
 
+const CLOSE_NO_CHANGE_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.closeEvent.noChangeToastTitle',
+  {
+    defaultMessage: 'No change made: the significant event is already inactive or no longer exists',
+  }
+);
+
 const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.errorToastTitle', {
   defaultMessage: 'Failed to mark significant event inactive',
 });
-
-const EVENT_NOT_FOUND_ERROR_MESSAGE = i18n.translate(
-  'xpack.nightshift.closeEvent.eventNotFoundErrorMessage',
-  {
-    defaultMessage: 'The significant event no longer exists.',
-  }
-);
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
 interface UseCloseSignificantEventResult {
-  closeSignificantEvent: (eventId: string, assessmentNote: string) => void;
+  closeSignificantEvent: (eventId: string, assessmentNote?: string) => void;
   closingEventId?: string;
 }
 
@@ -46,13 +46,16 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
   const [closingEventId, setClosingEventId] = useState<string>();
 
   const mutation = useMutation({
-    mutationFn: ({ eventId, assessmentNote }: { eventId: string; assessmentNote: string }) =>
+    mutationFn: ({ eventId, assessmentNote }: { eventId: string; assessmentNote?: string }) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/update',
         {
           params: {
             path: { id: eventId },
-            body: { status: 'inactive', assessment_note: assessmentNote },
+            body: {
+              status: 'inactive',
+              ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+            },
           },
           // Unmounting the list must not abort an update that is already in flight.
           signal: null,
@@ -61,14 +64,13 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
     onMutate: ({ eventId }) => {
       setClosingEventId(eventId);
     },
-    onSuccess: ({ found }, { eventId }) => {
-      if (!found) {
-        notifications.toasts.addError(new Error(EVENT_NOT_FOUND_ERROR_MESSAGE), {
-          title: CLOSE_ERROR_TOAST_TITLE,
-        });
+    onSuccess: ({ updated }, { eventId }) => {
+      // Nothing was written when `updated` is 0 (already inactive, or no such event); the
+      // invalidation in `onSettled` refetches the list.
+      if (updated === 0) {
+        notifications.toasts.addInfo({ title: CLOSE_NO_CHANGE_TOAST_TITLE });
         return;
       }
-
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
         (current) =>
@@ -101,7 +103,7 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
 
   return {
     closeSignificantEvent: (eventId, assessmentNote) =>
-      mutation.mutate({ eventId, assessmentNote: assessmentNote.trim() }),
+      mutation.mutate({ eventId, assessmentNote: assessmentNote?.trim() || undefined }),
     closingEventId,
   };
 };

@@ -38,7 +38,6 @@ describe('useCloseSignificantEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     significantEventsFetch.mockResolvedValue({
-      found: true,
       updated: 1,
       ignored: 0,
       status: 'inactive',
@@ -97,6 +96,27 @@ describe('useCloseSignificantEvent', () => {
       })
     );
     expect(addError).not.toHaveBeenCalled();
+  });
+
+  it('sends no assessment_note when the note is omitted', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
+
+    act(() => result.current.closeSignificantEvent(event.event_id));
+
+    await waitFor(() => expect(addSuccess).toHaveBeenCalled());
+    expect(significantEventsFetch).toHaveBeenCalledWith(
+      'POST /internal/significant_events/events/{id}/update',
+      {
+        params: { path: { id: 'event-1' }, body: { status: 'inactive' } },
+        signal: null,
+      }
+    );
   });
 
   it('surfaces inactive update failures as toast errors', async () => {

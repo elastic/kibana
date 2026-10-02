@@ -15,12 +15,14 @@ export async function updateEventStatusToolHandler({
   eventClient,
   eventId,
   status,
+  assessmentNote,
   alertEventsClient,
   logger,
 }: {
   eventClient: EventClient;
   eventId: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
   alertEventsClient?: AlertEventsClientApi;
   logger: Logger;
 }): Promise<{
@@ -33,6 +35,7 @@ export async function updateEventStatusToolHandler({
     eventClient,
     eventId,
     status,
+    assessmentNote,
     alertEventsClient,
     logger,
   });

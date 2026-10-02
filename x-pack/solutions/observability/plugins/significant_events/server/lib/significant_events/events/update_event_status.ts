@@ -28,7 +28,6 @@ export const updateSignificantEventStatus = async ({
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
 }): Promise<{
-  found: boolean;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
@@ -36,19 +35,21 @@ export const updateSignificantEventStatus = async ({
   const latest = await eventClient.findLatestByEventId(eventId);
 
   if (!latest) {
-    return { found: false, updated: 0, ignored: 1, status };
+    return { updated: 0, ignored: 1, status };
   }
 
   if (latest.status === status) {
-    return { found: true, updated: 0, ignored: 1, status };
+    return { updated: 0, ignored: 1, status };
   }
 
   const now = new Date().toISOString();
+  // A blank note counts as omitted, so it cannot overwrite the existing one.
+  const note = assessmentNote?.trim();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
     status,
-    ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+    ...(note ? { assessment_note: note } : {}),
   };
 
   // `wait_for` ensures the write is searchable before this resolves, so an immediate
@@ -67,5 +68,5 @@ export const updateSignificantEventStatus = async ({
     priorSignificantEvent: latest,
   });
 
-  return { found: true, updated: 1, ignored: 0, status };
+  return { updated: 1, ignored: 0, status };
 };

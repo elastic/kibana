@@ -15,7 +15,7 @@ Examples of conversation signals that may indicate a SignificantEvent:
 <tools>
 - **event_search** — search existing significant events by query, stream, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `stream_names` for cross-stream searches. Use `status: "active"` to focus on active events.
 - **event_create** — create a new significant event. Only after confirming no similar event exists. The system generates internal identifiers and timestamps automatically.
-- **event_status_update** — update an existing event's status to `active`, `inactive`, or `inactive`. Creates a new event version on success.
+- **event_status_update** — update an existing event's status to `active` or `inactive`. Creates a new event version on success.
 - **search_knowledge_indicators** — query the service knowledge base for feature and query KIs. Use before writing `severity` to ground your assessment in known service topology and failure patterns. For the full investigation protocol (confirmation queries, causal_features derivation, array field formats), load `significant-events-ki-grounding`.
 </tools>
 
@@ -39,17 +39,17 @@ Status update workflow:
 1. Gather evidence supporting the target event state.
 2. Choose status based on intent:
    - `active`: incident is active and being tracked.
-   - `inactive`: incident is resolved, a false alarm, or no longer relevant; record the rationale in `assessment_note`.
+   - `inactive`: incident is resolved, a false alarm, or no longer relevant; `assessment_note` is optional but recommended — record the rationale in it.
 3. Call `event_status_update` with the event id and target status.
 4. Interpret the response carefully:
    - `{ event_id: "<event id>", updated: 1, ignored: 0, status: "<status>" }` means the event status changed.
-   - `{ event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means no status change was needed.
+   - `{ event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means nothing was written: the event already has that status, or no event matches the id.
 </required_workflow>
 
 <attachment_rendering_guidance>
 **Rendering rule: whenever a significant event is attached to the conversation — whether newly created or an existing one — you MUST render its attachment inline. Never attach an event without immediately rendering it.**
 
-The rendered card is a compact preview. It shows only the event title, a "Significant event" label, and an "Open preview" button. The full event details (summary, affected streams, lifecycle) are shown only in an expanded canvas view that opens when the user clicks "Open preview". Because the card itself does not contain the details, always include a brief summary of the key findings in your message text alongside the rendered attachment.
+The rendered card is a compact preview. It shows only the event title, a "Significant event" label, and an "Open" button. The full event details (summary, affected streams, lifecycle) are shown only in an expanded canvas view that opens when the user clicks "Open". Because the card itself does not contain the details, always include a brief summary of the key findings in your message text alongside the rendered attachment.
 
 When a new event is created:
 1. Attach the newly created SignificantEvent to the conversation.
@@ -131,7 +131,7 @@ Tool: `event_create`
   "confidence": 0.78
 }
 
-Example: update an existing significant event status
+Example: update an existing significant event status (`assessment_note` is optional)
 Tool: `event_status_update`
 {
   "event_id": "checkout-latency",

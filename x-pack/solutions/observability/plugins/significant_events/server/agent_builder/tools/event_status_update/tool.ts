@@ -23,10 +23,20 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = significantEventSchema.pick({
-  status: true,
-  event_id: true,
-});
+const eventStatusUpdateSchema = significantEventSchema
+  .pick({
+    status: true,
+    event_id: true,
+    assessment_note: true,
+  })
+  .extend({
+    event_id: significantEventSchema.shape.event_id.describe(
+      'The event_id of the existing significant event to update.'
+    ),
+    assessment_note: significantEventSchema.shape.assessment_note.describe(
+      'Optional short reason for the change, for example why the event recovered or was a false alarm.'
+    ),
+  });
 
 export function createEventStatusUpdateTool({
   getScopedClients,
@@ -44,7 +54,8 @@ export function createEventStatusUpdateTool({
     type: ToolType.builtin,
     description: dedent`
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.description', {
-        defaultMessage: 'Update the status of an existing significant event.',
+        defaultMessage:
+          'Set an existing significant event to `active` or `inactive`. assessment_note is optional. Returns `updated: 0, ignored: 1` when no change was written, either because no event matches the id or because it already has that status.',
       })}
     `,
     annotations: {
@@ -70,6 +81,7 @@ export function createEventStatusUpdateTool({
           eventClient: await getEventClient(),
           eventId: toolParams.event_id,
           status: toolParams.status,
+          assessmentNote: toolParams.assessment_note,
           alertEventsClient: await getAlertEventsClient(),
           logger,
         });

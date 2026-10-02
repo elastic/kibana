@@ -78,7 +78,6 @@ describe('updateSignificantEventStatus', () => {
     });
 
     expect(result).toEqual({
-      found: true,
       updated: 1,
       ignored: 0,
       status: 'inactive',
@@ -151,6 +150,26 @@ describe('updateSignificantEventStatus', () => {
     expect(callArg.documents[0].assessment_note).toBe('Operator dismissed as noise.');
   });
 
+  it('does not overwrite the existing note with a whitespace-only note', async () => {
+    const existing = createSignificantEvent({
+      status: 'active',
+      assessment_note: 'Original rationale.',
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await updateSignificantEventStatus({
+      eventClient: client,
+      eventId: existing.event_id,
+      status: 'inactive',
+      assessmentNote: '   ',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0].assessment_note).toBe('Original rationale.');
+  });
+
   it('ignores when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 
@@ -163,7 +182,6 @@ describe('updateSignificantEventStatus', () => {
     });
 
     expect(result).toEqual({
-      found: false,
       updated: 0,
       ignored: 1,
       status: 'inactive',
@@ -183,7 +201,7 @@ describe('updateSignificantEventStatus', () => {
       logger: makeLogger(),
     });
 
-    expect(result).toEqual({ found: true, updated: 0, ignored: 1, status: 'inactive' });
+    expect(result).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 

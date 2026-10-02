@@ -339,6 +339,18 @@ describe('EventClient', () => {
       });
     });
 
+    it.each([
+      ['severity', { severity: '99-unknown' }, /unmapped severity: 99-unknown/],
+      ['status', { status: 'resolved' }, /unmapped status: resolved/],
+    ])('throws on an unmapped %s', async (_name, overrides, message) => {
+      const { client } = createSearchClient({
+        hits: [{ ...createEvent(), ...overrides } as never],
+        total: 1,
+      });
+
+      await expect(client.findLatestByCurrentStatePaginated({})).rejects.toThrow(message);
+    });
+
     it('filters severity after latest-per-slug reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],

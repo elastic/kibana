@@ -191,7 +191,7 @@ export function SignificantEventItem({
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate('xpack.nightshift.event.closeEventTooltip', {
-                      defaultMessage: 'Close significant event',
+                      defaultMessage: 'Mark significant event inactive',
                     })}
                     disableScreenReaderOutput
                   >
@@ -199,7 +199,7 @@ export function SignificantEventItem({
                       aria-label={i18n.translate(
                         'xpack.nightshift.event.closeEventButtonAriaLabel',
                         {
-                          defaultMessage: 'Close {eventTitle}',
+                          defaultMessage: 'Mark {eventTitle} inactive',
                           values: { eventTitle: event.title },
                         }
                       )}

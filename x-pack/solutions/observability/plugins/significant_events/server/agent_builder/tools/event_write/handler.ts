@@ -331,11 +331,9 @@ const fetchPriorDocsByEventId = async (
   candidates: WriteCandidate[]
 ): Promise<{
   latestByEventId: Map<string, SignificantEvent>;
-  latestLegacyByEventId: Map<string, SignificantEvent>;
   priorDocsByEventId: Map<string, SignificantEvent[]>;
 }> => {
   const latestByEventId = new Map<string, SignificantEvent>();
-  const latestLegacyByEventId = new Map<string, SignificantEvent>();
   const priorDocsByEventId = new Map<string, SignificantEvent[]>();
   await Promise.all(
     candidates
@@ -369,13 +367,9 @@ const fetchPriorDocsByEventId = async (
         if (latest !== undefined) {
           latestByEventId.set(c.eventId, latest);
         }
-        const latestLegacy = legacyHits.at(-1);
-        if (latestLegacy !== undefined) {
-          latestLegacyByEventId.set(c.eventId, latestLegacy);
-        }
       })
   );
-  return { latestByEventId, latestLegacyByEventId, priorDocsByEventId };
+  return { latestByEventId, priorDocsByEventId };
 };
 
 const buildPendingWrite = (
@@ -557,15 +551,18 @@ export async function eventsWriteBulkHandler({
   const activeEvents = client !== eventClient ? canonicalActiveEvents : searchClientActiveEvents;
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =
-    await fetchPriorDocsByEventId(client, eventClient, toWrite);
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
+    client,
+    eventClient,
+    toWrite
+  );
   const calibrated = toWrite.map((candidate) => ({
     ...candidate,
     input: {
       ...candidate.input,
       severity: getCalibratedSeverity({
         source,
-        latestEvent: latestLegacyByEventId.get(candidate.eventId),
+        latestEvent: latestByEventId.get(candidate.eventId),
         proposedSeverity: candidate.input.severity,
         proposedStatus: candidate.input.status,
         proposedSignals: candidate.input.signals,
@@ -576,7 +573,7 @@ export async function eventsWriteBulkHandler({
     if (
       candidate.mode === 'snapshot' &&
       shouldSkipAsNoOp(
-        latestLegacyByEventId.get(candidate.eventId),
+        latestByEventId.get(candidate.eventId),
         candidate,
         priorDocsByEventId.get(candidate.eventId) ?? []
       )
@@ -632,9 +629,9 @@ export async function eventsWriteBulkHandler({
       // Use the canonical predecessor (legacy write store) rather than the read-store view:
       // .rule-events is dual-written fire-and-forget (no refresh guarantee), so it may lag and
       // yield undefined — emitting a spurious eventCreated for an existing event. The read-store
-      // client also decodes dismissed → closed, corrupting the status comparison used to decide
+      // client may decode statuses differently, corrupting the status comparison used to decide
       // whether to emit eventStatusChanged.
-      priorSignificantEvent: latestLegacyByEventId.get(candidate.eventId),
+      priorSignificantEvent: latestByEventId.get(candidate.eventId),
     });
     if (alertEventsClient && dualWriteLimit) {
       return [

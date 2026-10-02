@@ -20,7 +20,7 @@ const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
 export const STALE_EVENT_ASSESSMENT_NOTE = i18n.translate(
   'xpack.significantEvents.staleEventCleanup.assessmentNoteDescription',
   {
-    defaultMessage: 'Automatically closed because none of its backing rules exist.',
+    defaultMessage: 'Automatically marked inactive because none of its backing rules exist.',
   }
 );
 
@@ -118,7 +118,7 @@ export const cleanupStaleEvents = async ({
       continue;
     }
 
-    // Resolve a batch before writing it so a lookup failure cannot inactivate events from that batch.
+    // Resolve a batch before writing it so a lookup failure cannot mark events from that batch inactive.
     const existingRuleIds = new Set(await rulesClient.findExistingRuleIds(allRuleIds));
     const staleEvents = eventsWithRuleIds.filter(
       ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))

@@ -949,6 +949,20 @@ const resolveKibanaUrl = async (url: string, auth: string): Promise<string> => {
     : base;
 };
 
+// Investigations persist severity with a sortable numeric prefix; the API converts it back to the
+// canonical value on read. Seeds are written straight into .kibana, so they must use the stored form.
+const STORED_SEVERITY: Record<Severity, string> = {
+  critical: '80-critical',
+  high: '60-high',
+  medium: '40-medium',
+  low: '20-low',
+};
+
+const toStoredAttributes = (attributes: InvestigationAttributes) =>
+  attributes.severity === undefined
+    ? attributes
+    : { ...attributes, severity: STORED_SEVERITY[attributes.severity] };
+
 const toBulkBody = (): string =>
   INVESTIGATIONS.flatMap((attributes, index) => [
     { index: { _id: `${SO_TYPE}:${ID_PREFIX}${String(index + 1).padStart(2, '0')}` } },
@@ -960,7 +974,7 @@ const toBulkBody = (): string =>
       typeMigrationVersion: TYPE_MIGRATION_VERSION,
       created_at: attributes.created_at,
       updated_at: attributes.completed_at ?? attributes.created_at,
-      [SO_TYPE]: attributes,
+      [SO_TYPE]: toStoredAttributes(attributes),
     },
   ])
     .map((line) => JSON.stringify(line))

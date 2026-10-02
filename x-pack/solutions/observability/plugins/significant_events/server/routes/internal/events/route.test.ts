@@ -335,20 +335,9 @@ describe('GET /internal/significant_events/events/{id}', () => {
 describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
   const bodySchema = eventsUpdateRoute.params.shape.body;
 
-  it('rejects inactive status with no assessment_note', () => {
+  it('accepts inactive status without assessment_note', () => {
     const result = bodySchema.safeParse({ status: 'inactive' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['assessment_note']);
-    }
-  });
-
-  it('rejects inactive status with a blank assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'inactive', assessment_note: '   ' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['assessment_note']);
-    }
+    expect(result.success).toBe(true);
   });
 
   it('accepts inactive status with a non-empty assessment_note', () => {
