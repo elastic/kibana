@@ -385,6 +385,24 @@ describe('Zabbix', () => {
     });
   });
 
+  describe.each([
+    [
+      'CreateMaintenanceInputSchema',
+      CreateMaintenanceInputSchema,
+      { name: 'DB01 patching', hostIds: ['10084'], activeSince: 1000, activeTill: 2000 },
+    ],
+    ['UpdateMaintenanceInputSchema', UpdateMaintenanceInputSchema, { maintenanceId: '3' }],
+  ])('%s description', (_name, schema, base) => {
+    it.each([
+      ['65,535 ASCII characters', 'd'.repeat(65_535), true],
+      ['65,536 ASCII characters', 'd'.repeat(65_536), false],
+      ['32,767 two-byte characters', 'é'.repeat(32_767), true],
+      ['32,768 two-byte characters', 'é'.repeat(32_768), false],
+    ])('is bounded at 65,535 UTF-8 bytes: %s', (_label, description, valid) => {
+      expect(schema.safeParse({ ...base, description }).success).toBe(valid);
+    });
+  });
+
   describe('AddProblemMessageInputSchema validation', () => {
     it('accepts a message up to the 2048-character acknowledges.message column', () => {
       expect(() =>

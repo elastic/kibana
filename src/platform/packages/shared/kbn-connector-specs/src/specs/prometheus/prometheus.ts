@@ -43,6 +43,7 @@ import {
   ListPrometheusTargetsInputSchema,
   GetPrometheusSeriesInputSchema,
   ListPrometheusLabelValuesInputSchema,
+  toMatchParams,
 } from './types';
 import type {
   ListAlertsInput,
@@ -510,18 +511,18 @@ export const Prometheus: ConnectorSpec = {
         'Find Prometheus time series matching one or more series selector expressions, without returning their sample values. Use this to discover which series exist for an entity (e.g. a job or instance) before querying them with queryPrometheus. Requires the optional "Prometheus server URL" connector field.',
       input: GetPrometheusSeriesInputSchema,
       handler: async (ctx, input: GetPrometheusSeriesInput) => {
-        const params: Record<string, string | string[]> = { match: input.match };
-        if (input.start) params.start = input.start;
-        if (input.end) params.end = input.end;
+        // A form-encoded POST keeps large selector batches out of the request line, which Go
+        // caps at 1 MiB with the headers. Go caps form bodies at 10 MiB, which fits
+        // MAX_MATCHERS fully percent-encoded selectors of MAX_QUERY_LENGTH.
+        const form = toMatchParams(input.match);
+        if (input.start) form.append('start', input.start);
+        if (input.end) form.append('end', input.end);
         try {
-          const response = await ctx.client.get(`${buildPrometheusUrl(ctx)}/api/v1/series`, {
-            params,
-            // Prometheus expects the literal repeated key `match[]=a&match[]=b` (confirmed
-            // live). `indexes: false` produces that `[]`-suffixed repeated-key form;
-            // `indexes: null` drops the brackets and Prometheus rejects the request with
-            // "no match[] parameter provided".
-            paramsSerializer: { indexes: false },
-          });
+          const response = await ctx.client.post(
+            `${buildPrometheusUrl(ctx)}/api/v1/series`,
+            form.toString(),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+          );
           return response.data;
         } catch (error) {
           throw formatPrometheusError('getPrometheusSeries', error);

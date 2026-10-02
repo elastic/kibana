@@ -251,7 +251,7 @@ export const CreateBuildAnnotationInputSchema = lazySchema(() =>
       .max(MAX_ANNOTATION_CONTEXT_LENGTH)
       .optional()
       .describe(
-        'A unique key identifying this annotation (at most 100 characters). Reusing the same context with append=true appends to the existing annotation instead of creating a new one; reusing it without append replaces the annotation.'
+        `A unique key identifying this annotation (at most ${MAX_ANNOTATION_CONTEXT_LENGTH} characters). Reusing the same context with append=true appends to the existing annotation instead of creating a new one; reusing it without append replaces the annotation.`
       ),
     priority: z
       .number()

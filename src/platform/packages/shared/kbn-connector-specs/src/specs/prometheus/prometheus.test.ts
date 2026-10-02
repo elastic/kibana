@@ -443,24 +443,31 @@ describe('Prometheus', () => {
       },
     } as unknown as ActionContext;
 
-    it('should send repeated match[] keys and optional start/end', async () => {
-      mockClient.get.mockResolvedValue({ data: [{ __name__: 'up', job: 'node' }] });
+    it('should POST repeated match[] keys and optional start/end as a form body', async () => {
+      mockClient.post.mockResolvedValue({ data: [{ __name__: 'up', job: 'node' }] });
 
       const result = await Prometheus.actions.getPrometheusSeries.handler(ctxWithPrometheus, {
-        match: ['up{job="node"}'],
+        match: ['up{job="node"}', 'process_start_time_seconds'],
         start: '2026-01-01T00:00:00Z',
         end: '2026-01-01T01:00:00Z',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://prometheus.example.com/api/v1/series', {
-        params: {
-          match: ['up{job="node"}'],
-          start: '2026-01-01T00:00:00Z',
-          end: '2026-01-01T01:00:00Z',
-        },
-        paramsSerializer: { indexes: false },
-      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://prometheus.example.com/api/v1/series',
+        'match%5B%5D=up%7Bjob%3D%22node%22%7D&match%5B%5D=process_start_time_seconds' +
+          '&start=2026-01-01T00%3A00%3A00Z&end=2026-01-01T01%3A00%3A00Z',
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
       expect(result).toEqual([{ __name__: 'up', job: 'node' }]);
+    });
+
+    it('accepts the maximum number of maximum-length selectors', () => {
+      expect(
+        Prometheus.actions.getPrometheusSeries.input.safeParse({
+          match: Array(50).fill('a'.repeat(65_536)),
+        }).success
+      ).toBe(true);
     });
 
     it('accepts any series selector that queryPrometheus accepts', () => {
@@ -513,6 +520,22 @@ describe('Prometheus', () => {
         { params: { match: ['up{job="node"}'] }, paramsSerializer: { indexes: false } }
       );
       expect(result).toEqual(['node-1', 'node-2']);
+    });
+
+    it('rejects selectors that only exceed the 1 MiB request header limit together', () => {
+      const selector = 'a'.repeat(65_536);
+      expect(
+        Prometheus.actions.listPrometheusLabelValues.input.safeParse({
+          label: 'job',
+          match: Array(15).fill(selector),
+        }).success
+      ).toBe(true);
+      expect(
+        Prometheus.actions.listPrometheusLabelValues.input.safeParse({
+          label: 'job',
+          match: Array(17).fill(selector),
+        }).success
+      ).toBe(false);
     });
   });
 

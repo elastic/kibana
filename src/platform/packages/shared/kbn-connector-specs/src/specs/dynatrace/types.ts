@@ -415,7 +415,9 @@ export const DynatraceCreateMaintenanceWindowInputSchema = lazySchema(() =>
       .int()
       .min(1)
       .max(MAX_MAINTENANCE_WINDOW_MINUTES)
-      .describe('Duration of the maintenance window in minutes (1 to 525600 = 1 year).'),
+      .describe(
+        `Duration of the maintenance window in minutes (1 to ${MAX_MAINTENANCE_WINDOW_MINUTES} = 1 year).`
+      ),
     description: z
       .string()
       .max(2000)

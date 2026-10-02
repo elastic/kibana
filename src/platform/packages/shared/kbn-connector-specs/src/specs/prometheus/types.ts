@@ -24,6 +24,10 @@ const MAX_ALERTS_PER_REQUEST = 1000;
 // 1 MiB default header limit, which this stays well under even when fully percent-encoded.
 const MAX_QUERY_LENGTH = 65_536;
 const MAX_RULE_NAME_LENGTH = 200;
+// Go's `http.DefaultMaxHeaderBytes` bounds the request line and headers of a GET request, so
+// GET-only endpoints must fit every selector in the query string with room left for headers.
+const MAX_REQUEST_HEADER_BYTES = 1024 * 1024;
+const REQUEST_HEADER_RESERVE_BYTES = 16 * 1024;
 
 /**
  * A single matcher used in the *body* of postableSilence, per the Alertmanager
@@ -361,6 +365,10 @@ const seriesSelectorField = () =>
     .max(MAX_QUERY_LENGTH)
     .describe("A PromQL series selector, e.g. 'up{job=\"node\"}' or 'process_start_time_seconds'.");
 
+/** Encodes series selectors as the repeated `match[]` keys the Prometheus HTTP API expects. */
+export const toMatchParams = (match: readonly string[]): URLSearchParams =>
+  new URLSearchParams(match.map((selector) => ['match[]', selector]));
+
 const seriesMatchField = () =>
   z
     .array(seriesSelectorField())
@@ -389,20 +397,31 @@ export const GetPrometheusSeriesInputSchema = lazySchema(() =>
 export type GetPrometheusSeriesInput = z.infer<typeof GetPrometheusSeriesInputSchema>;
 
 export const ListPrometheusLabelValuesInputSchema = lazySchema(() =>
-  z.object({
-    label: z
-      .string()
-      .min(1)
-      .max(MAX_LABEL_LENGTH)
-      .describe('The label name to list known values for, e.g. "job" or "instance".'),
-    match: z
-      .array(seriesSelectorField())
-      .max(MAX_MATCHERS)
-      .optional()
-      .describe('Optional series selector expressions to restrict which series are considered.'),
-    start: optionalRangeTimeField('start'),
-    end: optionalRangeTimeField('end'),
-  })
+  z
+    .object({
+      label: z
+        .string()
+        .min(1)
+        .max(MAX_LABEL_LENGTH)
+        .describe('The label name to list known values for, e.g. "job" or "instance".'),
+      match: z
+        .array(seriesSelectorField())
+        .max(MAX_MATCHERS)
+        .optional()
+        .describe('Optional series selector expressions to restrict which series are considered.'),
+      start: optionalRangeTimeField('start'),
+      end: optionalRangeTimeField('end'),
+    })
+    .refine(
+      ({ match }) =>
+        match === undefined ||
+        Buffer.byteLength(toMatchParams(match).toString(), 'utf8') <=
+          MAX_REQUEST_HEADER_BYTES - REQUEST_HEADER_RESERVE_BYTES,
+      {
+        message: `The URL-encoded series selectors must fit Prometheus's ${MAX_REQUEST_HEADER_BYTES}-byte request header limit.`,
+        path: ['match'],
+      }
+    )
 );
 export type ListPrometheusLabelValuesInput = z.infer<typeof ListPrometheusLabelValuesInputSchema>;
 
