@@ -16,6 +16,8 @@ import {
   MAX_CANDIDATES,
   NON_TERMINAL_INVESTIGATION_STATUSES,
   PAGE_SIZE,
+  UNTRACKED_RUN_TIMEOUT_ERROR,
+  UNTRACKED_RUN_TIMEOUT_MS,
 } from './investigation_reconciliation_types';
 import type {
   ExecutionSummary,
@@ -50,7 +52,7 @@ const getCandidatesBySpace = async ({
 
     const { results } = await investigationSweepRepository.findAcrossSpaces({
       statuses: [...NON_TERMINAL_INVESTIGATION_STATUSES],
-      fields: ['created_at', 'execution_id'],
+      fields: ['created_at', 'status', 'started_at', 'execution_id'],
       sortField: 'created_at',
       sortOrder: 'asc',
       page,
@@ -107,12 +109,40 @@ const toInvestigationStatus = (
   }
 };
 
+/**
+ * Fails a running investigation whose latest execution cannot be found once it outlives the
+ * workflow timeout. A pending one is left alone: it may still be waiting for its run to start.
+ */
+const failUntrackedRun = (
+  { status, started_at: startedAt }: ReconciliationCandidate['investigation'],
+  now: number
+): ReconciliationOutcome | undefined => {
+  const startedAtMs = startedAt === undefined ? NaN : Date.parse(startedAt);
+  if (status !== 'running' || Number.isNaN(startedAtMs)) {
+    return undefined;
+  }
+  return now - startedAtMs > UNTRACKED_RUN_TIMEOUT_MS
+    ? {
+        reconciledStatus: 'failed',
+        completedAt: new Date(now).toISOString(),
+        errorMessage: UNTRACKED_RUN_TIMEOUT_ERROR,
+      }
+    : undefined;
+};
+
 const toReconciliationOutcome = ({
+  investigation,
   execution,
+  now,
 }: {
+  investigation: ReconciliationCandidate['investigation'];
   execution: ExecutionSummary | undefined;
+  now: number;
 }): ReconciliationOutcome | undefined => {
-  if (!execution || !isInvestigationWorkflowExecution(execution)) {
+  if (!execution) {
+    return failUntrackedRun(investigation, now);
+  }
+  if (!isInvestigationWorkflowExecution(execution)) {
     return undefined;
   }
 
@@ -133,8 +163,9 @@ const toReconciliationOutcome = ({
  * Corrects investigations left in a non-terminal status by a workflow execution that has already
  * settled — the engine cancels or times out a run before its `persist_investigation_*` step can
  * write the outcome. An investigation is settled from its latest run's execution, which is its own
- * ID unless a later run continued it. Executions from removed workflows and missing execution
- * documents are left untouched. Only the status is corrected; no lifecycle trigger is emitted.
+ * ID unless a later run continued it. Executions from removed workflows are left untouched. A
+ * running investigation whose execution document is missing is failed only once it outlives the
+ * workflow timeout. Only the status is corrected; no lifecycle trigger is emitted.
  */
 export const reconcileInvestigationStatuses = async ({
   investigationSweepRepository,
@@ -176,7 +207,11 @@ export const reconcileInvestigationStatuses = async ({
 
         const { id, version } = candidate.investigation;
         const execution = executions.get(getLatestExecutionId(candidate.investigation));
-        const outcome = toReconciliationOutcome({ execution });
+        const outcome = toReconciliationOutcome({
+          investigation: candidate.investigation,
+          execution,
+          now: Date.now(),
+        });
 
         if (!outcome) {
           continue;
