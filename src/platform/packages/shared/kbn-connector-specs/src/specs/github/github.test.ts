@@ -481,6 +481,19 @@ describe('GithubConnector', () => {
       ).not.toThrow();
     });
 
+    it('bounds file contents at 100 MB once Base64-decoded', () => {
+      const write = (bytes: number) =>
+        GithubConnector.actions.createOrUpdateFile.input.safeParse({
+          ...repo,
+          path: 'big.bin',
+          message: 'add',
+          content: Buffer.alloc(bytes).toString('base64'),
+        }).success;
+      const maxBytes = 100 * 1024 * 1024;
+      expect(write(maxBytes)).toBe(true);
+      expect(write(maxBytes + 1)).toBe(false);
+    });
+
     it('bounds workflow_dispatch inputs by the 65,535 character payload of all inputs together', () => {
       const dispatch = (inputs: Record<string, string>) =>
         GithubConnector.actions.triggerWorkflow.input.safeParse({

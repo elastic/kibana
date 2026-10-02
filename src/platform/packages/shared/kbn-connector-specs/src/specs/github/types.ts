@@ -20,7 +20,6 @@ const COMMIT_TITLE_MAX_LENGTH = 1024;
 const COMMIT_MESSAGE_MAX_LENGTH = 65536;
 // https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents accepts files up to 100 MB.
 const GITHUB_CONTENTS_MAX_FILE_BYTES = 100 * 1024 * 1024;
-const GITHUB_CONTENTS_MAX_BASE64_LENGTH = Math.ceil(GITHUB_CONTENTS_MAX_FILE_BYTES / 3) * 4;
 // https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onworkflow_dispatchinputs
 const WORKFLOW_DISPATCH_MAX_INPUTS = 25;
 const WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD = 65535;
@@ -465,7 +464,13 @@ export const CreateOrUpdateFileInputSchema = lazySchema(() =>
     content: z
       .string()
       .min(1)
-      .max(GITHUB_CONTENTS_MAX_BASE64_LENGTH)
+      .max(Math.ceil(GITHUB_CONTENTS_MAX_FILE_BYTES / 3) * 4)
+      .refine(
+        (value) => Buffer.from(value, 'base64').byteLength <= GITHUB_CONTENTS_MAX_FILE_BYTES,
+        {
+          message: `File must not exceed ${GITHUB_CONTENTS_MAX_FILE_BYTES} bytes once decoded`,
+        }
+      )
       .describe('New file contents, Base64-encoded (required by the GitHub API)'),
     sha: z
       .string()
