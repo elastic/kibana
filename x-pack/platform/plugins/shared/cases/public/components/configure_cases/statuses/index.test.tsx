@@ -35,6 +35,12 @@ describe('CaseStatusesSection', () => {
     onMoveStatus: jest.fn(),
     onSetDefaultStatus: jest.fn(),
     onToggleStatusDisabled: jest.fn(),
+    pauseReasons: [],
+    onAddOnHoldStatus: jest.fn(),
+    onAddPauseReason: jest.fn(),
+    onEditPauseReason: jest.fn(),
+    onMovePauseReason: jest.fn(),
+    onRemovePauseReason: jest.fn(),
   };
 
   beforeEach(() => {
@@ -163,6 +169,54 @@ describe('CaseStatusesSection', () => {
 
       expect(screen.getByTestId('case-status-awaiting_customer-actions')).toBeDisabled();
       expect(screen.getByTestId('case-statuses-add-open')).toBeDisabled();
+    });
+  });
+
+  describe('pausing', () => {
+    const onHold = {
+      ...awaitingCustomer,
+      key: 'on_hold',
+      label: 'On hold',
+      pausesTimeTracking: true,
+    };
+
+    it('suggests an On hold status under In progress while nothing pauses time tracking', async () => {
+      renderWithTestingProviders(<CaseStatusesSection {...props} />);
+
+      const callout = within(screen.getByTestId('case-statuses-group-in-progress')).getByTestId(
+        'case-statuses-on-hold-callout'
+      );
+      expect(callout).toHaveTextContent(i18n.ON_HOLD_CALLOUT_TITLE);
+      expect(screen.queryByTestId('case-pause-reasons')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('case-statuses-add-on-hold'));
+      expect(props.onAddOnHoldStatus).toHaveBeenCalled();
+    });
+
+    it('marks pausing statuses and shows the pause reasons once one exists', () => {
+      renderWithTestingProviders(
+        <CaseStatusesSection
+          {...props}
+          statuses={[...props.statuses, onHold]}
+          pauseReasons={['Awaiting customer']}
+        />
+      );
+
+      expect(screen.getByTestId('case-status-on_hold-pausing-badge')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-status-awaiting_customer-pausing-badge')).toBeNull();
+      expect(screen.queryByTestId('case-statuses-on-hold-callout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('case-pause-reasons')).toBeInTheDocument();
+      expect(screen.getByTestId('case-pause-reason-row-Awaiting customer')).toBeInTheDocument();
+    });
+
+    it('does not let a pausing status become the default', async () => {
+      renderWithTestingProviders(
+        <CaseStatusesSection {...props} statuses={[...props.statuses, onHold]} />
+      );
+
+      await userEvent.click(screen.getByTestId('case-status-on_hold-actions'));
+
+      expect(screen.getByTestId('case-status-on_hold-set-default')).toBeDisabled();
     });
   });
 

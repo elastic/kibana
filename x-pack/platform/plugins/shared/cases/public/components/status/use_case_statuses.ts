@@ -71,6 +71,18 @@ export const useCaseStatuses = () => {
 
   const enabledStatuses = useMemo(() => statuses.filter((status) => !status.disabled), [statuses]);
 
+  /** Reasons of the owners in context, deduplicated; empty while custom statuses are off. */
+  const pauseReasons = useMemo(() => {
+    if (!customStatusesEnabled) {
+      return [];
+    }
+    const inContext =
+      owner.length === 0
+        ? configurations
+        : configurations.filter((configuration) => owner.includes(configuration.owner));
+    return [...new Set(inContext.flatMap((configuration) => configuration.pauseReasons ?? []))];
+  }, [configurations, customStatusesEnabled, owner]);
+
   /**
    * The configured status a case is on, falling back to its category's default (and then to the
    * built-in status) so cases written before statuses were configured still render.
@@ -88,6 +100,7 @@ export const useCaseStatuses = () => {
   return {
     statuses,
     enabledStatuses,
+    pauseReasons,
     getStatus,
     isCustomStatusesEnabled: customStatusesEnabled,
     isLoading,

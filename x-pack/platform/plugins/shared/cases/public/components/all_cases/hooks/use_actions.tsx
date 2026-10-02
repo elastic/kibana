@@ -32,6 +32,7 @@ import { EditAssigneesFlyout } from '../../actions/assignees/edit_assignees_flyo
 import { useCopyIDAction } from '../../actions/copy_id/use_copy_id_action';
 import { useShouldDisableStatus } from '../../actions/status/use_should_disable_status';
 import { useCloseCaseModal } from './use_close_case_modal';
+import { usePauseReasonModal } from './use_pause_reason_modal';
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import { useRunWorkflowAction } from '../../actions/run_workflow/use_run_workflow_action';
 import { RunCaseWorkflowModal } from '../../workflows/run_case_workflow_modal';
@@ -118,6 +119,11 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     onCloseCase,
   });
 
+  const { openPauseReasonModal, pauseReasonModal } = usePauseReasonModal({
+    onPause: (status, reason) =>
+      statusAction.handleUpdateCaseStatus([theCase], status, undefined, reason),
+  });
+
   const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       statusAction.getActions(
@@ -132,9 +138,11 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
               if (status.key !== getStatus(theCase.statusKey, theCase.status).key) {
                 statusAction.handleUpdateCaseStatus([theCase], status);
               }
-            }
+            },
+        // A case that is already paused keeps its reason when moving between pausing statuses.
+        theCase.pausedAt == null ? openPauseReasonModal : undefined
       ),
-    [getStatus, openCloseCaseModal, statusAction, theCase]
+    [getStatus, openCloseCaseModal, openPauseReasonModal, statusAction, theCase]
   );
 
   const canDelete = deleteAction.canDelete;
@@ -306,6 +314,7 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
         <RunCaseWorkflowModal {...runWorkflowAction.modalProps} focusButtonRef={buttonRef} />
       ) : null}
       {closeCaseModal}
+      {pauseReasonModal}
     </>
   );
 };

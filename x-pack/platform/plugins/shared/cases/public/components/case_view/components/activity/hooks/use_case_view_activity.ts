@@ -18,6 +18,7 @@ import { useStatusAction } from '../../../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../../../use_on_refresh_case_view_page';
 import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useStatusChangedEBT } from '../../../../../analytics/statuses';
+import { useCaseStatuses } from '../../../../status/use_case_statuses';
 
 /**
  * Local-storage-backed activity filters/pagination, plus status and
@@ -84,6 +85,25 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
     [setPersistedFilters, setUserActivityQueryParams]
   );
 
+  // Where Resume takes a paused case: the status it was paused from, or its category's default
+  // when that status has since been disabled.
+  const { getStatus } = useCaseStatuses();
+  const resumeStatus = useMemo(() => {
+    if (caseData.pausedAt == null) {
+      return null;
+    }
+    const target = getStatus(caseData.resumeToStatusKey, caseData.status);
+    return target.disabled || target.pausesTimeTracking
+      ? getStatus(undefined, caseData.status)
+      : target;
+  }, [caseData.pausedAt, caseData.resumeToStatusKey, caseData.status, getStatus]);
+
+  const onResume = useCallback(() => {
+    if (resumeStatus) {
+      statusAction.handleUpdateCaseStatus([caseData], resumeStatus);
+    }
+  }, [caseData, resumeStatus, statusAction]);
+
   const isLoadingDescription = isLoading && loadingKey === 'description';
   const isStatusLoading = (isLoading && loadingKey === 'status') || statusAction.isUpdatingStatus;
 
@@ -94,6 +114,8 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
       isLoadingDescription,
       isStatusLoading,
       changeStatus,
+      resumeStatus,
+      onResume,
       handleUserActivityParamsChanged,
     }),
     [
@@ -102,6 +124,8 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
       isLoadingDescription,
       isStatusLoading,
       changeStatus,
+      resumeStatus,
+      onResume,
       handleUserActivityParamsChanged,
     ]
   );

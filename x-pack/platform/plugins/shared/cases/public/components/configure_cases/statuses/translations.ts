@@ -39,6 +39,140 @@ export const CLOSED_CATEGORY_HELP = i18n.translate(
   }
 );
 
+export const PAUSES_TIME_TRACKING = i18n.translate(
+  'xpack.cases.configureCases.statuses.pausesTimeTracking',
+  {
+    defaultMessage: 'Pauses time tracking',
+  }
+);
+
+export const PAUSES_TIME_TRACKING_HELP = i18n.translate(
+  'xpack.cases.configureCases.statuses.pausesTimeTrackingHelp',
+  {
+    defaultMessage:
+      "Time a case spends in this status is left out of its duration, time to investigate, time to resolve, and the team's MTTR.",
+  }
+);
+
+export const DEFAULT_CANNOT_PAUSE = i18n.translate(
+  'xpack.cases.configureCases.statuses.defaultCannotPause',
+  {
+    defaultMessage: "The default status can't pause time tracking.",
+  }
+);
+
+export const PAUSING_CANNOT_BE_DEFAULT = i18n.translate(
+  'xpack.cases.configureCases.statuses.pausingCannotBeDefault',
+  {
+    defaultMessage: "A status that pauses time tracking can't be the default.",
+  }
+);
+
+export const ON_HOLD_CALLOUT_TITLE = i18n.translate(
+  'xpack.cases.configureCases.statuses.onHoldCalloutTitle',
+  {
+    defaultMessage: 'Need to park cases while you wait on someone?',
+  }
+);
+
+export const ON_HOLD_CALLOUT_BODY = i18n.translate(
+  'xpack.cases.configureCases.statuses.onHoldCalloutBody',
+  {
+    defaultMessage: 'Add an On hold status that pauses time tracking. You can rename it later.',
+  }
+);
+
+export const ADD_ON_HOLD_STATUS = i18n.translate(
+  'xpack.cases.configureCases.statuses.addOnHoldStatus',
+  {
+    defaultMessage: 'Add On hold status',
+  }
+);
+
+export const ON_HOLD_LABEL = i18n.translate('xpack.cases.configureCases.statuses.onHoldLabel', {
+  defaultMessage: 'On hold',
+});
+
+export const PAUSE_REASONS_TITLE = i18n.translate(
+  'xpack.cases.configureCases.statuses.pauseReasonsTitle',
+  {
+    defaultMessage: 'Pause reasons',
+  }
+);
+
+export const PAUSE_REASONS_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.statuses.pauseReasonsDescription',
+  {
+    defaultMessage:
+      'Analysts pick one of these when they move a case to a status that pauses time tracking.',
+  }
+);
+
+export const ADD_REASON = i18n.translate('xpack.cases.configureCases.statuses.addReason', {
+  defaultMessage: 'Add reason',
+});
+
+export const MAX_REASONS = (max: number) =>
+  i18n.translate('xpack.cases.configureCases.statuses.maxReasons', {
+    values: { max },
+    defaultMessage: 'You can have up to {max} pause reasons.',
+  });
+
+export const ADD_PAUSE_REASON = i18n.translate(
+  'xpack.cases.configureCases.statuses.addPauseReason',
+  {
+    defaultMessage: 'Add pause reason',
+  }
+);
+
+export const EDIT_PAUSE_REASON = i18n.translate(
+  'xpack.cases.configureCases.statuses.editPauseReason',
+  {
+    defaultMessage: 'Edit pause reason',
+  }
+);
+
+export const REASON = i18n.translate('xpack.cases.configureCases.statuses.reason', {
+  defaultMessage: 'Reason',
+});
+
+export const REQUIRED_REASON = i18n.translate(
+  'xpack.cases.configureCases.statuses.requiredReason',
+  {
+    defaultMessage: 'Enter a reason.',
+  }
+);
+
+export const DUPLICATE_REASON = i18n.translate(
+  'xpack.cases.configureCases.statuses.duplicateReason',
+  {
+    defaultMessage: 'This reason already exists.',
+  }
+);
+
+export const MAX_REASON_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.configureCases.statuses.maxReasonLength', {
+    values: { max },
+    defaultMessage: 'Reasons can be up to {max} characters.',
+  });
+
+export const REMOVE = i18n.translate('xpack.cases.configureCases.statuses.remove', {
+  defaultMessage: 'Remove',
+});
+
+export const CANNOT_REMOVE_LAST_REASON = i18n.translate(
+  'xpack.cases.configureCases.statuses.cannotRemoveLastReason',
+  {
+    defaultMessage: 'Add another reason first, or turn off pausing on every status.',
+  }
+);
+
+export const ACTIONS_FOR_REASON = (reason: string) =>
+  i18n.translate('xpack.cases.configureCases.statuses.actionsForReason', {
+    values: { reason },
+    defaultMessage: 'Actions for {reason}',
+  });
+
 export const DEFAULT_BADGE_TOOLTIP = (category: string) =>
   i18n.translate('xpack.cases.configureCases.statuses.defaultBadgeTooltip', {
     values: { category },

@@ -25,6 +25,7 @@ interface UseFilterConfigProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
+  countPausedCases?: number | null;
   currentUserProfile: CurrentUserProfile;
   hiddenStatuses?: CaseStatuses[];
   isLoading: boolean;
@@ -40,6 +41,7 @@ export const getSystemFilterConfig = ({
   countClosedCases,
   countInProgressCases,
   countOpenCases,
+  countPausedCases,
   currentUserProfile,
   hiddenStatuses,
   isLoading,
@@ -96,6 +98,7 @@ export const getSystemFilterConfig = ({
           countClosedCases={countClosedCases}
           countInProgressCases={countInProgressCases}
           countOpenCases={countOpenCases}
+          countPausedCases={countPausedCases}
         />
       ),
     },
@@ -194,6 +197,7 @@ export const useSystemFilterConfig = ({
   countClosedCases,
   countInProgressCases,
   countOpenCases,
+  countPausedCases,
   currentUserProfile,
   hiddenStatuses,
   isLoading,
@@ -208,6 +212,7 @@ export const useSystemFilterConfig = ({
     countClosedCases,
     countInProgressCases,
     countOpenCases,
+    countPausedCases,
     currentUserProfile,
     hiddenStatuses,
     isLoading,

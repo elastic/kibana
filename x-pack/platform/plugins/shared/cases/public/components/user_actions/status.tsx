@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
 import type { SnakeToCamelCase } from '../../../common/types';
@@ -32,6 +32,7 @@ StatusBadge.displayName = 'StatusBadge';
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
   const statusKey = userAction.payload.statusKey;
+  const pauseReason = userAction.payload.pauseReason;
   const closeReason = userAction.payload.closeReason;
   const syncedAlertCount = userAction.payload.syncedAlertCount;
 
@@ -49,6 +50,13 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
         <EuiFlexItem grow={false}>
           <StatusBadge status={status} statusKey={statusKey} />
         </EuiFlexItem>
+        {pauseReason != null && (
+          <EuiFlexItem grow={false} data-test-subj={`${userAction.id}-user-action-pause-reason`}>
+            <EuiText size="s" color="subdued">
+              {`· ${pauseReason}`}
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {shouldRenderSyncDetails && (
           <>
             <EuiFlexItem grow={false}>

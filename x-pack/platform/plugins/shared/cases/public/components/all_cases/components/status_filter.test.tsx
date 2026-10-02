@@ -134,6 +134,23 @@ describe('StatusFilter', () => {
       expect(options[2]).toBeChecked();
     });
 
+    it('groups statuses that pause time tracking under Paused with the paused count', async () => {
+      mockStatuses(
+        [...getBuiltInStatuses(), { ...awaitingCustomer, pausesTimeTracking: true }],
+        true
+      );
+      renderWithTestingProviders(<StatusFilter {...defaultProps} countPausedCases={3} />);
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByText(`${i18n.STATUS_PAUSED} (3)`)).toBeInTheDocument();
+
+      const options = await screen.findAllByRole('option');
+      expect(options).toHaveLength(4);
+      expect(options[3]).toHaveTextContent('Awaiting customer');
+    });
+
     it('reports the selection as status keys', async () => {
       renderWithTestingProviders(<StatusFilter {...defaultProps} />);
 

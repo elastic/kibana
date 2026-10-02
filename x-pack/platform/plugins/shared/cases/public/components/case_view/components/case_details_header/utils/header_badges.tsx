@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import type { CaseSeverity, CaseStatusConfiguration } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import { statuses } from '../../../../status/config';
 import { severities } from '../../../../severity/config';
+import { PAUSED_TOOLTIP } from '../../../../../common/translations';
 
 interface GetBadgesArgs {
   caseData: CaseUI;
@@ -56,6 +58,12 @@ export const getBadges = ({
     label: currentStatus.label,
     color: statuses[currentStatus.category].color as AppHeaderBadge['color'],
     'data-test-subj': 'case-view-status-badge',
+    // The header badge only takes a string, so the relative time is formatted here.
+    ...(caseData.pausedAt != null && {
+      tooltip: `${PAUSED_TOOLTIP(caseData.pauseReason ?? '')} ${moment(
+        caseData.pausedAt
+      ).fromNow()}`,
+    }),
   };
 
   if (!isStatusMenuDisabled) {

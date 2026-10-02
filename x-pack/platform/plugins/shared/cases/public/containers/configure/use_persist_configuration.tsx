@@ -37,6 +37,7 @@ export const usePersistConfiguration = () => {
       observableTypes,
       extractObservables,
       statuses,
+      pauseReasons,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -48,6 +49,7 @@ export const usePersistConfiguration = () => {
           observableTypes,
           extractObservables,
           statuses,
+          pauseReasons,
         });
       }
 
@@ -60,6 +62,7 @@ export const usePersistConfiguration = () => {
         observableTypes,
         extractObservables,
         statuses,
+        pauseReasons,
       });
     },
     {

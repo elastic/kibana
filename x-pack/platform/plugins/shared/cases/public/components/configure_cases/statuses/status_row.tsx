@@ -75,8 +75,14 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
       <EuiContextMenuItem
         key="setDefault"
         icon="check"
-        disabled={status.isDefault || status.disabled}
-        toolTipContent={status.disabled ? i18n.ENABLE_FIRST : undefined}
+        disabled={status.isDefault || status.disabled || status.pausesTimeTracking}
+        toolTipContent={
+          status.disabled
+            ? i18n.ENABLE_FIRST
+            : status.pausesTimeTracking
+            ? i18n.PAUSING_CANNOT_BE_DEFAULT
+            : undefined
+        }
         onClick={runAndClose(() => onSetDefault(status.key))}
         data-test-subj={`case-status-${status.key}-set-default`}
       >
@@ -159,6 +165,17 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
         <EuiFlexItem grow={false}>
           <Status status={status.category} label={status.label} />
         </EuiFlexItem>
+        {status.pausesTimeTracking && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              color="hollow"
+              iconType="pause"
+              data-test-subj={`case-status-${status.key}-pausing-badge`}
+            >
+              {i18n.PAUSES_TIME_TRACKING}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         {status.isDefault && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.DEFAULT_BADGE_TOOLTIP(categoryLabel)}>

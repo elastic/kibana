@@ -55,7 +55,14 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
   // Status editing mirrors the header status pill: closing a case routes through the
   // close-case flow (which may open the close-reason modal), while other transitions patch
   // the field directly. `closeCaseModal` renders null until that flow opens it.
-  const { onStatusChanged, closeCaseModal, isUpdatingStatus } = useCloseCaseFlow({
+  const {
+    onStatusChanged,
+    onResume,
+    resumeStatus,
+    closeCaseModal,
+    pauseReasonModal,
+    isUpdatingStatus,
+  } = useCloseCaseFlow({
     caseData,
     onUpdateField,
     entryPoint: 'case_view_sidebar',
@@ -103,6 +110,10 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
           statuses={statusOptions}
           selectedStatusKey={currentStatus.key}
           onStatusChange={onStatusChanged}
+          pausedAt={caseData.pausedAt}
+          pauseReason={caseData.pauseReason}
+          resumeStatus={permissions.update ? resumeStatus : undefined}
+          onResume={onResume}
         />
         <SeverityField
           isDisabled={!permissions.update}
@@ -129,6 +140,7 @@ const AttributesFieldsComponent: React.FC<AttributesFieldsProps> = ({ caseData }
         />
       </EuiFlexGroup>
       {closeCaseModal}
+      {pauseReasonModal}
     </>
   );
 };

@@ -35,6 +35,7 @@ const mockConfigurationData = {
   observableTypes: [],
   extractObservables: true,
   statuses: [],
+  pauseReasons: [],
 };
 
 export const useCaseConfigureResponse = {

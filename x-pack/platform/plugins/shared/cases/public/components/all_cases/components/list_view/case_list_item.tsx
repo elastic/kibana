@@ -31,6 +31,7 @@ import { useCaseViewNavigation } from '../../../../common/navigation/hooks';
 import { ActionColumnComponent as ActionColumn } from '../../hooks/use_actions';
 import { severities } from '../../../severity/config';
 import { useCaseStatuses } from '../../../status/use_case_statuses';
+import { PausedStatusTooltip } from '../../../status/paused_status_tooltip';
 import { CASE_DETAILS_LINK_ARIA } from '../../../links/translations';
 import * as i18n from '../../translations';
 
@@ -246,10 +247,15 @@ export const CaseListItem: React.FC<{
                         </EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <Status
-                          status={theCase.status}
-                          label={getStatus(theCase.statusKey, theCase.status).label}
-                        />
+                        <PausedStatusTooltip
+                          pausedAt={theCase.pausedAt}
+                          pauseReason={theCase.pauseReason}
+                        >
+                          <Status
+                            status={theCase.status}
+                            label={getStatus(theCase.statusKey, theCase.status).label}
+                          />
+                        </PausedStatusTooltip>
                       </EuiFlexItem>
                       {theCase.totalAlerts > 0 && (
                         <EuiFlexItem grow={false}>

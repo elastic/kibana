@@ -33,7 +33,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const { hasCaseSettings } = useCasesFeatures();
-  const { onStatusChanged, closeCaseModal } = useCloseCaseFlow({
+  const { onStatusChanged, closeCaseModal, pauseReasonModal } = useCloseCaseFlow({
     caseData,
     onUpdateField,
     entryPoint: 'case_view_header',
@@ -87,6 +87,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         metadata={metadata}
       />
       {closeCaseModal}
+      {pauseReasonModal}
       {runWorkflowModal}
       {isDeleteModalVisible && (
         <ConfirmDeleteCaseModal

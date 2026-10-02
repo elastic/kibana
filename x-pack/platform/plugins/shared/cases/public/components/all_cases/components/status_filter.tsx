@@ -26,6 +26,8 @@ interface Props {
   selectedOptionKeys: string[];
   /** Selected status keys; applied when custom statuses are on */
   selectedStatusKeys?: string[];
+  /** Cases in a status that pauses time tracking; null when none is configured */
+  countPausedCases?: number | null;
 }
 
 const caseStatuses = [
@@ -44,6 +46,7 @@ export const StatusFilterComponent = ({
   onChange,
   selectedOptionKeys,
   selectedStatusKeys = [],
+  countPausedCases,
 }: Props) => {
   const { enabledStatuses, isCustomStatusesEnabled, isLoading } = useCaseStatuses();
   const stats = useMemo(
@@ -62,14 +65,30 @@ export const StatusFilterComponent = ({
     }
 
     // Counts are per category, so custom statuses group under a category heading that carries it.
-    return categories.flatMap(({ key: category, label }) => [
-      // Built-in default keys equal their category, so the heading needs its own key.
-      { key: `${category}-group`, label: `${label} (${stats[category]})`, isGroupLabel: true },
-      ...enabledStatuses
-        .filter((status) => status.category === category)
-        .map((status) => ({ key: status.key, label: status.label })),
-    ]);
-  }, [enabledStatuses, hiddenStatuses, isCustomStatusesEnabled, stats]);
+    // Statuses that pause time tracking get their own group so "how many are waiting" is a glance.
+    const pausing = enabledStatuses.filter(
+      (status) => status.pausesTimeTracking && !hiddenStatuses.includes(status.category)
+    );
+    return [
+      ...categories.flatMap(({ key: category, label }) => [
+        // Built-in default keys equal their category, so the heading needs its own key.
+        { key: `${category}-group`, label: `${label} (${stats[category]})`, isGroupLabel: true },
+        ...enabledStatuses
+          .filter((status) => status.category === category && !status.pausesTimeTracking)
+          .map((status) => ({ key: status.key, label: status.label })),
+      ]),
+      ...(pausing.length > 0
+        ? [
+            {
+              key: 'paused-group',
+              label: `${i18n.STATUS_PAUSED} (${countPausedCases ?? 0})`,
+              isGroupLabel: true,
+            },
+            ...pausing.map((status) => ({ key: status.key, label: status.label })),
+          ]
+        : []),
+    ];
+  }, [countPausedCases, enabledStatuses, hiddenStatuses, isCustomStatusesEnabled, stats]);
 
   const onFilterChange = useCallback(
     ({ selectedOptionKeys: keys }: { filterId: string; selectedOptionKeys: string[] }) =>

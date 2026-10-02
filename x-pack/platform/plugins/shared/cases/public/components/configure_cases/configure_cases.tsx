@@ -106,6 +106,13 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onSetDefaultStatus,
     onToggleStatusDisabled,
     AddOrEditStatusFlyout,
+    pauseReasons,
+    onAddOnHoldStatus,
+    onAddPauseReason,
+    onEditPauseReason,
+    onMovePauseReason,
+    onRemovePauseReason,
+    AddOrEditPauseReasonFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
   const showStatusesSection = customStatusesEnabled && permissions.settings;
@@ -212,6 +219,12 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       onMoveStatus={onMoveStatus}
                       onSetDefaultStatus={onSetDefaultStatus}
                       onToggleStatusDisabled={onToggleStatusDisabled}
+                      pauseReasons={pauseReasons}
+                      onAddOnHoldStatus={onAddOnHoldStatus}
+                      onAddPauseReason={onAddPauseReason}
+                      onEditPauseReason={onEditPauseReason}
+                      onMovePauseReason={onMovePauseReason}
+                      onRemovePauseReason={onRemovePauseReason}
                     />
                   </SettingsSection>
                 )}
@@ -293,6 +306,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
             {ConnectorEditFlyout}
             {AddOrEditObservableTypeFlyout}
             {AddOrEditStatusFlyout}
+            {AddOrEditPauseReasonFlyout}
           </div>
         </EuiPageBody>
       </CasesPageBody>

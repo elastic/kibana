@@ -30,6 +30,8 @@ import { generateCaseViewPath } from '../../../common/navigation';
 
 interface GetUpdateSuccessToastParams {
   status: CaseStatuses;
+  /** Label of an admin-defined status, when the pick was not a category default */
+  statusLabel?: string;
   cases: CasesUI;
   updateSummary?: UpdateSummary[];
   // Dependencies for rendering re-direct button within toast
@@ -39,6 +41,7 @@ interface GetUpdateSuccessToastParams {
 
 const getUpdateSuccessToast = ({
   status,
+  statusLabel,
   cases,
   updateSummary,
   appId,
@@ -51,6 +54,11 @@ const getUpdateSuccessToast = ({
 } => {
   const totalCases = cases.length;
   const caseTitle = totalCases === 1 ? cases[0].title : '';
+
+  // An admin-defined status is named, since "in progress" would hide where the case went.
+  if (statusLabel != null && status !== CaseStatuses.closed) {
+    return { title: i18n.MOVED_CASES_TO({ totalCases, caseTitle, status: statusLabel }) };
+  }
 
   if (status === CaseStatuses.open) {
     return { title: i18n.REOPENED_CASES({ totalCases, caseTitle }) };
@@ -141,7 +149,8 @@ export const useStatusAction = ({
     (
       selectedCases: CasesUI,
       status: CaseStatuses | CaseStatusConfiguration,
-      closeReason?: string
+      closeReason?: string,
+      pauseReason?: string
     ) => {
       onAction();
       // A bare category lands on its default status.
@@ -149,6 +158,7 @@ export const useStatusAction = ({
       const casesToUpdate = selectedCases.map((theCase) => ({
         status: target.category,
         ...(isCustomStatusesEnabled && { status_key: target.key }),
+        ...(pauseReason != null && { pause_reason: pauseReason }),
         id: theCase.id,
         version: theCase.version,
         closeReason,
@@ -160,6 +170,7 @@ export const useStatusAction = ({
           getUpdateSuccessToast: ({ updateSummary }: { updateSummary?: UpdateSummary[] }) => {
             return getUpdateSuccessToast({
               status: target.category,
+              statusLabel: target.key !== target.category ? target.label : undefined,
               cases: selectedCases,
               updateSummary,
               appId,
@@ -174,6 +185,8 @@ export const useStatusAction = ({
               category: target.category,
               isCustom: target.key !== target.category,
               entryPoint,
+              pausesTimeTracking: target.pausesTimeTracking === true,
+              pauseReason,
             });
             onActionSuccess();
           },
@@ -202,18 +215,25 @@ export const useStatusAction = ({
 
   /**
    * @param onSelectClosed intercepts closed-category picks, for callers that collect a close reason first
+   * @param onSelectPausing intercepts picks of a status that pauses time tracking, which needs a reason
    */
   const getActions = (
     selectedCases: CasesUI,
-    onSelectClosed?: (status: CaseStatusConfiguration) => void
+    onSelectClosed?: (status: CaseStatusConfiguration) => void,
+    onSelectPausing?: (status: CaseStatusConfiguration) => void
   ): EuiContextMenuPanelItemDescriptor[] =>
     enabledStatuses.map((status) => ({
       name: status.label,
       icon: isSelected(status) ? 'check' : 'empty',
-      onClick: () =>
-        status.category === CaseStatuses.closed && onSelectClosed
-          ? onSelectClosed(status)
-          : handleUpdateCaseStatus(selectedCases, status),
+      onClick: () => {
+        if (status.category === CaseStatuses.closed && onSelectClosed) {
+          return onSelectClosed(status);
+        }
+        if (status.pausesTimeTracking && onSelectPausing) {
+          return onSelectPausing(status);
+        }
+        return handleUpdateCaseStatus(selectedCases, status);
+      },
       disabled: isDisabled || shouldDisableStatus(selectedCases),
       'data-test-subj': `cases-bulk-action-status-${status.key}`,
       key: `cases-bulk-action-status-${status.key}`,

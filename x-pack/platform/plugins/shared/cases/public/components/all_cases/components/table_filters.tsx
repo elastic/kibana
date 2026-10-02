@@ -35,6 +35,8 @@ export interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
+  /** Cases in a status that pauses time tracking; null when none is configured */
+  countPausedCases?: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   hiddenStatuses?: CaseStatuses[];
   availableSolutions: string[];
@@ -65,6 +67,7 @@ const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
   countInProgressCases,
+  countPausedCases,
   onFilterChanged,
   hiddenStatuses,
   availableSolutions,
@@ -135,6 +138,7 @@ const CasesTableFiltersComponent = ({
     countClosedCases,
     countInProgressCases,
     countOpenCases,
+    countPausedCases,
     currentUserProfile,
     hiddenStatuses,
     isLoading: isLoadingFilters,

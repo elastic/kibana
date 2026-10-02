@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -16,9 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { MAX_CASE_STATUSES_PER_CATEGORY } from '../../../../common/constants';
-import type { CaseStatuses, CaseStatusesConfiguration } from '../../../../common/types/domain';
+import type { CaseStatusesConfiguration } from '../../../../common/types/domain';
+import { CaseStatuses } from '../../../../common/types/domain';
 import { CASE_STATUS_CATEGORIES, getBuiltInStatuses } from '../../../../common/utils/statuses';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { PauseReasons } from './pause_reasons';
 import { StatusRow } from './status_row';
 import * as i18n from './translations';
 
@@ -30,27 +33,40 @@ const CATEGORY_HELP: Record<CaseStatuses, string> = {
 
 export interface CaseStatusesSectionProps {
   statuses: CaseStatusesConfiguration;
+  pauseReasons: string[];
   disabled: boolean;
   isLoading: boolean;
   onAddStatus: (category: CaseStatuses) => void;
+  onAddOnHoldStatus: () => void;
   onEditStatus: (key: string) => void;
   onMoveStatus: (key: string, direction: 'up' | 'down') => void;
   onSetDefaultStatus: (key: string) => void;
   onToggleStatusDisabled: (key: string) => void;
+  onAddPauseReason: () => void;
+  onEditPauseReason: (reason: string) => void;
+  onMovePauseReason: (reason: string, direction: 'up' | 'down') => void;
+  onRemovePauseReason: (reason: string) => void;
 }
 
 const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
   statuses,
+  pauseReasons,
   disabled,
   isLoading,
   onAddStatus,
+  onAddOnHoldStatus,
   onEditStatus,
   onMoveStatus,
   onSetDefaultStatus,
   onToggleStatusDisabled,
+  onAddPauseReason,
+  onEditPauseReason,
+  onMovePauseReason,
+  onRemovePauseReason,
 }) => {
   const { permissions } = useCasesContext();
   const canModify = !disabled && permissions.settings;
+  const hasPausingStatus = statuses.some((status) => status.pausesTimeTracking);
 
   if (!permissions.settings) {
     return null;
@@ -118,6 +134,30 @@ const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
                 </EuiAccordion>
               </>
             )}
+            {category === CaseStatuses['in-progress'] && !hasPausingStatus && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  title={i18n.ON_HOLD_CALLOUT_TITLE}
+                  iconType="pause"
+                  data-test-subj="case-statuses-on-hold-callout"
+                >
+                  <p>{i18n.ON_HOLD_CALLOUT_BODY}</p>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="plusCircle"
+                    isDisabled={!canModify}
+                    isLoading={isLoading}
+                    onClick={onAddOnHoldStatus}
+                    data-test-subj="case-statuses-add-on-hold"
+                  >
+                    {i18n.ADD_ON_HOLD_STATUS}
+                  </EuiButtonEmpty>
+                </EuiCallOut>
+              </>
+            )}
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
                 {inCategory.length < MAX_CASE_STATUSES_PER_CATEGORY ? (
@@ -145,6 +185,20 @@ const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
           </div>
         );
       })}
+      {hasPausingStatus && (
+        <PauseReasons
+          reasons={pauseReasons}
+          hasPausingStatus={statuses.some(
+            (status) => status.pausesTimeTracking && !status.disabled
+          )}
+          disabled={!canModify}
+          isLoading={isLoading}
+          onAdd={onAddPauseReason}
+          onEdit={onEditPauseReason}
+          onMove={onMovePauseReason}
+          onRemove={onRemovePauseReason}
+        />
+      )}
     </div>
   );
 };

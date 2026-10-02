@@ -165,6 +165,8 @@ describe('useStatusAction', () => {
       category: CaseStatuses.closed,
       isCustom: false,
       entryPoint,
+      pausesTimeTracking: false,
+      pauseReason: undefined,
     });
     expect(onActionSuccess).toHaveBeenCalled();
   });
@@ -304,6 +306,43 @@ describe('useStatusAction', () => {
       });
     }
   );
+
+  it('names an admin-defined status in the toast instead of its category', async () => {
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
+      { wrapper: TestProviders }
+    );
+
+    act(() => {
+      result.current.handleUpdateCaseStatus(
+        [basicCase],
+        {
+          key: 'on_hold',
+          label: 'On hold',
+          category: CaseStatuses['in-progress'],
+          order: 3,
+          isDefault: false,
+          disabled: false,
+          pausesTimeTracking: true,
+        },
+        undefined,
+        'Awaiting vendor'
+      );
+    });
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalled();
+    });
+    expect(getUpdateSuccessToastFromLastCall()).toEqual({
+      title: 'Moved "Another horrible breach!!" to On hold',
+    });
+    expect(mutate.mock.calls.at(-1)?.[0].cases[0]).toEqual(
+      expect.objectContaining({
+        status: CaseStatuses['in-progress'],
+        pause_reason: 'Awaiting vendor',
+      })
+    );
+  });
 
   it('shows the success toaster correctly when updating a single case to closed', async () => {
     const { result } = renderHook(

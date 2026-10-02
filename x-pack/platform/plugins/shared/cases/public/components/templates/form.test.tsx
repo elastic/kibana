@@ -59,6 +59,7 @@ describe('TemplateForm', () => {
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
       statuses: [],
+      pauseReasons: [],
       extractObservables: true,
     },
     onChange: jest.fn(),

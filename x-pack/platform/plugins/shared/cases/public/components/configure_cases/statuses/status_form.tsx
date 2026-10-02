@@ -8,21 +8,25 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { TextField, ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { MAX_CASE_STATUS_LABEL_LENGTH } from '../../../../common/constants';
 import type { CaseStatusConfiguration } from '../../../../common/types/domain';
+import { CaseStatuses } from '../../../../common/types/domain';
 import type { FormState } from '../flyout';
 import * as i18n from './translations';
 
 export interface StatusFormData {
   label: string;
+  pausesTimeTracking: boolean;
 }
 
 export interface StatusFormProps {
   onChange: (state: FormState<StatusFormData>) => void;
   /** The status being renamed; null when adding one */
   status: CaseStatusConfiguration | null;
+  /** The category the status belongs to */
+  category: CaseStatuses;
   /** Display name of the category the status belongs to, for messages */
   categoryLabel: string;
   /** Labels already used in the category, excluding the status being edited */
@@ -36,6 +40,7 @@ const normalizeLabel = (label: string) => label.trim().toLowerCase();
 const StatusFormComponent: React.FC<StatusFormProps> = ({
   onChange,
   status,
+  category,
   categoryLabel,
   takenLabels,
 }) => {
@@ -65,10 +70,16 @@ const StatusFormComponent: React.FC<StatusFormProps> = ({
   );
 
   const { form } = useForm<StatusFormData>({
-    defaultValue: { label: status?.label ?? '' },
+    defaultValue: {
+      label: status?.label ?? '',
+      pausesTimeTracking: status?.pausesTimeTracking ?? false,
+    },
     options: { stripEmptyFields: false },
     schema,
   });
+  // Closed statuses already stop every clock, and defaults are applied without a reason.
+  const canPause = category !== CaseStatuses.closed;
+  const isDefault = status?.isDefault === true;
 
   const { submit, isValid, isSubmitting } = form;
 
@@ -99,6 +110,20 @@ const StatusFormComponent: React.FC<StatusFormProps> = ({
             data-test-subj="case-status-key-readonly"
           />
         </EuiFormRow>
+      )}
+      {canPause && (
+        <UseField
+          path="pausesTimeTracking"
+          component={ToggleField}
+          componentProps={{
+            euiFieldProps: {
+              label: i18n.PAUSES_TIME_TRACKING,
+              disabled: isDefault || isSubmitting,
+              'data-test-subj': 'case-status-pauses-time-tracking',
+            },
+            helpText: isDefault ? i18n.DEFAULT_CANNOT_PAUSE : i18n.PAUSES_TIME_TRACKING_HELP,
+          }}
+        />
       )}
     </Form>
   );

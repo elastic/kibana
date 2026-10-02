@@ -24,6 +24,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useAssigneesAction } from '../../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../../actions/assignees/edit_assignees_flyout';
 import { useCloseCaseModal } from './use_close_case_modal';
+import { usePauseReasonModal } from './use_pause_reason_modal';
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import { useRunWorkflowAction } from '../../actions/run_workflow/use_run_workflow_action';
 import { RunCaseWorkflowModal } from '../../workflows/run_case_workflow_modal';
@@ -109,13 +110,22 @@ export const useBulkActions = ({
     onCloseCase,
   });
 
+  const { openPauseReasonModal, pauseReasonModal } = usePauseReasonModal({
+    onPause: (status, reason) =>
+      statusAction.handleUpdateCaseStatus(selectedCases, status, undefined, reason),
+  });
+
   const statusActions = useMemo(
     (): EuiContextMenuPanelItemDescriptor[] =>
-      statusAction.getActions(selectedCases, (status) => {
-        setClosingStatus(status);
-        openCloseCaseModal();
-      }),
-    [openCloseCaseModal, selectedCases, statusAction]
+      statusAction.getActions(
+        selectedCases,
+        (status) => {
+          setClosingStatus(status);
+          openCloseCaseModal();
+        },
+        (status) => openPauseReasonModal(status, selectedCases.length)
+      ),
+    [openCloseCaseModal, openPauseReasonModal, selectedCases, statusAction]
   );
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
@@ -217,6 +227,7 @@ export const useBulkActions = ({
           <RunCaseWorkflowModal {...runWorkflowAction.modalProps} />
         ) : null}
         {closeCaseModal}
+        {pauseReasonModal}
       </>
     ),
     flyouts: (
