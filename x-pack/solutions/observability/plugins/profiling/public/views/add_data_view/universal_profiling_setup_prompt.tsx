@@ -22,7 +22,7 @@ export function UniversalProfilingSetupPrompt() {
   const [postSetupLoading, setPostSetupLoading] = useState(false);
 
   const { docLinks, notifications } = core;
-  const { canSetup } = data.universalProfiling;
+  const canSetup = data.universalProfiling.canSetup === true;
 
   return (
     <ProfilingAppPageTemplate

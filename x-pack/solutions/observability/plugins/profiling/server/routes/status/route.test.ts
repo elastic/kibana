@@ -19,12 +19,13 @@ jest.mock('../universal_profiling/setup/lib/get_has_setup_privileges', () => ({
 
 const mockedGetHasSetupPrivileges = jest.mocked(getHasSetupPrivileges);
 
+// Universal Profiling isn't set up, the only case where the setup privileges are checked.
 const schemasStatus: ProfilingSchemasStatus = {
   isEnabled: true,
   otel: { isAvailable: true, hasData: true },
   universalProfiling: {
     isAvailable: true,
-    hasSetup: true,
+    hasSetup: false,
     hasData: false,
     hasLegacyData: false,
   },
@@ -125,12 +126,29 @@ describe('registerStatusRoute', () => {
     });
   });
 
+  it('does not check the setup privileges once Universal Profiling is set up', async () => {
+    const { getProfilingStatus, getStatus, response } = setup();
+    const setUpStatus = {
+      ...schemasStatus,
+      universalProfiling: { ...schemasStatus.universalProfiling, hasSetup: true },
+    };
+    getStatus.mockResolvedValue(setUpStatus);
+
+    await getProfilingStatus();
+
+    expect(mockedGetHasSetupPrivileges).not.toHaveBeenCalled();
+    // Serialize the body as the HTTP response would, which drops the undefined `canSetup`.
+    const body = response.ok.mock.calls[0][0]?.body;
+    expect(JSON.parse(JSON.stringify(body))).toStrictEqual(setUpStatus);
+  });
+
   it('only reports that profiling is disabled, without the setup privileges', async () => {
     const { getProfilingStatus, getStatus, response } = setup();
     getStatus.mockResolvedValue({ isEnabled: false });
 
     await getProfilingStatus();
 
+    expect(mockedGetHasSetupPrivileges).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({ body: { isEnabled: false } });
   });
 
