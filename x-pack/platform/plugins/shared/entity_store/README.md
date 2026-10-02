@@ -127,7 +127,7 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
 
 - Registration is only possible during setup. The registry is frozen when the Entity Store starts, so later calls are logged and ignored.
 - A rejected definition (invalid schema, invalid or duplicate type name) is logged and skipped. Registration never throws, and Kibana keeps starting.
-- Registered definitions are deep-frozen and cannot be modified afterwards.
+- Registered definitions are deep-frozen in place (the registry holds the object you pass, not a copy), so neither the registry nor the caller can modify them afterwards. Unknown keys, including `id`, are rejected.
 
 ### Type names
 

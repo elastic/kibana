@@ -47,24 +47,32 @@ interface RegistryEntry {
   provenance: Provenance;
 }
 
-const registrableEntityDefinitionSchema = entitySchema.omit({ id: true }).extend({
-  // Any string here; the name pattern and reservation are checked separately.
-  type: z.string(),
-});
+// Strict so unknown keys (notably a stale `id` from a full definition) are rejected, not kept.
+const registrableEntityDefinitionSchema = entitySchema
+  .omit({ id: true })
+  .extend({
+    // Any string here; the name pattern and reservation are checked separately.
+    type: z.string(),
+  })
+  .strict();
 
 const formatSchemaIssues = (error: z.ZodError): string =>
   error.issues
     .map(({ path, message }) => (path.length ? `${path.join('.')}: ${message}` : message))
     .join('; ');
 
-const describeType = (value: unknown): string =>
-  typeof value === 'string' ? value : `<${typeof value}>`;
+const describeType = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  return value === null ? '<null>' : `<${typeof value}>`;
+};
 
+const isObject = (value: unknown): value is object => typeof value === 'object' && value !== null;
+
+// Always recurses, so an object frozen only at the top level still has its children frozen.
 const deepFreeze = <T>(value: T): T => {
-  if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
-    Object.values(value).forEach(deepFreeze);
-    Object.freeze(value);
-  }
+  if (!isObject(value)) return value;
+  Object.values(value).forEach(deepFreeze);
+  if (!Object.isFrozen(value)) Object.freeze(value);
   return value;
 };
 
@@ -117,6 +125,10 @@ export class EntityDefinitionRegistry {
   }
 
   private add(definition: RegistrableEntityDefinition, provenance: Provenance): RegisterResult {
+    if (!isObject(definition)) {
+      return this.reject(describeType(definition), 'definition is not an object');
+    }
+
     const reason = this.validate(definition, provenance);
     if (reason) {
       return this.reject(describeType(definition.type), reason);

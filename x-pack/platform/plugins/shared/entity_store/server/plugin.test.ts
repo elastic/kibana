@@ -88,6 +88,33 @@ describe('EntityStorePlugin entity definition registry', () => {
     await expect(client.get('k8s.pod')).resolves.toBeDefined();
   });
 
+  it('rejects an invalid registration during setup without throwing', async () => {
+    let result: ReturnType<EntityStoreSetupContract['registerEntityDefinition']> | undefined;
+
+    expect(() => {
+      result = setupContract.registerEntityDefinition(makeDefinition('host'));
+    }).not.toThrow();
+
+    expect(result).toEqual({ ok: false, reason: 'type name is reserved for built-in definitions' });
+    expect(loggingSystemMock.collect(initializerContext.logger).error).toEqual([
+      [expect.stringContaining(`Rejected entity definition 'host'`)],
+    ]);
+    const client = startPlugin().getEntityDefinitionsClientForSpace('default');
+    expect(types(await client.list())).toEqual(BUILT_IN_TYPES);
+  });
+
+  it('logs an error through the registry logger for a registration after start', () => {
+    startPlugin();
+
+    setupContract.registerEntityDefinition(makeDefinition('k8s.pod'));
+
+    const [{ value: pluginLogger }] = jest.mocked(initializerContext.logger.get).mock.results;
+    expect(pluginLogger.get).toHaveBeenCalledWith('entity_definition_registry');
+    expect(loggingSystemMock.collect(initializerContext.logger).error).toEqual([
+      [expect.stringContaining(`Rejected entity definition 'k8s.pod': registry is frozen`)],
+    ]);
+  });
+
   it('rejects registrations after start', async () => {
     const startContract = startPlugin();
 

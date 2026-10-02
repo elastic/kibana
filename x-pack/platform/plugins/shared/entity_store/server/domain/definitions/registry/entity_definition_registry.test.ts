@@ -158,14 +158,33 @@ describe('EntityDefinitionRegistry', () => {
       expectRejected('k8s.pod', /not a built-in/);
     });
 
-    it('never throws, even for a non-object definition', () => {
-      const invalid = 'not a definition' as unknown as RegistrableEntityDefinition;
+    it.each([
+      [null, '<null>'],
+      [undefined, '<undefined>'],
+      ['not a definition', 'not a definition'],
+    ])('rejects non-object input %p without throwing', (input, type) => {
+      const invalid = input as unknown as RegistrableEntityDefinition;
 
       expect(() => registry.register(invalid)).not.toThrow();
+      expect(registry.registerBuiltIn(invalid)).toEqual({
+        ok: false,
+        reason: 'definition is not an object',
+      });
       expect(registry.rejected()).toEqual([
-        { type: '<undefined>', reason: expect.stringContaining('failed schema validation') },
+        { type, reason: 'definition is not an object' },
+        { type, reason: 'definition is not an object' },
       ]);
-      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects unknown keys, including a stale id', () => {
+      const withId = { ...makeDefinition('with_id'), id: 'stale' };
+      const withExtra = { ...makeDefinition('with_extra'), extra: true };
+
+      expect(registry.register(withId).ok).toBe(false);
+      expectRejected('with_id', /failed schema validation: .*id/);
+      expect(registry.register(withExtra).ok).toBe(false);
+      expectRejected('with_extra', /failed schema validation: .*extra/);
     });
   });
 
@@ -242,6 +261,15 @@ describe('EntityDefinitionRegistry', () => {
       expect(fromList).toBe(input);
       expect(Object.isFrozen(input)).toBe(true);
       expect(Object.isFrozen(input.fields[0])).toBe(true);
+    });
+
+    it('freezes nested values of a definition frozen only at the top level', () => {
+      const input = Object.freeze(makeDefinition('top_frozen'));
+      registry.register(input);
+
+      expect(Object.isFrozen(input.fields)).toBe(true);
+      expect(Object.isFrozen(input.fields[0])).toBe(true);
+      expect(Object.isFrozen(input.indexPatterns)).toBe(true);
     });
 
     it('prevents mutation of returned definitions, including nested values', () => {
