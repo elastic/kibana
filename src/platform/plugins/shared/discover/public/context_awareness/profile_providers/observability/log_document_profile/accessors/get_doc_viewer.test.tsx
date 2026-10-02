@@ -112,6 +112,10 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
         record: buildRecord('doc-1', { message: ['hello'] }),
       },
       {
+        name: 'an OTel body.text message',
+        record: buildRecord('doc-1', { 'body.text': ['hello'] }),
+      },
+      {
         name: 'a stacktrace',
         record: buildRecord('doc-1', { 'error.stack_trace': ['Error: boom'] }),
       },

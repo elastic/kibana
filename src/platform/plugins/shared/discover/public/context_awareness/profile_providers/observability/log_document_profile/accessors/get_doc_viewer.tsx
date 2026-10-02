@@ -12,10 +12,15 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
-import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
-import { getFieldValueWithFallback, getStacktraceFields } from '@kbn/discover-utils/src';
+import {
+  fieldConstants,
+  getFieldValueWithFallback,
+  getMessageFieldWithFallbacks,
+  getStacktraceFields,
+  type DataTableRecord,
+  type LogDocument,
+  type ObservabilityIndexes,
+} from '@kbn/discover-utils';
 import { PROJECT_ROUTING, type ICPSManager } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 import {
