@@ -109,6 +109,7 @@ import {
 } from './maintenance_windows/maintenance_windows_service.mock';
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { alertStatusChangedV1EventSchema } from '../../common/workflows/triggers/alert_status_changed';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -4608,6 +4609,20 @@ describe('Task Runner', () => {
         },
         expect.anything()
       );
+    });
+
+    test('payload built in task_runner passes alertStatusChangedV1EventSchema.parse()', async () => {
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      const published = mockBus.publish.mock.calls[0][0];
+      expect(() => alertStatusChangedV1EventSchema.parse(published.payload)).not.toThrow();
     });
 
     test('publishes recovered event when an alert recovers', async () => {

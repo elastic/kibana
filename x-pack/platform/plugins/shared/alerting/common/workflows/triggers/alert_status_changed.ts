@@ -16,7 +16,7 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
  * Ongoing alerts that have not changed state do NOT re-fire.
  * Scoped to lifecycle rule types (autoRecoverAlerts === true).
  */
-export const AlertStatusChangedV1TriggerId = 'alerting.v1.alertStatusChanged' as const;
+export const AlertStatusChangedTriggerId = 'alerting.v1.alertStatusChanged' as const;
 
 export const alertStatusChangedV1EventSchema = z.object({
   rule: z
@@ -115,7 +115,7 @@ export type AlertStatusChangedV1Payload = z.infer<typeof alertStatusChangedV1Eve
 export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
   typeof alertStatusChangedV1EventSchema
 > = {
-  id: AlertStatusChangedV1TriggerId,
+  id: AlertStatusChangedTriggerId,
   stability: 'tech_preview',
   eventSchema: alertStatusChangedV1EventSchema,
   title: i18n.translate('xpack.alerting.workflowTriggers.alertStatusChanged.title', {
@@ -146,7 +146,7 @@ triggers:
     on:
       condition: 'event.alert.status: "active" and event.rule.tags: "k8s"'
 \`\`\``,
-        values: { triggerId: AlertStatusChangedV1TriggerId },
+        values: { triggerId: AlertStatusChangedTriggerId },
       }),
       i18n.translate('xpack.alerting.workflowTriggers.alertStatusChanged.documentation.example2', {
         defaultMessage: `## React when any alert from a specific rule recovers
@@ -156,7 +156,7 @@ triggers:
     on:
       condition: 'event.alert.status: "recovered" and event.rule.id: "my-rule-id"'
 \`\`\``,
-        values: { triggerId: AlertStatusChangedV1TriggerId },
+        values: { triggerId: AlertStatusChangedTriggerId },
       }),
     ],
   },

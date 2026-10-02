@@ -6,7 +6,7 @@
  */
 
 import {
-  AlertStatusChangedV1TriggerId,
+  AlertStatusChangedTriggerId,
   alertStatusChangedV1EventSchema,
   alertStatusChangedV1TriggerDefinition,
 } from './alert_status_changed';
@@ -32,7 +32,7 @@ const validActivePayload = {
 
 describe('alertStatusChangedV1TriggerDefinition', () => {
   it('has a stable trigger ID', () => {
-    expect(alertStatusChangedV1TriggerDefinition.id).toBe(AlertStatusChangedV1TriggerId);
+    expect(alertStatusChangedV1TriggerDefinition.id).toBe(AlertStatusChangedTriggerId);
     expect(alertStatusChangedV1TriggerDefinition.id).toBe('alerting.v1.alertStatusChanged');
   });
 

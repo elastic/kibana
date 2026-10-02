@@ -7,7 +7,7 @@
 
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
 import { AlertStatusChangedWorkflowSubscriber } from './alert_status_changed_subscriber';
-import { AlertStatusChangedV1TriggerId } from '../../../common/workflows/triggers';
+import { AlertStatusChangedTriggerId } from '../../../common/workflows/triggers';
 import type { AlertStatusChangedEvent, AlertingPublisherContext } from './events';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE } from './events';
 
@@ -130,7 +130,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
       await capturedHandler(event, makeContext());
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(AlertStatusChangedV1TriggerId, event.payload);
+      expect(mockEmitEvent).toHaveBeenCalledWith(AlertStatusChangedTriggerId, event.payload);
     });
 
     it('skips emitEvent when isWorkflowsAvailable is false', async () => {

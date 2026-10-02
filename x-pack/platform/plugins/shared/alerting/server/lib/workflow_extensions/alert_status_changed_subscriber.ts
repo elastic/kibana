@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { AlertStatusChangedV1TriggerId } from '../../../common/workflows/triggers';
+import { AlertStatusChangedTriggerId } from '../../../common/workflows/triggers';
 import type { AsyncDomainEventBus } from '../events/event_bus';
 import type {
   AlertStatusChangedEvent,
@@ -52,7 +52,7 @@ export class AlertStatusChangedWorkflowSubscriber {
     try {
       const client = await this.workflows.getClient(context.request);
       if (!client.isWorkflowsAvailable) return;
-      await client.emitEvent(AlertStatusChangedV1TriggerId, event.payload);
+      await client.emitEvent(AlertStatusChangedTriggerId, event.payload);
     } catch (err) {
       this.logger.error(
         `[alert_status_changed_subscriber] Failed to emit for rule ${event.payload.rule.id}: ${
