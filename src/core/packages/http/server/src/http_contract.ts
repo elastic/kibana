@@ -524,7 +524,7 @@ export interface HttpServerInfo {
   /** The protocol used by the server */
   protocol: 'http' | 'https' | 'socket';
   /** The configured maximum payload size in bytes */
-  maxPayload: number;
+  maxPayloadInBytes: number;
 }
 
 /**

@@ -1872,7 +1872,7 @@ describe('setup contract', () => {
         name: 'kibana',
         port: 10002,
         protocol: 'http',
-        maxPayload: 1024,
+        maxPayloadInBytes: 1024,
       });
 
       ({ getServerInfo } = await server.setup({
@@ -1881,7 +1881,7 @@ describe('setup contract', () => {
           port: 12345,
           name: 'custom-name',
           host: 'localhost',
-          maxPayload: new ByteSizeValue(5 * 1024 * 1024),
+          maxPayloadInBytes: new ByteSizeValue(5 * 1024 * 1024),
         }),
       }));
 
@@ -1890,7 +1890,7 @@ describe('setup contract', () => {
         name: 'custom-name',
         port: 12345,
         protocol: 'http',
-        maxPayload: 5 * 1024 * 1024,
+        maxPayloadInBytes: 5 * 1024 * 1024,
       });
     });
 
