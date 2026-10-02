@@ -1562,6 +1562,26 @@ describe('Slack', () => {
       expect(mockClient.post).not.toHaveBeenCalled();
     });
 
+    it('rejects text longer than the 4,000 characters chat.update accepts', async () => {
+      const parse = (text: string) =>
+        SlackUpdateMessageInputSchema.safeParse({
+          channel: 'C123',
+          messageTs: '1234567890.123457',
+          text,
+        }).success;
+      expect(parse('x'.repeat(4000))).toBe(true);
+      expect(parse('x'.repeat(4001))).toBe(false);
+
+      await expect(
+        Slack.actions.updateMessage.handler(mockContext, {
+          channel: 'C123',
+          messageTs: '1234567890.123457',
+          text: 'x'.repeat(4001),
+        })
+      ).rejects.toThrow();
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
     it('should throw error when Slack API returns error', async () => {
       mockClient.post.mockResolvedValue({ data: { ok: false, error: 'message_not_found' } });
 
