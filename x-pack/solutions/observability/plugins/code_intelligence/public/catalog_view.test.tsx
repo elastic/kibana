@@ -210,6 +210,31 @@ describe('CatalogView', () => {
       expect.objectContaining({ repositories: ['open-telemetry/demo'], severities: ['critical'] })
     );
   });
+
+  it('reports its filters, total, and open entry as the page context', async () => {
+    getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 1, items: [item] });
+    const onContextChange = jest.fn();
+    renderView({ initialSeverities: ['high'], onContextChange });
+
+    fireEvent.click(await screen.findByTestId('codeIntelligenceCatalogRow'));
+
+    expect(onContextChange).toHaveBeenLastCalledWith({
+      tab: 'catalog',
+      repositories: [],
+      signalTypes: [],
+      severities: ['high'],
+      search: '',
+      sort: 'default',
+      total: 1,
+      selectedEntry: {
+        id: 'entry-1',
+        repository: 'elastic/eis-gateway',
+        title: 'Upstream request failed',
+        signal_type: 'log',
+        query: item.query,
+      },
+    });
+  });
 });
 
 describe('severityForScore', () => {

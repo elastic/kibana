@@ -10,18 +10,27 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CatalogSeverity } from '../common/catalog_filters';
+import type { PageContext } from './agent_builder/page_context';
+import { useAgentBuilderPageContext } from './agent_builder/use_agent_builder_page_context';
 import type { Repository } from './api';
 import { getRepositories } from './api';
 import { CatalogView } from './catalog_view';
+import type { CodeIntelligenceStartDependencies } from './plugin';
 import { RepositoriesView } from './repositories_view';
 
 type Tab = 'repositories' | 'catalog';
 
-const Application = ({ core }: { core: CoreStart }) => {
+const Application = ({
+  core,
+  plugins: { agentBuilder },
+}: {
+  core: CoreStart;
+  plugins: CodeIntelligenceStartDependencies;
+}) => {
   const [tab, setTab] = useState<Tab>('repositories');
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +42,13 @@ const Application = ({ core }: { core: CoreStart }) => {
     repository: string;
     severity?: CatalogSeverity;
   }>();
+
+  const [pageContext, setPageContext] = useState<PageContext>();
+  const sidebar = useMemo(
+    () => (agentBuilder === undefined ? undefined : core.chrome.sidebar.getApp('agentBuilder')),
+    [agentBuilder, core.chrome.sidebar]
+  );
+  useAgentBuilderPageContext({ agentBuilder, sidebar, context: pageContext });
 
   const reload = useCallback(() => setRequestSequence((value) => value + 1), []);
   const viewCatalog = useCallback((repository: string, severity?: CatalogSeverity) => {
@@ -104,6 +120,7 @@ const Application = ({ core }: { core: CoreStart }) => {
             error={error}
             reload={reload}
             onViewCatalog={viewCatalog}
+            onContextChange={setPageContext}
           />
         ) : (
           <CatalogView
@@ -123,6 +140,7 @@ const Application = ({ core }: { core: CoreStart }) => {
             initialSeverities={
               catalogPreset?.severity === undefined ? undefined : [catalogPreset.severity]
             }
+            onContextChange={setPageContext}
           />
         )}
       </EuiPageTemplate.Section>
@@ -130,11 +148,15 @@ const Application = ({ core }: { core: CoreStart }) => {
   );
 };
 
-export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
+export const renderApp = (
+  core: CoreStart,
+  plugins: CodeIntelligenceStartDependencies,
+  { element }: AppMountParameters
+) => {
   element.classList.add(APP_WRAPPER_CLASS);
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <Application core={core} />
+      <Application core={core} plugins={plugins} />
     </KibanaRenderContextProvider>,
     element
   );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -14,10 +15,20 @@ const APP_ID = 'codeIntelligence';
 export type CodeIntelligencePublicSetup = void;
 export type CodeIntelligencePublicStart = void;
 
+export interface CodeIntelligenceStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
+}
+
 export class CodeIntelligencePublicPlugin
-  implements Plugin<CodeIntelligencePublicSetup, CodeIntelligencePublicStart>
+  implements
+    Plugin<
+      CodeIntelligencePublicSetup,
+      CodeIntelligencePublicStart,
+      object,
+      CodeIntelligenceStartDependencies
+    >
 {
-  public setup(core: CoreSetup): void {
+  public setup(core: CoreSetup<CodeIntelligenceStartDependencies>): void {
     const startServices = core.getStartServices();
 
     core.application.register({
@@ -31,11 +42,11 @@ export class CodeIntelligencePublicPlugin
       order: 8990,
       keywords: ['code intelligence', 'catalog', 'repositories'],
       mount: async (params: AppMountParameters) => {
-        const [[coreStart], { renderApp }] = await Promise.all([
+        const [[coreStart, plugins], { renderApp }] = await Promise.all([
           startServices,
           import('./application'),
         ]);
-        return renderApp(coreStart, params);
+        return renderApp(coreStart, plugins, params);
       },
     });
   }
