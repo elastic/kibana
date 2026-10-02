@@ -25,8 +25,7 @@ import { css } from '@emotion/react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/code-editor';
-import { monaco as monacoEditor } from '@kbn/monaco';
+import { CodeEditor, jsonDefaults } from '@kbn/code-editor';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { IndexSettingsResponse } from '../../../../../../common';
 import type { Error } from '../../../../../shared_imports';
@@ -285,7 +284,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             <CodeEditor
               languageId="json"
               editorDidMount={(editor) => {
-                monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+                jsonDefaults.setDiagnosticsOptions({
                   validate: true,
                   schemas: [
                     {

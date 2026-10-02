@@ -7,13 +7,17 @@
 
 import { euiSelectors } from '@kbn/scout-oblt';
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
+import { KibanaCodeEditorWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
   public readonly ruleMonitorCount: Locator;
+  public readonly kibanaMonacoEditor: KibanaCodeEditorWrapper;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.ruleMonitorCount = page.testSubj.locator('syntheticsStatusRuleVizMonitorCount');
+    this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(page);
   }
 
   async navigateToMonitorManagement() {
@@ -198,7 +202,10 @@ export class SyntheticsAppPage {
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     if (inlineScript) {
       await this.page.testSubj.click('syntheticsSourceTab__inline');
-      await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+      await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+        'codeEditorContainer',
+        inlineScript
+      );
       return;
     }
     if (recorderScript) {
@@ -224,7 +231,7 @@ export class SyntheticsAppPage {
     await this.selectMonitorType('syntheticsMonitorTypeAPI');
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     await this.page.testSubj.click('syntheticsSourceTab__inline');
-    await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj('codeEditorContainer', inlineScript);
   }
 
   async createMonitor({

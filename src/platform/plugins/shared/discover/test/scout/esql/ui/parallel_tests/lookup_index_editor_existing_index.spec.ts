@@ -60,7 +60,9 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(LOOKUP_INDEX_EDITOR_ROLE);
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+      await pageObjects.discover.codeEditor.waitCodeEditorReady(
+        pageObjects.discover.esqlEditorTestSubjValue
+      );
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
@@ -78,11 +80,15 @@ spaceTest.describe(
       const { discover, lookupIndexEditor } = pageObjects;
       const indexName = getIndexName(scoutSpace.id);
 
-      await discover.codeEditor.setCodeEditorValue(`from logstash-* | LOOKUP JOIN ${indexName}`);
+      await discover.codeEditor.setCodeEditorValueByTestSubj(
+        pageObjects.discover.esqlEditorTestSubjValue,
+        `from logstash-* | LOOKUP JOIN ${indexName}`
+      );
       await discover.codeEditor.selectDecorationHoverOption(
         'lookupIndexBadge',
         'Edit lookup index'
       );
+
       await lookupIndexEditor.waitForOpen();
 
       await expect(lookupIndexEditor.rows).toHaveCount(2);

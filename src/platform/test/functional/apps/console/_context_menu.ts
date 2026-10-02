@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickContextMenu();
       await testSubjects.existOrFail('consoleMenuCopyAsButton');
       expect(await PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(await PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isCopyAsButtonVisible()).to.be.eql(true);
       expect(await PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(await PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('by default it should copy as curl and show toast when copy to language button is clicked', async () => {
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyToLanguageButton();
+        await PageObjects.console.clickCopyAsButton();
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.selectAllRequests();
 
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyToLanguageButton();
+        await PageObjects.console.clickCopyAsButton();
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
