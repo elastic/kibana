@@ -145,10 +145,10 @@ describe('ModelCard', () => {
       fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
       await waitFor(() => {
         expect(getByTestId('eisModelCardNearingEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'Model will be deprecated soon'
+          'Model soon no longer available'
         );
         expect(getByTestId('eisModelCardNearingEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'This model will be deprecated on 2026-08-01. We recommend a newer model for optimal results.'
+          'This model is reaching end of life on 2026-08-01. It will no longer be available after that date. We recommend using a more recent model.'
         );
       });
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
@@ -177,10 +177,10 @@ describe('ModelCard', () => {
       fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
       await waitFor(() => {
         expect(getByTestId('eisModelCardEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'Model is no longer available'
+          'Model no longer available'
         );
         expect(getByTestId('eisModelCardEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'This model was deprecated on 2026-02-01. We recommend a newer model for optimal results.'
+          'This model has reached end of life on 2026-02-01. Use a more recent model instead.'
         );
       });
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();

@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
 import {
-  getModelDeprecatedMessage,
   getModelEOLDate,
   getProviderKeyForCreator,
   isModelEndOfLifeReached,
@@ -160,7 +159,14 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
                 'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.title',
                 { defaultMessage: 'Model soon no longer available' }
               )}
-              tooltip={getModelDeprecatedMessage(endOfLifeDate)}
+              tooltip={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.content',
+                {
+                  defaultMessage:
+                    'This model is reaching end of life on {date}. It will no longer be available after that date. We recommend using a more recent model.',
+                  values: { date: endOfLifeDate },
+                }
+              )}
               tooltipTestSubj={`eisModelCardNearingEndOfLifeTooltip-${modelName}`}
             />
           </EuiFlexItem>
