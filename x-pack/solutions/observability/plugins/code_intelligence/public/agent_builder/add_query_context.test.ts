@@ -11,25 +11,21 @@ import { useAddQueryToAgent } from './add_query_context';
 
 const createAgentBuilder = (access: { hasRequiredLicense: boolean; hasLlmConnector: boolean }) => ({
   getAgentBuilderAccess: jest.fn().mockResolvedValue(access),
-  openChat: jest.fn(),
-  addAttachment: jest.fn(),
 });
 
-const sidebar = { isOpen: () => true };
+const stager = { addQuery: jest.fn() };
 const toasts = { addSuccess: jest.fn() };
 
 describe('useAddQueryToAgent', () => {
   it('is available once the user can chat', async () => {
     const agentBuilder = createAgentBuilder({ hasRequiredLicense: true, hasLlmConnector: true });
-    const { result } = renderHook(() =>
-      useAddQueryToAgent({ agentBuilder, sidebar, toasts, pageContext: undefined })
-    );
+    const { result } = renderHook(() => useAddQueryToAgent({ agentBuilder, stager, toasts }));
 
     expect(result.current).toBeUndefined();
     await waitFor(() => expect(result.current).toBeDefined());
 
     result.current!({ id: 'entry-1', query: 'FROM logs-*' });
-    expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+    expect(stager.addQuery).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'entry-1', type: 'esql' })
     );
   });
@@ -39,9 +35,7 @@ describe('useAddQueryToAgent', () => {
     ['LLM connector', { hasRequiredLicense: true, hasLlmConnector: false }],
   ])('is absent without the %s', async (_, access) => {
     const agentBuilder = createAgentBuilder(access);
-    const { result } = renderHook(() =>
-      useAddQueryToAgent({ agentBuilder, sidebar, toasts, pageContext: undefined })
-    );
+    const { result } = renderHook(() => useAddQueryToAgent({ agentBuilder, stager, toasts }));
 
     await waitFor(() => expect(agentBuilder.getAgentBuilderAccess).toHaveBeenCalled());
     await Promise.resolve();
@@ -50,12 +44,7 @@ describe('useAddQueryToAgent', () => {
 
   it('is absent without Agent Builder', () => {
     const { result } = renderHook(() =>
-      useAddQueryToAgent({
-        agentBuilder: undefined,
-        sidebar: undefined,
-        toasts,
-        pageContext: undefined,
-      })
+      useAddQueryToAgent({ agentBuilder: undefined, stager: undefined, toasts })
     );
 
     expect(result.current).toBeUndefined();

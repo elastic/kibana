@@ -15,6 +15,7 @@ import ReactDOM from 'react-dom';
 
 import type { CatalogSeverity } from '../common/catalog_filters';
 import { AddQueryToAgentContext, useAddQueryToAgent } from './agent_builder/add_query_context';
+import { useAgentBuilderStager } from './agent_builder/agent_builder_stager';
 import type { PageContext } from './agent_builder/page_context';
 import { useAgentBuilderPageContext } from './agent_builder/use_agent_builder_page_context';
 import type { Repository } from './api';
@@ -49,16 +50,12 @@ const Application = ({
     () => (agentBuilder === undefined ? undefined : core.chrome.sidebar.getApp('agentBuilder')),
     [agentBuilder, core.chrome.sidebar]
   );
-  const pageContextAttachment = useAgentBuilderPageContext({
-    agentBuilder,
-    sidebar,
-    context: pageContext,
-  });
+  const stager = useAgentBuilderStager(agentBuilder, sidebar);
+  useAgentBuilderPageContext({ stager, context: pageContext });
   const addQuery = useAddQueryToAgent({
     agentBuilder,
-    sidebar,
+    stager,
     toasts: core.notifications.toasts,
-    pageContext: pageContextAttachment,
   });
 
   const reload = useCallback(() => setRequestSequence((value) => value + 1), []);

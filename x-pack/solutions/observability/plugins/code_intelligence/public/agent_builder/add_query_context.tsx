@@ -7,14 +7,13 @@
 
 import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 import type { CatalogItem } from '../api';
 import { addQueryAttachment, hasQuery } from './add_query_attachment';
-import type { AgentBuilderSidebar } from './use_agent_builder_page_context';
+import type { AgentBuilderStager } from './agent_builder_stager';
 
 export type AddQueryToAgent = (entry: CatalogItem) => void;
 
@@ -27,16 +26,12 @@ export const AddQueryToAgentContext = createContext<AddQueryToAgent | undefined>
  */
 export const useAddQueryToAgent = ({
   agentBuilder,
-  sidebar,
+  stager,
   toasts,
-  pageContext,
 }: {
-  agentBuilder:
-    | Pick<AgentBuilderPluginStart, 'getAgentBuilderAccess' | 'openChat' | 'addAttachment'>
-    | undefined;
-  sidebar: Pick<AgentBuilderSidebar, 'isOpen'> | undefined;
+  agentBuilder: Pick<AgentBuilderPluginStart, 'getAgentBuilderAccess'> | undefined;
+  stager: Pick<AgentBuilderStager, 'addQuery'> | undefined;
   toasts: Pick<ToastsStart, 'addSuccess'>;
-  pageContext: AttachmentInput | undefined;
 }): AddQueryToAgent | undefined => {
   const [canChat, setCanChat] = useState(false);
   useEffect(() => {
@@ -55,13 +50,12 @@ export const useAddQueryToAgent = ({
 
   const addQuery = useCallback(
     (entry: CatalogItem) => {
-      if (agentBuilder === undefined || sidebar === undefined) return;
-      addQueryAttachment({ agentBuilder, sidebar, toasts, pageContext }, entry);
+      if (stager !== undefined) addQueryAttachment({ stager, toasts }, entry);
     },
-    [agentBuilder, pageContext, sidebar, toasts]
+    [stager, toasts]
   );
 
-  return canChat && agentBuilder !== undefined && sidebar !== undefined ? addQuery : undefined;
+  return canChat && stager !== undefined ? addQuery : undefined;
 };
 
 const addQueryLabel = i18n.translate('xpack.codeIntelligence.agentBuilder.addQueryAriaLabel', {

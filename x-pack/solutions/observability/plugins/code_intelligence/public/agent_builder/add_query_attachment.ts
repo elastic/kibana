@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { CatalogItem } from '../api';
 import { isSignalType, signalTypeLabels } from '../signal_type_badge';
-import { AGENT_BUILDER_SESSION_TAG } from './page_context';
-import type { AgentBuilderSidebar } from './use_agent_builder_page_context';
+import type { AgentBuilderStager } from './agent_builder_stager';
 
 const signalLabel = (signalType: string | undefined): string | undefined =>
   isSignalType(signalType) ? signalTypeLabels[signalType] : signalType;
@@ -47,32 +45,18 @@ export const buildQueryAttachment = (entry: CatalogItem): AttachmentInput | unde
 };
 
 export interface AddQueryDependencies {
-  readonly agentBuilder: Pick<AgentBuilderPluginStart, 'openChat' | 'addAttachment'>;
-  readonly sidebar: Pick<AgentBuilderSidebar, 'isOpen'>;
+  readonly stager: Pick<AgentBuilderStager, 'addQuery'>;
   readonly toasts: Pick<ToastsStart, 'addSuccess'>;
-  /** The page context attachment, resent because `openChat` options replace the chat config. */
-  readonly pageContext: AttachmentInput | undefined;
 }
 
-/**
- * Stages the entry's query in the AI Agent sidebar. An open sidebar gets the attachment upserted
- * next to queries already staged. A closed one is opened with it, because `addAttachment` is a
- * no-op until the sidebar has finished mounting.
- */
+/** Stages the entry's query in the AI Agent sidebar, opening it if needed. */
 export const addQueryAttachment = (
-  { agentBuilder, sidebar, toasts, pageContext }: AddQueryDependencies,
+  { stager, toasts }: AddQueryDependencies,
   entry: CatalogItem
 ): void => {
   const attachment = buildQueryAttachment(entry);
   if (attachment === undefined) return;
-  if (sidebar.isOpen()) {
-    agentBuilder.addAttachment(attachment);
-  } else {
-    agentBuilder.openChat({
-      sessionTag: AGENT_BUILDER_SESSION_TAG,
-      attachments: pageContext === undefined ? [attachment] : [pageContext, attachment],
-    });
-  }
+  stager.addQuery(attachment);
   toasts.addSuccess(
     i18n.translate('xpack.codeIntelligence.agentBuilder.queryAddedToast', {
       defaultMessage: 'Added "{title}" to the AI Agent',

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { renderHook } from '@testing-library/react';
 
 import {
-  AGENT_BUILDER_SESSION_TAG,
   PAGE_CONTEXT_ATTACHMENT_ID,
   buildPageContextAttachment,
   describePageContext,
@@ -17,11 +15,7 @@ import {
   type PageContext,
   type RepositoriesPageContext,
 } from './page_context';
-import {
-  useAgentBuilderPageContext,
-  type AgentBuilderSidebar,
-  type PageContextAgentBuilder,
-} from './use_agent_builder_page_context';
+import { useAgentBuilderPageContext } from './use_agent_builder_page_context';
 
 const catalogContext: CatalogPageContext = {
   tab: 'catalog',
@@ -41,22 +35,6 @@ const contentOf = (context: PageContext) =>
       content: string;
     }
   ).content;
-
-const createAgentBuilder = (): jest.Mocked<PageContextAgentBuilder> => ({
-  setChatConfig: jest.fn(),
-  clearChatConfig: jest.fn(),
-  addAttachment: jest.fn(),
-  removeAttachment: jest.fn(),
-});
-
-const createSidebar = (initiallyOpen: boolean) => {
-  const open$ = new BehaviorSubject(initiallyOpen);
-  const sidebar: AgentBuilderSidebar = {
-    isOpen: () => open$.getValue(),
-    isOpen$: () => open$.asObservable(),
-  };
-  return { open$, sidebar };
-};
 
 describe('describePageContext', () => {
   it('describes the catalog filters and total', () => {
@@ -103,13 +81,19 @@ describe('describePageContext', () => {
 });
 
 describe('buildPageContextAttachment', () => {
-  it('is a hidden text attachment with the description, URL, and flat fields', () => {
+  it('is a hidden text attachment with the same description for every page', () => {
     const attachment = buildPageContextAttachment(catalogContext, 'http://localhost/app/x');
     expect(attachment).toMatchObject({
       id: PAGE_CONTEXT_ATTACHMENT_ID,
       type: 'text',
       hidden: true,
     });
+    expect(attachment.description).toBe(
+      buildPageContextAttachment(repositoriesContext, 'http://localhost/app/y').description
+    );
+  });
+
+  it('has the summary, URL, and flat fields in its content', () => {
     expect(contentOf(catalogContext).split('\n')).toEqual([
       describePageContext(catalogContext),
       'url: http://localhost/app/codeIntelligence',
@@ -125,95 +109,41 @@ describe('buildPageContextAttachment', () => {
 });
 
 describe('useAgentBuilderPageContext', () => {
-  it('sets the chat config while the sidebar is closed', () => {
-    const agentBuilder = createAgentBuilder();
-    const { sidebar } = createSidebar(false);
-    renderHook(() =>
-      useAgentBuilderPageContext({ agentBuilder, sidebar, context: catalogContext })
-    );
-
-    expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({
-      sessionTag: AGENT_BUILDER_SESSION_TAG,
-      attachments: [expect.objectContaining({ id: PAGE_CONTEXT_ATTACHMENT_ID })],
-    });
-    expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+  const createStager = () => ({
+    setPageContext: jest.fn(),
+    addQuery: jest.fn(),
+    stop: jest.fn(),
   });
 
-  it('upserts the attachment while the sidebar is open, so staged queries are kept', () => {
-    const agentBuilder = createAgentBuilder();
-    const { sidebar } = createSidebar(true);
+  it('sends the page context and resends it only when it changes', () => {
+    const stager = createStager();
     const { rerender } = renderHook(
-      ({ context }: { context: PageContext }) =>
-        useAgentBuilderPageContext({ agentBuilder, sidebar, context }),
+      ({ context }: { context: PageContext }) => useAgentBuilderPageContext({ stager, context }),
       { initialProps: { context: catalogContext as PageContext } }
     );
-    rerender({ context: repositoriesContext });
-
-    expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
-    expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(2);
-    expect(
-      (agentBuilder.addAttachment.mock.calls[1][0].data as { content: string }).content
-    ).toContain('repositories tab with 16 repositories');
-  });
-
-  it('switches to upserting when the sidebar opens', () => {
-    const agentBuilder = createAgentBuilder();
-    const { open$, sidebar } = createSidebar(false);
-    renderHook(() =>
-      useAgentBuilderPageContext({ agentBuilder, sidebar, context: catalogContext })
-    );
-    expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
-
-    act(() => open$.next(true));
-
-    expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+    rerender({ context: catalogContext });
+    expect(stager.setPageContext).toHaveBeenCalledTimes(1);
+    expect(stager.setPageContext).toHaveBeenCalledWith(
       expect.objectContaining({ id: PAGE_CONTEXT_ATTACHMENT_ID })
     );
-  });
 
-  it('does not resend an unchanged context on rerender', () => {
-    const agentBuilder = createAgentBuilder();
-    const { sidebar } = createSidebar(false);
-    const { rerender } = renderHook(() =>
-      useAgentBuilderPageContext({ agentBuilder, sidebar, context: catalogContext })
+    rerender({ context: repositoriesContext });
+    expect(stager.setPageContext).toHaveBeenCalledTimes(2);
+    expect(stager.setPageContext.mock.calls[1][0].data.content).toContain(
+      'repositories tab with 16 repositories'
     );
-    rerender();
-
-    expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
   });
 
   it('waits for the page to report a context', () => {
-    const agentBuilder = createAgentBuilder();
-    const { sidebar } = createSidebar(false);
-    const { result } = renderHook(() =>
-      useAgentBuilderPageContext({ agentBuilder, sidebar, context: undefined })
-    );
+    const stager = createStager();
+    renderHook(() => useAgentBuilderPageContext({ stager, context: undefined }));
 
-    expect(result.current).toBeUndefined();
-    expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
-  });
-
-  it('clears the chat config and removes the attachment when the app unmounts', () => {
-    const agentBuilder = createAgentBuilder();
-    const { sidebar } = createSidebar(true);
-    const { unmount } = renderHook(() =>
-      useAgentBuilderPageContext({ agentBuilder, sidebar, context: catalogContext })
-    );
-    unmount();
-
-    expect(agentBuilder.clearChatConfig).toHaveBeenCalledTimes(1);
-    expect(agentBuilder.removeAttachment).toHaveBeenCalledWith(PAGE_CONTEXT_ATTACHMENT_ID);
+    expect(stager.setPageContext).not.toHaveBeenCalled();
   });
 
   it('does nothing without Agent Builder', () => {
-    const { result } = renderHook(() =>
-      useAgentBuilderPageContext({
-        agentBuilder: undefined,
-        sidebar: undefined,
-        context: catalogContext,
-      })
-    );
-
-    expect(result.current).toMatchObject({ id: PAGE_CONTEXT_ATTACHMENT_ID });
+    expect(() =>
+      renderHook(() => useAgentBuilderPageContext({ stager: undefined, context: catalogContext }))
+    ).not.toThrow();
   });
 });
