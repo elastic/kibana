@@ -31,6 +31,7 @@ import { auditLoggingService } from '../../audit_logging';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+import { runWithCache } from './cache';
 
 import * as knowledgeBaseIndex from './knowledge_base_index';
 
@@ -1097,6 +1098,70 @@ owner: elastic`,
       });
 
       expect(MockRegistry.getPackage).not.toHaveBeenCalled();
+    });
+
+    it('should reuse a successful package info lookup within a cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await runWithCache(async () => {
+        const first = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+        const second = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        });
+        expect(second).toBe(first);
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reuse a failed package info lookup within a cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'missing-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        const firstError = await lookup().catch((error) => error);
+        expect(firstError).toBeInstanceOf(PackageNotFoundError);
+        await expect(lookup()).rejects.toBe(firstError);
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retry a failed package info lookup in the next cache session', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+
+      const lookup = () =>
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'missing-package',
+          pkgVersion: '1.0.0',
+        });
+
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);
+      });
+      await runWithCache(async () => {
+        await expect(lookup()).rejects.toBeInstanceOf(PackageNotFoundError);
+      });
+
+      expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledTimes(2);
     });
 
     it('should remove excluded data stream types and policy templates', async () => {

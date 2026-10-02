@@ -1209,6 +1209,111 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should fall back to package info when version conditions are missing', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        return {
+          name: pkgName,
+          version: pkgVersion,
+          title: 'Synthetics',
+          conditions: { agent: { version: '>=8.12.0' } },
+        } as any;
+      });
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+          package_agent_version_condition: undefined,
+        },
+        {
+          id: 'pp-2',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+          package_agent_version_condition: undefined,
+        },
+      ] as any);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(getPackageInfo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pkgName: 'synthetics',
+          pkgVersion: '1.8.0',
+          prerelease: true,
+        })
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          min_agent_version: '8.12.0',
+          package_agent_version_conditions: expect.arrayContaining([
+            {
+              name: 'synthetics',
+              title: 'Synthetics',
+              version_condition: '>=8.12.0',
+            },
+          ]),
+        })
+      );
+    });
+
+    it('should collect version conditions from each distinct package in the fallback path', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        return {
+          name: pkgName,
+          version: pkgVersion,
+          title: pkgName,
+          conditions: {
+            agent: { version: pkgName === 'synthetics' ? '>=8.12.0' : '>=9.0.0' },
+          },
+        } as any;
+      });
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+        },
+        {
+          id: 'pp-2',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+        },
+        {
+          id: 'pp-3',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+      ] as any);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          package_agent_version_conditions: expect.arrayContaining([
+            {
+              name: 'synthetics',
+              title: 'Synthetics',
+              version_condition: '>=8.12.0',
+            },
+            {
+              name: 'apache',
+              title: 'Apache',
+              version_condition: '>=9.0.0',
+            },
+          ]),
+        })
+      );
+    });
+
     it('should not fetch full package policies when deploying asynchronously', async () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

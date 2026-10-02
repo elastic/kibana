@@ -149,6 +149,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
+import { runWithCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
@@ -1326,85 +1327,90 @@ class AgentPolicyService {
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
-    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, policyId);
+    // `getPackageInfo` only reuses results inside a `runWithCache` ALS session, including failed
+    // lookups. Sync agent-policy updates (unlike deploy/bump tasks) historically did not open one,
+    // so every package policy paid a full EPM lookup.
+    return runWithCache(async () => {
+      const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, policyId);
 
-    const conditions: AgentPolicyAgentVersionCondition[] = [];
-    for (const pp of packagePolicies) {
-      let versionCondition = pp.package_agent_version_condition;
+      const conditions: AgentPolicyAgentVersionCondition[] = [];
+      for (const pp of packagePolicies) {
+        let versionCondition = pp.package_agent_version_condition;
 
-      // For package policies created before this field was introduced, fall back
-      // to looking up the installed package info to get the version condition.
-      if (!versionCondition && pp.package?.name && pp.package?.version) {
-        try {
-          const pkgInfo = await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: pp.package.name,
-            pkgVersion: pp.package.version,
-            prerelease: true,
+        // For package policies created before this field was introduced, fall back
+        // to looking up the installed package info to get the version condition.
+        if (!versionCondition && pp.package?.name && pp.package?.version) {
+          try {
+            const pkgInfo = await getPackageInfo({
+              savedObjectsClient: soClient,
+              pkgName: pp.package.name,
+              pkgVersion: pp.package.version,
+              prerelease: true,
+            });
+            versionCondition = pkgInfo.conditions?.agent?.version;
+          } catch {
+            // ignore — package might not be installed or accessible
+          }
+        }
+
+        if (versionCondition) {
+          conditions.push({
+            name: pp.package?.name ?? '',
+            title: pp.package?.title ?? '',
+            version_condition: versionCondition,
           });
-          versionCondition = pkgInfo.conditions?.agent?.version;
-        } catch {
-          // ignore — package might not be installed or accessible
         }
       }
 
-      if (versionCondition) {
-        conditions.push({
-          name: pp.package?.name ?? '',
-          title: pp.package?.title ?? '',
-          version_condition: versionCondition,
-        });
+      // inputs_for_versions is stripped from the PackagePolicy type but is the only reliable
+      // indicator of template-level version conditions (HBS templates referencing _meta.agent.version).
+      // compilePackagePolicyForVersions only populates it when hasAgentVersionConditionInInputTemplate
+      // is true, so its presence means the policy requires version-specific behaviour.
+      const savedObjectType = await getPackagePolicySavedObjectType();
+      const rawResult = await Promise.resolve(
+        soClient.find<PackagePolicySOAttributes>({
+          type: savedObjectType,
+          filter: buildCurrentRevisionFilter(
+            savedObjectType,
+            `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
+          ),
+          perPage: SO_SEARCH_LIMIT,
+        })
+      ).catch(() => undefined);
+      const hasTemplateConditions = (rawResult?.saved_objects ?? []).some(
+        (so) =>
+          so.attributes.inputs_for_versions &&
+          Object.keys(so.attributes.inputs_for_versions).length > 0
+      );
+
+      const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
+
+      if (conditions.length === 0) {
+        return {
+          hasAgentVersionConditions,
+          minAgentVersion: undefined,
+          packageAgentVersionConditions: undefined,
+        };
       }
-    }
 
-    // inputs_for_versions is stripped from the PackagePolicy type but is the only reliable
-    // indicator of template-level version conditions (HBS templates referencing _meta.agent.version).
-    // compilePackagePolicyForVersions only populates it when hasAgentVersionConditionInInputTemplate
-    // is true, so its presence means the policy requires version-specific behaviour.
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    const rawResult = await Promise.resolve(
-      soClient.find<PackagePolicySOAttributes>({
-        type: savedObjectType,
-        filter: buildCurrentRevisionFilter(
-          savedObjectType,
-          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
-        ),
-        perPage: SO_SEARCH_LIMIT,
-      })
-    ).catch(() => undefined);
-    const hasTemplateConditions = (rawResult?.saved_objects ?? []).some(
-      (so) =>
-        so.attributes.inputs_for_versions &&
-        Object.keys(so.attributes.inputs_for_versions).length > 0
-    );
+      let highestMinVersion: string | undefined;
+      for (const { version_condition: condition } of conditions) {
+        try {
+          const parsed = minVersion(condition);
+          if (parsed && (!highestMinVersion || gt(parsed.version, highestMinVersion))) {
+            highestMinVersion = parsed.version;
+          }
+        } catch {
+          // skip invalid version condition
+        }
+      }
 
-    const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
-
-    if (conditions.length === 0) {
       return {
         hasAgentVersionConditions,
-        minAgentVersion: undefined,
-        packageAgentVersionConditions: undefined,
+        minAgentVersion: highestMinVersion,
+        packageAgentVersionConditions: conditions,
       };
-    }
-
-    let highestMinVersion: string | undefined;
-    for (const { version_condition: condition } of conditions) {
-      try {
-        const parsed = minVersion(condition);
-        if (parsed && (!highestMinVersion || gt(parsed.version, highestMinVersion))) {
-          highestMinVersion = parsed.version;
-        }
-      } catch {
-        // skip invalid version condition
-      }
-    }
-
-    return {
-      hasAgentVersionConditions,
-      minAgentVersion: highestMinVersion,
-      packageAgentVersionConditions: conditions,
-    };
+    });
   }
 
   /**
