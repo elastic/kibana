@@ -309,7 +309,8 @@ Calling it again replaces the automation this template already attached.
 `template: document_orchestration`. Pass `sourceIndex`, `titleField` and `bodyField`. The AI index
 is the one attached to the conversation.
 Pass `corpusFilter`, `maxDocuments` and `bodyMaxChars` when the corpus needs a bound; they default
-to an empty filter, 50 documents and 12000 characters. `corpusFilter` is inserted after `FROM`.
+to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` within the KI budget
+(`strategy_catalog`, "The KI budget"). `corpusFilter` is inserted after `FROM`.
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
 Each parallel branch is one `workflow.execute` of the system workflow
 `system-context-engine-document-summary`, which is already installed and is not an automation on
@@ -332,8 +333,8 @@ Pass `catalogIndex` and `catalogKey` when a second index holds one record per un
 catalog row or a case header; they default to `sourceIndex` and `unitKey`, which means there is no
 separate record. Pass `discoveryFilter`, a complete ES|QL line beginning with `| WHERE`, to
 re-profile only some units; it defaults to taking every unit.
-`maxUnits` bounds the run and defaults to 25; each unit costs a model call, so raise it
-deliberately on a high-cardinality field.
+`maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
+keep it within that budget (`strategy_catalog`, "The KI budget").
 The installed workflow pages through the units on a keyword cursor, so a corpus above the row cap
 is walked rather than truncated, and a re-run regenerates every unit and replaces its indicator.
 To accumulate across runs rather than replace, read the stored indicator and merge through
@@ -401,10 +402,11 @@ will invent it confidently. Put in the prompt:
 - the AI Index id, its destination index name, and whether that destination is an index or a
   data stream
 - the sources and the exact corpus filter the automation should apply
-- the KI budget: at most 100 KIs per run during onboarding, set in the template's own bound
-  (`max_units`, or `max_documents` — multiplied by the claims per document for a per-claim
-  variant). This is guidance for the automation, not a figure to put to the user, and it can be
-  raised once the output is trusted
+- the KI budget: at most 100 KIs per run during onboarding, set in the workflow's own bound
+  (`max_units` or `max_documents`; for a workflow that writes several KIs per document, the
+  `maxItems` and `max_documents` that `strategy_catalog`'s "The KI budget" describes). This is
+  guidance for the automation, not a limit to present to the user, and it can be raised once the
+  output is trusted
 - the strategy from `analyze-and-improve` **as its three answers** — the unit, what one KI
   carries, how units are found and refreshed — and what the indicators are meant to capture.
   Those three are what fill the `consts`, so a brief that names a strategy without them leaves
@@ -656,8 +658,8 @@ Present the subagent's summary and its pilot indicators before you save. The sav
 the workflow and the index but shows none of its content, so that account is the only thing the user
 has to approve on.
 
-**State the time estimate from the pilot in the same message.** The save dialog approves a run over
-the whole corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
+**State the time estimate from the pilot in the same message.** The run dialog approves the full run
+over the filtered corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
 duration and the number of units it wrote, divide to get a per-unit time, and multiply by the
 number of units the saved run will write: the unit count from the proposal's Unit section
 (units, not rows — a unit profile over 62,884 sales rows may have 2,517 units), or the
@@ -667,7 +669,7 @@ the verification retries that a full run pays for, so a straight-line projection
 Show the three numbers, not only the result, so the reader can see what was assumed.
 
 **When the projection exceeds one hour, put the estimate in bold between 🚨 markers** so it
-cannot be skimmed past: "🚨 **The full run over 300 units will take at least 80 minutes** 🚨".
+cannot be skimmed past: "🚨 **The full run over 100 units will take at least 80 minutes** 🚨".
 Under an hour, write it in plain text. A projection that comes out in hours is a finding of its
 own, and the answer is usually a narrower corpus filter or a cheaper unit rather than a shrug, so
 follow the warning with the option you would take. Report token usage only when the execution
@@ -681,8 +683,8 @@ handful of documents that get deleted afterwards. Running the saved automation i
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
 Saving an automation and running it are two separate operations, each with its own confirmation
-dialog. That is `save_automation`. The install tool is neither: it does not
-confirm and it does not start a run.
+dialog: `save_automation` confirms the save and `run_automation` confirms the run. The install tool
+is neither: it does not confirm and it does not start a run.
 
 **Index metadata, bottom-up document and unit profile** — call
 `platform.context_engine.install_automation_template` once. Pass `template: index_metadata`,
@@ -691,7 +693,7 @@ write the YAML and do not call
 `platform.context_engine.save_automation` for these. If this template is already an automation on
 the AI index, the tool replaces that workflow's definition and keeps the same workflow id. The
 result says `replaced: true` when it did. It does not add a second automation and it does not start
-a run. Do not look for `run.started`. The document summary workflow is
+a run. The document summary workflow is
 `system-context-engine-document-summary`. It is not attached to the AI index.
 
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save
