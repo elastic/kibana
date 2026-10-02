@@ -72,7 +72,7 @@ const mockAlertingVTwo = {
   ),
   EpisodesPage: ({ hostApp, privilegeCheck, manageRulesHref }: AlertingV2PageProps) => (
     <Placeholder
-      name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`}
+      name={`episodesPage:${hostApp?.alerts?.app ?? 'none'}`}
       privilegeCheck={privilegeCheck}
       {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
