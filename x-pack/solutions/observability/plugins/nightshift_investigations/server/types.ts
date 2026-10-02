@@ -16,10 +16,6 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type {
@@ -33,7 +29,7 @@ import type {
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
-import type { DeleteAllInvestigationsResult } from './storage';
+import type { DeleteAllInvestigationsResult } from './lib/delete_all_investigations';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
@@ -50,8 +46,8 @@ export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
   /**
-   * Deletes investigations in every space (saved objects and the shared investigation data, not
-   * the Agent Builder conversations); callers must authorize this destructive operation.
+   * Deletes the shared investigation data of investigations in every space (not the Agent Builder
+   * conversations); callers must authorize this destructive operation.
    */
   deleteAllInvestigations: () => Promise<DeleteAllInvestigationsResult>;
 }
@@ -68,7 +64,6 @@ export interface NightshiftInvestigationsSetupDeps {
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   sandbox?: SandboxPluginSetup;
-  taskManager: TaskManagerSetupContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }
@@ -84,7 +79,6 @@ export interface NightshiftInvestigationsStartDeps {
   sandbox?: SandboxPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  taskManager: TaskManagerStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 

@@ -10,53 +10,114 @@
  *
  *   node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift/scripts/seed_nightshift_investigations.ts
  *
- * Add --help to list the connection flags.
+ * Add --help to list the connection flags, --clean to only remove earlier seeds.
+ *
+ * Each scenario is written as a shared agentic investigation, the way a real run leaves it:
+ *
+ * - An Agent Builder conversation on the `investigation` template, run by the
+ *   `nightshift.investigation` agent, public, owned by the --auth user, with its title and the
+ *   `status` / `severity` / `summary` / `verdict` metadata. Its id is derived from the scenario,
+ *   so a re-run replaces the same investigations.
+ * - Its subject, impact, and hypotheses documents in the agentic investigations side indexes,
+ *   each attached to the conversation by reference (hidden, `origin` = document id).
+ * - Its proposed actions, created by the proposals gate workflow that `proposals.create` runs.
+ *
+ * Kibana HTTP APIs do the writes wherever a route exists. The side-index documents and the
+ * conversation timestamps have none, so they are written straight to Elasticsearch as the
+ * kibana_system user. No AI connector or investigation workflow run is needed.
  */
 
+import { createHash } from 'crypto';
+import { v5 as uuidv5 } from 'uuid';
 import { run } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { types } from '@kbn/storage-adapter';
+import type { StorageSchema } from '@kbn/storage-adapter';
+import {
+  AGENTIC_INVESTIGATIONS_API_VERSION,
+  HYPOTHESES_ATTACHMENT_TYPE,
+  HYPOTHESES_INDEX_NAME,
+  IMPACT_ATTACHMENT_TYPE,
+  IMPACT_INDEX_NAME,
+  INVESTIGATION_STATUS_URL,
+  INVESTIGATION_TEMPLATE_ID,
+  INVESTIGATIONS_INTERNAL_URL,
+  SUBJECT_ATTACHMENT_TYPE,
+  SUBJECT_INDEX_NAME,
+} from '@kbn/agentic-investigations-plugin/common';
 import type {
-  InvestigationStatus,
-  InvestigationStructuredOutput,
-  InvestigationSubjectType,
-  InvestigationTriggerType,
-  Severity,
-} from '@kbn/nightshift-investigations-plugin/common';
-import type {
+  AlertSubjectSnapshot,
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  Hypothesis,
+  Impact,
+  ImpactEntity,
   InvestigationEvidence,
-  InvestigationHypothesis,
-  InvestigationImpact,
-  InvestigationRecommendation,
-} from '@kbn/significant-events-schema';
+  InvestigationHypotheses,
+  InvestigationMetadataStatus,
+  InvestigationSeverity,
+  InvestigationSubject,
+  InvestigationSubjectInput,
+  InvestigationSubjectTriggerType,
+  ListInvestigationsResponse,
+  User,
+} from '@kbn/agentic-investigations-plugin/common';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  PROPOSALS_API_VERSION,
+  PROPOSALS_INDEX_NAME,
+  PROPOSALS_INTERNAL_URL,
+} from '@kbn/proposals-common';
+import type { ListProposalsResponse, ProposalConfidence } from '@kbn/proposals-common';
 
-const SO_TYPE = 'nightshift-investigation';
-const TYPE_MIGRATION_VERSION = '10.4.0';
-const ID_PREFIX = 'nightshift-seed-inv-';
+/** Namespace of the seeded conversation ids: `uuidv5(<scenario subject id>, SEED_ID_NAMESPACE)`. */
+const SEED_ID_NAMESPACE = '6f1d8f5e-2b8c-4c55-9a51-6b3f4c1e9d20';
 
-type ImpactEntity = NonNullable<InvestigationImpact['entities']>[number];
+/** Space the investigations are seeded in. */
+const SPACE_ID = 'default';
+
+/** The proposals gate workflow (`CREATE_PROPOSAL_WORKFLOW_ID` in `@kbn/workflows/managed`). */
+const CREATE_PROPOSAL_WORKFLOW_ID = 'system-create-proposal';
+
+/** Workflow execution statuses that end a run (`TerminalExecutionStatuses` in `@kbn/workflows`). */
+const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'skipped', 'timed_out'];
+
+/** Attachment type of a proposal card (`PROPOSAL_ATTACHMENT_TYPE` in `@kbn/proposals-common`). */
+const PROPOSAL_ATTACHMENT_TYPE = 'platform.proposal';
+
+/** Agent Builder's conversation index (`chatSystemIndex('conversations')` in `@kbn/agent-builder-server`). */
+const CONVERSATIONS_INDEX = '.chat-conversations';
+
+/** Agent Builder public API version. */
+const PUBLIC_API_VERSION = '2023-10-31';
+
 type ChartUnit = NonNullable<EvidenceChart['y_axis']['unit']>;
+type SeedSubject = Omit<InvestigationSubjectInput, 'triggerType'>;
+type SeedImpact = Pick<Impact, 'summary' | 'evidence' | 'entities'>;
 
-interface InvestigationAttributes extends InvestigationStructuredOutput {
+/** A proposed action, created like `proposals.create` creates one (`origin: nightshift`). */
+interface SeedProposal {
   title: string;
-  status: InvestigationStatus;
-  subject_type: InvestigationSubjectType;
-  subject_id: string;
-  subject_summary: string;
-  trigger_type: InvestigationTriggerType;
-  concurrency_key: string;
-  created_at: string;
-  started_at?: string;
-  completed_at?: string;
-  executed_by: string;
-  error?: string;
+  comment: string;
+  confidence: ProposalConfidence;
 }
 
-interface Subject {
-  type: InvestigationSubjectType;
-  id: string;
-  summary: string;
+interface Scenario {
+  title: string;
+  status: InvestigationMetadataStatus;
+  severity?: InvestigationSeverity;
+  /** What happened (`metadata.summary`). */
+  summary?: string;
+  /** The conclusion (`metadata.verdict`). */
+  verdict?: string;
+  subject: SeedSubject;
+  triggerType: InvestigationSubjectTriggerType;
+  hypotheses?: Hypothesis[];
+  impact?: SeedImpact;
+  proposals: SeedProposal[];
+  createdMinutesAgo: number;
+  updatedMinutesAgo: number;
 }
 
 const now = Date.now();
@@ -149,10 +210,10 @@ const chartEvidence = (chart: EvidenceChart): InvestigationEvidence => ({ chart 
 const hypothesis = (
   candidate: string,
   confidence: number,
-  status: InvestigationHypothesis['status'],
+  status: Hypothesis['status'],
   reason: string,
   ...evidences: InvestigationEvidence[]
-): InvestigationHypothesis => ({
+): Hypothesis => ({
   candidate,
   confidence,
   status,
@@ -160,13 +221,23 @@ const hypothesis = (
   ...(evidences.length > 0 && { evidence: evidences }),
 });
 
+/** `proposals.create` takes a confidence level, not a score. */
+const toConfidenceLevel = (score: number): ProposalConfidence =>
+  score >= 0.85 ? 'high' : score >= 0.7 ? 'medium' : 'low';
+
+/** A proposed action. Its comment is the description, then the command in a fenced block. */
 const recommendation = (
   title: string,
   confidence: number,
   description: string,
   code?: string
-): InvestigationRecommendation => ({ title, confidence, description, ...(code && { code }) });
+): SeedProposal => ({
+  title,
+  confidence: toConfidenceLevel(confidence),
+  comment: code ? `${description}\n\n\`\`\`\n${code}\n\`\`\`` : description,
+});
 
+/** An impacted entity. The agent's `set_impact` tool defaults the id to the name. */
 const entity = (
   name: string,
   type: string,
@@ -174,13 +245,15 @@ const entity = (
   featureId?: string,
   entityEvidence?: InvestigationEvidence
 ): ImpactEntity => ({
+  id: name,
   name,
   type,
-  stream_name: streamName,
-  ...(featureId && { feature_id: featureId }),
+  streamName,
+  ...(featureId && { featureId }),
   ...(entityEvidence && { evidence: entityEvidence }),
 });
 
+/** An investigation the agent finished: findings, impact, and proposed actions. */
 const completed = ({
   severity,
   title,
@@ -188,65 +261,97 @@ const completed = ({
   minutesAgo,
   durationMinutes,
   triggerType = 'automatic',
-  ...output
-}: Required<Pick<InvestigationStructuredOutput, 'summary' | 'conclusion' | 'impact'>> &
-  Pick<InvestigationStructuredOutput, 'hypotheses' | 'recommendations'> & {
-    severity: Severity;
-    title: string;
-    subject: Subject;
-    minutesAgo: number;
-    durationMinutes: number;
-    triggerType?: InvestigationTriggerType;
-  }): InvestigationAttributes => ({
+  status = 'open',
+  summary,
+  verdict,
+  hypotheses,
+  recommendations = [],
+  impact,
+}: {
+  severity: InvestigationSeverity;
+  title: string;
+  subject: SeedSubject;
+  minutesAgo: number;
+  durationMinutes: number;
+  triggerType?: InvestigationSubjectTriggerType;
+  status?: InvestigationMetadataStatus;
+  summary: string;
+  verdict: string;
+  hypotheses?: Hypothesis[];
+  recommendations?: SeedProposal[];
+  impact: SeedImpact;
+}): Scenario => ({
   title,
-  status: 'completed',
+  status,
   severity,
-  subject_type: subject.type,
-  subject_id: subject.id,
-  subject_summary: subject.summary,
-  trigger_type: triggerType,
-  concurrency_key: subject.id,
-  created_at: iso(minutesAgo + durationMinutes),
-  started_at: iso(minutesAgo + durationMinutes - 0.1),
-  completed_at: iso(minutesAgo),
-  executed_by: 'elastic',
-  ...output,
+  summary,
+  verdict,
+  subject,
+  triggerType,
+  hypotheses,
+  impact,
+  proposals: recommendations,
+  createdMinutesAgo: minutesAgo + durationMinutes,
+  updatedMinutesAgo: minutesAgo,
 });
 
+/**
+ * An investigation without findings: one that was just started, or whose run ended before the
+ * agent recorded any. Investigations keep no run status, so these are open (or closed) and not in
+ * progress.
+ */
 const unfinished = ({
-  status,
+  status = 'open',
   title,
   subject,
   minutesAgo,
   triggerType = 'automatic',
-  error,
-  completedMinutesAgo,
 }: {
-  status: Exclude<InvestigationStatus, 'completed'>;
+  status?: InvestigationMetadataStatus;
   title: string;
-  subject: Subject;
+  subject: SeedSubject;
   minutesAgo: number;
-  triggerType?: InvestigationTriggerType;
-  error?: string;
-  completedMinutesAgo?: number;
-}): InvestigationAttributes => ({
+  triggerType?: InvestigationSubjectTriggerType;
+}): Scenario => ({
   title,
   status,
-  subject_type: subject.type,
-  subject_id: subject.id,
-  subject_summary: subject.summary,
-  trigger_type: triggerType,
-  concurrency_key: subject.id,
-  created_at: iso(minutesAgo),
-  executed_by: 'elastic',
-  ...(status !== 'pending' && { started_at: iso(minutesAgo - 0.1) }),
-  ...(completedMinutesAgo !== undefined && { completed_at: iso(completedMinutesAgo) }),
-  ...(error && { error }),
+  subject,
+  triggerType,
+  proposals: [],
+  createdMinutesAgo: minutesAgo,
+  updatedMinutesAgo: minutesAgo,
 });
 
-const INVESTIGATIONS: InvestigationAttributes[] = [
+/** An alert subject's snapshot, as the start route records it from the alert document. */
+const alertSnapshot = (
+  id: string,
+  ruleName: string,
+  reason: string,
+  startMinutesAgo: number
+): AlertSubjectSnapshot => ({
+  id,
+  rule_id: `seed-rule-${id}`,
+  rule_name: ruleName,
+  rule_type_id: 'observability.rules.custom_threshold',
+  rule_category: 'Custom threshold',
+  reason,
+  status: 'active',
+  start: iso(startMinutesAgo),
+  timestamp: iso(startMinutesAgo),
+});
+
+/** Slack thread of the seeded Slack question (`toSlackThreadKey` in nightshift_investigations). */
+const SLACK_THREAD = {
+  workspace: 'T0SEED0001',
+  channel: 'C0SEEDSRE1',
+  threadTs: '1790000000.000100',
+  statusMessageTs: '1790000001.000200',
+};
+const SLACK_THREAD_KEY = `team:${SLACK_THREAD.workspace}/channel:${SLACK_THREAD.channel}/thread:${SLACK_THREAD.threadTs}`;
+
+const SCENARIOS: Scenario[] = [
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'api-gateway v2.8.1 auth middleware blocks the event loop',
     subject: {
       type: 'significant_event',
@@ -257,7 +362,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 6,
     summary:
       'P95 latency on web-frontend rose from about 120ms to 890ms within ten minutes of the api-gateway v2.8.1 rollout. Every slow request passes through the new auth middleware, which does a synchronous session lookup against Postgres.',
-    conclusion:
+    verdict:
       'The api-gateway v2.8.1 auth middleware runs a blocking database query on every request. Under normal browse load the Node.js event loop saturates, and latency spreads to every route that api-gateway fronts, including web-frontend login and browse.',
     hypotheses: [
       hypothesis(
@@ -344,7 +449,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'Transaction batching leaks references and OOM-kills payment-service',
     subject: {
       type: 'significant_event',
@@ -355,7 +460,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 9,
     summary:
       'payment-service pods restart about every 45 minutes after OOM kills. Heap grows linearly from about 512MB to 2GB between restarts. Growth started when the transaction batching flag was enabled.',
-    conclusion:
+    verdict:
       'The transaction batching feature keeps committed transactions in an unbounded array. Heap grows with payment volume until the kernel OOM-kills the pod, which interrupts in-flight payments on each restart.',
     hypotheses: [
       hypothesis(
@@ -420,7 +525,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'ILM policy gap fills Elasticsearch data nodes past the high watermark',
     subject: {
       type: 'significant_event',
@@ -431,7 +536,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 7,
     summary:
       'Three of five data nodes crossed the 90% disk high watermark. Elasticsearch stopped allocating shards to them and bulk writes started to fail with es_rejected_execution_exception.',
-    conclusion:
+    verdict:
       'A lifecycle migration left 40 daily log indices without an ILM policy, so they never rolled to the warm tier or got deleted. They hold 38% of hot-tier disk.',
     hypotheses: [
       hypothesis(
@@ -492,14 +597,14 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'Stale JWKS cache rejects valid tokens after IdP key rotation',
     subject: { type: 'significant_event', id: 'evt-009', summary: 'Auth API — elevated 401 rate' },
     minutesAgo: 70,
     durationMinutes: 5,
     summary:
       '401 responses on api-gateway auth routes doubled during the identity provider key rotation. web-frontend login failures rose at the same time.',
-    conclusion:
+    verdict:
       'api-gateway caches the IdP JWKS for 24 hours and does not refresh it on an unknown key ID. Tokens signed with the new key fail until each pod restarts.',
     hypotheses: [
       hypothesis(
@@ -560,7 +665,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'order-processors stuck in deserialisation retries after schema registry blip',
     subject: {
       type: 'significant_event',
@@ -571,7 +676,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 8,
     summary:
       'Consumer lag for order-processors grew to about 2.4M messages on partitions 0-7. Throughput fell from about 15k/s to 3k/s after a two-minute schema registry outage.',
-    conclusion:
+    verdict:
       'Consumers cached the registry failure and retry each message with exponential backoff. Throughput never recovers without a consumer restart.',
     hypotheses: [
       hypothesis(
@@ -637,18 +742,24 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'Checkout error rate alert traced to payment-service restarts',
     subject: {
       type: 'alert',
       id: 'alert-checkout-error-rate',
       summary: 'Checkout error rate above 5% for 10 minutes',
+      snapshot: alertSnapshot(
+        'alert-checkout-error-rate',
+        'Checkout error rate above 5%',
+        'Checkout error rate is 8.1%, above the threshold of 5% for the last 10 minutes.',
+        104
+      ),
     },
     minutesAgo: 100,
     durationMinutes: 4,
     summary:
       'The checkout error rate alert fired three times in two hours. Every spike lines up with a payment-service pod restart.',
-    conclusion:
+    verdict:
       'The alert is a downstream symptom of the payment-service memory leak. Checkout itself is healthy between restarts.',
     hypotheses: [
       hypothesis(
@@ -714,7 +825,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '40-medium',
+    severity: 'medium',
     title: 'Catalog index lag returns empty search facets for new SKUs',
     subject: {
       type: 'significant_event',
@@ -725,7 +836,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 6,
     summary:
       'The empty-result share on search-api rose after the catalog-service deploy. Only SKUs published after the deploy are affected.',
-    conclusion:
+    verdict:
       'The new catalog-service build indexes with a 15-minute refresh interval. New SKUs are invisible to search until the next refresh.',
     hypotheses: [
       hypothesis(
@@ -766,7 +877,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '40-medium',
+    severity: 'medium',
     title: 'Nightly batch saturates the cache-service connection pool',
     subject: {
       type: 'manual',
@@ -778,7 +889,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     triggerType: 'manual',
     summary:
       'cache-service P99 latency rises from 2ms to 40ms every night between 02:00 and 02:20 UTC.',
-    conclusion:
+    verdict:
       'The nightly price-sync batch opens 400 connections to cache-service and exhausts its pool. Online traffic queues behind it for about 20 minutes.',
     hypotheses: [
       hypothesis(
@@ -817,8 +928,10 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '20-low',
+    severity: 'low',
     title: 'Cache hit-rate dip was a planned node replacement',
+    // Nothing needed doing, so it was closed.
+    status: 'closed',
     subject: {
       type: 'significant_event',
       id: 'evt-007',
@@ -828,7 +941,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 3,
     summary:
       'Redis cache hit rate dipped for about eight minutes. Throughput and error rates stayed flat.',
-    conclusion:
+    verdict:
       'The dip matches a planned node drain. The hit rate recovered once the replacement node warmed up. No action is needed.',
     hypotheses: [
       hypothesis(
@@ -838,13 +951,12 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'The maintenance calendar lists the drain at this time.'
       ),
     ],
-    recommendations: [],
     impact: {
       summary: 'No user-facing impact. Throughput, latency, and error rates stayed flat.',
     },
   }),
   completed({
-    severity: '20-low',
+    severity: 'low',
     title: 'cert-manager lost DNS01 permissions after RBAC tightening',
     subject: {
       type: 'significant_event',
@@ -855,7 +967,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     durationMinutes: 5,
     summary:
       'The internal wildcard certificate was 48 hours from expiry. Manual renewal has already restored coverage.',
-    conclusion:
+    verdict:
       'An RBAC change removed cert-manager access to the DNS01 solver secret, so automated renewal failed without an alert.',
     hypotheses: [
       hypothesis(
@@ -884,8 +996,8 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
       ),
     },
   }),
+  // Just started: the agent has recorded nothing yet.
   unfinished({
-    status: 'running',
     title: 'DNS resolution failures in us-east-1 AZ-b',
     subject: {
       type: 'significant_event',
@@ -894,31 +1006,41 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
     minutesAgo: 3,
   }),
+  // A question asked in a Slack thread, not answered yet.
   unfinished({
-    status: 'pending',
     title: 'Investigate p99 latency on order-processing',
     subject: {
-      type: 'manual',
-      id: 'manual-order-latency',
+      type: 'slack_thread',
+      id: SLACK_THREAD_KEY,
       summary: "Is order-processing slower since yesterday's deploy?",
+      slack: {
+        channel: SLACK_THREAD.channel,
+        thread_ts: SLACK_THREAD.threadTs,
+        status_message_ts: SLACK_THREAD.statusMessageTs,
+      },
     },
     minutesAgo: 1,
     triggerType: 'manual',
   }),
+  // Its run ended before the agent recorded findings. Investigations have no failed state.
   unfinished({
-    status: 'failed',
     title: 'Kafka broker disk usage alert',
     subject: {
       type: 'alert',
       id: 'alert-kafka-disk',
       summary: 'Kafka broker disk usage above 80%',
+      snapshot: alertSnapshot(
+        'alert-kafka-disk',
+        'Kafka broker disk usage above 80%',
+        'Disk usage on kafka-broker-2 is 84%, above the threshold of 80%.',
+        205
+      ),
     },
     minutesAgo: 200,
-    completedMinutesAgo: 190,
-    error: 'The investigation agent timed out after 10 minutes.',
   }),
+  // Closed before the agent recorded findings.
   unfinished({
-    status: 'cancelled',
+    status: 'closed',
     title: 'Web frontend 5xx spike',
     subject: {
       type: 'manual',
@@ -927,12 +1049,153 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
     minutesAgo: 400,
     triggerType: 'manual',
-    completedMinutesAgo: 398,
   }),
 ];
 
+/** The stable conversation id of a scenario: a re-run replaces the same investigation. */
+const seedConversationId = ({ subject }: Scenario): string =>
+  uuidv5(`nightshift-seed:${subject.id}`, SEED_ID_NAMESPACE);
+
+/**
+ * Side-index document id, as `hashInvestigationAttachmentId` in the agentic investigations
+ * plugin (`server/investigation_attachments/doc_id.ts`) computes it: a SHA-256 of the
+ * length-prefixed parts. Each entity's `documentId` passes its attachment type first, except
+ * impact, whose ids predate the factory (`legacyUntypedDocumentIds`).
+ */
+const hashDocumentId = (...parts: string[]): string =>
+  createHash('sha256')
+    .update(parts.map((part) => `${part.length}:${part}`).join('\0'))
+    .digest('hex');
+
+const subjectDocumentId = (conversationId: string, { type, id }: SeedSubject): string =>
+  hashDocumentId(SUBJECT_ATTACHMENT_TYPE, SPACE_ID, conversationId, type, id);
+const hypothesesDocumentId = (conversationId: string): string =>
+  hashDocumentId(HYPOTHESES_ATTACHMENT_TYPE, SPACE_ID, conversationId);
+const impactDocumentId = (conversationId: string): string =>
+  hashDocumentId(SPACE_ID, conversationId);
+
+const userMapping = types.object({
+  properties: {
+    username: types.keyword({}),
+    fullName: types.keyword({}),
+    email: types.keyword({}),
+    profileUid: types.keyword({}),
+  },
+});
+
+/**
+ * Mappings of the side indexes, mirroring each entity's `server/<entity>/storage/*_storage.ts`
+ * with the storage adapter's own `types` factories, so every field carries the adapter's defaults
+ * (`ignore_above` on keywords, `format` on dates). Only installed when the plugin's storage adapter
+ * has not created the index yet; the adapter then puts its versioned mappings on its next read or
+ * write, which Elasticsearch only accepts while the field parameters are identical.
+ */
+const SIDE_INDEX_MAPPINGS: Record<string, StorageSchema['properties']> = {
+  [SUBJECT_INDEX_NAME]: {
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    subjectType: types.keyword({}),
+    subjectId: types.keyword({}),
+    summary: types.text({}),
+    triggerType: types.keyword({}),
+    snapshot: types.object({ enabled: false }),
+    slack: types.object({
+      properties: {
+        channel: types.keyword({}),
+        thread_ts: types.keyword({}),
+        status_message_ts: types.keyword({}),
+        permalink: types.keyword({ index: false }),
+        seen_event_ids: types.keyword({ index: false }),
+      },
+    }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
+    createdBy: userMapping,
+  },
+  [IMPACT_INDEX_NAME]: {
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    summary: types.text({}),
+    evidence: types.object({ enabled: false }),
+    entities: types.nested({
+      properties: {
+        id: types.keyword({}),
+        name: types.keyword({}),
+        type: types.keyword({}),
+        featureId: types.keyword({}),
+        streamName: types.keyword({}),
+        evidence: types.object({ enabled: false }),
+      },
+    }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
+    createdBy: userMapping,
+  },
+  [HYPOTHESES_INDEX_NAME]: {
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    hypotheses: types.object({ enabled: false }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
+    createdBy: userMapping,
+  },
+};
+
+/** Indexes a clean removes the seeded investigations' documents from. */
+const SEEDED_DOCUMENT_INDEXES = [
+  SUBJECT_INDEX_NAME,
+  IMPACT_INDEX_NAME,
+  HYPOTHESES_INDEX_NAME,
+  PROPOSALS_INDEX_NAME,
+];
+
+type JsonBody = object | undefined;
+
+interface HttpResponse<TBody> {
+  status: number;
+  body: TBody;
+}
+
 const basicAuth = (credentials: string): string =>
   `Basic ${Buffer.from(credentials).toString('base64')}`;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Polls `check` every half second until it returns a value, for at most `timeoutMs`. */
+const waitFor = async <T>(
+  label: string,
+  check: () => Promise<T | undefined>,
+  timeoutMs = 60_000
+): Promise<T> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const value = await check();
+    if (value !== undefined) {
+      return value;
+    }
+    await sleep(500);
+  }
+  throw new Error(`Timed out waiting for ${label}`);
+};
+
+const sendJson = async <TBody>(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body: JsonBody,
+  okStatuses: number[]
+): Promise<HttpResponse<TBody>> => {
+  const response = await fetch(url, {
+    method,
+    headers: { ...headers, ...(body !== undefined && { 'Content-Type': 'application/json' }) },
+    ...(body !== undefined && { body: JSON.stringify(body) }),
+  });
+  const text = await response.text();
+  if (!response.ok && !okStatuses.includes(response.status)) {
+    throw new Error(`${method} ${url} failed with ${response.status}: ${text.slice(0, 500)}`);
+  }
+  return { status: response.status, body: (text ? JSON.parse(text) : {}) as TBody };
+};
 
 const resolveKibanaUrl = async (url: string, auth: string): Promise<string> => {
   const base = url.replace(/\/$/, '');
@@ -949,69 +1212,475 @@ const resolveKibanaUrl = async (url: string, auth: string): Promise<string> => {
     : base;
 };
 
-const toBulkBody = (): string =>
-  INVESTIGATIONS.flatMap((attributes, index) => [
-    { index: { _id: `${SO_TYPE}:${ID_PREFIX}${String(index + 1).padStart(2, '0')}` } },
-    {
-      type: SO_TYPE,
-      references: [],
-      managed: false,
-      coreMigrationVersion: '8.8.0',
-      typeMigrationVersion: TYPE_MIGRATION_VERSION,
-      created_at: attributes.created_at,
-      updated_at: attributes.completed_at ?? attributes.created_at,
-      [SO_TYPE]: attributes,
+/**
+ * Logs in through the basic login form, like a browser does, so the requests carry the user's
+ * profile: Agent Builder then records the profile uid as the conversation owner, the same id the
+ * user's browser session has. Plain basic auth would record a realm-based id instead, and the
+ * browser session would not own the seeded investigations.
+ */
+const loginHeaders = async (
+  kibanaUrl: string,
+  auth: string,
+  log: ToolingLog
+): Promise<Record<string, string>> => {
+  const internal = { 'x-elastic-internal-origin': 'kibana', 'kbn-xsrf': 'seed' };
+  const { body: loginState } = await sendJson<{
+    selector?: { providers?: Array<{ type: string; name: string }> };
+  }>(`${kibanaUrl}/internal/security/login_state`, 'GET', internal, undefined, []);
+  const provider = loginState.selector?.providers?.find(({ type }) => type === 'basic');
+  if (!provider) {
+    log.warning(
+      'No basic login provider: seeding with basic auth, so your browser session will not own the investigations'
+    );
+    return { Authorization: basicAuth(auth) };
+  }
+
+  const separator = auth.indexOf(':');
+  const response = await fetch(`${kibanaUrl}/internal/security/login`, {
+    method: 'POST',
+    headers: { ...internal, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      providerType: provider.type,
+      providerName: provider.name,
+      currentURL: `${kibanaUrl}/login`,
+      params: { username: auth.slice(0, separator), password: auth.slice(separator + 1) },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Login as ${auth.slice(0, separator)} failed with ${response.status}`);
+  }
+  const cookie = response.headers
+    .getSetCookie()
+    .map((header) => header.split(';')[0])
+    .join('; ');
+  return { Cookie: cookie };
+};
+
+/** Kibana and Elasticsearch, as the seeding user and as kibana_system. */
+class SeedClient {
+  constructor(
+    private readonly options: {
+      kibanaUrl: string;
+      esUrl: string;
+      kibanaHeaders: Record<string, string>;
+      kibanaSystemAuth: string;
+    }
+  ) {}
+
+  /** Agent Builder and Workflows public APIs. */
+  publicApi<TBody>(method: string, path: string, body?: JsonBody, okStatuses: number[] = []) {
+    return sendJson<TBody>(
+      `${this.options.kibanaUrl}${path}`,
+      method,
+      {
+        ...this.options.kibanaHeaders,
+        'kbn-xsrf': 'seed',
+        'elastic-api-version': PUBLIC_API_VERSION,
+      },
+      body,
+      okStatuses
+    );
+  }
+
+  /** Internal routes (agentic investigations, proposals, security). */
+  internalApi<TBody>(
+    method: string,
+    path: string,
+    version: string,
+    body?: JsonBody,
+    okStatuses: number[] = []
+  ) {
+    return sendJson<TBody>(
+      `${this.options.kibanaUrl}${path}`,
+      method,
+      {
+        ...this.options.kibanaHeaders,
+        'kbn-xsrf': 'seed',
+        'x-elastic-internal-origin': 'kibana',
+        'elastic-api-version': version,
+      },
+      body,
+      okStatuses
+    );
+  }
+
+  /** Elasticsearch as kibana_system, which owns the `.kibana-*` and `.chat-*` indexes. */
+  es<TBody>(method: string, path: string, body?: JsonBody, okStatuses: number[] = []) {
+    return sendJson<TBody>(
+      `${this.options.esUrl}${path}`,
+      method,
+      { Authorization: basicAuth(this.options.kibanaSystemAuth) },
+      body,
+      okStatuses
+    );
+  }
+}
+
+/** The seeding user, shaped like the agentic investigations plugin's `resolveUser` records it. */
+const resolveSeedUser = async (client: SeedClient): Promise<User> => {
+  const { status, body: profile } = await client.internalApi<{
+    uid?: string;
+    user?: { username: string; full_name?: string | null; email?: string | null };
+  }>('GET', '/internal/security/user_profile', '1', undefined, [404]);
+  if (status === 200 && profile.uid && profile.user) {
+    return {
+      username: profile.user.username,
+      fullName: profile.user.full_name ?? null,
+      email: profile.user.email ?? null,
+      profileUid: profile.uid,
+    };
+  }
+  const { body: me } = await client.internalApi<{
+    username: string;
+    full_name?: string | null;
+    email?: string | null;
+    profile_uid?: string;
+  }>('GET', '/internal/security/me', '1');
+  return {
+    username: me.username,
+    fullName: me.full_name ?? null,
+    email: me.email ?? null,
+    ...(me.profile_uid && { profileUid: me.profile_uid }),
+  };
+};
+
+/**
+ * Makes sure each side index exists as the storage adapter creates it: an index template that
+ * puts the alias on `<name>-*`, and the `<name>-000001` write index. Without the template, a
+ * write to the alias would auto-create a plain index of that name, which then collides with the
+ * adapter's alias. Same approach as the proposals Scout suite's seeding helpers.
+ */
+const ensureSideIndexes = async (client: SeedClient): Promise<void> => {
+  for (const [name, properties] of Object.entries(SIDE_INDEX_MAPPINGS)) {
+    const { status: aliasStatus } = await client.es('HEAD', `/_alias/${name}`, undefined, [404]);
+    if (aliasStatus === 200) {
+      continue;
+    }
+    const { status: templateStatus } = await client.es(
+      'HEAD',
+      `/_index_template/${name}`,
+      undefined,
+      [404]
+    );
+    if (templateStatus === 404) {
+      await client.es('PUT', `/_index_template/${name}?create=true`, {
+        index_patterns: [`${name}-*`],
+        allow_auto_create: false,
+        template: {
+          settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+          mappings: { dynamic: 'strict', properties },
+          aliases: { [name]: { is_write_index: true } },
+        },
+      });
+    }
+    // Only a concurrent create by the adapter is benign; any other 400 (e.g. a plain index that
+    // already holds the alias name) must stop the seeding before it writes into the wrong index.
+    const { status, body } = await client.es<{ error?: { type?: string; reason?: string } }>(
+      'PUT',
+      `/${name}-000001`,
+      undefined,
+      [400]
+    );
+    if (status === 400 && body.error?.type !== 'resource_already_exists_exception') {
+      throw new Error(
+        `Creating ${name}-000001 failed: ${body.error?.type ?? 'unknown'} ${
+          body.error?.reason ?? ''
+        }`
+      );
+    }
+  }
+};
+
+const listProposals = async (
+  client: SeedClient,
+  conversationId: string
+): Promise<ListProposalsResponse['proposals']> => {
+  const { body } = await client.internalApi<ListProposalsResponse>(
+    'GET',
+    `${PROPOSALS_INTERNAL_URL}?conversationId=${conversationId}&size=100`,
+    PROPOSALS_API_VERSION
+  );
+  return body.proposals;
+};
+
+const executionStatus = async (client: SeedClient, executionId: string): Promise<string> => {
+  const { status, body } = await client.publicApi<{ status?: string }>(
+    'GET',
+    `/api/workflows/executions/${executionId}`,
+    undefined,
+    [404]
+  );
+  return status === 404 ? 'not_found' : body.status ?? 'unknown';
+};
+
+/**
+ * Removes the seeded investigations: cancels the gate workflows still waiting on their proposals,
+ * deletes the conversations (with their attachments), then the side-index and proposal documents.
+ */
+const cleanSeeds = async (client: SeedClient, log: ToolingLog): Promise<void> => {
+  const conversationIds = SCENARIOS.map(seedConversationId);
+
+  for (const conversationId of conversationIds) {
+    const executions = (await listProposals(client, conversationId)).flatMap(
+      ({ workflowExecutionId }) => (workflowExecutionId ? [workflowExecutionId] : [])
+    );
+    for (const executionId of executions) {
+      if (TERMINAL_EXECUTION_STATUSES.includes(await executionStatus(client, executionId))) {
+        continue;
+      }
+      await client.publicApi('POST', `/api/workflows/executions/${executionId}/cancel`, undefined, [
+        404,
+      ]);
+      await waitFor(`gate workflow ${executionId} to stop`, async () => {
+        const status = await executionStatus(client, executionId);
+        return TERMINAL_EXECUTION_STATUSES.includes(status) || status === 'not_found'
+          ? status
+          : undefined;
+      });
+    }
+    await client.publicApi(
+      'DELETE',
+      `/api/agent_builder/conversations/${conversationId}`,
+      undefined,
+      [404]
+    );
+  }
+
+  for (const index of SEEDED_DOCUMENT_INDEXES) {
+    await client.es(
+      'POST',
+      `/${index}/_delete_by_query?refresh=true&conflicts=proceed&ignore_unavailable=true`,
+      {
+        query: {
+          bool: {
+            filter: [
+              { term: { spaceId: SPACE_ID } },
+              { terms: { conversationId: conversationIds } },
+            ],
+          },
+        },
+      },
+      [404]
+    );
+  }
+  log.success(`Removed the ${conversationIds.length} seeded investigations`);
+};
+
+/** Indexes one side-index document and returns it with its id, as the services return it. */
+const indexDocument = async <TStored extends object>(
+  client: SeedClient,
+  index: string,
+  id: string,
+  stored: TStored
+): Promise<TStored & { id: string }> => {
+  await client.es('PUT', `/${index}/_doc/${id}?refresh=wait_for`, stored);
+  return { ...stored, id };
+};
+
+/**
+ * Attaches a side-index document by reference, as `attachWithPublicClient` does: attachment id and
+ * origin are the document id, the data is the document, and it is hidden from the chat.
+ */
+const attachDocument = async (
+  client: SeedClient,
+  conversationId: string,
+  type: string,
+  document: { id: string },
+  description?: string
+): Promise<void> => {
+  await client.publicApi('POST', `/api/agent_builder/conversations/${conversationId}/attachments`, {
+    id: document.id,
+    type,
+    origin: document.id,
+    data: document,
+    hidden: true,
+    ...(description !== undefined && { description }),
+  });
+};
+
+/** Starts the proposals gate workflow for each proposed action, as `proposals.create` does. */
+const createProposals = async (
+  client: SeedClient,
+  conversationId: string,
+  proposals: SeedProposal[]
+): Promise<void> => {
+  // One at a time, in order: the agent creates one proposal per tool call, strongest first.
+  for (const { title, comment, confidence } of proposals) {
+    const before = (await listProposals(client, conversationId)).length;
+    await client.publicApi('POST', `/api/workflows/workflow/${CREATE_PROPOSAL_WORKFLOW_ID}/run`, {
+      inputs: { conversationId, title, comment, origin: 'nightshift', confidence },
+    });
+    await waitFor(`proposal "${title}"`, async () =>
+      (await listProposals(client, conversationId)).length > before ? true : undefined
+    );
+  }
+  // The gate's create step indexes the proposal, then attaches its card.
+  await waitFor(`the proposal cards of ${conversationId}`, async () => {
+    const { body } = await client.publicApi<{ attachments?: Array<{ type: string }> }>(
+      'GET',
+      `/api/agent_builder/conversations/${conversationId}`
+    );
+    const cards = (body.attachments ?? []).filter(({ type }) => type === PROPOSAL_ATTACHMENT_TYPE);
+    return cards.length >= proposals.length ? true : undefined;
+  });
+};
+
+const seedScenario = async (
+  client: SeedClient,
+  scenario: Scenario,
+  user: User
+): Promise<string> => {
+  const conversationId = seedConversationId(scenario);
+  const createdAt = iso(scenario.createdMinutesAgo);
+  const updatedAt = iso(scenario.updatedMinutesAgo);
+  const base = { spaceId: SPACE_ID, conversationId, createdAt, createdBy: user, updatedAt };
+
+  // Titled at creation, so Agent Builder does not generate one. Seeded open; closing is the
+  // status route's job, below.
+  await client.publicApi('POST', '/api/agent_builder/conversations', {
+    conversation_id: conversationId,
+    agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+    title: scenario.title,
+    template_id: INVESTIGATION_TEMPLATE_ID,
+    access_control: { access_mode: 'public' },
+    metadata: {
+      status: 'open',
+      ...(scenario.severity && { severity: scenario.severity }),
+      ...(scenario.summary && { summary: scenario.summary }),
+      ...(scenario.verdict && { verdict: scenario.verdict }),
     },
-  ])
-    .map((line) => JSON.stringify(line))
-    .join('\n')
-    .concat('\n');
+  });
+
+  const { subject } = scenario;
+  const subjectDocument = await indexDocument<Omit<InvestigationSubject, 'id'>>(
+    client,
+    SUBJECT_INDEX_NAME,
+    subjectDocumentId(conversationId, subject),
+    {
+      ...base,
+      subjectType: subject.type,
+      subjectId: subject.id,
+      ...(subject.summary !== undefined && { summary: subject.summary }),
+      triggerType: scenario.triggerType,
+      ...(subject.snapshot && { snapshot: subject.snapshot }),
+      ...(subject.slack && { slack: subject.slack }),
+    }
+  );
+  await attachDocument(client, conversationId, SUBJECT_ATTACHMENT_TYPE, subjectDocument);
+
+  if (scenario.impact) {
+    const impactDocument = await indexDocument<Omit<Impact, 'id'>>(
+      client,
+      IMPACT_INDEX_NAME,
+      impactDocumentId(conversationId),
+      { ...base, ...scenario.impact }
+    );
+    await attachDocument(client, conversationId, IMPACT_ATTACHMENT_TYPE, impactDocument);
+  }
+
+  if (scenario.hypotheses) {
+    const hypothesesDocument = await indexDocument<Omit<InvestigationHypotheses, 'id'>>(
+      client,
+      HYPOTHESES_INDEX_NAME,
+      hypothesesDocumentId(conversationId),
+      { ...base, hypotheses: scenario.hypotheses }
+    );
+    // `investigations.set_hypotheses` labels the attachment it adds.
+    await attachDocument(
+      client,
+      conversationId,
+      HYPOTHESES_ATTACHMENT_TYPE,
+      hypothesesDocument,
+      'Hypotheses'
+    );
+  }
+
+  await createProposals(client, conversationId, scenario.proposals);
+
+  if (scenario.status === 'closed') {
+    await client.internalApi(
+      'PUT',
+      INVESTIGATION_STATUS_URL.replace('{id}', conversationId),
+      AGENTIC_INVESTIGATIONS_API_VERSION,
+      { status: 'closed' }
+    );
+  }
+
+  // Agent Builder stamps creation and every write with the current time, and has no route to
+  // set them, so the timeline is written last, to the conversation document itself. The Slack
+  // question also gets the conversation origin the `_slack_thread` route creates it with.
+  await client.es('POST', `/${CONVERSATIONS_INDEX}/_update/${conversationId}?refresh=wait_for`, {
+    doc: {
+      created_at: createdAt,
+      updated_at: updatedAt,
+      ...(subject.type === 'slack_thread' && {
+        origin: { external_conversation_id: subject.id },
+      }),
+    },
+  });
+
+  return conversationId;
+};
 
 run(
   async ({ log, flags }) => {
-    const esUrl = String(flags['es-url']);
     const auth = String(flags.auth);
     const kibanaUrl = await resolveKibanaUrl(String(flags['kibana-url']), auth);
-
-    const bulkResponse = await fetch(`${esUrl}/.kibana/_bulk?refresh=true`, {
-      method: 'POST',
-      headers: {
-        Authorization: basicAuth(String(flags['kibana-system-auth'])),
-        'Content-Type': 'application/x-ndjson',
-      },
-      body: toBulkBody(),
+    const client = new SeedClient({
+      kibanaUrl,
+      esUrl: String(flags['es-url']).replace(/\/$/, ''),
+      kibanaHeaders: await loginHeaders(kibanaUrl, auth, log),
+      kibanaSystemAuth: String(flags['kibana-system-auth']),
     });
-    const bulkResult = await bulkResponse.json();
-    if (!bulkResponse.ok || bulkResult.errors) {
-      throw new Error(`Investigation bulk failed: ${JSON.stringify(bulkResult).slice(0, 500)}`);
+
+    await cleanSeeds(client, log);
+    if (flags.clean) {
+      return;
     }
-    log.success(`Indexed ${INVESTIGATIONS.length} investigations into ${esUrl}/.kibana`);
 
-    const listResponse = await fetch(`${kibanaUrl}/internal/nightshift/investigations?size=1`, {
-      headers: { Authorization: basicAuth(auth), 'x-elastic-internal-origin': 'Kibana' },
-    });
-    const { total } = await listResponse.json();
-    log.info(`Investigations visible in Kibana: ${total}`);
+    const user = await resolveSeedUser(client);
+    await ensureSideIndexes(client);
+    for (const scenario of SCENARIOS) {
+      const id = await seedScenario(client, scenario, user);
+      log.info(`Seeded ${id}: ${scenario.title}`);
+    }
+    log.success(`Seeded ${SCENARIOS.length} investigations as ${user.username}`);
+
+    const seededIds = new Set(SCENARIOS.map(seedConversationId));
+    const { body } = await client.internalApi<ListInvestigationsResponse>(
+      'GET',
+      `${INVESTIGATIONS_INTERNAL_URL}?per_page=100`,
+      AGENTIC_INVESTIGATIONS_API_VERSION
+    );
+    const visible = body.results.filter(({ id }) => seededIds.has(id)).length;
+    log.info(`Seeded investigations listed by ${INVESTIGATIONS_INTERNAL_URL}: ${visible}`);
     log.info(`Open ${kibanaUrl}/app/nightshift`);
   },
   {
-    description: `Seeds ${INVESTIGATIONS.length} Nightshift investigations covering every severity and status.
+    description: `Seeds ${SCENARIOS.length} Nightshift investigations as shared agentic investigations,
+      covering every severity, open and closed, and alert, significant event, question, and Slack
+      thread subjects.
 
-      Investigations are hidden saved objects, so they are written straight into .kibana as the
-      kibana_system user. No AI connector or workflow run is needed. Re-running overwrites them.`,
+      Each one is an Agent Builder investigation conversation with its subject, impact, and
+      hypotheses documents attached by reference, and its proposed actions created through the
+      proposals gate workflow. No AI connector or investigation workflow run is needed. Re-running
+      replaces the earlier seeds; --clean only removes them.`,
     flags: {
       string: ['es-url', 'kibana-url', 'auth', 'kibana-system-auth'],
+      boolean: ['clean'],
       default: {
         'es-url': 'http://localhost:9200',
         'kibana-url': 'http://localhost:5601',
         auth: 'elastic:changeme',
         'kibana-system-auth': 'kibana_system:changeme',
+        clean: false,
       },
       help: `
         --es-url              Elasticsearch URL (default: http://localhost:9200)
         --kibana-url          Kibana URL; the dev base path is auto-detected (default: http://localhost:5601)
-        --auth                Kibana user credentials (default: elastic:changeme)
-        --kibana-system-auth  Credentials allowed to write .kibana (default: kibana_system:changeme)
+        --auth                Kibana user credentials; this user owns the investigations (default: elastic:changeme)
+        --kibana-system-auth  Credentials allowed to write the .kibana-* and .chat-* indexes (default: kibana_system:changeme)
+        --clean               Only remove the seeded investigations
       `,
     },
   }
