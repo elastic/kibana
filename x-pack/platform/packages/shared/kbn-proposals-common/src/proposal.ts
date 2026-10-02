@@ -183,6 +183,12 @@ export const proposalSchema = z.object({
   supersedes: z.string().max(MAX_ID_LENGTH).optional(),
   /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
   revision: z.number().int().min(1).optional(),
+  /**
+   * The caller-supplied key this chain was created under, if any. Stamped from
+   * `CreateProposalRequest.deduplicationKey` at creation and never rewritten —
+   * see that field's own doc comment for what it does.
+   */
+  deduplicationKey: z.string().max(MAX_ID_LENGTH).optional(),
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,
@@ -262,6 +268,23 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The caller's declaration that this call is the same logical operation as an
+   * earlier one, scoped to `origin` (a key only has to be unique within one
+   * producer's own namespace, not globally). A first call with a given key
+   * creates the chain as normal and stamps the key on it; a later call with the
+   * same key atomically reuses that chain and returns its current state rather
+   * than minting a new root — race-safe even under two concurrent callers, since
+   * the key determines the created document's id rather than being checked and
+   * then created as two separate steps. Omitting it is unconditionally identical
+   * to today's behavior: every existing caller is unaffected.
+   *
+   * A replay of a settled operation should return its existing outcome;
+   * intentionally requesting another action should use a new key. The key is the
+   * caller's declaration of "this is the same logical operation," not the
+   * service's to infer.
+   */
+  deduplicationKey: z.string().max(MAX_ID_LENGTH).optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 

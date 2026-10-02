@@ -708,6 +708,203 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('create — deduplicationKey', () => {
+    const dedupParams = (overrides: Partial<Parameters<ProposalsService['create']>[0]> = {}) => ({
+      conversationId: 'conv-1',
+      comment: 'Isolate the host for this finding',
+      confidence: 'medium' as const,
+      origin: 'alertzero' as const,
+      deduplicationKey: 'finding-abc',
+      ...overrides,
+    });
+
+    it('stamps the supplied key onto the stored document', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(dedupParams(), { spaceId: SPACE_ID, request });
+
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.document.deduplicationKey).toBe('finding-abc');
+      expect(createArgs.op_type).toBe('create');
+    });
+
+    it('derives the same id from the same (spaceId, origin, deduplicationKey) every time', async () => {
+      const storageA = createStorage();
+      const { service: serviceA } = createService(storageA);
+      const proposalA = await serviceA.create(dedupParams(), { spaceId: SPACE_ID, request });
+
+      const storageB = createStorage();
+      const { service: serviceB } = createService(storageB);
+      const proposalB = await serviceB.create(dedupParams(), { spaceId: SPACE_ID, request });
+
+      expect(proposalA.id).toBe(proposalB.id);
+    });
+
+    it('derives a different id for a different origin under the same key', async () => {
+      // A key only has to be unique within one producer's own namespace: two
+      // different producers using the literal same string must not collide.
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const alertzero = await service.create(dedupParams({ origin: 'alertzero' }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+      const other = await service.create(dedupParams({ origin: 'nightshift' }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+
+      expect(alertzero.id).not.toBe(other.id);
+    });
+
+    it('omitting the key behaves identically to today: a fresh random id every call', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const first = await service.create(dedupParams({ deduplicationKey: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+      const second = await service.create(dedupParams({ deduplicationKey: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+
+      expect(first.id).not.toBe(second.id);
+    });
+
+    it("reuses the existing chain, not the new call's own params, when the id already exists", async () => {
+      const existing = baseDocument({
+        comment: 'Original comment from the first call',
+        title: 'Original title',
+        deduplicationKey: 'finding-abc',
+      });
+      const storage = createStorage();
+      // The id is deterministic, so the conflict (and the subsequent load) can
+      // be scripted without knowing it in advance: `index` always conflicts,
+      // and `search` always answers with the one existing document, regardless
+      // of which id either call asks for — there is only ever one in this test.
+      storage.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+      storage.search.mockResolvedValue({
+        hits: { hits: [searchHit(existing, 'existing-id')], total: { value: 1 } },
+      });
+      const { service, attachmentsClient } = createService(storage);
+
+      const reused = await service.create(
+        dedupParams({ comment: 'A second, different comment the caller happened to pass' }),
+        { spaceId: SPACE_ID, request }
+      );
+
+      // The existing chain's own state, not anything derived from this call.
+      expect(reused.id).toBe('existing-id');
+      expect(reused.comment).toBe('Original comment from the first call');
+      expect(reused.title).toBe('Original title');
+      // Already attached when the chain was first created; a replay must not
+      // post a second card into the conversation.
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('does not run a precondition check before attempting the create', async () => {
+      // The atomicity this relies on comes from `op_type: 'create'` itself, not
+      // from a check-then-create pair in application code — a separate lookup
+      // first would reopen exactly the race window a deduplication key exists
+      // to close. Asserting the call order (not just that `search` was never
+      // called at all — `load()`'s search after a conflict is legitimate and
+      // covered by the test above) is what actually proves there is no
+      // precondition check preceding the create attempt.
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const calls: string[] = [];
+      storage.index.mockImplementation(async () => {
+        calls.push('index');
+        return { _id: 'whatever' };
+      });
+      storage.search.mockImplementation(async () => {
+        calls.push('search');
+        return { hits: { hits: [], total: { value: 0 } } };
+      });
+
+      await service.create(dedupParams(), { spaceId: SPACE_ID, request });
+
+      expect(calls[0]).toBe('index');
+    });
+
+    /**
+     * A true multi-request race can only be fully proven against real
+     * Elasticsearch, where `op_type: 'create'` is actually atomic — that would
+     * need a `jest_integration` suite against a live cluster, which this plugin
+     * does not have today. What a unit test *can* prove, and what this does: two
+     * `create()` calls fired together, racing against a storage fake that
+     * faithfully enforces the same "only the first `create` to reach a given id
+     * wins, every other throws a conflict" contract real Elasticsearch
+     * documents, resolve to the same single chain rather than two — with the
+     * fake's own check-and-set forced apart by a real `await` boundary so the
+     * two calls actually interleave at that point instead of just running one
+     * after the other in call order.
+     */
+    it('lets only one of two concurrent calls with the same key create the chain', async () => {
+      const documents = new Map<string, ProposalDocument>();
+      let created = 0;
+      const storage = {
+        index: jest.fn(
+          async ({
+            id,
+            document,
+            op_type,
+          }: {
+            id: string;
+            document: ProposalDocument;
+            op_type?: string;
+          }) => {
+            if (op_type === 'create') {
+              // Forces both callers to reach the check below only after both
+              // have already started, so whichever wins is decided by this
+              // race, not by which call happened to be issued first.
+              await new Promise((resolve) => setImmediate(resolve));
+              if (documents.has(id)) {
+                throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+              }
+              created += 1;
+            }
+            documents.set(id, document);
+            return { _id: id };
+          }
+        ),
+        search: jest.fn(
+          async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+            const idClause = query.bool.filter.find((clause) => 'ids' in clause);
+            const id = idClause?.ids.values[0];
+            const document = id ? documents.get(id) : undefined;
+            return {
+              hits: {
+                hits: document
+                  ? [{ _id: id, _source: document, _seq_no: 1, _primary_term: 1 }]
+                  : [],
+                total: { value: document ? 1 : 0 },
+              },
+            };
+          }
+        ),
+      } as unknown as ReturnType<typeof createStorage>;
+      const { service: serviceA, attachmentsClient: attachmentsA } = createService(storage);
+      const { service: serviceB, attachmentsClient: attachmentsB } = createService(storage);
+
+      const [resultA, resultB] = await Promise.all([
+        serviceA.create(dedupParams(), { spaceId: SPACE_ID, request }),
+        serviceB.create(dedupParams(), { spaceId: SPACE_ID, request }),
+      ]);
+
+      expect(resultA.id).toBe(resultB.id);
+      expect(created).toBe(1);
+      expect(documents.size).toBe(1);
+      // Exactly one of the two actually created the chain and attached it; the
+      // other reused the winner's chain rather than posting a second card.
+      expect(attachmentsA.create.mock.calls.length + attachmentsB.create.mock.calls.length).toBe(1);
+    });
+  });
+
   describe('releaseGate', () => {
     it('should release the gate without writing anything', async () => {
       const storage = createStorage(baseDocument());
@@ -2186,6 +2383,42 @@ describe('ProposalsService', () => {
       await service.list(listQuery(), SPACE_ID, request);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('count', () => {
+    it('returns the total without fetching a page of hits or resolving action metadata', async () => {
+      const storage = createStorage(baseDocument());
+      storage.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 7 } },
+      });
+      const { service, workflowsApi } = createService(storage);
+
+      const total = await service.count(listQuery({ status: 'pending' }), SPACE_ID);
+
+      expect(total).toBe(7);
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.size).toBe(0);
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { spaceId: SPACE_ID } }, { term: { status: 'pending' } }])
+      );
+      expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('applies the same filter vocabulary as list', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { service } = createService(storage);
+
+      await service.count(listQuery({ origin: 'alertzero', excludeSuperseded: true }), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { origin: 'alertzero' } },
+          { bool: { must_not: { exists: { field: 'supersededBy' } } } },
+        ])
+      );
     });
   });
 

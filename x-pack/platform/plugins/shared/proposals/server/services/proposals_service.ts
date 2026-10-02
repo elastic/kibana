@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
@@ -117,12 +117,27 @@ export class ProposalsService {
    * path has already resolved it: a caller that needs the approval policy —
    * the gate workflow does, to honour `always-gate` — would otherwise have to
    * fetch the same definition a second time.
+   *
+   * `deduplicationKey`, when supplied, makes the id itself the atomicity
+   * mechanism: two concurrent calls with the same `(spaceId, origin,
+   * deduplicationKey)` compute the identical id and both attempt
+   * `op_type: 'create'` against it, so Elasticsearch — not a check-then-create
+   * race in application code — guarantees only one of them actually creates the
+   * chain. The caller that loses the race reuses the winner's chain instead of
+   * throwing.
    */
   async create(
     params: CreateProposalRequest,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<ProposalWithMetadata> {
-    const id = uuidv4();
+    const id =
+      params.deduplicationKey !== undefined
+        ? buildDeduplicationId({
+            spaceId,
+            origin: params.origin,
+            deduplicationKey: params.deduplicationKey,
+          })
+        : uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
     // absent input as an empty string. Left as-is, `expiresAt: ''` is rejected
     // by the `date` mapping and an empty `actionWorkflowId` would make a
@@ -176,9 +191,23 @@ export class ProposalsService {
       // `clone()` retries deliberately do not touch it: a retry is not a revision.
       rootProposalId: id,
       revision: 1,
+      deduplicationKey: params.deduplicationKey,
     };
 
-    await this.deps.storage.index({ id, document, op_type: 'create' });
+    try {
+      await this.deps.storage.index({ id, document, op_type: 'create' });
+    } catch (error) {
+      if (params.deduplicationKey !== undefined && isVersionConflict(error)) {
+        // Another call with this same key already won the race to create this
+        // id — reuse its chain rather than throwing or minting a second one.
+        // The existing document's own state is what's returned, not anything
+        // derived from this call's params: a replay gets the real outcome of
+        // the operation it is replaying, not a blend of old and new.
+        const { proposal: existing } = await this.load(id, spaceId);
+        return this.withMetadata(stripRanks(existing), spaceId, request);
+      }
+      throw error;
+    }
 
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
@@ -276,6 +305,25 @@ export class ProposalsService {
           ? response.hits.total
           : response.hits.total?.value ?? proposals.length,
     };
+  }
+
+  /**
+   * Count of proposals matching the filter, with no page of hits and no action
+   * metadata resolved — for a pure count/exists check. `list({ size: 1 })`
+   * still pays for `withMetadataBatch` on the one row it returns even when a
+   * caller (e.g. a dedup guard that only wants to know "does any Proposal
+   * already exist for this Investigation") never reads it; this skips that
+   * resolution entirely by asking Elasticsearch for `size: 0`.
+   */
+  async count(query: ListProposalsQuery, spaceId: string): Promise<number> {
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: 0,
+      query: { bool: { filter: toFilterClauses(query, spaceId) } },
+    });
+    return typeof response.hits.total === 'number'
+      ? response.hits.total
+      : response.hits.total?.value ?? 0;
   }
 
   /**
@@ -1156,6 +1204,30 @@ export class ProposalsService {
     }));
   }
 }
+
+/**
+ * Fixed namespace for deduplication-key-derived proposal ids. Frozen: changing it
+ * would silently stop recognizing every key stamped under the old namespace, so a
+ * replay would mint a second chain instead of reusing the first.
+ */
+const PROPOSAL_DEDUPLICATION_UUID_NAMESPACE = 'f28b6d1a-6e9b-5c4b-8a2e-1a9c4e7d2b63';
+
+/**
+ * Deterministic id for a `(spaceId, origin, deduplicationKey)` triple. `origin` is
+ * part of the material, not just a filter elsewhere, so a key only has to be
+ * unique within one producer's own namespace — two different producers using the
+ * literal same string can never collide on an id.
+ */
+const buildDeduplicationId = ({
+  spaceId,
+  origin,
+  deduplicationKey,
+}: {
+  spaceId: string;
+  origin: string;
+  deduplicationKey: string;
+}): string =>
+  uuidv5(`${spaceId}|${origin}|${deduplicationKey}`, PROPOSAL_DEDUPLICATION_UUID_NAMESPACE);
 
 export interface ReleaseGateParams {
   approved: boolean;

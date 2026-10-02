@@ -35,6 +35,9 @@ const storageSettings = {
       rootProposalId: types.keyword({}),
       supersedes: types.keyword({}),
       revision: types.long({}),
+      // The id itself is derived from this (plus spaceId/origin) when present, so a
+      // term query on it is only ever needed for debugging/audit, not for dedup itself.
+      deduplicationKey: types.keyword({}),
       impact: types.keyword({}),
       confidence: types.keyword({}),
       category: types.keyword({}),
