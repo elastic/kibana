@@ -59,6 +59,7 @@ TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
 - Output column ordering or extra cosmetic \`KEEP\`/\`DROP\` clauses that don't change the answer.
 - Presence vs absence of \`SORT <time bucket> ASC\` on a time-series query — charts order the time axis; do NOT penalise either form.
 - Different but compatible bucketing where the granularity is interchangeable for the question (e.g. \`BUCKET(@timestamp, 1h)\` vs \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\` over the same window when the question is "by hour").
+- \`@timestamp\` time series: \`TBUCKET(100)\` vs \`BUCKET(@timestamp, <count>, ?_tstart, ?_tend)\`, including presence vs absence of \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`. Kibana supplies the \`@timestamp\` window. A non-\`@timestamp\` date field (e.g. \`order_date\`) must still use \`BUCKET(<field>, <count>, ?_tstart, ?_tend)\`; \`TBUCKET\` there is not equivalent, because it buckets \`@timestamp\` instead.
 - Broader index patterns that still cover the same logical dataset: \`logs-*\` vs \`logs-endpoint.*\` when the gold uses the broader pattern.
 - Different but equivalent ordering of clauses (\`SORT ... | LIMIT n\` vs \`LIMIT n | SORT ...\` when the result set fits in n).
 

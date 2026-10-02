@@ -13,11 +13,13 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
 export const vegaEsqlAdditionalInstructions = `
 ## Vega time-range filtering (required)
 
-This query feeds a Vega chart, whose ES|QL data source only respects the time picker when the query filters rows on the raw source time field. Passing \`?_tstart\`/\`?_tend\` to \`BUCKET(...)\` alone sets the bucket extent but does NOT drop rows outside the selected range.
+This query feeds a Vega chart, whose ES|QL data source only respects the time picker when the query filters rows on the raw source time field. \`TBUCKET(100)\` and passing \`?_tstart\`/\`?_tend\` to \`BUCKET(...)\` set the bucket extent but do NOT drop rows outside the selected range.
 
 Therefore, for EVERY time-based chart — time series AND plain metrics/categorical:
 - Always add an explicit row filter on the raw source time field: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
-- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.
+- Use the RAW source time field (e.g. \`@timestamp\`) directly in that WHERE and, when the time field is not \`@timestamp\`, in \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.
+- For an \`@timestamp\` time series, bucket with \`TBUCKET(100)\`. Do not pass \`?_tstart\` / \`?_tend\` into \`TBUCKET\`; the WHERE above is the range it uses.
+- For a time series on any other date field, bucket with \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\`.
 
 ## Field names for Vega
 

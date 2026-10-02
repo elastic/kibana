@@ -42,7 +42,7 @@ const findDateColumn = (columns: EsqlEsqlColumnInfo[] | undefined): string | und
   columns?.find((column) => column.type === 'date' || column.type === 'date_nanos')?.name;
 
 // A source field token: a name that starts with a letter or `@` (so numeric
-// literals like the `100` in `TBUCKET(100, …)` are not mistaken for a field),
+// literals like the `100` in `TBUCKET(100)` are not mistaken for a field),
 // optionally wrapped in backticks.
 const TIME_FIELD_TOKEN = String.raw`\`?([A-Za-z@][\w.@]*)\`?`;
 // `<time field> >= ?_tstart` (or `>`/`<=`/`<`, and `?_tend`).
