@@ -766,6 +766,9 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  # The revision the diagnosis read, so approving fails instead of
+                  # overwriting a rule that was edited while this waited.
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
                 impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
@@ -786,6 +789,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   # `${{ }}` keeps the score a number; the gate validates the input at creation.
                   risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
                   severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
@@ -839,6 +843,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   threshold:
                     value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
                     field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
@@ -860,6 +865,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
                   from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
                 impact: medium
