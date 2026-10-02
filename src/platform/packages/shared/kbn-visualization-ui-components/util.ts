@@ -10,7 +10,7 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IconCircle, IconTriangle } from '@kbn/chart-icons';
+import type { VisIconType } from '@kbn/chart-icons';
 import type { IconSet } from './components';
 import type { AnnotationReferenceLineIcons, SharedSetOfIcons } from './types';
 
@@ -27,7 +27,10 @@ export function hasIcon(icon: string | undefined): icon is string {
 /**
  * Sorting criteria for icons sets. It makes sure empty icon is always on top.
  */
-export function iconSortCriteria<T extends string>(a: IconSet<T>[number], b: IconSet<T>[number]) {
+export function iconSortCriteria<T extends VisIconType>(
+  a: IconSet<T>[number],
+  b: IconSet<T>[number]
+) {
   if (a.value === 'empty') {
     return -1;
   }
@@ -127,7 +130,6 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
         defaultMessage: 'Circle',
       }
     ),
-    icon: IconCircle,
   },
   {
     value: 'pinFilled',
@@ -155,7 +157,6 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
         defaultMessage: 'Triangle',
       }
     ),
-    icon: IconTriangle,
     shouldRotate: true,
   },
 ];

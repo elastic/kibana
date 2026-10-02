@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -18,15 +17,16 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { VisIconType } from '@kbn/chart-icons';
+import { resolveVisIcon } from '@kbn/chart-icons';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-export type IconSet<T> = Array<{
+export type IconSet<T extends VisIconType> = Array<{
   value: T;
   label: string;
-  icon?: T | IconType;
   shouldRotate?: boolean;
 }>;
 
@@ -34,32 +34,35 @@ const iconDecorationLabel = i18n.translate('visualizationUiComponents.iconSelect
   defaultMessage: 'Icon decoration',
 });
 
-const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
+const IconView = (props: { value?: VisIconType; label: string }) => {
   if (!props.value) return null;
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={props.icon ?? props.value} aria-hidden={true} />
+        <EuiIcon type={resolveVisIcon(props.value).icon} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>{props.label}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export function IconSelect<Icon extends string>({
+export function IconSelect<Icon extends VisIconType>({
   value,
   onChange,
   customIconSet,
   defaultIcon = 'empty',
 }: {
-  value?: Icon;
+  value?: string;
   onChange: (newIcon: Icon) => void;
   customIconSet: IconSet<Icon>;
-  defaultIcon?: string;
+  defaultIcon?: VisIconType;
 }) {
+  const { id } = resolveVisIcon(value);
   const selectedIcon =
-    customIconSet.find((option) => value === option.value) ||
+    customIconSet.find((option) => option.value === id) ||
     customIconSet.find((option) => option.value === defaultIcon)!;
+
+  const { icon } = resolveVisIcon(selectedIcon.value);
 
   return (
     <EuiComboBox
@@ -80,25 +83,21 @@ export function IconSelect<Icon extends string>({
       renderOption={IconView}
       compressed
       aria-label={iconDecorationLabel}
-      prepend={
-        hasIcon(selectedIcon.value) ? (
-          <EuiFormPrepend iconLeft={selectedIcon.icon ?? selectedIcon.value} />
-        ) : undefined
-      }
+      prepend={hasIcon(selectedIcon.value) ? <EuiFormPrepend iconLeft={icon} /> : undefined}
     />
   );
 }
 
-export function IconSelectSetting<Icon extends string = string>({
+export function IconSelectSetting<Icon extends VisIconType>({
   currentIcon,
   setIcon,
   customIconSet,
-  defaultIcon = 'empty',
+  defaultIcon,
 }: {
-  currentIcon?: Icon;
+  currentIcon?: string;
   setIcon: (icon: Icon) => void;
   customIconSet: IconSet<Icon>;
-  defaultIcon?: string;
+  defaultIcon?: Icon;
 }) {
   return (
     <EuiFormRow display="columnCompressed" fullWidth label={iconDecorationLabel}>

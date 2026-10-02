@@ -10,6 +10,7 @@
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getResolvedAnnotationColor, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import { resolveVisIcon } from '@kbn/chart-icons';
 import { annotationsIconSet } from './annotation_editor_controls/icon_set';
 
 export const getAnnotationAccessor = (
@@ -20,7 +21,9 @@ export const getAnnotationAccessor = (
     ? annotationsIconSet.find((option) => option.value === annotation?.icon) ||
       annotationsIconSet.find((option) => option.value === 'triangle')
     : undefined;
-  const icon = annotationIcon?.icon ?? annotationIcon?.value;
+
+  const icon = annotationIcon ? resolveVisIcon(annotationIcon.value).icon : undefined;
+
   return {
     columnId: annotation.id,
     triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : 'color',
