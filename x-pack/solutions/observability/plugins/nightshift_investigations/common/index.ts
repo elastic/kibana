@@ -58,11 +58,12 @@ import type {
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
   /**
-   * Human-readable headline shown in the investigations list and the details flyout from the
-   * moment the record exists. Seeded by the caller (significant event title, alert rule name,
-   * chat-supplied headline) and refined by the agent's structured output on completion.
+   * Optional headline from the caller (significant event title, alert rule name). Accepted for
+   * compatibility and passed to the investigation workflow as its `title` input, but not stored
+   * as the investigation's title: Agent Builder generates that from the investigation's first
+   * round, and UIs name the investigation after its first subject until then.
    */
-  title: string;
+  title?: string;
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   /**
@@ -76,17 +77,16 @@ export interface StartInvestigationRequest {
   stream_names?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
-  /**
-   * Caller-supplied key for concurrency control. Passed to the workflow engine as
-   * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
-   * Two starts with the same key cancel-and-replace the in-flight run (cancel-in-progress
-   * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
-   */
-  concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
 }
 
 export interface StartInvestigationResponse {
+  /**
+   * The investigation, which is an Agent Builder conversation with this id. A start whose
+   * subjects overlap an open investigation continues that one, so the id can be an existing
+   * investigation's. The investigation workflow creates the conversation, so for a few seconds
+   * after a first start the id may not resolve yet.
+   */
   investigation_id: string;
 }
 

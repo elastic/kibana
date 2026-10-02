@@ -27,18 +27,11 @@ const startInvestigationModel = {
   connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
 };
 
-/** Headline shown in the list and flyout from the moment the record exists. */
-const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
-
-/** Keeps a derived title to one readable line, since it is rendered as a list headline. */
-const MAX_DERIVED_TITLE_LENGTH = 200;
-
 /**
- * A manual investigation is defined by its question, so when the caller names no title the
- * question stands in for it, collapsed to one line the way the client derives the subject summary.
+ * Accepted for compatibility but not stored as the investigation's title: Agent Builder generates
+ * that from the investigation's first round.
  */
-const deriveTitleFromMessage = (message: string): string =>
-  message.replace(/\s+/g, ' ').trim().slice(0, MAX_DERIVED_TITLE_LENGTH);
+const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
 
 // A union rather than one object with a loose `context`, so that an alert investigation is
 // always backed by alert data: the alert branch accepts no caller context — the handler loads
@@ -51,15 +44,12 @@ const startInvestigationBodySchema = z.union([
       type: z.literal('alert'),
       ...subjectIdAndSummary,
     }),
-    // Optional here only: the handler derives it from the alert's rule name when omitted.
     title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
   }),
   // A manual investigation is defined by its question, so `message` is required and the
-  // subject id is optional: there is no entity to point at, only the prompt. The title is
-  // optional for the same reason: the handler derives it from the question when omitted.
+  // subject id is optional: there is no entity to point at, only the prompt.
   z.object({
     subject: z.object({
       type: z.literal('manual'),
@@ -71,7 +61,6 @@ const startInvestigationBodySchema = z.union([
       summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
     title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
     ...startInvestigationModel,
@@ -88,7 +77,10 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   options: {
     access: 'internal',
     summary: 'Start an investigation',
-    description: 'Triggers an investigation workflow for a given subject.',
+    description:
+      'Starts an investigation for a given subject, or continues the open investigation that ' +
+      'already holds it, and returns the investigation (Agent Builder conversation) id. The ' +
+      'investigation workflow creates the conversation, so it can take a few seconds to resolve.',
   },
   security: {
     // agentBuilder:write is used as a proxy for "this user is authorized to spend AI tokens."
@@ -118,19 +110,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
         return await client.start({
           subject: body.subject,
-          title: body.title ?? snapshot.rule_name,
-          concurrency_key: body.concurrency_key ?? snapshot.id,
+          title: body.title,
           context: { alerts: [snapshot] },
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),
         });
       }
-      return await client.start({
-        ...body,
-        title: body.title ?? deriveTitleFromMessage(body.message),
-        trigger_type: 'manual',
-      });
+      return await client.start({ ...body, trigger_type: 'manual' });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

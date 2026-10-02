@@ -79,7 +79,7 @@ describe('triggerInvestigationWorkflow', () => {
     expect(request.message).toBe('High error rate\n\nError rate spiked.');
   });
 
-  it('uses event_id as the concurrency_key', async () => {
+  it('matches open investigations by the event id rather than a concurrency key', async () => {
     const event = createEvent({ event_id: 'my-slug' });
     const nightshiftInvestigations = createNightshiftInvestigations();
 
@@ -91,7 +91,8 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
-    expect(request.concurrency_key).toBe('my-slug');
+    expect(request.subject).toEqual(expect.objectContaining({ id: 'my-slug' }));
+    expect(request).not.toHaveProperty('concurrency_key');
   });
 
   it('sets subject.id to event_id and includes event_uuid in the context', async () => {

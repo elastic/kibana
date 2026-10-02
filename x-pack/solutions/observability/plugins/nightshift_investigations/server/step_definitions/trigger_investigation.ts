@@ -26,7 +26,10 @@ const inputSchema = z.object({
     .string()
     .min(1)
     .max(MAX_TITLE_LENGTH)
-    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
+    .optional()
+    .describe(
+      'Accepted for compatibility; not used as the investigation title, which Agent Builder generates from the first round'
+    ),
   trigger_type: z
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .optional()
@@ -47,12 +50,6 @@ const inputSchema = z.object({
     .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Logical stream names to scope the investigation'),
-  concurrency_key: z
-    .string()
-    .optional()
-    .describe(
-      'Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'
-    ),
   context: z
     .record(z.string(), z.unknown())
     .optional()
@@ -69,12 +66,12 @@ export const triggerInvestigationStepDefinition = (
     label: 'Trigger Nightshift Investigation',
     category: StepCategory.Ai,
     description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). Returns investigation_id for tracking.',
+      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking.',
     inputSchema,
     outputSchema: z.object({
       investigation_id: z
         .string()
-        .describe('The workflow execution ID for the started investigation'),
+        .describe('The investigation (Agent Builder conversation) the start created or continued'),
     }),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
@@ -93,7 +90,6 @@ export const triggerInvestigationStepDefinition = (
         trigger_type: input.trigger_type ?? 'automatic',
         message: input.message,
         stream_names: input.stream_names,
-        concurrency_key: input.concurrency_key,
         context: input.context,
       });
       return { output: result };

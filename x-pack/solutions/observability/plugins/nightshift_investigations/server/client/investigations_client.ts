@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -13,8 +13,20 @@ import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type {
+  InvestigationSubject as StoredInvestigationSubject,
+  SlackThreadSubject,
+} from '@kbn/agentic-investigations-plugin/common';
+import {
+  INVESTIGATION_TEMPLATE_ID,
+  isInvestigationTitlePending,
+  MAX_SLACK_SEEN_EVENT_IDS,
+  MAX_EVIDENCE_TEXT_LENGTH,
+  MAX_SUBJECTS_PER_CONVERSATION,
+} from '@kbn/agentic-investigations-plugin/common';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
@@ -23,6 +35,7 @@ import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_in
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
+  AlertSnapshot,
   GetInvestigationResponse,
   InvestigationContext,
   InvestigationStatus,
@@ -39,34 +52,38 @@ import type {
 import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-  DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   freeFormContextSchema,
-  INVESTIGATION_SUBJECT_TYPES,
-  INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
 import type {
   InvestigationAttributes,
   InvestigationPatch,
   InvestigationRecord,
   InvestigationRepository,
-  InvestigationThread,
   ProjectedInvestigationRecord,
 } from '../storage';
-import {
-  InvestigationAlreadyExistsError,
-  InvestigationStaleWriteError,
-  MAX_THREAD_SEEN_EVENT_IDS,
-} from '../storage';
+import { InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
-  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
+import {
+  findInvestigationConversations,
+  getOrCreateInvestigationConversation,
+  type InvestigationConversation,
+} from './investigation_conversation';
+import {
+  buildFollowUpMessage,
+  recoverSubjectsFromInputs,
+  toStartSubjects,
+  toSubjectKeys,
+  withoutRecordedSubjects,
+  type WorkflowSubjectInput,
+} from './investigation_subjects';
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
@@ -83,25 +100,13 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
 /** Used when persist omitted `error`. */
 const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
 
-const SUPERSEDED_STATUSES = [
-  'pending',
-  'running',
-] as const satisfies ReadonlyArray<InvestigationStatus>;
-
-const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
-  typeof value === 'string' && INVESTIGATION_SUBJECT_TYPES.some((type) => type === value);
-
-const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
-  typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
-
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
 
 /**
- * A manual investigation's subject id is the placeholder `manual`, so until the agent writes its
- * summary the UI would label the run "manual". The prompt is the only thing that describes the run
- * at this point, so it stands in as the subject summary; the agent's summary takes precedence once
- * the run completes.
+ * A manual investigation's subject id is the placeholder `manual`, so the subject would carry no
+ * description of the run. The prompt is the only thing that describes the run at this point, so
+ * it stands in as the subject summary.
  */
 const withDerivedSubjectSummary = (
   subject: InvestigationSubject,
@@ -124,24 +129,8 @@ const withDerivedSubjectSummary = (
   return { ...subject, summary };
 };
 
-/** Namespace for the ids derived from a Slack thread. Changing it orphans every thread's record. */
-const SLACK_THREAD_ID_NAMESPACE = '6f1c3a52-8d4e-4b7a-9e21-3c5d7f0a9b64';
-
 const MAX_SLACK_THREAD_TITLE_LENGTH = 80;
 const DEFAULT_SLACK_THREAD_TITLE = 'Slack investigation';
-
-/** A thread write that lost a race is retried this many times against the fresh record. */
-const MAX_THREAD_WRITE_ATTEMPTS = 3;
-
-/** A continuing run that lost the claim race re-checks the fresh record this many times. */
-const MAX_CLAIM_ATTEMPTS = 3;
-
-/**
- * The run that owns a running investigation: the run that last continued it, otherwise the run it
- * is named after. Only one run may own an investigation at a time.
- */
-const getOwningExecutionId = (record: InvestigationRecord): string | undefined =>
-  record.status === 'running' ? record.execution_id ?? record.id : undefined;
 
 /** Response of POST /internal/nightshift/investigations/_slack_thread. */
 export interface SlackThreadInvestigation {
@@ -152,43 +141,75 @@ export interface SlackThreadInvestigation {
   duplicate?: true;
 }
 
+/**
+ * The investigation's title is Agent Builder's to generate on the first round. Until it has, the
+ * response's title is a headline from the thread's question.
+ */
 const toSlackThreadInvestigation = (
-  record: InvestigationRecord,
-  duplicate: boolean
+  { id, title }: InvestigationConversation,
+  {
+    statusMessageTs,
+    question,
+    duplicate,
+  }: { statusMessageTs: string | undefined; question: string | undefined; duplicate: boolean }
 ): SlackThreadInvestigation => ({
-  investigation_id: record.id,
-  title: record.title,
-  status_message_ts: record.thread?.status_message_ts,
+  investigation_id: id,
+  title: isInvestigationTitlePending(title) ? toSlackThreadTitle(question) : title,
+  ...(statusMessageTs ? { status_message_ts: statusMessageTs } : {}),
   ...(duplicate && { duplicate: true }),
 });
 
-/** The thread after it records `eventId` and `statusMessageTs`, or undefined when nothing changes. */
-const nextThreadState = (
-  thread: InvestigationThread,
-  { statusMessageTs, eventId }: { statusMessageTs?: string; eventId?: string }
-): InvestigationThread | undefined => {
-  const seen = thread.seen_event_ids ?? [];
+/** What one call of the Slack thread workflow records on the thread. */
+interface SlackThreadActivity {
+  statusMessageTs?: string;
+  eventId?: string;
+}
+
+/**
+ * The thread subject's `slack` fields that change when it records `activity`, or undefined when
+ * nothing changes. An event is remembered once; the oldest remembered events make room.
+ */
+const toSlackThreadUpdate = (
+  recorded: SlackThreadSubject | undefined,
+  { statusMessageTs, eventId }: SlackThreadActivity
+): Pick<SlackThreadSubject, 'status_message_ts' | 'seen_event_ids'> | undefined => {
+  const seen = recorded?.seen_event_ids ?? [];
   const recordEvent = eventId !== undefined && !seen.includes(eventId);
   const recordStatusMessage =
-    statusMessageTs !== undefined && statusMessageTs !== thread.status_message_ts;
+    statusMessageTs !== undefined && statusMessageTs !== recorded?.status_message_ts;
   if (!recordEvent && !recordStatusMessage) {
     return undefined;
   }
   return {
-    ...thread,
     ...(recordStatusMessage && { status_message_ts: statusMessageTs }),
-    ...(recordEvent && {
-      seen_event_ids: [...seen, eventId].slice(-MAX_THREAD_SEEN_EVENT_IDS),
-    }),
+    ...(recordEvent && { seen_event_ids: [...seen, eventId].slice(-MAX_SLACK_SEEN_EVENT_IDS) }),
   };
 };
 
-/** A headline from the opening message, with Slack mentions and markup collapsed away. */
-const toSlackThreadTitle = (text: string | undefined): string => {
-  const collapsed = (text ?? '')
+/**
+ * The key Agent Builder identifies a Slack thread's conversation by (its conversation origin),
+ * which is also the thread's subject id. Channel ids are only unique within a workspace.
+ */
+export const toSlackThreadKey = ({
+  workspace,
+  channel,
+  threadTs,
+}: {
+  workspace: string;
+  channel: string;
+  threadTs: string;
+}): string => `team:${workspace}/channel:${channel}/thread:${threadTs}`;
+
+/** The message text with Slack mentions and markup collapsed away. */
+const collapseSlackText = (text: string | undefined): string =>
+  (text ?? '')
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+/** A headline from the thread's question. */
+const toSlackThreadTitle = (text: string | undefined): string => {
+  const collapsed = collapseSlackText(text);
   if (!collapsed) {
     return DEFAULT_SLACK_THREAD_TITLE;
   }
@@ -197,22 +218,15 @@ const toSlackThreadTitle = (text: string | undefined): string => {
     : collapsed;
 };
 
-interface ExecutionInvestigationMetadata {
-  subject?: InvestigationSubject;
-  title?: string;
+const MAX_SLACK_SUBJECT_SUMMARY_LENGTH = MAX_EVIDENCE_TEXT_LENGTH;
+
+/** The subject an investigation's lifecycle events are attributed to. */
+export interface LifecycleSubject {
+  subject: Pick<InvestigationSubject, 'type' | 'id'>;
   triggerType: InvestigationTriggerType;
-  concurrencyKey?: string;
+  /** When the subject joined the investigation. */
+  startedAt: string;
 }
-/**
- * Context fields each subject type's id arrives under. The `satisfies` clause is what makes a
- * newly added {@link InvestigationSubjectType} a compile error rather than a run that silently
- * recovers no subject.
- */
-const SUBJECT_ID_FIELDS = {
-  significant_event: ['significant_event_id'],
-  alert: ['alert_id'],
-  manual: ['manual_id'],
-} as const satisfies Record<InvestigationSubjectType, readonly string[]>;
 
 const toSubject = ({
   subjectType,
@@ -295,65 +309,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
   };
 };
 
-const parseExecutionInvestigationMetadata = (
-  executionContext: Record<string, unknown> | undefined
-): ExecutionInvestigationMetadata => {
-  const inputs =
-    isPlainObject(executionContext) && isPlainObject(executionContext.inputs)
-      ? executionContext.inputs
-      : undefined;
-  const rawConcurrencyKey = inputs?.concurrency_key;
-  const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
-
-  return {
-    subject: recoverSubjectFromInput(inputs),
-    // A required workflow input, so the engine has already rejected a run without one.
-    title: asString(inputs?.title),
-    triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-    concurrencyKey,
-  };
-};
-
-const toSubjectFields = (
-  subject: InvestigationSubject
-): Pick<InvestigationAttributes, 'subject_type' | 'subject_id' | 'subject_summary'> => ({
-  subject_type: subject.type,
-  subject_id: subject.id,
-  ...(subject.summary ? { subject_summary: subject.summary } : {}),
-});
-
-/**
- * The investigation subject an execution's inputs describe, summary included, or undefined when
- * they describe none. Shared by `ensureOrCreate()` and the write path so they cannot disagree
- * about what a run is investigating.
- */
-function recoverSubjectFromInput(
-  input: Record<string, unknown> | undefined
-): InvestigationSubject | undefined {
-  const ctx = input?.context;
-  if (!isPlainObject(ctx)) return undefined;
-
-  const source = ctx.source;
-  if (!isSubjectType(source)) return undefined;
-
-  for (const field of SUBJECT_ID_FIELDS[source]) {
-    const subjectId = asString(ctx[field]);
-    if (subjectId) {
-      return toSubject({ subjectType: source, subjectId, subjectSummary: asString(ctx.summary) });
-    }
-  }
-
-  return undefined;
-}
-
-function recoverTriggerTypeFromInput(
-  input: Record<string, unknown> | undefined
-): InvestigationTriggerType | undefined {
-  const ctx = input?.context;
-  if (!isPlainObject(ctx)) return undefined;
-  return isTriggerType(ctx.trigger_type) ? ctx.trigger_type : undefined;
-}
-
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -365,6 +320,10 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Stores investigations: subjects, claims, and the open-investigation lookup. */
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
+  /** The username the request authenticates as, when security is enabled. */
+  getCallerUsername?: () => string | undefined;
   /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
   agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -383,6 +342,8 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
+  private readonly getCallerUsername: () => string | undefined;
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
@@ -399,6 +360,8 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.agenticInvestigations = deps.agenticInvestigations;
+    this.getCallerUsername = deps.getCallerUsername ?? (() => undefined);
     this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
@@ -431,7 +394,7 @@ export class NightshiftInvestigationsClient {
     subject: InvestigationSubject,
     message: string | undefined,
     context: InvestigationContext | AlertInvestigationContext
-  ): { message: string; context: Record<string, unknown> } {
+  ): { message: string; context: Record<string, unknown>; alerts: AlertSnapshot[] } {
     if (subject.type === 'alert') {
       const parsed = alertInvestigationContextSchema.safeParse(context);
       if (!parsed.success) {
@@ -439,7 +402,11 @@ export class NightshiftInvestigationsClient {
       }
       // An alert investigation always gets the brief composed from its alert data — that is what
       // the alert context exists for. Every other subject keeps the caller-supplied message.
-      return { message: buildInvestigationMessage(parsed.data), context: parsed.data };
+      return {
+        message: buildInvestigationMessage(parsed.data),
+        context: parsed.data,
+        alerts: parsed.data.alerts,
+      };
     }
 
     const parsed = freeFormContextSchema.safeParse(context);
@@ -449,6 +416,7 @@ export class NightshiftInvestigationsClient {
     return {
       message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
       context: parsed.data,
+      alerts: [],
     };
   }
 
@@ -459,20 +427,13 @@ export class NightshiftInvestigationsClient {
     message,
     stream_names,
     connector_id,
-    concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
-
-    if (
-      !this.workflowsManagement ||
-      !this.agentBuilder ||
-      !this.inference ||
-      !this.savedObjects ||
-      !this.uiSettings
-    ) {
+    const { workflowsManagement, agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    if (!this.inference || !this.savedObjects || !this.uiSettings) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
 
@@ -489,9 +450,10 @@ export class NightshiftInvestigationsClient {
     const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
 
     const spaceId = this.getSpaceId();
+    this.warnOnSpaceMismatch(spaceId);
 
     const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-    const workflow = await this.workflowsManagement.management.getWorkflow(
+    const workflow = await workflowsManagement.management.getWorkflow(
       workflowId,
       spaceId,
       this.request
@@ -527,17 +489,50 @@ export class NightshiftInvestigationsClient {
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
     await installInvestigationAgent({
-      agentBuilder: this.agentBuilder,
+      agentBuilder,
       spaceId,
       availability: this.agentAvailability,
     });
 
+    const { alerts } = prepared;
+    const newInvestigationId = uuidv4();
+    const subjects = toStartSubjects({
+      subject: resolvedSubject,
+      alerts,
+      triggerType: trigger_type,
+      investigationId: newInvestigationId,
+    });
+
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const { id: investigationId, recorded } = await this.resolveInvestigation({
+      conversations,
+      agenticInvestigations,
+      subjects,
+      newInvestigationId,
+    });
+    const isFollowUp = investigationId !== newInvestigationId;
+
+    const newSubjects = withoutRecordedSubjects(subjects, recorded);
+    const newAlertIds = new Set(newSubjects.map(({ id }) => id));
+
     const inputs = {
-      message: prepared.message,
-      title,
+      message: isFollowUp
+        ? buildFollowUpMessage({
+            subject: resolvedSubject,
+            message: prepared.message,
+            alerts,
+            newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
+          })
+        : prepared.message,
+      // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
+      // investigation from the first round instead.
+      ...(title ? { title } : {}),
       stream_names: stream_names ?? [],
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
-      ...(concurrency_key ? { concurrency_key } : {}),
+      investigation_id: investigationId,
+      subjects: newSubjects,
       context: {
         ...prepared.context,
         source: resolvedSubject.type,
@@ -547,7 +542,7 @@ export class NightshiftInvestigationsClient {
       },
     };
 
-    const executionId = await this.workflowsManagement.management.runWorkflow(
+    const executionId = await workflowsManagement.management.runWorkflow(
       { ...workflow, definition: workflow.definition },
       spaceId,
       inputs,
@@ -556,265 +551,212 @@ export class NightshiftInvestigationsClient {
     );
 
     this.logger.info(
-      `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
+      `${isFollowUp ? 'Continued' : 'Started'} investigation "${investigationId}" for ${
+        subject.type
+      }/${subject.id}, execution_id=${executionId}`
     );
 
-    await this.create({
-      investigationId: executionId,
-      subject: resolvedSubject,
-      title,
-      triggerType: trigger_type,
-      concurrencyKey: concurrency_key,
-    }).catch((error) => {
-      this.logger.warn(
-        `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
-      );
-    });
-
-    return { investigation_id: executionId };
+    return { investigation_id: investigationId };
   }
 
   /**
-   * Creates a new investigation record as `pending`. Called from start() so the id is readable
-   * immediately. The workflow's persist_investigation_started step later transitions the record
-   * to `running` via ensureOrCreate().
+   * The investigation a start lands on. Any overlap with an open investigation the caller can
+   * write continues the most recently updated one; otherwise the subjects are claimed for a new
+   * investigation, so that of two concurrent starts for one subject the second continues the
+   * first. Closed investigations never match.
+   *
+   * Only the conversation owner can record subjects or reopen an investigation, which the
+   * workflow does as the identity it runs as (the caller's). An investigation the caller does not
+   * own is therefore treated as no match and the start opens a new investigation; a claim held by
+   * such an investigation does not block it. Deployments run starts under one service identity
+   * so this does not happen there.
    */
-  async create({
-    investigationId,
-    subject,
-    title,
-    triggerType,
-    concurrencyKey,
+  private async resolveInvestigation({
+    conversations,
+    agenticInvestigations,
+    subjects,
+    newInvestigationId,
   }: {
-    investigationId: string;
-    subject: InvestigationSubject;
-    title: string;
-    triggerType: InvestigationTriggerType;
-    concurrencyKey?: string;
-  }): Promise<void> {
-    if (concurrencyKey) {
-      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
+    conversations: ConversationPublicClient;
+    agenticInvestigations: AgenticInvestigationsPluginStart;
+    subjects: WorkflowSubjectInput[];
+    newInvestigationId: string;
+  }): Promise<{ id: string; recorded: StoredInvestigationSubject[] }> {
+    const newInvestigation = { id: newInvestigationId, recorded: [] };
+    const keys = toSubjectKeys(subjects, newInvestigationId);
+    if (keys.length === 0) {
+      return newInvestigation;
     }
 
-    await this.createIgnoringConflict({
-      id: investigationId,
-      attributes: {
-        title,
-        status: 'pending',
-        ...toSubjectFields(subject),
-        trigger_type: triggerType,
-        concurrency_key: concurrencyKey,
-        created_at: new Date().toISOString(),
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    // An investigation holds at most MAX_SUBJECTS_PER_CONVERSATION subjects. Continuing a full one
+    // would fail its run on recording the subjects, and every later overlapping start would land
+    // on it again, so a full investigation is treated as no match.
+    const withRoom = async (
+      id: string
+    ): Promise<{ id: string; recorded: StoredInvestigationSubject[] } | undefined> => {
+      const recorded = await subjectsClient.listByConversationIds([id]);
+      if (
+        recorded.length + withoutRecordedSubjects(subjects, recorded).length >
+        MAX_SUBJECTS_PER_CONVERSATION
+      ) {
+        this.logger.warn(
+          `Investigation "${id}" shares a subject but has no room for more subjects; not continuing it`
+        );
+        return undefined;
+      }
+      return { id, recorded };
+    };
+
+    const open = await agenticInvestigations
+      .getInvestigationsClient(this.request)
+      .findOpenBySubjects(keys);
+    const callerUsername = this.getCallerUsername();
+    const candidates = await findInvestigationConversations(
+      conversations,
+      open.map(({ id }) => id),
+      callerUsername
+    );
+    const owned = candidates.filter(({ isOwner, status }) => isOwner && status === 'open');
+    for (const candidate of owned) {
+      const target = await withRoom(candidate.id);
+      if (target) {
+        return target;
+      }
+    }
+    if (candidates.length > owned.length) {
+      this.logger.warn(
+        `Open investigations [${candidates
+          .filter((candidate) => !owned.includes(candidate))
+          .map(({ id }) => id)
+          .join(', ')}] share a subject but are owned by another identity; starting a new one`
+      );
+    }
+
+    const claim = await subjectsClient.claimSubjects({
+      conversationId: newInvestigationId,
+      subjects: keys,
+      isHolderOpen: async (conversationId) => {
+        const [holder] = await findInvestigationConversations(conversations, [conversationId]);
+        return holder?.status === 'open';
       },
     });
+    if (claim.claimed) {
+      return newInvestigation;
+    }
+
+    // The holder may not have its conversation yet: a concurrent start claimed the subjects and
+    // its workflow creates the conversation. Continuing it then is right, since that workflow
+    // runs before this one on the investigation's queue.
+    const [holder] = await findInvestigationConversations(
+      conversations,
+      [claim.heldBy],
+      callerUsername
+    );
+    if (!holder) {
+      return { id: claim.heldBy, recorded: [] };
+    }
+    if (holder.isOwner && holder.status === 'open') {
+      return (await withRoom(holder.id)) ?? newInvestigation;
+    }
+    this.logger.warn(
+      `Investigation "${claim.heldBy}" holds a subject of this start but is closed or owned by another identity; starting a new one`
+    );
+    return newInvestigation;
   }
 
   /**
-   * Ensures the investigation record exists and is running. Called by the workflow's
-   * persist_investigation_started step. If a pending record exists (created by start()), transitions
-   * it to running. If no record exists (workflow triggered without start()), creates one as running
-   * from the execution document. A record this run already has running is left untouched. A
-   * settled record (completed, failed, or cancelled), or one a continuing run has taken over,
-   * throws so the persist step fails the run rather than continuing through the agent.
+   * Gets or creates the investigation conversation for a run of the investigation workflow and
+   * records the run's subjects on it. Called by the workflow's `_ensure` step, so every write to
+   * the conversation happens as the identity the workflow runs as. The conversation id is the
+   * investigation id: the `investigation_id` the run was started with, or, for a run started
+   * without one, the run's own execution id. A run continuing an investigation that was closed
+   * reopens it. Resolves to the conversation id, which the workflow's agent step continues.
    *
-   * Both write paths read the execution document, so `started_at` and `executed_by` mean the same
-   * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
-   * run's executor, and stamping the transition with the wall clock would date the record to when
-   * the persist step happened to run rather than to when the run began.
-   *
-   * A run whose execution is not the one the investigation is named after continues it instead,
-   * and resolves to the conversation it resumes, so callers name only the investigation.
+   * The run must be a live run of the investigation workflow that names this investigation, so a
+   * caller cannot create or reopen an investigation without a run to work on it.
    */
-  async ensureOrCreate(
-    investigationId: string,
-    executionId = investigationId
-  ): Promise<string | undefined> {
-    if (executionId !== investigationId) {
-      return this.continueInvestigation(investigationId, executionId);
-    }
+  async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<string> {
+    const { workflowsManagement, agentBuilder, agenticInvestigations } = this.requireWriteDeps();
 
-    const existing = await this.investigationRepository.get(investigationId);
-    if (existing && isTerminalStatus(existing.status)) {
-      throw InvestigationConflictError.settled(investigationId, existing.status);
-    }
-    if (existing && existing.status !== 'pending') {
-      if (getOwningExecutionId(existing) !== investigationId) {
-        throw InvestigationConflictError.runInProgress(investigationId);
-      }
-      return;
-    }
-
-    if (!this.workflowsManagement) {
-      throw new InvestigationUnavailableError('workflowsManagement is not available');
-    }
-
-    const spaceId = this.getSpaceId();
-    const execution = await this.workflowsManagement.management.getWorkflowExecution(
-      investigationId,
-      spaceId,
+    const execution = await workflowsManagement.management.getWorkflowExecution(
+      executionId,
+      this.getSpaceId(),
       { includeOutput: false, request: this.request }
     );
-
-    if (!execution || !isInvestigationWorkflowExecution(execution)) {
-      throw new InvestigationNotFoundError(investigationId);
-    }
-
-    const startedAt = execution.startedAt ?? new Date().toISOString();
-
-    if (existing) {
-      try {
-        await this.transitionToRunning({
-          investigationId,
-          version: existing.version,
-          startedAt,
-          executedBy: execution.executedBy,
-        });
-      } catch (error) {
-        if (!(error instanceof InvestigationStaleWriteError)) {
-          throw error;
-        }
-        // Losing the race is fine only to another ensure of this same run.
-        const fresh = await this.investigationRepository.get(investigationId);
-        if (!fresh || getOwningExecutionId(fresh) !== investigationId) {
-          throw InvestigationConflictError.runInProgress(investigationId);
-        }
-      }
-      return;
-    }
-
-    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
-      execution.context
-    );
-
-    if (!subject || !title) {
-      throw new InvestigationMetadataMissingError(investigationId);
-    }
-
-    if (concurrencyKey) {
-      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
-    }
-
-    await this.createIgnoringConflict({
-      id: investigationId,
-      attributes: {
-        title,
-        status: 'running',
-        ...toSubjectFields(subject),
-        trigger_type: triggerType,
-        concurrency_key: concurrencyKey,
-        executed_by: execution.executedBy,
-        created_at: startedAt,
-        started_at: startedAt,
-      },
-    });
-  }
-
-  /**
-   * Marks an existing investigation running for a run that continues it, such as a reply in its
-   * Slack thread. Unlike a first run, a settled record is reopened. The run must be a live run of
-   * the investigation workflow that names this investigation in its inputs, so a caller cannot
-   * reopen an investigation without a run to settle it. The record then points at the run's
-   * execution, which is what the reconciliation task settles it from. Resolves to the
-   * investigation's conversation.
-   *
-   * One run owns an investigation at a time. A run may claim one that is settled, or pending with
-   * no run of its own on the way; while another run owns it, this throws a conflict before the
-   * run's agent starts, so callers must serialize the runs they start for one investigation.
-   */
-  private async continueInvestigation(
-    investigationId: string,
-    executionId: string
-  ): Promise<string | undefined> {
-    const existing = await this.investigationRepository.get(investigationId);
-    if (!existing) {
-      throw new InvestigationNotFoundError(investigationId);
-    }
-
-    if (!this.workflowsManagement) {
-      throw new InvestigationUnavailableError('workflowsManagement is not available');
-    }
-    const { management } = this.workflowsManagement;
-
-    const execution = await management.getWorkflowExecution(executionId, this.getSpaceId(), {
-      includeOutput: false,
-      request: this.request,
-    });
-    const context = execution?.context;
     const inputs =
-      isPlainObject(context) && isPlainObject(context.inputs) ? context.inputs : undefined;
+      isPlainObject(execution?.context) && isPlainObject(execution?.context.inputs)
+        ? execution?.context.inputs
+        : undefined;
 
     if (
       !execution ||
       !isInvestigationWorkflowExecution(execution) ||
       TerminalExecutionStatuses.includes(execution.status) ||
-      inputs?.investigation_id !== investigationId
+      // The investigation the run works on: its `investigation_id` input, or itself without one.
+      (asString(inputs?.investigation_id) ?? executionId) !== investigationId
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    let current: InvestigationRecord = existing;
-    for (let attempt = 1; ; attempt++) {
-      // A retried ensure of the run that already owns it.
-      if (getOwningExecutionId(current) === executionId) {
-        return current.conversation_id;
-      }
-      if (!(await this.isClaimable(current, management))) {
-        throw InvestigationConflictError.runInProgress(investigationId);
-      }
-
-      try {
-        await this.transitionToRunning({
-          investigationId,
-          version: current.version,
-          startedAt: execution.startedAt ?? new Date().toISOString(),
-          executedBy: execution.executedBy,
-          executionId,
-          reopen: isTerminalStatus(current.status),
-        });
-        return current.conversation_id;
-      } catch (error) {
-        if (!(error instanceof InvestigationStaleWriteError)) {
-          throw error;
-        }
-        if (attempt >= MAX_CLAIM_ATTEMPTS) {
-          throw InvestigationConflictError.concurrentlyModified(investigationId);
-        }
-        const fresh = await this.investigationRepository.get(investigationId);
-        if (!fresh) {
-          throw new InvestigationNotFoundError(investigationId);
-        }
-        current = fresh;
-      }
-    }
-  }
-
-  /**
-   * Whether a continuing run may take the investigation over. A pending record named after a live
-   * run belongs to that run, which has not reached its own ensure step yet.
-   */
-  private async isClaimable(
-    record: InvestigationRecord,
-    management: WorkflowsServerPluginSetup['management']
-  ): Promise<boolean> {
-    if (isTerminalStatus(record.status)) {
-      return true;
-    }
-    if (record.status !== 'pending') {
-      return false;
-    }
-    const namedRun = await management.getWorkflowExecution(record.id, this.getSpaceId(), {
-      includeOutput: false,
+    // Agent Builder titles the conversation on the run's first round; the run's `title` input is
+    // not stored.
+    const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    return !namedRun || TerminalExecutionStatuses.includes(namedRun.status);
+    const conversation = await getOrCreateInvestigationConversation({
+      conversations,
+      id: investigationId,
+    });
+
+    if (!conversation.isOwner) {
+      // The agent can still work in a public conversation, but subjects and metadata are
+      // owner-only. Starts avoid this by never continuing an investigation they do not own.
+      // TODO(ns-1619): record subjects and reopen once Agent Builder allows converse-access writes.
+      this.logger.warn(
+        `Run "${executionId}" does not own investigation "${investigationId}"; continuing without recording subjects or reopening it`
+      );
+      return conversation.id;
+    }
+
+    const subjects = recoverSubjectsFromInputs(inputs, investigationId);
+    if (subjects.length > 0) {
+      const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+      const recorded = conversation.created
+        ? []
+        : await subjectsClient.listByConversationIds([conversation.id]);
+      const missing = withoutRecordedSubjects(subjects, recorded);
+      // Starts never continue a full investigation, but a run started some other way may still
+      // bring more subjects than fit. Record what fits rather than fail the run.
+      const room = Math.max(MAX_SUBJECTS_PER_CONVERSATION - recorded.length, 0);
+      if (missing.length > room) {
+        this.logger.warn(
+          `Investigation "${conversation.id}" has room for ${room} of ${missing.length} new subjects; recording the first ${room}`
+        );
+      }
+      const recordable = missing.slice(0, room);
+      if (recordable.length > 0) {
+        await subjectsClient.upsertSubjects(conversation.id, recordable);
+      }
+    }
+
+    if (conversation.status === 'closed') {
+      await conversations.patchMetadata(conversation.id, { status: 'open' });
+    }
+
+    return conversation.id;
   }
 
   /**
-   * The investigation for a Slack thread. Its ids derive from the thread, so concurrent calls for
-   * one thread agree on a single record and conversation. Without `create`, a thread that has no
-   * investigation yet returns undefined. `statusMessageTs` records the thread's status message
-   * whatever the investigation's status. `eventId` records a delivered event; an event the thread
-   * already recorded comes back marked `duplicate`.
+   * The investigation for a Slack thread, found by the thread's conversation origin (the
+   * `team:<T>/channel:<C>/thread:<ts>` key Agent Builder uses for Slack) and, when the origin
+   * names some other conversation, by the thread's `slack_thread` subject. Without `create`, a
+   * thread that has no investigation yet returns undefined. With `create`, the investigation is
+   * created with that origin and the thread as its subject, as the identity that runs the Slack
+   * workflow, which also runs the investigation workflow on it. `statusMessageTs` records the
+   * thread's status message on the thread's subject. `eventId` records a delivered Slack event
+   * there; an event the thread already recorded comes back marked `duplicate`. The Slack thread
+   * workflow runs one call per thread at a time, so recording an event cannot race itself.
    */
   async findOrCreateSlackThread({
     workspace,
@@ -833,188 +775,211 @@ export class NightshiftInvestigationsClient {
     statusMessageTs?: string;
     eventId?: string;
   }): Promise<SlackThreadInvestigation | undefined> {
-    // Channel ids are only unique within a workspace.
-    const threadKey = `${workspace}/${channel}/${threadTs}`;
-    const investigationId = uuidv5(`investigation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE);
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const threadKey = toSlackThreadKey({ workspace, channel, threadTs });
+    const subjectKey = { type: 'slack_thread' as const, id: threadKey };
+    const activity = { statusMessageTs, eventId };
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const findThreadSubject = async (conversationId: string) =>
+      (await subjectsClient.listByConversationIds([conversationId])).find(
+        ({ subjectType, subjectId }) =>
+          subjectType === subjectKey.type && subjectId === subjectKey.id
+      );
+    const isDuplicate = (recorded: SlackThreadSubject | undefined) =>
+      eventId !== undefined && (recorded?.seen_event_ids ?? []).includes(eventId);
 
-    let record = await this.investigationRepository.get(investigationId);
-    if (!record) {
-      if (!create) {
-        return undefined;
-      }
-      if (!(await this.isAvailable())) {
-        throw new InvestigationUnavailableError('Investigations are not available');
-      }
-
-      const attributes: InvestigationAttributes = {
-        title: toSlackThreadTitle(text),
-        status: 'pending',
-        // Like any manual run, a thread is defined by its prompt rather than an entity, so the
-        // subject stays the placeholder the UI hides. The thread itself is identified by `thread`
-        // and by the ids derived from it.
-        ...toSubjectFields({ type: 'manual', id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID }),
-        trigger_type: 'manual',
-        created_at: new Date().toISOString(),
-        // Conversations share one index across spaces, so a thread with an investigation in two
-        // spaces needs a conversation in each.
-        conversation_id: uuidv5(
-          `conversation/${this.getSpaceId()}/${threadKey}`,
-          SLACK_THREAD_ID_NAMESPACE
-        ),
-        // The event is recorded below, like on an existing record, so that of two concurrent
-        // creates for one event exactly one is told it is new.
-        thread: {
-          surface: 'slack',
-          workspace,
-          channel,
-          thread_ts: threadTs,
-          ...(statusMessageTs && { status_message_ts: statusMessageTs }),
-        },
+    const existing = await this.findSlackThreadInvestigation({
+      conversations,
+      agenticInvestigations,
+      threadKey,
+    });
+    if (existing) {
+      const threadSubject = await findThreadSubject(existing.id);
+      const recorded = threadSubject?.slack;
+      const response = {
+        question: threadSubject?.summary,
+        duplicate: isDuplicate(recorded),
       };
-      await this.createIgnoringConflict({ id: investigationId, attributes });
-      record = (await this.investigationRepository.get(investigationId)) ?? {
-        id: investigationId,
-        ...attributes,
-      };
-    }
-
-    return this.recordSlackThreadActivity(record, { statusMessageTs, eventId });
-  }
-
-  private async recordSlackThreadActivity(
-    record: InvestigationRecord,
-    activity: { statusMessageTs?: string; eventId?: string }
-  ): Promise<SlackThreadInvestigation> {
-    let current = record;
-    for (let attempt = 1; ; attempt++) {
-      const duplicate =
-        activity.eventId !== undefined &&
-        (current.thread?.seen_event_ids ?? []).includes(activity.eventId);
-      const thread = current.thread && nextThreadState(current.thread, activity);
-      if (!thread) {
-        return toSlackThreadInvestigation(current, duplicate);
-      }
-
-      try {
-        await this.investigationRepository.update({
-          id: current.id,
-          patch: { thread },
-          version: current.version,
+      const update = toSlackThreadUpdate(recorded, activity);
+      if (!update) {
+        return toSlackThreadInvestigation(existing, {
+          ...response,
+          statusMessageTs: recorded?.status_message_ts,
         });
-        return toSlackThreadInvestigation({ ...current, thread }, duplicate);
-      } catch (error) {
-        if (
-          !(error instanceof InvestigationStaleWriteError) ||
-          attempt >= MAX_THREAD_WRITE_ATTEMPTS
-        ) {
-          throw error;
-        }
-        const fresh = await this.investigationRepository.get(current.id);
-        if (!fresh) {
-          throw new InvestigationNotFoundError(current.id);
-        }
-        current = fresh;
       }
-    }
-  }
-
-  /**
-   * `reopen` clears the previous run's `completed_at` and `error`, so a reopened record does not
-   * report an old completion while running or an old failure after it succeeds.
-   */
-  private async transitionToRunning({
-    investigationId,
-    version,
-    startedAt,
-    executedBy,
-    executionId,
-    reopen = false,
-  }: {
-    investigationId: string;
-    version?: string;
-    startedAt: string;
-    executedBy?: string;
-    executionId?: string;
-    reopen?: boolean;
-  }): Promise<void> {
-    await this.investigationRepository.update({
-      id: investigationId,
-      patch: {
-        status: 'running',
-        started_at: startedAt,
-        ...(executedBy && { executed_by: executedBy }),
-        ...(executionId && { execution_id: executionId }),
-        ...(reopen && { completed_at: null, error: null }),
-      },
-      version,
-    });
-  }
-
-  private async createIgnoringConflict({
-    id,
-    attributes,
-  }: {
-    id: string;
-    attributes: InvestigationAttributes;
-  }): Promise<void> {
-    try {
-      await this.investigationRepository.create({ id, attributes });
-    } catch (error) {
-      if (error instanceof InvestigationAlreadyExistsError) {
-        return;
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Cancels the in-flight investigation that `investigationId` supersedes, if there is one.
-   *
-   * `investigationId` is excluded rather than assumed absent: both callers run while the workflow's
-   * `_ensure` step may be creating the very same record, so without the guard the newest match can
-   * be the incoming investigation itself — cancelling a record whose execution is alive and which
-   * nothing superseded. Two results are fetched because the excluded record can occupy the first.
-   */
-  private async cancelSupersededInvestigation({
-    concurrencyKey,
-    investigationId,
-  }: {
-    concurrencyKey: string;
-    investigationId: string;
-  }): Promise<void> {
-    const { results } = await this.investigationRepository.find({
-      concurrencyKey,
-      statuses: [...SUPERSEDED_STATUSES],
-      sortField: 'created_at',
-      sortOrder: 'desc',
-      perPage: 2,
-    });
-    const superseded = results.find(({ id }) => id !== investigationId);
-
-    if (!superseded) {
-      return;
-    }
-
-    try {
-      await this.investigationRepository.update({
-        id: superseded.id,
-        patch: {
-          status: 'cancelled',
-          completed_at: new Date().toISOString(),
-        },
-        version: superseded.version,
-      });
-    } catch (error) {
-      if (error instanceof InvestigationStaleWriteError) {
+      if (!existing.isOwner) {
         this.logger.warn(
-          `Skipped cancelling superseded investigation "${superseded.id}": it was concurrently modified`
+          `Cannot record the Slack status message or event on investigation "${existing.id}": it is owned by another identity`
         );
-        return;
+        return toSlackThreadInvestigation(existing, {
+          ...response,
+          statusMessageTs: recorded?.status_message_ts,
+        });
       }
-      throw error;
+      await subjectsClient.upsertSubjects(existing.id, [
+        { ...subjectKey, slack: { channel, thread_ts: threadTs, ...update } },
+      ]);
+      return toSlackThreadInvestigation(existing, {
+        ...response,
+        statusMessageTs: update.status_message_ts ?? recorded?.status_message_ts,
+      });
+    }
+
+    if (!create) {
+      return undefined;
+    }
+    if (!(await this.isAvailable())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+
+    const spaceId = this.getSpaceId();
+    await installInvestigationAgent({
+      agentBuilder,
+      spaceId,
+      availability: this.agentAvailability,
+    });
+
+    // Of two concurrent creates for one thread, the second continues the first.
+    const newInvestigationId = uuidv4();
+    const claim = await subjectsClient.claimSubjects({
+      conversationId: newInvestigationId,
+      subjects: [subjectKey],
+      isHolderOpen: async (conversationId) => {
+        const [holder] = await findInvestigationConversations(conversations, [conversationId]);
+        return holder?.status === 'open';
+      },
+    });
+    const investigationId = claim.claimed ? newInvestigationId : claim.heldBy;
+
+    const conversation = await getOrCreateInvestigationConversation({
+      conversations,
+      id: investigationId,
+      origin: { external_conversation_id: threadKey },
+    });
+    // The first create of the thread records it; a create that continues another reads it back.
+    const threadSubject = conversation.created
+      ? undefined
+      : await findThreadSubject(conversation.id);
+    const recorded = threadSubject?.slack;
+    const update = toSlackThreadUpdate(recorded, activity);
+    if (conversation.isOwner && (!threadSubject || update)) {
+      const summary = collapseSlackText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
+      await subjectsClient.upsertSubjects(conversation.id, [
+        {
+          ...subjectKey,
+          ...(!threadSubject && {
+            triggerType: 'manual' as const,
+            ...(summary ? { summary } : {}),
+          }),
+          slack: { channel, thread_ts: threadTs, ...update },
+        },
+      ]);
+    }
+    return toSlackThreadInvestigation(conversation, {
+      statusMessageTs: update?.status_message_ts ?? recorded?.status_message_ts,
+      question: threadSubject?.summary ?? text,
+      duplicate: isDuplicate(recorded),
+    });
+  }
+
+  private async findSlackThreadInvestigation({
+    conversations,
+    agenticInvestigations,
+    threadKey,
+  }: {
+    conversations: ConversationPublicClient;
+    agenticInvestigations: AgenticInvestigationsPluginStart;
+    threadKey: string;
+  }): Promise<InvestigationConversation | undefined> {
+    const byOrigin = await conversations.getByOrigin({ external_conversation_id: threadKey });
+    if (byOrigin?.template_id === INVESTIGATION_TEMPLATE_ID) {
+      const [investigation] = await findInvestigationConversations(conversations, [byOrigin.id]);
+      if (investigation) {
+        return investigation;
+      }
+    }
+
+    // The origin can belong to an Agent Builder chat about the same thread (a Slack mention
+    // starts one), so the thread's subject is the fallback.
+    const ids = await agenticInvestigations
+      .getSubjectsClient(this.request)
+      .findConversationIdsBySubjects([{ type: 'slack_thread', id: threadKey }]);
+    const candidates = await findInvestigationConversations(conversations, ids);
+    return candidates.find(({ status }) => status === 'open') ?? candidates[0];
+  }
+
+  /**
+   * What lifecycle events attribute the investigation to: its first recorded subject, preferring
+   * the subject types lifecycle triggers carry. A Slack thread is reported as a manual subject,
+   * since that is what it is to the trigger's consumers. Undefined when it has no subject.
+   */
+  async getLifecycleSubject(investigationId: string): Promise<LifecycleSubject | undefined> {
+    const { agenticInvestigations } = this.requireWriteDeps();
+    const subjects = await agenticInvestigations
+      .getSubjectsClient(this.request)
+      .listByConversationIds([investigationId]);
+    const [first] = [...subjects].sort(
+      (left, right) =>
+        Number(left.subjectType === 'slack_thread') -
+          Number(right.subjectType === 'slack_thread') ||
+        left.createdAt.localeCompare(right.createdAt)
+    );
+    if (!first) {
+      return undefined;
+    }
+    return {
+      subject: {
+        type: first.subjectType === 'slack_thread' ? 'manual' : first.subjectType,
+        id: first.subjectId,
+      },
+      triggerType: first.triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      startedAt: first.createdAt,
+    };
+  }
+
+  /**
+   * The workflow runs in `spaceId`, but Agent Builder and agentic investigations take the space
+   * from the request. A step's fake request carries the workflow's space, so the two agree; if a
+   * request ever lacks it, matching and claims would happen in another space than the run.
+   */
+  private warnOnSpaceMismatch(spaceId: string): void {
+    const requestSpaceId = this.spaces?.spacesService.getSpaceId(this.request);
+    if (requestSpaceId !== undefined && requestSpaceId !== spaceId) {
+      this.logger.warn(
+        `Starting an investigation in space "${spaceId}" from a request scoped to space "${requestSpaceId}"; subjects are matched in the request's space`
+      );
     }
   }
 
+  private requireWriteDeps(): {
+    workflowsManagement: WorkflowsServerPluginSetup;
+    agentBuilder: AgentBuilderPluginStart;
+    agenticInvestigations: AgenticInvestigationsPluginStart;
+  } {
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+    if (!this.agentBuilder) {
+      throw new InvestigationUnavailableError('agentBuilder is not available');
+    }
+    if (!this.agenticInvestigations) {
+      throw new InvestigationUnavailableError('agenticInvestigations is not available');
+    }
+    return {
+      workflowsManagement: this.workflowsManagement,
+      agentBuilder: this.agentBuilder,
+      agenticInvestigations: this.agenticInvestigations,
+    };
+  }
+
+  /**
+   * Writes the legacy saved-object record behind PATCH /internal/nightshift/investigations/{id}.
+   * Nothing in the investigation write path calls it anymore: investigations are conversations.
+   * TODO(ns-1619 s6): remove with the saved object type.
+   */
   async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {

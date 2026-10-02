@@ -54,7 +54,6 @@ export const triggerInvestigationWorkflow = async ({
       trigger_type: 'manual',
       message: `${title}\n\n${summary}`,
       stream_names: stream_names ?? [],
-      concurrency_key: event_id,
       context: {
         event_uuid,
         event_id,
