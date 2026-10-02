@@ -9,5 +9,3 @@ import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-security
 import { apiTest as baseApiTest } from '@kbn/scout-security';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
-export * as testData from './constants';

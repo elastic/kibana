@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags, type ApiClientFixture } from '@kbn/scout-security';
+import { PUBLIC_API_HEADERS, tags, type ApiClientFixture } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import {
@@ -26,7 +26,7 @@ import {
   ENDPOINT_EVENTS_INDEX,
 } from '../../../../../scripts/endpoint/common/constants';
 import { createSystemIndicesEsClient } from '../../../edr_response_actions/ui/fixtures/system_indices_es_client';
-import { apiTest, testData } from '../fixtures';
+import { apiTest } from '../fixtures';
 
 interface MetadataListBody {
   data: Array<{
@@ -101,7 +101,7 @@ apiTest.describe('Endpoint list isolation filter', { tag: tags.stateful.classic 
     const { apiKeyHeader } = await requestAuth.getApiKeyForPrivilegedUser();
     headers = {
       ...apiKeyHeader,
-      ...testData.COMMON_HEADERS,
+      ...PUBLIC_API_HEADERS,
     };
 
     // `.fleet-agents` is restricted. Indexed fleet agent documents stand in for enrollment.
