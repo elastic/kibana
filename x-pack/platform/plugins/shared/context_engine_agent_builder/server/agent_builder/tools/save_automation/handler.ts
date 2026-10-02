@@ -597,7 +597,7 @@ export const runSavedAutomation = async ({
       request,
       spaceId,
       workflowApi: workflowsManagement,
-      // A full-corpus run costs a model call per document, so return the execution id to poll
+      // A full-corpus run costs a model call per item, if any, so return the execution id to poll
       // rather than holding the turn open until it finishes. Only a bounded run waits.
       waitForCompletion,
       ...(waitForCompletion && { completionTimeoutSec }),

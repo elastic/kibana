@@ -16,7 +16,7 @@ import { assertContextEngineWriteAccess } from '../../assert_context_engine_writ
 
 export type { RunAutomationResult };
 
-export const PILOT_SIZE_INPUT = 'pilot_size';
+const PILOT_SIZE_INPUT = 'pilot_size';
 
 // Long enough for a pilot of ten model calls; a slower pilot returns its execution id to poll.
 const PILOT_COMPLETION_TIMEOUT_SEC = 180;

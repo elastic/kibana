@@ -216,7 +216,7 @@ describe('runAutomationHandler', () => {
       },
     };
 
-    const buildPilotDeps = () => ({ ...buildDeps(), params: { workflowId, pilotSize: 3 } });
+    const buildPilotDeps = () => ({ ...buildDeps(), params: { workflowId, pilotSize: 5 } });
 
     it('passes the pilot size as an input and waits for the run to finish', async () => {
       getWorkflowMock.mockResolvedValue(pilotWorkflow);
@@ -234,7 +234,7 @@ describe('runAutomationHandler', () => {
 
       expect(executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
-          workflowParams: { pilot_size: 3 },
+          workflowParams: { pilot_size: 5 },
           waitForCompletion: true,
           completionTimeoutSec: expect.any(Number),
         })
@@ -243,7 +243,7 @@ describe('runAutomationHandler', () => {
         expect.objectContaining({
           started: true,
           executionId: 'exec-pilot',
-          pilotSize: 3,
+          pilotSize: 5,
           status: 'completed',
           durationMs: 90000,
         })

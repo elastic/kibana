@@ -176,7 +176,7 @@ describe('run_automation tool', () => {
       const { schema } = createTool();
 
       expect(schema.safeParse({ workflowId: 'wf-1' }).success).toBe(true);
-      expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 3 }).success).toBe(true);
+      expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 5 }).success).toBe(true);
       expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 0 }).success).toBe(false);
       expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 11 }).success).toBe(false);
       expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 2.5 }).success).toBe(false);
@@ -186,11 +186,11 @@ describe('run_automation tool', () => {
       getWorkflowMock.mockResolvedValue({ id: 'wf-1', name: 'Nightly Enrichment', enabled: true });
 
       const confirmation = await createTool().confirmation?.getConfirmation?.(
-        createConfirmationContext({ workflowId: 'wf-1', pilotSize: 3 })
+        createConfirmationContext({ workflowId: 'wf-1', pilotSize: 5 })
       );
 
-      expect(confirmation?.message).toMatch(/Run a pilot of "Nightly Enrichment" over 3 items\?/);
-      expect(confirmation?.message).toMatch(/writes up to 3 knowledge indicators/);
+      expect(confirmation?.message).toMatch(/Run a pilot of "Nightly Enrichment" over 5 items\?/);
+      expect(confirmation?.message).toMatch(/writes up to 5 knowledge indicators/);
       expect(confirmation?.message).not.toMatch(/full corpus|documents or units|model call/);
       expect(confirmation?.confirm_text).toBe('Run pilot');
     });

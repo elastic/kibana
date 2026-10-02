@@ -751,7 +751,7 @@ many items, so there is no time estimate, and start it.
 ## Corpora larger than 10,000 documents
 
 ES|QL caps at 10,000 rows per query. The templates stay under it by design: each discovery query
-keeps the top `max_units` or `max_documents`, well within the cap. A custom automation that must
+keeps the top `max_units` or `max_documents`, at or under the cap. A custom automation that must
 walk a larger corpus needs cursor pagination — a `while` over a keyword cursor around its discovery
 query and `foreach` — or a parent workflow dispatching per-item children with
 `workflow.executeAsync`. Note
