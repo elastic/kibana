@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type {
@@ -20,12 +19,12 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { QuerySandbox, RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
-import { useRule } from '../rule_context';
+import { FlyoutAccordion } from '@kbn/flyout-sections';
+import { i18n } from '@kbn/i18n';
+import { useRuleSummary } from './rule_summary_context';
 
-const queryClient = new QueryClient();
-
-const RuleSidebarPreviewTabInner: React.FC = () => {
-  const rule = useRule();
+export const RuleSummaryQueryPreviewSection: React.FC = () => {
+  const rule = useRuleSummary();
   const query = rule.query ? getRootEsqlQuery(rule.query) : '';
   const timeField = rule.time_field ?? '@timestamp';
 
@@ -52,20 +51,22 @@ const RuleSidebarPreviewTabInner: React.FC = () => {
   }, []);
 
   return (
-    <RuleFormProvider services={services}>
-      <QuerySandbox
-        query={query}
-        timeField={timeField}
-        dateRange={{ dateStart, dateEnd }}
-        onDateRangeChange={handleDateRangeChange}
-        autoRun
-      />
-    </RuleFormProvider>
+    <FlyoutAccordion
+      title={i18n.translate('xpack.alertingV2.ruleSummary.queryPreview', {
+        defaultMessage: 'Query preview',
+      })}
+      hasBorder={false}
+      data-test-subj="ruleSummaryQueryPreview"
+    >
+      <RuleFormProvider services={services}>
+        <QuerySandbox
+          query={query}
+          timeField={timeField}
+          dateRange={{ dateStart, dateEnd }}
+          onDateRangeChange={handleDateRangeChange}
+          autoRun
+        />
+      </RuleFormProvider>
+    </FlyoutAccordion>
   );
 };
-
-export const RuleSidebarPreviewTab: React.FC = () => (
-  <QueryClientProvider client={queryClient}>
-    <RuleSidebarPreviewTabInner />
-  </QueryClientProvider>
-);
