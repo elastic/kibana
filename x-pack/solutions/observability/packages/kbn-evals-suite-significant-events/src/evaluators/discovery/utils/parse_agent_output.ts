@@ -19,7 +19,6 @@ interface EventsWriteToolResult {
 type EventsWriteItemResult =
   | {
       index: number;
-      event_uuid: string;
       event_id: string;
       written: true;
     }
@@ -151,7 +150,6 @@ export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): Sig
           ? ({
               ...items[index],
               event_id: result.event_id,
-              event_uuid: result.event_uuid,
             } as SignificantEvent)
           : undefined
       )

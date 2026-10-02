@@ -48,10 +48,10 @@ export const getCalibratedSeverity = ({
     return proposedSeverity;
   }
 
-  const isResolution = proposedStatus === 'closed' || proposedStatus === 'dismissed';
-  const isReopen = latestEvent.status !== 'open' && proposedStatus === 'open';
+  const isResolution = proposedStatus === 'inactive';
+  const isReactivation = latestEvent.status === 'inactive' && proposedStatus === 'active';
 
-  return isResolution || isReopen || hasNewConfirmedRule(proposedSignals, latestEvent)
+  return isResolution || isReactivation || hasNewConfirmedRule(proposedSignals, latestEvent)
     ? proposedSeverity
     : latestEvent.severity;
 };

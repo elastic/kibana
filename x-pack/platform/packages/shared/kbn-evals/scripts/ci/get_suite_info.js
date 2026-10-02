@@ -36,5 +36,11 @@ process.stdout.write(
     shards: Array.isArray(suite.shards) ? suite.shards : [],
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
     scoutHook: suite.scoutHook,
+    // Per-spec model config and the suite-level fallback, so `get_fanout_matrix.js` can resolve each
+    // spec's models without re-reading the suites config.
+    specModelGroups: Array.isArray(suite.specModelGroups) ? suite.specModelGroups : [],
+    weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
+      ? suite.weeklyEisModelGroups
+      : [],
   })
 );

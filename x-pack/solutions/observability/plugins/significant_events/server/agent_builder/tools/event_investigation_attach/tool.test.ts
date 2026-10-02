@@ -31,7 +31,6 @@ describe('event_investigation_attach tool', () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
     (attachEventInvestigationToolHandler as jest.Mock).mockResolvedValue({
-      event_uuid: 'event-uuid',
       updated: 1,
       ignored: 0,
     });
@@ -64,48 +63,6 @@ describe('event_investigation_attach tool', () => {
     );
     expect(attachEventInvestigationToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({ logger })
-    );
-  });
-
-  it('resolves event_id from a legacy event_uuid when only event_uuid is provided', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
-    (attachEventInvestigationToolHandler as jest.Mock).mockResolvedValue({
-      event_uuid: 'uuid-abc',
-      updated: 1,
-      ignored: 0,
-    });
-
-    const mockFindByEventUuid = jest.fn().mockResolvedValue({
-      hits: [{ event_id: 'resolved-event-id', event_uuid: 'uuid-abc' }],
-    });
-
-    const logger = loggingSystemMock.createLogger();
-    const tool = createEventInvestigationAttachTool({
-      getScopedClients: jest.fn().mockResolvedValue({
-        getEventClient: jest.fn().mockResolvedValue({ findByEventUuid: mockFindByEventUuid }),
-        getEventSearchClient: jest.fn().mockResolvedValue({}),
-        getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
-        licensing: {},
-      }) as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
-      logger,
-      telemetry: { trackAgentToolEventInvestigationAttach: jest.fn() } as never,
-    });
-
-    await invokeHandler(
-      tool as never,
-      {
-        event_uuid: 'uuid-abc',
-        workflow_execution_id: 'workflow-id',
-        started_at: '2026-01-01T00:00:00.000Z',
-      },
-      createMockToolContext()
-    );
-
-    expect(mockFindByEventUuid).toHaveBeenCalledWith('uuid-abc');
-    expect(attachEventInvestigationToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ eventId: 'resolved-event-id' })
     );
   });
 });

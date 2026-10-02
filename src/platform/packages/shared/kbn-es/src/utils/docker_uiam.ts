@@ -102,12 +102,12 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--net',
       'elastic',
 
-      // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // Host-OOM guard. 1g OOMs startup: tdnf distro-sync overlaps the
+      // pgcosmos/PostGIS install and the cgroup killer takes Postgres.
       '--memory',
-      '1g',
+      '1536m',
       '--memory-swap',
-      '1g',
+      '1536m',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,

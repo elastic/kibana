@@ -14,6 +14,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -25,11 +26,13 @@ const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 const RULE_COVERAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
+const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 
 const SCHEDULED_WORKER_IDS: string[] = [
   AD_WORKER_ID,
   RULE_TUNING_WORKER_ID,
   RULE_COVERAGE_WORKER_ID,
+  HUNT_WORKER_ID,
 ];
 
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
@@ -580,6 +583,41 @@ describe('createWorkerSettingsRegistration', () => {
         ).toMatch(/extras/);
       }
     );
+  });
+
+  describe('Worker-specific settings — continuous threat hunt', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+    const storedDefaults = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '4h',
+    };
+
+    it('has no extras: only autonomy and the schedule interval are configurable', () => {
+      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+      });
+    });
+
+    it('drops a stale extras value from a document stored before the dials were retired', () => {
+      const stale = { ...storedDefaults, extras: { tier2When: 'always', candidateLimit: 10 } };
+
+      expect(registration.withMissingDefaults(stale)).toEqual(storedDefaults);
+      expect(registration.toSettings(stale)).toEqual({
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+      });
+    });
+
+    it('rejects an extras patch, naming the field', () => {
+      expect(
+        expectInvalid(registration.applyPatch(storedDefaults, { extras: { tier2When: 'always' } }))
+      ).toMatch(/extras/);
+    });
   });
 
   describe('schedule interval — the Workers that own no schedule', () => {

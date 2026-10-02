@@ -34,8 +34,8 @@ describe('useSignificantEventsUrlState', () => {
     it('falls back to the defaults when the params are absent', () => {
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      expect(result.current.statusFilter).toEqual(['open']);
-      expect(result.current.severityFilter).toEqual(['80-critical', '60-high']);
+      expect(result.current.statusFilter).toEqual(['active']);
+      expect(result.current.severityFilter).toEqual(['critical', 'high']);
       expect(result.current.streamFilter).toEqual([]);
       expect(result.current.serviceFilter).toEqual([]);
     });
@@ -50,28 +50,28 @@ describe('useSignificantEventsUrlState', () => {
 
     it('accepts single and repeated values', () => {
       mockQuery = {
-        status: 'closed',
-        severity: ['20-low', '40-medium'],
+        status: 'inactive',
+        severity: ['low', 'medium'],
         stream: 'logs',
         service: ['svc-a', 'svc-b'],
       };
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      expect(result.current.statusFilter).toEqual(['closed']);
-      expect(result.current.severityFilter).toEqual(['40-medium', '20-low']);
+      expect(result.current.statusFilter).toEqual(['inactive']);
+      expect(result.current.severityFilter).toEqual(['medium', 'low']);
       expect(result.current.streamFilter).toEqual(['logs']);
       expect(result.current.serviceFilter).toEqual(['svc-a', 'svc-b']);
     });
 
     it('drops unknown values and canonicalises the order', () => {
       mockQuery = {
-        status: ['bogus', 'dismissed', 'open'],
-        severity: ['60-high', 'nope', '80-critical'],
+        status: ['bogus', 'inactive', 'active'],
+        severity: ['high', 'nope', 'critical'],
       };
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      expect(result.current.statusFilter).toEqual(['open', 'dismissed']);
-      expect(result.current.severityFilter).toEqual(['80-critical', '60-high']);
+      expect(result.current.statusFilter).toEqual(['active', 'inactive']);
+      expect(result.current.severityFilter).toEqual(['critical', 'high']);
     });
   });
 
@@ -82,12 +82,12 @@ describe('useSignificantEventsUrlState', () => {
         rangeTo: 'now',
         selectedEvent: 'event-1',
         openEvent: 'event-1',
-        severity: '20-low',
+        severity: 'low',
         stream: ['logs'],
       };
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      act(() => result.current.setFilters({ status: ['closed'] }));
+      act(() => result.current.setFilters({ status: ['inactive'] }));
 
       expect(mockReplace).toHaveBeenCalledTimes(1);
       expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
@@ -96,8 +96,8 @@ describe('useSignificantEventsUrlState', () => {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
           openEvent: 'event-1',
-          status: ['closed'],
-          severity: '20-low',
+          status: ['inactive'],
+          severity: 'low',
           stream: ['logs'],
         },
       });
@@ -153,7 +153,7 @@ describe('useSignificantEventsUrlState', () => {
 
       act(() =>
         result.current.setFilters(
-          { status: ['open'], severity: ['40-medium'], stream: ['logs'] },
+          { status: ['active'], severity: ['medium'], stream: ['logs'] },
           { keepSelectedEvent: true }
         )
       );
@@ -161,8 +161,8 @@ describe('useSignificantEventsUrlState', () => {
       expect(lastReplaceQuery()).toEqual({
         selectedEvent: 'event-1',
         openEvent: 'event-1',
-        status: ['open'],
-        severity: ['40-medium'],
+        status: ['active'],
+        severity: ['medium'],
         stream: ['logs'],
       });
     });
@@ -184,7 +184,7 @@ describe('useSignificantEventsUrlState', () => {
       mockQuery = {
         rangeFrom: 'now-24h',
         rangeTo: 'now',
-        status: 'closed',
+        status: 'inactive',
         severity: '',
         stream: ['logs'],
         service: ['svc-a'],
@@ -205,8 +205,8 @@ describe('useSignificantEventsUrlState', () => {
   describe('event selection preserves the filter params', () => {
     beforeEach(() => {
       mockQuery = {
-        status: 'closed',
-        severity: ['20-low'],
+        status: 'inactive',
+        severity: ['low'],
         stream: 'logs',
         selectedEvent: 'event-1',
       };
@@ -231,7 +231,7 @@ describe('useSignificantEventsUrlState', () => {
 
       expect(mockPush).toHaveBeenLastCalledWith('/{tab}', {
         path: { tab: SIGNIFICANT_EVENTS_TAB },
-        query: { status: 'closed', severity: ['20-low'], stream: 'logs', selectedEvent: 'event-1' },
+        query: { status: 'inactive', severity: ['low'], stream: 'logs', selectedEvent: 'event-1' },
       });
     });
 
@@ -243,7 +243,7 @@ describe('useSignificantEventsUrlState', () => {
       // openEvent was written by deep-link normalization on mount and must survive the clear.
       expect(mockReplace).toHaveBeenLastCalledWith('/{tab}', {
         path: { tab: SIGNIFICANT_EVENTS_TAB },
-        query: { status: 'closed', severity: ['20-low'], stream: 'logs', openEvent: 'event-1' },
+        query: { status: 'inactive', severity: ['low'], stream: 'logs', openEvent: 'event-1' },
       });
     });
   });

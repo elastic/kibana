@@ -107,6 +107,8 @@ export const FlakyTestBranchStatsSchema = z.object({
   /** Most recent execution, i.e. run that was not skipped; absent when every run was skipped. */
   latestExecutionAt: z.optional(z.coerce.date()),
   latestRun: z.optional(FlakyTestBranchLatestRunSchema),
+  /** Every setup (pipeline, config, target) that ran the test on this branch skipped it last. */
+  skipped: z.optional(z.boolean()),
 });
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
 

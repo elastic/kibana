@@ -1,6 +1,6 @@
 ## Prior Significant Events
 
-`platform_sig_events_event_search` is only available when Significant Events history is enabled for this deployment; check the tool list after `load_skill`. When it is available, call it at least once for the current stream after fetching features and before proposing queries. Search dismissed events when checking for known noise or demoted patterns, and use the full view when assessment notes or linked investigation outcomes matter. An empty result is acceptable; skipping the check when the tool is available is not. When the tool is not available, continue without this history check — do not attempt to call it.
+`platform_sig_events_event_search` is only available when Significant Events history is enabled for this deployment; check the tool list after `load_skill`. When it is available, call it at least once for the current stream after fetching features and before proposing queries. Search `inactive` events (`status: "inactive"`) when checking for known noise or demoted patterns, and use the full view when assessment notes or linked investigation outcomes matter. An empty result is acceptable; skipping the check when the tool is available is not. When the tool is not available, continue without this history check — do not attempt to call it.
 
 ## Semantic Code Search
 

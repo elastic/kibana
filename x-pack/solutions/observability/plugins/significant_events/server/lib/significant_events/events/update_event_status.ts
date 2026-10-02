@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
@@ -29,8 +28,6 @@ export const updateSignificantEventStatus = async ({
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
 }): Promise<{
-  /** The written or matched version's event_uuid — absent when no event was found for eventId. */
-  event_uuid?: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
@@ -42,18 +39,17 @@ export const updateSignificantEventStatus = async ({
   }
 
   if (latest.status === status) {
-    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1, status };
+    return { updated: 0, ignored: 1, status };
   }
 
-  const nextEventUuid = uuidv4();
   const now = new Date().toISOString();
+  // A blank note counts as omitted, so it cannot overwrite the existing one.
+  const note = assessmentNote?.trim();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
-    event_uuid: nextEventUuid,
-    previous_event_uuid: latest.event_uuid,
     status,
-    ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+    ...(note ? { assessment_note: note } : {}),
   };
 
   // `wait_for` ensures the write is searchable before this resolves, so an immediate
@@ -72,5 +68,5 @@ export const updateSignificantEventStatus = async ({
     priorSignificantEvent: latest,
   });
 
-  return { event_uuid: nextEventUuid, updated: 1, ignored: 0, status };
+  return { updated: 1, ignored: 0, status };
 };

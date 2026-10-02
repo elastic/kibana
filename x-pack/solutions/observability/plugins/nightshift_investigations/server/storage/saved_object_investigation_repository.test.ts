@@ -57,6 +57,18 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.create).toHaveBeenCalledWith(TYPE, attributes, { id: 'inv-1' });
     });
 
+    it('stores severity with its sortable prefix', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+
+      await repository.create({ id: 'inv-1', attributes: { ...attributes, severity: 'critical' } });
+
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        TYPE,
+        { ...attributes, severity: '80-critical' },
+        { id: 'inv-1' }
+      );
+    });
+
     it('maps a conflict to InvestigationAlreadyExistsError', async () => {
       const { repository, savedObjectsClient } = createRepository();
       savedObjectsClient.create.mockRejectedValue(
@@ -81,6 +93,18 @@ describe('SavedObjectInvestigationRepository', () => {
       });
     });
 
+    it('returns the canonical severity for a stored prefixed value', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.get.mockResolvedValue({
+        ...savedObject,
+        attributes: { ...attributes, severity: '60-high' } as unknown as InvestigationAttributes,
+      });
+
+      await expect(repository.get('inv-1')).resolves.toEqual(
+        expect.objectContaining({ severity: 'high' })
+      );
+    });
+
     it('returns undefined when the saved object is missing', async () => {
       const { repository, savedObjectsClient } = createRepository();
       savedObjectsClient.get.mockRejectedValue(
@@ -101,6 +125,19 @@ describe('SavedObjectInvestigationRepository', () => {
         TYPE,
         'inv-1',
         { status: 'completed' },
+        { version: 'WzEsMV0=' }
+      );
+    });
+
+    it('stores a patched severity with its sortable prefix', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+
+      await repository.update({ id: 'inv-1', patch: { severity: 'low' }, version: 'WzEsMV0=' });
+
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        'inv-1',
+        { severity: '20-low' },
         { version: 'WzEsMV0=' }
       );
     });
@@ -254,7 +291,7 @@ describe('SavedObjectInvestigationRepository', () => {
         per_page: 20,
       });
 
-      await repository.find({ severities: ['80-critical', '60-high'] });
+      await repository.find({ severities: ['critical', 'high'] });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({

@@ -15,12 +15,11 @@ import { SignificantEventItem } from './significant_event_item';
 const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
   event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['service-a'],
   title: 'Test significant event',
   summary: 'Something happened',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
 };
 
@@ -54,7 +53,7 @@ describe('SignificantEventItem', () => {
     expect(row).toHaveAttribute('tabindex', '0');
     expect(row).toHaveAttribute('data-ebt-action', 'viewSignificantEvent');
     expect(row).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
-    expect(row).toHaveAttribute('data-ebt-detail', 'open');
+    expect(row).toHaveAttribute('data-ebt-detail', 'active');
 
     fireEvent.click(row);
     expect(onClick).toHaveBeenCalledWith(mockEvent);
@@ -147,7 +146,8 @@ describe('SignificantEventItem', () => {
     expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
   });
 
-  it.each(['closed', 'dismissed'] as const)('hides the close action for %s events', (status) => {
+  it('hides the close action for inactive events', () => {
+    const status = 'inactive' as const;
     renderItem({ event: { ...mockEvent, status }, onCloseClick: jest.fn() });
 
     expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();

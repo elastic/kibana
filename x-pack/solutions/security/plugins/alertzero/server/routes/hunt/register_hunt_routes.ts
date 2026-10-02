@@ -11,12 +11,14 @@ import { registerHuntForThreatRoute } from './hunt_for_threat';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerCandidatesRoute } from './candidates';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
+import { registerFindOrCreateInvestigationRoute } from './find_or_create_investigation';
 
-/** Registers the hunt routes (index_scope, Tier 1, Tier 2, coordinator, candidates). */
+/** Registers the hunt routes (index_scope, Tier 1, Tier 2, coordinator, candidates, find-or-create). */
 export const registerHuntRoutes = (deps: RouteDependencies): void => {
   registerHuntIndexScopeRoute(deps);
   registerHuntForThreatRoute(deps);
   registerHuntBehaviorRoute(deps);
   registerCandidatesRoute(deps);
   registerHuntCoordinatorRoute(deps);
+  registerFindOrCreateInvestigationRoute(deps);
 };

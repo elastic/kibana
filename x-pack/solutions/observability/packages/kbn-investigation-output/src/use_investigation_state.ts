@@ -59,6 +59,45 @@ const FAILED_WITHOUT_DETAILS_MESSAGE = i18n.translate(
   { defaultMessage: 'The investigation did not complete.' }
 );
 
+const LEGACY_SEVERITY_VALUES: Record<string, string> = {
+  '80-critical': 'critical',
+  '60-high': 'high',
+  '40-medium': 'medium',
+  '20-low': 'low',
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Preserves completed investigations produced before Significant Events adopted Alerting v2
+ * severity and hypothesis-status vocabularies.
+ */
+const normalizeLegacyInvestigationState = (state: unknown): unknown => {
+  if (!isRecord(state)) {
+    return state;
+  }
+
+  const severity =
+    typeof state.severity === 'string'
+      ? LEGACY_SEVERITY_VALUES[state.severity] ?? state.severity
+      : undefined;
+  const hypotheses = Array.isArray(state.hypotheses)
+    ? state.hypotheses.map((hypothesis) => {
+        if (!isRecord(hypothesis) || hypothesis.status !== 'rejected') {
+          return hypothesis;
+        }
+        return { ...hypothesis, status: 'dismissed' };
+      })
+    : undefined;
+
+  return {
+    ...state,
+    ...(severity !== undefined && { severity }),
+    ...(hypotheses !== undefined && { hypotheses }),
+  };
+};
+
 const httpErrorMessage = (err: Error): string => {
   const fetchError = err as IHttpFetchError<ResponseErrorBody>;
   if (fetchError.response?.status === 403 || fetchError.body?.statusCode === 403) {
@@ -210,7 +249,9 @@ export function useInvestigationState({
         if (output?.conversation_id) {
           setConversationId(output.conversation_id);
         }
-        const parsed = investigationStateSchema.safeParse(output?.structured_output);
+        const parsed = investigationStateSchema.safeParse(
+          normalizeLegacyInvestigationState(output?.structured_output)
+        );
 
         if (parsed.success) {
           applySettled({ status: 'complete', state: parsed.data });
@@ -287,7 +328,9 @@ export function useInvestigationState({
         .subscribe({
           next: (event) => {
             if (isToolUiEvent(event, INVESTIGATION_PROGRESS_UI_EVENT)) {
-              const parsed = investigationStateSchema.safeParse(event.data.data);
+              const parsed = investigationStateSchema.safeParse(
+                normalizeLegacyInvestigationState(event.data.data)
+              );
               if (parsed.success) {
                 setState(parsed.data);
               }

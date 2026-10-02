@@ -19,16 +19,16 @@ import { randomUUID } from 'crypto';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
-import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { resolveScopedModel } from './lib/scoped_model';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 /**
  * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
  * connector is the ordinary outcome, not an error, so it never fails the request: the
- * coordinator degrades (no dynamic scope widening, Tier 2 reports `no_inference`).
+ * coordinator degrades (no model fallback for Tier 2 targets, Tier 2 reports `no_inference`).
  */
 const resolveModelForHunt = async ({
   resolve,
@@ -96,12 +96,7 @@ export const registerHuntCoordinatorRoute = ({
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
           const { getInference, getSearchInferenceEndpoints } = getHuntServices();
 
-          const technologyInput = parseTechnologyInput(request.body.technology);
-          if ('invalid' in technologyInput) {
-            return response.badRequest({
-              body: { message: `Unknown technology "${technologyInput.invalid}".` },
-            });
-          }
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const {
             report_id,
@@ -120,10 +115,9 @@ export const registerHuntCoordinatorRoute = ({
 
           // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
           // one that actually runs Tier 2 in production) resolves the same model. It is
-          // resolved regardless of `tier2_when`: scope resolution uses it to widen the
-          // dataset match once every static entry is blocked and the deterministic match
-          // misses, and resolving a connector spends no tokens. Tier 2 itself is still
-          // gated on `tier2_when` inside the coordinator, so a `never` run stays `never`.
+          // resolved regardless of `tier2_when`, since resolving a connector spends no
+          // tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
+          // so a `never` run stays `never`.
           const model = await resolveModelForHunt({
             resolve: () =>
               resolveScopedModel({
@@ -150,7 +144,7 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            technology: technologyInput.technology,
+            indexPatterns,
             // The Worker fan-out supplies a run id so one sweep's children share it,
             // which is what the packaging barrier and conclusion dedupe key off. Only
             // mint one when the caller has no sweep to tie the run to.

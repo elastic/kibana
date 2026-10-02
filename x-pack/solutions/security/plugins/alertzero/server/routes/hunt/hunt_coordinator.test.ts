@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
+import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
 import { buildSseAttachmentId } from '../../services/watches/hunt/common/sse_mapper';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
@@ -25,12 +26,16 @@ const huntCoordinatorMock = huntCoordinator as jest.MockedFunction<typeof huntCo
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
 
+const UNIVERSE = ['logs-*', 'filebeat-*', '-*elastic-cloud-logs-*'];
+
 const coordinatorResult: HuntCoordinatorResult = {
   status: 'tier1_only',
   report_id: 'report-1',
   run_id: 'run-1',
-  technologies: ['aws_iam'],
-  index_patterns: ['logs-aws.cloudtrail-*'],
+  index_patterns: UNIVERSE,
+  tier2_targets: [],
+  tier2_target_sources: [],
+  actionable_indices: [],
   tier1: {
     tier: 1,
     ...emptyHuntForThreatResult('no_environment_hits', [], [], { from: 'now-7d', to: 'now' }, ''),
@@ -40,9 +45,14 @@ const coordinatorResult: HuntCoordinatorResult = {
   has_confirmed_hit: false,
   completeness: 'complete',
   completed_successfully: true,
+  headline: 'no confirmed hits: Tier 1 found no matches; Tier 2 skipped',
+  narrative: 'Hunt Watch found no confirmed hits for threat report report-1.',
 };
 
-const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const makeDeps = ({
+  spaceId = 'default',
+  indexPatterns = UNIVERSE,
+}: { spaceId?: string; indexPatterns?: string[] } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -60,11 +70,12 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
 
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
+  const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
     alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
-      uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
+      uiSettings: { client: { get: uiSettingsGet } },
     }),
   };
 
@@ -79,6 +90,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     asCurrentUser,
     asInternalUser,
     logger,
+    uiSettingsGet,
   };
 };
 
@@ -104,24 +116,15 @@ describe('registerHuntCoordinatorRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('rejects an unknown technology with 400 before running anything', async () => {
-    const { handler, context } = makeDeps();
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(context, requestFor({ technology: 'not_a_technology' }), response);
-
-    expect(huntCoordinatorMock).not.toHaveBeenCalled();
-    expect(response.badRequest).toHaveBeenCalledWith({
-      body: { message: expect.stringContaining('not_a_technology') },
-    });
-  });
-
-  it('treats an absent technology as "resolve from the environment"', async () => {
-    const { handler, context } = makeDeps();
+  it('passes indexPatterns from the universe helper and never a technology', async () => {
+    const patterns = ['logs-*', 'winlogbeat-*'];
+    const { handler, context, uiSettingsGet } = makeDeps({ indexPatterns: patterns });
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(paramsOf().technology).toBeUndefined();
+    expect(uiSettingsGet).toHaveBeenCalledWith(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
+    expect(paramsOf().indexPatterns).toEqual(patterns);
+    expect(paramsOf()).not.toHaveProperty('technology');
   });
 
   it('runs against the request space, not the default one', async () => {
@@ -245,8 +248,8 @@ describe('registerHuntCoordinatorRoute', () => {
             technique_name: 'Valid Accounts: Cloud Accounts',
             reference: 'https://attack.mitre.org/techniques/T1078/004/',
             tactic_ids: ['TA0001'],
-            proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
-            rule_name: 'AssumeRole into high-risk policy boundary',
+            validated_esql: 'FROM logs-aws.cloudtrail-default | WHERE true',
+            title: 'AssumeRole into high-risk policy boundary',
             severity: 'high',
             risk_score: 73,
             execution: { executed: true, row_count: 2, hit: true },

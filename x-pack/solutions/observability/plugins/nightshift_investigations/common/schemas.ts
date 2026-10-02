@@ -133,10 +133,9 @@ export const alertInvestigationContextSchema = z
   .strict();
 
 /**
- * The one key in an otherwise open context that the workflow itself acts on: it interpolates
- * `context.event_uuid` into an internal request path, so a value carrying `/`, `?` or `..` would
- * point those steps at a different endpoint. Real values are uuids, so an id-shaped allowlist
- * costs a legitimate caller nothing.
+ * Legacy `event_uuid` key, kept optional and id-shaped. The workflow no longer interpolates it
+ * (significant events now send `context.event_id`), but an id-shaped allowlist costs a legitimate
+ * caller nothing and still rejects values carrying `/`, `?` or `..` from older callers.
  */
 const significantEventUuidSchema = z
   .string()

@@ -553,7 +553,7 @@ export const ALERTING_LOG_CODES = {
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
-  /** `refresh_episode` failed; tool returns an error result. */
+  /** `refresh_alert` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
   /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
@@ -561,9 +561,9 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED',
   /** `get_rule_events` existence lookup (`get`) failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_LOOKUP_FAILED: 'AGENT_BUILDER_EPISODE_LOOKUP_FAILED',
-  /** Episode attachment resolve failed; returns undefined. */
+  /** Alert attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
-  /** Episode attachment isStale check failed; returns false. */
+  /** Alert attachment isStale check failed; returns false. */
   AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
   /** Rule attachment resolve failed; returns undefined. */
   AGENT_BUILDER_RULE_RESOLVE_FAILED: 'AGENT_BUILDER_RULE_RESOLVE_FAILED',

@@ -374,20 +374,10 @@ const eventsUpdateRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: z
-      .object({
-        status: significantEventStatusSchema,
-        assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
-      })
-      .superRefine((val, ctx) => {
-        if (val.status === 'dismissed' && !val.assessment_note?.trim()) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['assessment_note'],
-            message: 'assessment_note is required when dismissing an event',
-          });
-        }
-      }),
+    body: z.object({
+      status: significantEventStatusSchema,
+      assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });

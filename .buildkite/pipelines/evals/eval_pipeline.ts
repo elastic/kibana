@@ -22,6 +22,11 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
+export interface EvalsSuiteSpecModelGroup {
+  files: string[];
+  models?: string[];
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
@@ -32,6 +37,7 @@ export interface EvalsSuiteMetadataEntry {
   defaultModelGroups?: string[] | null;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
+  specModelGroups?: EvalsSuiteSpecModelGroup[];
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
