@@ -186,6 +186,23 @@ describe('buildFanoutMatrix - fail-fast', () => {
       })
     ).toThrow(/does-not-exist/);
   });
+
+  it('throws when per-spec resolution leaves no step for the requested models', () => {
+    expect(() =>
+      run({
+        requestedModelGroups: ['eis/b'],
+        suiteInfo: {
+          ...SHARDED_SUITE,
+          specModelGroups: [
+            { files: [DISCOVERY], models: ['eis/a'] },
+            { files: [QUERY_GEN], models: ['eis/a', 'eis/c'] },
+          ],
+        },
+      })
+    ).toThrow(
+      'Per-spec resolution produced no steps for EVAL_MODEL_GROUPS="eis/b": no spec in evals.suites.json lists any of the requested models'
+    );
+  });
 });
 
 describe('buildFanoutMatrix - override / no-config parity', () => {

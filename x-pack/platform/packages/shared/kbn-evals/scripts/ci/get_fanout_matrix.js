@@ -173,6 +173,15 @@ function buildFanoutMatrix({
       }
     }
   }
+  // An empty matrix would make run_suite.sh take its "nothing provisioned" fallback and run the
+  // whole suite on the judge connector, which is never what a per-spec run asked for.
+  if (rows.length === 0) {
+    throw new Error(
+      `Per-spec resolution produced no steps for EVAL_MODEL_GROUPS="${requestedModelGroups.join(
+        ','
+      )}": no spec in evals.suites.json lists any of the requested models`
+    );
+  }
   return rows;
 }
 
