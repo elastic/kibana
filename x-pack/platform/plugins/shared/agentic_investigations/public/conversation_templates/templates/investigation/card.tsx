@@ -16,10 +16,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { InvestigationSubjectResponse, InvestigationSummary } from '../../../common';
-import { SUBJECT_ICONS } from '../../subjects/attachments/subject_view';
-import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
-import { getInvestigationDisplayTitle, getSubjectLabel } from './investigation_display_title';
+import type { InvestigationSubjectResponse, InvestigationSummary } from '../../../../common';
+import { SUBJECT_ICONS } from '../../../subjects/attachments/subject_view';
+import { SUBJECT_TYPE_LABELS } from '../../../subjects/attachments/translations';
+import { getInvestigationDisplayTitle, getSubjectLabel } from './to_view_model';
 import {
   CLOSED_LABEL,
   INVESTIGATION_SEVERITY_COLORS,

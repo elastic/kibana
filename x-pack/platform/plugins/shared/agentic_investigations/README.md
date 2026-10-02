@@ -45,13 +45,14 @@ public/
   hypotheses/            hypotheses attachment UI
   evidence/              evidence renderer (Markdown + line/bar chart), exported as `LazyEvidenceView`
   investigation_attachments/  attachment renderer registration helper
-  investigations/        query API hooks (investigation, privileges), overview tab, header live state (severity, running), investigation card and brief card
+  investigations/        data layer: query API hooks (investigation, privileges), status, close preview and assignee hooks, query keys, the brief cards loader
   escalations/           browser hooks
   user_profiles/         browser hooks
   conversation_templates/  investigation and escalation conversation template UI
     registry/            `TemplateDefinition` and `registerTemplate`, called once from `plugin.ts`
     shared/              connected components shared by the templates and exported to solutions (assignees, status, close confirmation, escalation modal, proposed actions)
     templates/           one directory per template: its `register.ts` and its own flyout parts
+      investigation/     also the investigation card and brief card, their view model, and the flyout's header title, live state (severity, running), and overview tab
   hooks/                 capability and open-in-chat hooks
 ```
 

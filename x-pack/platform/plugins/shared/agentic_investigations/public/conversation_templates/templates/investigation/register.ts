@@ -20,7 +20,7 @@ import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../..
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
-import { NEW_INVESTIGATION_TITLE } from '../../../investigations/components/translations';
+import { NEW_INVESTIGATION_TITLE } from './translations';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -114,33 +114,27 @@ export const investigationTemplate: TemplateDefinition = {
 
     const LazyInvestigationOverview = makeLazyWithSharedClient<OverviewSlotRenderProps>(
       async () => {
-        const { InvestigationOverview } = await import(
-          '../../../investigations/components/investigation_overview'
-        );
+        const { InvestigationOverview } = await import('./flyout/overview_tab');
         return InvestigationOverview;
       }
     );
 
     const LazyInvestigationLiveState = makeLazyWithSharedClient<LiveStateSlotRenderProps>(
       async () => {
-        const { InvestigationLiveState } = await import(
-          '../../../investigations/components/investigation_live_state'
-        );
+        const { InvestigationLiveState } = await import('./flyout/live_state');
         return InvestigationLiveState;
       }
     );
 
     const LazyInvestigationTitle = makeLazyWithSharedClient<TitleSlotRenderProps>(async () => {
-      const { InvestigationTitle } = await import(
-        '../../../investigations/components/investigation_title'
-      );
+      const { InvestigationTitle } = await import('./flyout/header_title');
       return InvestigationTitle;
     });
 
     const LazyInvestigationBriefCard =
       makeLazyWithSharedClient<ConversationTemplateBriefCardRenderProps>(async () => {
         const [{ InvestigationBriefCard }, { createInvestigationCardsLoader }] = await Promise.all([
-          import('../../../investigations/components/investigation_brief_card'),
+          import('./brief_card'),
           import('../../../investigations/investigation_cards_loader'),
         ]);
         // Created once, with the chunk: every card shares it, so one tick of cards is one request.

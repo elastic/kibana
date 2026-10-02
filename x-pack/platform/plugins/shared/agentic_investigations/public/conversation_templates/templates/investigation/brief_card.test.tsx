@@ -14,10 +14,7 @@ import {
   DEFAULT_CONVERSATION_TITLE,
   type ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
-import {
-  conversationToInvestigationSummary,
-  InvestigationBriefCard,
-} from './investigation_brief_card';
+import { conversationToInvestigationSummary, InvestigationBriefCard } from './brief_card';
 
 const conversation = {
   id: 'conv-1',

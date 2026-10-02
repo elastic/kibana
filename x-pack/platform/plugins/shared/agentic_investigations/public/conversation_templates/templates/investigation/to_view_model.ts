@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { InvestigationSubjectResponse, InvestigationSummary } from '../../../common';
-import { SUBJECT_TYPE_LABELS, slackChannelLabel } from '../../subjects/attachments/translations';
+import type { InvestigationSubjectResponse, InvestigationSummary } from '../../../../common';
+import { SUBJECT_TYPE_LABELS, slackChannelLabel } from '../../../subjects/attachments/translations';
 import { NEW_INVESTIGATION_TITLE } from './translations';
 
 /** What a subject is called in one line: the alert's rule, the Slack channel, or its summary. */

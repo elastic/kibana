@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiTextTruncate } from '@elastic/eui';
 import type { TitleSlotRenderProps } from '@kbn/agentic-investigations-common';
-import { isInvestigationTitlePending } from '../../../common';
-import { useInvestigation } from '../hooks/use_investigation';
-import { getInvestigationDisplayTitle } from './investigation_display_title';
-import { NEW_INVESTIGATION_TITLE } from './translations';
+import { isInvestigationTitlePending } from '../../../../../common';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { getInvestigationDisplayTitle } from '../to_view_model';
+import { NEW_INVESTIGATION_TITLE } from '../translations';
 
 /**
  * The flyout header's title. Agent Builder titles an investigation on its first round; until then

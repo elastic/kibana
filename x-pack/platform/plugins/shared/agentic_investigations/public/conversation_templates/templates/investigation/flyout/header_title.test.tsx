@@ -10,10 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
-import { useInvestigation } from '../hooks/use_investigation';
-import { InvestigationTitle } from './investigation_title';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { InvestigationTitle } from './header_title';
 
-jest.mock('../hooks/use_investigation');
+jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
 const renderTitle = (title: string) =>

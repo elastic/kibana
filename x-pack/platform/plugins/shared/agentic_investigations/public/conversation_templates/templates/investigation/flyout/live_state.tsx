@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { LiveStateSlotRenderProps } from '@kbn/agentic-investigations-common';
-import { INVESTIGATION_SEVERITIES, type InvestigationSeverity } from '../../../common';
-import { useInvestigation } from '../hooks/use_investigation';
+import { INVESTIGATION_SEVERITIES, type InvestigationSeverity } from '../../../../../common';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import {
   INVESTIGATION_SEVERITY_COLORS,
   INVESTIGATION_SEVERITY_LABELS,
   RUNNING_LABEL,
-} from './translations';
+} from '../translations';
 
 const isSeverity = (value: unknown): value is InvestigationSeverity =>
   INVESTIGATION_SEVERITIES.some((severity) => severity === value);

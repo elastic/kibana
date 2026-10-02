@@ -14,12 +14,12 @@ import {
   isInvestigationTitlePending,
   type InvestigationSeverity,
   type InvestigationSummary,
-} from '../../../common';
-import { retryOnTransientError } from '../../retry_on_transient_error';
-import { IN_PROGRESS_REFETCH_INTERVAL_MS } from '../hooks/use_investigation';
-import type { InvestigationCardsLoader } from '../investigation_cards_loader';
-import { investigationQueryKeys } from '../query_keys';
-import { InvestigationCard } from './investigation_card';
+} from '../../../../common';
+import { retryOnTransientError } from '../../../retry_on_transient_error';
+import { IN_PROGRESS_REFETCH_INTERVAL_MS } from '../../../investigations/hooks/use_investigation';
+import type { InvestigationCardsLoader } from '../../../investigations/investigation_cards_loader';
+import { investigationQueryKeys } from '../../../investigations/query_keys';
+import { InvestigationCard } from './card';
 
 const readString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;

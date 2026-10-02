@@ -9,8 +9,8 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { InvestigationSummary } from '../../../common';
-import { InvestigationCard } from './investigation_card';
+import type { InvestigationSummary } from '../../../../common';
+import { InvestigationCard } from './card';
 
 const investigation = (overrides: Partial<InvestigationSummary> = {}): InvestigationSummary => ({
   id: 'conv-1',

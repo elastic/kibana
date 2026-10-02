@@ -11,12 +11,12 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { Investigation } from '../../../common';
-import { useInvestigation } from '../hooks/use_investigation';
-import { InvestigationOverview } from './investigation_overview';
+import type { Investigation } from '../../../../../common';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { InvestigationOverview } from './overview_tab';
 
-jest.mock('../hooks/use_investigation');
-jest.mock('../../evidence/evidence_view', () => ({
+jest.mock('../../../../investigations/hooks/use_investigation');
+jest.mock('../../../../evidence/evidence_view', () => ({
   EvidenceView: () => <div data-test-subj="evidenceView" />,
 }));
 const mockUseInvestigation = useInvestigation as jest.Mock;
