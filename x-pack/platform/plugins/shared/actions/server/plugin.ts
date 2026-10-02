@@ -354,7 +354,7 @@ export class ActionsPlugin
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
-    this.serverMaxPayloadBytes = core.http.getServerInfo().maxPayload;
+    this.serverMaxPayloadBytes = core.http.getServerInfo().maxPayloadInBytes;
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig, {
       serverMaxPayloadBytes: this.serverMaxPayloadBytes,
     });
