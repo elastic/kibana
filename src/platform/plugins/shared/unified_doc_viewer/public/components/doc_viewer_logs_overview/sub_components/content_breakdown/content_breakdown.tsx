@@ -107,24 +107,22 @@ export const ContentBreakdown = ({
             </EuiText>
             <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
           </EuiFlexGroup>
-          {hasMessageField && (
-            <HoverActionPopover
-              value={value}
-              formattedValue={formattedValue}
-              field={field}
-              rawFieldValue={rawFieldValue}
-              anchorPosition="downCenter"
-              display="block"
-            >
-              <EuiCodeBlock
-                overflowHeight={100}
-                paddingSize="s"
-                isCopyable
-                fontSize="s"
-                {...messageCodeBlockProps}
-              />
-            </HoverActionPopover>
-          )}
+          <HoverActionPopover
+            value={value}
+            formattedValue={formattedValue}
+            field={field}
+            rawFieldValue={rawFieldValue}
+            anchorPosition="downCenter"
+            display="block"
+          >
+            <EuiCodeBlock
+              overflowHeight={100}
+              paddingSize="s"
+              isCopyable
+              fontSize="s"
+              {...messageCodeBlockProps}
+            />
+          </HoverActionPopover>
         </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="s" />
