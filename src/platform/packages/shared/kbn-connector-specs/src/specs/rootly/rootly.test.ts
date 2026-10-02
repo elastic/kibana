@@ -143,8 +143,8 @@ describe('Rootly', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject more than 50 serviceIds/groupIds', () => {
-      const ids = Array.from({ length: 51 }, (_, i) => `id${i}`);
+    it('should reject more than 1000 serviceIds/groupIds', () => {
+      const ids = Array.from({ length: 1001 }, (_, i) => `id${i}`);
       expect(
         RootlyCreateIncidentInputSchema.safeParse({ title: 'DB down', serviceIds: ids }).success
       ).toBe(false);
@@ -357,8 +357,8 @@ describe('Rootly', () => {
       );
     });
 
-    it('should reject more than 50 userIds', () => {
-      const userIds = Array.from({ length: 51 }, (_, i) => `u${i}`);
+    it('should reject more than 1000 userIds', () => {
+      const userIds = Array.from({ length: 1001 }, (_, i) => `u${i}`);
       const result = RootlyAddIncidentSubscribersInputSchema.safeParse({
         incidentId: 'inc1',
         userIds,

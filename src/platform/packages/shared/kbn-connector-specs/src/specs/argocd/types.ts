@@ -10,6 +10,9 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_STRING_LENGTH = 2048;
+// Argo CD documents no limit on the `projects` filter or on the sync request's `resources` list.
+const MAX_PROJECT_FILTERS = 1000;
+const MAX_SYNC_RESOURCES = 10_000;
 
 export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
@@ -39,7 +42,7 @@ export const ListApplicationsInputSchema = lazySchema(() =>
   z.object({
     projects: z
       .array(z.string().max(MAX_STRING_LENGTH))
-      .max(100)
+      .max(MAX_PROJECT_FILTERS)
       .optional()
       .describe('Filter by one or more AppProject names (query: projects).'),
     project: z
@@ -221,7 +224,7 @@ export const SyncApplicationInputSchema = lazySchema(() =>
             .describe('Kubernetes namespace of the resource. Omit for cluster-scoped resources.'),
         })
       )
-      .max(100)
+      .max(MAX_SYNC_RESOURCES)
       .optional()
       .describe('Optional list of specific resources to sync instead of the whole application.'),
     strategy: z

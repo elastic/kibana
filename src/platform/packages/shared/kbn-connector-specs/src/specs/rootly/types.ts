@@ -11,8 +11,12 @@ import { z } from '@kbn/zod/v4';
 
 const MAX_ID_LENGTH = 64;
 const MAX_TITLE_LENGTH = 500;
-const MAX_TEXT_LENGTH = 10000;
-const MAX_ARRAY_LENGTH = 50;
+// Rootly documents no length limit on summaries, descriptions, timeline events, or messages.
+const MAX_TEXT_LENGTH = 65_536;
+// Rootly documents no limit on ID arrays in request bodies.
+const MAX_ARRAY_LENGTH = 1000;
+// Comma-joined into a single query parameter, so kept small enough to stay within URL length limits.
+const MAX_FILTER_IDS = 100;
 const MAX_LABEL_ENTRIES = 50;
 
 const labelsSchema = z
@@ -102,12 +106,12 @@ export const RootlyListIncidentsInputSchema = z.object({
   severityId: z.string().max(MAX_ID_LENGTH).optional().describe('Filter by severity resource ID.'),
   serviceIds: z
     .array(z.string().max(MAX_ID_LENGTH))
-    .max(MAX_ARRAY_LENGTH)
+    .max(MAX_FILTER_IDS)
     .optional()
     .describe('Filter by affected service resource IDs.'),
   teamIds: z
     .array(z.string().max(MAX_ID_LENGTH))
-    .max(MAX_ARRAY_LENGTH)
+    .max(MAX_FILTER_IDS)
     .optional()
     .describe('Filter by owning team (group) resource IDs.'),
   search: z

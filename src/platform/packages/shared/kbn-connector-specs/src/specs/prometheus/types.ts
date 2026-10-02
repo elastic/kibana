@@ -13,11 +13,16 @@ const MAX_ID_LENGTH = 128;
 const MAX_LABEL_LENGTH = 200;
 const MAX_LABEL_VALUE_LENGTH = 1000;
 const MAX_TEXT_LENGTH = 4000;
-const MAX_MATCHER_EXPR_LENGTH = 500;
+// Fits a max-length label name, an operator, and a max-length value with every character escaped,
+// so any label written by createAlerts or createSilence can be filtered on.
+const MAX_MATCHER_EXPR_LENGTH = MAX_LABEL_LENGTH + 2 * MAX_LABEL_VALUE_LENGTH + 4;
 const MAX_MATCHERS = 50;
 const MAX_LABEL_ENTRIES = 50;
-const MAX_ALERTS_PER_REQUEST = 50;
-const MAX_QUERY_LENGTH = 2000;
+// Alertmanager's postAlerts schema sets no maxItems.
+const MAX_ALERTS_PER_REQUEST = 1000;
+// Prometheus documents no PromQL length limit; GET query parameters are bounded only by Go's
+// 1 MiB default header limit, which this stays well under even when fully percent-encoded.
+const MAX_QUERY_LENGTH = 65_536;
 const MAX_RULE_NAME_LENGTH = 200;
 
 /**
@@ -349,9 +354,16 @@ export const ListPrometheusTargetsInputSchema = lazySchema(() =>
 );
 export type ListPrometheusTargetsInput = z.infer<typeof ListPrometheusTargetsInputSchema>;
 
+const seriesSelectorField = () =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_QUERY_LENGTH)
+    .describe("A PromQL series selector, e.g. 'up{job=\"node\"}' or 'process_start_time_seconds'.");
+
 const seriesMatchField = () =>
   z
-    .array(matcherExprField())
+    .array(seriesSelectorField())
     .min(1)
     .max(MAX_MATCHERS)
     .describe(
@@ -384,7 +396,7 @@ export const ListPrometheusLabelValuesInputSchema = lazySchema(() =>
       .max(MAX_LABEL_LENGTH)
       .describe('The label name to list known values for, e.g. "job" or "instance".'),
     match: z
-      .array(matcherExprField())
+      .array(seriesSelectorField())
       .max(MAX_MATCHERS)
       .optional()
       .describe('Optional series selector expressions to restrict which series are considered.'),

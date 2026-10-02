@@ -9,9 +9,24 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+const MAX_ANNOTATION_BODY_BYTES = 1024 * 1024;
+const MAX_ANNOTATION_CONTEXT_LENGTH = 100;
+const MAX_META_DATA_VALUE_BYTES = 100_000;
+// Buildkite documents no limit on the build message, which is usually a full commit message.
+const MAX_BUILD_MESSAGE_LENGTH = 65_536;
+
 // =============================================================================
 // Shared field builders
 // =============================================================================
+
+// Every UTF-16 code unit encodes to at least one UTF-8 byte, so the char cap never undercuts the byte cap.
+const maxUtf8Bytes = (maxBytes: number) =>
+  z
+    .string()
+    .max(maxBytes)
+    .refine((value) => Buffer.byteLength(value, 'utf8') <= maxBytes, {
+      message: `Must be at most ${maxBytes} bytes (UTF-8)`,
+    });
 
 const pipelineSlug = () =>
   z
@@ -42,12 +57,10 @@ const perPage = () =>
     .optional()
     .describe('Results per page for pagination (min 1, max 100, default 30).');
 
-const boundedRecord = (maxEntries: number, valueMax: number) =>
-  z
-    .record(z.string().max(200), z.string().max(valueMax))
-    .refine((v) => Object.keys(v).length <= maxEntries, {
-      message: `Must contain at most ${maxEntries} entries`,
-    });
+const boundedRecord = (maxEntries: number, valueSchema: z.ZodType<string>) =>
+  z.record(z.string().max(200), valueSchema).refine((v) => Object.keys(v).length <= maxEntries, {
+    message: `Must contain at most ${maxEntries} entries`,
+  });
 
 // =============================================================================
 // Builds
@@ -64,7 +77,7 @@ export const CreateBuildInputSchema = lazySchema(() =>
     branch: z.string().min(1).max(200).describe('The git branch to build, e.g. "main".'),
     message: z
       .string()
-      .max(2000)
+      .max(MAX_BUILD_MESSAGE_LENGTH)
       .optional()
       .describe('Optional build message shown in the Buildkite UI, e.g. the commit message.'),
     ignoreBranchFilters: z
@@ -73,15 +86,15 @@ export const CreateBuildInputSchema = lazySchema(() =>
       .describe(
         'When true, triggers the build even if the pipeline steps have branch filters that would otherwise exclude this branch. Defaults to false.'
       ),
-    environment: boundedRecord(50, 4000)
+    environment: boundedRecord(50, z.string().max(4000))
       .optional()
       .describe(
         'Environment variables to set for the build, as a key/value map (max 50 entries). Example: { "DEPLOY_ENV": "staging" }.'
       ),
-    metadata: boundedRecord(50, 4000)
+    metadata: boundedRecord(50, maxUtf8Bytes(MAX_META_DATA_VALUE_BYTES))
       .optional()
       .describe(
-        'Build meta-data values to set for the build, as a key/value map (max 50 entries). Retrievable later via job environment or the Buildkite UI.'
+        'Build meta-data values to set for the build, as a key/value map (max 50 entries, each value at most 100 KB). Retrievable later via job environment or the Buildkite UI.'
       ),
   })
 );
@@ -172,7 +185,7 @@ export const UnblockJobInputSchema = lazySchema(() =>
     pipelineSlug: pipelineSlug(),
     buildNumber: buildNumber(),
     jobId: jobId(),
-    fields: boundedRecord(50, 2000)
+    fields: boundedRecord(50, z.string().max(2000))
       .optional()
       .describe(
         "Values for the block step's input fields, as a key/value map of field key to string value (max 50 entries). Only needed if the block step defines fields."
@@ -224,21 +237,21 @@ export const CreateBuildAnnotationInputSchema = lazySchema(() =>
   z.object({
     pipelineSlug: pipelineSlug(),
     buildNumber: buildNumber(),
-    body: z
-      .string()
+    body: maxUtf8Bytes(MAX_ANNOTATION_BODY_BYTES)
       .min(1)
-      .max(20000)
-      .describe('The annotation body as HTML or Markdown, e.g. "### Test failures\\n- ..." '),
+      .describe(
+        'The annotation body as HTML or Markdown (at most 1 MiB), e.g. "### Test failures\\n- ..." '
+      ),
     style: z
       .enum(['success', 'info', 'warning', 'error'])
       .optional()
       .describe('Visual style of the annotation. Defaults to "info" when omitted.'),
     context: z
       .string()
-      .max(200)
+      .max(MAX_ANNOTATION_CONTEXT_LENGTH)
       .optional()
       .describe(
-        'A unique key identifying this annotation. Reusing the same context with append=true appends to the existing annotation instead of creating a new one; reusing it without append replaces the annotation.'
+        'A unique key identifying this annotation (at most 100 characters). Reusing the same context with append=true appends to the existing annotation instead of creating a new one; reusing it without append replaces the annotation.'
       ),
     priority: z
       .number()

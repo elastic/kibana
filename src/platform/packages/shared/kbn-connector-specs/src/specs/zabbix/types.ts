@@ -9,9 +9,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-const MAX_IDS = 50;
+const MAX_RESULTS = 1000;
+// ID-list inputs must accept every ID a single getProblems/getHosts page can return.
+const MAX_IDS = MAX_RESULTS;
 const MAX_ID_LENGTH = 32;
-const MAX_MESSAGE_LENGTH = 2000;
+// Zabbix schema: acknowledges.message is varchar(2048); maintenances.description is a text column (65,535).
+const MAX_ACKNOWLEDGE_MESSAGE_LENGTH = 2048;
+const MAX_TEXT_FIELD_LENGTH = 65_535;
 const MAX_NAME_LENGTH = 128;
 const MAX_TAG_LENGTH = 255;
 const MAX_TAGS = 20;
@@ -104,7 +108,7 @@ export const GetProblemsInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(1000)
+      .max(MAX_RESULTS)
       .optional()
       .describe('Maximum number of problems to return. Defaults to 100.'),
   })
@@ -140,7 +144,7 @@ export const AddProblemMessageInputSchema = lazySchema(() =>
     message: z
       .string()
       .min(1)
-      .max(MAX_MESSAGE_LENGTH)
+      .max(MAX_ACKNOWLEDGE_MESSAGE_LENGTH)
       .describe("The note text to add to the problem's acknowledgement/update trail."),
   })
 );
@@ -212,7 +216,7 @@ export const CreateMaintenanceInputSchema = lazySchema(() =>
         .describe('A short, descriptive name for the maintenance window, e.g. "DB01 patching".'),
       description: z
         .string()
-        .max(MAX_MESSAGE_LENGTH)
+        .max(MAX_TEXT_FIELD_LENGTH)
         .optional()
         .describe('Optional longer description of the planned work.'),
       hostIds: IdArraySchema.optional().describe(
@@ -274,7 +278,7 @@ export const UpdateMaintenanceInputSchema = lazySchema(() =>
         'The maintenance ID to update, from createMaintenance or getMaintenances.'
       ),
       name: z.string().min(1).max(MAX_NAME_LENGTH).optional().describe('New name for the window.'),
-      description: z.string().max(MAX_MESSAGE_LENGTH).optional().describe('New description.'),
+      description: z.string().max(MAX_TEXT_FIELD_LENGTH).optional().describe('New description.'),
       hostIds: IdArraySchema.optional().describe(
         'Replace the target hosts with this list. Provide alongside groupIds to replace both, or omit to leave hosts unchanged.'
       ),
@@ -352,7 +356,7 @@ export const GetHostsInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(1000)
+      .max(MAX_RESULTS)
       .optional()
       .describe('Maximum number of hosts to return. Defaults to 100.'),
   })
@@ -410,7 +414,7 @@ export const GetItemHistoryInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(1000)
+      .max(MAX_RESULTS)
       .optional()
       .describe('Maximum number of history values to return, most recent first. Defaults to 100.'),
   })

@@ -272,6 +272,12 @@ describe('AnsibleControllerConnector', () => {
   });
 
   describe('listJobTemplates', () => {
+    it("accepts page sizes up to Controller's default MAX_PAGE_SIZE of 200", () => {
+      const { input } = AnsibleControllerConnector.actions.listJobTemplates;
+      expect(() => input.parse({ pageSize: 200 })).not.toThrow();
+      expect(() => input.parse({ pageSize: 201 })).toThrow();
+    });
+
     it('returns slim template summaries', async () => {
       mockRequest.mockResolvedValue(
         okResponse({

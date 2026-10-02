@@ -9,15 +9,24 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-const MAX_LABEL_ENTRIES = 50;
+const DYNATRACE_MAX_EVENT_PROPERTIES = 100;
+const DYNATRACE_MAX_EVENT_PROPERTY_KEY_LENGTH = 100;
+const DYNATRACE_MAX_EVENT_PROPERTY_VALUE_LENGTH = 4096;
+// Dynatrace documents no length limit on problem comment messages.
+const MAX_COMMENT_LENGTH = 65_536;
+// Dynatrace documents no maximum maintenance window duration; one year.
+const MAX_MAINTENANCE_WINDOW_MINUTES = 525_600;
 
 const eventPropertiesSchema = z
-  .record(z.string().max(100), z.string().max(4096))
-  .refine((props) => Object.keys(props).length <= MAX_LABEL_ENTRIES, {
-    message: `At most ${MAX_LABEL_ENTRIES} event properties are allowed.`,
+  .record(
+    z.string().max(DYNATRACE_MAX_EVENT_PROPERTY_KEY_LENGTH),
+    z.string().max(DYNATRACE_MAX_EVENT_PROPERTY_VALUE_LENGTH)
+  )
+  .refine((props) => Object.keys(props).length <= DYNATRACE_MAX_EVENT_PROPERTIES, {
+    message: `At most ${DYNATRACE_MAX_EVENT_PROPERTIES} event properties are allowed.`,
   })
   .describe(
-    'Map of event properties (max 50 entries). Use dt.event.* / dt.davis.* for classic behavior, dt.entity.* to attach entities, or any non-dt.* key for custom metadata.'
+    'Map of event properties (max 100 entries). Use dt.event.* / dt.davis.* for classic behavior, dt.entity.* to attach entities, or any non-dt.* key for custom metadata.'
   );
 
 export const DynatraceListProblemsInputSchema = lazySchema(() =>
@@ -102,7 +111,7 @@ export const DynatraceCloseProblemInputSchema = lazySchema(() =>
     message: z
       .string()
       .min(1)
-      .max(5000)
+      .max(MAX_COMMENT_LENGTH)
       .describe('Closing comment recorded on the problem, e.g. "Remediated by workflow XYZ".'),
   })
 );
@@ -111,7 +120,11 @@ export type DynatraceCloseProblemInput = z.infer<typeof DynatraceCloseProblemInp
 export const DynatraceAddProblemCommentInputSchema = lazySchema(() =>
   z.object({
     problemId: z.string().min(1).max(200).describe('ID of the problem to comment on.'),
-    message: z.string().min(1).max(5000).describe('Comment text to post on the problem.'),
+    message: z
+      .string()
+      .min(1)
+      .max(MAX_COMMENT_LENGTH)
+      .describe('Comment text to post on the problem.'),
     context: z
       .string()
       .max(500)
@@ -401,8 +414,8 @@ export const DynatraceCreateMaintenanceWindowInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(10080)
-      .describe('Duration of the maintenance window in minutes (1 to 10080 = 7 days).'),
+      .max(MAX_MAINTENANCE_WINDOW_MINUTES)
+      .describe('Duration of the maintenance window in minutes (1 to 525600 = 1 year).'),
     description: z
       .string()
       .max(2000)

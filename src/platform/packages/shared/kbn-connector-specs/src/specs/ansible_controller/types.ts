@@ -10,7 +10,9 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_STRING_LENGTH = 2048;
-const MAX_PAGE_SIZE = 100;
+// Controller's default `MAX_PAGE_SIZE` setting; larger page_size values are silently capped.
+const MAX_PAGE_SIZE = 200;
+const MAX_LAUNCH_CREDENTIALS = 100;
 const MAX_EXTRA_VARS_JSON_CHARS = 65536;
 
 export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
@@ -124,7 +126,7 @@ export const LaunchJobTemplateInputSchema = lazySchema(() =>
       .describe('Override inventory id when the template asks for it.'),
     credentials: z
       .array(z.union([z.number().int(), z.string().max(MAX_STRING_LENGTH)]))
-      .max(MAX_PAGE_SIZE)
+      .max(MAX_LAUNCH_CREDENTIALS)
       .optional()
       .describe('Credential ids to use for this launch.'),
     scmBranch: z
