@@ -13,7 +13,6 @@ import {
 import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
-  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from '../client/errors';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -32,7 +31,6 @@ const mapStatusCode = (error: Error): number => {
 describe('rethrowInvestigationClientError', () => {
   it.each([
     [new InvestigationNotFoundError('investigation-1'), 404],
-    [new InvestigationMetadataMissingError('investigation-1'), 400],
     [new InvestigationUnavailableError('Unavailable'), 503],
     [new InvestigationQuotaDeniedError(), 429],
     [new NightshiftModelNotFoundError('missing-model'), 400],
