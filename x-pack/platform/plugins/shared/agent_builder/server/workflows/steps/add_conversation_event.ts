@@ -15,20 +15,12 @@ import type { ConversationStepDeps } from '../registry';
 
 export const addConversationEventStepDefinition = ({
   getConversationClient,
-  isExperimentalEnabled,
 }: ConversationStepDeps) =>
   createServerStepDefinition({
     ...addConversationEventStepCommonDefinition,
     handler: async (context: StepHandlerContext<AddConversationEventInputSchema>) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        if (!(await isExperimentalEnabled(request))) {
-          return {
-            error: new Error(
-              'Conversation event steps require experimental features to be enabled'
-            ),
-          };
-        }
         const client = await getConversationClient(request);
         const input = context.input;
 

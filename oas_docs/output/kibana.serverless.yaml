@@ -1068,12 +1068,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available
                   required:
                     - access_mode
                 avatar_color:
@@ -1130,14 +1131,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available
                     tools:
                       items:
                         additionalProperties: false
@@ -1602,12 +1603,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available
                   required:
                     - access_mode
                 avatar_color:
@@ -1664,14 +1666,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available
                     tools:
                       items:
                         additionalProperties: false
@@ -1862,7 +1864,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/agents/{id}/access_control
-      x-state: Technical Preview
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -1923,7 +1925,7 @@ paths:
                         maxLength: 1024
                         minLength: 1
                         type: string
-                        x-state: Technical Preview
+                        x-state: Generally available
                       name:
                         description: Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.
                         maxLength: 1024
@@ -2023,7 +2025,7 @@ paths:
                 { "type": "user", "id": "u_bob_profile_uid", "role": "user" }
               ]
             }
-      x-state: Technical Preview
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2576,7 +2578,7 @@ paths:
                 { "type": "text_note", "data": { "text": "A note on this conversation" } }
               ]
             }
-      x-state: Experimental
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2750,7 +2752,7 @@ paths:
                 { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
               ]
             }
-      x-state: Technical Preview
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3495,7 +3497,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview
+                  x-state: Generally available
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -3977,7 +3979,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview
+                  x-state: Generally available
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.

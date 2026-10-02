@@ -211,7 +211,6 @@ export class AgentBuilderPlugin
         }
         return services.execution;
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
     registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
@@ -230,7 +229,6 @@ export class AgentBuilderPlugin
           source: 'workflow',
         });
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
     registerAgentBuilderHandlerContext({ coreSetup });

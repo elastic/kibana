@@ -34,7 +34,6 @@ export const createGenerateConfigPrompt = ({
   parsedExistingConfig,
   preserveESQL = false,
   applyChartRules = false,
-  additionalContext,
 }: {
   nlQuery: string;
   esqlQuery: string;
@@ -44,7 +43,6 @@ export const createGenerateConfigPrompt = ({
   parsedExistingConfig?: VisualizationConfig | null;
   preserveESQL?: boolean;
   applyChartRules?: boolean;
-  additionalContext?: string;
 }): BaseMessageLike[] => {
   const keepsExistingQueries = preserveESQL && Boolean(existingConfig);
 
@@ -74,7 +72,6 @@ ${JSON.stringify(schema)}
   "config": { ... }
 }
 \`\`\``,
-    additionalContext ?? '',
   ];
 
   return [

@@ -35,19 +35,16 @@ describe('addConversationEventStepDefinition', () => {
   };
 
   const buildDefinition = (
-    convOverrides: Parameters<typeof createWorkflowStepConversationClientMock>[0] = {},
-    { experimental = true }: { experimental?: boolean } = {}
+    convOverrides: Parameters<typeof createWorkflowStepConversationClientMock>[0] = {}
   ) => {
     const conv = createWorkflowStepConversationClientMock(convOverrides);
     const agents = createWorkflowStepAgentRegistryMock();
-    const isExperimentalEnabled = jest.fn().mockResolvedValue(experimental);
     const definition = addConversationEventStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
       getExecutionService: jest.fn(),
-      isExperimentalEnabled,
     });
-    return { conv, isExperimentalEnabled, definition };
+    return { conv, definition };
   };
 
   it('creates expected step definition structure', () => {
@@ -98,19 +95,6 @@ describe('addConversationEventStepDefinition', () => {
       },
       { source: 'workflow' }
     );
-  });
-
-  it('returns an error without writing when experimental features are disabled', async () => {
-    const { conv, definition } = buildDefinition({}, { experimental: false });
-
-    const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
-
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        message: expect.stringMatching(/experimental features/i),
-      }),
-    });
-    expect(conv.addCustomEvents).not.toHaveBeenCalled();
   });
 
   it('propagates validation errors for unknown event types', async () => {
