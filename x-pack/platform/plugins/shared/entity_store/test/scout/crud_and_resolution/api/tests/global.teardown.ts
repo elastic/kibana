@@ -11,10 +11,6 @@ import { uninstallEntityStoreSuiteWithKbnClient } from '../../../common/fixtures
 globalTeardownHook(
   'Uninstall Entity Store for CRUD and resolution API suite',
   async ({ esClient, kbnClient }) => {
-    await uninstallEntityStoreSuiteWithKbnClient({
-      esClient,
-      kbnClient,
-      suiteId: 'crud_and_resolution',
-    });
+    await uninstallEntityStoreSuiteWithKbnClient({ esClient, kbnClient });
   }
 );
