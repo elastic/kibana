@@ -17,6 +17,7 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const TIMEOUT_CHECK = 3000;
+const MORE_POPOVER = 'side-nav-popover-More';
 
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
@@ -48,7 +49,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           await browser.pressKeys(browser.keys.ESCAPE);
           // Wait for popover to close
           await retry.waitFor('popover to close after Escape', async () => {
-            const popoverExists = await testSubjects.exists('side-nav-popover-More');
+            const popoverExists = await testSubjects.exists(MORE_POPOVER);
             return !popoverExists;
           });
         }
@@ -57,7 +58,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await moreMenuItem.click();
         // Wait for the More menu popover to appear
         await retry.waitFor('More menu popover to appear after click', async () => {
-          return await testSubjects.exists('side-nav-popover-More');
+          return await testSubjects.exists(MORE_POPOVER);
         });
 
         isExpanded = await moreMenuItem.getAttribute('aria-expanded');
@@ -110,6 +111,38 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     }
     return found;
   }
+
+  // A nav item renders either in the primary rail or inside the "More" popover, never both, and the
+  // popover is layered over the rail. So a hit outside the popover means the fallback mis-fired and
+  // left the popover masking the item, where it would intercept every click on it.
+  async function waitForReachableNavItem(
+    description: string,
+    existsIn: (scope?: string) => Promise<boolean>
+  ) {
+    await retry.waitFor(`${description} to be clickable`, async () => {
+      // A bounded wait rather than an instant probe: the rail re-renders while the app switches, and
+      // a momentary miss here expands "More" over an item that is about to appear in the rail.
+      if (await existsIn()) {
+        return true;
+      }
+
+      await expandMoreIfNeeded();
+
+      if (await existsIn(MORE_POPOVER)) {
+        return true;
+      }
+
+      if (!(await existsIn())) {
+        return false;
+      }
+
+      await collapseMoreIfNeeded();
+      return true;
+    });
+  }
+
+  const scopedSubj = (selector: string, scope?: string) =>
+    scope ? `${scope} > ${selector}` : selector;
 
   return {
     // check that chrome ui is in project/solution mode
@@ -204,86 +237,32 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
         log.debug('SolutionNavigation.sidenav.clickLink', JSON.stringify(by));
 
-        const clickLinkByDeepLinkId = async (deepLinkId: string) => {
-          // Wait for link to be available (visible and enabled)
-          // This includes waiting for nested panel contents to render after panel animations
-          await retry.waitFor(`deepLinkId ${deepLinkId} to be clickable`, async () => {
-            // First check if it's in main nav or any open panels (e.g., nested panel)
-            // Use a longer timeout to account for panel animations
-            const existsInMain = await testSubjects.exists(`~nav-item-deepLinkId-${deepLinkId}`);
-            if (existsInMain) {
-              return true;
-            }
+        const clickLinkBySubj = async (description: string, selector: string) => {
+          await waitForReachableNavItem(description, (scope) =>
+            testSubjects.waitForExists(scopedSubj(selector, scope), { timeout: TIMEOUT_CHECK })
+          );
 
-            // If not in main nav/panels, try expanding More menu
-            await expandMoreIfNeeded();
-
-            const existsInMore = await testSubjects.exists(`~nav-item-deepLinkId-${deepLinkId}`);
-            return existsInMore;
-          });
-
-          await retry.tryForTime(30000, async () => {
-            const link = await testSubjects.find(
-              `~nav-item-deepLinkId-${deepLinkId}`,
-              TIMEOUT_CHECK
-            );
-            await link.click();
-          });
-        };
-
-        const clickLinkByNavId = async (navId: string) => {
-          // Wait for link to be available (visible and enabled)
-          // This includes waiting for nested panel contents to render after panel animations
-          await retry.waitFor(`navId ${navId} to be clickable`, async () => {
-            // First check if it's in main nav or any open panels (e.g., nested panel)
-            // Use a longer timeout to account for panel animations
-            const existsInMain = await testSubjects.exists(`~nav-item-id-${navId}`);
-            if (existsInMain) {
-              return true;
-            }
-
-            // If not in main nav/panels, try expanding More menu
-            await expandMoreIfNeeded();
-
-            const existsInMore = await testSubjects.exists(`~nav-item-id-${navId}`);
-            return existsInMore;
-          });
-
-          await retry.tryForTime(30000, async () => {
-            const link = await testSubjects.find(`~nav-item-id-${navId}`, TIMEOUT_CHECK);
-            await link.click();
-          });
+          // `WebElementWrapper.click` already re-finds and retries on interception and staleness.
+          const link = await testSubjects.find(selector, TIMEOUT_CHECK);
+          await link.click();
         };
 
         const clickLinkByText = async (text: string) => {
-          // Wait for link to be available
-          // This includes waiting for nested panel contents to render after panel animations
-          await retry.waitFor(`link with text "${text}" to be available`, async () => {
-            // First check if it's in main nav or any open panels (e.g., nested panel)
-            let link = await getByVisibleText('~nav-item', text);
-            if (link) {
-              return true;
-            }
-
-            // If not in main nav/panels, try expanding More menu
-            await expandMoreIfNeeded();
-
-            link = await getByVisibleText('~nav-item', text);
-            if (link) {
-              return true;
-            }
-
-            return false;
-          });
+          await waitForReachableNavItem(`link with text "${text}"`, async (scope) =>
+            Boolean(await getByVisibleText(scopedSubj('~nav-item', scope), text))
+          );
 
           const link = await getByVisibleText('~nav-item', text);
           await link!.click();
         };
 
         if ('deepLinkId' in by) {
-          await clickLinkByDeepLinkId(by.deepLinkId);
+          await clickLinkBySubj(
+            `deepLinkId ${by.deepLinkId}`,
+            `~nav-item-deepLinkId-${by.deepLinkId}`
+          );
         } else if ('navId' in by) {
-          await clickLinkByNavId(by.navId);
+          await clickLinkBySubj(`navId ${by.navId}`, `~nav-item-id-${by.navId}`);
         } else {
           await clickLinkByText(by.text);
         }
