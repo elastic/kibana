@@ -127,8 +127,8 @@ steps:
     type: ai.agent
     agent-id: nightshift.investigation
     connector-id: '{{ steps.resolve_model.output.connector_id }}'
-    plugin-id: 'significant_events_investigation'
-    aggregate-by: 'significant_events'
+    plugin-id: 'nightshift_investigation'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

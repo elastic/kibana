@@ -27,8 +27,9 @@ import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
+import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
+import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
@@ -39,15 +40,21 @@ import {
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
+import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
+import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { registerCortexTelemetryEvents } from './telemetry';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
+import { createMemoryService, type MemoryService } from './memory/internal_client';
+import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -101,9 +108,9 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
-  private inference?: NightshiftInvestigationsStartDeps['inference'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
   private uiSettings?: CoreStart['uiSettings'];
@@ -114,11 +121,16 @@ export class NightshiftInvestigationsPlugin
   private security?: CoreStart['security'];
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
+  private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
+  private readonly memoryService: MemoryService;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
+    this.memoryService = createMemoryService({
+      getElasticsearch: () => this.elasticsearch,
+    });
   }
 
   setup(
@@ -131,8 +143,13 @@ export class NightshiftInvestigationsPlugin
       new InvestigationLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    const telemetry = setupNightshiftTelemetry({
+      analytics: core.analytics,
+      logger: this.logger.get('telemetry'),
+    });
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
       registerCortexTelemetryEvents(core.analytics);
@@ -189,6 +206,7 @@ export class NightshiftInvestigationsPlugin
       registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
+        memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
         telemetryConnectorId,
       });
@@ -310,24 +328,58 @@ export class NightshiftInvestigationsPlugin
             getActions: () => this.actionsStart,
           })
         );
-        if (this.cortexEnabled) {
-          plugins.workflowsExtensions.registerStepDefinition(
-            cortexHydrateStepDefinition({
-              getSandboxStart: () => this.sandboxStart,
-              analytics: core.analytics,
-              logger: this.logger.get('cortex'),
-            })
-          );
-          plugins.workflowsExtensions.registerStepDefinition(
-            cortexOptimizeStepDefinition({
-              getInference: () => this.inference,
-              getSavedObjects: () => this.savedObjects,
-              getUiSettings: () => this.uiSettings,
-              analytics: core.analytics,
-              logger: this.logger.get('cortex'),
-            })
-          );
-        }
+        // Obtain + materialize steps are always registered so the combined workflow
+        // can no-op a disabled writer branch instead of failing on an unknown
+        // step type. Obtain runs first and hands sandbox_id to both writers.
+        plugins.workflowsExtensions.registerStepDefinition(
+          obtainSandboxStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('sandbox'),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          cortexHydrateStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            analytics: core.analytics,
+            logger: this.logger.get('cortex'),
+            isEnabled: () => this.cortexEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryMaterializeToSandboxStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            getMemoryEsClient: this.memoryService.getClientWhenReady,
+            logger: this.logger.get('memory'),
+            isEnabled: () => this.memoryEnabled,
+            telemetry,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          composeHydrateNotificationsStepDefinition()
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          cortexOptimizeStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            analytics: core.analytics,
+            logger: this.logger.get('cortex'),
+            isEnabled: () => this.cortexEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryOptimizeStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            getMemoryEsClient: this.memoryService.getClientWhenReady,
+            logger: this.logger.get('memory'),
+            isEnabled: () => this.memoryEnabled,
+            telemetry,
+          })
+        );
         if (this.decisionTreesEnabled) {
           const decisionTreeLogger = this.logger.get('decision_trees');
           plugins.workflowsExtensions.registerStepDefinition(
@@ -409,9 +461,9 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
-    this.inference = plugins.inference;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.uiSettings = coreStart.uiSettings;
@@ -420,6 +472,10 @@ export class NightshiftInvestigationsPlugin
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
+
+    if (this.memoryEnabled) {
+      void this.memoryService.initialize(this.logger.get('memory'));
+    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
@@ -583,8 +639,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
-    if (this.cortexEnabled) {
-      await installCortexWorkflows({ client });
+    if (this.cortexEnabled || this.memoryEnabled) {
+      await installSandboxMaterializeWorkspaceWorkflow({ client });
+      await installAgentOptimizationsWorkflow({ client });
     }
     if (this.decisionTreesEnabled) {
       await installDecisionTreeWorkflows({ client });
