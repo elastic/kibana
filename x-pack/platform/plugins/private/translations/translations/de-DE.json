@@ -33787,7 +33787,6 @@
     "xpack.ml.timeSeriesExplorer.mlSingleMetricViewerChart.annotationsErrorTitle": "Beim Abrufen von Anmerkungen ist ein Fehler aufgetreten",
     "xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo": "Die Liste enthält Werte aus den Ergebnissen des Modell-Plots.",
     "xpack.ml.timeSeriesExplorer.noResultsFoundLabel": "Keine Ergebnisse gefunden",
-    "xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel": "Keine Jobs für Einzelmetriken gefunden",
     "xpack.ml.timeSeriesExplorer.orderLabel": "Sortieren",
     "xpack.ml.timeSeriesExplorer.pageTitle": "Single Metric Viewer",
     "xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel": "Mittelwert",
