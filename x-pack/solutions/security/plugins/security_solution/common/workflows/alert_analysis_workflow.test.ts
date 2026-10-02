@@ -105,15 +105,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
     generated_summary: 'Hosts look compromised.',
     connector_id: 'connector-1',
     agent_id: 'elastic-ai-agent',
-    impacted_entities: [
-      {
-        entity_type: 'host' as const,
-        name: 'ws-1',
-        alert_count: 2,
-        verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
-      },
-    ],
-    impacted_entities_truncated: 'false',
+    impacted_entities: [{ id: 'host:ws-1', name: 'ws-1', type: 'host' as const }],
     missing_alert_ids: [] as string[],
   };
 
@@ -148,15 +140,14 @@ describe('AlertAnalysisWorkflowOutput', () => {
     ).toBe(false);
   });
 
-  it('rejects when impacted_entities exceeds 50', () => {
+  it('rejects when impacted_entities exceeds 100', () => {
     expect(
       AlertAnalysisWorkflowOutput.safeParse({
         ...sampleOutput,
-        impacted_entities: Array.from({ length: 51 }, (_, i) => ({
-          entity_type: 'host' as const,
+        impacted_entities: Array.from({ length: 101 }, (_, i) => ({
+          id: `host:host-${i}`,
           name: `host-${i}`,
-          alert_count: 1,
-          verdicts: { true_positive: 1, false_positive: 0, inconclusive: 0 },
+          type: 'host' as const,
         })),
       }).success
     ).toBe(false);
@@ -175,15 +166,6 @@ describe('AlertAnalysisWorkflowOutput', () => {
         true_positive_count: 1,
         false_positive_count: 0,
         inconclusive_count: 0,
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects non-canonical impacted_entities_truncated values', () => {
-    expect(
-      AlertAnalysisWorkflowOutput.safeParse({
-        ...sampleOutput,
-        impacted_entities_truncated: 'yes',
       }).success
     ).toBe(false);
   });
@@ -231,8 +213,7 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
     expect(yamlKeys).toEqual(zodKeys);
     expect([...workflow.outputs.required].sort()).toEqual(zodKeys);
 
-    expect(workflow.outputs.properties.impacted_entities_truncated.enum).toEqual(['true', 'false']);
-    expect(workflow.outputs.properties.impacted_entities.maxItems).toBe(50);
+    expect(workflow.outputs.properties.impacted_entities.maxItems).toBe(100);
     expect(workflow.outputs.properties.missing_alert_ids?.maxItems).toBe(1000);
     expect(workflow.outputs.properties.verdicts.items?.properties?.rationale?.maxLength).toBe(500);
     expect(
