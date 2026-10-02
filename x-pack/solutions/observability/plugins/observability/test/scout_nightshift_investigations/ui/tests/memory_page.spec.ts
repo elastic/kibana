@@ -46,6 +46,12 @@ const MERGED_SOURCE_A = slug('merged-checkout-dns');
 const MERGED_SOURCE_B = slug('merged-checkout-pool');
 const MERGED_GRANDPARENT = slug('merged-checkout-connection-pool');
 const OTHER_SPACE_MEMORY = slug('other-space-only');
+/**
+ * Archived memories this run seeds in the default Space: one retired by a person
+ * and three merge sources. The header's archived count has to see them while the
+ * sidebar is showing Active.
+ */
+const ARCHIVED_SEEDED_COUNT = 4;
 /** Enough rows to cross the 25-per-page list query, all on one `updated_at`. */
 const PAGE_SIZE_SLUGS = Array.from({ length: 30 }, (_, index) => slug(`paged-${index}`));
 
@@ -657,6 +663,14 @@ test.describe(
       return parsed;
     };
 
+    /** The archived count in the home header, as a number. */
+    const headerArchived = async (page: ScoutPage): Promise<number> => {
+      const text = await page.testSubj.locator('nightshiftMemoryHomeStats').innerText();
+      const parsed = Number.parseInt(text.split('·')[1] ?? '', 10);
+      expect(Number.isNaN(parsed)).toBe(false);
+      return parsed;
+    };
+
     /** The rows the two home lists show, as page ids, without the section headings. */
     const homeRowIds = async (page: ScoutPage): Promise<string[]> => {
       const rows = page.testSubj
@@ -679,6 +693,11 @@ test.describe(
       await gotoMemory(page, kbnUrl);
       const unfilteredTotal = await headerTotal(page);
       expect(KEYWORD_DOCS_WITH_INVOKE_AGENT.length).toBeGreaterThan(1);
+
+      // The sidebar opens on Active, so an archived count of zero here would be
+      // the count being taken from a listing that excludes archived memories. The
+      // fixture archives four: one by a person and three merge sources.
+      expect(await headerArchived(page)).toBe(ARCHIVED_SEEDED_COUNT);
 
       // One cell for three spellings: the chart selects the canonical key.
       await clickLargestCell(page, 'invoke_agent');

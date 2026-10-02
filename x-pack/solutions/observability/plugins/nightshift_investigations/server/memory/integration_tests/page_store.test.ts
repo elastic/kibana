@@ -187,6 +187,18 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
       'memory_cache-warmup',
     ]);
 
+    // The header's two numbers under every list filter. `total` follows the
+    // listing; `archived` is the Space's own count, so the Active view no longer
+    // reports "0 archived" for a Space that has one.
+    for (const [filter, total] of [
+      ['active', 1],
+      ['archived', 1],
+      ['all', 2],
+    ] as const) {
+      const page = await storeA.listPaginated({ filter });
+      expect(page.stats).toMatchObject({ total, archived: 1 });
+    }
+
     // Restoring clears the reason, which is the only archived marker.
     const restored = await storeA.unarchive(pageA.id);
     expect(restored).toEqual(expect.objectContaining({ id: pageA.id, archived: false }));
@@ -248,15 +260,20 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
       // Recall must not hand an archived memory to the agent.
       expect(await store.retrieve()).toEqual([]);
 
-      // Nothing active, and the header counts it as archived rather than active.
+      // Nothing active, and the header still counts the archived one: the
+      // archived number is scoped to the Space, not to the active listing.
       const active = await store.listPaginated({ filter: 'active' });
       expect(active.pages).toEqual([]);
       expect(active.total).toBe(0);
-      expect(active.stats).toMatchObject({ total: 0, archived: 0 });
+      expect(active.stats).toMatchObject({ total: 0, archived: 1 });
 
       const archived = await store.listPaginated({ filter: 'archived' });
       expect(archived.pages.map(({ id }) => id)).toEqual(['memory_legacy-archived']);
       expect(archived.stats).toMatchObject({ total: 1, archived: 1 });
+
+      // And so does the unfiltered listing, which has no reason to differ.
+      const all = await store.listPaginated({ filter: 'all' });
+      expect(all.stats).toMatchObject({ total: 1, archived: 1 });
     } finally {
       await esClient.delete({ index: MEMORY_INDEX, id: storedId, refresh: 'wait_for' });
     }

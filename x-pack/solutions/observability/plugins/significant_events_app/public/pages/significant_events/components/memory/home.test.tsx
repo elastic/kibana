@@ -184,4 +184,28 @@ describe('MemoryHome keyword filtering', () => {
     expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith([]);
     expect(listedTitles()).toHaveLength(PAGES.length);
   });
+
+  it('shows the Space-wide archived count, which does not follow the keyword selection', () => {
+    // The sidebar lists Active by default, so the archived number used to be
+    // counted inside a listing that excludes archived memories and read zero.
+    // It is the Space's own count now, and it stays put when a keyword narrows
+    // the view, because the Archived list is not keyword-filtered.
+    const archived = 4;
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <MemoryHome
+            pages={PAGES}
+            stats={{ total: PAGES.length, archived }}
+            onSelectPage={jest.fn()}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+    const header = screen.getByTestId('nightshiftMemoryHomeStats');
+    expect(header).toHaveTextContent(`${archived} archived`);
+
+    clickCell('kafka');
+    expect(header).toHaveTextContent(`${archived} archived`);
+  });
 });

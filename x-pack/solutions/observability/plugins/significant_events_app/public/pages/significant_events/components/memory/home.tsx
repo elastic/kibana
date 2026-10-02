@@ -84,7 +84,10 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
 
   // The header count follows the keyword selection, because the store-wide
   // number would describe memories the lists below are not showing. The archived
-  // count stays store-wide: the archived list is not filtered by keywords.
+  // count does not: the sidebar's Archived list is not filtered by keywords, so a
+  // count that followed the selection would not describe what that list shows.
+  // The server answers it over the Space whatever the sidebar's filter is, so the
+  // Active view does not read "0 archived".
   const total = (selectedKeywords.length > 0 ? keywordResult?.stats.total : stats?.total) ?? 0;
   const archived = stats?.archived ?? 0;
 

@@ -223,20 +223,111 @@ describe('createMemoryPageStore', () => {
     expect(serialized[0]).toContain('"attributes.status":"archived"');
     expect(serialized[1]).toContain('"attributes.status":"archived"');
     expect(serialized[3]).toContain('"attributes.status":"archived"');
-    // The archived count is a filter aggregation, so it has to use the same clause
-    // or the header reports a legacy archived page as active.
+    // The archived count is a filter aggregation over the whole index, so it has
+    // to use the same clause or the header reports a legacy archived page as
+    // active — and it cannot hang off the listing query, which matches no
+    // archived document at all under `active`.
     const statsQuery = calls[2][0] as unknown as {
-      aggs: { archived: { filter: unknown } };
+      aggs: { archived: { global: unknown; aggs: { inScope: { filter: unknown } } } };
     };
-    expect(statsQuery.aggs.archived.filter).toEqual({
+    expect(statsQuery.aggs.archived.global).toEqual({});
+    expect(statsQuery.aggs.archived.aggs.inScope.filter).toEqual({
       bool: {
-        should: [
-          { exists: { field: 'attributes.archive_reason' } },
-          { term: { 'attributes.status': 'archived' } },
+        filter: [
+          { term: { tags: 'memory' } },
+          { term: { 'attributes.space_id': 'space-a' } },
+          {
+            bool: {
+              should: [
+                { exists: { field: 'attributes.archive_reason' } },
+                { term: { 'attributes.status': 'archived' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
         ],
-        minimum_should_match: 1,
       },
     });
+  });
+
+  it('counts every archived memory in scope whatever the list filter is', async () => {
+    // The header's "N archived" describes the Archived list, which the
+    // Active/Archived/All choice does not narrow. Counting inside the active
+    // listing reported 0 for every Space that had any archived memory at all.
+    const search = jest.fn(({ size }: { size?: number }) =>
+      Promise.resolve(
+        size === 0
+          ? {
+              hits: { total: { value: 9 } },
+              aggregations: { archived: { inScope: { doc_count: 4 } } },
+            }
+          : { hits: { total: { value: 9 }, hits: [] } }
+      )
+    );
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    for (const filter of ['active', 'archived', 'all'] as const) {
+      search.mockClear();
+      const result = await store.listPaginated({ filter });
+      // `total` follows the listing; `archived` is the Space's own count.
+      expect(result.stats).toEqual({ total: 9, archived: 4 });
+
+      // `listPaginated` searches for the page, then aggregates the stats.
+      expect(search.mock.calls).toHaveLength(2);
+
+      const statsQuery = search.mock.calls[1][0] as unknown as {
+        query: { bool: { filter: object[] } };
+        aggs: { archived: { aggs: { inScope: { filter: { bool: { filter: object[] } } } } } };
+      };
+      // The listing query carries the active/archived choice...
+      const listingFilter = JSON.stringify(statsQuery.query.bool.filter);
+      expect(listingFilter.includes('"attributes.archive_reason"')).toBe(filter !== 'all');
+      // ...and the archived count does not: it hangs off a `global` aggregation
+      // and filters the tenancy scope itself, with no `must_not` to exclude them.
+      const archivedFilter = statsQuery.aggs.archived.aggs.inScope.filter.bool.filter;
+      expect(archivedFilter).toHaveLength(3);
+      expect(archivedFilter[0]).toEqual({ term: { tags: 'memory' } });
+      expect(archivedFilter[1]).toEqual({ term: { 'attributes.space_id': 'space-a' } });
+      expect(JSON.stringify(archivedFilter[2])).toContain('"minimum_should_match":1');
+      expect(JSON.stringify(archivedFilter[2])).not.toContain('must_not');
+    }
+  });
+
+  it('scopes the archived count to the selected keywords, like the total', async () => {
+    const search = jest.fn(({ size }: { size?: number }) =>
+      Promise.resolve(
+        size === 0
+          ? {
+              hits: { total: { value: 2 } },
+              aggregations: { archived: { inScope: { doc_count: 1 } } },
+            }
+          : { hits: { total: { value: 2 }, hits: [] } }
+      )
+    );
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const result = await store.listPaginated({ tags: ['invoke-agent'] });
+
+    expect(result.stats).toEqual({ total: 2, archived: 1 });
+    expect(search.mock.calls).toHaveLength(2);
+    const statsQuery = search.mock.calls[1][0] as unknown as {
+      aggs: { archived: { aggs: { inScope: { filter: unknown } } } };
+    };
+    // The keyword's spellings reach the archived count too, so an archived
+    // memory written before tags were canonicalized is still counted.
+    expect(JSON.stringify(statsQuery.aggs.archived.aggs.inScope.filter)).toContain(
+      '"tags":"invoke-agent"'
+    );
   });
 
   it('paginates on a total order so no row is skipped or repeated', async () => {
@@ -275,7 +366,7 @@ describe('createMemoryPageStore', () => {
         return Promise.resolve({
           hits: { total: { value: 3, relation: 'eq' }, hits: [] },
           aggregations: {
-            archived: { doc_count: 1 },
+            archived: { inScope: { doc_count: 1 } },
           },
         });
       }
@@ -369,7 +460,7 @@ describe('createMemoryPageStore', () => {
           ? {
               hits: { total: { value: 137, relation: 'eq' }, hits: [] },
               aggregations: {
-                archived: { doc_count: 12 },
+                archived: { inScope: { doc_count: 12 } },
               },
             }
           : {
@@ -459,7 +550,10 @@ describe('createMemoryPageStore', () => {
     const search = jest.fn((request: { size?: number }) =>
       Promise.resolve(
         request.size === 0
-          ? { hits: { total: { value: 2 } }, aggregations: { archived: { doc_count: 0 } } }
+          ? {
+              hits: { total: { value: 2 } },
+              aggregations: { archived: { inScope: { doc_count: 0 } } },
+            }
           : { hits: { total: { value: 2 }, hits: [] } }
       )
     );
