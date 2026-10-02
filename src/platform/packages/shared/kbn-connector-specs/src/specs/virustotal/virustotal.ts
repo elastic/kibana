@@ -33,8 +33,9 @@ const VIRUSTOTAL_URL_SCHEMA = z.url({
   hostname: VIRUSTOTAL_DOMAIN_REGEX,
 });
 
-// VirusTotal accepts direct file uploads up to 32 MB; base64 encoding inflates that by 4/3.
-const VIRUSTOTAL_MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((32 * 1024 * 1024) / 3);
+// VirusTotal accepts direct file uploads up to 32 MB: https://docs.virustotal.com/reference/files-scan
+const VIRUSTOTAL_MAX_FILE_MB = 32;
+const VIRUSTOTAL_MAX_FILE_BYTES = VIRUSTOTAL_MAX_FILE_MB * 1024 * 1024;
 // VirusTotal documents no URL length limit; URLs beyond 2048 characters are legal.
 const MAX_URL_LENGTH = 8192;
 
@@ -331,14 +332,17 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     submitFile: {
       isTool: true,
-      description:
-        'Upload a file (base64-encoded, up to 32 MB) to VirusTotal for scanning. Use this only when scanFileHash reports the hash as not found. Returns the analysis ID and links; pass the ID to getAnalysisResults to retrieve the verdict once the analysis completes.',
+      description: `Upload a file (base64-encoded, up to ${VIRUSTOTAL_MAX_FILE_MB} MB) to VirusTotal for scanning. Use this only when scanFileHash reports the hash as not found. Returns the analysis ID and links; pass the ID to getAnalysisResults to retrieve the verdict once the analysis completes.`,
       scope: 'write',
       input: lazySchema(() =>
         z.object({
           file: z
             .string()
-            .max(VIRUSTOTAL_MAX_FILE_BASE64_LENGTH)
+            .max(Math.ceil(VIRUSTOTAL_MAX_FILE_BYTES / 3) * 4)
+            .refine(
+              (value) => Buffer.from(value, 'base64').byteLength <= VIRUSTOTAL_MAX_FILE_BYTES,
+              { message: `File must not exceed ${VIRUSTOTAL_MAX_FILE_MB} MB once decoded` }
+            )
             .describe('Base64-encoded file content'),
           filename: z.string().max(255).optional().describe('Original filename'),
           failOnError: z

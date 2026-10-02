@@ -845,6 +845,19 @@ describe('VirusTotalConnector', () => {
     });
   });
 
+  describe('submitFile file size', () => {
+    const maxBytes = 32 * 1024 * 1024;
+    const isValid = (bytes: number) =>
+      VirusTotalConnector.actions.submitFile.input.safeParse({
+        file: Buffer.alloc(bytes).toString('base64'),
+      }).success;
+
+    it('is bounded at 32 MB once decoded', () => {
+      expect(isValid(maxBytes)).toBe(true);
+      expect(isValid(maxBytes + 1)).toBe(false);
+    });
+  });
+
   describe('URL length bounds', () => {
     const prefix = 'https://example.com/';
     const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
