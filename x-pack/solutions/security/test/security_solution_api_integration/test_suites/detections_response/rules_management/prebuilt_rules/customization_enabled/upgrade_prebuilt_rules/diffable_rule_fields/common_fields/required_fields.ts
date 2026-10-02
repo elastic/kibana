@@ -5,8 +5,24 @@
  * 2.0.
  */
 
-import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import expect from 'expect';
+import {
+  ModeEnum,
+  ThreeWayDiffConflict,
+  ThreeWayDiffOutcome,
+  ThreeWayMergeOutcome,
+  UpgradeConflictResolutionEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
+import {
+  DEFAULT_RULE_UPDATE_VERSION,
+  DEFAULT_TEST_RULE_ID,
+  setUpRuleUpgrade,
+} from '../../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
+import {
+  fetchFirstPrebuiltRuleUpgradeReviewDiff,
+  performUpgradePrebuiltRules,
+} from '../../../../../../utils';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
   testFieldUpgradeReview,
@@ -401,7 +417,7 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
       );
     });
 
-    describe('customized with an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
+    describe('customized with an upgrade resulting in a conflict (ABC diff case, solvable conflict)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -437,7 +453,8 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
           ruleUpgradeAssets,
           diffableRuleFieldName: 'required_fields',
           expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          isSolvableConflict: false,
+          isSolvableConflict: true,
+          expectedMergeOutcome: ThreeWayMergeOutcome.Target,
           expectedFieldDiffValues: {
             base: [
               {
@@ -462,7 +479,25 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
             ],
             merged: [
               {
-                name: 'fieldB',
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+          diffableRuleFieldName: 'required_fields',
+          expectedFieldsAfterUpgrade: {
+            required_fields: [
+              {
+                name: 'fieldC',
                 type: 'string',
                 ecs: false,
               },
@@ -495,6 +530,274 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
         },
         getService
       );
+    });
+
+    describe('reordered without an upgrade (AAA diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldB',
+              type: 'string',
+            },
+          ],
+        },
+        patch: {
+          required_fields: [
+            {
+              name: 'fieldB',
+              type: 'string',
+              ecs: false,
+            },
+            {
+              name: 'fieldA',
+              type: 'string',
+              ecs: false,
+            },
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldB',
+              type: 'string',
+            },
+          ],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'required_fields',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
+    });
+
+    describe('reordered with an upgrade (AAB diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldB',
+              type: 'string',
+            },
+          ],
+        },
+        patch: {
+          required_fields: [
+            {
+              name: 'fieldB',
+              type: 'string',
+              ecs: false,
+            },
+            {
+              name: 'fieldA',
+              type: 'string',
+              ecs: false,
+            },
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldC',
+              type: 'string',
+            },
+          ],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'required_fields',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldB',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+            current: [
+              {
+                name: 'fieldB',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+            target: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+            merged: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'required_fields',
+          expectedFieldsAfterUpgrade: {
+            required_fields: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+          },
+        },
+        getService
+      );
+    });
+
+    describe('shipped required fields list shrinks while the installed rule has a stale bloated list', () => {
+      const es = getService('es');
+      const supertest = getService('supertest');
+      const log = getService('log');
+      const detectionsApi = getService('detectionsApi');
+      const deps = { es, supertest, log, detectionsApi };
+
+      const bloatedRequiredFields = Array.from({ length: 50 }, (_, i) => ({
+        name: `field${i}`,
+        type: 'keyword',
+      }));
+      const targetRequiredFields = bloatedRequiredFields.slice(0, 5);
+
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          required_fields: bloatedRequiredFields.slice(0, 3),
+        },
+        // Emulates a stale stored list flagged as customized after the package rewrote the base version
+        patch: {
+          required_fields: bloatedRequiredFields,
+        },
+        upgrade: {
+          type: 'query',
+          required_fields: targetRequiredFields,
+        },
+      };
+
+      it('upgrades to the target list and does not flag "required_fields" as customized afterwards', async () => {
+        await setUpRuleUpgrade({
+          assets: ruleUpgradeAssets,
+          removeInstalledAssets: false,
+          deps,
+        });
+
+        const diff = await fetchFirstPrebuiltRuleUpgradeReviewDiff(supertest);
+
+        expect(diff.fields.required_fields).toMatchObject({
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
+          merge_outcome: ThreeWayMergeOutcome.Target,
+        });
+
+        await performUpgradePrebuiltRules(es, supertest, {
+          mode: ModeEnum.SPECIFIC_RULES,
+          on_conflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+          rules: [
+            {
+              rule_id: DEFAULT_TEST_RULE_ID,
+              revision: 1,
+              version: DEFAULT_RULE_UPDATE_VERSION,
+              fields: {
+                required_fields: { pick_version: 'MERGED' },
+              },
+            },
+          ],
+        });
+
+        const { body: upgradedRule } = await detectionsApi
+          .readRule({ query: { rule_id: DEFAULT_TEST_RULE_ID } })
+          .expect(200);
+
+        expect(upgradedRule.required_fields).toEqual(
+          targetRequiredFields.map((field) => ({ ...field, ecs: false }))
+        );
+        expect(upgradedRule.rule_source).toMatchObject({
+          is_customized: false,
+          customized_fields: [],
+        });
+
+        // Saving the rule unchanged, with reordered required fields, must keep it non-customized
+        const { body: savedRule } = await detectionsApi
+          .updateRule({
+            body: {
+              ...upgradedRule,
+              id: undefined,
+              required_fields: [...upgradedRule.required_fields].reverse(),
+            },
+          })
+          .expect(200);
+
+        expect(savedRule.rule_source).toMatchObject({
+          is_customized: false,
+          customized_fields: [],
+        });
+      });
     });
 
     describe('without historical versions', () => {
