@@ -67,8 +67,9 @@ const stripBackticks = (name: string): string => name.replace(/`/g, '');
 /**
  * Every column the config binds to a chart role. Lens bindings are `{ column }`
  * objects under role keys, including ones nested inside another binding; Vega
- * bindings are `encoding.<channel>.field` on the root view and any layered or
- * concatenated view, with quantitative channels treated as measures.
+ * bindings are `encoding.<channel>.field` and `facet` fields on the root view
+ * and any layered or concatenated view, with quantitative channels treated as
+ * measures. Fields a Vega transform produces are not ES|QL columns and are left out.
  * Custom content is an HTML template and binds nothing.
  */
 export function collectColumnBindings(visualization: ExtractedVisualization): ColumnBinding[] {
@@ -118,6 +119,20 @@ const VEGA_VIEW_KEYS = ['layer', 'concat', 'hconcat', 'vconcat', 'spec'] as cons
 // Aggregates that count rows, so the field they reference may be of any type.
 const VEGA_COUNTING_AGGREGATES = new Set(['count', 'distinct', 'valid', 'missing']);
 
+// Output names Vega-Lite transforms use when the spec does not set `as`.
+const VEGA_DEFAULT_TRANSFORM_OUTPUTS: Record<string, readonly string[]> = {
+  fold: ['key', 'value'],
+  density: ['value', 'density'],
+  quantile: ['prob', 'value'],
+};
+
+// Fields a view's transforms produce, inherited by its nested views. A pivot
+// names its outputs after data values, so bindings under it cannot be resolved.
+interface VegaScope {
+  derivedFields: ReadonlySet<string>;
+  hasPivot: boolean;
+}
+
 // A `.`, `[` or `]` not preceded by a backslash.
 const UNESCAPED_VEGA_ACCESSOR = /(^|[^\\])[.[\]]/;
 
@@ -138,38 +153,115 @@ function collectVegaBindings(spec: unknown): ColumnBinding[] {
     return [];
   }
   const bindings: ColumnBinding[] = [];
-  walkVegaView(parsed, 'spec', bindings);
+  walkVegaView(parsed, 'spec', { derivedFields: new Set(), hasPivot: false }, bindings);
   return bindings;
 }
 
-function walkVegaView(view: unknown, path: string, bindings: ColumnBinding[]): void {
+function walkVegaView(
+  view: unknown,
+  path: string,
+  parentScope: VegaScope,
+  bindings: ColumnBinding[]
+): void {
   if (!isRecord(view)) {
     return;
   }
+  const scope = extendVegaScope(parentScope, view.transform);
+  const addBinding = (definitionPath: string, definition: unknown) => {
+    if (!isRecord(definition) || typeof definition.field !== 'string') {
+      return;
+    }
+    const column = unescapeVegaField(definition.field);
+    // Transform outputs are not ES|QL columns; checking them would flag a valid chart.
+    if (scope.hasPivot || scope.derivedFields.has(column)) {
+      return;
+    }
+    bindings.push({
+      path: definitionPath,
+      column,
+      role: vegaRoleFor(definition),
+      ...(UNESCAPED_VEGA_ACCESSOR.test(definition.field) ? { nestedVegaAccess: true } : {}),
+    });
+  };
+
   if (isRecord(view.encoding)) {
     for (const [channel, value] of Object.entries(view.encoding)) {
       // Channels such as `tooltip` accept an array of field definitions.
-      const definitions = Array.isArray(value) ? value : [value];
-      definitions.forEach((definition, index) => {
-        if (!isRecord(definition) || typeof definition.field !== 'string') {
-          return;
-        }
-        bindings.push({
-          path: `${path}.encoding.${channel}${Array.isArray(value) ? `[${index}]` : ''}`,
-          column: unescapeVegaField(definition.field),
-          role: vegaRoleFor(definition),
-          ...(UNESCAPED_VEGA_ACCESSOR.test(definition.field) ? { nestedVegaAccess: true } : {}),
-        });
-      });
+      if (Array.isArray(value)) {
+        value.forEach((definition, index) =>
+          addBinding(`${path}.encoding.${channel}[${index}]`, definition)
+        );
+      } else {
+        addBinding(`${path}.encoding.${channel}`, value);
+      }
+    }
+  }
+  // The facet operator holds one field definition, or one per `row` / `column`.
+  if (isRecord(view.facet)) {
+    const { facet } = view;
+    if (typeof facet.field === 'string') {
+      addBinding(`${path}.facet`, facet);
+    } else {
+      for (const channel of ['row', 'column'] as const) {
+        addBinding(`${path}.facet.${channel}`, facet[channel]);
+      }
     }
   }
   for (const key of VEGA_VIEW_KEYS) {
     const child = view[key];
     if (Array.isArray(child)) {
-      child.forEach((item, index) => walkVegaView(item, `${path}.${key}[${index}]`, bindings));
+      child.forEach((item, index) =>
+        walkVegaView(item, `${path}.${key}[${index}]`, scope, bindings)
+      );
     } else {
-      walkVegaView(child, `${path}.${key}`, bindings);
+      walkVegaView(child, `${path}.${key}`, scope, bindings);
     }
+  }
+}
+
+function extendVegaScope(parentScope: VegaScope, transforms: unknown): VegaScope {
+  if (!Array.isArray(transforms) || transforms.length === 0) {
+    return parentScope;
+  }
+  const derivedFields = new Set(parentScope.derivedFields);
+  let { hasPivot } = parentScope;
+  for (const transform of transforms) {
+    if (!isRecord(transform)) {
+      continue;
+    }
+    if ('pivot' in transform) {
+      hasPivot = true;
+    }
+    for (const [operator, defaults] of Object.entries(VEGA_DEFAULT_TRANSFORM_OUTPUTS)) {
+      if (operator in transform && transform.as === undefined) {
+        defaults.forEach((name) => derivedFields.add(name));
+      }
+    }
+    collectTransformOutputs(transform, derivedFields);
+  }
+  return { derivedFields, hasPivot };
+}
+
+// `as` sits on the transform itself or on nested op definitions (`aggregate[].as`, `window[].as`).
+function collectTransformOutputs(value: unknown, derivedFields: Set<string>): void {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectTransformOutputs(item, derivedFields));
+    return;
+  }
+  if (!isRecord(value)) {
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key !== 'as') {
+      collectTransformOutputs(child, derivedFields);
+      continue;
+    }
+    const names = Array.isArray(child) ? child : [child];
+    names.forEach((name) => {
+      if (typeof name === 'string') {
+        derivedFields.add(unescapeVegaField(name));
+      }
+    });
   }
 }
 
