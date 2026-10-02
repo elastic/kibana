@@ -7,6 +7,7 @@
 
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,7 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
@@ -229,44 +231,68 @@ export function RequestFlyoutFailedCalls() {
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '60px',
-      actions: [
-        {
-          name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.viewInDiscover', {
-            defaultMessage: 'View in Discover',
-          }),
-          description: i18n.translate(
-            'xpack.apm.requestFlyout.failedCalls.action.viewInDiscover.description',
-            { defaultMessage: 'Open failed traces for this failure category in Discover' }
-          ),
-          type: 'icon' as const,
-          icon: 'discoverApp',
-          href: (item: FailedCallBucket) => buildDiscoverHref(item) ?? '',
-          available: (item: FailedCallBucket) => buildDiscoverHref(item) != null,
-          'data-test-subj': 'requestFlyoutFailedCallsViewInDiscover',
-        },
-        {
-          name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.openTrace', {
-            defaultMessage: 'Open a failed trace',
-          }),
-          description: i18n.translate(
-            'xpack.apm.requestFlyout.failedCalls.action.openTrace.description',
-            { defaultMessage: 'Open a sample failed trace in the waterfall view' }
-          ),
-          type: 'icon' as const,
-          icon: 'timeline',
-          enabled: (item: FailedCallBucket) => item.sampleTraceId != null,
-          available: (item: FailedCallBucket) => item.sampleTraceId != null,
-          href: (item: FailedCallBucket) =>
-            item.sampleTraceId
-              ? link('/link-to/trace/{traceId}', {
-                  path: { traceId: item.sampleTraceId },
-                  query: { rangeFrom, rangeTo },
-                })
-              : '#',
-          'data-test-subj': 'requestFlyoutFailedCallsOpenTrace',
-        },
-      ],
+      width: '40px',
+      render: (item: FailedCallBucket) => {
+        const discoverHref = buildDiscoverHref(item);
+        const traceHref = item.sampleTraceId
+          ? link('/link-to/trace/{traceId}', {
+              path: { traceId: item.sampleTraceId },
+              query: { rangeFrom, rangeTo },
+            })
+          : undefined;
+        if (!discoverHref && !traceHref) return null;
+        const menuActions: ActionGroups = [
+          {
+            id: 'failedCallActions',
+            actions: [
+              ...(discoverHref
+                ? [
+                    {
+                      id: 'viewInDiscover',
+                      name: i18n.translate(
+                        'xpack.apm.requestFlyout.failedCalls.action.viewInDiscover',
+                        { defaultMessage: 'View in Discover' }
+                      ),
+                      icon: 'discoverApp',
+                      href: discoverHref,
+                    },
+                  ]
+                : []),
+              ...(traceHref
+                ? [
+                    {
+                      id: 'openTrace',
+                      name: i18n.translate(
+                        'xpack.apm.requestFlyout.failedCalls.action.openTrace',
+                        { defaultMessage: 'Open a failed trace' }
+                      ),
+                      icon: 'timeline',
+                      href: traceHref,
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ];
+        return (
+          <ActionsContextMenu
+            id={`failedCallsActions-${item.type}`}
+            actions={menuActions}
+            dataTestSubjPrefix="requestFlyoutFailedCallsActions"
+            button={
+              <EuiButtonIcon
+                data-test-subj="requestFlyoutFailedCallsActionsButton"
+                aria-label={i18n.translate(
+                  'xpack.apm.requestFlyout.failedCalls.actions.ariaLabel',
+                  { defaultMessage: 'Actions' }
+                )}
+                iconType="boxesVertical"
+                color="text"
+              />
+            }
+          />
+        );
+      },
     },
   ];
 

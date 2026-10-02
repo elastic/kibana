@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTable, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, type EuiBasicTableColumn } from '@elastic/eui';
+import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { DependencyOperation } from '@kbn/apm-api-shared';
@@ -148,23 +149,45 @@ export function RequestFlyoutOperations() {
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '60px',
-      actions: [
-        {
-          name: i18n.translate('xpack.apm.requestFlyout.operations.action.viewInDiscover', {
-            defaultMessage: 'View traces in Discover',
-          }),
-          description: i18n.translate(
-            'xpack.apm.requestFlyout.operations.action.viewInDiscover.description',
-            { defaultMessage: 'Open traces for this operation in Discover' }
-          ),
-          type: 'icon' as const,
-          icon: 'discoverApp',
-          href: (item: DependencyOperation) => buildDiscoverHref(item) ?? '',
-          available: (item: DependencyOperation) => buildDiscoverHref(item) != null,
-          'data-test-subj': 'requestFlyoutOperationViewInDiscover',
-        },
-      ],
+      width: '40px',
+      render: (item: DependencyOperation) => {
+        const discoverHref = buildDiscoverHref(item);
+        if (!discoverHref) return null;
+        const menuActions: ActionGroups = [
+          {
+            id: 'operationActions',
+            actions: [
+              {
+                id: 'viewInDiscover',
+                name: i18n.translate(
+                  'xpack.apm.requestFlyout.operations.action.viewInDiscover',
+                  { defaultMessage: 'View traces in Discover' }
+                ),
+                icon: 'discoverApp',
+                href: discoverHref,
+              },
+            ],
+          },
+        ];
+        return (
+          <ActionsContextMenu
+            id={`operationActions-${item.spanName}`}
+            actions={menuActions}
+            dataTestSubjPrefix="requestFlyoutOperationActions"
+            button={
+              <EuiButtonIcon
+                data-test-subj="requestFlyoutOperationActionsButton"
+                aria-label={i18n.translate(
+                  'xpack.apm.requestFlyout.operations.actions.ariaLabel',
+                  { defaultMessage: 'Actions' }
+                )}
+                iconType="boxesVertical"
+                color="text"
+              />
+            }
+          />
+        );
+      },
     },
   ];
 
