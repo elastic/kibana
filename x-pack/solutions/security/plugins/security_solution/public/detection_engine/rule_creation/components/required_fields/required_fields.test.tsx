@@ -460,6 +460,82 @@ describe('RequiredFields form part', () => {
     });
   });
 
+  describe('folding long lists', () => {
+    const longInitialState = Array.from({ length: 20 }, (_, i) => ({
+      name: `field${i}`,
+      type: 'keyword',
+    }));
+
+    it('shows only the first 15 required fields', () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      expect(screen.getByDisplayValue('field14')).toBeVisible();
+      expect(screen.queryByDisplayValue('field15')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent('Show 5 more');
+    });
+
+    it('shows and hides the folded required fields', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.getByDisplayValue('field19')).toBeVisible();
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
+    });
+
+    it('does not show the fold button for short lists', () => {
+      render(<TestForm initialState={longInitialState.slice(0, 15)} />);
+
+      expect(screen.queryByTestId('toggleRequiredFieldsFoldButton')).not.toBeInTheDocument();
+    });
+
+    it('shows a newly added required field while the list is folded', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await addRequiredFieldRow();
+
+      expect(screen.getByTestId('requiredFieldNameSelect-empty')).toBeVisible();
+      expect(screen.queryByDisplayValue('field15')).not.toBeInTheDocument();
+    });
+
+    it('submits folded required fields', async () => {
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={longInitialState} onSubmit={handleSubmit} />);
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: longInitialState,
+          isValid: true,
+        });
+      });
+    });
+
+    it('unfolds the list when a folded required field is invalid', async () => {
+      const handleSubmit = jest.fn();
+      const initialState = [...longInitialState, { name: 'field0', type: 'keyword' }];
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      });
+
+      expect(screen.getByDisplayValue('field19')).toBeVisible();
+    });
+  });
+
   describe('form submission', () => {
     it('submits undefined when no required fields are selected', async () => {
       const handleSubmit = jest.fn();

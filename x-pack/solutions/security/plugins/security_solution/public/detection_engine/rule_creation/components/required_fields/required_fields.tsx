@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewFieldBase } from '@kbn/es-query';
@@ -126,16 +126,22 @@ const RequiredFieldsList = ({
     return false;
   };
 
-  const selectedFieldNames = fieldValue.map(({ name }) => name);
+  const allFieldNamesSet = useMemo(() => new Set(allFieldNames), [allFieldNames]);
 
-  const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
+  const selectedFieldNamesKey = fieldValue.map(({ name }) => name).join('\u0000');
+
+  const availableFieldNames = useMemo(() => {
+    const selectedFieldNames = new Set(selectedFieldNamesKey.split('\u0000'));
+
+    return allFieldNames.filter((name) => !selectedFieldNames.has(name));
+  }, [allFieldNames, selectedFieldNamesKey]);
 
   const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
     if (
       !isIndexPatternLoading &&
       /* Creating a warning only if "name" value is filled in */
       name !== '' &&
-      !allFieldNames.includes(name) &&
+      !allFieldNamesSet.has(name) &&
       !isSubfieldOfFlattenedField(name)
     ) {
       warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
@@ -162,6 +168,17 @@ const RequiredFieldsList = ({
   });
 
   const hasEmptyFieldName = fieldValue.some(({ name }) => name === '');
+
+  /*
+    Rendering a row is expensive (two comboboxes per row), so long lists are folded.
+    Folded rows are still mounted as form fields to keep their values in the form.
+  */
+  const [isExpanded, setIsExpanded] = useState(false);
+  const expand = useCallback(() => setIsExpanded(true), []);
+  const toggleExpanded = useCallback(() => setIsExpanded((value) => !value), []);
+  const foldedRowsCount = isExpanded
+    ? 0
+    : items.filter((item, index) => isRowFolded({ item, index, isExpanded })).length;
 
   const hasWarnings = Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
 
@@ -205,10 +222,12 @@ const RequiredFieldsList = ({
         data-test-subj="requiredFieldsFormRow"
       >
         <>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <RequiredFieldRow
               key={item.id}
               item={item}
+              isFolded={isRowFolded({ item, index, isExpanded })}
+              onFoldedRowError={expand}
               removeItem={removeItem}
               getWarnings={getWarnings}
               typesByFieldName={typesByFieldName}
@@ -216,6 +235,19 @@ const RequiredFieldsList = ({
               parentFieldPath={path}
             />
           ))}
+
+          {(foldedRowsCount > 0 || isExpanded) && (
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              onClick={toggleExpanded}
+              data-test-subj="toggleRequiredFieldsFoldButton"
+            >
+              {isExpanded
+                ? i18n.SHOW_LESS_REQUIRED_FIELDS
+                : i18n.SHOW_MORE_REQUIRED_FIELDS(foldedRowsCount)}
+            </EuiButtonEmpty>
+          )}
 
           <EuiSpacer size="s" />
           <EuiButtonEmpty
@@ -234,3 +266,16 @@ const RequiredFieldsList = ({
 };
 
 export const RequiredFields = React.memo(RequiredFieldsComponent);
+
+const MAX_UNFOLDED_ROWS = 15;
+
+/* Newly added rows are never folded so the user can fill them in */
+const isRowFolded = ({
+  item,
+  index,
+  isExpanded,
+}: {
+  item: ArrayItem;
+  index: number;
+  isExpanded: boolean;
+}): boolean => !isExpanded && index >= MAX_UNFOLDED_ROWS && !item.isNew;

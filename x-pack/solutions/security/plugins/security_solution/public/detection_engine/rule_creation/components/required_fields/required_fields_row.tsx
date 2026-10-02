@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -28,6 +28,8 @@ import type {
 
 interface RequiredFieldRowProps {
   item: ArrayItem;
+  isFolded: boolean;
+  onFoldedRowError: () => void;
   removeItem: (id: number) => void;
   typesByFieldName: Record<string, string[] | undefined>;
   availableFieldNames: string[];
@@ -40,6 +42,8 @@ interface RequiredFieldRowProps {
 
 export const RequiredFieldRow = ({
   item,
+  isFolded,
+  onFoldedRowError,
   removeItem,
   typesByFieldName,
   availableFieldNames,
@@ -62,9 +66,10 @@ export const RequiredFieldRow = ({
       key={item.id}
       path={item.path}
       config={rowFieldConfig}
-      component={RequiredFieldField}
+      component={isFolded ? FoldedRequiredFieldField : RequiredFieldField}
       readDefaultValueOnForm={!item.isNew}
       componentProps={{
+        onError: onFoldedRowError,
         itemId: item.id,
         autoFocus: item.isNew,
         onRemove: handleRemove,
@@ -168,4 +173,22 @@ const RequiredFieldField = ({
       </EuiFlexGroup>
     </EuiFormRow>
   );
+};
+
+interface FoldedRequiredFieldFieldProps {
+  field: FieldHook<RequiredFieldInput>;
+  onError: () => void;
+}
+
+/* Keeps a folded row registered in the form without rendering it, unfolds rows on validation errors */
+const FoldedRequiredFieldField = ({ field, onError }: FoldedRequiredFieldFieldProps) => {
+  const hasErrors = field.errors.length > 0;
+
+  useEffect(() => {
+    if (hasErrors) {
+      onError();
+    }
+  }, [hasErrors, onError]);
+
+  return null;
 };

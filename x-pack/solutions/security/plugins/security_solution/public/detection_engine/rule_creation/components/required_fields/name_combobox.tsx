@@ -35,14 +35,23 @@ export function NameComboBox({
   const { value, setValue } = field;
   const { euiTheme } = useEuiTheme();
 
+  /*
+    Building options for all available field names is expensive with long required fields lists
+    since every row has its own combobox. Options are built only once the user interacts with the combobox.
+  */
+  const [shouldBuildAllOptions, setShouldBuildAllOptions] = useState(Boolean(autoFocus));
+  const handleFocus = useCallback(() => setShouldBuildAllOptions(true), []);
+
   const selectableNameOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       /* Not adding an empty string to the list of selectable field names */
-      (value.name ? [value.name] : []).concat(availableFieldNames).map((name) => ({
-        label: name,
-        value: name,
-      })),
-    [availableFieldNames, value.name]
+      (value.name ? [value.name] : [])
+        .concat(shouldBuildAllOptions ? availableFieldNames : [])
+        .map((name) => ({
+          label: name,
+          value: name,
+        })),
+    [availableFieldNames, value.name, shouldBuildAllOptions]
   );
 
   /*
@@ -110,6 +119,7 @@ export function NameComboBox({
       options={selectableNameOptions}
       selectedOptions={selectedNameOption ? [selectedNameOption] : []}
       onChange={handleNameChange}
+      onFocus={handleFocus}
       isClearable={false}
       onCreateOption={handleAddCustomName}
       isInvalid={Boolean(nameError)}
