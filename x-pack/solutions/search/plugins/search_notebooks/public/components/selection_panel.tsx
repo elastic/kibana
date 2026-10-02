@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiHorizontalRule,
   EuiPanel,
@@ -36,8 +37,17 @@ export const SelectionPanel = ({
         data-test-subj={`console-embedded-notebook-select-btn-${id}`}
         data-telemdata-telemetry-id={`console-embedded-notebook-select-btn-${id}`}
         onClick={() => onClick(id)}
-        color={isSelected ? 'primary' : 'subdued'}
-        hasBorder
+        color={isSelected ? 'primary' : 'plain'}
+        hasBorder={false}
+        hasShadow={false}
+        borderRadius="none"
+        css={css`
+          &:hover,
+          &:focus {
+            background-color: ${euiTheme.colors.backgroundBasePrimary};
+            box-shadow: none;
+          }
+        `}
       >
         <EuiTitle size="xxs">
           <h5>

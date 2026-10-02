@@ -34,6 +34,7 @@ export const SearchNotebook = ({ notebookId }: SearchNotebookProps) => {
   return (
     <EuiPanel
       paddingSize="xl"
+      hasBorder={false}
       hasShadow={false}
       style={{ display: 'flex', justifyContent: 'center' }}
       data-test-subj={`console-embedded-notebook-view-panel-${notebookId}`}

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SearchLabsButtonPanel = () => {
   return (
-    <EuiPanel hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false}>
       <EuiFlexGroup justifyContent="center">
         <EuiButton
           href="https://github.com/elastic/elasticsearch-labs/tree/main/notebooks"

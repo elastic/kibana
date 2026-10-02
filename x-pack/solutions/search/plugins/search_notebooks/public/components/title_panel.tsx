@@ -10,7 +10,7 @@ import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
 export const TitlePanel: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <>
-    <EuiPanel hasShadow={false} paddingSize="s">
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       <EuiText size="s" color="subdued">
         {children}
       </EuiText>
