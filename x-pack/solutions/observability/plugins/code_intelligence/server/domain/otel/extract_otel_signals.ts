@@ -163,6 +163,35 @@ const languageOf = (path: string): string => {
   return languageByExtension[extension] ?? (extension || 'unknown');
 };
 
+/** Final key segments that name a quantity worth averaging or ranking by percentile. */
+const measureKeyPattern: RegExp =
+  /(?:^|_)(?:count|amount|total|duration|latency|size|length|bytes|ms|seconds?|cost|price)$/;
+/** Final key segments that name an identifier, index, ordinal, counter, flag, or code rather than a quantity. */
+const identifierKeyPattern: RegExp =
+  /(?:^|_)(?:id|idx|index|number|num|no|code|cvv|pin|ordinal|seq|attempt|try|retry|retries|section|skip|fetch|offset|page|shard|partition|port|pid|version|flag|flags|enabled|disabled)$|(?:^|_)(?:is|has)_[a-z0-9]+$/;
+/** A bare loop or index variable, optionally wrapped in numeric conversions such as `int(i)`. */
+const indexExpressionPattern: RegExp =
+  /^(?:(?:u?int(?:8|16|32|64)?|long|float(?:32|64)?|double|number|integer)\s*\(\s*)*(?:[ijk]|idx|index)\s*\)*$/i;
+
+/** Lower-cases a key and separates its words with underscores across dot, dash, and camelCase styles. */
+const normalizedKeyWords = (key: string): string =>
+  key
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/[.-]/g, '_')
+    .toLowerCase();
+
+/** Returns whether a numeric attribute holds an identifier-like value that only supports grouping. */
+const isIdentifierLikeNumber = (key: string, expression: string): boolean => {
+  /** Word-separated key used by both suffix vocabularies. */
+  const words: string = normalizedKeyWords(key);
+  if (measureKeyPattern.test(words)) return false;
+  return identifierKeyPattern.test(words) || indexExpressionPattern.test(expression.trim());
+};
+
+/** Chooses between a grouping hint and a numeric aggregation hint for a value known to be numeric. */
+const numericValueHint = (key: string, expression: string = ''): OtelValueHint =>
+  isIdentifierLikeNumber(key, expression) ? 'id' : 'number';
+
 /** Infers the useful value shape from an attribute key and immediate value expression. */
 const inferValueHint = (key: string, expression: string = ''): OtelValueHint => {
   /** Both key and expression may convey a stable type convention. */
@@ -171,7 +200,7 @@ const inferValueHint = (key: string, expression: string = ''): OtelValueHint => 
   if (/(?:^|[._])(count|amount|total|duration|latency|size|length|ms|seconds?)$/.test(key)) {
     return 'number';
   }
-  if (/\b\d+(?:\.\d+)?\b/.test(expression)) return 'number';
+  if (/\b\d+(?:\.\d+)?\b/.test(expression)) return numericValueHint(key, expression);
   if (/(?:^|[._])id$/.test(key)) return 'id';
   if (/enum|status|type|kind|state/.test(normalized)) return 'enum';
   return 'unknown';
@@ -563,7 +592,7 @@ export const extractOtelSignalsFromWindows = (
     }
     /** Constructor patterns preserve cross-language attribute keys even when setters hold wrapped values. */
     const attributeConstructorPattern: RegExp =
-      /(?:attribute\.(String|Bool|Int|Int64|Float64|StringSlice)|AttributeKey\.(stringKey|longKey|booleanKey|doubleKey)|KeyValue::new|(string|long|boolean|double)Key)\s*\(\s*(["'`])([a-zA-Z][\w.-]+)\4/g;
+      /(?:attribute\.(String|Bool|Int|Int64|Float64|StringSlice)|AttributeKey\.(stringKey|longKey|booleanKey|doubleKey)|KeyValue::new|(string|long|boolean|double)Key)\s*\(\s*(["'`])([a-zA-Z][\w.-]+)\4(?:\s*,\s*([^,)\n]*\)*))?/g;
     for (const match of content.matchAll(attributeConstructorPattern)) {
       if (!isExecutableMatch(content, window.initialCommentState, match, window.path)) continue;
       /** Constructor match groups carry the key in the final capture. */
@@ -575,7 +604,7 @@ export const extractOtelSignalsFromWindows = (
       const valueHint: OtelValueHint = /bool/.test(typeToken)
         ? 'bool'
         : /int|long|float|double/.test(typeToken)
-        ? 'number'
+        ? numericValueHint(key, match[6])
         : inferValueHint(key);
       addSignal({
         seen,

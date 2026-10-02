@@ -338,3 +338,105 @@ describe('log signatures', () => {
     ).toHaveLength(1);
   });
 });
+
+describe('log signatures followed by a process exit', () => {
+  /** Go evidence selects Go literal rules for the exit scan. */
+  const goEvidence = [{ excerpt: 'log.Println(...)', line: 131, path: 'cmd/migrate/main.go' }];
+
+  it('raises a classifier info level to fatal when os.Exit follows the Go call', () => {
+    const signatures = extractLogSignatures({
+      classified: { level: 'info', staticMessage: 'Failed to create destination store:' },
+      content: [
+        'if err != nil {',
+        '\t\tlog.Println("Failed to create destination store:", err)',
+        '',
+        '\t\tos.Exit(1)',
+        '\t}',
+      ].join('\n'),
+      evidence: goEvidence,
+      matchedLineIndex: 1,
+    });
+
+    expect(signatures).toEqual([expect.objectContaining({ level: 'fatal', severity: 80 })]);
+  });
+
+  it('raises a Kotlin classifier level to fatal when exitProcess follows a multi-line call', () => {
+    const signatures = extractLogSignatures({
+      classified: { level: 'error', staticMessage: 'Kafka consumer failed' },
+      content: [
+        '} catch (e: Exception) {',
+        '    logger.error(',
+        '        "Kafka consumer failed (retrying is pointless)", e',
+        '    )',
+        '    exitProcess(1)',
+        '}',
+      ].join('\n'),
+      evidence: [{ excerpt: 'logger.error(', line: 50, path: 'src/main.kt' }],
+      matchedLineIndex: 1,
+    });
+
+    expect(signatures).toEqual([expect.objectContaining({ level: 'fatal', severity: 80 })]);
+  });
+
+  it('raises a source-matched Java level to fatal when System.exit follows on the same line', () => {
+    const signatures = extractLogSignatures({
+      content:
+        'logger.warn("cannot bind port; shutting down"); System.exit(2);\nlogger.warn("unrelated")',
+      evidence: [{ excerpt: 'logger.warn(...)', line: 10, path: 'src/Main.java' }],
+    });
+
+    expect(signatures).toEqual([
+      expect.objectContaining({ level: 'fatal', message: 'cannot bind port; shutting down' }),
+      expect.objectContaining({ level: 'warn', message: 'unrelated' }),
+    ]);
+  });
+
+  it('keeps the level when the exit is outside the logging call block', () => {
+    const signatures = extractLogSignatures({
+      classified: { level: 'info', staticMessage: 'cleanup skipped' },
+      content: ['if err != nil {', '\tlog.Println("cleanup skipped")', '}', 'os.Exit(code)'].join(
+        '\n'
+      ),
+      evidence: goEvidence,
+      matchedLineIndex: 1,
+    });
+
+    expect(signatures).toEqual([expect.objectContaining({ level: 'info', severity: 30 })]);
+  });
+
+  it('keeps the level when the exit follows a different call in the window', () => {
+    const signatures = extractLogSignatures({
+      classified: { level: 'info', staticMessage: 'second' },
+      content: [
+        'log.Println("first")',
+        'os.Exit(1)',
+        '}',
+        'log.Println("second")',
+        'return nil',
+      ].join('\n'),
+      evidence: goEvidence,
+      matchedLineIndex: 3,
+    });
+
+    expect(signatures).toEqual([expect.objectContaining({ level: 'info', severity: 30 })]);
+  });
+
+  it.each([
+    ['an exit at the same Python indentation', '    sys.exit(1)', 'fatal'],
+    ['an exit dedented out of the Python block', 'sys.exit(1)', 'warn'],
+    ['a conditional Python exit', '    sys.exit(1) if failed else None', 'warn'],
+  ])('handles %s', (_name, exitLine, level) => {
+    const signatures = extractLogSignatures({
+      content: ['if failed:', '    logger.warning("migration aborted")', exitLine].join('\n'),
+      evidence: [{ excerpt: 'logger.warning(...)', line: 2, path: 'tools/migrate.py' }],
+    });
+
+    expect(signatures).toEqual([expect.objectContaining({ level })]);
+  });
+
+  it('does not treat exit-prefixed identifiers as a process exit', () => {
+    expect(
+      extractLogSignatures({ content: 'logger.info("shutting down");\nexitCode(1);' })
+    ).toEqual([expect.objectContaining({ level: 'info' })]);
+  });
+});

@@ -17,6 +17,21 @@ const TRACE_SOURCE = 'traces*';
 const METRIC_SOURCE = 'metrics*';
 /** Default percentile used by latency, attribute, and histogram aggregations. */
 const PERCENTILE = 95;
+/**
+ * Final key segments that name payment or credential data, which must not become catalog queries.
+ * Stopgap: replace with a dedicated sensitive-attribute finding once one exists.
+ */
+const sensitiveAttributeKeyPattern: RegExp =
+  /(?:^|_)(?:card_number|cvv|cvc|pan|ssn|password|secret|token|api_key)$/;
+
+/** Returns whether an attribute key names payment or credential data across dot, dash, and camelCase styles. */
+const isSensitiveAttributeKey = (key: string): boolean =>
+  sensitiveAttributeKeyPattern.test(
+    key
+      .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+      .replace(/[.-]/g, '_')
+      .toLowerCase()
+  );
 
 /** Constructs generated template metadata from a codec-compatible pure template. */
 const generatedTemplate = ({
@@ -119,6 +134,7 @@ export const generateOtelTemplates = ({
       }
       case 'attr_key': {
         if (signal.value === undefined || signal.value.length === 0) return [];
+        if (isSensitiveAttributeKey(signal.value)) return [];
         /** Holds the source-derived static attribute key. */
         const value: string = signal.value;
         /** Inlines the source-derived key as a field reference, quoted only when ES|QL requires it. */

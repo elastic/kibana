@@ -30,6 +30,10 @@ export interface LoggingCandidate {
   readonly evidence: readonly SourceLocation[];
   readonly excerpt: string;
   readonly id: string;
+  /** Zero-based line in `sourceWindow` that holds the grep hit. */
+  readonly matchedLineIndex: number;
+  /** Untrimmed source window, bounded like `excerpt`, whose indentation supports statement analysis. */
+  readonly sourceWindow: string;
 }
 
 /** A recoverable discovery error tied to the pattern or source file that caused it. */
@@ -167,13 +171,19 @@ export const discoverLoggingCandidates = async ({
     const matchedLine: string = result.value.lines[location.line - result.value.startLine];
     // Only the hit can prove a non-emission; its adjacent context may contain a real call.
     if (isNonEmittingLoggingLine(matchedLine)) continue;
+    /** Untrimmed window text keeps the line positions and indentation reported by the reader. */
+    const windowText: string = result.value.lines.join('\n');
     /** Bounded excerpt preserves multi-line calls while retaining just local evidence. */
-    const excerpt: string = result.value.lines.join('\n').trim().slice(0, maximumExcerptLength);
+    const excerpt: string = windowText.trim().slice(0, maximumExcerptLength);
     if (excerpt.length === 0) continue;
+    /** Leading whitespace that trimming removes before the excerpt starts. */
+    const leadingWhitespace: number = windowText.length - windowText.trimStart().length;
     candidates.push({
       evidence: [{ excerpt, line: location.line, path: location.path }],
       excerpt,
       id: candidateIdFor(location.path, location.line),
+      matchedLineIndex: location.line - result.value.startLine,
+      sourceWindow: windowText.slice(0, leadingWhitespace + maximumExcerptLength),
     });
   }
 

@@ -10,6 +10,7 @@ import type { ResolvedRepository } from '../models/repository_codec';
 import type { SourceReader } from '../ports/source_reader';
 import { loggingIdiomPatterns } from './idiom_patterns';
 import { discoverLoggingCandidates } from './discover_logging_candidates';
+import { extractLogSignatures } from './extract_log_signatures';
 
 /** Immutable snapshot supplied to each fake source operation. */
 const repository: ResolvedRepository = {
@@ -286,6 +287,78 @@ describe('discoverLoggingCandidates', () => {
       expect.objectContaining({ excerpt: 'logger.info("only")', id: 'src/only.ts:1' }),
     ]);
   });
+
+  it('keeps the untrimmed source window and the hit line within it', async () => {
+    /** The window starts 3 lines above the hit, and its first 2 lines are blank. */
+    const reader = readerWith({
+      grep: async ({ pattern }) =>
+        pattern === loggingIdiomPatterns[0]
+          ? {
+              items: [{ line: 4, path: 'src/blank.go', text: '\tlog.Println("stopping")' }],
+              status: 'complete',
+            }
+          : { items: [], status: 'complete' },
+      readWindow: async ({ endLine, path, startLine }) => ({
+        status: 'success',
+        value: {
+          endLine,
+          lines: ['', '  ', 'if err != nil {', '\tlog.Println("stopping")', '\tos.Exit(1)', '}'],
+          path,
+          startLine,
+        },
+      }),
+    });
+
+    const result = await discoverLoggingCandidates({ reader, repository });
+
+    expect(result.candidates).toEqual([
+      expect.objectContaining({
+        excerpt: 'if err != nil {\n\tlog.Println("stopping")\n\tos.Exit(1)\n}',
+        matchedLineIndex: 3,
+        sourceWindow: '\n  \nif err != nil {\n\tlog.Println("stopping")\n\tos.Exit(1)\n}',
+      }),
+    ]);
+  });
+
+  it.each([
+    ['    sys.exit(1)', 'fatal'],
+    ['sys.exit(1)', 'warn'],
+  ])(
+    'keeps the indentation of a hit after blank lines so exit analysis sees the real block: %s',
+    async (exitLine, level) => {
+      /** Blank lines above the hit make trimming remove the hit line's own indentation. */
+      const reader = readerWith({
+        grep: async ({ pattern }) =>
+          pattern === loggingIdiomPatterns[0]
+            ? {
+                items: [
+                  { line: 4, path: 'tools/migrate.py', text: '    logging.warning("aborted")' },
+                ],
+                status: 'complete',
+              }
+            : { items: [], status: 'complete' },
+        readWindow: async ({ path, startLine }) => ({
+          status: 'success',
+          value: {
+            endLine: 5,
+            lines: ['', '', '', '    logging.warning("aborted")', exitLine],
+            path,
+            startLine,
+          },
+        }),
+      });
+
+      const [candidate] = (await discoverLoggingCandidates({ reader, repository })).candidates;
+      const signatures = extractLogSignatures({
+        classified: { level: 'warn', staticMessage: 'aborted' },
+        content: candidate.sourceWindow,
+        evidence: candidate.evidence,
+        matchedLineIndex: candidate.matchedLineIndex,
+      });
+
+      expect(signatures).toEqual([expect.objectContaining({ level })]);
+    }
+  );
 
   it('diagnoses a successful source window that omits its matched line', async () => {
     /** Reader returns a valid source window whose bounds do not contain the grep hit. */
