@@ -45,7 +45,10 @@ import { ViewInDiscoverButton } from './discover_button';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
-import { useCanvasEvents } from '../stream_management/data_management/stream_detail_canvas/state_management';
+import {
+  useCanvasEvents,
+  useShowConfirmRemoveProcessingModal,
+} from '../stream_management/data_management/stream_detail_canvas/state_management';
 
 const TABS = [
   {
@@ -181,7 +184,8 @@ function StreamFlyoutContent({
       ? requestedTab
       : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const { showProcessingRemovalPrompt } = useCanvasEvents();
+  const { showProcessingRemovalPrompt, hideProcessingRemovalPrompt } = useCanvasEvents();
+  const confirmModalState = useShowConfirmRemoveProcessingModal();
   const [isHeaderMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerId = useGeneratedHtmlId();
   const headerMenuId = useGeneratedHtmlId({ prefix: 'canvasFlyoutHeaderMenu' });
@@ -235,10 +239,18 @@ function StreamFlyoutContent({
     if (definition && !loading && !isProcessingEnabled && selectedTab === 'processing') {
       selectTab('overview');
     }
-    if (definition && !loading && isProcessingEnabled) {
+    if (definition && !loading && isProcessingEnabled && !confirmModalState) {
       setShowProcessing(true);
     }
-  }, [definition, loading, isProcessingEnabled, selectedTab, selectTab]);
+  }, [definition, loading, isProcessingEnabled, selectedTab, selectTab, confirmModalState]);
+
+  useEffect(() => {
+    if (confirmModalState === 'confirmed') {
+      setShowProcessing(false);
+      hideProcessingRemovalPrompt();
+      selectTab('overview');
+    }
+  }, [confirmModalState, selectTab, hideProcessingRemovalPrompt]);
 
   const deleteStream = useCallback(async () => {
     if (!Streams.ingest.all.GetResponse.is(definition)) {

@@ -11,10 +11,10 @@ import React, { useState } from 'react';
 import { useStreamEnrichmentEvents } from '../stream_management/data_management/stream_detail_pipeline_processing/state_management/stream_enrichment_state_machine';
 import { useCanvasEvents } from '../stream_management/data_management/stream_detail_canvas/state_management';
 
-export function StreamRemoveProcessingConfirmationModal() {
+export function StreamRemoveProcessingConfirmationModal({ refresh }: { refresh: () => void }) {
   const modalTitleId = useGeneratedHtmlId();
   const [confirmation, setConfirmation] = useState(false);
-  const { hideProcessingRemovalPrompt, selectTab } = useCanvasEvents();
+  const { hideProcessingRemovalPrompt, confirmProcessingRemoval } = useCanvasEvents();
   const { saveChanges, switchToJsonMode, sendJSONUpdates } = useStreamEnrichmentEvents();
 
   return (
@@ -45,8 +45,8 @@ export function StreamRemoveProcessingConfirmationModal() {
         switchToJsonMode();
         sendJSONUpdates({ steps: [] }, '[]');
         saveChanges({ saveSchemaChanges: true });
-        hideProcessingRemovalPrompt();
-        selectTab('overview');
+        confirmProcessingRemoval();
+        refresh();
       }}
     >
       <>

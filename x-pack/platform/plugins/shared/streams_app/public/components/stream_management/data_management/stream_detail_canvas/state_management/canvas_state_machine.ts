@@ -159,9 +159,18 @@ export const canvasStateMachine = setup({
     storeConfirmationPrompt: assign(({ context, event }) => {
       switch (event.type) {
         case 'flyout.confirmation.prompt':
-          return { confirmations: { ...context.confirmations, [event.confirmation]: true } };
+          return {
+            confirmations: {
+              ...context.confirmations,
+              [event.confirmation]: 'unconfirmed' as const,
+            },
+          };
         case 'flyout.confirmation.answer':
-          return { confirmations: { ...context.confirmations, [event.confirmation]: false } };
+          return {
+            confirmations: { ...context.confirmations, [event.confirmation]: 'confirmed' as const },
+          };
+        case 'flyout.confirmation.close':
+          return { confirmations: { ...context.confirmations, [event.confirmation]: undefined } };
         default:
           return {};
       }

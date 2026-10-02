@@ -94,7 +94,7 @@ export const useCanvasNodePositions = () => {
 };
 
 export const useShowConfirmRemoveProcessingModal = () => {
-  return useCanvasStateSelector((state) => state.context.confirmations.processing ?? false);
+  return useCanvasStateSelector((state) => state.context.confirmations.processing);
 };
 
 export const useCanvasEvents = () => {
@@ -124,9 +124,12 @@ export const useCanvasEvents = () => {
       showProcessingRemovalPrompt: () => {
         service.send({ type: 'flyout.confirmation.prompt', confirmation: 'processing' });
       },
+      confirmProcessingRemoval: () => {
+        service.send({ type: 'flyout.confirmation.answer', confirmation: 'processing' });
+      },
       hideProcessingRemovalPrompt: () => {
         service.send({
-          type: 'flyout.confirmation.answer',
+          type: 'flyout.confirmation.close',
           confirmation: 'processing',
         });
       },

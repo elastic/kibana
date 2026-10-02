@@ -105,7 +105,7 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
         >
           <StreamDetailEnrichmentContentImpl />
         </EuiFlyoutBody>
-        {showConfirmationModal && <StreamRemoveProcessingConfirmationModal />}
+        {showConfirmationModal && <StreamRemoveProcessingConfirmationModal refresh={refreshAll} />}
       </>
       <StreamDetailEnrichmentFooter />
     </StreamDetailEnrichmentContentProvider>
