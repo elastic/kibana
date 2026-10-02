@@ -16,17 +16,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { InvestigationSubjectResponse, InvestigationSummary } from '../../../../common';
-import { SUBJECT_ICONS } from '../../../subjects/attachments/subject_view';
-import { SUBJECT_TYPE_LABELS } from '../../../subjects/attachments/translations';
-import { getInvestigationDisplayTitle, getSubjectLabel } from './to_view_model';
+import type { InvestigationSummary } from '../../../../common';
+import { getInvestigationDisplayTitle } from './to_view_model';
 import {
   CLOSED_LABEL,
   INVESTIGATION_SEVERITY_COLORS,
   INVESTIGATION_SEVERITY_LABELS,
   NO_SEVERITY_LABEL,
   RUNNING_LABEL,
-  moreSubjectsLabel,
+  moreEntitiesLabel,
   pendingProposalsLabel,
 } from './translations';
 
@@ -38,26 +36,6 @@ export interface InvestigationCardProps {
   onClick?: (investigation: InvestigationSummary) => void;
   isSelected?: boolean;
 }
-
-const SubjectChip = ({ subjects }: { subjects: InvestigationSubjectResponse[] }) => {
-  const [first] = subjects;
-  if (!first) {
-    return null;
-  }
-  return (
-    <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-      <EuiBadge
-        color="hollow"
-        iconType={SUBJECT_ICONS[first.type]}
-        title={SUBJECT_TYPE_LABELS[first.type]}
-        data-test-subj="investigationCardSubject"
-      >
-        {getSubjectLabel(first)}
-        {subjects.length > 1 ? ` ${moreSubjectsLabel(subjects.length - 1)}` : ''}
-      </EuiBadge>
-    </EuiFlexItem>
-  );
-};
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
   const entities = investigation.impact?.entities ?? [];
@@ -78,7 +56,7 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
       {overflow > 0 && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {moreSubjectsLabel(overflow)}
+            {moreEntitiesLabel(overflow)}
           </EuiText>
         </EuiFlexItem>
       )}
@@ -87,9 +65,10 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
 };
 
 /**
- * A compact investigation card: severity, title, running state, a two-line summary, what it is
- * about, the impacted entities, and how many proposed actions wait for a decision. Presentational;
- * the host supplies the investigation (from the list API) and decides what a click does.
+ * A compact investigation card: severity, title, running state, a two-line summary, the impacted
+ * entities, and how many proposed actions wait for a decision. Its subjects only name it while
+ * Agent Builder has not titled it; the overview lists them. Presentational; the host supplies the
+ * investigation (from the list API) and decides what a click does.
  */
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   investigation,
@@ -200,7 +179,6 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            <SubjectChip subjects={investigation.subjects} />
             <EntityChips investigation={investigation} />
             {pending > 0 && (
               <EuiFlexItem grow={false}>
