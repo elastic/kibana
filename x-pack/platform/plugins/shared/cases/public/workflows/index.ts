@@ -144,6 +144,10 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.syncCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
   );
 

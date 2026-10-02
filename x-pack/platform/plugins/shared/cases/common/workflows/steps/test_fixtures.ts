@@ -353,3 +353,12 @@ export const pushCasesInputFixture = {
 export const pushCasesOutputFixture = {
   cases: [createCaseResponseFixture],
 };
+
+export const syncCaseInputFixture = {
+  external_id: '10001',
+  connector_id: 'jira-1',
+};
+
+export const syncCaseOutputFixture = {
+  cases: [createCaseResponseFixture],
+};

@@ -39,6 +39,8 @@ import { search } from './search';
 import { find } from './find';
 import type { CasesByAlertIDParams, GetParams } from './get';
 import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
+import type { FindByExternalIdParams } from './find_by_external_id';
+import { findByExternalId } from './find_by_external_id';
 import type { PushParams } from './push';
 import { push } from './push';
 import type { SyncParams } from './sync';
@@ -110,6 +112,10 @@ export interface CasesSubClient {
    * Applies the linked external incident to the case (title, description, status). Technical preview.
    */
   sync(args: SyncParams): Promise<Case>;
+  /**
+   * Finds the cases last pushed to the given external incident. Technical preview.
+   */
+  findByExternalId(params: FindByExternalIdParams): Promise<Case[]>;
   /**
    * Update the specified cases with the passed in values.
    */
@@ -186,6 +192,7 @@ const usageCounterByMethod = {
   bulkGet: null,
   push: 'push_case',
   sync: 'sync_case',
+  findByExternalId: null,
   bulkUpdate: 'bulk_update_cases',
   delete: 'delete_cases',
   getTags: null,
@@ -232,6 +239,7 @@ export const createCasesSubClient = (
     sync: withUsageCounter(usageCounterByMethod.sync, clientArgs, (params: SyncParams) =>
       sync(params, clientArgs, casesClient)
     ),
+    findByExternalId: (params: FindByExternalIdParams) => findByExternalId(params, clientArgs),
     bulkUpdate: withUsageCounter(
       usageCounterByMethod.bulkUpdate,
       clientArgs,

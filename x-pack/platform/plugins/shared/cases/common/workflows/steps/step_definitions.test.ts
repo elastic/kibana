@@ -41,6 +41,7 @@ import {
 } from './delete_observable';
 import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
 import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
+import { SyncCaseStepTypeId, syncCaseStepCommonDefinition } from './sync_case';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,
@@ -69,6 +70,8 @@ import {
   getCasesInputFixture,
   getCasesOutputFixture,
   pushCasesInputFixture,
+  syncCaseInputFixture,
+  syncCaseOutputFixture,
   pushCasesOutputFixture,
 } from './test_fixtures';
 
@@ -201,6 +204,12 @@ const stepDefinitions = [
     input: pushCasesInputFixture,
     output: pushCasesOutputFixture,
   },
+  {
+    typeId: SyncCaseStepTypeId,
+    definition: syncCaseStepCommonDefinition,
+    input: syncCaseInputFixture,
+    output: syncCaseOutputFixture,
+  },
 ] as const;
 
 describe('cases common step definitions', () => {
@@ -214,6 +223,13 @@ describe('cases common step definitions', () => {
 
   it.each(stepDefinitions)('accepts valid output payload for $typeId', ({ definition, output }) => {
     expect(definition.outputSchema.safeParse(output).success).toBe(true);
+  });
+
+  it('requires a case id or an external id for syncCase', () => {
+    expect(syncCaseStepCommonDefinition.inputSchema.safeParse({}).success).toBe(false);
+    expect(syncCaseStepCommonDefinition.inputSchema.safeParse({ case_id: 'case-1' }).success).toBe(
+      true
+    );
   });
 
   it('rejects non built-in observable type keys for addObservables', () => {
