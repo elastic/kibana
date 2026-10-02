@@ -13,6 +13,7 @@ import type {
 } from '@kbn/profiling-utils';
 import { createGetOtelStatusService } from '../../otel/services/status';
 import { createGetStatusService as createGetUniversalProfilingStatusService } from '../../universal_profiling/services/status';
+import { isServerless } from '../../utils/is_serverless';
 import type { RegisterServicesParams } from '../register_services';
 
 export interface ProfilingStatusParams {
@@ -46,7 +47,7 @@ export function createGetProfilingStatusService(params: RegisterServicesParams) 
   const { buildFlavor, createProfilingEsClient, logger } = params;
   const getOtelStatus = createGetOtelStatusService(params);
   const getUniversalProfilingStatus = createGetUniversalProfilingStatusService(params);
-  const isUniversalProfilingAvailable = buildFlavor !== 'serverless';
+  const isUniversalProfilingAvailable = !isServerless(buildFlavor);
 
   return async ({
     esClient,
