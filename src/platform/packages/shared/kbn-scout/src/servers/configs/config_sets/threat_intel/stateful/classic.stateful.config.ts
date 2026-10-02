@@ -11,11 +11,14 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Scout server config for `security_solution/test/scout_threat_intel`.
+ * Scout server config for `security_solution/test/scout_threat_intel` and
+ * `alertzero/test/scout_threat_intel`.
  *
  * Threat-intel supply gates on `xpack.alertzero.enabled`. `agenticInvestigations`
  * and `proposals` are required by alertzero and default off; without them Kibana
- * cascade-disables alertzero and the TI routes never register.
+ * cascade-disables alertzero and the TI routes never register. The AlertZero UI
+ * suite relies on this set having no LLM connector and no EIS, so a fresh space
+ * has no model.
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet threat_intel
