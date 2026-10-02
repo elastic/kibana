@@ -13,7 +13,8 @@ import { startLongRunningSleep } from '../fixtures/host_sleep';
 import { killProcess, listRunningProcesses, suspendProcess } from '../fixtures/process_actions';
 import { test } from '../fixtures';
 
-const AGENT_BEAT_COMMAND_SUFFIX = '/components/agentbeat';
+// Elastic Defend's component binary on the enrolled host.
+const ENDPOINT_COMMAND_SUFFIX = '/components/endpoint-security';
 const KILL_SLEEP_SECONDS = 617;
 const SUSPEND_SLEEP_SECONDS = 619;
 const SLEEP_LIST_ATTEMPTS = 3;
@@ -82,25 +83,25 @@ test.describe('Response console process operations', { tag: ['@local-stateful-cl
     );
   });
 
-  test('live agent lists agentbeat and completes kill and suspend', async ({
+  test('live agent lists Endpoint and completes kill and suspend', async ({
     kbnClient,
     enrolledEndpoint,
   }) => {
     const { agentId, hostname } = enrolledEndpoint;
     let knownPids = new Set<string>();
 
-    await test.step('processes lists the Endpoint agentbeat process', async () => {
+    await test.step('processes lists the Elastic Defend process', async () => {
       const entries = await listRunningProcesses(kbnClient, agentId);
       knownPids = new Set(entries.map((entry) => entry.pid));
       const commands = entries.map((entry) => entry.command);
 
       expect(commands).toStrictEqual(
-        expect.arrayContaining([expect.stringContaining(AGENT_BEAT_COMMAND_SUFFIX)])
+        expect.arrayContaining([expect.stringContaining(ENDPOINT_COMMAND_SUFFIX)])
       );
     });
 
     // This worker shares one enrolled host. Kill and suspend a disposable sleep
-    // from that process list so stopping agentbeat cannot take the agent down.
+    // from that process list so stopping endpoint-security cannot take the agent down.
     await test.step('kill-process completes for a pid from that list', async () => {
       await startLongRunningSleep(hostname, KILL_SLEEP_SECONDS);
       const pid = await waitForNewSleepPid(kbnClient, agentId, knownPids, KILL_SLEEP_SECONDS);
