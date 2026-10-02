@@ -158,7 +158,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
               )}
               tooltipTitle={i18n.translate(
                 'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.title',
-                { defaultMessage: 'Model will be deprecated soon' }
+                { defaultMessage: 'Model soon no longer available' }
               )}
               tooltip={getModelDeprecatedMessage(endOfLifeDate)}
               tooltipTestSubj={`eisModelCardNearingEndOfLifeTooltip-${modelName}`}
