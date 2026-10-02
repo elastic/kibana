@@ -52,6 +52,14 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
     );
   });
 
+  it('ASSET_CRITICALITY resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY).toBe('entity_analytics:asset_criticality');
+  });
+
+  it('HOME_PAGE resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE).toBe('entity_analytics:home_page');
+  });
+
   it('RISK_SCORE_MANAGEMENT resolves to the exact expected string', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MANAGEMENT).toBe(
       'entity_analytics:risk_score_management'
