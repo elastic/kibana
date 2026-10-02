@@ -67,10 +67,25 @@ const createInMemoryStorage = () => {
   return {
     documents,
     client: {
-      index: jest.fn(async ({ id, document }: { id: string; document: ProposalDocument }) => {
-        documents.set(id, { document, seqNo: (seqNo += 1) });
-        return { _id: id };
-      }),
+      index: jest.fn(
+        async ({
+          id,
+          document,
+          op_type,
+        }: {
+          id: string;
+          document: ProposalDocument;
+          op_type?: string;
+        }) => {
+          // Elasticsearch's own contract for `op_type: 'create'`, which deduplication
+          // rests on: an id that already exists is refused, never overwritten.
+          if (op_type === 'create' && documents.has(id)) {
+            throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+          }
+          documents.set(id, { document, seqNo: (seqNo += 1) });
+          return { _id: id };
+        }
+      ),
       search: jest.fn(async ({ query }: { query: unknown }) => {
         const bool = (query as { bool?: { filter?: Clause[]; must_not?: Clause[] } })?.bool ?? {};
         const filter = bool.filter ?? [];
@@ -129,6 +144,16 @@ export interface ProposalGateFixture {
    * idle wake-up and the resume check both read.
    */
   gateTimeout: () => string | undefined;
+  /**
+   * Creates a proposal through the real service, outside the workflow under
+   * test: what another execution's gate has already done by the time this run
+   * starts. Returns what `create()` returned, so a test can see `reused`.
+   */
+  seedProposal: (params: {
+    id?: string;
+    conversationId?: string;
+    comment?: string;
+  }) => Promise<{ id: string; reused: boolean }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
@@ -246,6 +271,13 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const latest = parks[parks.length - 1];
       const dynamicTimeout = latest?.state?.dynamicTimeout;
       return typeof dynamicTimeout === 'string' ? dynamicTimeout : undefined;
+    },
+    seedProposal: async ({ conversationId = 'conv-other', comment = 'Seeded', ...rest }) => {
+      const created = await service.create(
+        { conversationId, comment, origin: FIXTURE_ORIGIN, confidence: 'medium', ...rest },
+        { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
+      );
+      return { id: created.id, reused: created.reused };
     },
     start: async (inputs = {}) => {
       await engine.runWorkflow({

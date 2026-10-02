@@ -112,6 +112,83 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('a caller-supplied proposalId', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+
+    it('should create the proposal under that id and park on it', async () => {
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().id).toBe(ID);
+    });
+
+    it('should end the run without a gate when the id already has a live proposal', async () => {
+      // Another execution's gate is parked on this one; only it is recorded on
+      // the proposal, so a second gate here would never be resumed.
+      const owner = await fixture.seedProposal({ id: ID });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+      expect(fixture.onlyProposal().id).toBe(owner.id);
+      // It never got as far as parking, deciding, or touching the proposal.
+      expect(fixture.stepExecutions('await_decision')).toHaveLength(0);
+      expect(fixture.stepExecutions('init_state')).toHaveLength(0);
+      const [stop] = fixture.stepExecutions('stop_if_reused', 'workflow.output');
+      expect(stop.output).toEqual({
+        proposalId: ID,
+        status: 'pending',
+        decision: '',
+        reused: true,
+      });
+      expect(fixture.onlyProposal().status).toBe('pending');
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should not post a second card for a reused proposal', async () => {
+      await fixture.seedProposal({ id: ID });
+      const cardsBefore = fixture.attachedProposalIds().length;
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.attachedProposalIds()).toHaveLength(cardsBefore);
+    });
+
+    it('should create and park normally under a different id', async () => {
+      await fixture.seedProposal({ id: '0c5d1b9e-3a47-5f2b-8d61-9e4a7c2b1f08' });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
+    });
+
+    it('should fail the run, and settle nothing, when the id belongs to a settled proposal', async () => {
+      // Choosing the next id is the caller's decision, not the workflow's. The
+      // run must not park a gate on a finished proposal, and it must not touch
+      // it: no proposal id is held yet, so the failure handler has nothing to settle.
+      await fixture.start({ proposalId: ID });
+      await fixture.resume(false);
+      const settled = fixture.onlyProposal();
+      expect(settled.status).toBe('no_action');
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+      expect(fixture.proposals()).toHaveLength(1);
+      expect(fixture.onlyProposal()).toEqual(settled);
+    });
+
+    it('should leave a proposal with no id unaffected: every run mints its own', async () => {
+      await fixture.seedProposal({});
+
+      await fixture.start({});
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
+    });
+  });
+
   describe('dismissal', () => {
     it('should settle as dismissed with no action and complete', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });

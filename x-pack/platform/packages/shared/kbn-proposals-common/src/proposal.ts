@@ -262,6 +262,27 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The id to create the proposal under, instead of a random one. For a caller
+   * that derives the id from what it is proposing, so that two calls for the same
+   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+   * check-then-create in application code — decides which one creates it.
+   *
+   * What happens when the id already exists is the caller's contract with the
+   * service, not something the service infers:
+   * - a live chain (`pending` or `executing`) in the caller's space is reused:
+   *   `create()` returns its current head with `reused: true` and creates nothing;
+   * - a settled chain, or a record in another space, throws
+   *   `ProposalAlreadyExistsError`. The caller believed the id was free, and
+   *   handing back a finished proposal as "reused" would end a gate with nobody
+   *   asked to decide.
+   *
+   * Whether a settled proposal should be followed by a new one is therefore the
+   * caller's decision: it reads what exists and derives the next id. Include the
+   * space and the producer in whatever the id is derived from, since the index is
+   * shared. Omitting `id` mints a random one, exactly as before.
+   */
+  id: z.uuid().optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 

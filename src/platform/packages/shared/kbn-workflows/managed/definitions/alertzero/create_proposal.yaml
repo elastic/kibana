@@ -79,6 +79,16 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, for a caller that derives it
+            from what it is proposing. While the proposal under that id is still
+            pending or executing, no new one is created and no gate is parked:
+            the existing proposal is returned with `reused: true`. If it has
+            settled, or the id belongs to another space, the run fails. The
+            caller owns the id, so it must include the space and anything else
+            that has to keep two producers apart. Must be a UUID.
       # `origin` is absent on purpose: this workflow owns it. The gate closes
       # its own inputs to additional properties, so accepting one here would
       # only let a caller pass a value that the forward below has to discard.
@@ -97,6 +107,8 @@ outputs:
     type: string
   - name: decision
     type: string
+  - name: reused
+    type: boolean
 
 steps:
   # Reopen the investigation if it was closed before raising a proposal against
@@ -146,6 +158,7 @@ steps:
         confidence: "${{ inputs.confidence }}"
         expiresIn: "${{ inputs.expiresIn }}"
         autoApprove: "${{ steps.resolve_auto_approve.output.value }}"
+        proposalId: "${{ inputs.proposalId }}"
         origin: alertzero
 
   # `{{ }}` here, matching how the gate emits these same three values, so an
@@ -157,3 +170,7 @@ steps:
       proposalId: "{{ steps.create_proposal.output.proposalId }}"
       status: "{{ steps.create_proposal.output.status }}"
       decision: "{{ steps.create_proposal.output.decision }}"
+      # `${{ }}`, not `{{ }}`: a boolean, which Liquid would render as a string
+      # and the output contract would then reject (the gate does the same for
+      # `expired`).
+      reused: "${{ steps.create_proposal.output.reused }}"

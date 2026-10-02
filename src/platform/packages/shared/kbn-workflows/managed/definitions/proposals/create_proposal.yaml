@@ -117,6 +117,16 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, instead of a random one, for a
+            caller that derives it from what it is proposing. While the proposal
+            under that id is still pending or executing, this creates nothing,
+            parks no gate, and returns it with `reused: true`. If it has settled,
+            or the id belongs to another space, the run fails: choosing the next
+            id is the caller's decision. Must be a UUID. Omit for a proposal
+            that is always new.
       required:
         - conversationId
         - comment
@@ -132,6 +142,8 @@ outputs:
     type: string
   - name: decision
     type: string
+  - name: reused
+    type: boolean
 
 steps:
   - name: create_proposal
@@ -149,6 +161,24 @@ steps:
       # The only deadline in this workflow. Every park below derives from the
       # `expiresAt` it resolves to.
       expiresIn: "{{ inputs.expiresIn | default: '72h' }}"
+      proposalId: '{{ inputs.proposalId }}'
+
+  # A reused proposal is one another execution created and is already parked on:
+  # only that execution is recorded on the proposal, so a second gate here would
+  # wait for a resume that never comes, and its expiry would then settle the live
+  # proposal as expired under the analyst. Nothing below applies to it, so
+  # `workflow.output` ends the run here (it terminates, as in
+  # rule_tuning_review.yaml's `stop_declined`). `status` is the existing chain's
+  # own, and `decision` is empty because the owner's gate has not recorded one.
+  - name: stop_if_reused
+    type: workflow.output
+    if: '${{ steps.create_proposal.output.reused == true }}'
+    status: completed
+    with:
+      proposalId: '{{ steps.create_proposal.output.proposalId }}'
+      status: '{{ steps.create_proposal.output.status }}'
+      decision: ''
+      reused: true
 
   # Everything the loop carries lives in variables: `data.set` is the only step
   # type exempt from output eviction, so its values survive a HITL park, a task
@@ -531,3 +561,4 @@ steps:
       proposalId: '{{ variables.current_proposal_id }}'
       status: '{{ variables.final_status }}'
       decision: '{{ variables.final_decision }}'
+      reused: false

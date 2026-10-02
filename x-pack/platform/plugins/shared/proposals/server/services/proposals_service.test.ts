@@ -15,6 +15,7 @@ import {
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
+  ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -153,6 +154,71 @@ const releaseParams = (overrides: Partial<ReleaseGateParams> = {}): ReleaseGateP
   request: httpServerMock.createKibanaRequest(),
   ...overrides,
 });
+
+/**
+ * A storage fake that faithfully enforces the one contract deduplication leans on:
+ * only the first `op_type: 'create'` to reach a given id wins, every other throws
+ * a conflict. Searches answer the two shapes the service issues for a single
+ * chain: by id, and by `rootProposalId` with no `supersededBy`.
+ *
+ * The check-and-set is forced apart by a real `await` boundary, so two calls fired
+ * together actually interleave there instead of running one after the other.
+ */
+const createInMemoryStorage = (seed: Record<string, ProposalDocument> = {}) => {
+  const documents = new Map<string, ProposalDocument>(Object.entries(seed));
+  let created = 0;
+  const storage = {
+    index: jest.fn(
+      async ({
+        id,
+        document,
+        op_type,
+      }: {
+        id: string;
+        document: ProposalDocument;
+        op_type?: string;
+      }) => {
+        if (op_type === 'create') {
+          await new Promise((resolve) => setImmediate(resolve));
+          if (documents.has(id)) {
+            throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+          }
+          created += 1;
+        }
+        documents.set(id, document);
+        return { _id: id };
+      }
+    ),
+    search: jest.fn(
+      async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+        const filter = query.bool.filter;
+        const idClause = filter.find((clause) => 'ids' in clause);
+        const rootClause = filter.find((clause) => clause.term && 'rootProposalId' in clause.term);
+        const spaceClause = filter.find((clause) => clause.term && 'spaceId' in clause.term);
+        const matches = [...documents.entries()].filter(
+          ([id, document]) =>
+            (!spaceClause || document.spaceId === spaceClause.term.spaceId) &&
+            (idClause
+              ? id === idClause.ids.values[0]
+              : document.rootProposalId === rootClause?.term.rootProposalId &&
+                document.supersededBy === undefined)
+        );
+        return {
+          hits: {
+            hits: matches.slice(0, 1).map(([id, document]) => ({
+              _id: id,
+              _source: document,
+              _seq_no: 1,
+              _primary_term: 1,
+            })),
+            total: { value: matches.length },
+          },
+        };
+      }
+    ),
+  } as unknown as ReturnType<typeof createStorage>;
+  return { storage, documents, createdCount: () => created };
+};
 
 describe('ProposalsService', () => {
   beforeEach(() => {
@@ -705,6 +771,251 @@ describe('ProposalsService', () => {
 
       expect(proposal.actionWorkflowId).toBeUndefined();
       expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create — caller-supplied id', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+    const idParams = (overrides: Partial<Parameters<ProposalsService['create']>[0]> = {}) => ({
+      conversationId: 'conv-1',
+      comment: 'Isolate the host for this finding',
+      confidence: 'medium' as const,
+      origin: 'alertzero' as const,
+      id: ID,
+      ...overrides,
+    });
+
+    it('creates the proposal under the supplied id, rooted at itself', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const proposal = await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.id).toBe(ID);
+      expect(createArgs.op_type).toBe('create');
+      expect(createArgs.document.rootProposalId).toBe(ID);
+      expect(proposal.id).toBe(ID);
+    });
+
+    it('omitting the id behaves identically to today: a fresh random id every call', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const first = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+      const second = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+
+      expect(first.id).not.toBe(second.id);
+      expect(first.id).not.toBe(ID);
+    });
+
+    it('reports reused: false for a proposal it created, with or without an id', async () => {
+      const { storage } = createInMemoryStorage();
+      const { service } = createService(storage);
+
+      const supplied = await service.create(idParams(), { spaceId: SPACE_ID, request });
+      const random = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+
+      expect(supplied.reused).toBe(false);
+      expect(random.reused).toBe(false);
+    });
+
+    it('does not run a precondition check before attempting the create', async () => {
+      // The atomicity comes from `op_type: 'create'` itself, not from a
+      // check-then-create pair in application code: a lookup first would reopen
+      // exactly the race window a caller-supplied id exists to close.
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const calls: string[] = [];
+      storage.index.mockImplementation(async () => {
+        calls.push('index');
+        return { _id: 'whatever' };
+      });
+      storage.search.mockImplementation(async () => {
+        calls.push('search');
+        return { hits: { hits: [], total: { value: 0 } } };
+      });
+
+      await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      expect(calls[0]).toBe('index');
+    });
+
+    it("reuses the existing live chain, not the new call's own params", async () => {
+      const existing = baseDocument({
+        comment: 'Original comment from the first call',
+        title: 'Original title',
+      });
+      const storage = createStorage();
+      storage.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+      storage.search.mockResolvedValue({
+        hits: { hits: [searchHit(existing, 'existing-id')], total: { value: 1 } },
+      });
+      const { service, attachmentsClient } = createService(storage);
+
+      const reused = await service.create(
+        idParams({ comment: 'A second, different comment the caller happened to pass' }),
+        { spaceId: SPACE_ID, request }
+      );
+
+      expect(reused.reused).toBe(true);
+      expect(reused.id).toBe('existing-id');
+      expect(reused.comment).toBe('Original comment from the first call');
+      expect(reused.title).toBe('Original title');
+      // Already attached when the chain was first created; a replay must not
+      // post a second card into the conversation.
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A true multi-request race can only be fully proven against real
+     * Elasticsearch, where `op_type: 'create'` is actually atomic. What a unit
+     * test can prove is that two `create()` calls fired together against a fake
+     * that enforces the same "only the first create to reach an id wins, every
+     * other throws a conflict" contract resolve to one chain: the fake's
+     * check-and-set is forced apart by a real `await`, so the calls interleave
+     * there instead of running one after the other.
+     */
+    it('lets only one of two concurrent calls with the same id create the chain', async () => {
+      const { storage, documents, createdCount } = createInMemoryStorage();
+      const { service: serviceA, attachmentsClient: attachmentsA } = createService(storage);
+      const { service: serviceB, attachmentsClient: attachmentsB } = createService(storage);
+
+      const [resultA, resultB] = await Promise.all([
+        serviceA.create(idParams(), { spaceId: SPACE_ID, request }),
+        serviceB.create(idParams(), { spaceId: SPACE_ID, request }),
+      ]);
+
+      expect(resultA.id).toBe(ID);
+      expect(resultB.id).toBe(ID);
+      expect(createdCount()).toBe(1);
+      expect(documents.size).toBe(1);
+      // Exactly one minted the chain; the other reused it.
+      expect([resultA.reused, resultB.reused].sort()).toEqual([false, true]);
+      // Exactly one attached it; the other did not post a second card.
+      expect(attachmentsA.create.mock.calls.length + attachmentsB.create.mock.calls.length).toBe(1);
+    });
+
+    it('returns the live revision, not the superseded root, when the chain was revised', async () => {
+      const memory = createInMemoryStorage();
+      const { service } = createService(memory.storage);
+      await service.create(idParams(), { spaceId: SPACE_ID, request });
+      // What revise() leaves behind: the root superseded, a revision as the head.
+      const rootDocument = memory.documents.get(ID)!;
+      memory.documents.set(ID, {
+        ...rootDocument,
+        status: 'superseded',
+        supersededBy: 'revision-2',
+      });
+      memory.documents.set('revision-2', {
+        ...rootDocument,
+        comment: 'Isolate the host.\n\nAlso raised by another investigation.',
+        supersedes: ID,
+        revision: 2,
+        supersededBy: undefined,
+      });
+
+      const reused = await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      expect(reused.reused).toBe(true);
+      expect(reused.id).toBe('revision-2');
+      expect(reused.revision).toBe(2);
+      expect(reused.comment).toContain('Also raised by');
+      expect(memory.documents.size).toBe(2);
+    });
+
+    describe('when the id is taken by something it cannot reuse', () => {
+      /** Creates the proposal under the id, then moves its stored status. */
+      const seeded = async (status: ProposalDocument['status'], decision?: 'approved') => {
+        const memory = createInMemoryStorage();
+        const { service } = createService(memory.storage);
+        await service.create(idParams(), { spaceId: SPACE_ID, request });
+        memory.documents.set(ID, { ...memory.documents.get(ID)!, status, decision });
+        return memory;
+      };
+
+      it.each(['succeeded', 'failed', 'no_action', 'expired'] as const)(
+        'throws rather than reusing a chain that settled as %s',
+        async (status) => {
+          // Returning a finished proposal as "reused" would end a gate with
+          // nobody asked to decide. Choosing the next id is the caller's call.
+          const { storage, documents } = await seeded(status);
+          const { service, attachmentsClient } = createService(storage);
+
+          await expect(
+            service.create(idParams(), { spaceId: SPACE_ID, request })
+          ).rejects.toBeInstanceOf(ProposalAlreadyExistsError);
+
+          expect(documents.size).toBe(1);
+          expect(attachmentsClient.create).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each([
+        ['pending', undefined],
+        ['pending', 'approved'],
+        ['executing', 'approved'],
+      ] as const)('still reuses a chain that is %s with decision %s', async (status, decision) => {
+        // An approved proposal stays live until the action it triggered
+        // finishes; it is still the thing a duplicate should converge on.
+        const { storage } = await seeded(status, decision);
+        const { service } = createService(storage);
+
+        const result = await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+        expect(result.reused).toBe(true);
+        expect(result.id).toBe(ID);
+      });
+
+      it('refuses an id owned by another space without revealing it', async () => {
+        const memory = createInMemoryStorage({
+          [ID]: baseDocument({
+            spaceId: 'other-space',
+            title: 'Secret other-space title',
+            comment: 'Secret other-space comment',
+            rootProposalId: ID,
+          }),
+        });
+        const { service, attachmentsClient } = createService(memory.storage);
+
+        const attempt = service.create(idParams(), { spaceId: SPACE_ID, request });
+
+        await expect(attempt).rejects.toBeInstanceOf(ProposalAlreadyExistsError);
+        await expect(attempt).rejects.not.toThrow(/other-space|Secret/);
+        // Nothing was created or overwritten.
+        expect(memory.documents.size).toBe(1);
+        expect(memory.documents.get(ID)?.spaceId).toBe('other-space');
+        expect(attachmentsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('is a conflict as far as routes and workflows are concerned', async () => {
+        const { storage } = await seeded('succeeded');
+        const { service } = createService(storage);
+
+        await expect(
+          service.create(idParams(), { spaceId: SPACE_ID, request })
+        ).rejects.toBeInstanceOf(ProposalConflictError);
+      });
+    });
+
+    it('rethrows a failure that is not a conflict', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(Object.assign(new Error('boom'), { statusCode: 500 }));
+      const { service } = createService(storage);
+
+      await expect(service.create(idParams(), { spaceId: SPACE_ID, request })).rejects.toThrow(
+        'boom'
+      );
     });
   });
 

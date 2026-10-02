@@ -61,8 +61,32 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
   } as unknown as StepHandlerContext<never, never>);
 
 describe('proposals.createProposal input schema', () => {
-  // Liquid renders a template for an absent workflow input as `''`, so the
-  // schema — not just the service — has to treat a blank as an omission.
+  it.each(['', null])('should treat %p as an absent proposalId', (blank) => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+      proposalId: blank,
+    });
+
+    expect(parsed.proposalId).toBeUndefined();
+  });
+
+  it('should keep a supplied proposalId, and refuse one that is not a UUID', () => {
+    const base = { conversationId: 'conv-1', comment: 'c', origin: 'alertzero' };
+
+    expect(
+      createProposalStepInputSchema.parse({
+        ...base,
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      }).proposalId
+    ).toBe('6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50');
+    // Every proposal id is a UUID, and routes and cards assume it.
+    expect(createProposalStepInputSchema.safeParse({ ...base, proposalId: 'host-1' }).success).toBe(
+      false
+    );
+  });
+
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
@@ -241,6 +265,7 @@ describe('proposals.createProposal step', () => {
       category: 'tune',
       action: { name: 'Create rule' },
       expiresAt: '2026-09-04T00:00:00.000Z',
+      reused: false,
     });
     const { definition } = createDefinition(create);
 
@@ -268,7 +293,43 @@ describe('proposals.createProposal step', () => {
       category: 'tune',
       alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
+      reused: false,
     });
+  });
+
+  it('should hand the proposalId to the service as its id and report a reused proposal', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: 'existing-proposal',
+      rootProposalId: 'existing-root',
+      status: 'pending',
+      category: 'respond',
+      action: { name: 'Isolate host', approvalPolicy: 'always-gate' },
+      expiresAt: '2026-09-04T00:00:00.000Z',
+      reused: true,
+    });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({
+        conversationId: 'conv-2',
+        origin: 'alertzero',
+        comment: 'Isolate the host',
+        actionWorkflowId: 'system-alertzero-action-isolate',
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50' }),
+      expect.anything()
+    );
+    expect(result.output).toEqual(
+      expect.objectContaining({
+        proposalId: 'existing-proposal',
+        rootProposalId: 'existing-root',
+        reused: true,
+      })
+    );
   });
 
   it('should report alwaysGate when the action refuses to be auto-approved', async () => {

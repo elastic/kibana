@@ -52,6 +52,7 @@ import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
+  ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -92,6 +93,13 @@ export interface UpdateProposalParams {
   executionError?: string;
 }
 
+/**
+ * What `create()` hands back: the proposal plus whether it is a pre-existing live
+ * chain a caller-supplied `id` resolved to, rather than one this call minted. A
+ * caller that gates on the proposal must not park a second gate on a reused one.
+ */
+export type CreateProposalResult = ProposalWithMetadata & { reused: boolean };
+
 export interface ProposalsServiceDeps {
   storage: ProposalsStorageClient;
   logger: Logger;
@@ -117,12 +125,23 @@ export class ProposalsService {
    * path has already resolved it: a caller that needs the approval policy —
    * the gate workflow does, to honour `always-gate` — would otherwise have to
    * fetch the same definition a second time.
+   *
+   * `id`, when supplied, is what makes two calls for the same thing atomic: both
+   * attempt `op_type: 'create'` against it, so Elasticsearch — not a
+   * check-then-create race in application code — guarantees only one of them
+   * actually creates the chain. The caller derives it from what it is proposing.
+   *
+   * When the id already exists, a live chain in this space is reused and its
+   * current head returned with `reused: true`, so the caller can tell it created
+   * nothing. A settled chain, or a record in another space, throws
+   * {@link ProposalAlreadyExistsError}: the service does not decide that a
+   * settled proposal should be followed by a new one, the caller does, by
+   * deriving the next id.
    */
   async create(
     params: CreateProposalRequest,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
-  ): Promise<ProposalWithMetadata> {
-    const id = uuidv4();
+  ): Promise<CreateProposalResult> {
     // Workflow callers reach us through Liquid templates, which render an
     // absent input as an empty string. Left as-is, `expiresAt: ''` is rejected
     // by the `date` mapping and an empty `actionWorkflowId` would make a
@@ -152,6 +171,7 @@ export class ProposalsService {
     // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
 
+    const id = params.id ?? uuidv4();
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
@@ -178,12 +198,24 @@ export class ProposalsService {
       revision: 1,
     };
 
-    await this.deps.storage.index({ id, document, op_type: 'create' });
+    try {
+      await this.deps.storage.index({ id, document, op_type: 'create' });
+    } catch (error) {
+      if (params.id === undefined || !isVersionConflict(error)) {
+        throw error;
+      }
+      // Only a caller-chosen id can already exist: a random one never collides.
+      // A live chain is a replay of the same operation, so its current head comes
+      // back rather than anything derived from this call's params — the caller
+      // gets the real outcome, not a blend of old and new.
+      const head = await this.loadLiveHead(id, spaceId);
+      const reused = await this.withMetadata(stripRanks(head), spaceId, request);
+      return { ...reused, reused: true };
+    }
 
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
-    const proposal = toProposal(id, document);
-    return { ...proposal, action: metadata };
+    return { ...toProposal(id, document), action: metadata, reused: false };
   }
 
   /**
@@ -1050,6 +1082,61 @@ export class ProposalsService {
       return undefined;
     }
     return parsed.data;
+  }
+
+  /**
+   * The live head of the chain a caller-chosen id collided with. Live means
+   * `pending` or `executing`: the only two statuses a proposal can still move out
+   * of. Anything else throws {@link ProposalAlreadyExistsError}.
+   *
+   * Resolves the head through `rootProposalId` rather than reading `rootId`
+   * itself, because a revision supersedes the row it replaces: after one, the
+   * root is a stale `superseded` row and the caller needs the revision.
+   *
+   * The read is filtered to `spaceId`, which is what keeps a collision with
+   * another space's proposal from disclosing it: that id is simply not found
+   * here, and is refused with the same error as a settled one.
+   */
+  private async loadLiveHead(rootId: string, spaceId: string): Promise<StoredProposalRecord> {
+    const unusable = () =>
+      new ProposalAlreadyExistsError(
+        `Proposal id [${rootId}] is already taken and cannot be reused: choose another id`
+      );
+
+    let root: StoredProposalRecord;
+    try {
+      ({ proposal: root } = await this.load(rootId, spaceId));
+    } catch (error) {
+      throw error instanceof ProposalNotFoundError ? unusable() : error;
+    }
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { rootProposalId: root.rootProposalId ?? rootId } },
+            { term: { spaceId } },
+          ],
+          must_not: [{ exists: { field: 'supersededBy' } }],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    // Should be unreachable: every chain has exactly one live revision by
+    // construction. Falls back to the root rather than throwing, so a storage
+    // inconsistency degrades to "trust the row we hold".
+    const head: StoredProposalRecord =
+      hit?._source && hit._id !== undefined
+        ? { id: hit._id, ...(hit._source as ProposalDocument) }
+        : root;
+
+    if (head.status !== 'pending' && head.status !== 'executing') {
+      throw unusable();
+    }
+    return head;
   }
 
   private async load(id: string, spaceId: string): Promise<StoredProposal> {

@@ -168,6 +168,48 @@ Chains predating this field have `rootProposalId` on neither row; the term query
 misses and the fallback returns the row asked about, which is the correct answer
 for a chain of one. The plugin is unshipped, so there is nothing to migrate.
 
+### Deduplication
+
+A caller that raises "the same proposal" more than once can pass its own `id` to
+`create()` instead of taking a random one, derived from whatever makes two calls
+the same thing (for Hunt Watch: the action, the host and the space). Two calls for
+the same thing then meet at the same id, and `op_type: 'create'` decides which one
+creates it, so there is no check-then-create window in application code. Omitting
+the `id` mints a random one, exactly as before. The id must be a UUID.
+
+What `create()` does when the id already exists is the service's whole contract:
+
+| What is under the id | `create()` |
+| --- | --- |
+| A live chain (`pending` or `executing`) in this space | Returns the chain's current head with `reused: true`. Nothing is created and no second card is posted. |
+| A settled chain (`succeeded`, `failed`, `no_action`, `expired`) | Throws `ProposalAlreadyExistsError`. |
+| A record in another space | Throws `ProposalAlreadyExistsError`, saying nothing about the record. |
+
+The head, not the root, is what comes back: after a `revise()` the root is a
+superseded row. A proposal that was approved stays live until its action finishes,
+so a duplicate that arrives in that window still converges on it.
+
+The service deliberately does not decide that a settled proposal should be
+followed by a new one. That is lifecycle policy and belongs to the caller: read
+what exists, and if it has settled, derive the next id and create that. The same
+rule is why a caller must put the space and its own producer into whatever the id
+is derived from. The index is shared, so a bare id from one space would collide
+with the same id from another. `ProposalAlreadyExistsError` extends
+`ProposalConflictError`, so it is already a 409 on the routes and a
+`ConflictError` in a workflow.
+
+A reused proposal belongs to whichever execution created it, and only that
+execution is parked on it. `proposals.createProposal` therefore takes the id as
+`proposalId` and reports `reused`, and `system-create-proposal` ends the run there
+instead of parking a second gate that nothing would ever resume.
+`system-create-alertzero-proposal` forwards `proposalId` and `reused`. A settled
+or cross-space collision fails the run before any proposal id is held, so the
+failure handler has nothing to settle and the existing proposal is left alone.
+
+One narrow edge: a head that has just `failed` counts as settled even though the
+gate is about to `clone()` it back to `pending`, so a caller that derives the next
+id in that window mints a second proposal rather than reusing the first.
+
 ### Architecture
 
 ```mermaid

@@ -59,6 +59,7 @@ export const getCreateProposalStepDefinition = ({
             confidence: input.confidence ?? 'medium',
             origin: input.origin,
             expiresAt: resolveExpiresAt(input.expiresIn),
+            id: input.proposalId,
             workflowExecutionId,
           },
           {
@@ -93,6 +94,7 @@ export const getCreateProposalStepDefinition = ({
             category: proposal.category,
             alwaysGate,
             expiresAt: proposal.expiresAt,
+            reused: proposal.reused,
           },
         };
       } catch (error) {
