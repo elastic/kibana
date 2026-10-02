@@ -1,6 +1,6 @@
 # MCP-Native Connector Setup
 
-Instructions for setting up a connector backed by an MCP server. MCP-native connectors get their own connector spec with typed actions that wrap MCP tools via `withMcpClient`.
+Instructions for setting up a connector backed by an MCP server. MCP-native connectors get their own connector spec with typed actions that wrap MCP tools via `callToolJson`, `callToolContent`, and `withMcpClient`.
 
 ## Run the Scaffold Generator
 
@@ -16,9 +16,12 @@ After running the generator, replace all `TODO:` placeholders in generated files
 
 ## Implement the MCP-Native Connector Spec
 
-Follow the GitHub and Tavily connectors as reference:
-- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts`
+Follow the Tavily and GitHub connectors as reference:
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/tavily.ts`
+- `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts`
+
+Input schemas and their inferred types (`SearchInput`, `GetFileInput`, `CallToolInput`, ...) live in
+`types.ts`, as described in [connector-patterns.md](connector-patterns.md#input-schemas--types).
 
 ### Key elements:
 
@@ -36,7 +39,7 @@ Follow the GitHub and Tavily connectors as reference:
    ),
    ```
 
-2. **Typed actions**: Create a typed action for each MCP tool. Set `isTool: true` and add a plain-string `description`. Use `callToolJson` for actions that return JSON (the common case) and `callToolContent` for binary/file downloads:
+2. **Typed actions**: Create a typed action for each MCP tool. Set `isTool: true`, an explicit `scope`, and a plain-string `description`. Use `callToolJson` for actions that return JSON (the common case) and `callToolContent` for binary/file downloads:
    ```typescript
    import { withMcpClient, callToolJson, callToolContent } from '../../lib/mcp';
 
@@ -44,6 +47,7 @@ Follow the GitHub and Tavily connectors as reference:
      // JSON-returning action (search, list, get metadata, etc.)
      search: {
        isTool: true,
+       scope: 'read',
        description: 'Search for items by keyword. Returns matching results with IDs and summaries.',
        input: SearchInputSchema,
        handler: async (ctx, input: SearchInput) => {
@@ -53,6 +57,7 @@ Follow the GitHub and Tavily connectors as reference:
      // Binary/file download action — use callToolContent, not callToolJson
      downloadFile: {
        isTool: true,
+       scope: 'read',
        description:
          'Download the content of a file. ' +
          'WARNING: Returns base64-encoded binary for non-text files — only call this when ' +
@@ -66,10 +71,14 @@ Follow the GitHub and Tavily connectors as reference:
    },
    ```
 
-3. **Escape hatches**: Always include `listTools` and `callTool` actions for dynamic tool discovery. Wrap their inline schemas in `lazySchema()`:
+   Classify each wrapped tool's `scope` from what the MCP tool does, not from its name — see the `scope`
+   section in [connector-patterns.md](connector-patterns.md#scope--classifying-side-effects-for-every-istool-true-action).
+
+3. **Escape hatches**: Always include `listTools` and `callTool` actions for dynamic tool discovery. `callTool` can invoke any tool, so it is always `scope: 'destroy'`. Wrap their inline schemas in `lazySchema()`:
    ```typescript
    listTools: {
      isTool: true,
+     scope: 'read',
      description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
      input: lazySchema(() => z.object({})),
      handler: async (ctx) => {
@@ -81,25 +90,33 @@ Follow the GitHub and Tavily connectors as reference:
    },
    callTool: {
      isTool: true,
+     scope: 'destroy',
      description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
-     input: lazySchema(() =>
-       z.object({
-         name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
-         arguments: z
-           .record(z.string().max(200), z.unknown())
-           .optional()
-           .describe('Tool arguments as a key/value map'),
-       })
-     ),
+     input: CallToolInputSchema,
      handler: async (ctx, input: CallToolInput) => {
        return callToolContent(ctx, input.name, input.arguments);
      },
    },
    ```
 
-4. **Connection test**: Include a test handler that validates the MCP connection:
+   With `CallToolInputSchema` in `types.ts`:
+   ```typescript
+   export const CallToolInputSchema = lazySchema(() =>
+     z.object({
+       name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
+       arguments: z
+         .record(z.string().max(200), z.unknown())
+         .optional()
+         .describe('Tool arguments as a key/value map'),
+     })
+   );
+   export type CallToolInput = z.infer<typeof CallToolInputSchema>;
+   ```
+
+4. **Connection test**: Include a test handler that validates the MCP connection. Keep `enabled: true`, or the "Test connector" button stays disabled:
    ```typescript
    test: {
+     enabled: true,
      description: i18n.translate('connectorSpecs.yourConnector.test.description', {
        defaultMessage: 'Verifies connection to the Your Service MCP server.',
      }),
@@ -127,51 +144,22 @@ kibana_curl -X POST -H "Content-Type: application/json" \
 
 During initial creation, use names from MCP server documentation but be prepared to fix them during testing.
 
-## Write LLM-Quality Descriptions and Skill Content
+## Descriptions and Skill Content
 
-Good descriptions make typed actions discoverable and usable by LLMs. Apply descriptions at three levels:
-
-1. **Action-level `description`**: Describe what the action does and when to use it. Use plain strings (not `i18n.translate()`) — action descriptions are for LLM consumption only.
-   ```typescript
-   actions: {
-     search: {
-       isTool: true,
-       description: 'Search for repositories, code, issues, and other GitHub content using GitHub search syntax.',
-       input: SearchInputSchema,
-       handler: withMcpClient(async (client, input) => { ... }),
-     },
-   },
-   ```
-
-2. **Param-level `.describe()`**: Add `.describe()` to every Zod field in the input schema. This tells the LLM what each parameter means and what values are valid.
-   ```typescript
-   const SearchInputSchema = lazySchema(() =>
-     z.object({
-       query: z.string().max(1000).describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
-       type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
-     })
-   );
-   ```
-
-3. **`skill` property** (optional): Provide a `skill` string on the connector spec to give the LLM high-level guidance on multi-step patterns and gotchas. Use the `[...].join('\n')` pattern:
-   ```typescript
-   skill: [
-     'Use search to find items by keyword, then getItem to retrieve full details by ID.',
-     'For tools not covered by typed actions, use listTools to discover available MCP tools, then call them with callTool.',
-   ].join('\n'),
-   ```
+Action `description`s, parameter `.describe()` text, and the `skill` property follow the same rules as
+any other connector — see Step 3 of [SKILL.md](../SKILL.md) and the "LLM-Quality Descriptions and Skill
+Content" section of [connector-patterns.md](connector-patterns.md#llm-quality-descriptions-and-skill-content).
+For an MCP connector, the `skill` text should also point agents at `listTools` and `callTool` for tools
+not covered by typed actions.
 
 ## Shared MCP Library
 
-Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/`:
+Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/` (import them from `'../../lib/mcp'`):
 
-- `with_mcp_client.ts` — wraps a handler to automatically create and manage the MCP client
-- `create_mcp_client_from_axios.ts` — creates an MCP client from an Axios-based connector context
-- `call_tool_helpers.ts` — helpers for calling MCP tools
+- `withMcpClient(ctx, fn)` (`with_mcp_client.ts`) — creates an MCP client for the connector's `serverUrl`, passes it to `fn`, and closes it afterwards
+- `callToolJson(ctx, toolName, args)` / `callToolContent(ctx, toolName, args)` (`call_tool_helpers.ts`) — call one MCP tool and return its JSON or raw content
+- `create_mcp_client_from_axios.ts` — creates an MCP client from an Axios-based connector context; used by `withMcpClient`
 
 ## ID Alignment
 
-MCP-native connectors follow the same ID alignment rules as custom connectors:
-
-1. `ConnectorSpec.metadata.id` in the connector spec
-2. Key in `ConnectorIconsMap` in `connector_icons_map.ts`
+Follow the [ID alignment rules in connector-patterns.md](connector-patterns.md#critical-id-alignment).

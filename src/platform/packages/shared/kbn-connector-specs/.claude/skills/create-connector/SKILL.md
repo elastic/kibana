@@ -12,7 +12,9 @@ We're going to create a new connector spec for **$0**. The connector will enable
 
 ## Reference Materials
 
-- **[reference/connector-patterns.md](reference/connector-patterns.md)** — Directory structure, file templates, and registration patterns
+- **[reference/connector-patterns.md](reference/connector-patterns.md)** — Directory structure, file templates, registration patterns, HTTP handling, input bounds, and description rules
+- **[reference/custom-connector-setup.md](reference/custom-connector-setup.md)** — Scaffold, vendor API research, and auth selection for a connector that calls the vendor API directly
+- **[reference/mcp-connector-setup.md](reference/mcp-connector-setup.md)** — Copy-ready template for a connector that wraps the vendor's MCP server
 - **[reference/pr-validation-table.md](reference/pr-validation-table.md)** — Format for the `## Validated` action-by-action table required in every connector PR description
 
 ## Step 1: Determine the Connector Strategy
@@ -158,9 +160,11 @@ Add tests following the existing examples:
 
 1. **Connector spec tests** — See `google_drive/google_drive.test.ts` or `slack/slack.test.ts` for the pattern.
 
-You do not need to execute the tests — just create the files. You should, however, run
-`node scripts/eslint <path>` on every file you create or edit (including test files) before moving on.
-This is fast, requires no running Kibana/Elasticsearch, and catches mechanical rule violations — e.g. a
+You do not need to run the whole package's test suite. Do run three things, none of which need a running
+Kibana or Elasticsearch: your connector's own tests
+(`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/{connector_name}`), the
+quality contract test in the self-review below, and `node scripts/eslint <path>` on every file you
+create or edit (including test files) before moving on. ESLint catches mechanical rule violations — e.g. a
 forbidden non-null assertion (`@typescript-eslint/no-non-null-assertion`) in a test file's
 `Connector.action!.handler` — that a code-reading self-review or an AI PR reviewer can miss, and that
 otherwise only surface once CI's lint step fails the build.

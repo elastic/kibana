@@ -176,9 +176,19 @@ Fill in the generated spec stub with actions, handlers, auth config, and tests. 
 
 ### Auth Type Selection
 
+The most common auth types:
+
 - `'bearer'` — for services where the user provides a pre-obtained OAuth access token or API token (e.g., Google APIs, Notion, GitHub). Simplest option.
 - `'api_key_header'` — for services that use API key authentication via a custom header.
+- `'api_key_query'` — for services that take the API key as a query parameter.
+- `'basic'` — for services that use HTTP basic authentication (username and password).
 - `'oauth_client_credentials'` — for services that use OAuth 2.0 Client Credentials flow (e.g., Microsoft/Azure services like SharePoint). Requires multi-field credential input (clientId, clientSecret, tenantId).
+- `'oauth_authorization_code'` — for services where each user signs in through an OAuth 2.0 authorization code flow (e.g., Google Drive, Salesforce, Figma, Zoom).
+
+Cloud-specific auth types (`aws_credentials`, `gcp_service_account`, `azure_shared_key`), certificate
+auth, and the others live in `src/platform/packages/shared/kbn-connector-specs/src/auth_types/`; check
+there before writing a custom token exchange. To configure the OAuth form, see "OAuth Auth
+Configuration" in [connector-patterns.md](connector-patterns.md#oauth-auth-configuration).
 
 ### Input Schemas & Types
 
@@ -186,8 +196,11 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 
 ### SubActions
 
-- Create subActions for core operations (search, list, get, download, etc.)
-- Limit to ~5 high-level, generically useful subActions
+- Create subActions for the operations an agent needs to complete the connector's use cases (search,
+  list, get, download, and any create/update actions in scope)
+- Prefer one generic action over several near-duplicates (one `search` with filters rather than
+  `searchOpen` and `searchClosed`), and skip vendor endpoints no agent use case needs. Each action is a
+  tool an agent must choose between, and each one adds review and test surface
 
 ### Connector ID Naming
 
@@ -214,58 +227,15 @@ miss because nothing fails until a human clicks the button.
 
 ### Avoid ICU-Unsafe Characters in Translated Help Text
 
-Any string passed through `i18n.translate()` (`metadata.description`, `.meta({ helpText: ... })`, etc.) is
-parsed as an ICU message. A literal `<placeholder>` in the text (e.g. `'found in the URL: example.com/<slug>/'`)
-is parsed as an unclosed XML tag and throws a `FORMAT_ERROR` when the spec is serialized to JSON schema —
-this only surfaces at runtime (e.g. when Agent Builder/Workflows loads the connector), not at compile time.
-Write placeholders without angle brackets instead, e.g. `'found in the URL: example.com/your-slug/'`.
+Do not write a literal `<placeholder>` in any string passed through `i18n.translate()`; it throws at
+runtime. See the ICU note under "Schema UI Configuration" in
+[connector-patterns.md](connector-patterns.md#schema-ui-configuration).
 
 ## Write LLM-Quality Descriptions and Skill Content
 
-LLMs discover and invoke connector actions entirely through the text you provide. Invest in descriptions at every level.
-
-### Action `description`
-
-Every action in the connector spec **must** have a `description` field. Write it from the perspective of an LLM deciding which tool to call: what does this action do, when should it be used, and what does it return?
-
-### Zod param `.describe()`
-
-Every Zod parameter schema **must** call `.describe()`. Include:
-- What the value represents
-- Valid formats or constraints (e.g., ISO 8601 dates, max length)
-- A concrete example
-
-```typescript
-const SearchInputSchema = lazySchema(() =>
-  z.object({
-    query: z.string().max(1000).describe('Full-text search query. Example: "Q4 budget report"'),
-    maxResults: z
-      .number()
-      .int()
-      .min(1)
-      .max(50)
-      .optional()
-      .describe('Maximum number of results to return (1–50). Defaults to 10.'),
-  })
-);
-```
-
-### `skill` property
-
-Add an optional `skill` property to the connector spec to provide multi-step usage patterns and gotchas for agents. Use the `[...].join('\n')` pattern to keep each point on its own line:
-
-```typescript
-export const YourConnector: ConnectorSpec = {
-  // ...
-  skill: [
-    'Use search to find items by keyword, then get_item to retrieve full details by ID.',
-    'Always pass the ID returned by search — do not guess or construct IDs manually.',
-    'If a search returns no results, try broader terms before concluding the item does not exist.',
-  ].join('\n'),
-};
-```
-
-The `skill` text surfaces as-is to agents, so write it as concise, actionable guidance.
+Follow Step 3 of [SKILL.md](../SKILL.md) and the "LLM-Quality Descriptions and Skill Content" section of
+[connector-patterns.md](connector-patterns.md#llm-quality-descriptions-and-skill-content), which cover
+action `description`s, parameter `.describe()` text, input bounds, and the `skill` property.
 
 ## Complete the Documentation
 
@@ -275,15 +245,10 @@ The generated documentation file at `docs/reference/connectors-kibana/<kebab-nam
 2. **Actions section** — Document each action with its parameters, types, and descriptions.
 3. **Get API credentials section** — Step-by-step instructions for obtaining the credential.
 
-Also update the snippet description in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` — the generator inserts a `TODO: Add brief description.` placeholder that must be replaced with a real, capability-focused description (see the `metadata.description` quality rules above).
+Also update the snippet description in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` — the generator inserts a `TODO: Add brief description.` placeholder that must be replaced with a real, capability-focused description (see the [`metadata.description` quality rules](connector-patterns.md#metadatadescription-quality)).
 
 See existing docs (e.g., `google-drive-action-type.md`) for the expected style.
 
 ## ID Alignment
 
-The following IDs **MUST all match exactly**:
-
-1. `ConnectorSpec.metadata.id` in the connector spec
-2. Key in `ConnectorIconsMap` in connector_icons_map.ts
-
-**Before choosing an ID**, search for existing connectors using that ID.
+Follow the [ID alignment rules in connector-patterns.md](connector-patterns.md#critical-id-alignment).

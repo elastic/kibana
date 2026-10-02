@@ -64,6 +64,7 @@ node scripts/generate connector <name> --id ".<id>" --owner "<team>"
 Replace `<team>` with the owning GitHub team. Ask the user if unsure.
 
 The generator creates:
+
 - Connector spec stub, test stub, icon placeholder
 - Documentation page at `docs/reference/connectors-kibana/`
 - Updates to `all_specs.ts`, `connector_icons_map.ts`, CODEOWNERS, docs TOC
@@ -81,7 +82,7 @@ import type { SearchInput, GetItemInput } from './types';
 
 export const YourConnector: ConnectorSpec = {
   metadata: {
-    id: '.your_connector',           // MUST start with a dot
+    id: '.your_connector', // MUST start with a dot
     displayName: 'Your Connector',
     description: i18n.translate('core.kibanaConnectorSpecs.yourConnector.metadata.description', {
       defaultMessage: 'Search items, list collections, and retrieve details from Your Service',
@@ -94,7 +95,7 @@ export const YourConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: [{ type: 'bearer' }],     // or 'api_key_header', 'oauth_client_credentials'
+    types: [{ type: 'bearer' }], // or 'api_key_header', 'oauth_client_credentials'
   },
 
   schema: lazySchema(() =>
@@ -107,7 +108,8 @@ export const YourConnector: ConnectorSpec = {
     search: {
       isTool: true,
       scope: 'read',
-      description: 'Search items by keyword. Returns a ranked list of matching results with IDs and summaries.',
+      description:
+        'Search items by keyword. Returns a ranked list of matching results with IDs and summaries.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
         const response = await ctx.client.request({ method: 'GET', url: '/search', params: input });
@@ -117,7 +119,8 @@ export const YourConnector: ConnectorSpec = {
     getItem: {
       isTool: true,
       scope: 'read',
-      description: 'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
+      description:
+        'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
         // Always encodeURIComponent() a user-supplied value interpolated into a URL
@@ -164,7 +167,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const SearchInputSchema = lazySchema(() =>
   z.object({
     query: z.string().max(1000).describe('Search query string'),
-    limit: z.number().optional().describe('Maximum results (default: 20)'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum results (1–100, default: 20)'),
   })
 );
 export type SearchInput = z.infer<typeof SearchInputSchema>;
@@ -178,6 +187,7 @@ export type GetItemInput = z.infer<typeof GetItemInputSchema>;
 ```
 
 This pattern (used by ServiceNow, Slack, GitHub connectors):
+
 - Eliminates drift between schemas and types — `z.infer` derives the type from the schema
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
@@ -195,88 +205,10 @@ wrapped the same way.
 
 ## MCP-Native Connector Pattern
 
-For connectors backed by an MCP server. Uses `withMcpClient` from `lib/mcp` to wrap MCP tool calls as typed actions.
-
-```typescript
-import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
-import { withMcpClient } from '../../lib/mcp/with_mcp_client';
-import { UISchemas } from '../../connector_spec_ui';
-
-export const YourMcpConnector: ConnectorSpec = {
-  metadata: {
-    id: '.your_mcp_connector',
-    displayName: 'Your MCP Connector',
-    description: 'Search and retrieve data via Your Service MCP server',
-    minimumLicense: 'enterprise',
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
-  },
-
-  auth: {
-    types: [{ type: 'bearer' }],
-  },
-
-  schema: lazySchema(() =>
-    z.object({
-      serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
-        .describe('MCP server URL')
-        .meta({ label: 'Server URL' }),
-    })
-  ),
-
-  actions: {
-    search: {
-      isTool: true,
-      scope: 'read',
-      description: 'Search Your Service by keyword using the underlying MCP tool.',
-      input: lazySchema(() =>
-        z.object({
-          query: z.string().max(1000).describe('Keyword or natural-language search query'),
-        })
-      ),
-      handler: withMcpClient(async (client, input) => {
-        return client.callTool({ name: 'your_search', arguments: input });
-      }),
-    },
-    // Escape hatches for dynamic tool discovery
-    listTools: {
-      isTool: true,
-      scope: 'read',
-      description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
-      input: lazySchema(() => z.object({})),
-      handler: withMcpClient(async (client) => {
-        return client.listTools();
-      }),
-    },
-    callTool: {
-      isTool: true,
-      scope: 'destroy',
-      description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
-      input: lazySchema(() =>
-        z.object({
-          name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
-          arguments: z.record(z.string().max(200), z.unknown()).optional().describe('Tool arguments as a key/value map'),
-        })
-      ),
-      handler: withMcpClient(async (client, input) => {
-        return client.callTool(input);
-      }),
-    },
-  },
-
-  skill: [
-    'To search: call `search` with a keyword query.',
-    'For tools not covered by typed actions, use `listTools` to discover available MCP tools, then call them with `callTool`.',
-  ].join('\n'),
-};
-```
-
-**Reference connectors:**
-- GitHub: `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts`
-- Tavily: `src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/tavily.ts`
+For connectors backed by an MCP server, use the template in
+[mcp-connector-setup.md](mcp-connector-setup.md). The metadata, auth, `test`, and `skill` parts of the
+spec structure above apply unchanged; only the config schema (`serverUrl`) and the action handlers
+(`callToolJson`, `callToolContent`, `withMcpClient(ctx, fn)`) differ.
 
 ## HTTP Response Handling in Handlers
 
@@ -287,7 +219,7 @@ real service responds.
 
 ### Do not let a request follow redirects when it carries a credential in a custom header
 
-Axios follows redirects by default and strips only the *standard* authorization headers on a cross-host
+Axios follows redirects by default and strips only the _standard_ authorization headers on a cross-host
 redirect. A credential in a vendor-specific header (`x-functions-key`, `x-api-key`, `private-token`) is
 forwarded to whatever host the redirect names — a live credential leak to a third party.
 
@@ -358,18 +290,18 @@ The remaining three details apply to a **URL** continuation:
 
 - **Check the origin of a continuation URL before requesting it.** A vendor-supplied link is
   caller-untrusted data, and `ctx.client` carries the connector's credentials. Axios strips a standard
-  authorization header on a cross-host *redirect*, but an explicit new request gets no such protection,
+  authorization header on a cross-host _redirect_, but an explicit new request gets no such protection,
   so an attacker-influenced `nextLink` sends the credentials to the host it names and can reach an
   internal address. Stop paginating unless the link's origin matches the request you sent (or an
   explicitly allowed host).
 
-  Resolve the link against the URL the client actually requested, and request the *resolved* URL.
+  Resolve the link against the URL the client actually requested, and request the _resolved_ URL.
   `new URL(nextLink)` alone throws on a relative link (`?page=2`, `/items?page=2`), which a `Link`
   header commonly carries, so a bare parse both breaks those vendors and reads as if every link were
   absolute.
 
   Take the base from `ctx.client.getUri()`, not from `new URL(url, baseURL)`. Axios does not resolve a
-  path the way the `URL` constructor does: it *concatenates* `baseURL` and `url` (`combineURLs`
+  path the way the `URL` constructor does: it _concatenates_ `baseURL` and `url` (`combineURLs`
   strips the leading slash), so `baseURL: 'https://api.example/v1'` with `url: '/items'` is requested as
   `https://api.example/v1/items`, while `new URL('/items', 'https://api.example/v1')` gives
   `https://api.example/items`. Resolving a `?page=2` link against that wrong base silently continues
@@ -465,7 +397,7 @@ is wrong for any autoscaled pool, and a capacity-remediation agent would act on 
 ### Build derived blocks from every alternative field
 
 When an output block depends on one of several alternative vendor fields (an IP endpoint or a DNS
-endpoint; a legacy ID or a new one), build it when *any* of them is present. The GKE connector's
+endpoint; a legacy ID or a new one), build it when _any_ of them is present. The GKE connector's
 Kubernetes connector hand-off was gated on the IP `endpoint` alone, so DNS-only clusters lost the whole
 block even though the DNS URL was already read.
 
@@ -618,6 +550,7 @@ auth: {
 ```
 
 **Key rules:**
+
 - Never use `defaults` for a field the user sees on "Edit" — the default will overwrite their encrypted value.
 - Always pair a `default` with `{ hidden: true }` so the field is invisible in the form.
 - Use `placeholder` to show examples for fields the user must fill in.
@@ -630,6 +563,7 @@ auth: {
 Save the brand SVG as a separate file, then load it via `EuiIcon`. This matches the pattern used by `amazon_s3`, `bigquery`, `azure_blob`, `figma`, and most other connectors.
 
 **`icon/box.svg`** — plain SVG markup (no JSX, no React imports):
+
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <!-- SVG paths from the original logo -->
@@ -637,6 +571,7 @@ Save the brand SVG as a separate file, then load it via `EuiIcon`. This matches 
 ```
 
 **`icon/index.tsx`**:
+
 ```typescript
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -688,13 +623,16 @@ Add to `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map
 
 ## Naming Conventions
 
-| Item | Convention | Example                                    |
-|------|------------|--------------------------------------------|
-| Directory name | snake_case | `sharepoint_online`                        |
-| Connector ID | **MUST start with dot**, snake_case | `.sharepoint-online`, `.servicenow_search` |
-| TypeScript files | snake_case.ts | `types.ts`                                 |
-| Export names | PascalCase for specs | `SharepointOnline`                         |
-| Test files | {name}.test.ts | `sharepoint_online.test.ts`                |
+| Item             | Convention                          | Example                               |
+| ---------------- | ----------------------------------- | ------------------------------------- |
+| Directory name   | snake_case                          | `sharepoint_online`                   |
+| Connector ID     | **MUST start with dot**, snake_case | `.google_drive`, `.servicenow_search` |
+| TypeScript files | snake_case.ts                       | `types.ts`                            |
+| Export names     | PascalCase for specs                | `SharepointOnline`                    |
+| Test files       | {name}.test.ts                      | `sharepoint_online.test.ts`           |
+
+A few older connectors use kebab-case IDs (`.sharepoint-online`, `.jira-cloud`). Do not copy them; IDs
+cannot be renamed once shipped, so new connectors use snake_case.
 
 ## Critical ID Alignment
 
@@ -724,10 +662,10 @@ as the GKE docs did for `createCluster` and `deleteCluster`.
 
 Every `isTool: true` action **must** include an explicit `scope` field. This is an advisory signal to the LLM and orchestration layer about what side effects the action may have — it does not enforce access control at runtime.
 
-| Value | When to use |
-|---|---|
-| `'read'` | Action only reads data; no external state is modified. Pure lookups, searches, listings, downloads. |
-| `'write'` | Action creates or appends new data but does not overwrite or delete existing state. Examples: send a message, create a resource, add a comment, post an event. |
+| Value       | When to use                                                                                                                                                                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'read'`    | Action only reads data; no external state is modified. Pure lookups, searches, listings, downloads.                                                                                                                                                                                    |
+| `'write'`   | Action creates or appends new data but does not overwrite or delete existing state. Examples: send a message, create a resource, add a comment, post an event.                                                                                                                         |
 | `'destroy'` | Action may overwrite, update, or delete existing data. Examples: resolve an issue, update a record, delete a resource, patch an entity, scale a workload. Also use for generic escape-hatch actions (`request`, `callTool`, `callRestApi`, `callGraphAPI`) since they can do anything. |
 
 **Decision rule**: if the action only sends GET requests (or equivalent read-only API calls), use `'read'`. If it creates new, distinct records without touching existing ones, use `'write'`. If it can overwrite, update, or remove, use `'destroy'`. When uncertain, prefer `'destroy'` — it's safer to over-classify than under-classify.
@@ -735,7 +673,7 @@ Every `isTool: true` action **must** include an explicit `scope` field. This is 
 **Classify on the HTTP method and the documented side effect, not on the action's name.** A vendor route
 whose name reads like a read can still mutate: `listSyncFunctionTriggers` is a `POST` that
 re-synchronizes an app's deployed trigger metadata, so it is `'destroy'`, not `'read'`. Go through every
-action and ask what the request *does* to the service; a `list`/`get`/`sync` prefix on a `POST` or
+action and ask what the request _does_ to the service; a `list`/`get`/`sync` prefix on a `POST` or
 `PATCH` is a signal to re-check, not a reason to trust the name.
 
 A `create`/`post`/`set` prefix is not evidence of `'write'` either. A call that writes under a
@@ -785,10 +723,12 @@ Every action should have a `description` that answers: "What does this do, and w
 - **Download/binary actions**: If the action returns base64-encoded or binary data, include a WARNING in the description advising agents to only call it when they have a plan to process the data (e.g. via an Elasticsearch ingest pipeline attachment processor). Warn about potentially large payloads.
 
 **ServiceNow examples:**
+
 - `'Search incidents by keyword, status, or assignee. Returns incident numbers, short descriptions, and state.'`
 - `'Retrieve the full details of a single incident by sys_id. Use the sys_id values returned by searchIncidents.'`
 
 **Slack examples:**
+
 - `'Send a message to a Slack channel or DM. Returns the message timestamp, which can be used to post a reply in a thread.'`
 - `'Search Slack messages by keyword. Returns matching messages with channel, author, and timestamp.'`
 
@@ -800,7 +740,21 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 - State the unit for numeric fields (`'Maximum number of results to return (1–100, default 20)'`).
 - For ID fields, say where the value comes from (`'The sys_id of the incident, returned by searchIncidents'`).
 - For enum-like strings, list the accepted values inline (`'Filter by state: "new", "in_progress", or "resolved"'`).
-- **Bound user-input strings** — add `.max()` to string fields that accept free-form user input (search queries, AI prompts, natural-language descriptions). Use the service's documented API limit if available; otherwise 2000 for queries and 10000 for AI prompts are safe defaults. Do not bound ID fields or pagination tokens — those have fixed service-side formats.
+- **Bound every input string** — add `.max()` to every string field, not only free-form user input
+  (search queries, AI prompts, natural-language descriptions) but also IDs, slugs, and pagination tokens.
+  `connector_spec_quality_contract.test.ts` fails on any unbounded input string that is not an enum or
+  literal. Use the service's documented limit if available. Otherwise, 2000 for queries and 10000 for AI
+  prompts are safe defaults, and for IDs and tokens pick a bound well above the longest value the
+  vendor issues (e.g. 255 for an ID, 2000 for an opaque cursor) so a valid value is never rejected.
+- **Bound numeric inputs** — give counts and page sizes `.int().min(...).max(...)` matching the vendor's
+  documented range, so an agent cannot request an absurd page size.
+- **Use the vendor's limit, not a guess** — take each `.max()`/`.min()` from the vendor docs and put the
+  doc URL in a comment above the constant. If the vendor limit is in bytes, check it with
+  `Buffer.byteLength(value, 'utf8')` in a `.refine()`, because `.max()` counts characters. Do not lower a
+  large vendor limit to fit Kibana: the actions plugin already rejects any `subActionParams` larger than
+  the configured `server.maxPayload` (default 1 MiB), on every execution path. When a vendor limit is
+  above that default, add the comment
+  `// Actions rejects input larger than the configured server.maxPayload (default 1 MiB).`
 - **Bound `z.record()` key strings too** — `z.record(z.string(), z.unknown())` (used for flexible/dynamic
   objects like alert-rule conditions or config maps) has the same unbounded-input DoS risk as a bare
   `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
@@ -809,7 +763,7 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   on the array itself, and a `z.record()`
   needs an entry-count cap via `.refine()` since Zod has no built-in one:
   `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
-  Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
+  Bounding only the elements' string length still leaves an unbounded _number_ of elements/entries as a DoS
   vector, and if the array is later joined into a query string, an oversized array also risks an oversized
   upstream request.
   Take `N` from the vendor's documented limit (an OpenAPI `maxItems`, an API reference limit, a server
@@ -828,7 +782,7 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 - **A path/route pattern must be checked in both directions** — a regex that constrains a value
   interpolated into a URL has two jobs: accept every legitimate value and reject every escape. Test both
   sets explicitly, because a pattern can fail at both at once. An allowlist like `[A-Za-z0-9._~/-]`
-  rejects a legitimately percent-encoded segment (`api/users/alice%40example.com`) *and* accepts
+  rejects a legitimately percent-encoded segment (`api/users/alice%40example.com`) _and_ accepts
   `//evil.com/x`, which a client reads as a protocol-relative URL to another host. Allow the RFC 3986
   `pchar` set minus `:` plus `%XX` triplets, exclude a leading `//`, and pin the accept and reject cases
   as table-driven tests. Dropping `:` is what stops `http://evil.com` parsing as a relative path.
@@ -853,8 +807,18 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 export const SearchInputSchema = lazySchema(() =>
   z.object({
     query: z.string().max(1000).describe('Keyword or natural-language search query'),
-    limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
-    state: z.string().max(50).optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum results to return (1–100, default 20)'),
+    state: z
+      .string()
+      .max(50)
+      .optional()
+      .describe('Filter by state: "new", "in_progress", or "resolved"'),
   })
 );
 
@@ -900,6 +864,7 @@ but not mark it ready, and a draft cannot be merged.
 The description is shown in the UI tile picker and surfaced to AI agents. Write it to accurately reflect capabilities.
 
 **Rules:**
+
 - **MUST use `i18n.translate()`** — this string is shown in the UI and must be internationalized
 - **List the key verbs/actions** the connector supports (e.g., "search", "list", "download", "send")
 - **Name the objects** those actions operate on (e.g., "messages", "issues", "files")
@@ -908,9 +873,11 @@ The description is shown in the UI tile picker and surfaced to AI agents. Write 
 - **Don't say "Kibana Stack Connector for X"** — that's an implementation detail
 
 **Good examples:**
+
 - `'Search messages, list public channels, and send messages in Slack'`
 - `'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub'`
 
 **Bad examples:**
+
 - `'Connect to Jira to pull data from your project.'` — too vague
 - `'Kibana Stack Connector for SharePoint Online.'` — says nothing about capabilities
