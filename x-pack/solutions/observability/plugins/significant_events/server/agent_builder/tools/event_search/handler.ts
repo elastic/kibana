@@ -13,8 +13,8 @@ import {
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
-  type SignificantEventsReadClient,
 } from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
@@ -263,10 +263,10 @@ const toEnvelope = (response: {
 // The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')
 // get back the matching response member, so callers don't need to narrow on `.view` themselves.
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
-  eventClient,
+  eventSearchClient,
   params,
 }: {
-  eventClient: SignificantEventsReadClient;
+  eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
@@ -276,14 +276,14 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
 
   const sharedParams = buildSearchParams(view, params);
   const response = hasEventSearchFilters(params)
-    ? await eventClient.findLatestByCurrentStatePaginated({
+    ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
         status: params.status ? [params.status] : undefined,
         ruleUuids: params.rule_uuids,
         eventIds: params.event_ids,
         topologyFeatureIds: params.topology_feature_ids,
       })
-    : await eventClient.findLatestPaginated(sharedParams);
+    : await eventSearchClient.findLatestPaginated(sharedParams);
 
   const envelope = toEnvelope(response);
 
