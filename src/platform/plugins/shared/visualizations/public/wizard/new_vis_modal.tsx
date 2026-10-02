@@ -20,10 +20,7 @@ import {
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import type {
-  EmbeddableStateTransfer,
-  EmbeddableEditorState,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStateTransfer, EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { css } from '@emotion/react';
 import { SearchSelection } from './search_selection';

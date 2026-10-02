@@ -59,7 +59,14 @@ export const DashboardListing = ({
         getTabs,
         refreshListBouncer,
       }),
-    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs, refreshListBouncer]
+    [
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      getTabs,
+      refreshListBouncer,
+    ]
   );
 
   const activeTabId = useMemo(() => {
