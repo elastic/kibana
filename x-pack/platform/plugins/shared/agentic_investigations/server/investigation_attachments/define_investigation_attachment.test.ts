@@ -73,6 +73,17 @@ const note = defineInvestigationAttachment<typeof TYPE, typeof storageSettings, 
   describe: (document) => `Note ${document.count}`,
 });
 
+const hiddenNote = defineInvestigationAttachment<typeof TYPE, typeof storageSettings, NoteDocument>(
+  {
+    type: TYPE,
+    storageSettings,
+    schema: noteSchema,
+    format: (document) => `Note: ${document.text} (${document.count})`,
+    agentDescription: 'A note.',
+    hiddenInConversation: true,
+  }
+);
+
 const noteId = (conversationId = CONVERSATION_ID, spaceId = SPACE_ID) =>
   hashInvestigationAttachmentId(spaceId, conversationId);
 
@@ -409,6 +420,62 @@ describe('writeAndAttach', () => {
     expect(storage.entries.has(noteId())).toBe(true);
   });
 
+  it('shows the attachment unless the definition hides it', () => {
+    expect(note.hiddenInConversation).toBe(false);
+    expect(hiddenNote.hiddenInConversation).toBe(true);
+  });
+
+  it('creates a hidden attachment when the definition hides it', async () => {
+    const { service } = setup();
+    const create = jest.fn().mockResolvedValue({ id: noteId() });
+
+    const document = await hiddenNote.writeAndAttach({
+      service,
+      id: noteId(),
+      spaceId: SPACE_ID,
+      mutate: () => body(),
+      conversationId: CONVERSATION_ID,
+      conversations: owner(),
+      attachments: { create } as unknown as AttachmentPublicClient,
+    });
+
+    expect(create).toHaveBeenCalledWith({
+      conversationId: CONVERSATION_ID,
+      id: noteId(),
+      type: TYPE,
+      origin: noteId(),
+      data: document,
+      hidden: true,
+    });
+  });
+
+  it('updates an existing attachment of a hidden definition with its data only', async () => {
+    const { service } = setup();
+    const update = jest.fn().mockResolvedValue({ id: noteId() });
+
+    const document = await hiddenNote.writeAndAttach({
+      service,
+      id: noteId(),
+      spaceId: SPACE_ID,
+      mutate: () => body(),
+      conversationId: CONVERSATION_ID,
+      conversations: owner(),
+      attachments: {
+        create: jest
+          .fn()
+          .mockRejectedValue(createAttachmentAlreadyExistsError({ attachmentId: noteId() })),
+        get: jest.fn().mockResolvedValue({ id: noteId(), active: true }),
+        update,
+      } as unknown as AttachmentPublicClient,
+    });
+
+    expect(update).toHaveBeenCalledWith({
+      conversationId: CONVERSATION_ID,
+      attachmentId: noteId(),
+      data: document,
+    });
+  });
+
   it('does not write when the caller does not own the conversation', async () => {
     const { storage, service } = setup();
 
@@ -473,7 +540,7 @@ describe('writeAndAttach', () => {
 });
 
 describe('writeFromTool', () => {
-  const setupTool = () => {
+  const setupTool = (definitionUnderTest = note) => {
     const { storage, service } = setup();
     const definition = registeredType(service);
     const attachments = createAttachmentStateManager([], {
@@ -481,7 +548,7 @@ describe('writeFromTool', () => {
     });
     const context = { attachments, request: httpServerMock.createKibanaRequest() };
     const write = (count: number) =>
-      note.writeFromTool({
+      definitionUnderTest.writeFromTool({
         service,
         id: noteId(),
         spaceId: SPACE_ID,
@@ -508,6 +575,19 @@ describe('writeFromTool', () => {
     const updated = attachments.getAttachmentRecord(noteId());
     expect(updated?.current_version).toBe(2);
     expect(updated?.versions[1].data).toEqual({ id: noteId(), ...body({ count: 2 }) });
+  });
+
+  it('adds a hidden attachment that records no change events when the definition hides it', async () => {
+    const { attachments, write } = setupTool(hiddenNote);
+
+    await write(1);
+    await write(2);
+
+    expect(attachments.getAttachmentRecord(noteId())).toMatchObject({
+      hidden: true,
+      current_version: 2,
+    });
+    expect(attachments.drainChanges()).toEqual([]);
   });
 
   it('keeps an attachment the user removed removed, but still writes the index', async () => {

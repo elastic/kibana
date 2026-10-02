@@ -10,6 +10,7 @@ import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import type { Impact } from '../../../common/impact/impact';
 import { attachWithPublicClient } from '../../investigation_attachments';
 import type { WrittenAttach } from '../services/impact_service';
+import { impactAttachment } from './impact_attachment_type';
 
 /**
  * Writes impact only after the caller is allowed to update the conversation,
@@ -40,4 +41,5 @@ export const attachImpactToInvestigation = ({
     read: readImpact,
     write: writeImpact,
     revert: revertImpact,
+    hidden: impactAttachment.hiddenInConversation,
   });
