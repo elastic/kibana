@@ -807,6 +807,76 @@ describe('MonitorConfigRepository', () => {
     });
   });
 
+  describe('findExistingMonitorName', () => {
+    it('searches both monitor Saved Object types with one terms query', async () => {
+      soClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [
+            {
+              _index: '.kibana',
+              _id: 'monitor-id',
+              fields: {
+                [`${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`]: [
+                  'Existing monitor',
+                ],
+              },
+            },
+          ],
+        },
+      });
+
+      await expect(
+        repository.findExistingMonitorName(['Existing monitor', 'Another monitor'], 'default')
+      ).resolves.toBe('Existing monitor');
+
+      expect(soClient.search).toHaveBeenCalledWith({
+        type: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
+        namespaces: ['default'],
+        _source: false,
+        fields: [
+          `${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`,
+          `${legacySyntheticsMonitorTypeSingle}.${ConfigKey.NAME}.keyword`,
+        ],
+        size: 1,
+        terminate_after: 1,
+        track_total_hits: false,
+        query: {
+          bool: {
+            should: [
+              {
+                terms: {
+                  [`${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`]: [
+                    'Existing monitor',
+                    'Another monitor',
+                  ],
+                },
+              },
+              {
+                terms: {
+                  [`${legacySyntheticsMonitorTypeSingle}.${ConfigKey.NAME}.keyword`]: [
+                    'Existing monitor',
+                    'Another monitor',
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      });
+    });
+
+    it('does not search when no names are provided', async () => {
+      await expect(repository.findExistingMonitorName([], 'default')).resolves.toBeUndefined();
+
+      expect(soClient.search).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findDecryptedMonitors', () => {
     it('should find decrypted monitors by space id and filter', async () => {
       const spaceId = 'test-space';

@@ -363,6 +363,38 @@ export class MonitorConfigRepository {
     return combineAndSortSavedObjects<T>(results, options, page, perPage);
   }
 
+  /** Finds a monitor name across the current and legacy Saved Object types. */
+  async findExistingMonitorName(names: string[], namespace: string): Promise<string | undefined> {
+    if (names.length === 0) {
+      return undefined;
+    }
+
+    const nameFields = [
+      `${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`,
+      `${legacySyntheticsMonitorTypeSingle}.${ConfigKey.NAME}.keyword`,
+    ];
+    const { hits } = await this.soClient.search({
+      type: syntheticsMonitorSOTypes,
+      namespaces: [namespace],
+      _source: false,
+      fields: nameFields,
+      size: 1,
+      terminate_after: 1,
+      track_total_hits: false,
+      query: {
+        bool: {
+          should: [{ terms: { [nameFields[0]]: names } }, { terms: { [nameFields[1]]: names } }],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    const existingName = nameFields
+      .map((field) => hits.hits[0]?.fields?.[field]?.[0])
+      .find((value): value is string => typeof value === 'string');
+    return existingName ?? (hits.hits.length > 0 ? names[0] : undefined);
+  }
+
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
     const getDecrypted = async (soType: string) => {
       // Handle legacy filter if the type is legacy

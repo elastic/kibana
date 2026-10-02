@@ -6,10 +6,7 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core/server';
-import { chunk } from 'lodash';
-import pMap from 'p-map';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { getSavedObjectKqlFilter } from '../../common';
 import type { RouteContext } from '../../types';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -22,9 +19,6 @@ import {
   assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from '../monitor_locations_utils';
-
-const MONITOR_NAME_QUERY_BATCH_SIZE = 100;
-const MONITOR_NAME_QUERY_CONCURRENCY = 4;
 
 export interface BulkCreatePreprocessResult {
   normalizedMonitors: SyntheticsMonitor[];
@@ -206,24 +200,10 @@ export class CreateMonitorBulkAPI {
     const names = monitors.map((monitor) => monitor[ConfigKey.NAME]);
     const { monitorConfigRepository } = this.routeContext;
 
-    const existingNames = await pMap(
-      chunk(names, MONITOR_NAME_QUERY_BATCH_SIZE),
-      async (nameBatch) => {
-        const filter = getSavedObjectKqlFilter({ field: 'name.keyword', values: nameBatch });
-        const { saved_objects: existingMonitors = [], total } = await monitorConfigRepository.find<
-          Pick<MonitorFields, ConfigKey.NAME>
-        >({
-          perPage: 1,
-          fields: [ConfigKey.NAME],
-          filter,
-        });
-        return total > 0
-          ? existingMonitors[0]?.attributes[ConfigKey.NAME] ?? nameBatch[0]
-          : undefined;
-      },
-      { concurrency: MONITOR_NAME_QUERY_CONCURRENCY }
+    const existingName = await monitorConfigRepository.findExistingMonitorName(
+      names,
+      this.routeContext.spaceId
     );
-    const existingName = existingNames.find(Boolean);
     if (existingName) {
       throw bulkCreateValidationError(monitorNameExistsMessage(existingName));
     }
