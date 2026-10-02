@@ -132,6 +132,13 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     });
 
   const selectedCount = selectionMode === 'query' ? total : selectedTokens.length;
+
+  // Disable bulk revoke when every manually-selected token is already revoked (active === false).
+  // In query mode we don't have the full token set, so leave it enabled.
+  const allSelectedRevoked =
+    selectionMode === 'manual' &&
+    selectedTokens.length > 0 &&
+    selectedTokens.every((t) => !t.active);
   const showSelectionInfo =
     isBulkActionInProgress ||
     (selectionMode === 'manual' && selectedTokens.length > 0) ||
@@ -262,6 +269,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 onRevoke: () => setBulkActionPending('revoke'),
                 onDelete: () => setBulkActionPending('delete'),
                 plural: true,
+                revokeDisabled: allSelectedRevoked,
               })}
               button={{
                 props: {
