@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiPanel,
-  EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -182,18 +181,32 @@ export const DetectionTopology = ({
     >
       <div
         css={css`
-          padding: ${euiTheme.size.l};
+          padding: ${euiTheme.size.m} ${euiTheme.size.l};
           border-bottom: 1px solid ${euiTheme.colors.borderBasePlain};
         `}
       >
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>{title || labels.topology}</h2>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              <p>{description || labels.topologyDescription}</p>
-            </EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>{title || labels.topology}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={description || labels.topologyDescription}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="significantEventsAppDetectionTopologyButton"
+                    iconType="iInCircle"
+                    size="s"
+                    aria-label={description || labels.topologyDescription}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -513,7 +526,10 @@ export const DetectionTopology = ({
       </div>
       <div
         css={css`
-          padding: ${euiTheme.size.m} ${euiTheme.size.l};
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: ${euiTheme.size.s} ${euiTheme.size.l};
           border-top: 1px solid ${euiTheme.colors.borderBasePlain};
         `}
       >
@@ -522,9 +538,14 @@ export const DetectionTopology = ({
           <EuiHealth color={euiTheme.colors.mediumShade}>{labels.coverageGap}</EuiHealth>
           <EuiHealth color={euiTheme.colors.danger}>{labels.withEvents}</EuiHealth>
         </EuiFlexGroup>
-        <EuiText size="xs" color="subdued">
-          <p>{labels.graphHint}</p>
-        </EuiText>
+        <EuiToolTip content={labels.graphHint} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="significantEventsAppDetectionTopologyButton"
+            iconType="question"
+            size="s"
+            aria-label={labels.graphHint}
+          />
+        </EuiToolTip>
       </div>
     </EuiPanel>
   );

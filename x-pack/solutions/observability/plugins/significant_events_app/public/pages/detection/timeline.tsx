@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -124,6 +125,7 @@ export const DetectionTimeline = ({
   const preferences = useEngineSettings();
   const controlsId = useGeneratedHtmlId({ prefix: 'detectionTimeline' });
   const [mode, setMode] = useState('lanes');
+  const [showEventLabels, setShowEventLabels] = useState(false);
   const [feedLimit, setFeedLimit] = useState(60);
   const [fitActivity, setFitActivity] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -407,24 +409,35 @@ export const DetectionTimeline = ({
         })) ?? []
       : []),
   ]);
-  // Stack overlapping labels while preserving each event's true position on the time axis.
+  // Dense dots share a marker by kind; expanding reveals every entry at its actual timestamp.
   let nextLaneY = 40;
   const laneLayouts = rows.map((lane) => {
+    const ordered = [...lane.entries].sort((a, b) => a.timestamp - b.timestamp);
+    const groups = new Map<string, TimelineEntry[]>();
+    for (const entry of ordered) {
+      const x = plotLeft + ((entry.timestamp - from) / span) * plotWidth;
+      const key = showEventLabels ? entry.id : `${entry.kind}:${Math.floor(x / 12)}`;
+      const group = groups.get(key) ?? [];
+      group.push(entry);
+      groups.set(key, group);
+    }
     const trackEnds: number[] = [];
-    const markers = [...lane.entries]
-      .sort((a, b) => a.timestamp - b.timestamp)
-      .map((entry) => {
-        const x = plotLeft + ((entry.timestamp - from) / span) * plotWidth;
-        const labelWidth = 152;
-        const labelX = x + labelWidth + 12 < width - 10 ? x + 10 : x - labelWidth - 10;
-        const left = Math.min(x - 5, labelX);
-        const right = Math.max(x + 5, labelX + labelWidth);
-        let track = trackEnds.findIndex((value) => value + 12 < left);
-        if (track === -1) track = trackEnds.length;
-        trackEnds[track] = right;
-        return { entry, x, labelX, track };
-      });
-    const laneHeight = 18 + Math.max(1, trackEnds.length) * 40;
+    const markers = [...groups.values()].map((entries) => {
+      const entry = entries[0];
+      const x = plotLeft + ((entry.timestamp - from) / span) * plotWidth;
+      const labelWidth = 152;
+      const labelX = x + labelWidth + 12 < width - 10 ? x + 10 : x - labelWidth - 10;
+      const left = showEventLabels ? Math.min(x - 5, labelX) : x - 10;
+      const right = showEventLabels ? Math.max(x + 5, labelX + labelWidth) : x + 10;
+      let track = trackEnds.findIndex((value) => value + (showEventLabels ? 12 : 4) < left);
+      if (track === -1) track = trackEnds.length;
+      trackEnds[track] = right;
+      return { entry, entries, x, labelX, track };
+    });
+    const laneHeight = Math.max(
+      56,
+      18 + Math.max(1, trackEnds.length) * (showEventLabels ? 40 : 20)
+    );
     const y = nextLaneY;
     nextLaneY += laneHeight;
     return { lane, markers, y, height: laneHeight };
@@ -503,6 +516,19 @@ export const DetectionTimeline = ({
               <h2>{labels.browseTimeline}</h2>
             </EuiTitle>
           </EuiFlexItem>
+          {mode === 'lanes' && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={i18n.translate('xpack.significantEventsApp.timeline.expandEvents', {
+                  defaultMessage: 'Expand events',
+                })}
+                checked={showEventLabels}
+                onChange={(event) => setShowEventLabels(event.target.checked)}
+                data-test-subj="detectionTimelineExpandEvents"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="significantEventsAppDetectionTimelineButton"
@@ -749,112 +775,237 @@ export const DetectionTimeline = ({
                     </text>
                   )}
                 </g>
-                {markers.map(({ entry, x, labelX, track }) => {
-                  const markerY = y + 26 + track * 40;
+                {markers.map(({ entry, entries, x, labelX, track }) => {
+                  const markerY = y + 26 + track * (showEventLabels ? 40 : 20);
                   const color = colors[entry.kind];
                   return (
                     <g key={entry.id}>
-                      <line
-                        x1={x}
-                        y1={y + 12}
-                        x2={x}
-                        y2={markerY}
-                        stroke={color}
-                        strokeOpacity=".25"
-                        strokeDasharray="2 3"
-                      />
-                      <line
-                        x1={x}
-                        y1={markerY}
-                        x2={labelX < x ? labelX + 152 : labelX}
-                        y2={markerY}
-                        stroke={color}
-                        strokeOpacity=".5"
-                      />
-                      {entry.kind === 'knowledge' ? (
-                        <path
-                          d={`M ${x} ${markerY - 4} L ${x + 4} ${markerY} L ${x} ${markerY + 4} L ${
-                            x - 4
-                          } ${markerY} Z`}
-                          fill={color}
-                        />
-                      ) : entry.kind === 'detection' ? (
-                        <rect x={x - 4} y={markerY - 4} width="8" height="8" rx="2" fill={color} />
+                      {showEventLabels ? (
+                        <>
+                          <line
+                            x1={x}
+                            y1={y + 12}
+                            x2={x}
+                            y2={markerY}
+                            stroke={color}
+                            strokeOpacity=".25"
+                            strokeDasharray="2 3"
+                          />
+                          <line
+                            x1={x}
+                            y1={markerY}
+                            x2={labelX < x ? labelX + 152 : labelX}
+                            y2={markerY}
+                            stroke={color}
+                            strokeOpacity=".5"
+                          />
+                          {entry.kind === 'knowledge' ? (
+                            <path
+                              d={`M ${x} ${markerY - 4} L ${x + 4} ${markerY} L ${x} ${
+                                markerY + 4
+                              } L ${x - 4} ${markerY} Z`}
+                              fill={color}
+                            />
+                          ) : entry.kind === 'detection' ? (
+                            <rect
+                              x={x - 4}
+                              y={markerY - 4}
+                              width="8"
+                              height="8"
+                              rx="2"
+                              fill={color}
+                            />
+                          ) : (
+                            <circle
+                              cx={x}
+                              cy={markerY}
+                              r={entry.kind === 'event' ? 5 : 3}
+                              fill={color}
+                            />
+                          )}
+                        </>
                       ) : (
-                        <circle
-                          cx={x}
-                          cy={markerY}
-                          r={entry.kind === 'event' ? 5 : 3}
-                          fill={color}
-                        />
+                        <foreignObject x={x - 10} y={markerY - 10} width="20" height="20">
+                          <EuiToolTip
+                            position="top"
+                            delay="regular"
+                            content={
+                              entries.length === 1 ? (
+                                entryTooltip(entry)
+                              ) : (
+                                <EuiText size="xs">
+                                  <p>
+                                    <strong>
+                                      {i18n.translate(
+                                        'xpack.significantEventsApp.timeline.groupedEntries',
+                                        {
+                                          defaultMessage: '{count} activities · {kind}',
+                                          values: {
+                                            count: entries.length,
+                                            kind: kindLabel(entry.kind),
+                                          },
+                                        }
+                                      )}
+                                    </strong>
+                                  </p>
+                                  <p>{lane.label}</p>
+                                  <p>
+                                    {timestampLabel(entry.timestamp)}–
+                                    {timestampLabel(entries[entries.length - 1].timestamp)}
+                                  </p>
+                                  {entries.slice(0, 5).map((item) => (
+                                    <p key={item.id}>{item.title}</p>
+                                  ))}
+                                  {entries.length > 5 && (
+                                    <p>
+                                      {i18n.translate(
+                                        'xpack.significantEventsApp.timeline.moreEntries',
+                                        {
+                                          defaultMessage: '+{count} more · Select to see all',
+                                          values: { count: entries.length - 5 },
+                                        }
+                                      )}
+                                    </p>
+                                  )}
+                                </EuiText>
+                              )
+                            }
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setSelected(entries)}
+                              aria-label={
+                                entries.length === 1
+                                  ? `${entry.title}, ${timestampLabel(entry.timestamp)}, ${
+                                      lane.label
+                                    }`
+                                  : i18n.translate(
+                                      'xpack.significantEventsApp.timeline.groupedEntryLabel',
+                                      {
+                                        defaultMessage:
+                                          '{count} {kind} activities for {service}. Select to expand details.',
+                                        values: {
+                                          count: entries.length,
+                                          kind: kindLabel(entry.kind),
+                                          service: lane.label,
+                                        },
+                                      }
+                                    )
+                              }
+                              data-test-subj="detectionTimelineDotEntry"
+                              css={css`
+                                display: grid;
+                                place-items: center;
+                                width: 20px;
+                                height: 20px;
+                                border-radius: 50%;
+                                color: ${euiTheme.colors.text};
+                                &:hover {
+                                  background: color-mix(in srgb, ${color} 18%, transparent);
+                                }
+                                &:focus-visible {
+                                  outline: 2px solid ${euiTheme.colors.primary};
+                                  outline-offset: -2px;
+                                }
+                              `}
+                            >
+                              <span
+                                css={css`
+                                  display: grid;
+                                  place-items: center;
+                                  width: ${entries.length > 1
+                                    ? 18
+                                    : entry.kind === 'event'
+                                    ? 10
+                                    : 7}px;
+                                  height: ${entries.length > 1
+                                    ? 18
+                                    : entry.kind === 'event'
+                                    ? 10
+                                    : 7}px;
+                                  border-radius: 50%;
+                                  background: ${color};
+                                  color: ${euiTheme.colors.backgroundBasePlain};
+                                  font-size: 8px;
+                                  font-weight: ${euiTheme.font.weight.semiBold};
+                                  font-variant-numeric: tabular-nums;
+                                `}
+                              >
+                                {entries.length > 1 ? entries.length : null}
+                              </span>
+                            </button>
+                          </EuiToolTip>
+                        </foreignObject>
                       )}
-                      <foreignObject x={labelX} y={markerY - 17} width="152" height="36">
-                        <EuiToolTip content={entryTooltip(entry)} position="top" delay="regular">
-                          <button
-                            type="button"
-                            onClick={() => setSelected([entry])}
-                            aria-label={`${entry.title}, ${timestampLabel(entry.timestamp)}, ${
-                              lane.label
-                            }`}
-                            data-test-subj="detectionTimelineLabeledEntry"
-                            css={css`
-                              width: 152px;
-                              height: 34px;
-                              padding: 3px 6px;
-                              text-align: left;
-                              color: ${euiTheme.colors.text};
-                              border-left: 2px solid ${color};
-                              border-radius: ${euiTheme.border.radius.medium};
-                              background: color-mix(
-                                in srgb,
-                                ${color} 8%,
-                                ${euiTheme.colors.backgroundBasePlain}
-                              );
-                              &:hover {
+                      {showEventLabels && (
+                        <foreignObject x={labelX} y={markerY - 17} width="152" height="36">
+                          <EuiToolTip content={entryTooltip(entry)} position="top" delay="regular">
+                            <button
+                              type="button"
+                              onClick={() => setSelected([entry])}
+                              aria-label={`${entry.title}, ${timestampLabel(entry.timestamp)}, ${
+                                lane.label
+                              }`}
+                              data-test-subj="detectionTimelineLabeledEntry"
+                              css={css`
+                                width: 152px;
+                                height: 34px;
+                                padding: 3px 6px;
+                                text-align: left;
+                                color: ${euiTheme.colors.text};
+                                border-left: 2px solid ${color};
+                                border-radius: ${euiTheme.border.radius.medium};
                                 background: color-mix(
                                   in srgb,
-                                  ${color} 16%,
+                                  ${color} 8%,
                                   ${euiTheme.colors.backgroundBasePlain}
                                 );
-                              }
-                              &:focus-visible {
-                                outline: 2px solid ${euiTheme.colors.primary};
-                                outline-offset: -2px;
-                              }
-                            `}
-                          >
-                            <span
-                              css={css`
-                                display: block;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                white-space: nowrap;
-                                font-size: 8px;
-                                line-height: 11px;
-                                color: ${color};
+                                &:hover {
+                                  background: color-mix(
+                                    in srgb,
+                                    ${color} 16%,
+                                    ${euiTheme.colors.backgroundBasePlain}
+                                  );
+                                }
+                                &:focus-visible {
+                                  outline: 2px solid ${euiTheme.colors.primary};
+                                  outline-offset: -2px;
+                                }
                               `}
                             >
-                              {entry.activityKind
-                                ? activityLabel(entry.activityKind)
-                                : kindLabel(entry.kind)}
-                              {entry.count ? ` · ${entry.count}` : ''}
-                            </span>
-                            <span
-                              css={css`
-                                display: block;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                white-space: nowrap;
-                                font-size: 10px;
-                                line-height: 14px;
-                                font-weight: ${euiTheme.font.weight.medium};
-                              `}
-                            >
-                              {entry.title}
-                            </span>
-                          </button>
-                        </EuiToolTip>
-                      </foreignObject>
+                              <span
+                                css={css`
+                                  display: block;
+                                  overflow: hidden;
+                                  text-overflow: ellipsis;
+                                  white-space: nowrap;
+                                  font-size: 8px;
+                                  line-height: 11px;
+                                  color: ${color};
+                                `}
+                              >
+                                {entry.activityKind
+                                  ? activityLabel(entry.activityKind)
+                                  : kindLabel(entry.kind)}
+                                {entry.count ? ` · ${entry.count}` : ''}
+                              </span>
+                              <span
+                                css={css`
+                                  display: block;
+                                  overflow: hidden;
+                                  text-overflow: ellipsis;
+                                  white-space: nowrap;
+                                  font-size: 10px;
+                                  line-height: 14px;
+                                  font-weight: ${euiTheme.font.weight.medium};
+                                `}
+                              >
+                                {entry.title}
+                              </span>
+                            </button>
+                          </EuiToolTip>
+                        </foreignObject>
+                      )}
                     </g>
                   );
                 })}
@@ -985,29 +1136,27 @@ export const DetectionTimeline = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {selected.slice(0, 20).map((entry) => (
-            <EuiButtonEmpty
-              data-test-subj="significantEventsAppDetectionTimelineButton"
-              key={entry.id}
-              size="xs"
-              flush="left"
-              iconType="sortRight"
-              onClick={() => action(entry)}
-              isDisabled={!entry.feature && !entry.query && !entry.event && !entry.detection}
-            >
-              {entry.title}
-              {entry.count ? ` · ${entry.count} ${labels.matches}` : ''}
-            </EuiButtonEmpty>
-          ))}
-          {feed.length > feedLimit && (
-            <EuiButtonEmpty
-              data-test-subj="significantEventsAppDetectionTimelineButton"
-              size="s"
-              onClick={() => setFeedLimit(feedLimit + 60)}
-            >
-              {labels.showMore}
-            </EuiButtonEmpty>
-          )}
+          <div
+            css={css`
+              max-height: 240px;
+              overflow-y: auto;
+            `}
+          >
+            {selected.map((entry) => (
+              <EuiButtonEmpty
+                data-test-subj="significantEventsAppDetectionTimelineButton"
+                key={entry.id}
+                size="xs"
+                flush="left"
+                iconType="sortRight"
+                onClick={() => action(entry)}
+                isDisabled={!entry.feature && !entry.query && !entry.event && !entry.detection}
+              >
+                {entry.title}
+                {entry.count ? ` · ${entry.count} ${labels.matches}` : ''}
+              </EuiButtonEmpty>
+            ))}
+          </div>
         </div>
       )}
       <div

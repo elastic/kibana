@@ -27,6 +27,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  EuiButtonIcon,
   euiPaletteColorBlind,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -39,9 +41,6 @@ import type { DetectionEntity } from './model';
 import { labels } from './translations';
 
 const copy = {
-  title: i18n.translate('xpack.significantEventsApp.rulesWorkspace.title', {
-    defaultMessage: 'Rules',
-  }),
   scope: i18n.translate('xpack.significantEventsApp.rulesWorkspace.scope', {
     defaultMessage: 'Showing rules for',
   }),
@@ -212,7 +211,16 @@ const RuleList = ({
               <strong>{rule.title}</strong>
             </EuiText>
             <EuiText size="xs" color="subdued">
-              {rule.stream_name}
+              <span
+                css={css`
+                  display: -webkit-box;
+                  -webkit-line-clamp: 1;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                `}
+              >
+                {rule.description}
+              </span>
             </EuiText>
           </span>
           <span
@@ -304,9 +312,6 @@ export const RulesWorkspace = ({
       <EuiPanel hasBorder hasShadow={false} paddingSize="l">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>{copy.title}</h2>
-            </EuiTitle>
             <EuiText size="s" color="subdued">
               <p>
                 {copy.scope}{' '}
@@ -322,7 +327,14 @@ export const RulesWorkspace = ({
             </EuiText>
             {selected && (
               <EuiText size="xs" color="subdued">
-                <p>{selected.streams.join(' · ')}</p>
+                <EuiToolTip content={selected.streams.join(' · ')}>
+                  <span tabIndex={0}>
+                    {i18n.translate('xpack.significantEventsApp.rulesWorkspace.streamCount', {
+                      defaultMessage: '{count, plural, one {# stream} other {# streams}}',
+                      values: { count: selected.streams.length },
+                    })}
+                  </span>
+                </EuiToolTip>
               </EuiText>
             )}
           </EuiFlexItem>
@@ -340,12 +352,23 @@ export const RulesWorkspace = ({
         <EuiSpacer size="l" />
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
           <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{copy.activity}</strong>
-            </EuiText>
-            <EuiText size="xs" color="subdued">
-              <p>{copy.description}</p>
-            </EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>{copy.activity}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={copy.description} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="significantEventsAppRulesWorkspaceButton"
+                    iconType="iInCircle"
+                    size="s"
+                    aria-label={copy.description}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">

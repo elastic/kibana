@@ -9,11 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiButtonGroup,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -31,6 +30,7 @@ import {
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ import { useMaintenanceStatus } from '../../hooks/use_significant_events_mainten
 import { buildDetectionModel, hasRuleCoverage, type DetectionEntity } from './model';
 import { MetricValue } from './metric_value';
 import { RuleCoverage } from './rule_coverage';
-import { StreamsControls } from './streams_controls';
+import { EngineDrawer, engineDrawerLabels, type EngineDrawerTab } from './engine_drawer';
 import { RulesWorkspace } from './rules_workspace';
 import { useEngineActivity } from './use_engine_activity';
 import { EngineActivityPanel } from './engine_activity_panel';
@@ -58,7 +58,6 @@ import { journey } from './journey_translations';
 import { DetectionEventsFeed } from './events_feed';
 import { SignificantEventFlyout } from '../significant_events/components/significant_events_tab/significant_event_flyout';
 import { DetectionFlyout } from '../significant_events/components/detections_tab/detection_flyout';
-import { InfrastructureTopology } from './infrastructure_topology';
 import { DetectionTopology } from './topology';
 import { DetectionTimeline } from './timeline';
 import { useDetectionData } from './use_detection_data';
@@ -106,9 +105,23 @@ const DetectionWorkspace = (): React.ReactElement => {
   const selectedId = params.get('entity') || undefined;
   const showCoverageGaps = params.get('coverage') === 'uncovered';
   const requestedView = params.get('view') || 'overview';
-  const view = requestedView === 'services' ? 'rules' : requestedView;
+  const view =
+    requestedView === 'services'
+      ? 'rules'
+      : ['overview', 'rules', 'timeline', 'events'].includes(requestedView)
+      ? requestedView
+      : 'overview';
+  const drawerParam = params.get('engine');
+  const engineTab: EngineDrawerTab | undefined =
+    drawerParam === 'activity' || drawerParam === 'streams' ? drawerParam : undefined;
+  useEffect(() => {
+    if (requestedView !== 'activity' && requestedView !== 'streams') return;
+    const next = new URLSearchParams(history.location.search);
+    next.set('engine', requestedView);
+    next.delete('view');
+    history.replace({ ...history.location, search: next.toString() });
+  }, [history, requestedView]);
   const [search, setSearch] = useState('');
-  const [topologyView, setTopologyView] = useState('services');
   const [openedEvent, setOpenedEvent] = useState<SignificantEventResponse>();
   const [openedDetection, setOpenedDetection] = useState<Detection>();
   const [inspected, setInspected] = useState<KnowledgeIndicator>();
@@ -255,12 +268,6 @@ const DetectionWorkspace = (): React.ReactElement => {
     data.activity.total > data.activity.activities.length;
   const totals = [
     {
-      label: journey.streams,
-      value: engineActivity.data?.streams.filter((stream) => stream.watched).length ?? 0,
-      hint: journey.streamSettings,
-      icon: 'database',
-    },
-    {
       label: labels.entities,
       value: model.entities.length,
       hint: labels.entitiesHint,
@@ -294,14 +301,40 @@ const DetectionWorkspace = (): React.ReactElement => {
     { id: 'rules', label: labels.browseRules },
     { id: 'timeline', label: labels.browseTimeline },
     { id: 'events', label: labels.browseEvents },
-    {
-      id: 'activity',
-      label: i18n.translate('xpack.significantEventsApp.detection.engineTab', {
-        defaultMessage: 'Engine',
-      }),
-    },
-    { id: 'streams', label: journey.streams },
   ];
+
+  const viewNavigation = (
+    <>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiTabs size="s">
+            {viewTabs.map((tab) => (
+              <EuiTab
+                key={tab.id}
+                isSelected={view === tab.id}
+                onClick={() => updateParam('view', tab.id)}
+              >
+                {tab.label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 300px;
+              `}
+            >
+              <SignificantEventsSearchBar showDatePicker enableDateRangePicker />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
+  );
 
   return (
     <div
@@ -313,13 +346,6 @@ const DetectionWorkspace = (): React.ReactElement => {
         padding-bottom: ${euiTheme.size.xxl};
       `}
     >
-      <EngineActivityPanel
-        streams={selected?.streams}
-        onConfigure={() => updateParam('view', 'streams')}
-        onOpenActivity={() => updateParam('view', 'activity')}
-      />
-      <EuiSpacer size="m" />
-
       {query.isError && (
         <>
           <EuiCallOut announceOnMount color="warning" title={labels.loadError}>
@@ -341,16 +367,50 @@ const DetectionWorkspace = (): React.ReactElement => {
         </>
       )}
 
+      <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+        <EngineActivityPanel
+          onOpenActivity={() => updateParam('engine', 'activity')}
+          headerAction={
+            <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.significantEventsApp.engineBar.watchedStreams', {
+                    defaultMessage: '{count} watched streams',
+                    values: {
+                      count: engineActivity.data
+                        ? number(
+                            engineActivity.data.streams.filter((stream) => stream.watched).length
+                          )
+                        : '—',
+                    },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="inspect"
+                  aria-haspopup="dialog"
+                  aria-expanded={Boolean(engineTab)}
+                  onClick={() => updateParam('engine', 'activity')}
+                  data-test-subj="detectionOpenEngineDrawer"
+                >
+                  {engineDrawerLabels.title}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiPanel>
+
       <div
         css={css`
           display: flex;
           align-items: center;
           flex-wrap: wrap;
-          gap: ${euiTheme.size.l};
-          padding: ${euiTheme.size.m} ${euiTheme.size.l};
-          border: 1px solid ${euiTheme.colors.borderBasePlain};
-          border-radius: ${euiTheme.border.radius.panel};
-          background: ${euiTheme.colors.backgroundBasePlain};
+          gap: ${euiTheme.size.m};
+          padding: ${euiTheme.size.s};
+          margin-top: ${euiTheme.size.xs};
         `}
       >
         {totals.map((metric) => (
@@ -392,58 +452,39 @@ const DetectionWorkspace = (): React.ReactElement => {
             updateParam('view', 'overview');
           }}
         />
-        <span
-          css={css`
-            font-size: ${euiTheme.font.scale.xs}rem;
-            color: ${euiTheme.colors.textSubdued};
-          `}
+        <EuiToolTip
+          content={`${labels.updated} ${date(new Date(query.dataUpdatedAt).toISOString())}`}
+          disableScreenReaderOutput
         >
-          {query.isFetching ? labels.isUpdating : labels.live}
-        </span>
+          <EuiButtonIcon
+            data-test-subj="detectionWorkspaceRefresh"
+            size="s"
+            iconType="refresh"
+            aria-label={labels.refresh}
+            onClick={refresh}
+            isLoading={query.isFetching}
+          />
+        </EuiToolTip>
       </div>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiTabs size="s">
-            {viewTabs.map((tab) => (
-              <EuiTab
-                key={tab.id}
-                isSelected={view === tab.id}
-                onClick={() => updateParam('view', tab.id)}
-              >
-                {tab.label}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            min-width: 300px;
-          `}
-        >
-          <SignificantEventsSearchBar showDatePicker enableDateRangePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="m" />
-
-      {view === 'streams' ? (
-        <StreamsControls />
-      ) : model.entities.length === 0 && view === 'overview' ? (
-        <EuiEmptyPrompt
-          iconType="graphApp"
-          title={<h2>{labels.emptyTitle}</h2>}
-          body={<p>{labels.emptyBody}</p>}
-          actions={
-            <EuiButton
-              data-test-subj="significantEventsAppDetectionWorkspaceButton"
-              href={listHref('detection', { view: 'streams' })}
-              fill
-            >
-              {journey.configureStreams}
-            </EuiButton>
-          }
-        />
+      {model.entities.length === 0 && view === 'overview' ? (
+        <>
+          {viewNavigation}
+          <EuiEmptyPrompt
+            iconType="graphApp"
+            title={<h2>{labels.emptyTitle}</h2>}
+            body={<p>{labels.emptyBody}</p>}
+            actions={
+              <EuiButton
+                data-test-subj="significantEventsAppDetectionWorkspaceButton"
+                onClick={() => updateParam('engine', 'streams')}
+                fill
+              >
+                {journey.configureStreams}
+              </EuiButton>
+            }
+          />
+        </>
       ) : (
         <>
           <div
@@ -487,6 +528,7 @@ const DetectionWorkspace = (): React.ReactElement => {
               <EuiSpacer size="m" />
               <button
                 type="button"
+                aria-pressed={!selectedId}
                 onClick={() => updateParam('entity')}
                 css={css`
                   width: 100%;
@@ -606,6 +648,7 @@ const DetectionWorkspace = (): React.ReactElement => {
                 min-width: 0;
               `}
             >
+              {viewNavigation}
               {selected && (
                 <>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -628,7 +671,7 @@ const DetectionWorkspace = (): React.ReactElement => {
                   <EuiSpacer size="m" />
                 </>
               )}
-              {(view === 'overview' || !viewTabs.some((tab) => tab.id === view)) && (
+              {view === 'overview' && (
                 <>
                   <div
                     css={css`
@@ -644,32 +687,12 @@ const DetectionWorkspace = (): React.ReactElement => {
                     `}
                   >
                     <div>
-                      <EuiButtonGroup
-                        legend={labels.topology}
-                        buttonSize="compressed"
-                        idSelected={`topology-${topologyView}`}
-                        options={[
-                          { id: 'topology-services', label: journey.services },
-                          { id: 'topology-infrastructure', label: journey.infrastructure },
-                        ]}
-                        onChange={(id) => setTopologyView(id.replace('topology-', ''))}
+                      <DetectionTopology
+                        model={topologyModel}
+                        selectedId={selected?.id}
+                        onSelect={(id) => updateParam('entity', id)}
+                        onInspectFeature={inspectFeature}
                       />
-                      <EuiSpacer size="s" />
-                      {topologyView === 'infrastructure' ? (
-                        <InfrastructureTopology
-                          model={topologyModel}
-                          features={data.features.features}
-                          onSelectService={(id) => updateParam('entity', id)}
-                          onInspectFeature={inspectFeature}
-                        />
-                      ) : (
-                        <DetectionTopology
-                          model={topologyModel}
-                          selectedId={selected?.id}
-                          onSelect={(id) => updateParam('entity', id)}
-                          onInspectFeature={inspectFeature}
-                        />
-                      )}
                     </div>
                     {selected && (
                       <ServiceInspector
@@ -714,13 +737,6 @@ const DetectionWorkspace = (): React.ReactElement => {
                 </>
               )}
 
-              {view === 'activity' && (
-                <EngineActivityPanel
-                  expanded
-                  streams={selected?.streams}
-                  onConfigure={() => updateParam('view', 'streams')}
-                />
-              )}
               {view === 'rules' && (
                 <RulesWorkspace
                   entities={model.entities}
@@ -746,27 +762,13 @@ const DetectionWorkspace = (): React.ReactElement => {
           </div>
         </>
       )}
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <p>
-              {labels.updated} {date(new Date(query.dataUpdatedAt).toISOString())}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={labels.refresh} disableScreenReaderOutput>
-            <EuiButtonIcon
-              data-test-subj="significantEventsAppDetectionWorkspaceButton"
-              iconType="refresh"
-              aria-label={labels.refresh}
-              onClick={refresh}
-              isLoading={query.isFetching}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {engineTab && (
+        <EngineDrawer
+          tab={engineTab}
+          onSelectTab={(tab) => updateParam('engine', tab)}
+          onClose={() => updateParam('engine')}
+        />
+      )}
       {openedEvent && (
         <SignificantEventFlyout
           event={openedEvent}
@@ -810,6 +812,7 @@ const ServiceInspector = ({
   onInspectFeature: (feature: Feature) => void;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const contextId = useGeneratedHtmlId({ prefix: 'serviceContext' });
   const { core } = useKibana();
   const location = useLocation();
   const range = new URLSearchParams(location.search);
@@ -834,35 +837,49 @@ const ServiceInspector = ({
   const infrastructure = entity.features.filter((feature) => feature.type === 'infrastructure');
   const known = entity.features.filter(
     (feature) =>
-      !['dataset_analysis', 'log_samples', 'log_patterns', 'error_logs', 'infrastructure'].includes(
-        feature.type
-      )
+      ![
+        'dataset_analysis',
+        'log_samples',
+        'log_patterns',
+        'error_logs',
+        'infrastructure',
+        'dependency',
+      ].includes(feature.type)
   );
   return (
     <EuiPanel
-      paddingSize="l"
+      paddingSize="m"
       hasBorder
       hasShadow={false}
       data-test-subj="detectionServiceInspector"
     >
-      <EuiButtonEmpty
-        data-test-subj="significantEventsAppServiceInspectorButton"
-        size="xs"
-        iconType="apmApp"
-        href={core.application.getUrlForApp('apm', {
-          path: `/services/${encodeURIComponent(apmServiceName)}/overview?${apmParams}`,
-        })}
-      >
-        {journey.openApm}
-      </EuiButtonEmpty>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.significantEventsApp.serviceInspector.context', {
+                defaultMessage: 'Service context',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={journey.openApm} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="significantEventsAppServiceInspectorButton"
+              size="s"
+              iconType="apmApp"
+              aria-label={journey.openApm}
+              href={core.application.getUrlForApp('apm', {
+                path: `/services/${encodeURIComponent(apmServiceName)}/overview?${apmParams}`,
+              })}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiBadge color="hollow">{entity.subtype.replace(/_/g, ' ')}</EuiBadge>
-      <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h3>{entity.label}</h3>
-      </EuiTitle>
       <EuiText size="xs" color="subdued">
-        <p>{entity.namespace || entity.name}</p>
+        {entity.namespace || entity.name}
       </EuiText>
       <EuiHorizontalRule margin="m" />
       <EuiText size="xs" color="subdued">
@@ -872,19 +889,12 @@ const ServiceInspector = ({
       <EuiHealth color={active ? euiTheme.colors.primary : euiTheme.colors.mediumShade}>
         {active ? `${number(active)} ${labels.covered}` : labels.uncovered}
       </EuiHealth>
-      <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
-        <p>{labels.freshness}</p>
-      </EuiText>
-      <EuiText size="xs">
-        <p>{date(latest)}</p>
-      </EuiText>
       <EuiHorizontalRule margin="m" />
       <EuiText size="xs" color="subdued">
         <p>{labels.learned}</p>
       </EuiText>
       <EuiSpacer size="s" />
-      {known.slice(0, 8).map((feature) => (
+      {known.slice(0, 4).map((feature) => (
         <EuiButtonEmpty
           data-test-subj="significantEventsAppServiceInspectorButton"
           key={feature.uuid}
@@ -903,31 +913,31 @@ const ServiceInspector = ({
           {feature.title || feature.id}
         </EuiButtonEmpty>
       ))}
+      {known.length > 4 && (
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType="sortRight"
+          iconSide="right"
+          href={core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+            path: `/knowledge?${new URLSearchParams({
+              entity: entity.id,
+              rangeFrom: range.get('rangeFrom') || 'now-24h',
+              rangeTo: range.get('rangeTo') || 'now',
+            })}`,
+          })}
+          data-test-subj="serviceInspectorAllKnowledge"
+        >
+          {i18n.translate('xpack.significantEventsApp.serviceInspector.allKnowledge', {
+            defaultMessage: 'All {count} findings',
+            values: { count: known.length },
+          })}
+        </EuiButtonEmpty>
+      )}
       {known.length === 0 && (
         <EuiText size="xs" color="subdued">
           <p>{labels.noKnowledge}</p>
         </EuiText>
-      )}
-      {infrastructure.length > 0 && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiText size="xs" color="subdued">
-            <p>{labels.infrastructure}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          {infrastructure.map((feature) => (
-            <EuiButtonEmpty
-              data-test-subj="significantEventsAppServiceInspectorButton"
-              key={feature.uuid}
-              size="xs"
-              iconType="boxesVertical"
-              flush="left"
-              onClick={() => onInspectFeature(feature)}
-            >
-              {feature.title || feature.id}
-            </EuiButtonEmpty>
-          ))}
-        </>
       )}
       {entity.features.some((feature) => feature.type === 'dependency') && (
         <>
@@ -957,20 +967,55 @@ const ServiceInspector = ({
         </>
       )}
       <EuiHorizontalRule margin="m" />
-      <EuiText size="xs" color="subdued">
-        <p>{labels.sources}</p>
-        {entity.streams.map((stream) => (
-          <p
-            key={stream}
-            css={css`
-              overflow-wrap: anywhere;
-              font-family: ${euiTheme.font.familyCode};
-            `}
-          >
-            {stream}
+      <EuiAccordion
+        id={contextId}
+        buttonContent={i18n.translate(
+          'xpack.significantEventsApp.serviceInspector.evidenceSources',
+          { defaultMessage: 'Sources & metadata' }
+        )}
+        paddingSize="s"
+      >
+        <EuiText size="xs" color="subdued">
+          <p>
+            {entity.subtype.replace(/_/g, ' ')} · {labels.freshness}: {date(latest)}
           </p>
-        ))}
-      </EuiText>
+        </EuiText>
+        {infrastructure.length > 0 && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiText size="xs" color="subdued">
+              <p>{labels.infrastructure}</p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            {infrastructure.map((feature) => (
+              <EuiButtonEmpty
+                data-test-subj="significantEventsAppServiceInspectorButton"
+                key={feature.uuid}
+                size="xs"
+                iconType="boxesVertical"
+                flush="left"
+                onClick={() => onInspectFeature(feature)}
+              >
+                {feature.title || feature.id}
+              </EuiButtonEmpty>
+            ))}
+          </>
+        )}
+        <EuiText size="xs" color="subdued">
+          <p>{labels.sources}</p>
+          {entity.streams.map((stream) => (
+            <p
+              key={stream}
+              css={css`
+                overflow-wrap: anywhere;
+                font-family: ${euiTheme.font.familyCode};
+              `}
+            >
+              {stream}
+            </p>
+          ))}
+        </EuiText>
+      </EuiAccordion>
     </EuiPanel>
   );
 };

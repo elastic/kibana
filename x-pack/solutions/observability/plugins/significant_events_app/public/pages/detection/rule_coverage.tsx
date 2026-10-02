@@ -59,7 +59,9 @@ export const RuleCoverage = ({
         <div
           tabIndex={0}
           css={css`
-            min-width: 155px;
+            display: flex;
+            align-items: center;
+            gap: ${euiTheme.size.s};
             font-size: ${euiTheme.font.scale.xs}rem;
           `}
         >
@@ -87,8 +89,8 @@ export const RuleCoverage = ({
             aria-valuemax={100}
             aria-valuenow={total ? percent : undefined}
             css={css`
+              width: 64px;
               height: 4px;
-              margin: ${euiTheme.size.xs} 0;
               overflow: hidden;
               border-radius: 4px;
               background: ${euiTheme.colors.backgroundBaseSubdued};
@@ -112,10 +114,7 @@ export const RuleCoverage = ({
               color: ${euiTheme.colors.textSubdued};
             `}
           >
-            {covered}/{total}{' '}
-            {i18n.translate('xpack.significantEventsApp.ruleCoverage.services', {
-              defaultMessage: 'services',
-            })}
+            {covered}/{total}
           </span>
         </div>
       </EuiToolTip>

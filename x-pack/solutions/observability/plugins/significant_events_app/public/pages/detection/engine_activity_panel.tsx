@@ -12,7 +12,6 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -58,9 +57,6 @@ const copy = {
   starting: i18n.translate('xpack.significantEventsApp.activityStrip.starting', {
     defaultMessage: 'Starting discovery',
   }),
-  details: i18n.translate('xpack.significantEventsApp.activityStrip.details', {
-    defaultMessage: 'Activity',
-  }),
 };
 const jobs = {
   pipeline: { title: copy.finding, icon: 'inspect' },
@@ -84,13 +80,13 @@ const stepLabel = (name: string): string =>
 export const EngineActivityPanel = ({
   streams,
   expanded = false,
-  onConfigure,
   onOpenActivity,
+  headerAction,
 }: {
   streams?: string[];
   expanded?: boolean;
-  onConfigure: () => void;
   onOpenActivity?: () => void;
+  headerAction?: React.ReactNode;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const id = useGeneratedHtmlId({ prefix: 'engineActivity' });
@@ -163,9 +159,9 @@ export const EngineActivityPanel = ({
     : euiTheme.colors.textSubdued;
   return (
     <EuiPanel
-      hasBorder
+      hasBorder={expanded}
       hasShadow={false}
-      paddingSize="s"
+      paddingSize={expanded ? 's' : 'none'}
       data-test-subj="detectionEngineActivity"
       css={css`
         background: ${active
@@ -182,7 +178,7 @@ export const EngineActivityPanel = ({
         gutterSize="s"
         wrap
         css={css`
-          min-height: 36px;
+          min-height: 28px;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -193,8 +189,8 @@ export const EngineActivityPanel = ({
               gap: 3px;
               align-items: center;
               justify-content: center;
-              width: 32px;
-              height: 32px;
+              width: 28px;
+              height: 28px;
               border-radius: ${euiTheme.border.radius.medium};
               background: color-mix(in srgb, ${color} 10%, transparent);
               color: ${color};
@@ -220,14 +216,25 @@ export const EngineActivityPanel = ({
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${euiTheme.size.s};
+              font-size: ${euiTheme.font.scale.xs}rem;
+            `}
+          >
             <strong>{copy.engine}</strong>
-          </EuiText>
-          <EuiText size="xs" color={unavailable ? euiTheme.colors.warning : 'subdued'}>
-            <span role="status" aria-live="polite">
+            <span
+              role="status"
+              aria-live="polite"
+              css={css`
+                color: ${unavailable ? euiTheme.colors.warning : euiTheme.colors.textSubdued};
+              `}
+            >
               {state}
             </span>
-          </EuiText>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
@@ -282,19 +289,20 @@ export const EngineActivityPanel = ({
             {!active && latest && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={`${copy.latest} · ${formatTimestamp(
-                    latest.finishedAt || latest.startedAt
-                  )}${latest.error ? ` · ${latest.error}` : ''}`}
+                  content={`${copy.latest} · ${jobs[latest.kind].title} · ${runLabel(
+                    latest
+                  )} · ${formatTimestamp(latest.finishedAt || latest.startedAt)}${
+                    latest.error ? ` · ${latest.error}` : ''
+                  }`}
                 >
-                  <EuiText size="xs" color="subdued" tabIndex={0}>
+                  <EuiText size="xs" color="subdued" tabIndex={0} aria-label={copy.latest}>
                     <span>
                       <EuiIcon
                         type={latest.error ? 'warning' : 'clock'}
                         size="s"
                         aria-hidden={true}
                       />{' '}
-                      {jobs[latest.kind].title} · {runLabel(latest)} ·{' '}
-                      {formatTimestamp(latest.finishedAt || latest.startedAt)}
+                      {expanded && `${jobs[latest.kind].title} · ${runLabel(latest)}`}
                     </span>
                   </EuiText>
                 </EuiToolTip>
@@ -332,30 +340,7 @@ export const EngineActivityPanel = ({
             </EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
-        {onOpenActivity && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="significantEventsAppEngineActivityPanelButton"
-              size="xs"
-              iconType="sortRight"
-              iconSide="right"
-              onClick={onOpenActivity}
-            >
-              {copy.details}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={journey.configureStreams} disableScreenReaderOutput>
-            <EuiButtonIcon
-              data-test-subj="significantEventsAppEngineActivityConfigure"
-              size="s"
-              iconType="gear"
-              aria-label={journey.configureStreams}
-              onClick={onConfigure}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
+        {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
       </EuiFlexGroup>
       {unavailable && expanded && (
         <EuiCallOut announceOnMount size="s" color="warning" title={journey.engineUnavailable}>

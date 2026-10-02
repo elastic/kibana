@@ -44,7 +44,7 @@ export const MetricValue = ({
     <>
       <span
         css={css`
-          font-size: ${euiTheme.font.scale.l}rem;
+          font-size: ${euiTheme.font.scale.s}rem;
           font-weight: ${euiTheme.font.weight.semiBold};
           font-variant-numeric: tabular-nums;
         `}

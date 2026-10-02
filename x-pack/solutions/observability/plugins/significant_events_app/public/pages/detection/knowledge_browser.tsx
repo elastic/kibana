@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -16,11 +17,15 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiTab,
+  EuiTabs,
   EuiText,
-  EuiTitle,
+  EuiToolTip,
   useEuiTheme,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { Feature } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../util/formatters';
@@ -40,6 +45,30 @@ const categoryOf = (feature: Feature): string =>
     ? 'infrastructure'
     : 'patterns';
 
+const copy = {
+  finding: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.finding', {
+    defaultMessage: 'Finding',
+  }),
+  confidence: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.confidence', {
+    defaultMessage: 'Confidence',
+  }),
+  confidenceHint: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.confidenceHint', {
+    defaultMessage: 'Confidence assigned to this finding during knowledge extraction.',
+  }),
+  filters: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.filters', {
+    defaultMessage: 'Filters',
+  }),
+  expired: i18n.translate('xpack.significantEventsApp.knowledge.showExpired', {
+    defaultMessage: 'Include expired knowledge',
+  }),
+  type: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.type', {
+    defaultMessage: 'Type',
+  }),
+  usage: i18n.translate('xpack.significantEventsApp.knowledgeCatalog.usage', {
+    defaultMessage: 'Used by',
+  }),
+};
+
 export const KnowledgeBrowser = ({
   features,
   model,
@@ -56,6 +85,7 @@ export const KnowledgeBrowser = ({
   const [search, setSearch] = useState('');
   const [showExpired, setShowExpired] = useState(false);
   const [showExcluded, setShowExcluded] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [limit, setLimit] = useState(36);
   const categories = [
     { id: 'all', label: journey.allKnowledge, icon: 'documents' },
@@ -65,6 +95,11 @@ export const KnowledgeBrowser = ({
     { id: 'infrastructure', label: journey.infrastructure, icon: 'database' },
     { id: 'patterns', label: journey.patterns, icon: 'visLine' },
   ];
+  const eligible = features.filter(
+    (feature) =>
+      (showExcluded || !feature.excluded) &&
+      (showExpired || !feature.expires_at || Date.parse(feature.expires_at) > Date.now())
+  );
   const visible = useMemo(
     () =>
       features
@@ -82,66 +117,218 @@ export const KnowledgeBrowser = ({
         .sort((a, b) => Date.parse(b.updated_at ?? '') - Date.parse(a.updated_at ?? '')),
     [features, category, search, showExcluded, showExpired]
   );
+  const associations = useMemo(
+    () =>
+      new Map(
+        features.map((feature) => {
+          const entities = model.entities.filter((entity) =>
+            entity.features.some((item) => item.uuid === feature.uuid)
+          );
+          const rules = new Set(
+            entities.flatMap((entity) =>
+              entity.queries
+                .filter((query) => query.features?.some((reference) => reference.id === feature.id))
+                .map((query) => `${query.stream_name}:${query.id}`)
+            )
+          );
+          return [feature.uuid, { entities, rules }];
+        })
+      ),
+    [features, model.entities]
+  );
+  const columns: Array<EuiBasicTableColumn<Feature>> = [
+    {
+      name: copy.finding,
+      render: (feature: Feature) => (
+        <div
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EuiButtonEmpty
+            data-test-subj="significantEventsAppKnowledgeBrowserButton"
+            size="s"
+            flush="left"
+            onClick={() => onInspect(feature)}
+            css={css`
+              height: auto;
+              text-align: left;
+            `}
+          >
+            {feature.title || feature.id}
+          </EuiButtonEmpty>
+          <EuiText size="xs" color="subdued">
+            <span
+              css={css`
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                max-width: 560px;
+              `}
+            >
+              {feature.description}
+            </span>
+          </EuiText>
+        </div>
+      ),
+    },
+    {
+      name: copy.type,
+      width: '140px',
+      render: (feature: Feature) => (
+        <EuiToolTip
+          content={
+            <EuiText size="xs">
+              <p>{feature.stream_name}</p>
+              {feature.updated_at && <p>{formatTimestamp(feature.updated_at)}</p>}
+            </EuiText>
+          }
+        >
+          <span
+            tabIndex={0}
+            css={css`
+              color: ${euiTheme.colors.textSubdued};
+              font-size: ${euiTheme.font.scale.xs}rem;
+            `}
+          >
+            <EuiIcon
+              type={categories.find((item) => item.id === categoryOf(feature))?.icon || 'documents'}
+              size="s"
+              aria-hidden={true}
+            />{' '}
+            {feature.subtype?.replace(/_/g, ' ') || feature.type.replace(/_/g, ' ')}
+          </span>
+        </EuiToolTip>
+      ),
+    },
+    {
+      name: journey.services,
+      width: '180px',
+      render: (feature: Feature) => {
+        const entities = associations.get(feature.uuid)?.entities ?? [];
+        return (
+          <div>
+            {entities.slice(0, 2).map((entity) => (
+              <EuiButtonEmpty
+                key={entity.id}
+                size="xs"
+                flush="left"
+                onClick={() => onSelectService(entity.id)}
+                data-test-subj="knowledgeCatalogService"
+                css={css`
+                  display: flex;
+                  text-align: left;
+                  height: auto;
+                  min-height: 24px;
+                `}
+              >
+                {entity.label}
+              </EuiButtonEmpty>
+            ))}
+            {entities.length > 2 && (
+              <EuiToolTip
+                content={entities
+                  .slice(2)
+                  .map((entity) => entity.label)
+                  .join(' · ')}
+              >
+                <span
+                  tabIndex={0}
+                  css={css`
+                    color: ${euiTheme.colors.textSubdued};
+                    font-size: ${euiTheme.font.scale.xs}rem;
+                  `}
+                >
+                  +{entities.length - 2}
+                </span>
+              </EuiToolTip>
+            )}
+            {!entities.length && (
+              <EuiText size="xs" color="subdued">
+                —
+              </EuiText>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      name: copy.usage,
+      width: '90px',
+      render: (feature: Feature) => {
+        const count = associations.get(feature.uuid)?.rules.size ?? 0;
+        return (
+          <EuiText size="xs" color={count ? 'default' : 'subdued'}>
+            {count
+              ? i18n.translate('xpack.significantEventsApp.knowledgeCatalog.ruleCount', {
+                  defaultMessage: '{count, plural, one {# rule} other {# rules}}',
+                  values: { count },
+                })
+              : '—'}
+          </EuiText>
+        );
+      },
+    },
+    {
+      name: copy.confidence,
+      width: '100px',
+      align: 'right',
+      render: (feature: Feature) => {
+        const expired = Boolean(feature.expires_at && Date.parse(feature.expires_at) <= Date.now());
+        return feature.excluded || expired ? (
+          <EuiBadge color={feature.excluded ? 'default' : 'warning'}>
+            {feature.excluded
+              ? journey.excluded
+              : i18n.translate('xpack.significantEventsApp.knowledgeCatalog.expired', {
+                  defaultMessage: 'Expired',
+                })}
+          </EuiBadge>
+        ) : (
+          <EuiToolTip content={copy.confidenceHint}>
+            <span
+              tabIndex={0}
+              css={css`
+                font-size: ${euiTheme.font.scale.xs}rem;
+                font-variant-numeric: tabular-nums;
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            >
+              {feature.confidence}%
+            </span>
+          </EuiToolTip>
+        );
+      },
+    },
+  ];
   return (
     <div data-test-subj="detectionKnowledgeBrowser">
-      <EuiTitle size="s">
-        <h2>{journey.knowledge}</h2>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>{journey.knowledgeHint}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <div
-        css={css`
-          display: flex;
-          gap: ${euiTheme.size.s};
-          flex-wrap: wrap;
-        `}
-      >
+      <EuiTabs size="s">
         {categories.map((item) => (
-          <button
+          <EuiTab
             key={item.id}
-            type="button"
-            aria-pressed={category === item.id}
+            isSelected={category === item.id}
             onClick={() => {
               setCategory(item.id);
               setLimit(36);
             }}
-            css={css`
-              display: flex;
-              align-items: center;
-              gap: ${euiTheme.size.s};
-              padding: ${euiTheme.size.s} ${euiTheme.size.m};
-              border: 1px solid
-                ${category === item.id ? euiTheme.colors.primary : euiTheme.colors.borderBasePlain};
-              border-radius: ${euiTheme.border.radius.medium};
-              background: ${category === item.id
-                ? `color-mix(in srgb, ${euiTheme.colors.primary} 8%, transparent)`
-                : euiTheme.colors.backgroundBasePlain};
-              color: ${category === item.id ? euiTheme.colors.primary : euiTheme.colors.text};
-              font-size: ${euiTheme.font.scale.s}rem;
-              &:focus-visible {
-                outline: 2px solid ${euiTheme.colors.primary};
-              }
-            `}
           >
-            <EuiIcon type={item.icon} aria-hidden={true} />
-            {item.label}
-            <EuiBadge color="hollow">
+            {item.label}{' '}
+            <span
+              css={css`
+                font-size: ${euiTheme.font.scale.xs}rem;
+                color: ${euiTheme.colors.textSubdued};
+                margin-left: ${euiTheme.size.xs};
+              `}
+            >
               {
-                features.filter(
-                  (feature) =>
-                    (showExcluded || !feature.excluded) &&
-                    (showExpired ||
-                      !feature.expires_at ||
-                      Date.parse(feature.expires_at) > Date.now()) &&
-                    (item.id === 'all' || categoryOf(feature) === item.id)
-                ).length
+                eligible.filter((feature) => item.id === 'all' || categoryOf(feature) === item.id)
+                  .length
               }
-            </EuiBadge>
-          </button>
+            </span>
+          </EuiTab>
         ))}
-      </div>
+      </EuiTabs>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
         <EuiFlexItem>
@@ -159,145 +346,64 @@ export const KnowledgeBrowser = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('xpack.significantEventsApp.knowledge.showExpired', {
-              defaultMessage: 'Include expired knowledge',
-            })}
-            checked={showExpired}
-            onChange={(event) => setShowExpired(event.target.checked)}
-          />
-          <EuiSwitch
-            compressed
-            checked={showExcluded}
-            onChange={(event) => setShowExcluded(event.target.checked)}
-            label={journey.showExcluded}
-          />
+          <EuiPopover
+            aria-label={copy.filters}
+            isOpen={filtersOpen}
+            closePopover={() => setFiltersOpen(false)}
+            anchorPosition="downRight"
+            button={
+              <EuiButtonEmpty
+                size="s"
+                iconType="filter"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+                data-test-subj="knowledgeCatalogFilters"
+              >
+                {copy.filters}
+                {showExpired || showExcluded
+                  ? ` · ${Number(showExpired) + Number(showExcluded)}`
+                  : ''}
+              </EuiButtonEmpty>
+            }
+          >
+            <EuiSwitch
+              compressed
+              label={copy.expired}
+              checked={showExpired}
+              onChange={(event) => {
+                setShowExpired(event.target.checked);
+                setLimit(36);
+              }}
+            />
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              compressed
+              label={journey.showExcluded}
+              checked={showExcluded}
+              onChange={(event) => {
+                setShowExcluded(event.target.checked);
+                setLimit(36);
+              }}
+            />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!visible.length && (
-        <EuiEmptyPrompt
-          iconType="documents"
-          titleSize="xs"
-          title={<h3>{journey.emptyKnowledge}</h3>}
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+        <EuiBasicTable
+          items={visible.slice(0, limit)}
+          itemId="uuid"
+          columns={columns}
+          tableCaption={journey.knowledge}
+          noItemsMessage={
+            <EuiEmptyPrompt
+              iconType="documents"
+              titleSize="xs"
+              title={<h3>{journey.emptyKnowledge}</h3>}
+            />
+          }
+          data-test-subj="knowledgeCatalogTable"
         />
-      )}
-      <div
-        css={css`
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: ${euiTheme.size.m};
-        `}
-      >
-        {visible.slice(0, limit).map((feature) => {
-          const entities = model.entities.filter((entity) =>
-            entity.features.some((item) => item.uuid === feature.uuid)
-          );
-          const rules = new Set(
-            entities.flatMap((entity) =>
-              entity.queries
-                .filter((query) => query.features?.some((reference) => reference.id === feature.id))
-                .map((query) => query.id)
-            )
-          );
-          const expired = feature.expires_at && Date.parse(feature.expires_at) < Date.now();
-          return (
-            <EuiPanel
-              key={feature.uuid}
-              hasBorder
-              hasShadow={false}
-              paddingSize="m"
-              css={css`
-                display: flex;
-                flex-direction: column;
-                gap: ${euiTheme.size.s};
-                border-top: 2px solid
-                  ${feature.excluded
-                    ? euiTheme.colors.borderBasePlain
-                    : categoryOf(feature) === 'dependencies'
-                    ? euiTheme.colors.accent
-                    : euiTheme.colors.primary};
-              `}
-            >
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    <p>{feature.subtype?.replace(/_/g, ' ') || feature.type.replace(/_/g, ' ')}</p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={feature.excluded ? 'default' : expired ? 'warning' : 'hollow'}>
-                    {feature.excluded ? journey.excluded : `${feature.confidence}%`}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiButtonEmpty
-                data-test-subj="significantEventsAppKnowledgeBrowserButton"
-                size="s"
-                flush="left"
-                onClick={() => onInspect(feature)}
-                css={css`
-                  align-self: flex-start;
-                  text-align: left;
-                  height: auto;
-                `}
-              >
-                {feature.title || feature.id}
-              </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued">
-                <p
-                  css={css`
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                  `}
-                >
-                  {feature.description}
-                </p>
-              </EuiText>
-              <div
-                css={css`
-                  margin-top: auto;
-                  padding-top: ${euiTheme.size.s};
-                  border-top: 1px solid ${euiTheme.colors.borderBasePlain};
-                `}
-              >
-                <EuiFlexGroup gutterSize="xs" wrap>
-                  {entities.slice(0, 3).map((entity) => (
-                    <EuiFlexItem grow={false} key={entity.id}>
-                      <EuiButtonEmpty
-                        data-test-subj="significantEventsAppKnowledgeBrowserButton"
-                        size="xs"
-                        iconType="apps"
-                        onClick={() => onSelectService(entity.id)}
-                      >
-                        {entity.label}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-                <EuiText size="xs" color="subdued">
-                  <p>
-                    {rules.size} {journey.relatedRules.toLowerCase()}
-                  </p>
-                  <p>
-                    {feature.updated_at ? formatTimestamp(feature.updated_at) : journey.noEstimate}
-                  </p>
-                  <p
-                    css={css`
-                      overflow-wrap: anywhere;
-                    `}
-                  >
-                    {feature.stream_name}
-                  </p>
-                </EuiText>
-              </div>
-            </EuiPanel>
-          );
-        })}
-      </div>
+      </EuiPanel>
       {visible.length > limit && (
         <>
           <EuiSpacer size="m" />
