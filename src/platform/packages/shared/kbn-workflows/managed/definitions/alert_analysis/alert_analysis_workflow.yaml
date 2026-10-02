@@ -2018,18 +2018,19 @@ steps:
           # these to the shared `investigations.attachImpact` step, so each row is
           # { id, name, type } with a type-prefixed id (a host and a user can share a name).
           # Alerts without the field carry `__missing__` and are skipped.
-          # Names longer than 251 characters are skipped: the prefixed id must fit the shared
-          # 256-character entity id limit, or the whole attachImpact call and the output
-          # validation below fail. Truncating instead would give two names with the same first
-          # 251 characters one id, and the shared impact would silently keep only one of them.
+          # The id is cut to 251 characters so the prefixed value fits the shared 256-character
+          # entity id limit; an over-long id would fail the whole attachImpact call and the output
+          # validation below. `name` keeps the full value. Two names that share their first 251
+          # characters therefore share an id and merge into one entity; hostnames cap at 253
+          # characters, so this is accepted rather than dropping the entity.
           #
           # Hosts and users are each capped at 50, so the list never exceeds the shared
           # MAX_ENTITY_IDS (100).
           - name: collect_unique_entity_names
             type: data.set
             with:
-              host_names_for_entities: "${{ variables.output_verdicts | reject: 'host_name', '__missing__' | reject_exp: 'v', 'v.host_name.size > 251' | map: 'host_name' | uniq | slice: 0, 50 }}"
-              user_names_for_entities: "${{ variables.output_verdicts | reject: 'user_name', '__missing__' | reject_exp: 'v', 'v.user_name.size > 251' | map: 'user_name' | uniq | slice: 0, 50 }}"
+              host_names_for_entities: "${{ variables.output_verdicts | reject: 'host_name', '__missing__' | map: 'host_name' | uniq | slice: 0, 50 }}"
+              user_names_for_entities: "${{ variables.output_verdicts | reject: 'user_name', '__missing__' | map: 'user_name' | uniq | slice: 0, 50 }}"
 
           - name: build_host_entities
             type: foreach
@@ -2039,7 +2040,7 @@ steps:
                 type: data.set
                 with:
                   current_entity:
-                    id: "host:{{ foreach.item }}"
+                    id: "host:{{ foreach.item | truncate: 251, '' }}"
                     name: "{{ foreach.item }}"
                     type: host
               - name: push_host_entity
@@ -2055,7 +2056,7 @@ steps:
                 type: data.set
                 with:
                   current_entity:
-                    id: "user:{{ foreach.item }}"
+                    id: "user:{{ foreach.item | truncate: 251, '' }}"
                     name: "{{ foreach.item }}"
                     type: user
               - name: push_user_entity
