@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import type {
   ESQLAstAllCommands,
   ESQLColumn,
-  ESQLCommand,
   ESQLFunction,
   ESQLIdentifier,
   ESQLLocation,
@@ -485,13 +484,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkNotAllowedWithSubqueries':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkNotAllowedWithSubqueries', {
-          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
-        }),
-        type: 'error',
-      };
     case 'invalidSettingValue':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
@@ -740,7 +732,7 @@ export const errors = {
   invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation): ESQLMessage =>
     errors.byId('invalidInlineCast', location, { castType, valueType }),
 
-  tooManyForks: (command: ESQLCommand): ESQLMessage =>
+  tooManyForks: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
 
   nestedAggFunction: (fn: ESQLFunction, parentName: string): ESQLMessage =>
@@ -910,9 +902,6 @@ export const errors = {
 
   forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
-
-  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

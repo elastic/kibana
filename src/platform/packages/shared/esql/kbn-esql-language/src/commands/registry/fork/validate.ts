@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand } from '@elastic/esql/types';
-import { isSubQuery, Walker } from '@elastic/esql';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { errors } from '../../definitions/utils';
@@ -30,19 +29,11 @@ export const validate = (
 
   messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
 
-  const allCommands = Walker.commands(ast);
-  const forks = allCommands.filter(({ name }) => name === 'fork');
+  // `ast` is this pipeline alone: a subquery runs on its own and may hold a FORK of its own.
+  const forks = ast.filter(({ name }) => name === 'fork');
 
   if (forks.length > 1) {
     messages.push(errors.tooManyForks(forks[1]));
-  }
-
-  // FORK is not allowed when the query contains subqueries
-  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
-  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
-
-  if (hasSubqueries) {
-    messages.push(errors.forkNotAllowedWithSubqueries(forkCommand));
   }
 
   return messages;

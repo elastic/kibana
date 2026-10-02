@@ -70,6 +70,23 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
 
         await expectErrors('FROM (TS a_index | STATS col0 = AVG(AVG_OVER_TIME(doubleField)))', []);
       });
+
+      it('should validate commands inside the branches of a FORK in a subquery', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM index, (FROM other_index | FORK (KEEP missingField) (LIMIT 10))', [
+          'Unknown column "missingField"',
+        ]);
+      });
+
+      it('accepts a FORK inside a subquery and another FORK after it', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index, (FROM other_index | FORK (WHERE integerField > 1) (LIMIT 10)) | FORK (WHERE integerField > 2) (LIMIT 5)',
+          []
+        );
+      });
     });
 
     describe('WHERE IN subqueries', () => {
