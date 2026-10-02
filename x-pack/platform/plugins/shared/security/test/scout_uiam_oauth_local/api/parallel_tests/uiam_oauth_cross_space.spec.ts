@@ -92,6 +92,16 @@ apiTest.describe(
         body: mcpInitBody(1),
       });
 
+    // Assert the response is a 400 caused specifically by an OAuth audience
+    // validation failure
+    const expectAudienceMismatch = (response: {
+      statusCode: number;
+      body: { message: string };
+    }) => {
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toContain('[0x37768A/VALIDATION.OAUTH]');
+    };
+
     // ── Same-space controls (prove tokens work in their target space) ──
 
     apiTest('token for default space succeeds on default space', async ({ apiClient }) => {
@@ -112,35 +122,37 @@ apiTest.describe(
     // ── Cross-space rejection (audience mismatch, not permission denial) ──
 
     apiTest('token for Space A is rejected on Space B', async ({ apiClient }) => {
-      const response = await postMcp(apiClient, `s/${SPACE_B}/${MCP_ENDPOINT}`, tokenForSpaceA);
-      expect(response.statusCode).toBe(400);
+      expectAudienceMismatch(
+        await postMcp(apiClient, `s/${SPACE_B}/${MCP_ENDPOINT}`, tokenForSpaceA)
+      );
     });
 
     apiTest('token for Space B is rejected on Space A', async ({ apiClient }) => {
-      const response = await postMcp(apiClient, `s/${SPACE_A}/${MCP_ENDPOINT}`, tokenForSpaceB);
-      expect(response.statusCode).toBe(400);
+      expectAudienceMismatch(
+        await postMcp(apiClient, `s/${SPACE_A}/${MCP_ENDPOINT}`, tokenForSpaceB)
+      );
     });
 
     // ── Default-space ↔ custom-space rejection ──
 
     apiTest('token for default space is rejected on Space A', async ({ apiClient }) => {
-      const response = await postMcp(apiClient, `s/${SPACE_A}/${MCP_ENDPOINT}`, tokenForDefault);
-      expect(response.statusCode).toBe(400);
+      expectAudienceMismatch(
+        await postMcp(apiClient, `s/${SPACE_A}/${MCP_ENDPOINT}`, tokenForDefault)
+      );
     });
 
     apiTest('token for default space is rejected on Space B', async ({ apiClient }) => {
-      const response = await postMcp(apiClient, `s/${SPACE_B}/${MCP_ENDPOINT}`, tokenForDefault);
-      expect(response.statusCode).toBe(400);
+      expectAudienceMismatch(
+        await postMcp(apiClient, `s/${SPACE_B}/${MCP_ENDPOINT}`, tokenForDefault)
+      );
     });
 
     apiTest('token for Space A is rejected on default space', async ({ apiClient }) => {
-      const response = await postMcp(apiClient, MCP_ENDPOINT, tokenForSpaceA);
-      expect(response.statusCode).toBe(400);
+      expectAudienceMismatch(await postMcp(apiClient, MCP_ENDPOINT, tokenForSpaceA));
     });
 
     apiTest('token for Space B is rejected on default space', async ({ apiClient }) => {
-      const response = await postMcp(apiClient, MCP_ENDPOINT, tokenForSpaceB);
-      expect(response.statusCode).toBe(400);
+      expectAudienceMismatch(await postMcp(apiClient, MCP_ENDPOINT, tokenForSpaceB));
     });
 
     // ── WWW-Authenticate header includes space prefix ──

@@ -609,7 +609,7 @@ export class UiamService implements UiamServicePublic {
   async exchangeOAuthToken(accessToken: string, resourcePath: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    const expectedAudience = `${this.#kibanaServerResourceURL}${resourcePath}`;
+    const expectedAudience = new URL(resourcePath, this.#kibanaServerResourceURL).toString();
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
