@@ -172,6 +172,8 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/ui-callout'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/alerting-v2-constants'
 tags:
   - plugin
   - prod
