@@ -1027,6 +1027,24 @@ describe('runServerlessCluster()', () => {
     expect(initializeUiamContainersMock).toHaveBeenCalledTimes(1);
   });
 
+  test('should tear down started containers when a UIAM container fails to start', async () => {
+    const started = ['es01', 'es02', 'uiam-cosmosdb'];
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    execa.commandSync.mockImplementation(() => ({ stdout: started.join('\n') }));
+    runUiamContainerMock.mockRejectedValue(new Error('uiam-cosmosdb failed to start'));
+
+    await expect(
+      runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
+    ).rejects.toThrow('uiam-cosmosdb failed to start');
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${started.join(' ')}`);
+    expect(initializeUiamContainersMock).not.toHaveBeenCalled();
+  });
+
   test(`should wait for serverless nodes to return 'green' status`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({

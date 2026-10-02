@@ -1033,30 +1033,39 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const portCmd = resolvePort(options);
 
   log.info('[runServerlessCluster] Starting ES nodes...');
-  // This is where nodes are started
-  const nodeNames = await Promise.all(
-    SERVERLESS_NODES.map(async (node, i) => {
-      await runServerlessEsNode(log, {
-        ...node,
-        image: esServerlessImage,
-        params: node.params.concat(
-          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
-          i === 0 ? portCmd : [],
-          volumeCmd
-        ),
-      });
-      return node.name;
-    })
-  );
-  log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
+  const nodeNames: string[] = [];
 
-  // UIAM containers must start sequentially: uiam-cosmosdb first, then uiam.
-  // Starting them in parallel risks uiam connecting to CosmosDB before the
-  // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
-  if (options.uiam) {
-    for (const container of getUiamContainers({ includeOAuth: options.uiamOAuth })) {
-      nodeNames.push(await runUiamContainer(log, container));
+  try {
+    // This is where nodes are started
+    const esNodeNames = await Promise.all(
+      SERVERLESS_NODES.map(async (node, i) => {
+        await runServerlessEsNode(log, {
+          ...node,
+          image: esServerlessImage,
+          params: node.params.concat(
+            resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+            i === 0 ? portCmd : [],
+            volumeCmd
+          ),
+        });
+        return node.name;
+      })
+    );
+    nodeNames.push(...esNodeNames);
+    log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
+
+    // UIAM containers must start sequentially: uiam-cosmosdb first, then uiam.
+    // Starting them in parallel risks uiam connecting to CosmosDB before the
+    // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
+    if (options.uiam) {
+      for (const container of getUiamContainers({ includeOAuth: options.uiamOAuth })) {
+        nodeNames.push(await runUiamContainer(log, container));
+      }
     }
+  } catch (error) {
+    // Containers started before the failure would keep holding the published ES port.
+    teardownServerlessClusterSync(log, options);
+    throw error;
   }
 
   log.success(`Serverless ES cluster running.
