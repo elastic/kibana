@@ -692,7 +692,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
             }
           }
           onColumnResize={onColumnResize}
-          // isResizable={false}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}
           ref={dataGridRef}
