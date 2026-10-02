@@ -17,7 +17,11 @@ import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '.
 import type { SecretReference } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
-import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
+import {
+  AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
+  AGENTS_INDEX,
+} from '../../../common/constants';
 import { splitVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 /** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
@@ -80,16 +84,60 @@ export async function getVariantPolicyIdsForParent(
 }
 
 /**
- * Same as {@link buildVariantAgentsKuery}, with the variant ids looked up from `.fleet-policies`.
+ * Same as {@link buildVariantAgentsKuery}, with the variant ids looked up from `.fleet-policies`
+ * and merged with `extraVariantPolicyIds` (e.g. ids only known from agents whose variant document
+ * is already gone).
  */
 export async function getVariantAgentsKuery(
   esClient: ElasticsearchClient,
-  parentPolicyId: string
+  parentPolicyId: string,
+  extraVariantPolicyIds: string[] = []
 ): Promise<string> {
+  const policyIds = await getVariantPolicyIdsForParent(esClient, parentPolicyId);
   return buildVariantAgentsKuery(
     parentPolicyId,
-    await getVariantPolicyIdsForParent(esClient, parentPolicyId)
+    Array.from(new Set([...policyIds, ...extraVariantPolicyIds]))
   );
+}
+
+/**
+ * Returns the versioned policy ids (e.g. `"<parentId>#9.4"`) referenced by agents that have no
+ * `policy_base_id`, grouped by parent (base) policy id. These agents were enrolled by a downlevel
+ * fleet-server after the last startup backfill and cannot be located via `policy_base_id`; the
+ * variant `.fleet-policies` document they reference may also already be gone.
+ */
+export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
+  esClient: ElasticsearchClient
+): Promise<Map<string, string[]>> {
+  const response = await esClient.search<
+    unknown,
+    { policy_ids: { buckets: Array<{ key: string }> } }
+  >({
+    index: AGENTS_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    // Includes inactive/unenrolled agents: they would be stranded on a missing policy as well.
+    query: { bool: { must_not: [{ exists: { field: POLICY_BASE_ID_FIELD } }] } },
+    aggs: {
+      policy_ids: {
+        // `include` regex is a terms-aggregation option (not a query), so it is unaffected by
+        // `search.allow_expensive_queries: false`.
+        terms: {
+          field: 'policy_id',
+          size: MAX_VARIANT_POLICY_IDS_PER_PARENT,
+          include: `.*[${AGENT_POLICY_VERSION_SEPARATOR}].*`,
+        },
+      },
+    },
+  });
+
+  const byParent = new Map<string, string[]>();
+  for (const { key } of response.aggregations?.policy_ids?.buckets ?? []) {
+    const { baseId, version } = splitVersionSuffixFromPolicyId(key);
+    if (version === null) continue;
+    byParent.set(baseId, [...(byParent.get(baseId) ?? []), key]);
+  }
+  return byParent;
 }
 
 export async function getAgentVersionsForVersionSpecificPolicies(): Promise<string[]> {

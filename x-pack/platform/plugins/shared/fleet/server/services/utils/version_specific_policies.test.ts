@@ -52,6 +52,7 @@ import * as AgentService from '../agents';
 import {
   buildVariantAgentsKuery,
   getVariantPolicyIdsForParent,
+  getVariantPolicyIdsFromAgentsWithoutBaseId,
   deleteVersionSpecificFleetServerPolicies,
   deleteVersionSpecificFleetServerPoliciesForVersions,
   getAgentAssignedVersionsForPolicies,
@@ -589,5 +590,34 @@ describe('getAgentCountsForVariantPolicyIds', () => {
     await getAgentCountsForVariantPolicyIds(esClient, ids);
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('getVariantPolicyIdsFromAgentsWithoutBaseId', () => {
+  it('groups versioned policy ids of agents lacking policy_base_id by parent', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: {
+          policy_ids: {
+            buckets: [{ key: 'policy1#9.4' }, { key: 'policy1#9.3' }, { key: 'policy2#8.19' }],
+          },
+        },
+      }),
+    } as any;
+
+    const result = await getVariantPolicyIdsFromAgentsWithoutBaseId(esClient);
+
+    expect(result).toEqual(
+      new Map([
+        ['policy1', ['policy1#9.4', 'policy1#9.3']],
+        ['policy2', ['policy2#8.19']],
+      ])
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.fleet-agents',
+        query: { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
+      })
+    );
   });
 });
