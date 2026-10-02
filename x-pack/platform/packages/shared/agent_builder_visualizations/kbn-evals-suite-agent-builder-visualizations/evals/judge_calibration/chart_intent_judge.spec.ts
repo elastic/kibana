@@ -14,19 +14,26 @@ import {
 
 type CalibrationInput = Pick<ChartIntentCalibrationPair, 'question' | 'gold' | 'actual'>;
 type CalibrationExpected = Pick<ChartIntentCalibrationPair, 'verdict' | 'rationale'>;
-interface CalibrationOutput {
-  verdict: string;
-  reason: string;
-}
+type CalibrationOutput = { verdict: string; reason: string } | { judgeError: string };
 
-/** CODE evaluator: 1 when the judge's verdict equals the human verdict. */
+/** CODE evaluator: 1 when the judge's verdict equals the human verdict; abstains when the judge failed. */
 const judgeAgreement: Evaluator = {
   name: 'Chart Intent Judge Agreement',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const { verdict, reason } = output as CalibrationOutput;
+    const calibrationOutput = output as CalibrationOutput;
     const { verdict: humanVerdict, rationale } = expected as CalibrationExpected;
+    if ('judgeError' in calibrationOutput) {
+      const { judgeError } = calibrationOutput;
+      return {
+        score: null,
+        label: 'judge-error',
+        explanation: `Judge returned no verdict: ${judgeError}`,
+        metadata: { judgeError, humanVerdict, rationale },
+      };
+    }
+    const { verdict, reason } = calibrationOutput;
     const agrees = verdict === humanVerdict;
     return {
       score: agrees ? 1 : 0,
@@ -67,9 +74,15 @@ evaluate.describe(
                 ),
               },
             ],
-            task: async ({ input }) => {
+            // The executor does not catch task errors, so one failed judge call would
+            // abort the whole experiment; report it as an abstention instead.
+            task: async ({ input }): Promise<CalibrationOutput> => {
               const { question, gold, actual } = input as CalibrationInput;
-              return judge({ question, gold, actual });
+              try {
+                return await judge({ question, gold, actual });
+              } catch (error) {
+                return { judgeError: error instanceof Error ? error.message : String(error) };
+              }
             },
           },
           [judgeAgreement]
