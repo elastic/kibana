@@ -14,14 +14,18 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  SYSTEM_SECURITY_WORKER_CATALOG,
   UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import type { AlertTriageEnableBlockedReason } from '../../services/workers/workers_service';
+import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
-const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReason, () => string> = {
+const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
+  WorkerEnableBlockedReason,
+  (workerName: string) => string
+> = {
   alertAnalysisWorkflowDisabled: () =>
     i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
       defaultMessage:
@@ -37,7 +41,16 @@ const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReaso
       defaultMessage:
         'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
     }),
+  noModel: (workerName) =>
+    i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
+      defaultMessage:
+        '{workerName} cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
+      values: { workerName },
+    }),
 };
+
+const workerDisplayName = (workerId: string): string =>
+  SYSTEM_SECURITY_WORKER_CATALOG.find(({ id }) => id === workerId)?.name ?? workerId;
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
@@ -120,7 +133,11 @@ export const registerUpdateWorkerRoute = ({
               });
             case 'blocked':
               return response.badRequest({
-                body: { message: ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES[result.reason]() },
+                body: {
+                  message: WORKER_ENABLE_BLOCKED_MESSAGES[result.reason](
+                    workerDisplayName(workerId)
+                  ),
+                },
               });
             case 'invalid':
               return response.badRequest({
@@ -141,16 +158,6 @@ export const registerUpdateWorkerRoute = ({
                       values: { workerId },
                     }
                   ),
-                },
-              });
-            case 'no-model':
-              return response.badRequest({
-                body: {
-                  message: i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
-                    defaultMessage:
-                      'Worker "{workerId}" cannot be enabled because this space has no AI model configured. Check Feature settings.',
-                    values: { workerId },
-                  }),
                 },
               });
             case 'unavailable':

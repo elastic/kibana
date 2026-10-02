@@ -148,6 +148,8 @@ export {
   HuntCoordinatorStatus,
 } from './impl/schemas';
 
+export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
+
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,

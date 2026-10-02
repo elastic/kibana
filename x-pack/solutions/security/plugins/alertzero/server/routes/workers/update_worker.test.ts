@@ -115,8 +115,8 @@ describe('registerUpdateWorkerRoute', () => {
     });
   });
 
-  it('maps no-model to 400 naming Feature settings', async () => {
-    const update = jest.fn().mockResolvedValue({ outcome: 'no-model' });
+  it('maps a no-model block to 400 naming the Worker and Feature settings', async () => {
+    const update = jest.fn().mockResolvedValue({ outcome: 'blocked', reason: 'noModel' });
     const { handler } = setupRoute(update);
     const response = httpServerMock.createResponseFactory();
 
@@ -137,7 +137,8 @@ describe('registerUpdateWorkerRoute', () => {
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
-        message: `Worker "${TRIAGE}" cannot be enabled because this space has no AI model configured. Check Feature settings.`,
+        message:
+          'Alert Triage cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
       },
     });
   });

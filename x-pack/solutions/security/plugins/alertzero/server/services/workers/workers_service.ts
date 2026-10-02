@@ -10,6 +10,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  isWorkerEnableBlocked,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   touchesWorkerSettings,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -44,6 +45,7 @@ import {
   detachAlertTriageWorkerFromAllRules,
   detachRuleIdChunks,
 } from './alert_triage_rule_attachments';
+import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 interface AlertTriageOpts {
   getAttachmentService?: AlertTriageAttachmentServiceProvider;
@@ -56,7 +58,6 @@ interface AlertTriageOpts {
    */
   isAlertAnalysisRuntimeEnabled?: (request: KibanaRequest) => Promise<boolean>;
 }
-import { getSpaceBlockingReasons, type HasSpaceModel } from './space_model_availability';
 
 /**
  * Workers hidden until the named skill is registered. These skills may be
@@ -93,14 +94,16 @@ export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisRuntimeDisabled'
   | 'ruleAttachmentUnavailable';
 
+/** Why a Worker enable was refused before anything was written. */
+export type WorkerEnableBlockedReason = AlertTriageEnableBlockedReason | 'noModel';
+
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
-  | { outcome: 'blocked'; reason: AlertTriageEnableBlockedReason }
+  | { outcome: 'blocked'; reason: WorkerEnableBlockedReason }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
-  | { outcome: 'no-model' }
   | { outcome: 'unavailable' }
   | { outcome: 'failed' };
 
@@ -120,8 +123,8 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: AlertTriageOpts = {},
-    private readonly hasSpaceModel: HasSpaceModel = async () => true
+    private readonly alertTriageOpts: AlertTriageOpts,
+    private readonly getBlockingReasons: GetWorkerBlockingReasons
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -182,17 +185,13 @@ export class WorkersService {
     }
   }
 
-  private async blockingReasons(request: KibanaRequest): Promise<WorkerBlockingReason[]> {
-    return getSpaceBlockingReasons(await this.hasSpaceModel(request));
-  }
-
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
     const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
       this.buildAgentLookup(request),
       this.hiddenWorkerIds(request),
-      this.blockingReasons(request),
+      this.getBlockingReasons(request),
     ]);
     const workers = await Promise.all(
       workerRegistry
@@ -221,7 +220,7 @@ export class WorkersService {
 
     const [agentLookup, blockingReasons] = await Promise.all([
       this.buildAgentLookup(request),
-      this.blockingReasons(request),
+      this.getBlockingReasons(request),
     ]);
     return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
   }
@@ -239,10 +238,9 @@ export class WorkersService {
     if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return { outcome: 'not-found' };
     }
-    // Refused before any write, so the whole patch is rejected and the stored value is untouched.
-    const blockingReasons = await this.blockingReasons(request);
-    if (patch.enabled === true && blockingReasons.includes('no_model')) {
-      return { outcome: 'no-model' };
+    const blockingReasons = await this.getBlockingReasons(request);
+    if (patch.enabled === true && isWorkerEnableBlocked(blockingReasons)) {
+      return { outcome: 'blocked', reason: 'noModel' };
     }
 
     const touchesSettings = touchesWorkerSettings(patch);

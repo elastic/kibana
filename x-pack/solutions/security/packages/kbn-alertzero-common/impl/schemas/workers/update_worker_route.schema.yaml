@@ -39,7 +39,9 @@ paths:
                     Enables or disables the Worker. Enabling an uninstalled Worker first installs
                     its per-space managed document with defaults. `true` is refused with a 400,
                     and nothing in the patch is applied, while the Worker's `blockingReasons`
-                    include `no_model`.
+                    include `no_model`. The Workflows API does not apply this check, so a user
+                    who can edit managed workflows can still enable the underlying workflow
+                    there.
                 settingsRevision:
                   type: integer
                   format: int64

@@ -9,68 +9,59 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { ALERTZERO_INFERENCE_PARENT_FEATURE_ID } from '@kbn/alertzero-common';
-import { createHasSpaceModel, getSpaceBlockingReasons } from './space_model_availability';
+import { createGetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 const request = {} as KibanaRequest;
 
 const searchInferenceEndpointsReturning = (getForFeature: jest.Mock) =>
   ({ endpoints: { getForFeature } } as unknown as SearchInferenceEndpointsPluginStart);
 
-describe('createHasSpaceModel', () => {
-  it('reports a model when the parent feature resolves at least one endpoint', async () => {
+describe('createGetWorkerBlockingReasons', () => {
+  it('has no reasons when the parent feature resolves at least one endpoint, in default mode', async () => {
     const getForFeature = jest.fn().mockResolvedValue({
       endpoints: [{ connectorId: 'my-openai' }],
       warnings: [],
       soEntryFound: false,
     });
-    const hasSpaceModel = createHasSpaceModel(
+    const getBlockingReasons = createGetWorkerBlockingReasons(
       searchInferenceEndpointsReturning(getForFeature),
       loggingSystemMock.createLogger()
     );
 
-    await expect(hasSpaceModel(request)).resolves.toBe(true);
-    // Default mode on the parent: a tier, or `onlyReturnConfigured`, would read EIS-only
-    // recommendations and a deleted per-tier pick as "no model".
+    await expect(getBlockingReasons(request)).resolves.toEqual([]);
     expect(getForFeature).toHaveBeenCalledWith(ALERTZERO_INFERENCE_PARENT_FEATURE_ID, request);
   });
 
-  it('reports no model when the parent feature resolves nothing', async () => {
+  it('reports no_model when the parent feature resolves nothing', async () => {
     const getForFeature = jest
       .fn()
       .mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
-    const hasSpaceModel = createHasSpaceModel(
+    const getBlockingReasons = createGetWorkerBlockingReasons(
       searchInferenceEndpointsReturning(getForFeature),
       loggingSystemMock.createLogger()
     );
 
-    await expect(hasSpaceModel(request)).resolves.toBe(false);
+    await expect(getBlockingReasons(request)).resolves.toEqual(['no_model']);
   });
 
-  it('does not block when the search inference endpoints plugin is unavailable', async () => {
-    const hasSpaceModel = createHasSpaceModel(undefined, loggingSystemMock.createLogger());
+  it('has no reasons when the search inference endpoints plugin is unavailable', async () => {
+    const getBlockingReasons = createGetWorkerBlockingReasons(
+      undefined,
+      loggingSystemMock.createLogger()
+    );
 
-    await expect(hasSpaceModel(request)).resolves.toBe(true);
+    await expect(getBlockingReasons(request)).resolves.toEqual([]);
   });
 
-  it('does not block, and warns, when resolution fails', async () => {
+  it('has no reasons, and warns, when reading the uiSettings fails', async () => {
     const logger = loggingSystemMock.createLogger();
     const getForFeature = jest.fn().mockRejectedValue(new Error('ui settings down'));
-    const hasSpaceModel = createHasSpaceModel(
+    const getBlockingReasons = createGetWorkerBlockingReasons(
       searchInferenceEndpointsReturning(getForFeature),
       logger
     );
 
-    await expect(hasSpaceModel(request)).resolves.toBe(true);
+    await expect(getBlockingReasons(request)).resolves.toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ui settings down'));
-  });
-});
-
-describe('getSpaceBlockingReasons', () => {
-  it('blocks every Worker with no_model when the space has no model', () => {
-    expect(getSpaceBlockingReasons(false)).toEqual(['no_model']);
-  });
-
-  it('has no reasons when the space has a model', () => {
-    expect(getSpaceBlockingReasons(true)).toEqual([]);
   });
 });

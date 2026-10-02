@@ -34,10 +34,11 @@ components:
       type: string
       enum: [no_model]
       description: >-
-        Why a Worker can't run in this space. `no_model`: the space has no AI model to run on (no
-        LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no
-        default set). It applies to every Worker in the space alike, and while it holds the Worker
-        can't be enabled.
+        Why a Worker can't run in this space. `no_model`: the requesting user has no AI model to run
+        it on (no LLM connector they can use and no Elastic Managed LLM, or "use only the default
+        connector" is on with no default set). Workers run as the user who enabled them and resolve
+        their model the same way. It applies to every Worker alike, and while it holds the Worker
+        can't be switched on; switching it off is still allowed.
 
     WorkerSettingsExtras:
       type: object
@@ -145,8 +146,8 @@ components:
           items:
             $ref: '#/components/schemas/WorkerBlockingReason'
           description: >-
-            Why this Worker can't run, hardest first; empty when nothing blocks it. A blocking
-            reason never changes the stored `enabled` value.
+            Why this Worker can't run; empty when nothing blocks it. A blocking reason never
+            changes the stored `enabled` value.
         skills:
           type: array
           items:

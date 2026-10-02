@@ -40,7 +40,7 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
-import { createHasSpaceModel } from './services/workers/space_model_availability';
+import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
@@ -290,7 +290,7 @@ export class AlertZeroPlugin
             .asScopedToClient(core.savedObjects.getScopedClient(request))
             .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
       },
-      createHasSpaceModel(plugins.searchInferenceEndpoints, this.logger.get('workers'))
+      createGetWorkerBlockingReasons(plugins.searchInferenceEndpoints, this.logger.get('workers'))
     );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
