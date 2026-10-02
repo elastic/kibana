@@ -17,7 +17,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import { DataViewSource, isSameDataset } from '@kbn/data-source';
+import { DataViewSource, isSameDataset, type DataSource } from '@kbn/data-source';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   internalStateSlice,
@@ -44,10 +44,14 @@ import { fetchData } from './tab_state';
 /**
  * Set the data view in the tab's runtime state
  */
+/**
+ * `dataSource` is the source the data view was built for. ES|QL data views are shared by every
+ * query on the same dataset, so the source cannot be looked up from the data view id.
+ */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView; dataSource?: DataSource }>]
 > =
-  ({ tabId, dataView }) =>
+  ({ tabId, dataView, dataSource }) =>
   (dispatch, _, { runtimeStateManager, services }) => {
     const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
       runtimeStateManager,
@@ -55,6 +59,7 @@ export const setDataView: InternalStateThunkActionCreator<
     );
     const currentSource = currentDataSource$.getValue();
     const nextSource =
+      dataSource ??
       services.dataSourceService.fromDataView(dataView) ??
       (dataView.type !== ESQL_TYPE ? new DataViewSource(dataView) : undefined);
 
@@ -83,10 +88,10 @@ export const setDataView: InternalStateThunkActionCreator<
  * Assign the next data view to the tab's runtime state and pause the refresh interval
  */
 export const assignNextDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
+  [TabActionPayload<{ dataView: DataView; dataSource?: DataSource }>]
+> = ({ tabId, dataView, dataSource }) =>
   function assignNextDataViewThunkFn(dispatch) {
-    dispatch(setDataView({ tabId, dataView }));
+    dispatch(setDataView({ tabId, dataView, dataSource }));
     dispatch(internalStateActions.pauseAutoRefreshInterval({ tabId, dataView }));
   };
 
@@ -109,14 +114,14 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
     if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
-      const { dataView } = await resolveEsqlSource({
+      const { esqlSource, dataView } = await resolveEsqlSource({
         esql: query.esql,
         services,
         esqlVariables: esqlVariables.length ? esqlVariables : undefined,
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });
-      dispatch(assignNextDataView({ tabId, dataView }));
+      dispatch(assignNextDataView({ tabId, dataView, dataSource: esqlSource }));
     }
 
     dispatch(fetchData({ tabId }));

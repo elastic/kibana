@@ -22,6 +22,7 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -42,6 +43,7 @@ jest.mock('../../data_fetching/create_esql_source', () => ({
     query: 'FROM mock',
     title: 'mock',
     name: 'mock',
+    datasetKey: 'esql:mock::',
     timeFieldName: undefined,
     references: [],
     fields: [],
@@ -117,6 +119,8 @@ const setup = async ({
         searchResult instanceof Error ? throwError(() => searchResult) : from(searchResult)
       );
   }
+
+  services.dataViews.create = createMockDataViewsService().create;
 
   const toolkit = getDiscoverInternalStateMock({ services });
 

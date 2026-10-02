@@ -51,11 +51,7 @@ export async function resolveEsqlSource({
   }
 
   services.dataSourceService.registerEsqlSource(esqlSource);
-  const dataView = await registerEsqlSourceInDataViewsCache(
-    services.dataViews,
-    esqlSource,
-    services.http
-  );
+  const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
 
   return { esqlSource, dataView };
 }

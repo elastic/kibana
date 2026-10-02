@@ -98,7 +98,7 @@ export const buildStateSubscribe =
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
-      const { dataView } = await resolveEsqlSource({
+      const { esqlSource, dataView } = await resolveEsqlSource({
         esql: nextState.query.esql,
         services,
         esqlVariables: getCurrentTab().esqlVariables,
@@ -109,6 +109,7 @@ export const buildStateSubscribe =
         internalStateActions.assignNextDataView({
           tabId,
           dataView,
+          dataSource: esqlSource,
         })
       );
     }

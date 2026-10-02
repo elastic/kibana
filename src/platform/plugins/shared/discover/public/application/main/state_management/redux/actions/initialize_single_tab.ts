@@ -265,7 +265,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       initialGlobalState.filters = urlGlobalState.filters;
     }
 
-    dispatch(setDataView({ tabId, dataView }));
+    dispatch(setDataView({ tabId, dataView, dataSource: esqlSource }));
 
     /**
      * Sync global services
