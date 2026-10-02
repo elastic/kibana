@@ -20,9 +20,10 @@ import {
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
+import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { EscalationsPage } from './escalations_page';
 
 jest.mock('../../hooks/use_agentic_investigations_capabilities');
@@ -34,6 +35,9 @@ jest.mock('../conversations/use_investigation_details', () => ({
 }));
 jest.mock('../conversations/conversations_url_params', () => ({
   useConversationsUrlParams: jest.fn(),
+}));
+jest.mock('../../hooks/use_open_in_chat', () => ({
+  useOpenInChat: jest.fn(),
 }));
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
@@ -86,15 +90,17 @@ const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
-const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
+const mockUseOpenInChat = useOpenInChat as jest.Mock;
 const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
-
-// Stable URL-param spies — recreated in beforeEach so jest.clearAllMocks() can track calls.
+const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
 let selectConversation: jest.Mock;
 let clearSelectedConversation: jest.Mock;
 
+let openChat: jest.Mock;
+
 const openEscalation = {
   id: 'esc-open-1',
+  agent_id: 'agent-1',
   title: 'Suspicious login',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-02T00:00:00Z',
@@ -103,6 +109,7 @@ const openEscalation = {
 
 const closedEscalation = {
   id: 'esc-closed-1',
+  agent_id: 'agent-1',
   title: 'Resolved threat',
   created_at: '2024-01-03T00:00:00Z',
   updated_at: '2024-01-04T00:00:00Z',
@@ -145,7 +152,14 @@ const renderPage = (
   return { core, rerender };
 };
 
+let getChatHref: jest.Mock;
+
 beforeEach(() => {
+  openChat = jest.fn();
+  getChatHref = jest.fn((id?: string, agentId?: string) =>
+    id ? `/mock-chat/${agentId}/${id}` : undefined
+  );
+  mockUseOpenInChat.mockReturnValue({ getChatHref, openChat });
   selectConversation = jest.fn();
   clearSelectedConversation = jest.fn();
   mockUseCapabilities.mockReturnValue({
@@ -363,30 +377,22 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Failed to load escalations')).toBeInTheDocument();
   });
 
-  it('opens the flyout when a row card is clicked', () => {
+  it('navigates to Agent Builder when a row card is clicked', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
     fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
 
-    expect(selectConversation).toHaveBeenCalledWith('esc-open-1');
+    expect(openChat).toHaveBeenCalledWith('esc-open-1', 'agent-1');
   });
 
-  it('clears the URL when the flyout closes', () => {
-    // Capture the onClose passed to the details hook so we can invoke it.
-    let capturedOnClose: (() => void) | undefined;
-    mockUseInvestigationDetails.mockImplementation(({ onClose }: { onClose: () => void }) => {
-      capturedOnClose = onClose;
-    });
-
+  it('renders card titles as links with hrefs from getChatHref', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
-    act(() => {
-      capturedOnClose?.();
-    });
-
-    expect(clearSelectedConversation).toHaveBeenCalled();
+    expect(getChatHref).toHaveBeenCalledWith('esc-open-1', 'agent-1');
+    const link = screen.getByTestId('escalationCardLink-esc-open-1');
+    expect(link).toHaveAttribute('href', '/mock-chat/agent-1/esc-open-1');
   });
 
   it('does not duplicate rows when the same page 2 data is re-delivered (refetch regression)', async () => {
@@ -395,6 +401,7 @@ describe('EscalationsPage', () => {
     // The new page-keyed state replaces the entry instead, preventing duplication.
     const page2Item = {
       id: 'esc-p2',
+      agent_id: 'agent-1',
       title: 'Page 2 escalation',
       created_at: '2024-02-01T00:00:00Z',
       updated_at: '2024-02-02T00:00:00Z',

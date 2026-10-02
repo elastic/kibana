@@ -151,7 +151,7 @@ export const RulesListHeader = ({
         isSelected: true,
         href: basePath.prepend(paths.ruleList),
         badge: {
-          iconType: 'sparkles',
+          iconType: 'dot',
           tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
             defaultMessage: 'New',
           }),
