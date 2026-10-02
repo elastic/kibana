@@ -141,6 +141,21 @@ steps:
   # needs answered (all Proposals / only pending / only executing) and reads
   # `total` rather than paging through results this gate has no use for.
   # `size: 1` on every pair: the only thing any of them reads is `total`.
+  #
+  # Accepted residual gap: three independent reads are three independent instants, not one
+  # atomic snapshot, so a Proposal that transitions executing -> failed -> re-parked pending
+  # (`managed/definitions/proposals/create_proposal.yaml`'s own retry/clone path) exactly
+  # between the pending pair and the executing pair could read as absent from both --
+  # genuinely pending, but invisible to this settlement check. The single-snapshot requery
+  # this replaced didn't have this gap, but paid for it with the `size: 100` undercount this
+  # change exists to fix; this engine's status filter is single-valued (no "status in
+  # [pending, executing]" query), so there is no way to read a status-agnostic "any Proposal
+  # still open" total without either that undercount or a real bucketed aggregation. The
+  # window itself is narrow -- it needs a failure-and-reclone cycle to land inside a few
+  # back-to-back, near-instant reads -- and elastic/security-team#19855 (a per-status
+  # aggregate route, proposed independently in review) closes it for good by reading every
+  # status from one snapshot instead of several; not worth a more complex workaround here
+  # against the existing single-status-filter API for a window this narrow.
   - name: requery_created
     type: kibana.request
     with:
