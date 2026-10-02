@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryActivity } from './activity';
@@ -27,7 +34,7 @@ export function MemoryTab() {
   const livePages = useMemo(() => rows.filter((page) => !page.archived), [rows]);
 
   if (isLoading) {
-    return <div data-test-subj="nightshiftMemoryLoading" />;
+    return <EuiLoadingSpinner size="xl" data-test-subj="nightshiftMemoryLoading" />;
   }
 
   if (isError) {

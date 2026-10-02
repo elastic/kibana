@@ -127,6 +127,10 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
                 />
               }
             >
+              {/* No confirmation here, unlike delete below. Archiving only hides
+                  a memory from recall and this same button restores it, so a
+                  dialog would add a step to a reversible action. Delete is
+                  permanent and asks the operator to type the title. */}
               <EuiButton
                 size="s"
                 iconType={page.archived ? 'refresh' : 'archive'}
