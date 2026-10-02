@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
@@ -30,7 +30,7 @@ const renderView = (subject: InvestigationSubject) =>
   );
 
 describe('SubjectView', () => {
-  it('renders an alert with its rule, status, reason, and details link', () => {
+  it('renders an alert as one compact row that links to the alert URL', () => {
     renderView({
       ...base,
       subjectType: 'alert',
@@ -43,15 +43,19 @@ describe('SubjectView', () => {
       },
     });
 
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row.tagName).toBe('A');
+    expect(row).toHaveAttribute('href', '/app/observability/alerts/alert-1');
+    expect(row).not.toHaveAttribute('target');
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('High latency');
-    expect(screen.getByTestId('investigationSubjectAlertStatus')).toHaveTextContent('active');
-    expect(screen.getByTestId('investigationSubjectAlertReason')).toHaveTextContent(
-      'p99 above 500 ms'
+    expect(screen.getByTestId('investigationSubjectTitle')).toHaveAttribute(
+      'title',
+      'High latency'
     );
-    expect(screen.getByTestId('investigationSubjectAlertLink')).toHaveAttribute(
-      'href',
-      '/app/observability/alerts/alert-1'
-    );
+    expect(screen.getByTestId('investigationSubjectTrigger')).toHaveTextContent('Trigger · Alert');
+    // The row names the subject; the reason and status stay in the alert itself.
+    expect(row).not.toHaveTextContent('p99 above 500 ms');
+    expect(row).not.toHaveTextContent('active');
   });
 
   it('does not link an alert URL that is not a path or http(s) URL', () => {
@@ -62,7 +66,9 @@ describe('SubjectView', () => {
       snapshot: { rule_name: 'High latency', url: 'data:text/html,hello' },
     });
 
-    expect(screen.queryByTestId('investigationSubjectAlertLink')).not.toBeInTheDocument();
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row.tagName).toBe('DIV');
+    expect(row).not.toHaveAttribute('href');
   });
 
   it('falls back to the subject id for an alert without a snapshot', () => {
@@ -71,22 +77,26 @@ describe('SubjectView', () => {
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('alert-1');
   });
 
-  it('renders a significant event and a question by their summary', () => {
+  it('renders a significant event and a question by their summary, without a link', () => {
     renderView({
       ...base,
       subjectType: 'significant_event',
       subjectId: 'event-1',
       summary: 'Checkout errors spiked',
     });
-    expect(screen.getByTestId('investigationSubject-significant_event')).toHaveTextContent(
-      'Checkout errors spiked'
-    );
+    const event = screen.getByTestId('investigationSubject-significant_event');
+    expect(event.tagName).toBe('DIV');
+    expect(event).toHaveTextContent('Checkout errors spiked');
+    expect(event).toHaveTextContent('Trigger · Significant event');
 
     renderView({ ...base, subjectType: 'manual', subjectId: 'q-1', summary: 'Why is it slow?' });
-    expect(screen.getByTestId('investigationSubject-manual')).toHaveTextContent('Why is it slow?');
+    const question = screen.getByTestId('investigationSubject-manual');
+    expect(question.tagName).toBe('DIV');
+    expect(question).toHaveTextContent('Why is it slow?');
+    expect(question).toHaveTextContent('Trigger · Question');
   });
 
-  it('renders a Slack thread with its channel, question, and thread link', () => {
+  it('renders a Slack thread by its question and opens the thread in a new tab', () => {
     renderView({
       ...base,
       subjectType: 'slack_thread',
@@ -99,14 +109,35 @@ describe('SubjectView', () => {
       },
     });
 
-    expect(screen.getByTestId('investigationSubjectSlackChannel')).toHaveTextContent('#oncall');
-    expect(screen.getByTestId('investigationSubjectSummary')).toHaveTextContent(
+    const row = screen.getByTestId('investigationSubject-slack_thread');
+    expect(row.tagName).toBe('A');
+    expect(row).toHaveAttribute('href', 'https://example.slack.com/archives/C1/p1700000000000100');
+    expect(row).toHaveAttribute('target', '_blank');
+    expect(row).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent(
       'Why is checkout slow?'
     );
-    expect(screen.getByTestId('investigationSubjectSlackLink')).toHaveAttribute(
-      'href',
-      'https://example.slack.com/archives/C1/p1700000000000100'
-    );
+    expect(screen.getByTestId('investigationSubjectTrigger')).toHaveTextContent('Trigger · Slack');
+    expect(within(row).getByTestId('investigationSubjectExternal')).toBeInTheDocument();
+  });
+
+  it('does not link a Slack permalink that is not an HTTPS URL', () => {
+    renderView({
+      ...base,
+      subjectType: 'slack_thread',
+      subjectId: 'team:T1/channel:C1/thread:1',
+      summary: 'Why?',
+      slack: {
+        channel: 'oncall',
+        thread_ts: '1',
+        permalink: 'http://example.slack.com/archives/C1/p1',
+      },
+    });
+
+    const row = screen.getByTestId('investigationSubject-slack_thread');
+    expect(row.tagName).toBe('DIV');
+    expect(row).not.toHaveAttribute('href');
+    expect(within(row).queryByTestId('investigationSubjectExternal')).not.toBeInTheDocument();
   });
 
   it('renders a Slack thread without a link when there is no permalink', () => {
@@ -118,7 +149,9 @@ describe('SubjectView', () => {
       slack: { channel: 'oncall', thread_ts: '1' },
     });
 
-    expect(screen.queryByTestId('investigationSubjectSlackLink')).not.toBeInTheDocument();
+    const row = screen.getByTestId('investigationSubject-slack_thread');
+    expect(row.tagName).toBe('DIV');
+    expect(within(row).queryByTestId('investigationSubjectExternal')).not.toBeInTheDocument();
   });
 });
 
@@ -141,7 +174,7 @@ describe('subjectAttachmentRenderer', () => {
         subjectId: 't',
         slack: { channel: 'oncall', thread_ts: '1' },
       })
-    ).toBe('Slack thread: #oncall');
+    ).toBe('Slack: #oncall');
     expect(getLabel({ ...base, subjectType: 'manual', subjectId: 'q' })).toBe('Question');
   });
 });
