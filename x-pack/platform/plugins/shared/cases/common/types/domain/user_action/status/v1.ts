@@ -14,6 +14,7 @@ export const StatusUserActionPayloadRt = rt.exact(
     rt.type({ status: CaseStatusRt }),
     rt.partial({
       status_key: rt.string,
+      pause_reason: rt.string,
       closeReason: CaseCloseReasonRt,
       syncedAlertCount: rt.number,
     }),

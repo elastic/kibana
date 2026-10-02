@@ -76,23 +76,33 @@ export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
 export const ObservableTypesConfigurationRt = rt.array(CaseObservableTypeRt);
 
-export const CaseStatusConfigurationRt = rt.strict({
-  /**
-   * Immutable identifier; the built-in entries use the `CaseStatuses` values as keys
-   */
-  key: rt.string,
-  label: rt.string,
-  /**
-   * The built-in status this entry belongs to. Drives every status-dependent behavior.
-   */
-  category: CaseStatusRt,
-  order: rt.number,
-  /**
-   * Target of writes that only specify the category (legacy clients, close-by-pushing, connectors)
-   */
-  isDefault: rt.boolean,
-  disabled: rt.boolean,
-});
+export const CaseStatusConfigurationRt = rt.intersection([
+  rt.strict({
+    /**
+     * Immutable identifier; the built-in entries use the `CaseStatuses` values as keys
+     */
+    key: rt.string,
+    label: rt.string,
+    /**
+     * The built-in status this entry belongs to. Drives every status-dependent behavior.
+     */
+    category: CaseStatusRt,
+    order: rt.number,
+    /**
+     * Target of writes that only specify the category (legacy clients, close-by-pushing, connectors)
+     */
+    isDefault: rt.boolean,
+    disabled: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * Time spent in this status is left out of the case's duration and time-to metrics
+       */
+      pausesTimeTracking: rt.boolean,
+    })
+  ),
+]);
 
 export const CaseStatusesConfigurationRt = rt.array(CaseStatusConfigurationRt);
 
@@ -156,6 +166,10 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * Statuses configured for the case. Empty means the three built-in statuses.
    */
   statuses: CaseStatusesConfigurationRt,
+  /**
+   * Reasons an analyst picks from when moving a case to a status that pauses time tracking
+   */
+  pauseReasons: rt.array(rt.string),
 });
 
 export const CasesConfigureBasicRt = rt.intersection([

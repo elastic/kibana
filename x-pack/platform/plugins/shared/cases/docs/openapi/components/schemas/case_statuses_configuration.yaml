@@ -39,3 +39,12 @@ items:
       type: boolean
       description: Disabled statuses cannot be applied but keep their label on cases that already use them.
       example: false
+    pausesTimeTracking:
+      type: boolean
+      description: >
+        Time a case spends in this status is left out of its `duration`, `time_to_investigate`,
+        `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and
+        `in-progress` categories, and never on a category's default status. Moving a case to such
+        a status requires `pause_reason`.
+      default: false
+      example: true

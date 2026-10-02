@@ -122,6 +122,7 @@ export class UserActionPersister {
               payload: {
                 status: updatedCase.updatedAttributes.status ?? originalCase.attributes.status,
                 status_key: updatedCase.updatedAttributes.status_key ?? undefined,
+                pause_reason: updatedCase.updatedAttributes.pause_reason ?? undefined,
                 closeReason: updatedCase.closeReason,
                 syncAlerts:
                   updatedCase.updatedAttributes.settings?.syncAlerts ??

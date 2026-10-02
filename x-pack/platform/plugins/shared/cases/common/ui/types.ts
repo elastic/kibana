@@ -175,6 +175,7 @@ export type CasesConfigurationUI = Pick<
   | 'observableTypes'
   | 'extractObservables'
   | 'statuses'
+  | 'pauseReasons'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

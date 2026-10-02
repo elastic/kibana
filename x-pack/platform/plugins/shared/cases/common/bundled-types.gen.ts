@@ -857,6 +857,43 @@ export const CaseResponseProperties = lazySchema(() =>
     severity: CaseSeverity,
     status: CaseStatus,
     status_key: CaseStatusKey.optional(),
+    /**
+     * Set while the case is in a status that pauses time tracking.
+     */
+    paused_at: z
+      .string()
+      .datetime()
+      .nullable()
+      .optional()
+      .describe('Set while the case is in a status that pauses time tracking.'),
+    /**
+     * Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.
+     */
+    time_paused: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        'Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.'
+      ),
+    /**
+     * The reason picked when the case was paused.
+     */
+    pause_reason: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The reason picked when the case was paused.'),
+    /**
+     * The status key the case was paused from; moving the case back to it resumes time tracking.
+     */
+    resume_to_status_key: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'The status key the case was paused from; moving the case back to it resumes time tracking.'
+      ),
     tags: z.array(z.string()),
     title: z.string(),
     totalAlerts: z.number().int(),
@@ -992,6 +1029,17 @@ export const UpdateCaseRequest = lazySchema(() =>
             .optional()
             .describe(
               "The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.\n"
+            ),
+          /**
+      * One of the configured pause reasons. Required when the target status pauses time tracking and the case is not already paused; rejected when the target status does not.
+
+      */
+          pause_reason: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              'One of the configured pause reasons. Required when the target status pauses time tracking and the case is not already paused; rejected when the target status does not.\n'
             ),
           tags: CaseTags.optional(),
           title: CaseTitle.optional(),
@@ -1155,11 +1203,29 @@ export const CaseStatusesConfiguration = lazySchema(() =>
           .describe(
             'Disabled statuses cannot be applied but keep their label on cases that already use them.'
           ),
+        /**
+      * Time a case spends in this status is left out of its `duration`, `time_to_investigate`, `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and `in-progress` categories, and never on a category's default status. Moving a case to such a status requires `pause_reason`.
+
+      */
+        pausesTimeTracking: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            "Time a case spends in this status is left out of its `duration`, `time_to_investigate`, `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and `in-progress` categories, and never on a category's default status. Moving a case to such a status requires `pause_reason`.\n"
+          ),
       })
     )
     .max(30)
 );
 export type CaseStatusesConfiguration = z.infer<typeof CaseStatusesConfiguration>;
+
+/**
+  * The reasons an analyst can pick from when moving a case to a status that pauses time tracking. At least one is required while any enabled status pauses time tracking. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+
+  */
+export const PauseReasonsConfiguration = lazySchema(() => z.array(z.string().max(50)).max(10));
+export type PauseReasonsConfiguration = z.infer<typeof PauseReasonsConfiguration>;
 
 /**
   * The words and phrases that help categorize templates. It can be an empty array.
@@ -1374,6 +1440,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       ),
     owner: Owner,
     statuses: CaseStatusesConfiguration.optional(),
+    pauseReasons: PauseReasonsConfiguration.optional(),
     templates: Templates.optional(),
   })
 );
@@ -1483,6 +1550,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
         'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
       ),
     statuses: CaseStatusesConfiguration.optional(),
+    pauseReasons: PauseReasonsConfiguration.optional(),
     templates: Templates.optional(),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
@@ -2757,6 +2825,13 @@ export const PayloadStatus = lazySchema(() =>
       .string()
       .optional()
       .describe('The key of the configured status the case was moved to.'),
+    /**
+     * The reason picked when the status pauses time tracking.
+     */
+    pause_reason: z
+      .string()
+      .optional()
+      .describe('The reason picked when the status pauses time tracking.'),
   })
 );
 export type PayloadStatus = z.infer<typeof PayloadStatus>;

@@ -251,6 +251,7 @@ function transformToExternalModel(
 
   const statuses = (configuration.attributes.statuses ??
     []) as ConfigurationTransformedAttributes['statuses'];
+  const pauseReasons = configuration.attributes.pauseReasons ?? [];
 
   return {
     ...configuration,
@@ -262,6 +263,7 @@ function transformToExternalModel(
       observableTypes,
       extractObservables,
       statuses,
+      pauseReasons,
     },
   };
 }

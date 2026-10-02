@@ -150,6 +150,7 @@ export const transformCases = ({
   perPage,
   total,
   mttr,
+  countPausedCases,
 }: {
   casesMap: Map<string, Case>;
   countOpenCases: number;
@@ -160,6 +161,8 @@ export const transformCases = ({
   total: number;
   /** Average resolve time in seconds of the matching cases; only the search API provides it. */
   mttr?: number | null;
+  /** Cases in a status that pauses time tracking; only when such statuses are configured. */
+  countPausedCases?: number;
 }): CasesSearchResponse => ({
   page,
   per_page: perPage,
@@ -168,6 +171,7 @@ export const transformCases = ({
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
+  ...(countPausedCases !== undefined ? { count_paused_cases: countPausedCases } : {}),
   // Only add the `mttr` key when a value was passed. The public `find` caller passes nothing, so
   // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseRt`
   // decode. Do NOT change this to `mttr: mttr ?? null` — that would leak `mttr` onto the public

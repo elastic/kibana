@@ -44,6 +44,9 @@ get:
                 type: integer
               count_open_cases:
                 type: integer
+              count_paused_cases:
+                type: integer
+                description: Cases in a status that pauses time tracking. Present when such statuses are configured.
               page:
                 type: integer
               per_page:

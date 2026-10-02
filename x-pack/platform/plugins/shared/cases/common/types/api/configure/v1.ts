@@ -19,6 +19,8 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_CASE_PAUSE_REASONS,
+  MAX_CASE_PAUSE_REASON_LENGTH,
   MAX_CASE_STATUSES,
   MAX_CASE_STATUS_LABEL_LENGTH,
 } from '../../../constants';
@@ -176,13 +178,27 @@ export const CaseStatusesConfigurationRt = limitedArraySchema({
   min: 0,
   max: MAX_CASE_STATUSES,
   fieldName: 'statuses',
-  codec: rt.strict({
-    key: CaseStatusKeyRt,
-    label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CASE_STATUS_LABEL_LENGTH }),
-    category: CaseStatusRt,
-    order: rt.number,
-    isDefault: rt.boolean,
-    disabled: rt.boolean,
+  codec: rt.intersection([
+    rt.strict({
+      key: CaseStatusKeyRt,
+      label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CASE_STATUS_LABEL_LENGTH }),
+      category: CaseStatusRt,
+      order: rt.number,
+      isDefault: rt.boolean,
+      disabled: rt.boolean,
+    }),
+    rt.exact(rt.partial({ pausesTimeTracking: rt.boolean })),
+  ]),
+});
+
+export const PauseReasonsConfigurationRt = limitedArraySchema({
+  min: 0,
+  max: MAX_CASE_PAUSE_REASONS,
+  fieldName: 'pauseReasons',
+  codec: limitedStringSchema({
+    fieldName: 'pauseReasons',
+    min: 1,
+    max: MAX_CASE_PAUSE_REASON_LENGTH,
   }),
 });
 
@@ -208,6 +224,7 @@ export const ConfigurationRequestRt = rt.intersection([
       observableTypes: ObservableTypesConfigurationRt,
       extractObservables: rt.boolean,
       statuses: CaseStatusesConfigurationRt,
+      pauseReasons: PauseReasonsConfigurationRt,
     })
   ),
 ]);
@@ -236,6 +253,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       observableTypes: ObservableTypesConfigurationRt,
       extractObservables: ConfigurationBasicWithoutOwnerRt.type.props.extractObservables,
       statuses: CaseStatusesConfigurationRt,
+      pauseReasons: PauseReasonsConfigurationRt,
     })
   ),
   rt.strict({ version: rt.string }),

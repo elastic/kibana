@@ -167,6 +167,7 @@ describe('Metrics case', () => {
         closeDate: new Date(2).toISOString(),
         statusInfo: {
           inProgressDuration: 20,
+          pausedDuration: 0,
           openDuration: 10,
           reopenDates: [new Date(1).toISOString()],
         },

@@ -93,6 +93,10 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   time_to_acknowledge: z.number().nullable().optional(),
   time_to_investigate: z.number().nullable().optional(),
   time_to_resolve: z.number().nullable().optional(),
+  paused_at: z.string().nullable().optional(),
+  time_paused: z.number().nullable().optional(),
+  pause_reason: z.string().nullable().optional(),
+  resume_to_status_key: z.string().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });

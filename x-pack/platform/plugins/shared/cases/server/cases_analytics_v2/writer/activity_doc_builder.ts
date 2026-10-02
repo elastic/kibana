@@ -58,6 +58,7 @@ export interface ActivityAnalyticsDoc {
     // mapping treats absent and null differently; omitting keeps the
     // index sparse).
     status_new?: string;
+    pause_reason?: string;
     severity_new?: string;
     assignees_changed?: string[];
     tags_changed?: string[];
@@ -238,6 +239,9 @@ function extractCuratedFields(
 
   if (type === 'status' && typeof payload.status === 'string') {
     out.status_new = payload.status;
+    if (typeof payload.pause_reason === 'string') {
+      out.pause_reason = payload.pause_reason;
+    }
   }
   if (type === 'severity' && typeof payload.severity === 'string') {
     out.severity_new = payload.severity;

@@ -28,6 +28,7 @@ import {
   MAX_TEMPLATE_DEFINITION_LENGTH,
   CASE_EXTENDED_FIELDS,
   MAX_CASE_STATUSES,
+  MAX_CASE_PAUSE_REASON_LENGTH,
   MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import {
@@ -202,6 +203,14 @@ export const CaseRequestFieldsRt = rt.intersection([
        * The key of a configured status; the server derives `status` from its category
        */
       status_key: CaseStatusKeyRt,
+      /**
+       * Why the case is paused; required when the target status pauses time tracking
+       */
+      pause_reason: limitedStringSchema({
+        fieldName: 'pause_reason',
+        min: 1,
+        max: MAX_CASE_PAUSE_REASON_LENGTH,
+      }),
 
       /**
        * The plugin owner of the case
@@ -545,6 +554,14 @@ export const CasesFindResponseRt = rt.intersection([
     total: rt.number,
   }),
   CasesStatusResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * Cases in a status that pauses time tracking; present when such statuses are configured
+       */
+      count_paused_cases: rt.number,
+    })
+  ),
 ]);
 
 /**

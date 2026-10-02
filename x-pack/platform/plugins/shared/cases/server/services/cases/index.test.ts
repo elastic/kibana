@@ -257,6 +257,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -267,6 +270,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -1796,6 +1800,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -1806,6 +1813,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2327,6 +2335,10 @@ describe('CasesService', () => {
       'time_to_acknowledge',
       'time_to_resolve',
       'time_to_investigate',
+      'paused_at',
+      'time_paused',
+      'pause_reason',
+      'resume_to_status_key',
       'template',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS
@@ -2475,6 +2487,9 @@ describe('CasesService', () => {
               "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
+              "pause_reason": null,
+              "paused_at": null,
+              "resume_to_status_key": null,
               "settings": Object {
                 "extractObservables": false,
                 "syncAlerts": true,
@@ -2485,6 +2500,7 @@ describe('CasesService', () => {
               "tags": Array [
                 "defacement",
               ],
+              "time_paused": 0,
               "title": "Super Bad Security Issue",
               "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2582,6 +2598,9 @@ describe('CasesService', () => {
                 "incremental_id": undefined,
                 "observables": Array [],
                 "owner": "securitySolution",
+                "pause_reason": null,
+                "paused_at": null,
+                "resume_to_status_key": null,
                 "settings": Object {
                   "extractObservables": false,
                   "syncAlerts": true,
@@ -2592,6 +2611,7 @@ describe('CasesService', () => {
                 "tags": Array [
                   "defacement",
                 ],
+                "time_paused": 0,
                 "title": "Super Bad Security Issue",
                 "total_observables": 0,
                 "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2680,6 +2700,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -2690,6 +2713,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2778,6 +2802,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -2788,6 +2815,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2889,6 +2917,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -2899,6 +2930,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2950,6 +2982,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -2960,6 +2995,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -3057,6 +3093,9 @@ describe('CasesService', () => {
               "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
+              "pause_reason": null,
+              "paused_at": null,
+              "resume_to_status_key": null,
               "settings": Object {
                 "extractObservables": false,
                 "syncAlerts": true,
@@ -3067,6 +3106,7 @@ describe('CasesService', () => {
               "tags": Array [
                 "defacement",
               ],
+              "time_paused": 0,
               "title": "Super Bad Security Issue",
               "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
@@ -3180,6 +3220,9 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
@@ -3190,6 +3233,7 @@ describe('CasesService', () => {
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",

@@ -27,6 +27,7 @@ import {
   MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_CASE_STATUSES,
+  MAX_CASE_PAUSE_REASON_LENGTH,
   MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import {
@@ -129,6 +130,11 @@ export const CaseStatusKeySchema = regexStringSchema({
 export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.extend({
   status: CaseStatusSchema.optional(),
   status_key: CaseStatusKeySchema.optional(),
+  pause_reason: limitedStringSchema({
+    fieldName: 'pause_reason',
+    min: 1,
+    max: MAX_CASE_PAUSE_REASON_LENGTH,
+  }).optional(),
   owner: z.string().optional(),
 });
 

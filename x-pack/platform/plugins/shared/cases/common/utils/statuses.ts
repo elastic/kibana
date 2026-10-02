@@ -43,6 +43,23 @@ export const getDefaultStatus = (
 ): CaseStatusConfiguration | undefined =>
   statuses.find((status) => status.category === category && status.isDefault);
 
+/** Seeded into a configuration the first time one of its statuses pauses time tracking. */
+export const DEFAULT_CASE_PAUSE_REASONS = [
+  'Awaiting customer',
+  'Awaiting vendor',
+  'Awaiting another team',
+  'Scheduled work',
+] as const;
+
+/**
+ * Keys of the enabled statuses that pause time tracking. Only the public `find` filters by
+ * them, so a configuration without any yields an empty list and callers skip the count.
+ */
+export const getPausingStatusKeys = (statuses: CaseStatusesConfiguration): string[] =>
+  statuses
+    .filter((status) => status.pausesTimeTracking && !status.disabled)
+    .map((status) => status.key);
+
 export const findStatusByKey = (
   statuses: CaseStatusesConfiguration,
   key: string

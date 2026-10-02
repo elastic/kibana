@@ -6,3 +6,7 @@ properties:
     type: string
     description: The key of the configured status the case was moved to.
     example: awaiting_customer
+  pause_reason:
+    type: string
+    description: The reason picked when the status pauses time tracking.
+    example: Awaiting vendor

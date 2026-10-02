@@ -578,6 +578,25 @@ export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTIO
   }
 );
 
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_KEY_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.statusKey',
+  {
+    defaultMessage: 'The key of the configured status the case moved to.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_KEY_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.previousStatusKey', {
+    defaultMessage: 'The key of the configured status the case moved from.',
+  });
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PAUSED_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.paused',
+  {
+    defaultMessage: 'Whether the new status pauses time tracking for the case.',
+  }
+);
+
 export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentIds',
   {

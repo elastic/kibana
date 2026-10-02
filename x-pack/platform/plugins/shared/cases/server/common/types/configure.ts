@@ -35,6 +35,7 @@ export interface ConfigurationPersistedAttributes {
   observableTypes?: PersistedObservableTypesConfiguration;
   extractObservables?: boolean;
   statuses?: PersistedCaseStatusesConfiguration;
+  pauseReasons?: string[];
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**
@@ -58,6 +59,7 @@ type PersistedCaseStatusesConfiguration = Array<{
   order: number;
   isDefault: boolean;
   disabled: boolean;
+  pausesTimeTracking?: boolean;
 }>;
 
 type PersistedCustomFieldsConfiguration = Array<{

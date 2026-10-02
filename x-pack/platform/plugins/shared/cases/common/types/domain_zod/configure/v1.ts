@@ -61,6 +61,7 @@ export const CaseStatusConfigurationSchema = z.object({
   order: z.number(),
   isDefault: z.boolean(),
   disabled: z.boolean(),
+  pausesTimeTracking: z.boolean().optional(),
 });
 
 export const CaseStatusesConfigurationSchema = z.array(CaseStatusConfigurationSchema);
@@ -83,6 +84,7 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
   observableTypes: ObservableTypesConfigurationSchema,
   extractObservables: z.boolean(),
   statuses: CaseStatusesConfigurationSchema,
+  pauseReasons: z.array(z.string()),
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({

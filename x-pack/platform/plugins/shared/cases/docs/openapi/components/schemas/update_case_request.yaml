@@ -66,6 +66,13 @@ properties:
             Requires `xpack.cases.customStatuses.enabled`. Technical preview.
           maxLength: 50
           example: awaiting_customer
+        pause_reason:
+          type: string
+          maxLength: 50
+          description: >
+            One of the configured pause reasons. Required when the target status pauses time
+            tracking and the case is not already paused; rejected when the target status does not.
+          example: Awaiting vendor
         tags:
           $ref: 'case_tags.yaml'
         title:

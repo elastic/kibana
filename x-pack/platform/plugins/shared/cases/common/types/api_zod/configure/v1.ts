@@ -19,6 +19,8 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_CASE_PAUSE_REASONS,
+  MAX_CASE_PAUSE_REASON_LENGTH,
   MAX_CASE_STATUSES,
   MAX_CASE_STATUS_LABEL_LENGTH,
 } from '../../../constants';
@@ -145,6 +147,18 @@ export const CaseStatusesConfigurationSchema = limitedArraySchema({
     order: z.number(),
     isDefault: z.boolean(),
     disabled: z.boolean(),
+    pausesTimeTracking: z.boolean().optional(),
+  }),
+});
+
+export const PauseReasonsConfigurationSchema = limitedArraySchema({
+  min: 0,
+  max: MAX_CASE_PAUSE_REASONS,
+  fieldName: 'pauseReasons',
+  codec: limitedStringSchema({
+    fieldName: 'pauseReasons',
+    min: 1,
+    max: MAX_CASE_PAUSE_REASON_LENGTH,
   }),
 });
 
@@ -157,6 +171,7 @@ export const ConfigurationRequestSchema = z.object({
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
   statuses: CaseStatusesConfigurationSchema.optional(),
+  pauseReasons: PauseReasonsConfigurationSchema.optional(),
 });
 
 export const GetConfigurationFindRequestSchema = z.object({
@@ -175,6 +190,7 @@ export const ConfigurationPatchRequestSchema = z.object({
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
   statuses: CaseStatusesConfigurationSchema.optional(),
+  pauseReasons: PauseReasonsConfigurationSchema.optional(),
   version: z.string(),
 });
 

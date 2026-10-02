@@ -170,6 +170,19 @@ export const CaseAttributesRt = rt.intersection([
       time_to_acknowledge: rt.union([rt.number, rt.null]),
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
+      /**
+       * Set while the case sits in a status that pauses time tracking
+       */
+      paused_at: rt.union([rt.string, rt.null]),
+      /**
+       * Seconds spent in pausing statuses, left out of duration and the time-to metrics
+       */
+      time_paused: rt.union([rt.number, rt.null]),
+      pause_reason: rt.union([rt.string, rt.null]),
+      /**
+       * The status key the case was paused from; Resume returns it there
+       */
+      resume_to_status_key: rt.union([rt.string, rt.null]),
       template: rt.union([rt.null, CaseTemplate]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })

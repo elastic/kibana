@@ -29,6 +29,7 @@ export class StatusUserActionBuilder extends UserActionBuilder {
     parameters.attributes.payload = {
       ...parameters.attributes.payload,
       ...(args.payload.status_key != null ? { status_key: args.payload.status_key } : {}),
+      ...(args.payload.pause_reason != null ? { pause_reason: args.payload.pause_reason } : {}),
       ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
       ...(args.payload.syncedAlertCount != null
         ? { syncedAlertCount: args.payload.syncedAlertCount }

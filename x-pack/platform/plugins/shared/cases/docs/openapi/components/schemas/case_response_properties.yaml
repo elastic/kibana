@@ -134,6 +134,26 @@ properties:
     $ref: 'case_status.yaml'
   status_key:
     $ref: 'case_status_key.yaml'
+  paused_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: Set while the case is in a status that pauses time tracking.
+    example: 2026-10-01T15:05:00.000Z
+  time_paused:
+    type: integer
+    description: Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.
+    example: 86400
+  pause_reason:
+    type: string
+    nullable: true
+    description: The reason picked when the case was paused.
+    example: Awaiting vendor
+  resume_to_status_key:
+    type: string
+    nullable: true
+    description: The status key the case was paused from; moving the case back to it resumes time tracking.
+    example: in-progress
   tags:
     type: array
     items:
