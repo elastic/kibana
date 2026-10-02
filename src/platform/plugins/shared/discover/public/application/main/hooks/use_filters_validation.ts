@@ -33,7 +33,7 @@ export const useFiltersValidation = ({
   filterManager,
   toastNotifications,
 }: {
-  dataView: DataView;
+  dataView: DataView | undefined;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
 }) => {

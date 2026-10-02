@@ -45,7 +45,7 @@ import { fetchData } from './tab_state';
  * Set the data view in the tab's runtime state
  */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView | undefined }>]
 > =
   ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager, services }) => {
@@ -54,15 +54,20 @@ export const setDataView: InternalStateThunkActionCreator<
       tabId
     );
     const currentSource = currentDataSource$.getValue();
-    const nextSource =
-      services.dataSourceService.fromDataView(dataView) ??
-      (dataView.type !== ESQL_TYPE ? new DataViewSource(dataView) : undefined);
+    const nextSource = dataView
+      ? services.dataSourceService.fromDataView(dataView) ??
+        (dataView.type !== ESQL_TYPE ? new DataViewSource(dataView) : undefined)
+      : undefined;
 
     if (!isSameDataset(currentSource, nextSource)) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     currentDataView$.next(dataView);
+
+    if (!dataView) {
+      return;
+    }
 
     const existingSource = currentDataSource$.getValue();
     if (existingSource?.kind === 'index-pattern' && existingSource.getDataView() === dataView) {

@@ -10,6 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
@@ -205,21 +206,25 @@ export const useTopNavLinks = ({
     }
 
     if (!services.embeddableEditor.isEmbeddedEditor()) {
-      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined = isEsqlMode
-        ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-        : undefined;
+      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
+        isEsqlMode && currentDataView?.type === ESQL_TYPE
+          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+          : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
-        : currentDataView.isPersisted()
+        : currentDataView?.isPersisted()
         ? { dataViewId: currentDataView.id }
-        : { dataViewSpec: currentDataView.toMinimalSpec() };
+        : currentDataView
+        ? { dataViewSpec: currentDataView.toMinimalSpec() }
+        : { query: { esql: '' } };
       const newSearchMenuItem = getNewSearchAppMenuItem({
         newSearchUrl: services.locator.getRedirectUrl(locatorParams),
         onNewSearch: () => {
           const defaultState: DiscoverAppState = defaultEsqlState ?? {
-            dataSource: currentDataView.id
+            dataSource: currentDataView?.id
               ? createDataViewDataSource({ dataViewId: currentDataView.id })
               : undefined,
+            ...(currentDataView ? {} : { query: { esql: '' } }),
           };
           services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
         },

@@ -47,7 +47,7 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
-  currentDataView: DataView;
+  currentDataView: DataView | undefined;
   currentDataSource: DataSource;
   unsubscribeFn: (() => void) | undefined;
 }
@@ -373,13 +373,8 @@ const useRuntimeStateContext = () => {
 export const useCurrentDataSource = () => useRuntimeStateContext().currentDataSource;
 
 /** Returns the underlying DataView for DSL consumers. Use {@link useCurrentDataSource} for rendering. */
-export const useCurrentDataView = (): DataView => {
-  const dataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
-  if (!dataView) {
-    throw new Error('currentDataView is not initialized');
-  }
-  return dataView;
-};
+export const useCurrentDataView = (): DataView | undefined =>
+  useCurrentTabRuntimeState((tab) => tab.currentDataView$);
 
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;
 

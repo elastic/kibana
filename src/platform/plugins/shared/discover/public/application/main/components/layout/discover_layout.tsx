@@ -207,7 +207,7 @@ export function DiscoverLayout() {
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription: `The user is looking at the Discover view on the ${
         isEsqlMode ? 'ES|QL' : 'dataView'
-      } mode. The index pattern is the ${dataView.getIndexPattern()}`,
+      } mode. The index pattern is the ${dataView?.getIndexPattern() ?? 'unset'}`,
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
@@ -243,6 +243,9 @@ export function DiscoverLayout() {
       const { editedDataView, removedFieldName } = options || {
         editedDataView: dataView,
       };
+      if (!editedDataView) {
+        return;
+      }
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
         onRemoveColumn(removedFieldName);
       }
@@ -308,7 +311,7 @@ export function DiscoverLayout() {
   const isSidebarHidden = resultState === 'uninitialized';
 
   const mainDisplay = useMemo(() => {
-    if (resultState === 'uninitialized') {
+    if (resultState === 'uninitialized' || !dataView) {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
       return <DiscoverUninitialized onRefresh={() => dataStateContainer.fetch()} />;
     }
@@ -439,7 +442,7 @@ export function DiscoverLayout() {
             }
             mainPanel={
               <div css={styles.dscPageContentWrapper}>
-                {resultState === 'none' ? (
+                {resultState === 'none' && dataView ? (
                   <>
                     <div css={styles.mainPanel}>
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
@@ -489,13 +492,15 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
-      <DiscoverDocumentFlyout
-        dataView={dataView}
-        columns={currentColumns}
-        onAddColumn={onAddColumnWithTracking}
-        onRemoveColumn={onRemoveColumnWithTracking}
-        onAddFilter={onAddFilter}
-      />
+      {dataView ? (
+        <DiscoverDocumentFlyout
+          dataView={dataView}
+          columns={currentColumns}
+          onAddColumn={onAddColumnWithTracking}
+          onRemoveColumn={onRemoveColumnWithTracking}
+          onAddFilter={onAddFilter}
+        />
+      ) : null}
     </EuiPage>
   );
 }

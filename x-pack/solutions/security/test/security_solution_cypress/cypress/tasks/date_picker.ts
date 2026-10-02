@@ -210,8 +210,13 @@ export const updateDateRangeInLocalDatePickers = (
   startDate: string,
   endDate: string
 ) => {
-  cy.get(localQueryBarSelector).then(($container) => {
-    if ($container.find('[data-test-subj="dateRangePickerControlButton"]').length) {
+  const pickerSelector = [
+    GET_DATE_RANGE_PICKER_CONTROL_BUTTON(localQueryBarSelector),
+    GET_LOCAL_SHOW_DATES_BUTTON(localQueryBarSelector),
+  ].join(', ');
+
+  cy.get(pickerSelector).then(($picker) => {
+    if ($picker.attr('data-test-subj') === 'dateRangePickerControlButton') {
       // New DateRangePicker: type the full range as ISO into the text input.
       // Convert "MMM D, YYYY @ HH:mm:ss.SSS" → ISO by stripping the " @ " separator.
       const toIso = (d: string) => new Date(d.replace(' @ ', ' ')).toISOString();

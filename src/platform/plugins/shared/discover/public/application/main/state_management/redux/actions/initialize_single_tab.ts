@@ -13,7 +13,7 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { EsqlSource } from '@kbn/data-source';
+import { EsqlSource } from '@kbn/data-source';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -67,10 +67,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
   ) {
-    const { dataStateContainer$, customizationService$, scopedEbtManager$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      tabId
-    );
+    const { dataStateContainer$, customizationService$, scopedEbtManager$, currentDataSource$ } =
+      selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
      * New tab initialization with the restored data if available
@@ -191,7 +189,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Tab initialization
      */
 
-    let dataView: DataView;
+    let dataView: DataView | undefined;
     let esqlSource: EsqlSource | undefined;
 
     const resolveEsqlQuerySource = (esql: string) =>
@@ -205,7 +203,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           services.data.query.timefilter.timefilter.getTime(),
       });
 
-    if (isOfAggregateQueryType(initialQuery) && initialQuery.esql.trim() !== '') {
+    if (isEmptyEsqlQuery(initialQuery)) {
+      // Empty ES|QL has no index pattern yet — leave the data view unset until a query runs.
+      dataView = undefined;
+    } else if (isOfAggregateQueryType(initialQuery) && initialQuery.esql.trim() !== '') {
       ({ esqlSource, dataView } = await resolveEsqlQuerySource(initialQuery.esql));
     } else {
       // Load the requested data view if one exists, or a fallback otherwise.
@@ -225,7 +226,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView = result.dataView;
     }
 
-    if (!isEsqlMode && !dataView.isPersisted()) {
+    if (!isEsqlMode && dataView && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
@@ -246,8 +247,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ({ esqlSource, dataView } = await resolveEsqlQuerySource(openingQuery.esql));
     }
 
+    if (!dataView && !esqlSource && isEmptyEsqlQuery(openingQuery)) {
+      esqlSource = await EsqlSource.create({ query: '', resultColumns: [] });
+      services.dataSourceService.registerEsqlSource(esqlSource);
+    }
+
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())
+      ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView?.isTimeBased())
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
@@ -266,6 +272,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     dispatch(setDataView({ tabId, dataView }));
+    if (esqlSource) {
+      currentDataSource$.next(esqlSource);
+    }
 
     /**
      * Sync global services
@@ -320,10 +329,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
       // some filters may not be valid for this context, so update
       // the filter manager with a modified list of valid filters
-      const currentFilters = services.filterManager.getFilters();
-      const validFilters = getValidFilters(dataView, currentFilters);
-      if (!isEqual(currentFilters, validFilters)) {
-        services.filterManager.setFilters(validFilters);
+      if (dataView) {
+        const currentFilters = services.filterManager.getFilters();
+        const validFilters = getValidFilters(dataView, currentFilters);
+        if (!isEqual(currentFilters, validFilters)) {
+          services.filterManager.setFilters(validFilters);
+        }
       }
 
       if (initialAppState.query) {

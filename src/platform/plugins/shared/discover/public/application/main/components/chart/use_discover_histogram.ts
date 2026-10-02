@@ -279,6 +279,10 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
+      if (!collectedFetchParams) {
+        return;
+      }
+
       const dataSourceForColumns =
         currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
