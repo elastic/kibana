@@ -39,6 +39,7 @@ import { observabilityAlertingNavRole } from '../fixtures/roles';
 const ALERTS_PANEL_ID = 'alerting';
 const ALERTS_DEEP_LINK = 'observability-overview:alerts';
 const CLASSIC_ALERTS_TITLE = 'Alerts';
+const V1_ALERTS_NAV_TITLE = 'Alerts (V1)';
 
 const PANEL_LINKS = {
   alerts: 'observabilityAlerting:alerts',
@@ -59,6 +60,7 @@ const expectPageTitle = async (pageTitle: Locator, title: string) => {
 const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
   const alertsLink = await nav.revealBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
   await expect(alertsLink).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
+  await expect(alertsLink).toHaveText(CLASSIC_ALERTS_TITLE);
   await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
   await expect(nav.navItemInBodyById(ALERTS_PANEL_ID)).not.toBeVisible();
 };
@@ -385,6 +387,9 @@ test.describe(
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
+      await expect(
+        nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)
+      ).toHaveText(V1_ALERTS_NAV_TITLE);
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
