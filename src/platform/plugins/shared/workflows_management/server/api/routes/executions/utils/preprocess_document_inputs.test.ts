@@ -13,12 +13,24 @@ import { preprocessDocumentInputs } from './preprocess_document_inputs';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
-const searchHits = (hits: Array<{ _id: string; _index: string; fields: object }>) => ({
-  hits: { hits },
+interface Hit {
+  _id: string;
+  _index: string;
+  fields: object;
+}
+
+/** One `msearch` response per selected index, in the order the indices were first selected. */
+const msearchResponses = (...hitsPerIndex: Hit[][]) => ({
+  responses: hitsPerIndex.map((hits) => ({ status: 200, hits: { hits } })),
+});
+
+const msearchError = (reason: string) => ({
+  status: 500,
+  error: { type: 'search_phase_execution_exception', reason },
 });
 
 describe('preprocessDocumentInputs', () => {
-  let mockEsClient: { search: jest.Mock };
+  let mockEsClient: { msearch: jest.Mock };
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockContext: AlertPreprocessingContext;
 
@@ -28,7 +40,7 @@ describe('preprocessDocumentInputs', () => {
   ];
 
   beforeEach(() => {
-    mockEsClient = { search: jest.fn() };
+    mockEsClient = { msearch: jest.fn() };
     mockLogger = loggerMock.create();
     mockContext = {
       core: Promise.resolve({
@@ -50,7 +62,7 @@ describe('preprocessDocumentInputs', () => {
       const result = await preprocessDocumentInputs(inputs, mockContext, mockLogger);
 
       expect(result).toEqual(inputs);
-      expect(mockEsClient.search).not.toHaveBeenCalled();
+      expect(mockEsClient.msearch).not.toHaveBeenCalled();
     });
   });
 
@@ -59,8 +71,8 @@ describe('preprocessDocumentInputs', () => {
       // This is the shape every client produced when it embedded documents itself. Reading
       // `_source` instead would hand workflows nested objects and scalars, breaking any
       // expression written against the embedded shape.
-      mockEsClient.search.mockResolvedValue(
-        searchHits([
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([
           {
             _id: 'doc-1',
             _index: 'logs-default',
@@ -100,8 +112,8 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('asks for every mapped field of the selected ids and no source', async () => {
-      mockEsClient.search.mockResolvedValue(
-        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: {} }])
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([{ _id: 'doc-1', _index: 'logs-default', fields: {} }])
       );
 
       await preprocessDocumentInputs(
@@ -110,37 +122,26 @@ describe('preprocessDocumentInputs', () => {
         mockLogger
       );
 
-      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: ['logs-default'],
-          size: 2,
-          _source: false,
-          fields: ['*'],
-          query: {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    filter: [
-                      { term: { _index: 'logs-default' } },
-                      { ids: { values: ['doc-1', 'doc-2'] } },
-                    ],
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
+      expect(mockEsClient.msearch).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.msearch).toHaveBeenCalledWith({
+        searches: [
+          { index: 'logs-default', ignore_unavailable: true },
+          {
+            size: 2,
+            _source: false,
+            fields: ['*'],
+            query: { ids: { values: ['doc-1', 'doc-2'] } },
           },
-        })
-      );
+        ],
+      });
     });
 
     // A single `ids` query over every selected index would also match (doc-1, logs-b) and
-    // (doc-2, logs-a); those extra hits would compete with the requested pairs for `size`.
-    it('scopes each id to the index it was selected from', async () => {
-      mockEsClient.search.mockResolvedValue(
-        searchHits([{ _id: 'doc-1', _index: 'logs-a', fields: {} }])
+    // (doc-2, logs-a); those extra hits would compete with the requested pairs for `size`. Index
+    // names also stay in the body, so many indices cannot outgrow the request-line limit.
+    it('searches each selected index for only the ids selected from it', async () => {
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([{ _id: 'doc-1', _index: 'logs-a', fields: {} }], [])
       );
 
       await preprocessDocumentInputs(
@@ -158,38 +159,21 @@ describe('preprocessDocumentInputs', () => {
         mockLogger
       );
 
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: ['logs-a', 'logs-b'],
-          size: 2,
-          query: {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    filter: [{ term: { _index: 'logs-a' } }, { ids: { values: ['doc-1'] } }],
-                  },
-                },
-                {
-                  bool: {
-                    filter: [{ term: { _index: 'logs-b' } }, { ids: { values: ['doc-2'] } }],
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        })
-      );
+      expect(mockEsClient.msearch).toHaveBeenCalledWith({
+        searches: [
+          { index: 'logs-a', ignore_unavailable: true },
+          expect.objectContaining({ size: 1, query: { ids: { values: ['doc-1'] } } }),
+          { index: 'logs-b', ignore_unavailable: true },
+          expect.objectContaining({ size: 1, query: { ids: { values: ['doc-2'] } } }),
+        ],
+      });
     });
 
-    // An `ids` query spans every selected index, so it can match an id in an index the user
-    // never selected.
-    it('ignores hits outside the selected (id, index) pairs', async () => {
-      mockEsClient.search.mockResolvedValue(
-        searchHits([
-          { _id: 'doc-1', _index: 'logs-default', fields: { 'host.name': ['host-1'] } },
-          { _id: 'doc-1', _index: 'logs-other', fields: { 'host.name': ['impostor'] } },
+    it('resolves a data stream or alias to the backing index the document lives in', async () => {
+      const backingIndex = '.ds-logs-default-2026.09.15-000012';
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([
+          { _id: 'doc-1', _index: backingIndex, fields: { 'host.name': ['host-1'] } },
         ])
       );
 
@@ -205,13 +189,81 @@ describe('preprocessDocumentInputs', () => {
       );
 
       expect((result.event as { documents: unknown[] }).documents).toEqual([
-        { _id: 'doc-1', _index: 'logs-default', 'host.name': ['host-1'] },
+        { _id: 'doc-1', _index: backingIndex, 'host.name': ['host-1'] },
+      ]);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('ignores hits for ids not selected from that index and keeps one hit per pair', async () => {
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([
+          { _id: 'doc-1', _index: 'logs-2026.09.14', fields: { 'host.name': ['host-1'] } },
+          { _id: 'doc-1', _index: 'logs-2026.09.15', fields: { 'host.name': ['duplicate'] } },
+          { _id: 'doc-9', _index: 'logs-2026.09.15', fields: { 'host.name': ['impostor'] } },
+        ])
+      );
+
+      const result = await preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [{ _id: 'doc-1', _index: 'logs' }],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      expect((result.event as { documents: unknown[] }).documents).toEqual([
+        { _id: 'doc-1', _index: 'logs-2026.09.14', 'host.name': ['host-1'] },
       ]);
     });
 
+    it('skips and logs an index whose search failed while expanding the others', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [
+          { status: 200, hits: { hits: [{ _id: 'doc-1', _index: 'logs-a', fields: { a: [1] } }] } },
+          msearchError('shard failure'),
+        ],
+      });
+
+      const result = await preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'logs-a' },
+              { _id: 'doc-2', _index: 'logs-b' },
+            ],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      expect((result.event as { documents: unknown[] }).documents).toEqual([
+        { _id: 'doc-1', _index: 'logs-a', a: [1] },
+      ]);
+      expect(mockLogger.warn).toHaveBeenCalledWith('Failed to search index logs-b: shard failure');
+      expect(mockLogger.warn).toHaveBeenCalledWith('Document not found: doc-2 in index logs-b');
+    });
+
+    it('surfaces a failure of every index search as an error, not an empty selection', async () => {
+      mockEsClient.msearch.mockResolvedValue({ responses: [msearchError('cluster unavailable')] });
+
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow('cluster unavailable');
+    });
+
     it('drops documentIds from the expanded event', async () => {
-      mockEsClient.search.mockResolvedValue(
-        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
       );
 
       const result = await preprocessDocumentInputs(
@@ -224,8 +276,8 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('preserves other input fields and other event fields', async () => {
-      mockEsClient.search.mockResolvedValue(
-        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
       );
 
       const result = await preprocessDocumentInputs(
@@ -242,8 +294,8 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('skips and logs documents that no longer exist', async () => {
-      mockEsClient.search.mockResolvedValue(
-        searchHits([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([{ _id: 'doc-1', _index: 'logs-default', fields: { a: [1] } }])
       );
 
       const result = await preprocessDocumentInputs(
@@ -259,7 +311,7 @@ describe('preprocessDocumentInputs', () => {
     });
 
     it('throws an input error when none of the selected documents are found', async () => {
-      mockEsClient.search.mockResolvedValue(searchHits([]));
+      mockEsClient.msearch.mockResolvedValue(msearchResponses([]));
 
       await expect(
         preprocessDocumentInputs(
@@ -286,29 +338,30 @@ describe('preprocessDocumentInputs', () => {
       await expect(result).rejects.toThrow(
         `Cannot run a workflow on more than ${MAX_RUN_WORKFLOW_DOCS} documents`
       );
-      expect(mockEsClient.search).not.toHaveBeenCalled();
+      expect(mockEsClient.msearch).not.toHaveBeenCalled();
     });
 
-    it('accepts a full selection of the longest valid pairs, which fits the default payload', async () => {
-      // If the cap or the per-field limits grow, this is what catches a request the HTTP layer
-      // would reject for size before validation could run.
-      const longest = Array.from({ length: MAX_RUN_WORKFLOW_DOCS }, (_, i) => ({
-        _id: `${i}-`.padEnd(512, 'x'),
-        _index: 'i'.repeat(255),
+    it('accepts a full selection of realistic pairs, which fits the default payload', async () => {
+      // If the cap grows, this is what catches a typical request the HTTP layer would reject for
+      // size before validation could run. Alert ids are 64 hex characters; backing index names run
+      // to about 60.
+      const realistic = Array.from({ length: MAX_RUN_WORKFLOW_DOCS }, (_, i) => ({
+        _id: `${i}`.padStart(64, 'a'),
+        _index: '.ds-logs-endpoint.events.process-default-2026.09.15-000012',
       }));
-      mockEsClient.search.mockResolvedValue(
-        searchHits([{ _id: longest[0]._id, _index: longest[0]._index, fields: {} }])
+      mockEsClient.msearch.mockResolvedValue(
+        msearchResponses([{ _id: realistic[0]._id, _index: realistic[0]._index, fields: {} }])
       );
 
       await preprocessDocumentInputs(
-        { event: { triggerType: 'document', documentIds: longest } },
+        { event: { triggerType: 'document', documentIds: realistic } },
         mockContext,
         mockLogger
       );
 
-      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.msearch).toHaveBeenCalledTimes(1);
       expect(
-        Buffer.byteLength(JSON.stringify({ inputs: { event: { documentIds: longest } } }))
+        Buffer.byteLength(JSON.stringify({ inputs: { event: { documentIds: realistic } } }))
       ).toBeLessThan(1024 * 1024);
     });
 
@@ -337,8 +390,23 @@ describe('preprocessDocumentInputs', () => {
 
       await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
       await expect(result).rejects.toThrow(message);
-      expect(mockEsClient.search).not.toHaveBeenCalled();
+      expect(mockEsClient.msearch).not.toHaveBeenCalled();
     });
+
+    it.each(['logs-*', 'logs-a,logs-b', '_all', '-logs-a'])(
+      'rejects the multi-target _index "%s" without querying',
+      async (index) => {
+        const result = preprocessDocumentInputs(
+          { event: { triggerType: 'document', documentIds: [{ _id: 'doc-1', _index: index }] } },
+          mockContext,
+          mockLogger
+        );
+
+        await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+        await expect(result).rejects.toThrow('must name a single index, alias, or data stream');
+        expect(mockEsClient.msearch).not.toHaveBeenCalled();
+      }
+    );
 
     it('rejects documents and documentIds sent together rather than overwriting documents', async () => {
       await expect(
@@ -354,11 +422,11 @@ describe('preprocessDocumentInputs', () => {
           mockLogger
         )
       ).rejects.toThrow('cannot be sent together');
-      expect(mockEsClient.search).not.toHaveBeenCalled();
+      expect(mockEsClient.msearch).not.toHaveBeenCalled();
     });
 
     it('surfaces Elasticsearch errors', async () => {
-      mockEsClient.search.mockRejectedValue(new Error('Elasticsearch connection failed'));
+      mockEsClient.msearch.mockRejectedValue(new Error('Elasticsearch connection failed'));
 
       await expect(
         preprocessDocumentInputs(

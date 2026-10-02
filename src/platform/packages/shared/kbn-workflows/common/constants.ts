@@ -104,10 +104,12 @@ export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
 /**
  * Maximum number of alerts or documents a single run-workflow selection may carry.
  *
- * Selections travel as `(id, index)` pairs, so the ceiling is the request payload. With ids up to
- * 512 bytes and index names up to 255, a pair serializes to at most about 790 bytes, so a full
- * selection stays near 790 KB, inside Kibana's default 1 MB `server.maxPayload`. The server
- * enforces it during trigger preprocessing and the UI reads the same number to warn a user
- * before a larger selection is trimmed.
+ * Selections travel as `(id, index)` pairs. Real pairs (64-character alert ids, index names around
+ * 60 characters) keep a full selection near 300 KB, inside Kibana's default 1 MB
+ * `server.maxPayload`; only pathologically long ids, up to the 512 bytes Elasticsearch allows, can
+ * push a full selection past it and draw a 413 from the HTTP layer. The count does not guarantee
+ * the expanded event fits its separate 10 MB budget, which is enforced after expansion with a 400.
+ * The server enforces the count during trigger preprocessing and the UI reads the same number to
+ * warn a user before a larger selection is trimmed.
  */
-export const MAX_RUN_WORKFLOW_DOCS = 1000;
+export const MAX_RUN_WORKFLOW_DOCS = 2000;

@@ -60,7 +60,9 @@ describe('preprocessTriggerInputs', () => {
     const result = preprocessTriggerInputs(inputs, context, 'default', logger);
 
     await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
-    await expect(result).rejects.toThrow('limit for a workflow run');
+    await expect(result).rejects.toThrow(
+      'The selection expands to 10.1 MB, above the 10 MB limit for a workflow run. Select fewer alerts or documents.'
+    );
   });
 
   it('does not measure inputs that nothing expanded', async () => {
