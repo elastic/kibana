@@ -231,7 +231,7 @@ export const SET_STATUS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setStatus.documentation.details',
   {
     defaultMessage:
-      'This step sets only the status field of an existing case. If version is not specified, the latest case version is resolved automatically.',
+      'This step sets only the status of an existing case, by category (`status`) or by configured status key (`status_key`). A status that pauses time tracking needs a `pause_reason` from Case settings. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
