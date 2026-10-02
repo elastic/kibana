@@ -131,7 +131,10 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
   });
 
   it('scores 0 when the candidate query fails', async () => {
-    const esClient = buildEsClient({ 'n = COUNT': new Error('parse error') });
+    const esClient = buildEsClient({
+      'c = COUNT': [['200', 10]],
+      'n = COUNT': new Error('parse error'),
+    });
 
     const result = await evaluate(esClient);
 
