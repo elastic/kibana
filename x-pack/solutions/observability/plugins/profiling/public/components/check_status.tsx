@@ -85,7 +85,10 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  if (hasProfilingData(data) || UTILITY_PATHNAMES.includes(pathname)) {
+  if (
+    (hasProfilingData(data) && data.universalProfiling.hasSetup) ||
+    UTILITY_PATHNAMES.includes(pathname)
+  ) {
     return children;
   }
 
