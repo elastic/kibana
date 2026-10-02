@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { RunCommandParams, RunCommandResult } from '@kbn/sandbox-plugin/server';
 
-import type { GitCommandFailure } from '../local_git/local_bare_git_helpers';
+import type { GitCommandFailure } from './sandbox_git_helpers';
 import type { GitCredentialsProvider, GitRemote } from './git_credentials_provider';
 import {
   FIXED_GIT_ENV,

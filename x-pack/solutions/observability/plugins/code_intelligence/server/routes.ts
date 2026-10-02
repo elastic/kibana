@@ -37,10 +37,7 @@ import {
   listExtractableRepositories,
   selectBatchRepositories,
   upsertRepository,
-  type ExtractableRepository,
 } from './repository_service';
-
-export type { ExtractableRepository } from './repository_service';
 
 const errorAttributes = (
   attributes: StartExtractionErrorAttributes
@@ -81,8 +78,6 @@ const asArray = <T>(value: T | readonly T[] | undefined): readonly T[] =>
 /** Services available once the plugin has started; extraction is absent when its source is unavailable. */
 export interface RouteServices {
   readonly extractionService?: ExtractionService;
-  /** Replaces the settings index as the extraction selection source, for the `local_git` source. */
-  readonly configuredRepositories?: readonly ExtractableRepository[];
   /** Explains why extraction is unavailable, for example a missing `xpack.sandbox` configuration. */
   readonly extractionUnavailableReason?: string;
   readonly getSpaceId: (request: KibanaRequest) => string;
@@ -211,8 +206,7 @@ export const registerRoutes = ({
       },
     },
     async (context, request, response) => {
-      const { configuredRepositories, extractionService, extractionUnavailableReason, getSpaceId } =
-        getServices();
+      const { extractionService, extractionUnavailableReason, getSpaceId } = getServices();
       const sourceUnavailable = (message: string) =>
         response.customError({
           statusCode: 503,
@@ -227,11 +221,7 @@ export const registerRoutes = ({
       const { elasticsearch } = await context.core;
       const selection = selectBatchRepositories(
         request.body.repositories ?? [],
-        await listExtractableRepositories(
-          elasticsearch.client.asCurrentUser,
-          settingsIndex,
-          configuredRepositories
-        )
+        await listExtractableRepositories(elasticsearch.client.asCurrentUser, settingsIndex)
       );
       if (!selection.ok) {
         const { code, message, repository } = selection;

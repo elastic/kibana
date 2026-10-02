@@ -146,28 +146,6 @@ describe('list_repositories', () => {
       })
     );
   });
-
-  it('lists the configured repositories instead of the settings index when given', async () => {
-    const client = fakeClient({ stored: [settings('grafana/loki')] });
-    const configuredRepositories = [
-      {
-        repository: 'elastic/local',
-        remoteUrl: 'https://github.com/elastic/local.git',
-        defaultRef: 'HEAD',
-        enabled: true,
-      },
-    ];
-
-    const [result] = await run(
-      createListRepositoriesTool(dependencies({ configuredRepositories })),
-      {},
-      client
-    );
-
-    expect(result.data).toEqual({
-      repositories: [expect.objectContaining({ repository: 'elastic/local' })],
-    });
-  });
 });
 
 describe('upsert_repository', () => {

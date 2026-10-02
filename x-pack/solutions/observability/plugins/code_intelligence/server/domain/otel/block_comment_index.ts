@@ -18,7 +18,7 @@ import {
 
 /** One Git ERE finds block delimiters and quote context without materializing unrelated repository paths. */
 const lexicalContextPattern: string = '([/][*]|[*][/]|["\'`])';
-/** Matches the local adapter's default scan capacity without reducing complete path coverage. */
+/** Matches the sandbox reader's default scan capacity without reducing complete path coverage. */
 const lexicalReadConcurrency: number = 2;
 
 /** Preserves incomplete path-scoped lexical discovery separately from complete no-comment state. */

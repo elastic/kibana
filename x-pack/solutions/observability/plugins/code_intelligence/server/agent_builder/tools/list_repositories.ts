@@ -23,7 +23,6 @@ const schema = z.object({});
 export const createListRepositoriesTool = ({
   catalogIndex,
   settingsIndex,
-  getServices,
 }: CodeIntelligenceToolDependencies): BuiltinToolDefinition<typeof schema> => ({
   id: CODE_INTELLIGENCE_TOOL_IDS.listRepositories,
   type: ToolType.builtin,
@@ -47,7 +46,7 @@ ${CATALOG_QUERY_NOTE}`,
   handler: async (_args, { esClient }) => {
     const client = esClient.asCurrentUser;
     const [repositories, summaries] = await Promise.all([
-      listExtractableRepositories(client, settingsIndex, getServices().configuredRepositories),
+      listExtractableRepositories(client, settingsIndex),
       summarizeCatalog(client, catalogIndex),
     ]);
     const counts = new Map(summaries.map((summary) => [summary.repository, summary]));

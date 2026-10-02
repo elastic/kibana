@@ -14,7 +14,7 @@ import type {
   RepositoryRevisionRequest,
   ResolvedRepository,
 } from '../../domain';
-import { commandFailure, failure, isSafeRevision } from '../local_git/local_bare_git_helpers';
+import { commandFailure, failure, isSafeRevision } from './sandbox_git_helpers';
 import {
   CLONE_SETUP_FAILED_EXIT,
   REMOTE_UNAVAILABLE_EXIT,

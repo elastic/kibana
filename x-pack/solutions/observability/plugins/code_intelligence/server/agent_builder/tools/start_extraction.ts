@@ -119,8 +119,7 @@ Each repository must already be configured; add it first with the upsert reposit
     }),
   },
   handler: async ({ repositories }, { esClient, request, spaceId }) => {
-    const { configuredRepositories, extractionService, extractionUnavailableReason } =
-      getServices();
+    const { extractionService, extractionUnavailableReason } = getServices();
     if (extractionService === undefined) {
       return {
         results: [
@@ -134,7 +133,7 @@ Each repository must already be configured; add it first with the upsert reposit
     const client = esClient.asCurrentUser;
     const selection = selectBatchRepositories(
       repositories,
-      await listExtractableRepositories(client, settingsIndex, configuredRepositories)
+      await listExtractableRepositories(client, settingsIndex)
     );
     if (!selection.ok) return { results: [refusalResult(selection)] };
     try {
