@@ -11,7 +11,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // Server default for max_allowed_packet, which bounds a single SQL statement; servers may raise it.
 // https://dev.mysql.com/doc/refman/8.4/en/packet-too-large.html
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES = 64 * 1024 * 1024;
 // https://dev.mysql.com/doc/refman/8.4/en/column-count-limit.html
 const MYSQL_MAX_COLUMNS_PER_TABLE = 4096;

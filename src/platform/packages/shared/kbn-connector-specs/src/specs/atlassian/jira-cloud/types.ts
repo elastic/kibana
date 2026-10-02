@@ -330,7 +330,6 @@ export const AddAttachmentInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to attach the file to.'),
-    // Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
     file: z.string().base64().max(10_000_000).describe('Base64-encoded file content.'),
     filename: z.string().max(255).describe('Filename including extension (e.g. screenshot.png).'),
   })

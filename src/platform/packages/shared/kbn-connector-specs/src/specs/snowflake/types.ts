@@ -12,9 +12,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // https://docs.snowflake.com/en/sql-reference/identifiers-syntax
 const MAX_IDENTIFIER_LENGTH = 255;
 // https://docs.snowflake.com/en/user-guide/query-size-limits
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_QUERY_TEXT_BYTES = 1024 * 1024;
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_BINDING_VALUE_LENGTH = 1_048_576;
 const MAX_BINDING_KEY_LENGTH = 10;
 // https://docs.snowflake.com/en/sql-reference/parameters#query-tag

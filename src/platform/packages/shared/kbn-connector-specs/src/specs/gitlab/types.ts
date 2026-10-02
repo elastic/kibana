@@ -12,10 +12,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // https://docs.gitlab.com/development/issuable-like-models/#important-text-fields
 const GITLAB_TITLE_MAX_LENGTH = 255;
 // Default of the `description_and_note_max_size` setting, enforced in bytes: https://docs.gitlab.com/api/settings/
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const GITLAB_DESCRIPTION_MAX_BYTES = 1048576;
 // https://docs.gitlab.com/api/notes/
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const GITLAB_NOTE_MAX_LENGTH = 1000000;
 // `Issuable::MAX_NUMBER_OF_ASSIGNEES_OR_REVIEWERS` in app/models/concerns/issuable.rb
 const GITLAB_MAX_ASSIGNEES_OR_REVIEWERS = 200;
@@ -890,7 +888,6 @@ export const CreateOrUpdateFileInputSchema = lazySchema(() =>
       .min(1)
       .max(200)
       .describe('Branch to create or update the file on. Example: "main" or "feature/my-branch".'),
-    // Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
     content: z
       .string()
       .max(10485760)

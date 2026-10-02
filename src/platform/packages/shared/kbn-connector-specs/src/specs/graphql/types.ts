@@ -17,7 +17,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // The GraphQL spec sets no limit on document size, name length, or variable count;
 // these are generous DoS ceilings. Servers may enforce their own, lower limits.
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_QUERY_LENGTH = 1_000_000;
 const MAX_OPERATION_NAME_LENGTH = 255;
 const MAX_VARIABLES = 1000;

@@ -19,7 +19,6 @@ const GITHUB_MAX_REQUESTED_REVIEWERS = 100;
 const COMMIT_TITLE_MAX_LENGTH = 1024;
 const COMMIT_MESSAGE_MAX_LENGTH = 65536;
 // https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents accepts files up to 100 MB.
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const GITHUB_CONTENTS_MAX_FILE_BYTES = 100 * 1024 * 1024;
 const GITHUB_CONTENTS_MAX_BASE64_LENGTH = Math.ceil(GITHUB_CONTENTS_MAX_FILE_BYTES / 3) * 4;
 // https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onworkflow_dispatchinputs

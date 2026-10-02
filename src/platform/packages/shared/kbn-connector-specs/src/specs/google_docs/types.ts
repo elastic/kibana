@@ -11,7 +11,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // Google Docs documents no limit on subrequests or payload size per batchUpdate. These
 // ceilings sit well above rewriting a full document (Docs caps documents at 1.02M characters).
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_BATCH_UPDATE_REQUESTS = 10_000;
 const MAX_BATCH_UPDATE_BYTES = 10 * 1024 * 1024;
 

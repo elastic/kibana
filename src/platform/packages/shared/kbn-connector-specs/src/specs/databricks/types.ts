@@ -16,7 +16,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // =============================================================================
 
 // https://docs.databricks.com/api/workspace/statementexecution/executestatement
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_STATEMENT_BYTES = 16 * 1024 * 1024;
 // https://docs.databricks.com/aws/en/jobs/#limitations
 const MAX_JOB_TASKS = 1000;

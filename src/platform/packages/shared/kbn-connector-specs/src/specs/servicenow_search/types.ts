@@ -481,7 +481,6 @@ export const UploadAttachmentInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .describe('MIME type of the file (e.g., application/pdf, image/png, text/plain)'),
-    // Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
     base64Content: z
       .string()
       .max(10_000_000)
