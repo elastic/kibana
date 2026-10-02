@@ -22,6 +22,7 @@ import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import { createInMemoryStorage } from '../../investigation_attachments/in_memory_storage.mock';
+import { TRANSIENT_SEARCH_RETRY_DELAYS_MS } from '../../investigation_attachments/search_with_transient_retry';
 import { subjectAttachment } from '../../subjects/attachments';
 import { SubjectClaimsService } from '../../subjects/services/subject_claims_service';
 import { subjectDocumentId, SubjectsService } from '../../subjects/services/subjects_service';
@@ -242,6 +243,30 @@ describe('InvestigationsQueryService', () => {
 
       expect(investigation.subjects.map(({ id }) => id)).toEqual(['alert-2']);
       expect(investigation.impact).toBeUndefined();
+    });
+
+    it('retries reading a conversation whose new index has no shard available yet', async () => {
+      jest.useFakeTimers();
+      try {
+        const { service, client } = setup();
+        const noShardAvailable = Object.assign(new Error('no_shard_available_action_exception'), {
+          meta: {
+            statusCode: 503,
+            body: { error: { type: 'no_shard_available_action_exception' } },
+          },
+        });
+        client.get
+          .mockRejectedValueOnce(noShardAvailable)
+          .mockResolvedValueOnce(conversation('conv-1'));
+
+        const investigation = service.get(request, 'conv-1');
+        await jest.advanceTimersByTimeAsync(TRANSIENT_SEARCH_RETRY_DELAYS_MS[0]);
+
+        await expect(investigation).resolves.toMatchObject({ id: 'conv-1' });
+        expect(client.get).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('rejects a conversation on another template as not an investigation', async () => {

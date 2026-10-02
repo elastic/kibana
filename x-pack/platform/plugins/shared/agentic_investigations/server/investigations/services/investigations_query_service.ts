@@ -48,6 +48,7 @@ import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import type { SubjectsService } from '../../subjects/services/subjects_service';
+import { retryWhileShardUnavailable } from '../../investigation_attachments';
 import type { InProgressResolver } from './in_progress';
 
 /** Bound on the proposals one investigation read returns. */
@@ -99,7 +100,7 @@ export class InvestigationsQueryService {
 
   async get(request: KibanaRequest, id: string): Promise<Investigation> {
     const client = await this.deps.getConversationClient(request);
-    const conversation = await client.get(id);
+    const conversation = await retryWhileShardUnavailable(() => client.get(id));
     if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
       throw new WrongTemplateError(id, INVESTIGATION_TEMPLATE_ID);
     }
@@ -208,7 +209,7 @@ export class InvestigationsQueryService {
       return [];
     }
 
-    const open = [...(await client.bulkGet(ids)).values()]
+    const open = [...(await retryWhileShardUnavailable(() => client.bulkGet(ids))).values()]
       .filter(
         (conversation) =>
           conversation.template_id === INVESTIGATION_TEMPLATE_ID &&
@@ -252,18 +253,24 @@ export class InvestigationsQueryService {
 
     let conversations: ConversationSummary[];
     if (ids === undefined) {
-      const { results } = await client.search({
-        filter: buildSearchFilter(filters),
-        sort: searchSort,
-        page: 1,
-        perPage: MAX_INVESTIGATION_CANDIDATES,
-      });
+      const { results } = await retryWhileShardUnavailable(() =>
+        client.search({
+          filter: buildSearchFilter(filters),
+          sort: searchSort,
+          page: 1,
+          perPage: MAX_INVESTIGATION_CANDIDATES,
+        })
+      );
       conversations = results;
     } else if (ids.length === 0) {
       return [];
     } else {
       conversations = [
-        ...(await client.bulkGet(ids.slice(0, MAX_INVESTIGATION_CANDIDATES))).values(),
+        ...(
+          await retryWhileShardUnavailable(() =>
+            client.bulkGet(ids.slice(0, MAX_INVESTIGATION_CANDIDATES))
+          )
+        ).values(),
       ];
     }
 
@@ -511,16 +518,18 @@ export class InvestigationsQueryService {
     } catch {
       return [];
     }
-    const { proposals: found } = await proposals.getProposalsService().list(
-      {
-        conversationId,
-        excludeSuperseded: true,
-        excludeExpired: false,
-        size: MAX_INVESTIGATION_PROPOSALS,
-        from: 0,
-      },
-      spaceId,
-      request
+    const { proposals: found } = await retryWhileShardUnavailable(() =>
+      proposals.getProposalsService().list(
+        {
+          conversationId,
+          excludeSuperseded: true,
+          excludeExpired: false,
+          size: MAX_INVESTIGATION_PROPOSALS,
+          from: 0,
+        },
+        spaceId,
+        request
+      )
     );
     return found.map(toProposalSummary);
   }
