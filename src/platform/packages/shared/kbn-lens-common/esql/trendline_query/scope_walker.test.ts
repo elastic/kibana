@@ -85,6 +85,15 @@ describe('trackColumnAndEnsureKept', () => {
     );
   });
 
+  it('tracks an existing aliased STATS grouping without duplicating it', () => {
+    const root = parse('FROM index | STATS total = COUNT(*) BY time_bucket = bucket');
+    const state = trackColumnAndEnsureKept(root.commands, 'bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket = bucket'
+    );
+    expect(state.name).toBe('time_bucket');
+  });
+
   it('groups STATS by the renamed column', () => {
     const root = parse('FROM index | RENAME bucket AS time_bucket | STATS total = COUNT(*)');
     trackColumnAndEnsureKept(root.commands, 'bucket', { ensureGrouped: true });

@@ -79,6 +79,23 @@ const statsTransfer: CommandTransfer = (command, state, { ensureGrouped }) => {
   if (!ensureGrouped) return state;
 
   const byOption = command.args.find(isOptionNode);
+  const groupedAlias = byOption?.args.find((arg) => {
+    if (!isFunctionExpression(arg) || arg.name !== '=') return false;
+    const [left, rightArg] = arg.args;
+    // Right-hand assignment expressions are represented as argument lists, even when
+    // the grouping expression is a single column (`alias = tracked_column`).
+    const right = Array.isArray(rightArg) && rightArg.length === 1 ? rightArg[0] : rightArg;
+    return (
+      !Array.isArray(left) && !Array.isArray(right) && isColumn(right) && right.name === state.name
+    );
+  });
+  if (groupedAlias && isFunctionExpression(groupedAlias)) {
+    // The aggregation exposes the grouping under its left-hand alias, so later
+    // commands must track that output name rather than the upstream column.
+    const [alias] = groupedAlias.args;
+    if (!Array.isArray(alias) && isColumn(alias)) return { name: alias.name };
+  }
+
   const isGrouped = byOption?.args.some((arg) => isColumn(arg) && arg.name === state.name);
   if (isGrouped) return state;
 
@@ -118,8 +135,8 @@ const walkColumn = (
   commands.reduce<TrackedColumnState>(
     (state, command) =>
       (transferFns[command.name] ?? identityTransfer)(command, state, {
-        ensureKept,
-        ensureGrouped,
+      ensureKept,
+      ensureGrouped,
       }),
     { name: columnName }
   );
