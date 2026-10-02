@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
 import type { CoreServiceAccountsService } from '@kbn/core-security-server';
 
@@ -18,6 +18,7 @@ const serviceAccountRequest = {
 } as unknown as KibanaRequest;
 
 const authenticate = jest.fn();
+const logger = { warn: jest.fn() } as unknown as Logger;
 
 const elasticsearch = {
   asScoped: () => ({
@@ -54,6 +55,7 @@ describe('scheduleForCaller', () => {
         spaceId: 'default',
         taskInstance: task,
         schedule,
+        logger,
       })
     ).resolves.toBe('scheduled');
 
@@ -76,6 +78,7 @@ describe('scheduleForCaller', () => {
       spaceId: 'default',
       taskInstance: task,
       schedule,
+      logger,
     });
 
     expect(schedule).toHaveBeenCalledWith(task, { request, cloneApiKey: true });

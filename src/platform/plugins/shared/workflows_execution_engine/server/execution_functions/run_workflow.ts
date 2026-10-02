@@ -296,7 +296,8 @@ export const runWorkflow = async (
       ...params,
       workflowTaskManager: workflowTaskManagerFor(
         params.dependencies.taskManager,
-        params.dependencies.coreStart
+        params.dependencies.coreStart,
+        params.logger
       ),
       cloudSetup: params.dependencies.cloudSetup,
     });
@@ -337,7 +338,8 @@ export const runWorkflow = async (
         ...params,
         workflowTaskManager: workflowTaskManagerFor(
           params.dependencies.taskManager,
-          params.dependencies.coreStart
+          params.dependencies.coreStart,
+          params.logger
         ),
         cloudSetup: params.dependencies.cloudSetup,
       });

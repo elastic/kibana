@@ -11,6 +11,7 @@ import { v4 } from 'uuid';
 import {
   type IClusterClient,
   type KibanaRequest,
+  type Logger,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { CoreServiceAccountsService } from '@kbn/core-security-server';
@@ -50,6 +51,7 @@ export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
 export interface ServiceAccountBearerScheduling {
   elasticsearch: IClusterClient;
   serviceAccounts: CoreServiceAccountsService;
+  logger: Logger;
 }
 
 export const workflowTaskManagerFor = (
@@ -57,11 +59,13 @@ export const workflowTaskManagerFor = (
   core: {
     elasticsearch: { client: IClusterClient };
     security: { serviceAccounts: CoreServiceAccountsService };
-  }
+  },
+  logger: Logger
 ): WorkflowTaskManager =>
   new WorkflowTaskManager(taskManager, {
     elasticsearch: core.elasticsearch.client,
     serviceAccounts: core.security.serviceAccounts,
+    logger,
   });
 
 export class WorkflowTaskManager {
@@ -92,6 +96,7 @@ export class WorkflowTaskManager {
       spaceId,
       taskInstance,
       schedule,
+      logger: this.serviceAccountBearer.logger,
     });
   }
 

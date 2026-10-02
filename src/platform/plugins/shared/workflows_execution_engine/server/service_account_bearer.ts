@@ -58,6 +58,8 @@ export const serviceAccountIdFromExchangeBearer = async (
 /**
  * Binds this service account to the execution under {@link SERVICE_ACCOUNT_BEARER_TYPE}
  * when that binding is missing or names a different account.
+ * Returns true only when no binding existed and this call created one. A schedule that
+ * then fails releases that binding. A binding that was already stored is left in place.
  */
 export const ensureServiceAccountBearerBinding = async (
   serviceAccounts: CoreServiceAccountsService,
@@ -65,7 +67,7 @@ export const ensureServiceAccountBearerBinding = async (
   executionId: string,
   spaceId: string,
   serviceAccountId: string
-): Promise<void> => {
+): Promise<boolean> => {
   if (!serviceAccounts.isEnabled()) {
     throw Boom.forbidden('Service account execution is disabled.');
   }
@@ -75,18 +77,20 @@ export const ensureServiceAccountBearerBinding = async (
     spaceId,
   });
   if (binding?.serviceAccountId === serviceAccountId) {
-    return;
+    return false;
   }
   await serviceAccounts.bindWorkload(request, {
     workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
     workloadId: executionId,
     serviceAccountId,
   });
+  return !binding;
 };
 
 /**
  * Schedules a task that already knows its service account. Binds that account to the execution
- * and omits the request so Task Manager does not grant an API key.
+ * and omits the request so Task Manager does not grant an API key. A binding created by this
+ * attempt is released when scheduling rejects, so no task is left to clean it up.
  */
 export const scheduleBoundServiceAccountBearer = async <T extends { params?: object }, R>({
   serviceAccounts,
@@ -96,6 +100,7 @@ export const scheduleBoundServiceAccountBearer = async <T extends { params?: obj
   serviceAccountId,
   taskInstance,
   schedule,
+  logger,
 }: {
   serviceAccounts: CoreServiceAccountsService;
   request: KibanaRequest;
@@ -104,21 +109,40 @@ export const scheduleBoundServiceAccountBearer = async <T extends { params?: obj
   serviceAccountId: string;
   taskInstance: T;
   schedule: (taskInstance: T) => Promise<R>;
+  logger: Logger;
 }): Promise<R> => {
   if (!spaceId) {
     throw new Error('Workflow execution must have a space to run as a service account.');
   }
-  await ensureServiceAccountBearerBinding(
+  const created = await ensureServiceAccountBearerBinding(
     serviceAccounts,
     request,
     executionId,
     spaceId,
     serviceAccountId
   );
-  return schedule({
-    ...taskInstance,
-    params: { ...(taskInstance.params ?? {}), serviceAccountId },
-  });
+  try {
+    return await schedule({
+      ...taskInstance,
+      params: { ...(taskInstance.params ?? {}), serviceAccountId },
+    });
+  } catch (error) {
+    if (created) {
+      try {
+        await serviceAccounts.unbindWorkload(request, {
+          workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
+          workloadId: executionId,
+        });
+      } catch (unbindError) {
+        logger.warn(
+          `Failed to release the service account binding for execution ${executionId}: ${
+            unbindError instanceof Error ? unbindError.message : String(unbindError)
+          }`
+        );
+      }
+    }
+    throw error;
+  }
 };
 
 /**
@@ -154,6 +178,49 @@ export const runServiceAccountBearer = async <T>({
 
 const isMissingWorkloadBinding = (error: unknown): boolean =>
   Boom.isBoom(error) && error.output.statusCode === 404;
+
+/**
+ * Releases the bearer binding for this execution when one exists.
+ * A queued cancel never runs the task that would otherwise do this.
+ */
+export const releaseStoredServiceAccountBearerBinding = async ({
+  serviceAccounts,
+  spaceId,
+  executionId,
+  logger,
+}: {
+  serviceAccounts: CoreServiceAccountsService;
+  spaceId: string;
+  executionId: string;
+  logger: Logger;
+}): Promise<void> => {
+  if (!serviceAccounts.isEnabled()) {
+    return;
+  }
+  try {
+    const binding = await serviceAccounts.getWorkloadBinding({
+      workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
+      workloadId: executionId,
+      spaceId,
+    });
+    if (!binding) {
+      return;
+    }
+    await releaseServiceAccountBearerBinding({
+      serviceAccounts,
+      spaceId,
+      executionId,
+      serviceAccountId: binding.serviceAccountId,
+      logger,
+    });
+  } catch (error) {
+    logger.warn(
+      `Failed to release the service account binding for execution ${executionId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
 
 /**
  * Removes the `service_account_bearer` binding for this execution.

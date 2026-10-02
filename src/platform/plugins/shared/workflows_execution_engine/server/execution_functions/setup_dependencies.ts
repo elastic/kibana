@@ -195,7 +195,7 @@ export async function setupDependencies(
   const esClient: ElasticsearchClient =
     coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
-  const workflowTaskManager = workflowTaskManagerFor(taskManager, coreStart);
+  const workflowTaskManager = workflowTaskManagerFor(taskManager, coreStart, logger);
 
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,

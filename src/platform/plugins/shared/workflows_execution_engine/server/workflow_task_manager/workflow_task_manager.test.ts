@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
@@ -89,6 +89,7 @@ describe('WorkflowTaskManager', () => {
     workflowTaskManager = new WorkflowTaskManager(mockTaskManager, {
       elasticsearch: {} as IClusterClient,
       serviceAccounts: {} as CoreServiceAccountsService,
+      logger: { warn: jest.fn() } as unknown as Logger,
     });
   });
 
@@ -176,6 +177,7 @@ describe('WorkflowTaskManager', () => {
         asScoped: () => ({ asCurrentUser: { security: { authenticate } } }),
       } as unknown as IClusterClient,
       serviceAccounts: serviceAccounts as unknown as CoreServiceAccountsService,
+      logger: { warn: jest.fn() } as unknown as Logger,
     });
     const request = httpServerMock.createKibanaRequest({
       headers: { authorization: 'Bearer essu_exchange_token' },

@@ -398,7 +398,11 @@ export class WorkflowsExecutionEnginePlugin
                   workflowExecutionRepository,
                   stepExecutionRepository,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                  workflowTaskManager: workflowTaskManagerFor(pluginsStart.taskManager, coreStart),
+                  workflowTaskManager: workflowTaskManagerFor(
+                    pluginsStart.taskManager,
+                    coreStart,
+                    logger
+                  ),
                   meteringService: this.meteringService,
                   cloudSetup: setupDependencies.cloudSetup,
                   logger,
@@ -647,9 +651,62 @@ export class WorkflowsExecutionEnginePlugin
                 });
               };
 
+              let resumeStarted = false;
+              const recordResumeFailure = async (error: unknown): Promise<never> => {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_RESUME_TASK_TYPE,
+                  workflowRunId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
+                await resolveExhaustedWorkflowRunTask({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  workflowRunId,
+                  spaceId,
+                  taskAttempts: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  error,
+                  logger,
+                });
+                if (taskInstance.attempts >= WORKFLOW_RESUME_TASK_MAX_ATTEMPTS) {
+                  await releaseBearerWhenTerminal();
+                }
+                if (aborted) {
+                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                    workflow_execution_id: workflowRunId,
+                    space_id: spaceId,
+                    outcome: 'cancelled',
+                  });
+                  throw error;
+                }
+                const execution = await getExecutionForTaskRunEvent(
+                  workflowExecutionRepository,
+                  workflowRunId,
+                  spaceId,
+                  logger
+                );
+                const isExhausted = taskInstance.attempts >= WORKFLOW_RESUME_TASK_MAX_ATTEMPTS;
+                stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                  workflow_execution_id: workflowRunId,
+                  workflow_id: execution?.workflowId,
+                  space_id: spaceId,
+                  outcome: isExhausted ? 'interrupted' : 'failed',
+                });
+                throw error;
+              };
+
               const resumeWithRequest = async (request: KibanaRequest) => {
                 if (taskInstance.id !== getWorkflowWakeTaskId(workflowRunId)) {
-                  await workflowTaskManagerFor(pluginsStart.taskManager, coreStart).ensureWakeTask({
+                  await workflowTaskManagerFor(
+                    pluginsStart.taskManager,
+                    coreStart,
+                    logger
+                  ).ensureWakeTask({
                     executionId: workflowRunId,
                     spaceId,
                     fakeRequest: request,
@@ -668,7 +725,8 @@ export class WorkflowsExecutionEnginePlugin
                   }
                   const accepted = await workflowTaskManagerFor(
                     pluginsStart.taskManager,
-                    coreStart
+                    coreStart,
+                    logger
                   ).tryRunImmediateResume({
                     executionId: workflowRunId,
                     spaceId,
@@ -719,7 +777,8 @@ export class WorkflowsExecutionEnginePlugin
                     internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                     workflowTaskManager: workflowTaskManagerFor(
                       pluginsStart.taskManager,
-                      coreStart
+                      coreStart,
+                      logger
                     ),
                     meteringService: this.meteringService,
                     cloudSetup: setupDependencies.cloudSetup,
@@ -785,65 +844,33 @@ export class WorkflowsExecutionEnginePlugin
                     }
                   }
                 } catch (error) {
-                  const aborted = taskAbortController.signal.aborted;
-                  logWorkflowTaskFailure(logger, error, {
-                    taskType: WORKFLOW_RESUME_TASK_TYPE,
-                    workflowRunId,
-                    spaceId,
-                    taskId: taskInstance.id,
-                    attempt: taskInstance.attempts,
-                    maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-                    aborted,
-                  });
-                  await resolveExhaustedWorkflowRunTask({
-                    workflowExecutionRepository,
-                    stepExecutionRepository,
-                    workflowRunId,
-                    spaceId,
-                    taskAttempts: taskInstance.attempts,
-                    maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-                    error,
-                    logger,
-                  });
-                  if (taskInstance.attempts >= WORKFLOW_RESUME_TASK_MAX_ATTEMPTS) {
-                    await releaseBearerWhenTerminal();
-                  }
-                  if (aborted) {
-                    stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
-                      workflow_execution_id: workflowRunId,
-                      space_id: spaceId,
-                      outcome: 'cancelled',
-                    });
-                    throw error;
-                  }
-                  const execution = await getExecutionForTaskRunEvent(
-                    workflowExecutionRepository,
-                    workflowRunId,
-                    spaceId,
-                    logger
-                  );
-                  const isExhausted = taskInstance.attempts >= WORKFLOW_RESUME_TASK_MAX_ATTEMPTS;
-                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
-                    workflow_execution_id: workflowRunId,
-                    workflow_id: execution?.workflowId,
-                    space_id: spaceId,
-                    outcome: isExhausted ? 'interrupted' : 'failed',
-                  });
-                  throw error;
+                  await recordResumeFailure(error);
                 }
               };
 
-              const resumeResult = fakeRequest
-                ? await resumeWithRequest(fakeRequest)
-                : await runServiceAccountBearer({
-                    serviceAccountId,
-                    serviceAccounts: coreStart.security.serviceAccounts,
-                    spaceId,
-                    executionId: workflowRunId,
-                    run: resumeWithRequest,
-                  });
-              await releaseBearerWhenTerminal();
-              return resumeResult;
+              // The exchange throws before `resumeWithRequest` runs. Record that here.
+              // Failures inside the callback are already recorded.
+              try {
+                const resumeResult = fakeRequest
+                  ? await resumeWithRequest(fakeRequest)
+                  : await runServiceAccountBearer({
+                      serviceAccountId,
+                      serviceAccounts: coreStart.security.serviceAccounts,
+                      spaceId,
+                      executionId: workflowRunId,
+                      run: (request) => {
+                        resumeStarted = true;
+                        return resumeWithRequest(request);
+                      },
+                    });
+                await releaseBearerWhenTerminal();
+                return resumeResult;
+              } catch (error) {
+                if (resumeStarted || fakeRequest) {
+                  throw error;
+                }
+                await recordResumeFailure(error);
+              }
             },
             cancel: async () => {
               // TM logs task-cancel before invoking this handler; this stamp feeds the
@@ -1001,7 +1028,8 @@ export class WorkflowsExecutionEnginePlugin
                 );
                 const workflowTaskManager = workflowTaskManagerFor(
                   pluginsStart.taskManager,
-                  coreStart
+                  coreStart,
+                  logger
                 );
                 const skipResult = await checkAndSkipIfExistingScheduledExecution(
                   workflow,
@@ -1288,7 +1316,7 @@ export class WorkflowsExecutionEnginePlugin
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
 
     // Initialize ConcurrencyManager with dependencies
-    const workflowTaskManager = workflowTaskManagerFor(plugins.taskManager, coreStart);
+    const workflowTaskManager = workflowTaskManagerFor(plugins.taskManager, coreStart, this.logger);
     const { workflowExecutionRepository, stepExecutionRepository } =
       this.createScopedRepositories();
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
@@ -1576,6 +1604,7 @@ export class WorkflowsExecutionEnginePlugin
           spaceId: workflowExecution.spaceId,
           taskInstance,
           schedule: (task, options) => plugins.taskManager.schedule(task, options),
+          logger: this.logger,
         });
         this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
@@ -1641,6 +1670,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflowExecution.spaceId,
         taskInstance,
         schedule: (task, options) => plugins.taskManager.schedule(task, options),
+        logger: this.logger,
       });
       this.logger.debug(
         `Scheduled workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}`
@@ -1865,6 +1895,7 @@ export class WorkflowsExecutionEnginePlugin
               serviceAccountId,
               taskInstance: task,
               schedule: (scheduled) => plugins.taskManager.schedule(scheduled),
+              logger: this.logger,
             });
           }
         }
@@ -1945,6 +1976,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflowExecution.spaceId,
         taskInstance,
         schedule: (task, options) => plugins.taskManager.schedule(task, options),
+        logger: this.logger,
       });
 
       return {
@@ -1965,6 +1997,7 @@ export class WorkflowsExecutionEnginePlugin
         schedulingRequest,
         workflowExecutionRepository,
         workflowTaskManager,
+        serviceAccounts: coreStart.security.serviceAccounts,
         logger: this.logger,
       });
     };

@@ -16,6 +16,7 @@ import {
   ensureServiceAccountBearerBinding,
   releaseServiceAccountBearerBinding,
   runServiceAccountBearer,
+  scheduleBoundServiceAccountBearer,
   SERVICE_ACCOUNT_BEARER_TYPE,
   serviceAccountIdFromExchangeBearer,
 } from './service_account_bearer';
@@ -88,13 +89,15 @@ describe('ensureServiceAccountBearerBinding', () => {
       serviceAccountId: 'account-id',
     } as never);
 
-    await ensureServiceAccountBearerBinding(
-      serviceAccounts as unknown as CoreServiceAccountsService,
-      serviceAccountRequest,
-      'execution-id',
-      'default',
-      'account-id'
-    );
+    await expect(
+      ensureServiceAccountBearerBinding(
+        serviceAccounts as unknown as CoreServiceAccountsService,
+        serviceAccountRequest,
+        'execution-id',
+        'default',
+        'account-id'
+      )
+    ).resolves.toBe(false);
 
     expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith({
       workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
@@ -107,13 +110,15 @@ describe('ensureServiceAccountBearerBinding', () => {
   it('binds the service account when the execution has no binding', async () => {
     serviceAccounts.getWorkloadBinding.mockResolvedValue(null);
 
-    await ensureServiceAccountBearerBinding(
-      serviceAccounts as unknown as CoreServiceAccountsService,
-      serviceAccountRequest,
-      'execution-id',
-      'default',
-      'account-id'
-    );
+    await expect(
+      ensureServiceAccountBearerBinding(
+        serviceAccounts as unknown as CoreServiceAccountsService,
+        serviceAccountRequest,
+        'execution-id',
+        'default',
+        'account-id'
+      )
+    ).resolves.toBe(true);
 
     expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(serviceAccountRequest, {
       workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
@@ -127,13 +132,15 @@ describe('ensureServiceAccountBearerBinding', () => {
       serviceAccountId: 'other-account',
     } as never);
 
-    await ensureServiceAccountBearerBinding(
-      serviceAccounts as unknown as CoreServiceAccountsService,
-      serviceAccountRequest,
-      'execution-id',
-      'default',
-      'account-id'
-    );
+    await expect(
+      ensureServiceAccountBearerBinding(
+        serviceAccounts as unknown as CoreServiceAccountsService,
+        serviceAccountRequest,
+        'execution-id',
+        'default',
+        'account-id'
+      )
+    ).resolves.toBe(false);
 
     expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(serviceAccountRequest, {
       workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
@@ -155,6 +162,96 @@ describe('ensureServiceAccountBearerBinding', () => {
       )
     ).rejects.toThrow('Service account execution is disabled.');
     expect(serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+  });
+});
+
+describe('scheduleBoundServiceAccountBearer', () => {
+  const logger = { warn: jest.fn() } as unknown as Logger;
+  const serviceAccounts = {
+    isEnabled: jest.fn().mockReturnValue(true),
+    getWorkloadBinding: jest.fn(),
+    bindWorkload: jest.fn(),
+    unbindWorkload: jest.fn(),
+  } as unknown as jest.Mocked<
+    Pick<
+      CoreServiceAccountsService,
+      'isEnabled' | 'getWorkloadBinding' | 'bindWorkload' | 'unbindWorkload'
+    >
+  >;
+  const task = { params: { workflowRunId: 'execution-id' } };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    serviceAccounts.isEnabled.mockReturnValue(true);
+    serviceAccounts.unbindWorkload.mockResolvedValue(true);
+  });
+
+  it('releases a binding this attempt created when scheduling fails', async () => {
+    serviceAccounts.getWorkloadBinding.mockResolvedValue(null);
+    const schedule = jest.fn().mockRejectedValue(new Error('schedule failed'));
+
+    await expect(
+      scheduleBoundServiceAccountBearer({
+        serviceAccounts: serviceAccounts as unknown as CoreServiceAccountsService,
+        request: serviceAccountRequest,
+        executionId: 'execution-id',
+        spaceId: 'default',
+        serviceAccountId: 'account-id',
+        taskInstance: task,
+        schedule,
+        logger,
+      })
+    ).rejects.toThrow('schedule failed');
+
+    expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(serviceAccountRequest, {
+      workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
+      workloadId: 'execution-id',
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps an existing binding when scheduling fails', async () => {
+    serviceAccounts.getWorkloadBinding.mockResolvedValue({
+      serviceAccountId: 'account-id',
+    } as never);
+    const schedule = jest.fn().mockRejectedValue(new Error('schedule failed'));
+
+    await expect(
+      scheduleBoundServiceAccountBearer({
+        serviceAccounts: serviceAccounts as unknown as CoreServiceAccountsService,
+        request: serviceAccountRequest,
+        executionId: 'execution-id',
+        spaceId: 'default',
+        serviceAccountId: 'account-id',
+        taskInstance: task,
+        schedule,
+        logger,
+      })
+    ).rejects.toThrow('schedule failed');
+
+    expect(serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+    expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('logs the release failure and still throws the schedule error', async () => {
+    serviceAccounts.getWorkloadBinding.mockResolvedValue(null);
+    serviceAccounts.unbindWorkload.mockRejectedValue(new Error('store unavailable'));
+    const schedule = jest.fn().mockRejectedValue(new Error('schedule failed'));
+
+    await expect(
+      scheduleBoundServiceAccountBearer({
+        serviceAccounts: serviceAccounts as unknown as CoreServiceAccountsService,
+        request: serviceAccountRequest,
+        executionId: 'execution-id',
+        spaceId: 'default',
+        serviceAccountId: 'account-id',
+        taskInstance: task,
+        schedule,
+        logger,
+      })
+    ).rejects.toThrow('schedule failed');
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('execution-id'));
   });
 });
 

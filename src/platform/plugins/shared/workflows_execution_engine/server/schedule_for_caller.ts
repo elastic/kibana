@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { CoreServiceAccountsService } from '@kbn/core-security-server';
 
 import {
@@ -33,6 +33,7 @@ export const scheduleForCaller = async <T extends { params?: object }, R>({
   spaceId,
   taskInstance,
   schedule,
+  logger,
 }: {
   elasticsearch: IClusterClient;
   serviceAccounts: CoreServiceAccountsService;
@@ -41,6 +42,7 @@ export const scheduleForCaller = async <T extends { params?: object }, R>({
   spaceId: string | undefined;
   taskInstance: T;
   schedule: (taskInstance: T, options?: ScheduleOptions) => Promise<R>;
+  logger: Logger;
 }): Promise<R> => {
   const serviceAccountId = await serviceAccountIdFromExchangeBearer(elasticsearch, request);
   if (!serviceAccountId) {
@@ -54,5 +56,6 @@ export const scheduleForCaller = async <T extends { params?: object }, R>({
     serviceAccountId,
     taskInstance,
     schedule,
+    logger,
   });
 };
