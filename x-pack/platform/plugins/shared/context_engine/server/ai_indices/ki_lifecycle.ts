@@ -45,16 +45,27 @@ const globToRegExp = (pattern: string): RegExp =>
 const overlaps = (source: string, dest: string): boolean =>
   globToRegExp(source).test(dest) || globToRegExp(dest).test(source);
 
-/** Lifecycle fields the query names itself; each one switches off the matching default. */
+/**
+ * Lifecycle fields the query handles itself. A `WHERE` on `expires_at` or on
+ * `governance.lifecycle.status` switches off that filter; naming any `governance.*` field anywhere
+ * keeps `governance` in the result.
+ */
 const namedLifecycleFields = (root: ESQLAstQueryExpression) => {
   const named = { status: false, expiry: false, governance: false };
   Walker.walk(root, {
     visitColumn: ({ parts }) => {
-      if (parts[0] === GOVERNANCE_FIELD) {
-        named.governance = true;
-        named.status ||= parts.join('.') === KI_LIFECYCLE_STATUS_FIELD;
+      named.governance ||= parts[0] === GOVERNANCE_FIELD;
+    },
+    visitCommand: (command) => {
+      if (command.name !== 'where') {
+        return;
       }
-      named.expiry ||= parts[0] === KI_EXPIRES_AT_FIELD;
+      Walker.walk(command, {
+        visitColumn: ({ parts }) => {
+          named.status ||= parts.join('.') === KI_LIFECYCLE_STATUS_FIELD;
+          named.expiry ||= parts[0] === KI_EXPIRES_AT_FIELD;
+        },
+      });
     },
   });
   return named;
@@ -80,7 +91,7 @@ const latestRevisionByTarget = (streams: string[]): string[] => [
 
 /**
  * Inserts the lifecycle pipeline after `FROM` when the query reads a registered AI index dest.
- * Each lifecycle field the query names switches off its own default; a data stream dest always
+ * A `WHERE` on a lifecycle field switches off that field's filter; a data stream dest always
  * gets the revision collapse. A query the parser rejects is returned unchanged.
  */
 export const applyKiLifecycle = (query: string, dests: AiIndexDest[]): string => {
