@@ -7,7 +7,7 @@
 import { badRequest, conflict, notFound } from '@hapi/boom';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { MemoryPage } from '../../common/memory';
-import { MAX_PAGE_SIZE, MemoryVersionConflictError } from '../memory/page_store';
+import { MAX_PAGE_SIZE, MAX_TAG_FILTER_TERMS, MAX_TAG_TERM_LENGTH, MemoryVersionConflictError } from '../memory/page_store';
 import { archiveMemoryPageRoute } from './archive_memory_page';
 import { deleteMemoryPageRoute } from './delete_memory_page';
 import { getMemoryAvailabilityRoute } from './get_memory_availability';
@@ -70,7 +70,12 @@ describe('listMemoryPagesRoute', () => {
     const listPaginated = jest.fn().mockResolvedValue({ pages: [], cursor: undefined });
     await handler(context({ listPaginated }, true, { query: { size: 10, cursor: 'abc' } }));
 
-    expect(listPaginated).toHaveBeenCalledWith({ filter: 'all', cursor: 'abc', size: 10 });
+    expect(listPaginated).toHaveBeenCalledWith({
+      filter: 'all',
+      cursor: 'abc',
+      size: 10,
+      tags: undefined,
+    });
   });
 
   it('reports disabled as not found rather than an empty list', async () => {
@@ -101,6 +106,23 @@ describe('listMemoryPagesRoute', () => {
       filter: 'all',
       cursor: undefined,
       size: undefined,
+      tags: undefined,
+    });
+  });
+
+  it('forwards the repeated tag terms so the store can group them by keyword', async () => {
+    const listPaginated = jest.fn().mockResolvedValue({ pages: [] });
+    await handler(
+      context({ listPaginated }, true, {
+        query: { filter: 'active', tags: ['invoke-agent', 'invoke_agent', 'cart cache'] },
+      })
+    );
+
+    expect(listPaginated).toHaveBeenCalledWith({
+      filter: 'active',
+      cursor: undefined,
+      size: undefined,
+      tags: ['invoke-agent', 'invoke_agent', 'cart cache'],
     });
   });
 });
@@ -170,6 +192,24 @@ describe('memory route request bounds', () => {
   it('rejects an unknown list filter rather than silently listing everything', () => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
     expect(params.safeParse({ query: { filter: 'everything' } }).success).toBe(false);
+  });
+
+  it.each([
+    ['an empty tag term', ['']],
+    ['an over-long tag term', ['t'.repeat(MAX_TAG_TERM_LENGTH + 1)]],
+    ['more terms than the tag bound', Array.from(
+      { length: MAX_TAG_FILTER_TERMS + 1 },
+      (_, i) => `t${i}`
+    )],
+  ])('rejects %s on the list route', (_label, tags) => {
+    const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
+    expect(params.safeParse({ query: { tags } }).success).toBe(false);
+  });
+
+  it('accepts the full set of tag terms the client can send', () => {
+    const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
+    const tags = Array.from({ length: MAX_TAG_FILTER_TERMS }, (_, i) => `t${i}`);
+    expect(params.safeParse({ query: { tags } }).success).toBe(true);
   });
 
   it('rejects an over-long cursor and an over-long confirm title', () => {

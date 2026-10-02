@@ -14,6 +14,8 @@ import {
   createMemoryPageStore,
   epochSecondsToIso,
   isCanonicalMemoryId,
+  MAX_TAG_FILTER_KEYWORDS,
+  MAX_TAG_SPELLINGS_PER_KEYWORD,
   toMemoryDisplayTelemetry,
   toMemoryKiId,
 } from './page_store';
@@ -393,6 +395,113 @@ describe('createMemoryPageStore', () => {
       total: 137,
       archived: 12,
     });
+  });
+
+  it('matches a keyword against every spelling of it, and ANDs the keywords', async () => {
+    const search = jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.list({ filter: 'active', tags: ['invoke-agent', 'invoke_agent', 'cart cache'] });
+
+    const query = (search.mock.calls[0][0] as { query: { bool: { filter: unknown[] } } }).query;
+    expect(query.bool.filter).toEqual([
+      { term: { tags: 'memory' } },
+      { term: { 'attributes.space_id': 'space-a' } },
+      expect.objectContaining({ bool: { must_not: expect.anything() } }),
+      {
+        // One keyword: any of its spellings matches, so a document written before
+        // tags were canonicalized is still found.
+        bool: {
+          should: [{ term: { tags: 'invoke-agent' } }, { term: { tags: 'invoke_agent' } }],
+          minimum_should_match: 1,
+        },
+      },
+      {
+        bool: { should: [{ term: { tags: 'cart cache' } }], minimum_should_match: 1 },
+      },
+    ]);
+  });
+
+  it('counts the filtered set in the stats, so the header cannot drift from the rows', async () => {
+    const search = jest.fn((request: { size?: number }) =>
+      Promise.resolve(
+        request.size === 0
+          ? { hits: { total: { value: 2 } }, aggregations: { archived: { doc_count: 0 } } }
+          : { hits: { total: { value: 2 }, hits: [] } }
+      )
+    );
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const result = await store.listPaginated({ tags: ['kafka'] });
+
+    expect(result.total).toBe(2);
+    expect(result.stats).toEqual({ total: 2, archived: 0 });
+    // Both the page query and the stats aggregation carry the tag clause.
+    const serialized = search.mock.calls.map(([request]) => JSON.stringify(request));
+    expect(serialized).toHaveLength(2);
+    serialized.forEach((request) => expect(request).toContain('"tags":"kafka"'));
+  });
+
+  it('leaves the query untagged when no keyword was selected', async () => {
+    const search = jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.list({ tags: [] });
+
+    expect((search.mock.calls[0][0] as { query: unknown }).query).toEqual({
+      bool: {
+        filter: [{ term: { tags: 'memory' } }, { term: { 'attributes.space_id': 'space-a' } }],
+      },
+    });
+  });
+
+  it('bounds the tag query so a request cannot grow without limit', async () => {
+    const search = jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    // More keywords than the cap: the extra ones are dropped rather than making
+    // the boolean clause arbitrarily large.
+    const tooManyKeywords = Array.from(
+      { length: MAX_TAG_FILTER_KEYWORDS + 5 },
+      (_, i) => `keyword ${i}`
+    );
+    await store.list({ tags: tooManyKeywords });
+    const many = (search.mock.calls[0][0] as { query: { bool: { filter: unknown[] } } }).query
+      .bool.filter;
+    expect(many).toHaveLength(MAX_TAG_FILTER_KEYWORDS + 2);
+
+    // Too many spellings of one keyword: the surplus is dropped, not kept. Each
+    // spelling differs only in its internal spacing, so they all canonicalize to
+    // the same keyword — which is exactly the group the cap applies to.
+    const tooManySpellings = Array.from(
+      { length: MAX_TAG_SPELLINGS_PER_KEYWORD + 5 },
+      (_, i) => `invoke${' '.repeat(i + 1)}agent`
+    );
+    await store.list({ tags: ['invoke-agent', ...tooManySpellings] });
+    const spellings = (
+      search.mock.calls[1][0] as { query: { bool: { filter: Array<{ bool?: unknown }> } } }
+    ).query.bool.filter[2].bool as { should: unknown[] };
+    expect(spellings.should).toHaveLength(MAX_TAG_SPELLINGS_PER_KEYWORD);
   });
 
   it('reports empty stats rather than failing when the index does not exist yet', async () => {

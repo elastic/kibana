@@ -20,6 +20,7 @@ import {
 } from '../../common/memory';
 import { formatPageRefs, previewText } from './log_format';
 import { applyUpdate, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
+import { canonicalizeTag, MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const MAX_LIST_SIZE = 500;
 const DEFAULT_PAGE_SIZE = 25;
@@ -69,6 +70,32 @@ export class MemoryVersionConflictError extends Error {
   }
 }
 
+/**
+ * Keywords one request may filter by, which is the write layer's per-page tag cap:
+ * a request cannot ask about more tags than one memory could carry.
+ */
+export const MAX_TAG_FILTER_KEYWORDS = MAX_MEMORY_TAGS_PER_PAGE;
+
+/**
+ * Spellings one keyword may match. Documents written before tags were
+ * canonicalized hold every spelling, so a keyword is matched against all of them.
+ */
+export const MAX_TAG_SPELLINGS_PER_KEYWORD = MAX_MEMORY_TAGS_PER_PAGE;
+
+/**
+ * Terms the tag query may carry. The client sends each selected keyword's
+ * canonical key plus every original spelling it was seen spelled, so this bounds
+ * keywords × spellings rather than keywords alone. The request is a query
+ * string, so it is bounded more tightly than one page's full tag list.
+ */
+export const MAX_TAG_FILTER_TERMS = MAX_TAG_FILTER_KEYWORDS * 8;
+
+/**
+ * Longest single tag term. Canonical tags are capped far lower; the bound is only
+ * here so a raw spelling from a pre-canonicalization document cannot be unbounded.
+ */
+export const MAX_TAG_TERM_LENGTH = 200;
+
 export type MemoryRetrieveMatch = 'context' | 'content';
 
 export interface VersionedMemoryPage {
@@ -111,7 +138,7 @@ export interface MemoryPageListResult {
 }
 
 export interface MemoryPageStore {
-  list: (options?: { filter?: MemoryFilter }) => Promise<{
+  list: (options?: { filter?: MemoryFilter; tags?: readonly string[] }) => Promise<{
     pages: MemoryPageSummary[];
     stats: MemoryStats;
   }>;
@@ -123,6 +150,11 @@ export interface MemoryPageStore {
     filter?: MemoryFilter;
     cursor?: string;
     size?: number;
+    /**
+     * Keyword filter: each selected keyword plus every original spelling of it.
+     * AND across keywords, OR across one keyword's spellings.
+     */
+    tags?: readonly string[];
   }) => Promise<MemoryPageListResult>;
   retrieve: (options?: {
     query?: string;
@@ -405,19 +437,55 @@ export const createMemoryPageStore = ({
   ];
 
   /**
+   * One clause per selected keyword, each matching any spelling of it.
+   *
+   * Tags written before the write layer canonicalized them hold every spelling a
+   * model or a person produced (`invoke_agent`, `invoke-agent`, `Invoke Agent`),
+   * so spelling terms alone would miss documents. Grouping by the canonical key
+   * keeps one keyword's spellings together; the clauses are ANDed by
+   * `filterClause`, so selecting two keywords means both.
+   */
+  const tagFilterClauses = (tags: readonly string[] | undefined): object[] => {
+    const byKeyword = new Map<string, string[]>();
+    for (const tag of tags ?? []) {
+      const keyword = canonicalizeTag(tag);
+      if (keyword === null) continue;
+      const spellings = byKeyword.get(keyword);
+      if (spellings === undefined) {
+        if (byKeyword.size >= MAX_TAG_FILTER_KEYWORDS) continue;
+        byKeyword.set(keyword, [tag]);
+        continue;
+      }
+      if (spellings.length < MAX_TAG_SPELLINGS_PER_KEYWORD && !spellings.includes(tag)) {
+        spellings.push(tag);
+      }
+    }
+    return [...byKeyword.values()].map((spellings) => ({
+      bool: {
+        should: spellings.map((spelling) => ({ term: { tags: spelling } })),
+        minimum_should_match: 1,
+      },
+    }));
+  };
+
+  /**
    * `active` is "not archived", where archived is `ARCHIVED_CLAUSE` — the same
    * definition the read path applies, so a legacy `status: 'archived'` document
    * with no reason is not offered as active.
+   *
+   * The tag clauses come last and are shared by every filter, so the stats
+   * aggregation counts exactly the rows the listing returns.
    */
-  const filterClause = (filter: MemoryFilter): object[] => {
+  const filterClause = (filter: MemoryFilter, tags?: readonly string[]): object[] => {
+    const tagClauses = tagFilterClauses(tags);
     switch (filter) {
       case 'active':
-        return [...spaceAndTagFilter, { bool: { must_not: [ARCHIVED_CLAUSE] } }];
+        return [...spaceAndTagFilter, { bool: { must_not: [ARCHIVED_CLAUSE] } }, ...tagClauses];
       case 'archived':
-        return [...spaceAndTagFilter, ARCHIVED_CLAUSE];
+        return [...spaceAndTagFilter, ARCHIVED_CLAUSE, ...tagClauses];
       case 'all':
       default:
-        return spaceAndTagFilter;
+        return tagClauses.length > 0 ? [...spaceAndTagFilter, ...tagClauses] : spaceAndTagFilter;
     }
   };
 
@@ -441,12 +509,15 @@ export const createMemoryPageStore = ({
   const emptyStats = (): MemoryStats => ({ total: 0, archived: 0 });
 
   /** Counts over the whole filtered set, independent of the page slice. */
-  const aggregateStats = async (filter: MemoryFilter): Promise<MemoryStats> => {
+  const aggregateStats = async (
+    filter: MemoryFilter,
+    tags?: readonly string[]
+  ): Promise<MemoryStats> => {
     try {
       const response = await esClient.search<StoredMemoryPage>(
         {
           index: MEMORY_INDEX,
-          query: { bool: { filter: filterClause(filter) } },
+          query: { bool: { filter: filterClause(filter, tags) } },
           size: 0,
           track_total_hits: true,
           aggs: {
@@ -497,12 +568,12 @@ export const createMemoryPageStore = ({
       : undefined;
 
   return {
-    async list({ filter = 'all' } = {}) {
+    async list({ filter = 'all', tags } = {}) {
       try {
         const response = await esClient.search<StoredMemoryPage>(
           {
             index: MEMORY_INDEX,
-            query: { bool: { filter: filterClause(filter) } },
+            query: { bool: { filter: filterClause(filter, tags) } },
             size: MAX_LIST_SIZE,
             sort: PAGINATION_SORT,
           },
@@ -525,7 +596,7 @@ export const createMemoryPageStore = ({
       }
     },
 
-    async listPaginated({ filter = 'all', cursor, size } = {}) {
+    async listPaginated({ filter = 'all', cursor, size, tags } = {}) {
       const pageSize = Math.min(Math.max(size ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
       const searchAfter = decodeCursor(cursor);
 
@@ -533,7 +604,7 @@ export const createMemoryPageStore = ({
         const response = await esClient.search<StoredMemoryPage>(
           {
             index: MEMORY_INDEX,
-            query: { bool: { filter: filterClause(filter) } },
+            query: { bool: { filter: filterClause(filter, tags) } },
             size: pageSize,
             track_total_hits: true,
             sort: PAGINATION_SORT,
@@ -557,7 +628,7 @@ export const createMemoryPageStore = ({
 
         return {
           pages: pages.map(toSummary),
-          stats: await aggregateStats(filter),
+          stats: await aggregateStats(filter, tags),
           total,
           ...(nextCursor ? { cursor: nextCursor } : {}),
         };
