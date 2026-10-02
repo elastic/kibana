@@ -36,12 +36,14 @@ jest.mock('../../../action_policy/details_flyout/action_policy_details_flyout_co
     policyId,
     onClose,
     session,
+    size,
   }: {
     policyId: string;
     onClose: () => void;
     session?: string;
+    size?: string;
   }) => (
-    <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
+    <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session} data-size={size}>
       <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
       <button type="button" onClick={onClose}>
         close
@@ -346,6 +348,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'data-session',
       'start'
     );
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toHaveAttribute('data-size', 'm');
     expect(screen.getByTestId('actionPolicyDetailsFlyoutMockId')).toHaveTextContent('policy-match');
 
     fireEvent.click(screen.getByText('close'));
@@ -368,6 +371,11 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'data-session',
       'inherit'
     );
+    // Regression test: when nested inside another flyout (e.g. the rule summary
+    // flyout, which renders at size "m"), this flyout must use a different size.
+    // EUI's managed-flyout validation throws "Parent and child flyouts cannot
+    // both be size 'm'" if a child flyout shares its parent's size.
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toHaveAttribute('data-size', 's');
   });
 
   it('shows disabled and snoozed badges when the policy would not fire', () => {

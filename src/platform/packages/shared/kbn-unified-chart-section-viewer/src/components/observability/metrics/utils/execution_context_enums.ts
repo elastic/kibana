@@ -16,4 +16,5 @@ export enum MetricsExecutionContextAction {
 export enum MetricsExecutionContextName {
   METRICS_INFO = 'metrics_info',
   HISTOGRAM_BOUNDS = 'histogram_bounds',
+  EXEMPLARS = 'exemplars',
 }

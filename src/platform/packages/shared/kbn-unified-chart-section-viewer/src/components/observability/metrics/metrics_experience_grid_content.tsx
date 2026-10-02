@@ -168,6 +168,7 @@ export const MetricsExperienceGridContent = ({
           getUserMessages={getUserMessages}
           getDescription={getDescription}
           isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
