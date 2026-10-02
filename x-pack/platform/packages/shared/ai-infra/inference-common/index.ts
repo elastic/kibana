@@ -150,6 +150,7 @@ export {
   getConnectorProvider,
   connectorToInference,
   getModelDefinition,
+  getModelFamilyFromName,
   getContextWindowSize,
   contextWindowFromModelName,
   type InferenceConnector,
