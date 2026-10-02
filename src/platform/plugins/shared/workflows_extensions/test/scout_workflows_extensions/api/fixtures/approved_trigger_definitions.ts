@@ -204,11 +204,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: '537230a2eb86302d4a80e93f396effd93681ba4a2e11fd70c5b7b5b56fe4c3fb',
+    schemaHash: '090e3242d2363bc4171d8136809cbf578ca1002e1e2cde81e4f354b4ba9dbb6e',
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: 'f140133a6ecef997484c3d4ef94b326207b4f1124cce889d34fef6e38fa019fe',
+    schemaHash: 'b0f707c9cd0d9933a57ed7f3503b8cc62bbf36a1e7dc6a57071a07f7a6297ae6',
   },
   {
     id: 'workflows.failed',

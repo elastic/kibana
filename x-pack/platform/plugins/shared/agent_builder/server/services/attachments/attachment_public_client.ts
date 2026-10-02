@@ -17,7 +17,11 @@ import {
   createAttachmentPermanentDeleteBlockedError,
   createAttachmentInvalidError,
 } from '@kbn/agent-builder-common';
-import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
+import type {
+  AttachmentPublicClient,
+  BulkCreateAttachmentsResult,
+  ListAttachmentsResult,
+} from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
   attachmentChangesToEvents,
@@ -100,9 +104,7 @@ export const createAttachmentPublicClient = ({
         : [];
     // Route the write through `appendEvents` in both cases (with or without events): it's the only
     // path that runs `reconcileAttachments` against the caller's snapshot, so a concurrent
-    // add/delete between `loadState` and this write can't be silently clobbered. Uses the same
-    // `converse` access as the `loadState` read, so anyone who can converse in a public or shared
-    // conversation can also manage its attachments.
+    // add/delete between `loadState` and this write can't be silently clobbered.
     await conversationClient.appendEvents(
       {
         id: conversation.id,
@@ -140,6 +142,8 @@ export const createAttachmentPublicClient = ({
       origin,
       description,
       hidden,
+      readonly,
+      group_id,
       render_inline: renderInline,
     }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
@@ -158,7 +162,7 @@ export const createAttachmentPublicClient = ({
       let attachment;
       try {
         attachment = await stateManager.add(
-          { id, type, data, origin, description, hidden } as AttachmentInput,
+          { id, type, data, origin, description, hidden, readonly, group_id } as AttachmentInput,
           ATTACHMENT_REF_ACTOR.user,
           resolveContext,
           { request }
@@ -248,6 +252,64 @@ export const createAttachmentPublicClient = ({
       }
 
       await persist({ conversation, conversationClient, stateManager });
+    },
+
+    async bulkCreate({
+      conversationId,
+      attachments,
+      render_inline: renderInline,
+    }): Promise<BulkCreateAttachmentsResult> {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
+
+      const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+      const resolveContext = {
+        request,
+        spaceId,
+        savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+      };
+
+      const created = [];
+      const errors = [];
+
+      for (const input of attachments) {
+        const { id, type } = input;
+
+        if (id && stateManager.getAttachmentRecord(id)) {
+          errors.push({
+            id,
+            type,
+            message: `Attachment with id '${id}' already exists`,
+          });
+          continue;
+        }
+
+        try {
+          const attachment = await stateManager.add(
+            {
+              id,
+              type,
+              data: input.data,
+              origin: input.origin,
+              description: input.description,
+              hidden: input.hidden,
+              readonly: input.readonly,
+              group_id: input.group_id,
+            } as AttachmentInput,
+            ATTACHMENT_REF_ACTOR.user,
+            resolveContext,
+            { request }
+          );
+          created.push(attachment);
+        } catch (e) {
+          errors.push({ id, type, message: (e as Error).message });
+        }
+      }
+
+      if (created.length > 0) {
+        await persist({ conversation, conversationClient, stateManager, renderInline });
+      }
+
+      return { created, errors };
     },
   };
 };

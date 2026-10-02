@@ -6,28 +6,34 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   AttachmentRenderProps,
   AttachmentServiceStartContract,
   AttachmentUIDefinition,
+  HeaderData,
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import { InlineAttachmentTitle } from '../inline_attachment_title';
 
 /**
  * Conversation-scoped, and distinct from the discovery attachment's scope so a field-pill
- * flyout opened from the verdict does not collide with one opened from the evidence.
+ * flyout opened from the verdict would not collide with one opened from the evidence.
+ * Field-pill actions are disabled in Agent Builder today; this scope is reserved for when
+ * they are re-enabled.
  */
 export const ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID =
   'agent-builder-investigation-attack-discovery-verdict';
 
 export const ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID =
   'attackDiscoveryVerdictInlineContent';
+export const ATTACK_DISCOVERY_VERDICT_INLINE_TITLE_TEST_ID = 'attackDiscoveryVerdictInlineTitle';
 export const ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID =
   'attackDiscoveryVerdictInlineSummary';
 export const ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID =
@@ -115,19 +121,58 @@ const DEFAULT_ICON: IconType = 'document';
 export const getVerdictLabel = (verdict: string | undefined): string =>
   (verdict != null ? VERDICT_BADGE_LABELS[verdict] : undefined) ?? DEFAULT_LABEL;
 
+/**
+ * Header metadata for the attachment card: the verdict's icon and badge. A missing or
+ * unrecognized verdict gets no badge, because its only label would be the generic title.
+ */
+export const getVerdictHeader = (attachment: AttackDiscoveryVerdictAttachment): HeaderData => {
+  const { verdict } = attachment.data ?? {};
+
+  return {
+    icon: (verdict != null ? VERDICT_ICONS[verdict] : undefined) ?? DEFAULT_ICON,
+    subtitle: SUBTITLE,
+    ...(verdict != null && Object.hasOwn(VERDICT_BADGE_LABELS, verdict)
+      ? {
+          badges: [
+            {
+              color: VERDICT_BADGE_COLORS[verdict] ?? 'default',
+              label: getVerdictLabel(verdict),
+            },
+          ],
+        }
+      : {}),
+  };
+};
+
 export const AttackDiscoveryVerdictInlineContent = ({
   attachment,
 }: AttachmentRenderProps<AttackDiscoveryVerdictAttachment>) => {
+  const { euiTheme } = useEuiTheme();
   const rationaleMarkdown = attachment.data?.rationale_markdown;
   const summaryMarkdown = attachment.data?.summary_markdown ?? '';
 
   return (
-    <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID}>
+    <div
+      css={css`
+        min-width: 0;
+        overflow-wrap: anywhere;
+        padding: ${euiTheme.size.m};
+      `}
+      data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID}
+    >
+      {/* The generic title, because the verdict is already the header badge. */}
+      <InlineAttachmentTitle
+        {...getVerdictHeader(attachment)}
+        data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_TITLE_TEST_ID}
+        title={DEFAULT_LABEL}
+      />
+      <EuiSpacer size="s" />
       <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
-          disableActions={false}
+          disableActions={true}
           markdown={summaryMarkdown}
           scopeId={ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID}
+          wrapFieldValues={true}
         />
       </div>
       {rationaleMarkdown != null && (
@@ -139,9 +184,10 @@ export const AttackDiscoveryVerdictInlineContent = ({
           <EuiSpacer size="s" />
           <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID}>
             <AttackDiscoveryMarkdownFormatter
-              disableActions={false}
+              disableActions={true}
               markdown={rationaleMarkdown}
               scopeId={ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID}
+              wrapFieldValues={true}
             />
           </div>
         </>
@@ -158,20 +204,7 @@ export const createAttackDiscoveryVerdictAttachmentDefinition =
 
     getLabel: (attachment) => getVerdictLabel(attachment.data?.verdict),
 
-    getHeader: ({ attachment }) => {
-      const { verdict } = attachment.data ?? {};
-
-      return {
-        icon: (verdict != null ? VERDICT_ICONS[verdict] : undefined) ?? DEFAULT_ICON,
-        subtitle: SUBTITLE,
-        badges: [
-          {
-            color: (verdict != null ? VERDICT_BADGE_COLORS[verdict] : undefined) ?? 'default',
-            label: getVerdictLabel(verdict),
-          },
-        ],
-      };
-    },
+    getHeader: ({ attachment }) => getVerdictHeader(attachment),
 
     renderInlineContent: (props) => <AttackDiscoveryVerdictInlineContent {...props} />,
   });
