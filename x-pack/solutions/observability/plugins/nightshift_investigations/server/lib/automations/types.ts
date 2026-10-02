@@ -17,6 +17,12 @@ export type CompletionTargetMode = 'thread' | 'channel' | 'self';
 
 export type NightshiftTriggerRow =
   | {
+      kind: 'significant_event';
+      titlePattern?: string;
+      severities?: Array<'80-critical' | '60-high' | '40-medium' | '20-low'>;
+      streamNames?: string[];
+    }
+  | {
       kind: 'alert';
       ruleNamePattern?: string;
       ruleNameMatchMode?: RuleNameMatchMode;

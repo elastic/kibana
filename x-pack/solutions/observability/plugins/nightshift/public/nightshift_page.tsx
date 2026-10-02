@@ -38,6 +38,13 @@ export function NightshiftPage(): React.ReactElement | null {
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/settings',
   });
+  const detectionHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/detection',
+  });
+  const navigateToDetection = useCallback(
+    () => application.navigateToUrl(detectionHref),
+    [application, detectionHref]
+  );
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/streams',
   });
@@ -95,6 +102,9 @@ export function NightshiftPage(): React.ReactElement | null {
       <NightshiftAppHeader
         onManagementClick={navigateToManagement}
         managementHref={managementHref}
+        onDetectionClick={navigateToDetection}
+        detectionHref={detectionHref}
+        knowledgeHref={application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, { path: '/knowledge' })}
         onSettingsClick={canConfigure ? navigateToSettings : undefined}
         settingsHref={canConfigure ? settingsHref : undefined}
         onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}

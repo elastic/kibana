@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -31,9 +32,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@kbn/react-query';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { SeverityFeedback } from '../../../detection/severity_feedback';
+import { journey } from '../../../detection/journey_translations';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -178,10 +183,28 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       notifications,
       application: {
         capabilities: { nightshift },
+        getUrlForApp,
       },
     },
   } = useKibana();
   const { canManage } = getNightshiftCapabilities(nightshift);
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
+  const priorEvents = useQuery({
+    queryKey: ['eventRelatedOccurrences', event.event_id],
+    queryFn: ({ signal }) =>
+      significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
+        signal: signal ?? null,
+        params: { query: { to: event.created_at, perPage: 1000, page: 1 } },
+      }),
+  });
+  const priorOccurrences = (priorEvents.data?.hits ?? [])
+    .filter(
+      (prior) =>
+        prior.event_id !== event.event_id &&
+        prior.title === event.title &&
+        prior.stream_names.slice().sort().join('|') === event.stream_names.slice().sort().join('|')
+    )
+    .slice(0, 5);
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
@@ -326,7 +349,16 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               iconType="link"
               aria-label={COPY_LINK_ARIA_LABEL}
               onClick={() => {
-                const ok = copyToClipboard(window.location.href);
+                const ok = copyToClipboard(
+                  new URL(
+                    getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                      path: `/detection?view=events&eventId=${encodeURIComponent(
+                        latestEvent.event_id
+                      )}`,
+                    }),
+                    window.location.origin
+                  ).href
+                );
                 if (ok) {
                   notifications.toasts.addSuccess({ title: COPY_LINK_SUCCESS });
                 }
@@ -348,35 +380,36 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id={flyoutTitleId}>{event.title}</h2>
+          <h2 id={flyoutTitleId}>{latestEvent.title}</h2>
         </EuiTitle>
         <EuiText size="xs" color="subdued">
           {formatTimestamp(event.created_at ?? event['@timestamp'])}
         </EuiText>
         <EuiSpacer size="m" />
-        <BadgeRow items={event.stream_names ?? []} color="hollow" />
+        <BadgeRow items={latestEvent.stream_names ?? []} color="hollow" />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
             <FlyoutMetadataCard title={STATUS_LABEL}>
-              <EuiBadge color={getSignificantEventStatusColor(event.status)}>
-                {SIGNIFICANT_EVENT_STATUS_LABELS[event.status]}
+              <EuiBadge color={getSignificantEventStatusColor(latestEvent.status)}>
+                {SIGNIFICANT_EVENT_STATUS_LABELS[latestEvent.status]}
               </EuiBadge>
             </FlyoutMetadataCard>
           </EuiFlexItem>
           <EuiFlexItem>
             <FlyoutMetadataCard title={SEVERITY_LABEL}>
-              <SeverityBadge score={Number.parseInt(event.severity, 10)} />
+              <SeverityBadge score={Number.parseInt(latestEvent.severity, 10)} />
+              <SeverityFeedback event={latestEvent} />
             </FlyoutMetadataCard>
           </EuiFlexItem>
-          {event.confidence != null && (
+          {latestEvent.confidence != null && (
             <EuiFlexItem>
               <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
                 <EuiHealth
-                  color={getConfidenceColor(Math.round(event.confidence * 100))}
+                  color={getConfidenceColor(Math.round(latestEvent.confidence * 100))}
                   textSize="xs"
                 >
-                  {`${Math.round(event.confidence * 100)}%`}
+                  {`${Math.round(latestEvent.confidence * 100)}%`}
                 </EuiHealth>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -386,11 +419,43 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <SignificantEventDetails event={event} />
+          <SignificantEventDetails event={latestEvent} />
 
           <EuiHorizontalRule margin="none" />
 
           <EventInvestigations event={latestEvent} />
+          {priorOccurrences.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.significantEventsApp.event.relatedOccurrences', {
+                    defaultMessage: 'Similar earlier events',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiText size="xs" color="subdued">
+                <p>
+                  {i18n.translate('xpack.significantEventsApp.event.recurrenceHint', {
+                    defaultMessage:
+                      'Separate event lifecycles with the same title and streams. Their evidence may differ.',
+                  })}
+                </p>
+              </EuiText>
+              {priorOccurrences.map((prior) => (
+                <EuiButtonEmpty
+                  data-test-subj="significantEventsAppSignificantEventFlyoutButton"
+                  key={prior.event_id}
+                  size="s"
+                  href={getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                    path: `/detection?view=events&eventId=${encodeURIComponent(prior.event_id)}`,
+                  })}
+                >
+                  {formatTimestamp(prior.created_at)} · {prior.title}
+                </EuiButtonEmpty>
+              ))}
+            </>
+          )}
 
           <EuiHorizontalRule margin="none" />
 
@@ -413,6 +478,19 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
       {canManage && (
         <EuiFlyoutFooter>
+          <EuiButtonEmpty
+            data-test-subj="significantEventsAppSignificantEventFlyoutButton"
+            size="xs"
+            href={getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+              path: `/settings?${new URLSearchParams({
+                section: 'investigations',
+                automationRule: latestEvent.title,
+                automationName: latestEvent.title,
+              })}`,
+            })}
+          >
+            {journey.createAutomation}
+          </EuiButtonEmpty>
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiToolTip

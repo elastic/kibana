@@ -20,6 +20,10 @@ const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
 
+const detectionLabel = i18n.translate('xpack.nightshift.detectionLinkLabel', {
+  defaultMessage: 'Detection',
+});
+
 const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
   defaultMessage: 'Management',
 });
@@ -56,12 +60,18 @@ const applyEbtProps = (
 export function NightshiftAppHeader({
   onManagementClick,
   managementHref,
+  onDetectionClick,
+  detectionHref,
+  knowledgeHref,
   onSettingsClick,
   settingsHref,
   onSandboxSecretsClick,
 }: {
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
+  onDetectionClick?: () => void | Promise<void>;
+  detectionHref?: string;
+  knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
   settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
@@ -70,6 +80,20 @@ export function NightshiftAppHeader({
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
+        ...(knowledgeHref
+          ? [
+              {
+                id: 'nightshiftKnowledge',
+                label: i18n.translate('xpack.nightshift.knowledgeLinkLabel', {
+                  defaultMessage: 'Knowledge',
+                }),
+                iconType: 'documents' as const,
+                href: knowledgeHref,
+                overflow: true,
+                testId: 'nightshiftKnowledgeLink',
+              },
+            ]
+          : []),
         ...(onSandboxSecretsClick
           ? [
               {
@@ -79,6 +103,20 @@ export function NightshiftAppHeader({
                 run: () => onSandboxSecretsClick(),
                 testId: 'nightshiftSandboxSecretsLink',
                 overflow: true,
+              },
+            ]
+          : []),
+        ...(onDetectionClick && detectionHref
+          ? [
+              {
+                id: 'nightshiftDetection',
+                label: detectionLabel,
+                iconType: 'graphApp' as const,
+                href: detectionHref,
+                run: () => {
+                  void onDetectionClick();
+                },
+                testId: 'nightshiftDetectionLink',
               },
             ]
           : []),
@@ -111,7 +149,16 @@ export function NightshiftAppHeader({
           : []),
       ],
     }),
-    [managementHref, onManagementClick, onSandboxSecretsClick, onSettingsClick, settingsHref]
+    [
+      managementHref,
+      onManagementClick,
+      onDetectionClick,
+      detectionHref,
+      knowledgeHref,
+      onSandboxSecretsClick,
+      onSettingsClick,
+      settingsHref,
+    ]
   );
 
   return <AppHeader title={nightshiftPageTitle} menu={menu} spacing="compact" />;

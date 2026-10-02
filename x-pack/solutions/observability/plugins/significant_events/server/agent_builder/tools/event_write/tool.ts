@@ -19,6 +19,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
+import { readEnginePreferences, severityFeedbackKey } from '../../../lib/engine_preferences';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -322,8 +323,43 @@ export function createEventsWriteTool({
         });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
+        const preferences = await readEnginePreferences(
+          server,
+          server.spaces?.spacesService.getSpaceId(request) ?? 'default'
+        );
+        const assessedItems = toolParams.items.map((item) =>
+          toolParams.source === 'discovery' &&
+          !item.event_id &&
+          item.status === 'open' &&
+          item.confidence < preferences.confidenceThreshold
+            ? {
+                ...item,
+                status: 'dismissed' as const,
+                assessment_note: `Below the configured confidence threshold (${Math.round(
+                  preferences.confidenceThreshold * 100
+                )}%). ${item.assessment_note ?? ''}`,
+              }
+            : item
+        );
         const items = await enrichCausalFeatures(
-          toolParams.items,
+          assessedItems.map((item) => {
+            const key = severityFeedbackKey({
+              signals: item.signals,
+              stream_names: item.stream_names?.length
+                ? item.stream_names
+                : [...new Set((item.signals ?? []).map((signal) => signal.stream_name))],
+            });
+            const feedback = key ? preferences.severityFeedback?.[key] : undefined;
+            return feedback
+              ? {
+                  ...item,
+                  severity: feedback.severity,
+                  assessment_note: `User severity calibration: ${feedback.reason}. ${
+                    item.assessment_note ?? ''
+                  }`.slice(0, MAX_ASSESSMENT_NOTE_LENGTH),
+                }
+              : item;
+          }),
           getKnowledgeIndicatorClient,
           logger
         );

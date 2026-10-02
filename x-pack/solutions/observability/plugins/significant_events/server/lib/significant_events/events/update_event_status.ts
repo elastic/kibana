@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEventStatus, Severity } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { EventClient } from './event_client';
@@ -18,6 +18,7 @@ export const updateSignificantEventStatus = async ({
   eventId,
   status,
   assessmentNote,
+  severity,
   alertEventsClient,
   logger,
 }: {
@@ -25,6 +26,7 @@ export const updateSignificantEventStatus = async ({
   eventId: string;
   status: SignificantEventStatus;
   assessmentNote?: string;
+  severity?: Severity;
   /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
@@ -41,7 +43,11 @@ export const updateSignificantEventStatus = async ({
     return { updated: 0, ignored: 1, status };
   }
 
-  if (latest.status === status) {
+  if (
+    latest.status === status &&
+    (severity === undefined || latest.severity === severity) &&
+    (assessmentNote === undefined || latest.assessment_note === assessmentNote)
+  ) {
     return { event_uuid: latest.event_uuid, updated: 0, ignored: 1, status };
   }
 
@@ -53,6 +59,7 @@ export const updateSignificantEventStatus = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     status,
+    ...(severity !== undefined ? { severity } : {}),
     ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
   };
 

@@ -102,6 +102,15 @@ describe('NightshiftPage', () => {
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
+  it('links to the dedicated Detection workspace', async () => {
+    renderPage();
+    await openAppMenuOverflow();
+    const detectionLink = await screen.findByTestId('nightshiftDetectionLink');
+    expect(detectionLink).toHaveAttribute('href', '/app/significant_events/detection');
+    await act(async () => fireEvent.click(detectionLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/detection');
+  });
+
   it('links to Significant Events management', async () => {
     renderPage();
     await openAppMenuOverflow();

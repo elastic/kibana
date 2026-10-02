@@ -61,6 +61,7 @@ export function useKnowledgeIndicatorActions({
 
   const invalidateData = useCallback(async () => {
     await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['detectionWorkspace'] }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: ['features', streamName] }),

@@ -15,11 +15,17 @@ import {
   EuiHealth,
   EuiHorizontalRule,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useFetchDiscoveryQueries } from '../../../hooks/use_fetch_discovery_queries';
+import { FeatureCorrection } from '../../../pages/detection/feature_correction';
+import { journey } from '../../../pages/detection/journey_translations';
 import { useDeveloperMode } from '../../../hooks/use_developer_mode';
 import { DeveloperModeBadge } from '../../developer_mode_badge/developer_mode_badge';
 import { InfoPanel } from '../../info_panel';
@@ -28,14 +34,34 @@ import { getConfidenceColor } from '../utils/get_confidence_color';
 interface Props {
   feature: Feature;
   onOpenInDiscover?: () => void;
+  onUpdated?: () => void;
 }
 
-export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDiscover }: Props) {
+export function KnowledgeIndicatorFeatureDetailsContent({
+  feature,
+  onOpenInDiscover,
+  onUpdated,
+}: Props) {
   const { isDeveloperMode } = useDeveloperMode();
+  const { core } = useKibana();
+  const rules = useFetchDiscoveryQueries({ name: feature.stream_name, page: 1, perPage: 1000 });
+  const relatedRules =
+    rules.data?.queries.filter((item) =>
+      item.query.features?.some((reference) => reference.id === feature.id)
+    ) ?? [];
   const listItems = useMemo(() => {
     const tags = feature.tags?.length ? feature.tags : [];
 
     return [
+      { title: journey.source, description: <EuiText size="s">{feature.stream_name}</EuiText> },
+      {
+        title: journey.expires,
+        description: (
+          <EuiText size="s">
+            {feature.expires_at ? new Date(feature.expires_at).toLocaleString() : journey.noExpiry}
+          </EuiText>
+        ),
+      },
       {
         title: DETAILS_ID_LABEL,
         description: (
@@ -99,6 +125,36 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <InfoPanel title={journey.relatedRules}>
+          {relatedRules.length ? (
+            relatedRules.map((item) => (
+              <div key={item.query.id}>
+                <EuiButtonEmpty
+                  data-test-subj="significantEventsAppKnowledgeIndicatorFeatureDetailsContentButton"
+                  size="xs"
+                  iconType="visLine"
+                  href={core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                    path: `/detection?${new URLSearchParams({
+                      view: 'rules',
+                      ruleId: item.query.id,
+                      stream: feature.stream_name,
+                    })}`,
+                  })}
+                >
+                  {item.query.title}
+                </EuiButtonEmpty>
+              </div>
+            ))
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <p>{rules.isLoading ? journey.waiting : journey.noRelatedRules}</p>
+            </EuiText>
+          )}
+        </InfoPanel>
+        <EuiSpacer size="m" />
+        <FeatureCorrection feature={feature} onSaved={onUpdated} />
+      </EuiFlexItem>
       <EuiFlexItem>
         <InfoPanel
           title={GENERAL_INFORMATION_LABEL}

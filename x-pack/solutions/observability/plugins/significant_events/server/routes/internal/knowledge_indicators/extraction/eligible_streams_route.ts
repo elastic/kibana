@@ -15,6 +15,7 @@ import {
 import { parseIndexPatterns } from '@kbn/streams-schema';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { readEnginePreferences } from '../../../../lib/engine_preferences';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
@@ -126,11 +127,15 @@ const eligibleStreamsRoute = createServerRoute({
 
     const indexPatterns = parseIndexPatterns(rawIndexPatterns);
 
+    const preferences = await readEnginePreferences(
+      server,
+      server.spaces?.spacesService.getSpaceId(request) ?? 'default'
+    );
     const eligibleStreams = filterEligibleStreams({
       allStreams,
       isQueryStreamsEnabled,
       indexPatterns,
-    });
+    }).filter((stream) => !preferences.pausedStreams.includes(stream.name));
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
