@@ -74,7 +74,6 @@ describe('Security Plugin', () => {
       name: 'kibana',
       port: 80,
       protocol: 'https',
-      maxPayloadInBytes: 1048576,
     });
 
     mockCoreSetup.getStartServices.mockResolvedValue([
@@ -199,7 +198,6 @@ describe('Security Plugin', () => {
         name: 'kibana',
         port: 80,
         protocol: 'https',
-        maxPayloadInBytes: 1048576,
       });
 
       await plugin.setup(mockCoreSetup, mockSetupDependencies);

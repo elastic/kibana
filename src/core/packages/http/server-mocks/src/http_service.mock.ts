@@ -221,7 +221,6 @@ const createInternalSetupContractMock = () => {
       name: 'kibana',
       port: 80,
       protocol: 'http',
-      maxPayloadInBytes: 1048576,
     }),
     registerRouterAfterListening: jest.fn(),
     rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,

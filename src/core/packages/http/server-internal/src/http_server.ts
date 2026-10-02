@@ -369,7 +369,6 @@ export class HttpServer {
         hostname: config.host,
         port: config.port,
         protocol: this.server!.info.protocol,
-        maxPayloadInBytes: config.maxPayload.getValueInBytes(),
       }),
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't

@@ -538,6 +538,7 @@ describe('create()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
+      maxPayloadSize: new ByteSizeValue(100 * 1024 * 1024),
       responseTimeout: moment.duration('60s'),
       ssl: {
         verificationMode: 'full',

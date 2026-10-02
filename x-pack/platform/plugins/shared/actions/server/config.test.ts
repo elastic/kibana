@@ -50,6 +50,9 @@ describe('config validation', () => {
           },
           "maxEmitted": 25,
         },
+        "maxPayloadSize": ByteSizeValue {
+          "valueInBytes": 104857600,
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -104,6 +107,9 @@ describe('config validation', () => {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+        },
+        "maxPayloadSize": ByteSizeValue {
+          "valueInBytes": 104857600,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -268,6 +274,9 @@ describe('config validation', () => {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+        },
+        "maxPayloadSize": ByteSizeValue {
+          "valueInBytes": 104857600,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -459,6 +468,9 @@ describe('config validation', () => {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+        },
+        "maxPayloadSize": ByteSizeValue {
+          "valueInBytes": 104857600,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,

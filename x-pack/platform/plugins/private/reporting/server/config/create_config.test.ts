@@ -120,7 +120,6 @@ describe('Reporting server createConfig', () => {
           hostname,
           port: 5601,
           protocol: 'http',
-          maxPayloadInBytes: 1048576,
         })
       );
 

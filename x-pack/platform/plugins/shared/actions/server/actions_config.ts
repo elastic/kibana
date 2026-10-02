@@ -153,8 +153,7 @@ export interface ActionsConfigurationUtilities {
   isInboundEventsEnabled: () => boolean;
   getInboundEventsMaxBodyBytes: () => number;
   getInboundEventsMaxEmitted: () => number;
-  /** Configured `server.maxPayload` in bytes, or `undefined` when built without core's server info. */
-  getServerMaxPayloadBytes: () => number | undefined;
+  getMaxPayloadBytes: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -278,8 +277,7 @@ function validateEmails(
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsConfig,
-  { serverMaxPayloadBytes }: { serverMaxPayloadBytes?: number } = {}
+  config: ActionsConfig
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
@@ -382,6 +380,6 @@ export function getActionsConfigurationUtilities(
     isInboundEventsEnabled: () => config.inboundEvents.enabled,
     getInboundEventsMaxBodyBytes: () => config.inboundEvents.maxBodyBytes.getValueInBytes(),
     getInboundEventsMaxEmitted: () => config.inboundEvents.maxEmitted,
-    getServerMaxPayloadBytes: () => serverMaxPayloadBytes,
+    getMaxPayloadBytes: () => config.maxPayloadSize.getValueInBytes(),
   };
 }

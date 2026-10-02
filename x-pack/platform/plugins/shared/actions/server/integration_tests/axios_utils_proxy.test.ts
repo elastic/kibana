@@ -590,6 +590,7 @@ const BaseActionsConfig: ActionsConfig = {
   proxyBypassHosts: undefined,
   proxyOnlyHosts: undefined,
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
+  maxPayloadSize: ByteSizeValue.parse('100mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
   enableFooterInEmail: true,

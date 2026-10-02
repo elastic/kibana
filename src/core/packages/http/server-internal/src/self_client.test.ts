@@ -95,7 +95,6 @@ const createClient = ({
       hostname,
       port: 5601,
       protocol: serverProtocol,
-      maxPayloadInBytes: 1048576,
     }),
     getHttpConfig,
     kibanaVersion: '9.9.9',

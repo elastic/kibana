@@ -61,6 +61,7 @@ function getConfig(overrides = {}) {
     proxyBypassHosts: undefined,
     proxyOnlyHosts: undefined,
     maxResponseContentLength: new ByteSizeValue(1000000),
+    maxPayloadSize: new ByteSizeValue(100 * 1024 * 1024),
     responseTimeout: moment.duration('60s'),
     enableFooterInEmail: true,
     microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
@@ -124,6 +125,7 @@ describe('Actions Plugin', () => {
         preconfiguredAlertHistoryEsIndex: false,
         preconfigured: {},
         maxResponseContentLength: new ByteSizeValue(1000000),
+        maxPayloadSize: new ByteSizeValue(100 * 1024 * 1024),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
         microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
@@ -569,6 +571,7 @@ describe('Actions Plugin', () => {
           },
         },
         maxResponseContentLength: new ByteSizeValue(1000000),
+        maxPayloadSize: new ByteSizeValue(100 * 1024 * 1024),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
         microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
@@ -632,21 +635,6 @@ describe('Actions Plugin', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
-      );
-    });
-
-    it('exposes the configured server.maxPayload through the configuration utilities', async () => {
-      coreSetup.http.getServerInfo.mockReturnValue({
-        name: 'kibana',
-        hostname: 'localhost',
-        port: 5601,
-        protocol: 'http',
-        maxPayload: 5 * 1024 * 1024,
-      });
-      const pluginSetup = await plugin.setup(coreSetup, pluginsSetup);
-
-      expect(pluginSetup.getActionsConfigurationUtilities().getServerMaxPayloadBytes()).toBe(
-        5 * 1024 * 1024
       );
     });
 

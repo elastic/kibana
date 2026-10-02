@@ -388,6 +388,16 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.actions.maxPayloadSize
+        description: |
+          Specifies the max number of bytes a single connector execution can hold in memory. Applies to the parameters passed to a connector, regardless of whether the execution comes from the HTTP API, Workflows, Agent Builder, or alerting, and caps the per-execution response limit override that Workflows sets from `max-step-size`. Currently enforced for connectors defined with connector specs.
+        datatype: string
+        default: "100mb"
+        applies_to:
+          stack: ga 9.6
+          ech: ga
+          self: ga
+
       - setting: xpack.actions.maxResponseContentLength
         description: |
           Specifies the max number of bytes of the http response for requests to external resources.

@@ -6,9 +6,25 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import { generateParamsSchema } from './generate_params_schema';
 import { z } from '@kbn/zod/v4';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { configSchema } from '../../config';
+
+const collectSizeLimits = (node: unknown): number[] => {
+  if (Array.isArray(node)) {
+    return node.flatMap(collectSizeLimits);
+  }
+  if (typeof node !== 'object' || node === null) {
+    return [];
+  }
+  return Object.entries(node).flatMap(([key, value]) =>
+    (key === 'maxLength' || key === 'maxBytes') && typeof value === 'number'
+      ? [value]
+      : collectSizeLimits(value)
+  );
+};
 
 describe('generateParamsSchema', () => {
   const mockActions: ConnectorSpec['actions'] = {
@@ -187,42 +203,70 @@ describe('generateParamsSchema', () => {
     });
   });
 
-  describe('server.maxPayload check', () => {
-    const params = { subAction: 'action1', subActionParams: { message: 'hello', foobar: 42 } };
-    const paramsBytes = Buffer.byteLength(JSON.stringify(params.subActionParams), 'utf8');
+  describe('xpack.actions.maxPayloadSize check', () => {
+    const subActionParams = { message: 'hello', foobar: 42 };
+    const paramsBytes = Buffer.byteLength(JSON.stringify(subActionParams), 'utf8');
 
-    const validate = (maxPayloadBytes: number | undefined) => {
+    const validate = (maxPayloadBytes: number, params: Record<string, unknown>) => {
       const configurationUtilities = actionsConfigMock.create();
-      configurationUtilities.getServerMaxPayloadBytes.mockReturnValue(maxPayloadBytes);
+      configurationUtilities.getMaxPayloadBytes.mockReturnValue(maxPayloadBytes);
       const { customValidator } = generateParamsSchema(mockActions);
       return () => customValidator?.(params, { configurationUtilities });
     };
 
-    it('skips the check when server.maxPayload is not provided', () => {
-      expect(validate(undefined)).not.toThrow();
+    it('accepts subActionParams at exactly the limit', () => {
+      expect(validate(paramsBytes, { subAction: 'action1', subActionParams })).not.toThrow();
     });
 
-    it('accepts subActionParams at exactly server.maxPayload bytes', () => {
-      expect(validate(paramsBytes)).not.toThrow();
-    });
-
-    it('rejects subActionParams larger than server.maxPayload', () => {
-      expect(validate(paramsBytes - 1)).toThrow(
-        `subActionParams is ${paramsBytes} bytes, which exceeds server.maxPayload (${
+    it('rejects subActionParams larger than the limit', () => {
+      expect(validate(paramsBytes - 1, { subAction: 'action1', subActionParams })).toThrow(
+        `subActionParams is ${paramsBytes} bytes, which exceeds xpack.actions.maxPayloadSize (${
           paramsBytes - 1
         } bytes)`
       );
     });
 
     it('measures multi-byte characters in bytes', () => {
-      const subActionParams = { message: 'ééé', foobar: 1 };
-      const json = JSON.stringify(subActionParams);
-      const configurationUtilities = actionsConfigMock.create();
-      configurationUtilities.getServerMaxPayloadBytes.mockReturnValue(json.length);
-      const { customValidator } = generateParamsSchema(mockActions);
-      expect(() =>
-        customValidator?.({ subAction: 'action1', subActionParams }, { configurationUtilities })
+      const multiByteParams = { message: 'ééé', foobar: 1 };
+      const json = JSON.stringify(multiByteParams);
+      expect(
+        validate(json.length, { subAction: 'action1', subActionParams: multiByteParams })
       ).toThrow(`subActionParams is ${json.length + 3} bytes`);
     });
+
+    it('accepts fetchOptions.max_content_length at exactly the limit', () => {
+      expect(
+        validate(1024, {
+          subAction: 'action1',
+          subActionParams,
+          fetchOptions: { max_content_length: 1024 },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects fetchOptions.max_content_length larger than the limit', () => {
+      expect(
+        validate(1024, {
+          subAction: 'action1',
+          subActionParams,
+          fetchOptions: { max_content_length: 1025 },
+        })
+      ).toThrow(
+        'fetchOptions.max_content_length is 1025 bytes, which exceeds xpack.actions.maxPayloadSize (1024 bytes)'
+      );
+    });
+
+    it.each(Object.entries(connectorsSpecs) as Array<[string, ConnectorSpec]>)(
+      '%s has no input field limit above the default maxPayloadSize',
+      (_exportName, spec) => {
+        const defaultMaxBytes = configSchema.validate({}).maxPayloadSize.getValueInBytes();
+        const tooLarge = Object.entries(spec.actions).flatMap(([actionName, { input }]) =>
+          collectSizeLimits(z.toJSONSchema(input, { io: 'input', unrepresentable: 'any' }))
+            .filter((limit) => limit > defaultMaxBytes)
+            .map((limit) => `${actionName}: ${limit}`)
+        );
+        expect(tooLarge).toEqual([]);
+      }
+    );
   });
 });

@@ -159,6 +159,8 @@ export const configSchema = schema.object({
     })
   ),
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
+  // Ceiling on connector params and on per-call response size overrides, for every execution path.
+  maxPayloadSize: schema.byteSize({ defaultValue: '100mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
   relay: schema.maybe(
