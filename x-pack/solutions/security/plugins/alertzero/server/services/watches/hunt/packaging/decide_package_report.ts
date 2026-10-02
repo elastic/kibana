@@ -103,6 +103,14 @@ const requiredFields = (schema: JsonSchema | undefined): string[] => {
  * it as executable would mint a proposal that fails after an analyst has already approved it.
  * This also means a catalog action gaining a new required field in the future falls back to a
  * recommendation automatically, rather than silently minting an unfillable proposal.
+ *
+ * A process-scoped action requires `processSelector.entityId` specifically, not a bare
+ * `pid`: PIDs are reused by the OS, and between minting and an analyst's approval (the
+ * gate's decision window is measured in days) a bare PID can come to belong to an
+ * unrelated process. `entity_id` is Endpoint's durable per-process identity and doesn't
+ * have that failure mode. A selector with only a `pid` still surfaces for the
+ * recommendation path (see `decidePackageReport`'s `processUncovered`) — it just can't
+ * back an executable kill/suspend.
  */
 export const canFillRespondAction = ({
   entry,
@@ -122,10 +130,7 @@ export const canFillRespondAction = ({
     return false;
   }
   if (needsProcessParameters(schema)) {
-    if (!processSelector) {
-      return false;
-    }
-    return processSelector.pid !== undefined || processSelector.entityId !== undefined;
+    return processSelector?.entityId !== undefined;
   }
   return true;
 };
@@ -147,16 +152,8 @@ export const buildActionInput = ({
     endpoint_ids: [agentId],
   };
   if (needsProcessParameters(schema)) {
-    if (!processSelector) {
-      return undefined;
-    }
-    if (processSelector.entityId !== undefined) {
-      actionInput.parameters = { entity_id: processSelector.entityId };
-    } else if (processSelector.pid !== undefined) {
-      actionInput.parameters = { pid: processSelector.pid };
-    } else {
-      return undefined;
-    }
+    // `canFillRespondAction` above already guarantees `processSelector.entityId` is set.
+    actionInput.parameters = { entity_id: processSelector!.entityId };
   }
   return actionInput;
 };
@@ -350,12 +347,17 @@ export const decidePackageReport = ({
   const hasExecutable = proposals.length > 0;
   const notHostScoped =
     state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsActionable;
-  // Only worth flagging once something else did mint for a host with process evidence;
-  // "nothing minted at all" is already covered by `!hasExecutable` above.
+  // Covers both "no process selector was found at all" and "a selector was found but only
+  // as a bare pid" (no `entityId`): `canFillRespondAction` above refuses to back an
+  // executable action with a bare pid, since PID reuse can point it at the wrong process by
+  // the time an analyst approves it, so both shapes land here as process evidence that could
+  // not back an action. Only worth flagging once something else did mint for a host with
+  // process evidence; "nothing minted at all" is already covered by `!hasExecutable` above.
+  const hasDurableProcessIdentity = state.processSelectors.some((s) => s.entityId !== undefined);
   const processUncovered =
     hasExecutable &&
     state.hasProcessBearingEvent &&
-    state.processSelectors.length === 0 &&
+    !hasDurableProcessIdentity &&
     !proposals.some((p) => p.actionInput?.parameters !== undefined);
   const needsRecommendation =
     !hasExecutable || unenrolled.length > 0 || notHostScoped || processUncovered;
