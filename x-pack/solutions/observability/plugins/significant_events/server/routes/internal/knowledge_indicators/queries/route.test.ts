@@ -12,6 +12,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
+import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
@@ -126,8 +127,8 @@ describe('reconcileQueriesRoute', () => {
       params: { body: { streamNames: ['logs.test'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }),
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -140,7 +141,7 @@ describe('reconcileQueriesRoute', () => {
 
     const result = await route.handler(handlerParams);
 
-    expect(replaceStreamQueries).toHaveBeenCalledWith({ name: 'logs.test' }, expect.any(Function));
+    expect(replaceStreamQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
     expect(result).toEqual({
       reconciled: 1,
       failed: 0,
@@ -157,11 +158,11 @@ describe('reconcileQueriesRoute', () => {
       params: { body: { streamNames: ['logs.a', 'logs.b'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: {
-          getStream: jest
+        sourcesClient: {
+          get: jest
             .fn()
-            .mockResolvedValueOnce({ name: 'logs.a' })
-            .mockResolvedValueOnce({ name: 'logs.b' }),
+            .mockResolvedValueOnce({ source: { id: 'logs.a' } })
+            .mockResolvedValueOnce({ source: { id: 'logs.b' } }),
         },
         licensing: {},
         uiSettingsClient: {},
@@ -267,7 +268,9 @@ describe('bulkDeleteQueriesRoute', () => {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           getQueryLinks: jest
@@ -317,8 +320,8 @@ describe('bulkDeleteQueriesRoute', () => {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: {
-          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+        sourcesClient: {
+          get: jest.fn().mockImplementation((id: string) => Promise.resolve({ source: { id } })),
         },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
@@ -357,12 +360,22 @@ describe('bulkDeleteQueriesRoute', () => {
 });
 
 describe('getDiscoveryQueriesRoute stream resolution', () => {
-  const listStreams = jest.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
+  const list = jest.fn().mockResolvedValue({
+    sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
+    total: 2,
+    page: 1,
+    per_page: 100,
+  });
   const kiClient = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
-    listStreams.mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
+    list.mockResolvedValue({
+      sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
+      total: 2,
+      page: 1,
+      per_page: 100,
+    });
     mockFetchQueryLinks.mockResolvedValue([makeQueryLink('q1', 80)]);
     mockComputeOccurrences.mockResolvedValue({
       sparseByRule: new Map(),
@@ -376,7 +389,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
       params: { query },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { listStreams },
+        sourcesClient: { list },
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -392,7 +405,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
       makeDiscoveryHandlerParams({ ...discoveryBaseQuery, query: 'checkout' })
     );
 
-    expect(listStreams).toHaveBeenCalled();
+    expect(list).toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
         streamNames: ['logs.a', 'logs.b'],
@@ -402,7 +415,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
     );
   });
 
-  it('passes explicit streamNames through without listing streams', async () => {
+  it('passes explicit source ids through without listing the catalog', async () => {
     await discoveryQueriesRoute.handler(
       makeDiscoveryHandlerParams({
         ...discoveryBaseQuery,
@@ -411,7 +424,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
       })
     );
 
-    expect(listStreams).not.toHaveBeenCalled();
+    expect(list).not.toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
         streamNames: ['logs.only'],
@@ -424,7 +437,7 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
   it('resolves streams for the unfiltered list path when streamNames is omitted', async () => {
     await discoveryQueriesRoute.handler(makeDiscoveryHandlerParams({ ...discoveryBaseQuery }));
 
-    expect(listStreams).toHaveBeenCalled();
+    expect(list).toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
         streamNames: ['logs.a', 'logs.b'],
@@ -436,12 +449,22 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
 });
 
 describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
-  const listStreams = jest.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
+  const list = jest.fn().mockResolvedValue({
+    sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
+    total: 2,
+    page: 1,
+    per_page: 100,
+  });
   const kiClient = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
-    listStreams.mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
+    list.mockResolvedValue({
+      sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
+      total: 2,
+      page: 1,
+      per_page: 100,
+    });
     mockGetQueryOccurrences.mockResolvedValue({
       queryLinks: [],
       sparseByRule: new Map(),
@@ -455,7 +478,7 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
       params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { listStreams },
+        sourcesClient: { list },
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -468,7 +491,7 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
 
     await discoveryOccurrencesRoute.handler(handlerParams);
 
-    expect(listStreams).toHaveBeenCalled();
+    expect(list).toHaveBeenCalled();
     expect(mockGetQueryOccurrences).toHaveBeenCalledWith(
       expect.objectContaining({
         streamNames: ['logs.a', 'logs.b'],
@@ -476,6 +499,62 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
       }),
       expect.objectContaining({ kiClient })
     );
+  });
+});
+
+describe('promoteUnbackedQueriesRoute', () => {
+  const promoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_promote'];
+
+  it('offers only enabled sources for promotion, so disabled sources get no live rules', async () => {
+    const promoteUnbackedQueries = jest
+      .fn()
+      .mockResolvedValue({ promoted: 1, skipped_stats: 0, skipped_ineligible: 0 });
+    const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
+    const handlerParams = {
+      params: { body: { queryIds: ['q1'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { list },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ promoteUnbackedQueries }),
+      }),
+      server: {},
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof promoteRoute.handler>[0];
+
+    await promoteRoute.handler(handlerParams);
+
+    expect(list).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    expect(promoteUnbackedQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ queryIds: ['q1'], sourceIds: ['enabled-source'] })
+    );
+  });
+});
+
+describe('persistQueriesRoute', () => {
+  const persistRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_persist'];
+
+  it('rejects a disabled source, which would get a live rule', async () => {
+    const handlerParams = {
+      params: { path: { streamName: 'logs.test' }, body: { queries: [] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'logs.test', view_name: 'logs.test', enabled: false },
+          }),
+        },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof persistRoute.handler>[0];
+
+    await expect(persistRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
   });
 });
 
@@ -493,6 +572,10 @@ describe('generateQueriesRoute', () => {
     });
   });
 
+  const makeAgentBuilder = () => ({
+    agents: { ensure: jest.fn().mockResolvedValue(undefined) },
+  });
+
   const makeHandlerParams = ({
     agentBuilder,
     body = { connectorId: 'test-connector' },
@@ -502,9 +585,13 @@ describe('generateQueriesRoute', () => {
   }) =>
     ({
       params: { path: { streamName: 'logs.test' }, body },
-      request: { events: { aborted$: { subscribe: jest.fn() } } },
+      request: { spaceId: 'space-a', events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: {},
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
+          }),
+        },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
       }),
@@ -549,14 +636,14 @@ describe('generateQueriesRoute', () => {
   it('delegates to query generation and returns its result', async () => {
     const result = await generateRoute.handler(
       makeHandlerParams({
-        agentBuilder: {},
+        agentBuilder: makeAgentBuilder(),
         body: { connectorId: 'test-connector', runId: 'run-1' },
       })
     );
 
     expect(mockGenerateKIQueries).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamName: 'logs.test',
+        source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
         connectorId: 'test-connector',
         runId: 'run-1',
       }),
@@ -569,8 +656,24 @@ describe('generateQueriesRoute', () => {
     });
   });
 
+  it('installs the KI query generation agent in the request space before generating', async () => {
+    const agentBuilder = makeAgentBuilder();
+
+    await generateRoute.handler(makeHandlerParams({ agentBuilder }));
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'space-a',
+        agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
+      })
+    );
+    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
+      mockGenerateKIQueries.mock.invocationCallOrder[0]
+    );
+  });
+
   it('generates a run id when one is not provided', async () => {
-    await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
+    await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
 
     const { runId } = mockGenerateKIQueries.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
@@ -592,7 +695,7 @@ describe('generateQueriesRoute', () => {
     await expect(
       generateRoute.handler(
         makeHandlerParams({
-          agentBuilder: {},
+          agentBuilder: makeAgentBuilder(),
           body: { connectorId: 'custom-model' },
         })
       )
@@ -601,7 +704,8 @@ describe('generateQueriesRoute', () => {
 });
 
 describe('upsertQueryRoute', () => {
-  const definition = { name: 'logs.test' };
+  const source = { id: 'logs.test', view_name: 'logs.test, logs.test.*', enabled: true };
+  const disabledSource = { ...source, enabled: false };
   const upsertBody = {
     title: 'Error count',
     description: '',
@@ -615,7 +719,7 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
       }),
@@ -626,7 +730,7 @@ describe('upsertQueryRoute', () => {
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
     expect(getQueryLinks).not.toHaveBeenCalled();
     expect(upsertQuery).toHaveBeenCalledWith(
-      definition,
+      'logs.test',
       expect.objectContaining({
         id: 'q1',
         type: 'match',
@@ -642,7 +746,7 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'q1' }, body: upsertBody },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
@@ -654,7 +758,7 @@ describe('upsertQueryRoute', () => {
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
-    expect(upsertQuery).toHaveBeenCalledWith(definition, expect.objectContaining({ id: 'q1' }));
+    expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
   });
 
   it('throws 404 when the query is missing and no target_name is provided', async () => {
@@ -663,7 +767,7 @@ describe('upsertQueryRoute', () => {
       params: { path: { queryId: 'missing' }, body: upsertBody },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn() },
+        sourcesClient: { get: jest.fn() },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           upsertQuery,
@@ -680,6 +784,29 @@ describe('upsertQueryRoute', () => {
     expect(upsertQuery).not.toHaveBeenCalled();
   });
 
+  it('rejects every upsert for a disabled source, which would get a live rule', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source: disabledSource }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
   it('does not persist when ES|QL is invalid', async () => {
     const upsertQuery = jest.fn();
     const handlerParams = {
@@ -689,7 +816,7 @@ describe('upsertQueryRoute', () => {
       },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery }),
       }),

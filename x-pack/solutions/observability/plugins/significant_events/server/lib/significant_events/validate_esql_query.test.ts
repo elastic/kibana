@@ -6,7 +6,11 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { validateEsqlQueryForStreamOrThrow, EsqlQueryValidationError } from './validate_esql_query';
+import {
+  validateEsqlQueryForSourceOrThrow,
+  validateEsqlQueryForStreamOrThrow,
+  EsqlQueryValidationError,
+} from './validate_esql_query';
 
 jest.mock('@elastic/esql', () => {
   const actual = jest.requireActual('@elastic/esql');
@@ -278,5 +282,36 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
         })
       ).toThrow('ES|QL query must use FROM $.query');
     });
+  });
+});
+
+describe('validateEsqlQueryForSourceOrThrow', () => {
+  const viewName = '$.nightshift.sources.default.checkout';
+
+  it('accepts a query whose only FROM source is the view', () => {
+    expect(() =>
+      validateEsqlQueryForSourceOrThrow({
+        esqlQuery: `FROM ${viewName} | LIMIT 10`,
+        viewName,
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects a query that reads a different source', () => {
+    expect(() =>
+      validateEsqlQueryForSourceOrThrow({
+        esqlQuery: 'FROM logs-* | LIMIT 10',
+        viewName,
+      })
+    ).toThrow(`ES|QL query must use FROM ${viewName}`);
+  });
+
+  it('rejects a query without a FROM clause', () => {
+    expect(() =>
+      validateEsqlQueryForSourceOrThrow({
+        esqlQuery: 'ROW a = 1',
+        viewName,
+      })
+    ).toThrow('ES|QL query must contain a FROM clause');
   });
 });

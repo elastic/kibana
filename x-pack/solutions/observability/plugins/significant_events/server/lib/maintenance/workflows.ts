@@ -12,7 +12,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import {
   shouldRestoreSettingsBackedWorkflow,
-  type PausedFeatureSettings,
+  type StillOnFeatureSettings,
 } from './feature_settings';
 import {
   buildCancelTargets,
@@ -171,7 +171,7 @@ export const restoreWorkflowsAfterReset = async ({
 }: {
   mgmt: ManagementApi | undefined;
   workflows: MaintenanceWorkflowTarget[];
-  settingsStillOn: PausedFeatureSettings;
+  settingsStillOn: StillOnFeatureSettings;
   request: KibanaRequest;
   failures: SignificantEventsMaintenanceFailure[];
 }): Promise<MaintenanceWorkflowTarget[]> => {

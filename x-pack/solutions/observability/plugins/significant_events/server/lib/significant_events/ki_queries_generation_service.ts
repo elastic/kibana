@@ -7,21 +7,19 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 export interface GenerateKIQueriesParams {
-  streamName: string;
+  source: NightshiftSource;
   connectorId?: string;
   runId: string;
 }
 
 export interface GenerateKIQueriesDependencies {
-  streamsClient: StreamsClient;
   kiClient: KnowledgeIndicatorClient;
   agentBuilder: AgentBuilderPluginStart;
   resolveModel: (requestedId?: string) => Promise<string>;
@@ -35,26 +33,14 @@ export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const { streamName, connectorId: connectorIdOverride, runId } = params;
-  const {
-    streamsClient,
-    kiClient,
-    agentBuilder,
-    resolveModel,
-    request,
-    logger,
-    signal,
-    telemetry,
-  } = deps;
+  const { source, connectorId: connectorIdOverride, runId } = params;
+  const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
 
   const connectorId = await resolveModel(connectorIdOverride);
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const definition = await streamsClient.getStream(streamName);
-  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
-    definition.name,
-  ]);
+  const { [source.id]: existingLinks } = await kiClient.getStreamToQueryLinksMap([source.id]);
   const existingQueries = existingLinks.map(({ query }) => ({
     id: query.id,
     title: query.title,
@@ -70,7 +56,7 @@ export async function generateKIQueries(
     request,
     connectorId,
     interactionId: runId,
-    definition,
+    source,
     existingQueries,
     signal,
     logger: logger.get('significant_events_queries_generation'),
@@ -80,8 +66,7 @@ export async function generateKIQueries(
   telemetry.trackSignificantEventsQueriesGenerated({
     count: queries.length,
     connector_id: connectorId,
-    stream_name: definition.name,
-    stream_type: getStreamTypeFromDefinition(definition),
+    source_id: source.id,
     input_tokens_used: tokensUsed.prompt,
     output_tokens_used: tokensUsed.completion,
     cached_tokens_used: tokensUsed.cached ?? 0,

@@ -19,6 +19,7 @@ const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 interface StartKiIdentificationHandlerParams {
   streamName: string;
+  sourceSlug: string;
   steps: KIsOnboardingStep[];
   connectors?: {
     features?: string;
@@ -35,6 +36,7 @@ interface StartKiIdentificationHandlerResult {
 
 export async function startKiIdentificationToolHandler({
   streamName,
+  sourceSlug,
   steps,
   connectors,
   streamsKIsOnboardingClient,
@@ -51,6 +53,7 @@ export async function startKiIdentificationToolHandler({
 
   const inputs: SignificantEventsKIsOnboardingInputs = {
     streamName,
+    sourceSlug,
     features: {
       skip: skipFeatures,
       start: now - DEFAULT_LOOKBACK_MS,

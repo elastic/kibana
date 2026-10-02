@@ -18,12 +18,14 @@ import {
 } from '../../../common/maintenance/state_machine';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import type { GetScopedClients } from '../../routes/types';
+import { listAllSources } from '../../routes/utils/list_all_sources';
 import type { SignificantEventsServer } from '../../types';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import type { SignificantEventsMaintenanceStateAttributes } from './saved_object';
 import {
   createFeatureSettingsController,
   hasPausedSettings,
+  isContinuousOnboardingWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
 } from './feature_settings';
 import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
@@ -118,6 +120,13 @@ export interface SignificantEventsMaintenanceService {
    */
   reassertPause(): Promise<void>;
 }
+
+/** Unions workflow targets by document and space; a later list wins on a shared key. */
+const mergeWorkflowTargets = (
+  ...lists: MaintenanceWorkflowTarget[][]
+): MaintenanceWorkflowTarget[] => [
+  ...new Map(lists.flat().map((target) => [workflowKey(target), target])).values(),
+];
 
 export const createSignificantEventsMaintenanceService = ({
   logger,
@@ -230,18 +239,33 @@ export const createSignificantEventsMaintenanceService = ({
       return { failedIds: [], toggledCount: 0 };
     }
     try {
-      const { getSignificantEventsAlertingContext } = await getScopedClients({ request });
+      const { getSignificantEventsAlertingContext, getKnowledgeIndicatorClient, sourcesClient } =
+        await getScopedClients({ request });
       const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
       if (!alertingV2RulesClient) {
         failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
         // Keep every rule recorded so a later resume can retry them.
         return { failedIds: ruleIds, toggledCount: 0 };
       }
+      // A source disabled before or during the pause keeps its rules off: its enabled flag owns
+      // them now, and enabling the source turns them back on. They leave the record here.
+      const [links, disabledSources] = await Promise.all([
+        (await getKnowledgeIndicatorClient()).getRuleBackedQueryLinks(),
+        listAllSources(sourcesClient, { enabled: false }),
+      ]);
+      const disabledSourceIds = new Set(disabledSources.map(({ id }) => id));
+      const disabledSourceRuleIds = new Set(
+        links.filter((link) => disabledSourceIds.has(link.stream_name)).map((link) => link.rule_id)
+      );
+      const ruleIdsToEnable = ruleIds.filter((id) => !disabledSourceRuleIds.has(id));
+      if (ruleIdsToEnable.length === 0) {
+        return { failedIds: [], toggledCount: 0 };
+      }
       const {
         toggledIds,
         failedIds,
         failures: ruleFailures,
-      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIds, true);
+      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIdsToEnable, true);
       failures.push(...ruleFailures);
       return { failedIds, toggledCount: toggledIds.length };
     } catch (error) {
@@ -286,18 +310,10 @@ export const createSignificantEventsMaintenanceService = ({
     const newlyDisabledRuleIds =
       access === 'user' ? await disableBackedRules(request, failures) : [];
 
-    const workflowByKey = new Map<string, MaintenanceWorkflowTarget>();
-    for (const workflow of previousWorkflows) {
-      workflowByKey.set(workflowKey(workflow), workflow);
-    }
-    for (const target of newlyDisabled) {
-      workflowByKey.set(workflowKey(target), target);
-    }
-
     const disabledRuleIds = [...new Set([...previousRuleIds, ...newlyDisabledRuleIds])];
 
     return {
-      disabledWorkflows: [...workflowByKey.values()],
+      disabledWorkflows: mergeWorkflowTargets(previousWorkflows, newlyDisabled),
       disabledRuleIds,
       workflowsDisabledThisSweep: newlyDisabled.length,
       rulesDisabledThisSweep: newlyDisabledRuleIds.length,
@@ -353,14 +369,34 @@ export const createSignificantEventsMaintenanceService = ({
     // Turn Settings off after the workflow sweep so a settings write failure
     // still leaves workflows stopped. Reuse the sweep's space enumeration.
     let pausedSettings: SignificantEventsMaintenanceStateAttributes['pausedSettings'];
+    let disabledWorkflows = sweep.disabledWorkflows;
     if (mode === 'pause') {
-      pausedSettings = await featureSettings.pauseFeatureSettings({
+      const pausedFeatures = await featureSettings.pauseFeatureSettings({
         request,
         access,
         spaceIds: sweep.spaceIds,
         previous: existing?.pausedSettings,
         failures: sweep.failures,
       });
+      pausedSettings = pausedFeatures.pausedSettings;
+      // Only keep continuous documents that are legitimate restore records: those
+      // the settings read confirmed were on (continuousOnboardingTargets), and
+      // those already recorded from a prior pause (existing.disabledWorkflows).
+      // Documents the sweep disabled by drift (enabled document, setting was never
+      // on and no prior record) are dropped so Resume cannot write the setting to
+      // true for a space that never had it on.
+      const continuousTargetKeys = new Set([
+        ...pausedFeatures.continuousOnboardingTargets.map(workflowKey),
+        ...(existing?.disabledWorkflows ?? [])
+          .filter((w) => isContinuousOnboardingWorkflowId(w.id))
+          .map(workflowKey),
+      ]);
+      disabledWorkflows = mergeWorkflowTargets(
+        disabledWorkflows.filter(
+          (w) => !isContinuousOnboardingWorkflowId(w.id) || continuousTargetKeys.has(workflowKey(w))
+        ),
+        pausedFeatures.continuousOnboardingTargets
+      );
     } else {
       await featureSettings.reassertFeatureSettingsOff({
         request,
@@ -377,7 +413,7 @@ export const createSignificantEventsMaintenanceService = ({
     const summary: SignificantEventsMaintenanceSummary = {
       state: 'paused',
       executionsCancelled: 0,
-      workflowsDisabled: sweep.disabledWorkflows.length,
+      workflowsDisabled: disabledWorkflows.length,
       rulesDisabled: sweep.disabledRuleIds.length,
       partialFailures: sweep.failures,
     };
@@ -388,7 +424,7 @@ export const createSignificantEventsMaintenanceService = ({
         state: 'paused',
         updatedAt: new Date().toISOString(),
         updatedBy: actor,
-        disabledWorkflows: sweep.disabledWorkflows,
+        disabledWorkflows,
         disabledRuleIds: sweep.disabledRuleIds,
         pausedSettings,
         lastSummary: summary,
@@ -406,7 +442,7 @@ export const createSignificantEventsMaintenanceService = ({
         `Significant Events ${mode} snapshot persist failed after sweep (state remains paused): newly disabled ${
           sweep.workflowsDisabledThisSweep
         } workflow(s) / ${sweep.rulesDisabledThisSweep} rule(s), snapshot would have ${
-          sweep.disabledWorkflows.length
+          disabledWorkflows.length
         } workflow(s); write error: ${toMessage(writeError)}`,
         failuresWithSnapshot
       );
@@ -611,6 +647,19 @@ export const createSignificantEventsMaintenanceService = ({
             } else if (outcome === 'failed') {
               remainingWorkflows.push(workflow);
             }
+            // A recorded continuous document is the restore record for its space
+            // setting. It stays recorded until the setting write succeeds.
+            if (
+              (outcome === 'toggled' || outcome === 'already') &&
+              isContinuousOnboardingWorkflowId(workflow.id) &&
+              !(await featureSettings.restoreContinuousOnboarding({
+                request,
+                spaceId: workflow.spaceId,
+                failures,
+              }))
+            ) {
+              remainingWorkflows.push(workflow);
+            }
           }
         } else {
           for (const workflow of recordedWorkflows) {
@@ -690,14 +739,11 @@ export const createSignificantEventsMaintenanceService = ({
         // Stop activity first, as pause does, then destroy data, then restore.
         const spaceIds = await getAllSpaceIds({ server, request, access: 'user', failures });
         const mgmt = server.workflowsManagement?.management;
-        const recoveryByKey = new Map<string, MaintenanceWorkflowTarget>();
-        for (const workflow of existing?.disabledWorkflows ?? []) {
-          recoveryByKey.set(workflowKey(workflow), workflow);
-        }
         const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds, request, failures });
-        for (const target of newlyDisabled) {
-          recoveryByKey.set(workflowKey(target), target);
-        }
+        const recoveryWorkflows = mergeWorkflowTargets(
+          existing?.disabledWorkflows ?? [],
+          newlyDisabled
+        );
         const settingsStillOn = await featureSettings.reassertFeatureSettingsOff({
           request,
           spaceIds,
@@ -712,7 +758,7 @@ export const createSignificantEventsMaintenanceService = ({
             state: 'paused',
             updatedAt: new Date().toISOString(),
             updatedBy,
-            disabledWorkflows: [...recoveryByKey.values()],
+            disabledWorkflows: recoveryWorkflows,
             disabledRuleIds: existing?.disabledRuleIds ?? [],
             pausedSettings: existing?.pausedSettings,
             lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
@@ -770,7 +816,7 @@ export const createSignificantEventsMaintenanceService = ({
 
         const remainingWorkflows = await restoreWorkflowsAfterReset({
           mgmt,
-          workflows: [...recoveryByKey.values()],
+          workflows: recoveryWorkflows,
           settingsStillOn,
           request,
           failures,

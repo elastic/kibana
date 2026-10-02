@@ -7,12 +7,11 @@
 
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
@@ -26,6 +25,7 @@ import {
 } from './saved_object';
 import {
   REQUEST,
+  continuousDocumentId,
   makeManagementApi,
   makeV2RulesClient,
   makeService,
@@ -284,7 +284,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, globalUiSettingsClient, spaceUiSettingsClient, soClient } = makeService({
+      const { service, spaceUiSettingsClient, soClient } = makeService({
         management: api,
         continuousOnboardingEnabled: true,
         scheduledDiscoveryEnabled: true,
@@ -305,8 +305,7 @@ describe('SignificantEventsMaintenanceService', () => {
       );
       expect(
         updateWorkflow.mock.calls.some(
-          ([id, patch]) =>
-            id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID && patch.enabled === true
+          ([id, patch]) => id === continuousDocumentId('default') && patch.enabled === true
         )
       ).toBe(false);
       expect(
@@ -317,7 +316,7 @@ describe('SignificantEventsMaintenanceService', () => {
         )
       ).toBe(false);
       expect(
-        globalUiSettingsClient._store.get(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
+        spaceUiSettingsClient._store.get(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
       ).toBe(false);
       expect(
         spaceUiSettingsClient._store.get(
@@ -339,10 +338,10 @@ describe('SignificantEventsMaintenanceService', () => {
       const summary = await service.reset({ request: REQUEST });
 
       expect(summary.partialFailures).toContainEqual(
-        expect.objectContaining({ target: 'settings:continuous-onboarding' })
+        expect.objectContaining({ target: 'settings:continuous-onboarding@default' })
       );
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        continuousDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -357,7 +356,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.workflowsDisabled).toBe(0);
     });
 
-    it('leaves a settings-backed workflow off when its toggle write fails but the toggle is already off', async () => {
+    it('leaves the continuous onboarding document off when its toggle was already off', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({
         management: api,
@@ -367,15 +366,39 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const summary = await service.reset({ request: REQUEST });
 
-      expect(summary.partialFailures).toContainEqual(
-        expect.objectContaining({ target: 'settings:continuous-onboarding' })
+      // The toggle reads off, so no write is attempted and nothing needs restoring.
+      expect(summary.partialFailures).not.toContainEqual(
+        expect.objectContaining({ target: 'settings:continuous-onboarding@default' })
       );
       expect(
         updateWorkflow.mock.calls.some(
-          ([id, patch]) =>
-            id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID && patch.enabled === true
+          ([id, patch]) => id === continuousDocumentId('default') && patch.enabled === true
         )
       ).toBe(false);
+    });
+
+    it('restores the continuous onboarding document only in spaces whose toggle is still on', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, getInternalSpaceUiSettingsClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        continuousOnboardingEnabled: true,
+      });
+      // Only space-a refuses to turn the toggle off.
+      const spaceA = getInternalSpaceUiSettingsClient('space-a');
+      spaceA.set.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED) {
+          throw new Error('set failed for continuous');
+        }
+      });
+
+      await service.reset({ request: REQUEST });
+
+      const reEnabledIds = updateWorkflow.mock.calls
+        .filter(([, patch]) => patch.enabled === true)
+        .map(([id]) => id);
+      expect(reEnabledIds).toContain(continuousDocumentId('space-a'));
+      expect(reEnabledIds).not.toContain(continuousDocumentId('default'));
     });
 
     it('keeps failed workflow re-enables as retry inventory for Resume', async () => {

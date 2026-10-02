@@ -37,11 +37,13 @@ export class KnowledgeIndicatorService {
   async getClient({
     esClient,
     soClient,
+    space,
     context,
     config = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
+    space: string;
     context: SignificantEventsAlertingContext;
     config?: Pick<
       SignificantEventsTuningConfig,
@@ -65,6 +67,7 @@ export class KnowledgeIndicatorService {
         esClient,
         soClient,
         logger: this.logger.get('knowledge_indicators'),
+        space,
       },
       significantEventsAvailable,
       context,

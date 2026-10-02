@@ -22,10 +22,25 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
     request: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({
+          sources: streamNames.map((id) => ({ id, enabled: true })),
+          total: streamNames.length,
+          page: 1,
+          per_page: 100,
+        }),
+      },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
+        findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(streamNames),
+        setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+        deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+        deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+        deleteIndicators: jest.fn().mockResolvedValue(undefined),
       }),
     }),
+    workflowClients: {},
+    maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
     server: {} as HandlerParams['server'],
   } as unknown as HandlerParams);
 
@@ -34,20 +49,20 @@ describe('streamsWithIndicatorsRoute', () => {
     (assertSignificantEventsAccess as jest.Mock).mockClear();
   });
 
-  it('maps stream names to the foreach item shape', async () => {
+  it('maps source ids to the foreach item shape', async () => {
     const result = await route.handler(
       makeHandlerParams({ streamNames: ['logs.nginx', 'logs.app'] })
     );
 
     expect(result).toEqual({
-      streams: [{ streamName: 'logs.nginx' }, { streamName: 'logs.app' }],
+      sources: [{ sourceId: 'logs.nginx' }, { sourceId: 'logs.app' }],
     });
   });
 
   it('returns an empty list when there is nothing to reconcile', async () => {
     const result = await route.handler(makeHandlerParams({ streamNames: [] }));
 
-    expect(result).toEqual({ streams: [] });
+    expect(result).toEqual({ sources: [] });
   });
 
   it('enforces significant events access', async () => {

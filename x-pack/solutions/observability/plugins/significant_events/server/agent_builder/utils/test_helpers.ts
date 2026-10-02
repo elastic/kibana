@@ -15,6 +15,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 
@@ -71,6 +72,32 @@ export const createMockGetScopedClients = () => {
     uiSettingsClient,
   };
 };
+
+/** A source whose id equals its slug, so tool tests can keep the old stream-name strings. */
+export const sourceWithSlug = (
+  slug: string,
+  overrides: Partial<NightshiftSource> = {}
+): NightshiftSource => ({
+  id: slug,
+  title: slug,
+  tags: [],
+  esql: '',
+  slug,
+  view_name: `$.nightshift.sources.default.${slug}`,
+  enabled: true,
+  created_by: 'user',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  esql_updated_at: '2026-01-01T00:00:00.000Z',
+  ...overrides,
+});
+
+export const mockSourcesClient = (slugs: readonly string[]) => ({
+  list: jest.fn().mockResolvedValue({
+    sources: slugs.map((slug) => sourceWithSlug(slug)),
+    total: slugs.length,
+  }),
+});
 
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 

@@ -17,13 +17,21 @@ export class EsqlQueryValidationError extends StatusError {
   }
 }
 
-export function validateEsqlQueryForStreamOrThrow({
+/** Requires the query's FROM index sources to be exactly the Nightshift source view. */
+export function validateEsqlQueryForSourceOrThrow({
   esqlQuery,
-  stream,
+  viewName,
 }: {
   esqlQuery: string;
-  stream: Streams.all.Definition;
+  viewName: string;
 }): void {
+  const sourcesPattern = readFromSources(esqlQuery);
+  if (sourcesPattern !== viewName) {
+    throw new EsqlQueryValidationError(`ES|QL query must use FROM ${viewName}`);
+  }
+}
+
+function readFromSources(esqlQuery: string): string {
   let root: ESQLAstQueryExpression;
   let parseErrors: ReturnType<typeof Parser.parse>['errors'];
 
@@ -34,8 +42,6 @@ export function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError(`Invalid ES|QL query: ${message}`);
   }
 
-  // `Parser.parse` reports syntax errors in `errors` (it does not throw). Fail
-  // closed: an unparseable query would install a rule that breaks on execution.
   if (parseErrors.length > 0) {
     throw new EsqlQueryValidationError(
       `Invalid ES|QL query: ${parseErrors.map((error) => error.message).join('; ')}`
@@ -47,9 +53,19 @@ export function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError('ES|QL query must contain a FROM clause');
   }
 
-  const sourcesPattern = Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' })
+  return Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' })
     .map((node) => node.name)
     .join(', ');
+}
+
+export function validateEsqlQueryForStreamOrThrow({
+  esqlQuery,
+  stream,
+}: {
+  esqlQuery: string;
+  stream: Streams.all.Definition;
+}): void {
+  const sourcesPattern = readFromSources(esqlQuery);
   const { name } = stream;
   const wiredPattern = [name, `${name}.*`].join(', ');
   const matchesWiredPattern = sourcesPattern === wiredPattern;

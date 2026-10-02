@@ -7,23 +7,22 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { getStreamTypeFromDefinition, type Streams } from '@kbn/streams-schema';
 import { type FeatureUpsert } from '@kbn/significant-events-schema';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import {
   generateAllComputedFeatures,
   CODE_ANALYSIS_PROVIDER_KEY,
+  type AnalysisTarget,
   type ComputedFeatureProvider,
 } from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { createCodeAnalysisProvider } from '../../semantic_code_search_grounding/compute_code_analysis';
-import { streamToAnalysisTarget } from '../stream_to_analysis_target';
 import type { EbtTelemetryClient } from '../../telemetry/ebt';
 import { reconcileComputedFeatures } from './reconcile_features';
 
 export interface IdentifyComputedFeaturesOptions {
-  stream: Streams.all.Definition;
-  streamName: string;
+  target: AnalysisTarget;
+  sourceId: string;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -49,8 +48,8 @@ export interface IdentifyComputedFeaturesResult {
 }
 
 export async function identifyComputedFeatures({
-  stream,
-  streamName,
+  target,
+  sourceId,
   start,
   end,
   esClient,
@@ -72,8 +71,7 @@ export async function identifyComputedFeatures({
             onOutcome: telemetry
               ? (outcome) =>
                   telemetry.trackCodeAnalysisGrounding({
-                    stream_name: streamName,
-                    stream_type: getStreamTypeFromDefinition(stream),
+                    source_id: sourceId,
                     status: outcome.status,
                     repository: outcome.repository,
                     candidate_count: outcome.candidateCount,
@@ -85,7 +83,7 @@ export async function identifyComputedFeatures({
       : undefined;
 
   const { features: computedFeatures, errors } = await generateAllComputedFeatures({
-    target: streamToAnalysisTarget(stream),
+    target,
     start,
     end,
     esClient,
@@ -97,14 +95,14 @@ export async function identifyComputedFeatures({
 
   const reconciledComputedFeatures = reconcileComputedFeatures({
     computedFeatures,
-    streamName,
+    streamName: sourceId,
     runId,
   });
 
   if (reconciledComputedFeatures.length > 0) {
     const expiresAt = kiClient.getDefaultExpiresAt();
     await kiClient.bulk(
-      streamName,
+      sourceId,
       reconciledComputedFeatures.map((feature) => ({
         index: { feature: { ...feature, expires_at: expiresAt } },
       }))

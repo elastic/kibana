@@ -13,19 +13,20 @@ import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabl
 import type { SignificantEventsResetResult } from '../../../../lib/significant_events/reset_stream_significant_events';
 import { resetSignificantEvents } from '../../../../lib/significant_events/reset_stream_significant_events';
 
-// TODO: Remove with the time-boxed follow-up to nightshift-program#651 once supported
-// upgrade paths can no longer contain Significant Events v1 rules or alerts.
+// TODO(nightshift-program#1306 follow-up): this route is now space-scoped, not cluster-wide.
+// Pre-v3 KI documents (no kibana.space_ids) are invisible and expire via data_retention.
+// A proper cluster-wide reset that iterates spaces ships with the space-aware reset rewrite.
 const resetKIsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/_reset_kis',
   options: {
     access: 'internal',
-    summary: 'Clean up legacy Significant Events state',
+    summary: 'Clean up Significant Events state in the current space',
     description:
-      'One-time cleanup for a cluster that used experimental Significant Events alerting v1. ' +
-      'Cluster-wide by design: acts on ALL spaces, not just the caller’s. ' +
-      'Cancels in-flight onboarding, deletes all knowledge indicators and their linked v1 or v2 ' +
-      'backing rules, and removes documents from `.alerts-streams.alerts-default` across every ' +
-      'space. Does not modify detections, discoveries, events, memories, or `.rule-events`. ' +
+      'Cleanup for Significant Events state in the caller\u2019s space. ' +
+      'Cancels in-flight onboarding, deletes knowledge indicators and their linked v1 or v2 ' +
+      'backing rules visible in this space, and removes v1 alert documents from ' +
+      '`.alerts-streams.alerts-default` (cluster-wide). ' +
+      'Does not modify detections, discoveries, events, memories, or `.rule-events`. ' +
       'Re-onboard streams via POST /internal/streams/{streamName}/onboarding/_execute to create ' +
       'new KIs and v2 rules. Blocked while Significant Events activity is paused (resume first), ' +
       'because reset deletes rules that Pause recorded for Resume.',

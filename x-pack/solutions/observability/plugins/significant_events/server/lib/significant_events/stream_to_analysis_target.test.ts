@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { Streams } from '@kbn/streams-schema';
-import { streamToAnalysisTarget } from './stream_to_analysis_target';
+import { sourceToAnalysisTarget, streamToAnalysisTarget } from './stream_to_analysis_target';
 
 const createWiredStreamDefinition = (name: string): Streams.WiredStream.Definition => ({
   name,
@@ -61,6 +62,25 @@ describe('streamToAnalysisTarget', () => {
       description: 'Query stream for tests',
       sources: ['$.cars.electric'],
       samplingSource: '$.cars.electric',
+    });
+  });
+});
+
+describe('sourceToAnalysisTarget', () => {
+  it('uses the stored view for both sources and sampling', () => {
+    const source = {
+      id: 'source-1',
+      title: 'Checkout',
+      description: 'Checkout logs',
+      view_name: '$.nightshift.sources.default.checkout',
+    } as NightshiftSource;
+
+    expect(sourceToAnalysisTarget(source)).toEqual({
+      id: 'source-1',
+      name: 'Checkout',
+      description: 'Checkout logs',
+      sources: ['$.nightshift.sources.default.checkout'],
+      samplingSource: '$.nightshift.sources.default.checkout',
     });
   });
 });

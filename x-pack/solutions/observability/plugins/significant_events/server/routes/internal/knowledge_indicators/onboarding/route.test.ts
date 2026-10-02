@@ -29,6 +29,8 @@ jest.mock('@kbn/nightshift-ai', () => ({
 }));
 
 const route = internalKIOnboardingRoutes['POST /internal/streams/{streamName}/onboarding/_execute'];
+const bulkStatusRoute =
+  internalKIOnboardingRoutes['POST /internal/streams/onboarding/_bulk_status'];
 type HandlerParams = Parameters<typeof route.handler>[0];
 
 const makeHandlerParams = ({
@@ -39,7 +41,9 @@ const makeHandlerParams = ({
   connectors?: { features?: string; queries?: string };
 } = {}) => {
   const run = jest.fn().mockResolvedValue({ executionId: 'execution-1' });
-  const ensureStream = jest.fn().mockResolvedValue(undefined);
+  const getSource = jest
+    .fn()
+    .mockResolvedValue({ source: { id: 'logs.test', slug: 'logs-test', enabled: true } });
   const request = {};
   const server = {
     inference: {},
@@ -62,13 +66,13 @@ const makeHandlerParams = ({
       request,
       getScopedClients: jest.fn().mockResolvedValue({
         licensing,
-        streamsClient: { ensureStream },
+        sourcesClient: { get: getSource },
       }),
       server,
       workflowClients: { streamsKIsOnboardingClient: { run } },
       maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
     } as unknown as HandlerParams,
-    ensureStream,
+    getSource,
     licensing,
     request,
     run,
@@ -112,6 +116,7 @@ it('resolves strict overrides and forwards canonical connector IDs', async () =>
   expect(run).toHaveBeenCalledWith({
     inputs: {
       streamName: 'logs.test',
+      sourceSlug: 'logs-test',
       features: {
         skip: false,
         start: 1,
@@ -157,4 +162,86 @@ it('maps an unknown strict override to a 400 response', async () => {
     output: { statusCode: 400 },
   });
   expect(run).not.toHaveBeenCalled();
+});
+
+describe('onboardingBulkStatusRoute', () => {
+  it('returns not_started for ids outside the space catalog', async () => {
+    const getStatuses = jest.fn().mockResolvedValue({
+      'source-a': {
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'exec-1',
+      },
+    });
+    const handlerParams = {
+      params: { body: { streamNames: ['source-a', 'other-space-source'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [{ id: 'source-a', slug: 'slug-a' }],
+            total: 1,
+            page: 1,
+            per_page: 10_000,
+          }),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { getStatuses },
+      },
+    } as unknown as Parameters<typeof bulkStatusRoute.handler>[0];
+
+    const result = await bulkStatusRoute.handler(handlerParams);
+
+    expect(getStatuses).toHaveBeenCalledWith({
+      sources: [{ id: 'source-a', slug: 'slug-a' }],
+      request: handlerParams.request,
+    });
+    expect(result).toEqual({
+      'source-a': {
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'exec-1',
+      },
+      'other-space-source': {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      },
+    });
+    expect(assertSignificantEventsAccess).toHaveBeenCalled();
+  });
+});
+
+describe('onboardingExecuteRoute', () => {
+  it('rejects scheduling a disabled source', async () => {
+    const run = jest.fn();
+    const handlerParams = {
+      params: {
+        path: { streamName: 'source-a' },
+        body: { action: 'schedule', from: Date.now(), to: Date.now(), steps: [] },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'source-a', enabled: false },
+          }),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { run },
+      },
+      maintenanceService: { getState: jest.fn() },
+    } as unknown as HandlerParams;
+
+    const error = await route.handler(handlerParams).catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({
+      message: 'Cannot schedule onboarding for a disabled source',
+      output: { statusCode: 400 },
+    });
+    expect(run).not.toHaveBeenCalled();
+  });
 });

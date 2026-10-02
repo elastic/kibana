@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -32,6 +33,7 @@ export interface SignificantEventsAppStartDependencies {
   inference: InferencePublicStart;
   licensing: LicensingPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
+  nightshiftSources: NightshiftSourcesPublicPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
   spaces?: SpacesPluginStart;

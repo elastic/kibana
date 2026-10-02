@@ -18,13 +18,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('returns the persisted state without reading feature settings', async () => {
       const { api } = makeManagementApi();
-      const { service, globalUiSettingsClient } = makeService({ management: api });
+      const { service, spaceUiSettingsClient } = makeService({ management: api });
 
       await service.pause({ request: REQUEST });
-      globalUiSettingsClient.get.mockClear();
+      spaceUiSettingsClient.get.mockClear();
 
       await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
-      expect(globalUiSettingsClient.get).not.toHaveBeenCalled();
+      expect(spaceUiSettingsClient.get).not.toHaveBeenCalled();
     });
   });
 

@@ -34,7 +34,6 @@ const createRawFeature = ({
   ...overrides
 }: Partial<BaseFeature> & Pick<BaseFeature, 'id'>): BaseFeature => ({
   id,
-  stream_name: 'logs.test',
   type: 'technology',
   subtype: 'library',
   title: id,

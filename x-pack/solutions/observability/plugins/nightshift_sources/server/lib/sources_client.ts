@@ -32,6 +32,7 @@ import {
 import { assertSourceQueryExecutes, hasNoIndicesBehind } from './assert_source_query_executes';
 import { isEsqlUnknownIndexError, isEsqlVerificationError } from './es_errors';
 import type { EsqlViewsClient } from './esql_views_client';
+import type { SourceChange } from './source_change_emitter';
 import { validateSourceQuery } from './validate_source_query';
 
 // Every write sends the full attribute set, so a field the caller dropped (an optional
@@ -51,6 +52,8 @@ interface SourcesClientDependencies {
   username: string;
   /** Request space; encoded in the view name so grants can be `$.nightshift.sources.<spaceId>.*`. */
   spaceId: string;
+  /** Called after every committed write, never after a rolled-back one. */
+  onChange: (change: SourceChange) => Promise<void>;
 }
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
@@ -122,7 +125,9 @@ export class SourcesClient {
       throw error;
     }
 
-    return toSource(id, attributes);
+    const source = toSource(id, attributes);
+    await this.deps.onChange({ type: 'created', source });
+    return source;
   }
 
   async update(id: string, input: UpdateSourceRequest): Promise<NightshiftSource> {
@@ -175,7 +180,9 @@ export class SourcesClient {
       throw error;
     }
 
-    return toSource(id, attributes);
+    const source = toSource(id, attributes);
+    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, previous) });
+    return source;
   }
 
   async get(id: string): Promise<SourceWithHealth> {
@@ -230,9 +237,10 @@ export class SourcesClient {
     // `deleteView` already ignores 404; anything else must not acknowledge the source as gone.
     await viewsClient.deleteView(attributes.view_name);
     await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
+    await this.deps.onChange({ type: 'deleted', source: toSource(id, attributes) });
   }
 
-  /** Flips the flag only; engines reconcile their rules and onboarding from it. */
+  /** Flips the flag, then waits for the `onSourceChange` listeners, which align rules and onboarding. */
   async setEnabled(id: string, enabled: boolean): Promise<NightshiftSource> {
     const so = await this.getSavedObject(id);
     if (so.attributes.enabled === enabled) {
@@ -247,7 +255,9 @@ export class SourcesClient {
       ...FULL_UPDATE,
       version: so.version,
     });
-    return toSource(id, attributes);
+    const source = toSource(id, attributes);
+    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, so.attributes) });
+    return source;
   }
 
   /**

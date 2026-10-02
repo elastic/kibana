@@ -13,10 +13,40 @@ export const MAX_SOURCE_DESCRIPTION_LENGTH = 2000;
 export const MAX_SOURCE_ESQL_LENGTH = 10_000;
 export const MAX_SOURCE_TAGS = 20;
 export const MAX_SOURCE_TAG_LENGTH = 64;
-const MAX_SOURCES_PER_PAGE = 100;
+export const MAX_SOURCES_PER_PAGE = 100;
 const DEFAULT_SOURCES_PER_PAGE = 25;
 
 export type SourceHealth = 'ok' | 'view_missing' | 'view_drift' | 'unresolvable' | 'unknown';
+
+const NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION =
+  'Nightshift source slug, e.g. "nginx-errors", or the source id. Not the title and not the view name.';
+
+const NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION =
+  'Nightshift source slugs, e.g. "nginx-errors", or source ids. Not titles and not view names.';
+
+/** A single request can name at most a page of sources. */
+export const MAX_NIGHTSHIFT_SOURCE_SLUGS = 100;
+
+/** One source slug. Callers append a sentence with {@link nightshiftSourceSlugField}. */
+export const nightshiftSourceSlugSchema = z
+  .string()
+  .min(1)
+  .max(MAX_SOURCE_SLUG_LENGTH)
+  .describe(NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION);
+
+/** Same slug field, with one extra sentence after the shared description. */
+export const nightshiftSourceSlugField = (detail: string): z.ZodString =>
+  nightshiftSourceSlugSchema.describe(`${NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION} ${detail}`);
+
+/** A bounded list of source slugs. */
+export const nightshiftSourceSlugsSchema = z
+  .array(nightshiftSourceSlugSchema)
+  .max(MAX_NIGHTSHIFT_SOURCE_SLUGS)
+  .describe(NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION);
+
+/** Same slug list, with one extra sentence after the shared description. */
+export const nightshiftSourceSlugsField = (detail: string): z.ZodArray<z.ZodString> =>
+  nightshiftSourceSlugsSchema.describe(`${NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION} ${detail}`);
 
 const sourceTitleSchema = z.string().trim().min(1).max(MAX_SOURCE_TITLE_LENGTH);
 const sourceDescriptionSchema = z.string().max(MAX_SOURCE_DESCRIPTION_LENGTH);
@@ -31,7 +61,7 @@ const nightshiftSourceSchema = z.object({
   description: sourceDescriptionSchema.optional(),
   tags: sourceTagsSchema,
   esql: sourceEsqlSchema,
-  slug: z.string().min(1).max(MAX_SOURCE_SLUG_LENGTH),
+  slug: nightshiftSourceSlugSchema,
   view_name: z.string().min(1).max(MAX_SOURCE_VIEW_NAME_LENGTH),
   enabled: z.boolean(),
   created_by: z.string(),

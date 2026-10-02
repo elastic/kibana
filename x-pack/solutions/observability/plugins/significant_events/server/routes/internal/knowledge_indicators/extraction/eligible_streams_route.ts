@@ -7,12 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
-import { parseIndexPatterns } from '@kbn/streams-schema';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
@@ -24,20 +21,20 @@ import {
 import { StatusError } from '../../../../lib/errors/status_error';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
-  classifyStreams,
-  filterEligibleStreams,
-  type StreamCandidate,
-  type StreamClassificationResult,
-} from './classify_streams';
+  classifySources,
+  type SourceCandidate,
+  type SourceClassificationResult,
+} from './classify_sources';
+import { reconcileSourceCatalog } from '../reconcile_source_catalog';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 export interface EligibleStreamsResponse {
-  candidates: StreamCandidate[];
-  alreadyRunning: StreamClassificationResult['alreadyRunning'];
-  upToDate: StreamCandidate[];
+  candidates: SourceCandidate[];
+  alreadyRunning: SourceClassificationResult['alreadyRunning'];
+  upToDate: SourceCandidate[];
   unsupported: string[];
-  skipped: StreamCandidate[];
+  skipped: SourceCandidate[];
   settings: {
     enabled: boolean;
     intervalHours: number;
@@ -71,7 +68,7 @@ const eligibleStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -89,54 +86,50 @@ const eligibleStreamsRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
+    maintenanceService,
   }): Promise<EligibleStreamsResponse> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =
+    const { sourcesClient, uiSettingsClient, licensing, getKnowledgeIndicatorClient } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const query = params?.query ?? {};
 
-    const enabled = await globalUiSettingsClient.get<boolean>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    const enabled = await uiSettingsClient.get<boolean>(
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
     );
 
     if (!enabled) {
       throw new StatusError('Continuous KI extraction is disabled', 400);
     }
 
-    const intervalHoursSetting = await globalUiSettingsClient.get<number>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
+    const intervalHoursSetting = await uiSettingsClient.get<number>(
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS
     );
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [executions, allStreams, isQueryStreamsEnabled, rawIndexPatterns] = await Promise.all([
-      streamsKIsOnboardingClient.getRecentExecutions(request),
-      streamsClient.listStreams(),
-      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
-      uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS),
-    ]);
-
-    const indexPatterns = parseIndexPatterns(rawIndexPatterns);
-
-    const eligibleStreams = filterEligibleStreams({
-      allStreams,
-      isQueryStreamsEnabled,
-      indexPatterns,
+    const kiClient = await getKnowledgeIndicatorClient();
+    const { sources } = await reconcileSourceCatalog({
+      sourcesClient,
+      kiClient,
+      onboardingClient: streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
     });
+    const executions = await streamsKIsOnboardingClient.getRecentExecutions(request);
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const { alreadyRunning, candidates, upToDate, unsupported } = classifyStreams({
-      allStreams: eligibleStreams,
+    const { alreadyRunning, candidates, upToDate, unsupported } = classifySources({
+      sources: sources.filter((source) => source.enabled),
       executions,
       intervalHours,
     });

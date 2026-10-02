@@ -186,10 +186,10 @@ describe('identifyFeatures', () => {
     expect(result.features).toEqual([
       expect.objectContaining({
         id: 'okta',
-        stream_name: 'logs.test',
         filter: undefined,
       }),
     ]);
+    expect(result.features[0]).not.toHaveProperty('stream_name');
     expect(result.ignoredFeatures).toEqual([
       {
         feature_id: 'excluded',

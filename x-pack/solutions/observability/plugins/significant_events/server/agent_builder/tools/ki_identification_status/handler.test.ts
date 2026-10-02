@@ -11,7 +11,7 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 import { getKiIdentificationStatusToolHandler } from './handler';
 
 describe('getKiIdentificationStatusToolHandler', () => {
-  it('returns stream_name alongside the onboarding status', async () => {
+  it('returns the onboarding status', async () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: {
         getClient: () => ({
@@ -20,16 +20,19 @@ describe('getKiIdentificationStatusToolHandler', () => {
         }),
       } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+      }),
     });
 
     const result = await getKiIdentificationStatusToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       request: httpServerMock.createKibanaRequest(),
       streamsKIsOnboardingClient,
     });
 
     expect(result).toEqual({
-      stream_name: 'logs.nginx',
       execution_id: null,
       status: SignificantEventsWorkflowStatus.NotStarted,
     });

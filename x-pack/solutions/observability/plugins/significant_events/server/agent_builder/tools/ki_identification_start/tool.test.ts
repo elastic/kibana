@@ -6,7 +6,7 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext, mockSourcesClient } from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
@@ -26,9 +26,11 @@ describe('createKiIdentificationStartTool', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
+    const getSourcesClient = jest.fn();
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient,
     });
     const maintenanceService = {
       getState: jest.fn().mockResolvedValue('enabled'),
@@ -38,18 +40,28 @@ describe('createKiIdentificationStartTool', () => {
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: mockSourcesClient(['logs.nginx']),
+      }) as never,
     });
     const context = createMockToolContext();
 
-    return { tool, context, managementApi, maintenanceService };
+    return {
+      tool,
+      context,
+      managementApi,
+      maintenanceService,
+      streamsKIsOnboardingClient,
+      getSourcesClient,
+    };
   };
 
   it('triggers onboarding workflow and returns immediately by default', async () => {
-    const { tool, context, managementApi } = setup();
+    const { tool, context, managementApi, getSourcesClient } = setup();
 
     const result = await tool.handler(
       {
-        stream_name: 'logs.nginx',
+        slug: 'logs.nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       },
       context
@@ -59,16 +71,22 @@ describe('createKiIdentificationStartTool', () => {
       expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
       'default',
       expect.objectContaining({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs.nginx',
         skipFeatures: false,
         skipQueries: false,
       }),
       context.request
     );
+    // The tool already resolved the source, so the client does not look it up again.
+    expect(getSourcesClient).not.toHaveBeenCalled();
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
         kibanaPath: '/app/significant_events/knowledge_indicators?stream=logs.nginx',
+        slug: 'logs.nginx',
+        title: 'logs.nginx',
+        view_name: '$.nightshift.sources.default.logs.nginx',
       });
     }
   });
@@ -79,7 +97,7 @@ describe('createKiIdentificationStartTool', () => {
 
     const result = await tool.handler(
       {
-        stream_name: 'logs.nginx',
+        slug: 'logs.nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       },
       context

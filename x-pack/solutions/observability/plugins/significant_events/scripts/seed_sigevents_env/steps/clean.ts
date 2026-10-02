@@ -119,7 +119,7 @@ export async function cleanSeedData(
   const allQueries = (listRes.data as { queries: StreamQuery[] }).queries;
   const queryIds = allQueries.map((q) => q.id);
   const ruleIds = allQueries.map((query) =>
-    computeRuleId(ctx.streamName, query.id, query.esql.query)
+    computeRuleId(ctx.space, ctx.streamName, query.id, query.esql.query)
   );
 
   if (queryIds.length > 0) {

@@ -21,10 +21,6 @@ const mockBulkOnboarding = {
   processStatusUpdateQueue: jest.fn().mockResolvedValue(undefined),
 };
 
-jest.mock('../../../../hooks/use_index_patterns_config', () => ({
-  useIndexPatternsConfig: () => ({ indexPatterns: [] }),
-}));
-
 jest.mock('../../hooks/use_fetch_streams', () => ({
   useFetchStreams: () => ({ data: { streams: [] }, isLoading: false }),
 }));

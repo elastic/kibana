@@ -185,5 +185,3 @@ export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_erro
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 
 export { NIGHTSHIFT_DEFAULT_MODELS, type NightshiftModelStep } from './src/nightshift_models';
-
-export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';

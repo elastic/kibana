@@ -85,7 +85,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
 
     await context.rulesClient.createRule('rule-1', {
       name: 'Errors',
-      streamName: 'my-stream',
+      sourceId: 'my-stream',
       timestampField: '@timestamp',
       esqlQuery: 'FROM logs-* | WHERE level == "error"',
       schedule: { interval: '5m' },

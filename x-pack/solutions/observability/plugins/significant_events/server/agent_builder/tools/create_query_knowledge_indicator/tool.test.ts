@@ -11,7 +11,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, sourceWithSlug } from '../../utils/test_helpers';
 import {
   createQueryKnowledgeIndicatorTool,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
@@ -61,7 +61,7 @@ describe('ki_query_create tool', () => {
 
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         title: 'Checkout 5xx burst detector',
         description: 'Detects 5xx bursts',
         esql: {
@@ -78,7 +78,7 @@ describe('ki_query_create tool', () => {
         cancel_text: 'Cancel',
       })
     );
-    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('source "logs.test"');
     expect(confirmation?.message).toContain('title: "Checkout 5xx burst detector"');
     expect(confirmation?.message).toContain(
       'esql: "FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500"'
@@ -130,15 +130,10 @@ describe('ki_query_create tool', () => {
 
     const getScopedClients = jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [sourceWithSlug('logs.test', { view_name: 'logs.test' })],
+            total: 1,
           }),
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(queryClient),
@@ -158,7 +153,7 @@ describe('ki_query_create tool', () => {
     await invokeHandler(
       tool as never,
       {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         title: 'suspicious query',
         description: 'desc',
         esql: { query: 'FROM logs.test | stats c = count()' },
@@ -171,8 +166,7 @@ describe('ki_query_create tool', () => {
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: true,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
       })
     );
   });
@@ -186,15 +180,10 @@ describe('ki_query_create tool', () => {
 
     const getScopedClients = jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [sourceWithSlug('logs.test', { view_name: 'logs.test' })],
+            total: 1,
           }),
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(queryClient),
@@ -214,7 +203,7 @@ describe('ki_query_create tool', () => {
     await invokeHandler(
       tool as never,
       {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         title: 'suspicious query',
         description: 'desc',
         esql: { query: 'FROM logs.test | stats c = count()' },
@@ -227,8 +216,7 @@ describe('ki_query_create tool', () => {
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: false,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
         error_message: 'upsert failed',
       })
     );

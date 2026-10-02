@@ -37,8 +37,9 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
 // The continuous extraction workflow used to be a normal workflow created at
 // this hardcoded id in the default space. It is now a managed workflow
 // (`system-streams-ki-continuous-onboarding`). This constant is retained so the
-// legacy workflow can be deleted on-demand when the user disables continuous
-// KI extraction.
+// legacy workflow can be deleted at startup.
+// TODO: remove with the legacy default-space cleanup.
+// https://github.com/elastic/kibana/issues/294271
 export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
   'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 

@@ -96,6 +96,7 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
     deleteView: jest.fn().mockResolvedValue(undefined),
   };
   const logger = loggingSystemMock.createLogger();
+  const onChange = jest.fn().mockResolvedValue(undefined);
 
   const client = new SourcesClient({
     soClient,
@@ -104,12 +105,13 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
     logger,
     username: 'marco',
     spaceId,
+    onChange,
   });
 
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger };
+  return { client, soClient, viewsClient, dataEsClient, logger, onChange };
 };
 
 describe('SourcesClient', () => {
@@ -827,6 +829,101 @@ describe('SourcesClient', () => {
       expect(source.enabled).toBe(true);
       expect(source.updated_at).toBe('2026-09-01T00:00:00.000Z');
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('change notifications', () => {
+    it('reports a created source once its view exists', async () => {
+      const { client, onChange } = setup();
+
+      const source = await client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' });
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith({ type: 'created', source });
+    });
+
+    it('does not report a create that was rolled back', async () => {
+      const { client, viewsClient, onChange } = setup();
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+
+      await expect(
+        client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports an update with the source as it was before', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.update('source-1', {
+        title: 'nginx 5xx',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+      });
+    });
+
+    it('does not report an update that was restored', async () => {
+      const { client, soClient, viewsClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockResolvedValueOnce({ ...makeSavedObject(), version: 'v2' });
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+
+      await expect(
+        client.update('source-1', { title: 'new', tags: [], esql: 'FROM logs-other-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports a disabled source as an update', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.setEnabled('source-1', false);
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+      });
+    });
+
+    it('does not report an enable that changed nothing', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await client.setEnabled('source-1', true);
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports a deleted source after its view and saved object are gone', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await client.delete('source-1');
+
+      expect(onChange).toHaveBeenCalledWith({ type: 'deleted', source: makeSource() });
+    });
+
+    it('does not report a delete whose view could not be removed', async () => {
+      const { client, soClient, viewsClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      viewsClient.deleteView.mockRejectedValue(forbidden('no delete_view'));
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 });

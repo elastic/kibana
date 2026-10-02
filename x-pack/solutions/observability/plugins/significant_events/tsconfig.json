@@ -16,6 +16,7 @@
   "kbn_references": [
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/nightshift-shared",
+    "@kbn/nightshift-sources-plugin",
     "@kbn/streams-plugin",
     "@kbn/core",
     "@kbn/core-pricing-common",

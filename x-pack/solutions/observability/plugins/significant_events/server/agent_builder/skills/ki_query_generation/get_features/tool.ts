@@ -9,6 +9,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import {
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
@@ -16,12 +17,16 @@ import {
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
-import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
 const getFeaturesSchema = z.object({
-  target_id: z.string().max(MAX_ID_LENGTH).describe('Target identifier for KI feature lookup.'),
+  slug: nightshiftSourceSlugField('Load the KI features stored for this source.'),
   feature_types: z
     .array(z.string().max(MAX_ID_LENGTH))
     .max(20)
@@ -60,15 +65,15 @@ export const createGetFeaturesTool = ({
       'Load the extracted and computed KI features for a target before generating detection queries.',
     schema: getFeaturesSchema,
     handler: async (
-      { target_id: targetId, feature_types: featureTypes, min_confidence: minConfidence, limit },
+      { slug, feature_types: featureTypes, min_confidence: minConfidence, limit },
       context
     ) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
-        const stream = await scopedClients.streamsClient.getStream(targetId);
-        const target = streamToAnalysisTarget(stream);
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const [source] = resolveSourcesBySlug(catalog, [slug]);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const { hits } = await kiClient.getFeatures(target.id, {
+        const { hits } = await kiClient.getFeatures(source.id, {
           type: featureTypes,
           minConfidence,
           limit,
@@ -80,7 +85,7 @@ export const createGetFeaturesTool = ({
           results: [
             {
               type: ToolResultType.other,
-              data: { features, count: features.length },
+              data: { ...toSourceRef(source), features, count: features.length },
             },
           ],
         };

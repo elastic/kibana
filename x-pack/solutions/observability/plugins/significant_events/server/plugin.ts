@@ -64,6 +64,7 @@ import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
+
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
@@ -89,8 +90,8 @@ import { registerSignificantEventsSkills } from './agent_builder/skills/register
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import {
-  createContinuousKiOnboardingWorkflowService,
-  type ContinuousKiOnboardingWorkflowService,
+  createContinuousOnboardingWorkflowService,
+  type ContinuousOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
 import {
   createCleanupWorkflowService,
@@ -102,6 +103,7 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
 import {
@@ -120,6 +122,7 @@ import { createSignificantEventsAvailability } from './agent_builder/tools/signi
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
@@ -143,6 +146,7 @@ export class SignificantEventsPlugin
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
+  private removeLegacyWorkflows?: () => Promise<void>;
   private maintenanceService?: SignificantEventsMaintenanceService;
 
   constructor(context: PluginInitializerContext) {
@@ -205,9 +209,9 @@ export class SignificantEventsPlugin
       // `scopedClusterClient`: origin-only. Used for everything the plugin owns (its hidden
       // data streams), which only ever exists in the origin project.
       // `streamDataEsClient`: always routed across every CPS-linked project, regardless of the
-      // active space's project routing expression. Knowledge indicators are not space-scoped -
-      // they model all data available to a stream - so extraction must always read across every
-      // linked project.
+      // active space's project routing expression. Knowledge indicators are stored per space,
+      // but they model all data available to a source, so extraction must always read across
+      // every linked project.
       //
       // Detection matches that all-projects scope when CPS is enabled via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
@@ -225,9 +229,14 @@ export class SignificantEventsPlugin
         getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
-      const streamsClient = await streamsSetup.getStreamsClient({ request, rulesClientOptions });
+      const [streamsClient, sourcesClient] = await Promise.all([
+        streamsSetup.getStreamsClient({ request, rulesClientOptions }),
+        pluginsStart.nightshiftSources.getSourcesClient({ request }),
+      ]);
 
-      const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      // Core always populates `request.spaceId` (default space when the URL has no prefix), so
+      // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
+      const space = request.spaceId;
 
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
@@ -246,7 +255,7 @@ export class SignificantEventsPlugin
       });
 
       const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space);
 
       let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
       const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
@@ -285,6 +294,7 @@ export class SignificantEventsPlugin
         knowledgeIndicatorService.getClient({
           esClient: scopedClusterClient.asInternalUser,
           soClient,
+          space,
           context,
           config: tuningConfig,
         });
@@ -303,6 +313,7 @@ export class SignificantEventsPlugin
         scopedClusterClient,
         streamDataEsClient,
         soClient,
+        space,
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
@@ -312,6 +323,7 @@ export class SignificantEventsPlugin
         inferenceClient,
         fieldsMetadataClient,
         streamsClient,
+        sourcesClient,
         licensing,
         uiSettingsClient,
         globalUiSettingsClient,
@@ -320,16 +332,15 @@ export class SignificantEventsPlugin
       };
     };
 
-    streamsSetup.registerKnowledgeIndicatorClientProvider(async (request) => {
-      const { getKnowledgeIndicatorClient } = await this.getScopedClients!({ request });
-      return getKnowledgeIndicatorClient();
-    });
-
     const telemetryClient = this.ebtTelemetryService.getClient();
 
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
-      telemetryClient
+      telemetryClient,
+      async (request) => {
+        const [, pluginsStart] = await core.getStartServices();
+        return pluginsStart.nightshiftSources.getSourcesClient({ request });
+      }
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
     this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;
@@ -387,27 +398,12 @@ export class SignificantEventsPlugin
         });
     }
 
-    let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
+    let continuousOnboardingWorkflowService: ContinuousOnboardingWorkflowService | undefined;
     let syncWorkflowService: SyncWorkflowService | undefined;
     let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
-
-    if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
-      continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-        streamsKIsOnboardingClient,
-      });
-    }
-
-    if (plugins.workflowsManagement) {
-      syncWorkflowService = createSyncWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-      });
-    }
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
@@ -425,6 +421,7 @@ export class SignificantEventsPlugin
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      const { management: managementApi } = plugins.workflowsManagement;
       const getManagedWorkflowsClient = async () => {
         const [, pluginsStart] = await core.getStartServices();
         if (!pluginsStart.workflowsExtensions) {
@@ -435,11 +432,35 @@ export class SignificantEventsPlugin
         );
       };
 
+      if (streamsKIsOnboardingClient) {
+        continuousOnboardingWorkflowService = createContinuousOnboardingWorkflowService({
+          logger: this.logger,
+          managementApi,
+          streamsKIsOnboardingClient,
+          getManagedWorkflowsClient,
+        });
+      }
+
+      syncWorkflowService = createSyncWorkflowService({
+        logger: this.logger,
+        managementApi,
+        getManagedWorkflowsClient,
+      });
+
       cleanupWorkflowService = createCleanupWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         getManagedWorkflowsClient,
       });
+
+      // TODO: remove with the legacy default-space cleanup.
+      // https://github.com/elastic/kibana/issues/294271
+      this.removeLegacyWorkflows = () =>
+        removeLegacyDefaultSpaceWorkflows({
+          getManagedWorkflowsClient,
+          managementApi,
+          logger: this.logger,
+        });
 
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
@@ -459,6 +480,17 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
+    // Without this a deleted or disabled source's rules keep firing until the next catalog
+    // reconcile, which only runs with continuous onboarding or sync.
+    plugins.nightshiftSources.onSourceChange(
+      createSourceChangeListener({
+        getScopedClients: this.getScopedClients,
+        onboardingClient: streamsKIsOnboardingClient,
+        maintenanceService: this.maintenanceService,
+        logger: this.logger,
+      })
+    );
+
     const priceService = createPriceService({
       fetchFn: fetch,
       getNow: () => new Date(),
@@ -476,17 +508,15 @@ export class SignificantEventsPlugin
         server: this.server,
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
-        continuousKiOnboardingWorkflowService,
+        continuousOnboardingWorkflowService,
         syncWorkflowService,
         cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
         priceService,
-        getSpaceId: async (request: KibanaRequest) => {
-          const [, pluginsStart] = await core.getStartServices();
-          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        },
+        // Same resolution as the knowledge indicator space above; core always populates it.
+        getSpaceId: async (request: KibanaRequest) => request.spaceId,
       },
       core,
       logger: this.logger,
@@ -608,7 +638,8 @@ export class SignificantEventsPlugin
     // Editable discovery agents: installed via agents.ensure when significant events is
     // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
     // startup as well. Per-space installs also happen just-in-time from scheduled discovery
-    // enablement and manual discovery execute.
+    // enablement and manual discovery execute, and for the feature identification and KI query
+    // generation agents from the routes that run them.
     // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
@@ -696,6 +727,10 @@ export class SignificantEventsPlugin
     try {
       await this.managedWorkflowsInstaller?.install();
     } finally {
+      // Independent of the install outcome: one failing static workflow would otherwise keep the
+      // legacy default-space documents around, next to their per-space replacements, on every
+      // restart. It never throws.
+      await this.removeLegacyWorkflows?.();
       await this.reassertPauseAfterWorkflowInstall();
     }
   }

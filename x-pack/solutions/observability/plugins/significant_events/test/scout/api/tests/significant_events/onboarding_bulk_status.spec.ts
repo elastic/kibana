@@ -21,12 +21,11 @@ apiTest.describe(
     // Per-test enable/disable below is intentional for the 403 denial path only.
 
     apiTest(
-      'returns not_started for every requested stream that has never been onboarded',
+      'returns not_started for every requested source id that has never been onboarded',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const suffix = uuidv4().slice(0, 8);
-        const streamNames = [`logs.bulk_status_a_${suffix}`, `logs.bulk_status_b_${suffix}`];
+        const streamNames = [uuidv4(), uuidv4()];
 
         const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -35,7 +34,7 @@ apiTest.describe(
         });
 
         expect(response.statusCode).toBe(200);
-        // The response always contains an entry for every requested stream name.
+        // The response always contains an entry for every requested source id.
         expect(Object.keys(response.body).sort()).toStrictEqual([...streamNames].sort());
         for (const streamName of streamNames) {
           expect(response.body[streamName]).toStrictEqual({
@@ -68,7 +67,7 @@ apiTest.describe(
         try {
           const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            body: { streamNames: [`logs.bulk_status_${uuidv4().slice(0, 8)}`] },
+            body: { streamNames: [uuidv4()] },
             responseType: 'json',
           });
 

@@ -33,9 +33,11 @@ const createCoreSetup = () => {
 
 const createSetupDeps = ({
   registerInvestigationQuota,
+  onSourceChange = jest.fn(),
   workflowsExtensions,
 }: {
   registerInvestigationQuota?: jest.Mock;
+  onSourceChange?: jest.Mock;
   workflowsExtensions?: {
     registerStepDefinition: jest.Mock;
     registerManagedWorkflowOwner: jest.Mock;
@@ -44,8 +46,10 @@ const createSetupDeps = ({
 } = {}) =>
   ({
     streams: {
-      registerKnowledgeIndicatorClientProvider: jest.fn(),
+      getAttachmentClient: jest.fn(),
+      getStreamsClient: jest.fn(),
     },
+    nightshiftSources: { onSourceChange },
     ...(registerInvestigationQuota
       ? { nightshiftInvestigations: { registerInvestigationQuota } }
       : {}),
@@ -62,6 +66,14 @@ describe('SignificantEventsPlugin setup', () => {
     const plugin = createPlugin();
 
     expect(() => plugin.setup(createCoreSetup(), createSetupDeps())).not.toThrow();
+  });
+
+  it('subscribes to source changes so deletes and toggles reach knowledge right away', () => {
+    const onSourceChange = jest.fn();
+
+    createPlugin().setup(createCoreSetup(), createSetupDeps({ onSourceChange }));
+
+    expect(onSourceChange).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('registers its model resolver when the investigations plugin is absent', () => {

@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
 import {
   DEFAULT_MAINTENANCE_STATE,
@@ -16,7 +16,10 @@ import {
 } from '../../../common/maintenance/state_machine';
 import type { SignificantEventsServer } from '../../types';
 import type { PausedFeatureSettings } from './feature_settings';
-import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
+import {
+  LEGACY_DEFAULT_SPACE_WORKFLOW_IDS,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -95,11 +98,25 @@ export const createMaintenanceStateStore = (server: SignificantEventsServer) => 
         }
       : undefined;
 
-  /** Brand SO-loaded workflow targets once at the SO → domain boundary. */
+  /**
+   * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets
+   * recorded for the pre-per-space continuous onboarding documents of the default
+   * space are dropped: those documents are deleted at startup and would only
+   * produce "not found" failures. The legacy sync document is kept, since startup
+   * only removes it once its per-space replacement is enabled.
+   *
+   * TODO: drop the legacy filter with the legacy default-space cleanup.
+   * https://github.com/elastic/kibana/issues/294271
+   */
   const brandDisabledWorkflows = (
     workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
   ): MaintenanceWorkflowTarget[] =>
-    (workflows ?? []).map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
+    (workflows ?? [])
+      .filter(
+        ({ id, spaceId }) =>
+          !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
+      )
+      .map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
 
   const readVersionedState = async (): Promise<VersionedMaintenanceState | undefined> => {
     try {

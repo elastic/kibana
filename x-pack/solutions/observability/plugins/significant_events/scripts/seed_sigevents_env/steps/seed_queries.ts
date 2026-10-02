@@ -67,7 +67,7 @@ export async function seedQueries(
 
   return prepared.map(({ q, queryId, esql }) => ({
     queryId,
-    ruleId: computeRuleId(ctx.streamName, queryId, esql),
+    ruleId: computeRuleId(ctx.space, ctx.streamName, queryId, esql),
     title: q.title,
     esql,
     severityScore: q.severityScore,

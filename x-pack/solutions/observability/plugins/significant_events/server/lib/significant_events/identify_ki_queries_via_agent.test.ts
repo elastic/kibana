@@ -11,27 +11,15 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Streams } from '@kbn/streams-schema';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
+import { sourceWithSlug } from '../../agent_builder/utils/test_helpers';
 import {
   buildKIQueryGenerationUserMessage,
   executeKIQueryGenerationAgent,
   MAX_EXISTING_QUERIES_FOR_CONTEXT,
 } from './identify_ki_queries_via_agent';
 
-const definition: Streams.WiredStream.Definition = {
-  name: 'logs.test',
-  description: 'Test logs',
-  updated_at: new Date().toISOString(),
-  type: 'wired',
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: { steps: [], updated_at: new Date().toISOString() },
-    settings: {},
-    failure_store: { inherit: {} },
-    wired: { fields: {}, routing: [] },
-  },
-};
+const source = sourceWithSlug('logs.test', { description: 'Test logs' });
 
 describe('executeKIQueryGenerationAgent', () => {
   afterEach(() => {
@@ -59,7 +47,7 @@ describe('executeKIQueryGenerationAgent', () => {
               {
                 type: ToolResultType.other,
                 data: {
-                  target_id: 'logs.other',
+                  slug: 'logs.other',
                   finalized: true,
                   finalized_queries: [
                     { ...validatedQuery, esql: { query: 'FROM superseded-validation' } },
@@ -78,7 +66,7 @@ describe('executeKIQueryGenerationAgent', () => {
               {
                 type: ToolResultType.other,
                 data: {
-                  target_id: 'logs.test',
+                  slug: 'logs.test',
                   finalized: true,
                   finalized_queries: [validatedQuery],
                 },
@@ -121,7 +109,7 @@ describe('executeKIQueryGenerationAgent', () => {
         request,
         connectorId: 'connector-1',
         interactionId: 'run-1',
-        definition,
+        source,
         existingQueries: [],
         signal: requestSignal,
         logger: loggerMock.create(),
@@ -165,7 +153,7 @@ describe('executeKIQueryGenerationAgent', () => {
     );
   });
 
-  it('rejects queries finalized for a different target', async () => {
+  it('rejects queries finalized for a different source', async () => {
     const executeAgent = jest.fn().mockResolvedValue({
       events$: of({
         type: ChatEventType.toolResult,
@@ -176,7 +164,7 @@ describe('executeKIQueryGenerationAgent', () => {
             {
               type: ToolResultType.other,
               data: {
-                target_id: 'logs.other',
+                slug: 'logs.other',
                 finalized: true,
                 finalized_queries: [],
               },
@@ -200,24 +188,19 @@ describe('executeKIQueryGenerationAgent', () => {
         request: {} as KibanaRequest,
         connectorId: 'connector-1',
         interactionId: 'run-1',
-        definition,
+        source,
         existingQueries: [],
         logger: loggerMock.create(),
       })
-    ).rejects.toThrow('KI query generation agent finalized for unexpected target "logs.other"');
+    ).rejects.toThrow('KI query generation agent finalized for unexpected source "logs.other"');
   });
 });
 
 describe('buildKIQueryGenerationUserMessage', () => {
-  const target = {
-    id: 'logs.test',
-    name: 'logs.test',
-    sources: ['logs.test'],
-    samplingSource: 'logs.test',
-  };
+  const target = { slug: 'logs.test' };
 
   it('omits existing_queries when there are none', () => {
-    expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`target_id`: logs.test');
+    expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`slug`: logs.test');
   });
 
   it('bounds existing queries by severity, count and description length', () => {

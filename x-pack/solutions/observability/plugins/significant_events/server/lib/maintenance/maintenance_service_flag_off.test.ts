@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -59,7 +59,7 @@ describe('SignificantEventsMaintenanceService', () => {
           updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR,
           disabledRuleIds: [],
           pausedSettings: {
-            continuousOnboardingWasEnabled: true,
+            continuousOnboardingWasEnabled: false,
             scheduledDiscoveryEnabledSpaceIds: ['default', 'space-a'],
           },
           lastSummary: expect.objectContaining({ partialFailures: [] }),
@@ -137,21 +137,16 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('re-asserts across every space with a credential-less request', async () => {
       const { api, updateWorkflow, getWorkflow } = makeManagementApi();
-      const {
-        service,
-        soClient,
-        getScopedClients,
-        globalUiSettingsClient,
-        getInternalSpaceUiSettingsClient,
-      } = makeService({
-        management: api,
-        spaceIds: ['default'],
-        internalSpaceIds: ['default', 'space-a'],
-      });
+      const { service, soClient, getScopedClients, getInternalSpaceUiSettingsClient } = makeService(
+        {
+          management: api,
+          spaceIds: ['default'],
+          internalSpaceIds: ['default', 'space-a'],
+        }
+      );
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
-      globalUiSettingsClient.set.mockClear();
 
       // The system request has no credentials, so anything user-scoped fails.
       getScopedClients.mockRejectedValue(new Error('missing authentication credentials'));
@@ -160,6 +155,12 @@ describe('SignificantEventsMaintenanceService', () => {
         enabled: true,
         definition: { id },
       }));
+
+      // Something turned continuous onboarding back on in space-a while paused.
+      getInternalSpaceUiSettingsClient('space-a')._store.set(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
 
       await service.reassertPause();
 
@@ -173,8 +174,8 @@ describe('SignificantEventsMaintenanceService', () => {
         'space-a',
         SYSTEM_REQUEST
       );
-      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         false
       );
       expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(

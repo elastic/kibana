@@ -26,7 +26,7 @@ describe('buildKIQueryGenerationEvalUserMessage', () => {
       groundingContext: 'Use repository test/repo.',
     });
 
-    expect(message).toContain('`target_id`: logs.test');
+    expect(message).toContain('`slug`: logs.test');
     expect(message).toContain('include `expects_matches` on every candidate query');
     expect(message).toContain('Use repository test/repo.');
   });
@@ -151,7 +151,7 @@ describe('getFinalizedQueries', () => {
               {
                 type: 'other',
                 data: {
-                  target_id: 'logs.test',
+                  slug: 'logs.test',
                   finalized: true,
                   finalized_queries: [finalizedQuery],
                 },
@@ -175,7 +175,7 @@ describe('getFinalizedQueries', () => {
               {
                 type: 'other',
                 data: {
-                  target_id: 'logs.other',
+                  slug: 'logs.other',
                   finalized: true,
                   finalized_queries: [finalizedQuery],
                 },
@@ -185,7 +185,7 @@ describe('getFinalizedQueries', () => {
         ],
         'logs.test'
       )
-    ).toThrow('KI query generation agent finalized for unexpected target "logs.other"');
+    ).toThrow('KI query generation agent finalized for unexpected source "logs.other"');
   });
 
   it('does not fall back when the latest validation is not finalized', () => {
@@ -200,7 +200,7 @@ describe('getFinalizedQueries', () => {
               {
                 type: 'other',
                 data: {
-                  target_id: 'logs.test',
+                  slug: 'logs.test',
                   finalized: true,
                   finalized_queries: [{}],
                 },
