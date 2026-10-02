@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { refreshEpisodeTool, refreshEpisodeToolId } from './refresh_episode';
-export type { RefreshEpisodeToolParams } from './refresh_episode';
+export { refreshAlertTool, refreshAlertToolId } from './refresh_alert';
+export type { RefreshAlertToolParams } from './refresh_alert';

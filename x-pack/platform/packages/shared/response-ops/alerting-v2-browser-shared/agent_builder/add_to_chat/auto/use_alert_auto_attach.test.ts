@@ -11,18 +11,18 @@ import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   ALERT_EPISODE_STATUS,
-  EPISODE_ATTACHMENT_TYPE,
+  ALERT_ATTACHMENT_TYPE,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import type { AutoAttachServices } from './use_auto_attach';
-import { useEpisodeAutoAttach } from './use_episode_auto_attach';
+import { useAlertAutoAttach } from './use_alert_auto_attach';
 
 jest.mock('@kbn/alerting-v2-utils', () => ({
   ...jest.requireActual('@kbn/alerting-v2-utils'),
-  alertEpisodeToEpisodeAttachment: (episode: unknown) => ({
+  alertEpisodeToAlertAttachment: (episode: unknown) => ({
     ...(episode as Record<string, unknown>),
     __mapped: true,
   }),
@@ -39,7 +39,7 @@ const episode: AlertEpisode = {
   duration: 3600000,
 };
 
-describe('useEpisodeAutoAttach', () => {
+describe('useAlertAutoAttach', () => {
   let addAttachment: jest.Mock;
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
@@ -79,14 +79,14 @@ describe('useEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode, { ruleName: 'Rule A' }, services));
+    renderHook(() => useAlertAutoAttach(episode, { ruleName: 'Rule A' }, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'episode:ep-1',
-        type: EPISODE_ATTACHMENT_TYPE,
+        id: 'alert:ep-1',
+        type: ALERT_ATTACHMENT_TYPE,
         origin: 'ep-1',
       })
     );
@@ -95,7 +95,7 @@ describe('useEpisodeAutoAttach', () => {
   it('does not stage on mount when sidebar is closed', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode, undefined, services));
+    renderHook(() => useAlertAutoAttach(episode, undefined, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -104,7 +104,7 @@ describe('useEpisodeAutoAttach', () => {
   it('stages when sidebar opens after mount', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode, undefined, services));
+    renderHook(() => useAlertAutoAttach(episode, undefined, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -122,7 +122,7 @@ describe('useEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode, undefined, services));
+    renderHook(() => useAlertAutoAttach(episode, undefined, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -133,19 +133,43 @@ describe('useEpisodeAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
 
-    const { rerender } = renderHook(({ ep }) => useEpisodeAutoAttach(ep, undefined, services), {
+    const { rerender } = renderHook(({ ep }) => useAlertAutoAttach(ep, undefined, services), {
       initialProps: { ep: episode },
     });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'alert:ep-1', origin: 'ep-1' })
+    );
 
     rerender({ ep: episode2 });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'alert:ep-2', origin: 'ep-2' })
+    );
+  });
+
+  it('stages the new episode when hook remounts with a different episode', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+    const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
+
+    const { unmount } = renderHook(() => useAlertAutoAttach(episode, undefined, services));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+
+    unmount();
+
+    renderHook(() => useAlertAutoAttach(episode2, undefined, services));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(2);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'alert:ep-2', origin: 'ep-2' })
     );
   });
 
@@ -153,7 +177,7 @@ describe('useEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(undefined, undefined, services));
+    renderHook(() => useAlertAutoAttach(undefined, undefined, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -162,7 +186,7 @@ describe('useEpisodeAutoAttach', () => {
   it('does not stage when Agent Builder is unavailable', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     renderHook(() =>
-      useEpisodeAutoAttach(episode, undefined, { ...services, agentBuilder: undefined })
+      useAlertAutoAttach(episode, undefined, { ...services, agentBuilder: undefined })
     );
     jest.runOnlyPendingTimers();
 
@@ -172,7 +196,7 @@ describe('useEpisodeAutoAttach', () => {
   it('cleans up subscriptions on unmount', () => {
     activeConversation$.next({ id: undefined });
 
-    const { unmount } = renderHook(() => useEpisodeAutoAttach(episode, undefined, services));
+    const { unmount } = renderHook(() => useAlertAutoAttach(episode, undefined, services));
     unmount();
 
     act(() => {

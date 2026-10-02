@@ -10,7 +10,7 @@ import {
   MAX_EPISODE_LABEL_LENGTH,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
-import { resolveEpisodeLabel } from './resolve_episode_label';
+import { resolveAlertLabel } from './resolve_alert_label';
 
 const baseEpisode: AlertEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
@@ -23,9 +23,9 @@ const baseEpisode: AlertEpisode = {
   duration: 3600000,
 };
 
-describe('resolveEpisodeLabel', () => {
+describe('resolveAlertLabel', () => {
   it('appends "alert" to the rule name', () => {
-    expect(resolveEpisodeLabel({ episode: baseEpisode, ruleName: 'Host CPU high' })).toBe(
+    expect(resolveAlertLabel({ episode: baseEpisode, ruleName: 'Host CPU high' })).toBe(
       'Host CPU high alert'
     );
   });
@@ -36,7 +36,7 @@ describe('resolveEpisodeLabel', () => {
       episode_data: JSON.stringify({ host: { name: 'web-01' } }),
     };
     expect(
-      resolveEpisodeLabel({ episode, ruleName: 'Host CPU high', groupingFields: ['host.name'] })
+      resolveAlertLabel({ episode, ruleName: 'Host CPU high', groupingFields: ['host.name'] })
     ).toBe('Host CPU high alert for web-01');
   });
 
@@ -46,7 +46,7 @@ describe('resolveEpisodeLabel', () => {
       episode_data: JSON.stringify({ host: { name: 'web-01' }, service: { name: 'checkout' } }),
     };
     expect(
-      resolveEpisodeLabel({
+      resolveAlertLabel({
         episode,
         ruleName: 'Host CPU high',
         groupingFields: ['host.name', 'service.name'],
@@ -60,7 +60,7 @@ describe('resolveEpisodeLabel', () => {
       episode_data: JSON.stringify({ 'host.name': 'web-01' }),
     };
     expect(
-      resolveEpisodeLabel({ episode, ruleName: 'Host CPU high', groupingFields: ['host.name'] })
+      resolveAlertLabel({ episode, ruleName: 'Host CPU high', groupingFields: ['host.name'] })
     ).toBe('Host CPU high alert for web-01');
   });
 
@@ -70,7 +70,7 @@ describe('resolveEpisodeLabel', () => {
       episode_data: JSON.stringify({ 'host.name': 'web-01' }),
     };
     expect(
-      resolveEpisodeLabel({
+      resolveAlertLabel({
         episode,
         ruleName: 'Host CPU high',
         groupingFields: ['host.name', 'service.name'],
@@ -83,12 +83,12 @@ describe('resolveEpisodeLabel', () => {
       ...baseEpisode,
       episode_data: JSON.stringify({ host: { name: 'web-01' } }),
     };
-    expect(resolveEpisodeLabel({ episode, groupingFields: ['host.name'] })).toBe('web-01 alert');
+    expect(resolveAlertLabel({ episode, groupingFields: ['host.name'] })).toBe('web-01 alert');
   });
 
   it('ignores grouping fields when episode_data is absent', () => {
     expect(
-      resolveEpisodeLabel({
+      resolveAlertLabel({
         episode: baseEpisode,
         ruleName: 'Host CPU high',
         groupingFields: ['host.name'],
@@ -97,26 +97,24 @@ describe('resolveEpisodeLabel', () => {
   });
 
   it('falls back to rule ID when no rule name or grouping values are available', () => {
-    expect(resolveEpisodeLabel({ episode: baseEpisode })).toBe('Alert for rule rule-1');
-    expect(resolveEpisodeLabel({ episode: baseEpisode, ruleName: '' })).toBe(
-      'Alert for rule rule-1'
-    );
+    expect(resolveAlertLabel({ episode: baseEpisode })).toBe('Alert for rule rule-1');
+    expect(resolveAlertLabel({ episode: baseEpisode, ruleName: '' })).toBe('Alert for rule rule-1');
   });
 
   it('falls back to rule ID for malformed episode_data', () => {
     const episode = { ...baseEpisode, episode_data: '{not json}' };
-    expect(resolveEpisodeLabel({ episode, groupingFields: ['host.name'] })).toBe(
+    expect(resolveAlertLabel({ episode, groupingFields: ['host.name'] })).toBe(
       'Alert for rule rule-1'
     );
   });
 
-  it('truncates labels that exceed the episode attachment schema max', () => {
+  it('truncates labels that exceed the alert attachment schema max', () => {
     const longGroup = 'g'.repeat(MAX_EPISODE_LABEL_LENGTH);
     const episode = {
       ...baseEpisode,
       episode_data: JSON.stringify({ 'host.name': longGroup }),
     };
-    const label = resolveEpisodeLabel({
+    const label = resolveAlertLabel({
       episode,
       ruleName: 'Host CPU high',
       groupingFields: ['host.name'],
