@@ -57,6 +57,8 @@ spaceTest.describe(
     spaceTest(
       'filters response actions by trigger type and opens the linked rule',
       async ({ page, pageObjects }) => {
+        // The history list's first fetch, plus the filter steps, can exceed the default 60s.
+        spaceTest.setTimeout(180_000);
         const history = requireSeededHistory(seeded);
 
         const { responseActionsHistory } = pageObjects;
