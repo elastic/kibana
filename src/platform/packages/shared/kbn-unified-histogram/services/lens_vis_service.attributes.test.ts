@@ -838,7 +838,8 @@ describe('LensVisService attributes', () => {
     expect(visContext?.attributes.state.query).toBeUndefined();
     expect(getRepresentativeQuery(visContext?.attributes)).toStrictEqual({
       esql: `from logstash-* | limit 10
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
     });
     expect(visContext?.requestData).toStrictEqual({
       dataViewId: dataViewWithAtTimefieldMock.id,
@@ -872,7 +873,8 @@ describe('LensVisService attributes', () => {
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
       esql: `from logstash-* | limit 10
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
     };
     const lensVis = await getLensVisMock({
       filters,
