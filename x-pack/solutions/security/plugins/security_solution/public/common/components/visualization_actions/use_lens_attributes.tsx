@@ -134,6 +134,13 @@ export const useLensAttributes = ({
       return filters;
     })();
 
+    // Ad hoc (not persisted) data views only exist in-memory for this app session; attach the spec
+    // so a new app context (e.g. "Open in Lens") can resolve it instead of failing to find it by id.
+    const scopeAdHocDataView =
+      !hasAdHocDataViews && dataView.id && !dataView.isPersisted()
+        ? { [dataView.id]: dataView.toSpec() }
+        : undefined;
+
     return {
       ...attrs,
       ...(title != null ? { title } : {}),
@@ -147,6 +154,7 @@ export const useLensAttributes = ({
           ...indexFilters,
           ...queryFilters,
         ],
+        ...(scopeAdHocDataView ? { adHocDataViews: scopeAdHocDataView } : {}),
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
         ...ref,
@@ -171,7 +179,7 @@ export const useLensAttributes = ({
     pageFilters,
     tabsFilters,
     filters,
-    dataView.id,
+    dataView,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData
