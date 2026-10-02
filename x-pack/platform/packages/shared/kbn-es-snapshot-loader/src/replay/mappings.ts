@@ -42,40 +42,35 @@ export async function copySourceMappings({
 
   for (const [dataStream, sources] of sourcesByDestination) {
     try {
-      await copyMetricMappings({ esClient, log, dataStream, sources });
+      await ensureDataStream(esClient, dataStream);
     } catch (error) {
       log.warning(
-        `Could not copy all metric mappings to ${dataStream}; metric fields not copied will be mapped dynamically: ${getErrorMessage(
+        `Could not create data stream ${dataStream}; replay will reindex without it: ${getErrorMessage(
           error
         )}`
       );
-    }
-  }
-}
-
-async function copyMetricMappings({
-  esClient,
-  log,
-  dataStream,
-  sources,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-  dataStream: string;
-  sources: string[];
-}): Promise<void> {
-  await ensureDataStream(esClient, dataStream);
-  const applied = new Set<string>();
-  for (const source of sources) {
-    const response = await esClient.indices.getMapping({ index: source });
-    const properties = metricProperties(response[source]?.mappings?.properties ?? {});
-    const key = JSON.stringify(properties);
-    if (Object.keys(properties).length === 0 || applied.has(key)) {
       continue;
     }
-    applied.add(key);
-    log.debug(`Copying metric mappings from ${source} to ${dataStream}`);
-    await esClient.indices.putMapping({ index: dataStream, properties });
+    const applied = new Set<string>();
+    for (const source of sources) {
+      try {
+        const response = await esClient.indices.getMapping({ index: source });
+        const properties = metricProperties(response[source]?.mappings?.properties ?? {});
+        const key = JSON.stringify(properties);
+        if (Object.keys(properties).length === 0 || applied.has(key)) {
+          continue;
+        }
+        applied.add(key);
+        log.debug(`Copying metric mappings from ${source} to ${dataStream}`);
+        await esClient.indices.putMapping({ index: dataStream, properties });
+      } catch (error) {
+        log.warning(
+          `Could not copy metric mappings from ${source} to ${dataStream}; its metric fields will be mapped dynamically: ${getErrorMessage(
+            error
+          )}`
+        );
+      }
+    }
   }
 }
 

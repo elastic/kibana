@@ -127,10 +127,11 @@ describe('copySourceMappings', () => {
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
   });
 
-  it('continues with the other streams when a mapping cannot be applied', async () => {
+  it('continues with the other backing indices when a mapping cannot be applied', async () => {
+    const otherMapping = { metrics: { properties: { errors_total: counter } } };
     const esClient = createMockEsClient({
       [metricsSource('000001')]: sourceMapping,
-      'snapshot-loader-temp-.ds-metrics-other.otel-default-2026.04.19-000001': sourceMapping,
+      [metricsSource('000002')]: otherMapping,
     });
     (esClient.indices.putMapping as jest.Mock)
       .mockRejectedValueOnce(
@@ -141,20 +142,14 @@ describe('copySourceMappings', () => {
     await copySourceMappings({
       esClient,
       log,
-      restoredIndices: [
-        metricsSource('000001'),
-        'snapshot-loader-temp-.ds-metrics-other.otel-default-2026.04.19-000001',
-      ],
-      originalIndices: [
-        metricsOriginal('000001'),
-        '.ds-metrics-other.otel-default-2026.04.19-000001',
-      ],
+      restoredIndices: [metricsSource('000001'), metricsSource('000002')],
+      originalIndices: [metricsOriginal('000001'), metricsOriginal('000002')],
     });
 
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
     expect(esClient.indices.putMapping).toHaveBeenLastCalledWith({
-      index: 'metrics-other.otel-default',
-      properties: keptMapping,
+      index: 'metrics-app.otel-2026-04-19',
+      properties: otherMapping,
     });
   });
 
