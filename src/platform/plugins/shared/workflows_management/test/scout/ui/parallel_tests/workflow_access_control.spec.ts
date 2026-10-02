@@ -9,16 +9,32 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { spaceTest as test } from '../fixtures';
 import { getDummyWorkflowYaml } from '../fixtures/workflows';
 
+interface TestIdentity {
+  displayName: string;
+  username: string;
+}
+
 test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   let workflowId: string | undefined;
   let ownerHeaders: Record<string, string>;
+  let editorIdentity: TestIdentity;
+  let viewerIdentity: TestIdentity;
 
-  test.beforeAll(async ({ scoutSpace }) => {
+  test.beforeAll(async ({ scoutSpace, samlAuth }) => {
     await scoutSpace.uiSettings.set({ [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: true });
+    const resolveIdentity = async (role: string): Promise<TestIdentity> => {
+      const user = await samlAuth.session.getUserData(role);
+      return { displayName: getUserDisplayName(user), username: user.username };
+    };
+    [editorIdentity, viewerIdentity] = await Promise.all([
+      resolveIdentity('editor'),
+      resolveIdentity('viewer'),
+    ]);
   });
 
   test.beforeEach(async () => {
@@ -67,13 +83,13 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await editor.openAccessDialog();
     await expect(editor.accessMode).toContainText('Public');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
-    await expect(page.getByText('test editor', { exact: true })).toBeVisible();
+    await expect(page.getByText(editorIdentity.displayName, { exact: true })).toBeVisible();
     expect(
       (await page.checkA11y({ include: ['[aria-labelledby="workflowAccessTitle"]'] })).violations
     ).toStrictEqual([]);
     await editor.setAccessMode('private');
-    await editor.addAccessUser('test viewer');
-    await editor.setAccessRole('elastic_viewer', 'executor');
+    await editor.addAccessUser(viewerIdentity.displayName);
+    await editor.setAccessRole(viewerIdentity.username, 'executor');
     await page.testSubj.click('workflowAccessSave');
     await expect(
       page.getByText(
@@ -81,7 +97,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
         { exact: true }
       )
     ).toBeVisible();
-    await editor.setAccessRole('elastic_viewer', 'viewer');
+    await editor.setAccessRole(viewerIdentity.username, 'viewer');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
     expect(
       (await page.checkA11y({ include: ['[aria-labelledby="workflowAccessTitle"]'] })).violations
@@ -94,7 +110,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await editor.gotoWorkflow(workflowId);
     await editor.openAccessDialog();
     await expect(editor.accessMode).toContainText('Private');
-    await expect(editor.accessRole('elastic_viewer')).toContainText('Viewer');
+    await expect(editor.accessRole(viewerIdentity.username)).toContainText('Viewer');
     await editor.setAccessMode('public');
     await editor.saveAccess();
     await editor.gotoWorkflow(workflowId);
@@ -125,8 +141,8 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       await editor.gotoWorkflow(workflowId);
       await editor.openAccessDialog();
       await editor.setAccessMode('private');
-      await editor.addAccessUser('test editor');
-      await editor.setAccessRole('elastic_editor', 'executor');
+      await editor.addAccessUser(editorIdentity.displayName);
+      await editor.setAccessRole(editorIdentity.username, 'executor');
       await editor.saveAccess();
       await browserAuth.loginAsPrivilegedUser();
       await editor.gotoWorkflow(workflowId);
