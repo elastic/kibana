@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsClient, KbnClient } from '@kbn/scout';
+import type { EsClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -28,7 +28,6 @@ import {
   UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from './constants';
-import { EntityResolutionRuleTypeName } from '../../../../server/domain/resolution/rules/saved_object/constants';
 import {
   LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
@@ -41,6 +40,15 @@ export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
 type KbnClientFixture = ApiWorkerFixtures['kbnClient'];
 type SamlAuthFixture = ApiWorkerFixtures['samlAuth'];
 type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+type ResolutionRuleState = Record<string, boolean>;
+
+interface SuiteInstallState {
+  previousEntityStoreV2Setting: boolean | undefined;
+  initiallyInstalled: boolean;
+  initialResolutionRuleState: ResolutionRuleState;
+}
+
+const suiteInstallState = new Map<string, SuiteInstallState>();
 
 const DEFAULT_LOG_EXTRACTION_CONFIG = {
   docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
@@ -131,13 +139,57 @@ export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => 
   }
 };
 
-/**
- * Removes rule enablement overrides so `defaultEnabled` is what the matcher sees.
- * Disable/enable routes write a saved object rather than deleting one, and
- * uninstall does not clean these up.
- */
-export const clearResolutionRuleOverrides = async (kbnClient: KbnClient): Promise<void> => {
-  await kbnClient.savedObjects.clean({ types: [EntityResolutionRuleTypeName] });
+const readResolutionRuleState = async (kbnClient: KbnClientFixture): Promise<ResolutionRuleState> => {
+  const response = await kbnClient.request({
+    method: 'GET',
+    path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_LIST,
+    headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+  });
+  expect(response.status).toBe(200);
+
+  const rules = (response.body as { rules?: Array<{ id: string; enabled: boolean }> }).rules ?? [];
+  return Object.fromEntries(rules.map((rule) => [rule.id, rule.enabled]));
+};
+
+const setResolutionRuleEnabled = async ({
+  kbnClient,
+  ruleId,
+  enabled,
+}: {
+  kbnClient: KbnClientFixture;
+  ruleId: string;
+  enabled: boolean;
+}) => {
+  const response = await kbnClient.request({
+    method: 'PUT',
+    path: enabled
+      ? ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(ruleId)
+      : ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(ruleId),
+    headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+  });
+  expect(response.status).toBe(200);
+};
+
+const restoreResolutionRuleState = async ({
+  kbnClient,
+  initialState,
+}: {
+  kbnClient: KbnClientFixture;
+  initialState: ResolutionRuleState;
+}) => {
+  const currentState = await readResolutionRuleState(kbnClient);
+  const ruleIds = new Set([...Object.keys(initialState), ...Object.keys(currentState)]);
+
+  for (const ruleId of ruleIds) {
+    const initialEnabled = initialState[ruleId];
+    if (typeof initialEnabled !== 'boolean') {
+      continue;
+    }
+    const currentEnabled = currentState[ruleId];
+    if (currentEnabled !== initialEnabled) {
+      await setResolutionRuleEnabled({ kbnClient, ruleId, enabled: initialEnabled });
+    }
+  }
 };
 
 /**
@@ -295,14 +347,31 @@ export const installEntityStoreSuite = async ({
 
 export const installEntityStoreSuiteWithKbnClient = async ({
   kbnClient,
+  suiteId = 'default',
 }: {
   kbnClient: KbnClientFixture;
+  suiteId?: string;
 }) => {
   const publicHeaders = { 'elastic-api-version': API_VERSIONS.public.v1 };
   const internalHeaders = { 'elastic-api-version': API_VERSIONS.internal.v2 };
-
+  const previousEntityStoreV2Setting = (await kbnClient.uiSettings.get(
+    FF_ENABLE_ENTITY_STORE_V2
+  )) as boolean | undefined;
   await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
-  await clearResolutionRuleOverrides(kbnClient);
+
+  const statusResponse = await kbnClient.request({
+    method: 'GET',
+    path: ENTITY_STORE_ROUTES.public.STATUS,
+    headers: publicHeaders,
+  });
+  expect(statusResponse.status).toBe(200);
+  const initiallyInstalled = (statusResponse.body as { status?: string }).status !== 'not_installed';
+  const initialResolutionRuleState = await readResolutionRuleState(kbnClient);
+  suiteInstallState.set(suiteId, {
+    previousEntityStoreV2Setting,
+    initiallyInstalled,
+    initialResolutionRuleState,
+  });
 
   const installResponse = await kbnClient.request({
     method: 'POST',
@@ -326,6 +395,11 @@ export const installEntityStoreSuiteWithKbnClient = async ({
     headers: publicHeaders,
   });
   expect(enableEmailRuleResponse.status).toBe(200);
+  await setResolutionRuleEnabled({
+    kbnClient,
+    ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+    enabled: true,
+  });
 
   const stopResponse = await kbnClient.request({
     method: 'PUT',
@@ -405,26 +479,46 @@ export const resetLogExtractionConfig = async ({
 export const uninstallEntityStoreSuiteWithKbnClient = async ({
   esClient,
   kbnClient,
+  suiteId = 'default',
 }: {
   esClient: EsClient;
   kbnClient: KbnClientFixture;
+  suiteId?: string;
 }) => {
+  const suiteState = suiteInstallState.get(suiteId);
   try {
-    await kbnClient.request({
-      method: 'POST',
-      path: ENTITY_STORE_ROUTES.public.UNINSTALL,
-      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
-      body: {},
-      ignoreErrors: [404],
-    });
+    if (suiteState) {
+      await restoreResolutionRuleState({
+        kbnClient,
+        initialState: suiteState.initialResolutionRuleState,
+      });
+    }
+
+    if (suiteState?.initiallyInstalled === false) {
+      await kbnClient.request({
+        method: 'POST',
+        path: ENTITY_STORE_ROUTES.public.UNINSTALL,
+        headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+        body: {},
+        ignoreErrors: [404],
+      });
+    }
   } finally {
     try {
-      await clearResolutionRuleOverrides(kbnClient);
+      if (suiteState?.initiallyInstalled === false) {
+        await clearEntityStoreIndices(esClient);
+      }
     } finally {
       try {
-        await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+        if (suiteState?.previousEntityStoreV2Setting === undefined) {
+          await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+        } else {
+          await kbnClient.uiSettings.update({
+            [FF_ENABLE_ENTITY_STORE_V2]: suiteState.previousEntityStoreV2Setting,
+          });
+        }
       } finally {
-        await clearEntityStoreIndices(esClient);
+        suiteInstallState.delete(suiteId);
       }
     }
   }
