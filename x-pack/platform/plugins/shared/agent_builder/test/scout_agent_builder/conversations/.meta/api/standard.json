@@ -1,5 +1,5 @@
 {
-  "sha1": "f6b3aa702188923ebeb61e79944543011209d502",
+  "sha1": "8782e8b2419e1b12459d11d6057ffd9805125d70",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversation_updated_trigger_api.spec.ts",
-        "line": 155,
-        "column": 31
+        "line": 161,
+        "column": 19
       }
     },
     {
