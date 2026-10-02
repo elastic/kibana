@@ -12,11 +12,13 @@ export type {
   AlertTimelineSeries,
   AlertTimelineSummary,
   AlertTimelineData,
+  AlertTimelinePhaseRow,
   AlertTimelineEventRow,
   AlertTimelineGroupingValues,
 } from './types';
 export { ALERT_TIMELINE_TOP_N_DEFAULT } from './types';
 export { deriveAlertTimelineData } from './derive_alert_timeline_data';
+export { applyEpisodeStarts, makeEpisodeStartKey } from './apply_episode_starts';
 export { deriveEpisodeAlertTimelineData } from './derive_episode_alert_timeline_data';
 export type { EpisodeAlertTimelineData } from './derive_episode_alert_timeline_data';
 export { deriveEpisodeSeverityTimelineData } from './derive_episode_severity_timeline_data';

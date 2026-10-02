@@ -103,6 +103,9 @@ describe('EpisodeSeverityTimelineRow', () => {
         ],
       })
     );
+    expect(mockLineSeries).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'episode-severity-timeline-end-caps' })
+    );
   });
 
   it('reports the selected event when a transition dot is clicked', () => {

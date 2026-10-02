@@ -57,7 +57,7 @@ export const AlertTimelineSection: React.FC = () => {
     timeRange.to
   );
 
-  const { events, groupingValuesByHash, summary, isLoading, isError, refetch } = useFetchRuleEvents(
+  const { phases, groupingValuesByHash, summary, isLoading, isError, refetch } = useFetchRuleEvents(
     {
       ruleId: rule.id,
       windowStartMs,
@@ -70,14 +70,14 @@ export const AlertTimelineSection: React.FC = () => {
   const timelineData = useMemo(
     () =>
       deriveAlertTimelineData(
-        events,
+        phases,
         groupingValuesByHash,
         'recently_active',
         windowStartMs,
         windowEndMs,
         summary
       ),
-    [events, groupingValuesByHash, windowStartMs, windowEndMs, summary]
+    [phases, groupingValuesByHash, windowStartMs, windowEndMs, summary]
   );
 
   const discoverHref = useMemo(

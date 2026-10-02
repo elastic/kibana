@@ -6,12 +6,12 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import { deriveAlertTimelineData } from './derive_alert_timeline_data';
+import { deriveAlertTimelineDataFromEvents } from './derive_alert_timeline_events';
 
 const START_MS = Date.parse('2026-04-01T00:00:00.000Z');
 const summary = { episodesStarted: 1, recovered: 1, stillOpen: 0, medianDurationMs: 3_000 };
 
-describe('deriveAlertTimelineData raw events', () => {
+describe('deriveAlertTimelineDataFromEvents', () => {
   it('collapses heartbeats while preserving repeated status transitions', () => {
     const events = [
       { status: ALERT_EPISODE_STATUS.ACTIVE, offsetMs: 0 },
@@ -26,7 +26,7 @@ describe('deriveAlertTimelineData raw events', () => {
       group_hash: 'group-1',
     }));
 
-    const result = deriveAlertTimelineData(
+    const result = deriveAlertTimelineDataFromEvents(
       events,
       {},
       'started_asc',

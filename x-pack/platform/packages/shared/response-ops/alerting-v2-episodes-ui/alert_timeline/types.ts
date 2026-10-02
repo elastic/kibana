@@ -68,7 +68,16 @@ export interface AlertTimelineData {
   summary: AlertTimelineSummary;
 }
 
-/** One raw rule event used to reconstruct an episode's ordered status transitions. */
+/** One pre-aggregated status phase used by the rule-details timeline. */
+export interface AlertTimelinePhaseRow {
+  'episode.id': string;
+  'episode.status': AlertEpisodeStatus;
+  group_hash: string;
+  seg_start: string;
+  seg_end: string;
+}
+
+/** One raw event used to reconstruct an episode-details timeline. */
 export interface AlertTimelineEventRow {
   '@timestamp': string;
   'episode.id': string;

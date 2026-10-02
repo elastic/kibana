@@ -11,7 +11,9 @@ import { useQuery } from '@kbn/react-query';
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';
 import {
-  type AlertTimelineEventRow,
+  applyEpisodeStarts,
+  makeEpisodeStartKey,
+  type AlertTimelinePhaseRow,
   type AlertTimelineSummary,
 } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
@@ -24,7 +26,11 @@ import {
   MAX_EPISODES_PER_LANE,
   type EpisodeSelectionRow,
 } from '../queries/alert_series_activity/episode_selection_query';
-import { buildRuleEventsQuery } from '../queries/alert_series_activity/rule_events_query';
+import { buildEpisodePhasesQuery } from '../queries/alert_series_activity/episode_phases_query';
+import {
+  buildEpisodeStartsQuery,
+  type EpisodeStartRow,
+} from '../queries/alert_series_activity/episode_starts_query';
 import {
   buildAlertTimelineSummaryQuery,
   parseAlertTimelineSummaryRow,
@@ -33,7 +39,7 @@ import {
 import { useFetchSeriesGroupingValues } from './use_fetch_series_grouping_values';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
 
-const EMPTY_EVENTS: AlertTimelineEventRow[] = [];
+const EMPTY_PHASES: AlertTimelinePhaseRow[] = [];
 const EMPTY_GROUPING_VALUES: SeriesGroupingValuesByHash = {};
 const EMPTY_SUMMARY: AlertTimelineSummary = {
   episodesStarted: 0,
@@ -126,22 +132,28 @@ export const useFetchRuleEvents = ({
     [selectionQuery.data]
   );
 
-  // --- 3. Rule events (depends on the selected episode IDs) — all raw events up
-  // to the display window end, including earlier events needed to reconstruct a
-  // status that began before the visible window. ---
-  const eventsEnabled =
+  // --- 3. Episode phases (depends on the selected episode IDs) — one row per
+  // status phase, bounded to the display window for *drawing* the segments. The
+  // true start of each phase comes from the untimed starts query (step 3b). ---
+  const phasesEnabled =
     selectionEnabled && selectionQuery.isSuccess && selectedEpisodeIds.length > 0;
 
-  const eventsQuery = useQuery({
-    queryKey: ruleOverviewQueryKeys.ruleEvents(ruleId ?? '', windowEndMs, selectedEpisodeIds),
-    enabled: eventsEnabled,
+  const phasesQuery = useQuery({
+    queryKey: ruleOverviewQueryKeys.episodePhases(
+      ruleId ?? '',
+      windowStartMs,
+      windowEndMs,
+      selectedEpisodeIds
+    ),
+    enabled: phasesEnabled,
     refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildRuleEventsQuery({
+          query: buildEpisodePhasesQuery({
             ruleId: ruleId!,
+            windowStartMs,
             windowEndMs,
             episodeIds: selectedEpisodeIds,
           }).print('basic'),
@@ -149,8 +161,50 @@ export const useFetchRuleEvents = ({
         },
         abortSignal: signal,
       }),
-    select: (raw) => esqlResponseToObjectRows<AlertTimelineEventRow>(raw),
+    select: (raw) => esqlResponseToObjectRows<AlertTimelinePhaseRow>(raw),
   });
+
+  // --- 3b. Episode starts (depends on the selected episode IDs) — each episode's
+  // true MIN(@timestamp) per status, UNTIMED so the start is independent of the
+  // display window. Sibling to the phases query (same gate, no dependency between
+  // them) → runs in parallel. Merged into the phase rows below. ---
+  const startsQuery = useQuery({
+    queryKey: ruleOverviewQueryKeys.episodeStarts(ruleId ?? '', selectedEpisodeIds),
+    enabled: phasesEnabled,
+    refetchOnWindowFocus: false,
+    queryFn: ({ signal }) =>
+      runEsqlAsyncSearch({
+        data,
+        params: {
+          query: buildEpisodeStartsQuery({
+            ruleId: ruleId!,
+            episodeIds: selectedEpisodeIds,
+          }).print('basic'),
+          time_zone: 'UTC',
+        },
+        abortSignal: signal,
+      }),
+    select: (raw) => esqlResponseToObjectRows<EpisodeStartRow>(raw),
+  });
+
+  // Per-(episode, status) true start, keyed for the merge below.
+  const startsMs = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const row of startsQuery.data ?? []) {
+      const startMs = Date.parse(row.episode_start);
+      if (Number.isFinite(startMs)) {
+        map.set(makeEpisodeStartKey(row['episode.id'], row['episode.status']), startMs);
+      }
+    }
+    return map;
+  }, [startsQuery.data]);
+
+  // Phase rows for drawing, with each phase's left edge overlaid with its true
+  // (window-independent) start. Degrades to the windowed start when unknown.
+  const phases = useMemo(
+    () => applyEpisodeStarts(phasesQuery.data ?? EMPTY_PHASES, startsMs),
+    [phasesQuery.data, startsMs]
+  );
 
   // --- 4. Summary aggregation query (independent of top-N) ---
   const summaryQuery = useQuery({
@@ -188,19 +242,23 @@ export const useFetchRuleEvents = ({
   const isLoading =
     (enabled && topNSeriesQuery.isLoading) ||
     (selectionEnabled && selectionQuery.isLoading) ||
-    (eventsEnabled && eventsQuery.isLoading) ||
+    (phasesEnabled && phasesQuery.isLoading) ||
+    // Wait for starts too, so a bar doesn't flash its windowed start then jump.
+    (phasesEnabled && startsQuery.isLoading) ||
     (enabled && summaryQuery.isLoading) ||
     groupingValuesQuery.isLoading;
 
+  // `startsQuery` is intentionally excluded: if only the (optional) true-start
+  // overlay fails, the chart still renders correctly with windowed starts.
   const isError =
     topNSeriesQuery.isError ||
     selectionQuery.isError ||
-    eventsQuery.isError ||
+    phasesQuery.isError ||
     summaryQuery.isError ||
     groupingValuesQuery.isError;
 
   return {
-    events: eventsQuery.data ?? EMPTY_EVENTS,
+    phases,
     groupingValuesByHash: groupingValuesQuery.data ?? EMPTY_GROUPING_VALUES,
     summary: summaryQuery.data ?? EMPTY_SUMMARY,
     isLoading,
@@ -208,7 +266,8 @@ export const useFetchRuleEvents = ({
     refetch: () => {
       topNSeriesQuery.refetch();
       selectionQuery.refetch();
-      eventsQuery.refetch();
+      phasesQuery.refetch();
+      startsQuery.refetch();
       summaryQuery.refetch();
       groupingValuesQuery.refetch();
     },

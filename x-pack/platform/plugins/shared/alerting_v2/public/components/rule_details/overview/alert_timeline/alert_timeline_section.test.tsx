@@ -65,7 +65,7 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 const successResult = {
-  events: [],
+  phases: [],
   groupingValuesByHash: {},
   summary: { episodesStarted: 0, recovered: 0, stillOpen: 0, medianDurationMs: 0 },
   isLoading: false,

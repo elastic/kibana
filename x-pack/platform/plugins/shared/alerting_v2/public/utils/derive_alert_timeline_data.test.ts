@@ -9,7 +9,7 @@ import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-
 import {
   deriveAlertTimelineData,
   type AlertTimelineSummary,
-  type AlertTimelineEventRow,
+  type AlertTimelinePhaseRow,
 } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -24,43 +24,48 @@ const STUB_SUMMARY: AlertTimelineSummary = {
   medianDurationMs: 0,
 };
 
-interface EventSpec {
+interface PhaseSpec {
   episodeId: string;
   groupHash?: string;
   status: AlertEpisodeStatus;
+  /** Phase start (MIN @timestamp). Drives the segment's left edge. */
   startMs: number;
+  /** Phase end (MAX @timestamp). Defaults to `startMs`; drives series lastEventMs only. */
+  endMs?: number;
 }
 
-const event = ({
+const phase = ({
   episodeId,
   groupHash = 'gh-A',
   status,
   startMs,
-}: EventSpec): AlertTimelineEventRow => ({
-  '@timestamp': new Date(startMs).toISOString(),
+  endMs,
+}: PhaseSpec): AlertTimelinePhaseRow => ({
   'episode.id': episodeId,
   'episode.status': status,
   group_hash: groupHash,
+  seg_start: new Date(startMs).toISOString(),
+  seg_end: new Date(endMs ?? startMs).toISOString(),
 });
 
 describe('deriveAlertTimelineData', () => {
   it('lays an episode out as one segment per status phase, linking each phase to the next', () => {
-    const events: AlertTimelineEventRow[] = [
-      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.PENDING, startMs: T0 }),
-      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 + HOUR_MS }),
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.PENDING, startMs: T0 }),
+      phase({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 + HOUR_MS }),
+      phase({
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.RECOVERING,
         startMs: T0 + 2 * HOUR_MS,
       }),
-      event({
+      phase({
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.INACTIVE,
         startMs: T0 + 3 * HOUR_MS,
       }),
     ];
 
-    const result = deriveAlertTimelineData(events, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
+    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
     const row = result.rows[0];
 
     // The terminal INACTIVE phase is the recovery marker — no bar drawn for it.
@@ -98,9 +103,9 @@ describe('deriveAlertTimelineData', () => {
   });
 
   it('extends the tail segment to windowEndMs for open episodes and tracks longest open', () => {
-    const phases: AlertTimelineEventRow[] = [
-      event({ episodeId: 'open-long', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 }),
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({ episodeId: 'open-long', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 }),
+      phase({
         episodeId: 'open-short',
         status: ALERT_EPISODE_STATUS.PENDING,
         startMs: T0 + 6 * HOUR_MS,
@@ -129,26 +134,26 @@ describe('deriveAlertTimelineData', () => {
   });
 
   it('groups phases by group_hash into separate lanes', () => {
-    const phases: AlertTimelineEventRow[] = [
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({
         episodeId: 'ep-1',
         groupHash: 'gh-A',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0,
       }),
-      event({
+      phase({
         episodeId: 'ep-1',
         groupHash: 'gh-A',
         status: ALERT_EPISODE_STATUS.INACTIVE,
         startMs: T0 + HOUR_MS,
       }),
-      event({
+      phase({
         episodeId: 'ep-2',
         groupHash: 'gh-B',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0 + 2 * HOUR_MS,
       }),
-      event({
+      phase({
         episodeId: 'ep-2',
         groupHash: 'gh-B',
         status: ALERT_EPISODE_STATUS.INACTIVE,
@@ -163,16 +168,16 @@ describe('deriveAlertTimelineData', () => {
   });
 
   it('renders multiple episodes in one lane independently, each with its true start', () => {
-    const phases: AlertTimelineEventRow[] = [
+    const phases: AlertTimelinePhaseRow[] = [
       // Older completed episode.
-      event({ episodeId: 'ep-old', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 + HOUR_MS }),
-      event({
+      phase({ episodeId: 'ep-old', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 + HOUR_MS }),
+      phase({
         episodeId: 'ep-old',
         status: ALERT_EPISODE_STATUS.INACTIVE,
         startMs: T0 + 3 * HOUR_MS,
       }),
       // Long-running open episode whose start is far earlier — no anchor needed.
-      event({
+      phase({
         episodeId: 'ep-new',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0 + 10 * HOUR_MS,
@@ -200,14 +205,14 @@ describe('deriveAlertTimelineData', () => {
   });
 
   it('passes through externally-supplied summary unchanged', () => {
-    const phases: AlertTimelineEventRow[] = [
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({
         episodeId: 'r1',
         groupHash: 'gh-1',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0,
       }),
-      event({
+      phase({
         episodeId: 'r1',
         groupHash: 'gh-1',
         status: ALERT_EPISODE_STATUS.INACTIVE,
@@ -228,14 +233,14 @@ describe('deriveAlertTimelineData', () => {
   });
 
   it('attaches groupingValues from the lookup map', () => {
-    const phases: AlertTimelineEventRow[] = [
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({
         episodeId: 'ep-1',
         groupHash: 'gh-A',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0,
       }),
-      event({
+      phase({
         episodeId: 'ep-1',
         groupHash: 'gh-A',
         status: ALERT_EPISODE_STATUS.INACTIVE,
@@ -256,43 +261,40 @@ describe('deriveAlertTimelineData', () => {
   });
 
   it('sorts by recently_active and longest_open as expected', () => {
-    const phases: AlertTimelineEventRow[] = [
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({
         episodeId: 'old',
         groupHash: 'gh-old',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0,
       }),
-      event({
+      phase({
         episodeId: 'old',
         groupHash: 'gh-old',
         status: ALERT_EPISODE_STATUS.INACTIVE,
         startMs: T0 + HOUR_MS,
+        endMs: T0 + HOUR_MS,
       }),
-      event({
+      phase({
         episodeId: 'recent',
         groupHash: 'gh-recent',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0 + 2 * DAY_MS,
       }),
-      event({
+      phase({
         episodeId: 'recent',
         groupHash: 'gh-recent',
         status: ALERT_EPISODE_STATUS.INACTIVE,
         startMs: T0 + 2 * DAY_MS + HOUR_MS,
+        endMs: T0 + 2 * DAY_MS + HOUR_MS,
       }),
-      // One open active episode with a later heartbeat.
-      event({
+      // One open active phase spanning T0 → T0+3d (merged heartbeats).
+      phase({
         episodeId: 'long-open',
         groupHash: 'gh-long-open',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0,
-      }),
-      event({
-        episodeId: 'long-open',
-        groupHash: 'gh-long-open',
-        status: ALERT_EPISODE_STATUS.ACTIVE,
-        startMs: T0 + 3 * DAY_MS,
+        endMs: T0 + 3 * DAY_MS,
       }),
     ];
 
@@ -306,11 +308,6 @@ describe('deriveAlertTimelineData', () => {
         (r) => r.groupHash
       )[0]
     ).toBe('gh-long-open');
-    expect(
-      deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY).rows.find(
-        ({ groupHash }) => groupHash === 'gh-long-open'
-      )?.transitions
-    ).toHaveLength(1);
   });
 
   it('clips segments to windowStartMs and suppresses pre-window transitions', () => {
@@ -318,18 +315,19 @@ describe('deriveAlertTimelineData', () => {
     const WINDOW_END_MS = T0 + 8 * HOUR_MS;
 
     // The active phase began before the visible window (a wider lookback found it).
-    const phases: AlertTimelineEventRow[] = [
-      event({
+    const phases: AlertTimelinePhaseRow[] = [
+      phase({
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         startMs: T0 + 2 * HOUR_MS,
+        endMs: T0 + 5 * HOUR_MS,
       }),
-      event({
+      phase({
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.RECOVERING,
         startMs: T0 + 6 * HOUR_MS,
       }),
-      event({
+      phase({
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.INACTIVE,
         startMs: T0 + 7 * HOUR_MS,
@@ -370,48 +368,44 @@ describe('deriveAlertTimelineData', () => {
     ]);
   });
 
-  it('preserves repeated transitions back to a previously visited status', () => {
-    const events = [
-      {
-        '@timestamp': new Date(T0).toISOString(),
-        'episode.id': 'ep-1',
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        group_hash: 'gh-A',
-      },
-      {
-        '@timestamp': new Date(T0 + HOUR_MS).toISOString(),
-        'episode.id': 'ep-1',
-        'episode.status': ALERT_EPISODE_STATUS.RECOVERING,
-        group_hash: 'gh-A',
-      },
-      {
-        '@timestamp': new Date(T0 + 2 * HOUR_MS).toISOString(),
-        'episode.id': 'ep-1',
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        group_hash: 'gh-A',
-      },
-      {
-        '@timestamp': new Date(T0 + 3 * HOUR_MS).toISOString(),
-        'episode.id': 'ep-1',
-        'episode.status': ALERT_EPISODE_STATUS.RECOVERING,
-        group_hash: 'gh-A',
-      },
-      {
-        '@timestamp': new Date(T0 + 4 * HOUR_MS).toISOString(),
-        'episode.id': 'ep-1',
-        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
-        group_hash: 'gh-A',
-      },
-    ] satisfies AlertTimelineEventRow[];
+  describe('flapping (accepted limitation)', () => {
+    it('merges non-contiguous same-status runs into one span', () => {
+      // active → recovering → active again. The aggregation merges the two active
+      // runs into one [start, end]; the re-breach after recovering is smoothed over.
+      const phases: AlertTimelinePhaseRow[] = [
+        phase({
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          startMs: T0,
+          endMs: T0 + 5 * HOUR_MS,
+        }),
+        phase({
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.RECOVERING,
+          startMs: T0 + 2 * HOUR_MS,
+        }),
+      ];
 
-    const result = deriveAlertTimelineData(events, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
+      const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
+      const row = result.rows[0];
 
-    expect(result.rows[0]?.transitions.map(({ status }) => status)).toEqual([
-      ALERT_EPISODE_STATUS.ACTIVE,
-      ALERT_EPISODE_STATUS.RECOVERING,
-      ALERT_EPISODE_STATUS.ACTIVE,
-      ALERT_EPISODE_STATUS.RECOVERING,
-      ALERT_EPISODE_STATUS.INACTIVE,
-    ]);
+      expect(row.segments).toEqual([
+        {
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          x0Ms: T0,
+          x1Ms: T0 + 2 * HOUR_MS,
+          trueStartMs: T0,
+        },
+        {
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.RECOVERING,
+          x0Ms: T0 + 2 * HOUR_MS,
+          x1Ms: NOW,
+          trueStartMs: T0 + 2 * HOUR_MS,
+        },
+      ]);
+      expect(row.hasOpenEpisode).toBe(true);
+    });
   });
 });
