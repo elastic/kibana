@@ -8,6 +8,7 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DOC_VIEWER_SHAREABLE_STATE_MAX_LENGTH } from '@kbn/unified-doc-viewer';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
@@ -114,6 +115,18 @@ export function cleanupUrlState(
     appStateFromUrl.esqlApproximation = appStateFromUrl.isApproximate;
   }
   delete appStateFromUrl.isApproximate;
+
+  // Drop shareable doc viewer state that isn't a plain object or exceeds the size budget, guarding
+  // against unbounded URL input. The doc viewer validates the per-tab slices against each tab's
+  // schema when restoring them.
+  const { docViewerState } = appStateFromUrl;
+  if (
+    docViewerState &&
+    (typeof docViewerState !== 'object' ||
+      JSON.stringify(docViewerState).length > DOC_VIEWER_SHAREABLE_STATE_MAX_LENGTH)
+  ) {
+    delete appStateFromUrl.docViewerState;
+  }
 
   return appStateFromUrl as DiscoverAppState;
 }

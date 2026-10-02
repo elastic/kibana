@@ -42,7 +42,10 @@ import { useFlyoutA11y } from './use_flyout_a11y';
 import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document';
 
 export interface UnifiedDocViewerFlyoutProps
-  extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
+  extends Pick<
+    DocViewerProps,
+    'initialTabId' | 'onUpdateSelectedTabId' | 'initialShareableState' | 'onShareableStateChange'
+  > {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
@@ -129,6 +132,8 @@ export function UnifiedDocViewerFlyout({
   onFilter,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  initialShareableState,
+  onShareableStateChange,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -341,6 +346,8 @@ export function UnifiedDocViewerFlyout({
                     initialState={initialDocViewerState}
                     onInitialStateChange={onInitialDocViewerStateChange}
                     onUpdateSelectedTabId={onUpdateSelectedTabId}
+                    initialShareableState={initialShareableState}
+                    onShareableStateChange={onShareableStateChange}
                     originDocType={originDocType}
                     {...docViewRenderProps}
                   />
