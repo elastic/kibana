@@ -1325,6 +1325,36 @@ describe('CreateDatasetWizardPage', () => {
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
   });
 
+  it('allows Back after a failed Next leaves an invalid additional setting', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+    fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+
+    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
+    await clickNext(getByTestId);
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(getByTestId('createDatasetSettingsEscape')).toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+    expect(getByTestId('backButton')).toBeEnabled();
+
+    await clickBack(getByTestId);
+
+    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
+    expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
+  });
+
   it('blocks navigation when an edited dataset has an invalid delimiter', async () => {
     const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
     const { getByTestId, getByText, queryByTestId } = render(
