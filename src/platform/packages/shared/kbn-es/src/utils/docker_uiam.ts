@@ -62,6 +62,7 @@ const MAX_CONTAINER_READY_CHECK_RETRIES = Math.ceil(
 const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
+  UIAM_COSMOS_DB_MEMORY: '3g',
   UIAM_SERVICE_PORT: '8443',
   UIAM_OAUTH_SERVICE_PORT: '8444',
   UIAM_APP_LOGGING_LEVEL: 'DEBUG',
@@ -104,10 +105,11 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
       // when total stack RSS approaches Docker VM limit.
+      // Lower `UIAM_COSMOS_DB_MEMORY` on memory-tight hosts.
       '--memory',
-      '1g',
+      env.UIAM_COSMOS_DB_MEMORY,
       '--memory-swap',
-      '1g',
+      env.UIAM_COSMOS_DB_MEMORY,
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -553,8 +555,20 @@ async function tryExportLogs(containerName: string, log: ToolingLog) {
     await mkdir(join(REPO_ROOT, '.es'), {
       recursive: true,
     });
-    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+    await writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
   } catch (err) {
     log.error(`Failed to export logs for container ${containerName}: ${err}`);
+  }
+
+  try {
+    const { stdout: state } = await execa('docker', [
+      'inspect',
+      '-f',
+      'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}} MemoryLimit={{.HostConfig.Memory}}',
+      containerName,
+    ]);
+    log.error(`The "${containerName}" container state: ${state.trim()}`);
+  } catch (err) {
+    log.error(`Failed to inspect container ${containerName}: ${err}`);
   }
 }

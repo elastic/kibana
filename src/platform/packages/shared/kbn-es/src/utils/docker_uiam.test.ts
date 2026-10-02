@@ -83,9 +83,9 @@ describe(`#runUiamContainer()`, () => {
             "--net",
             "elastic",
             "--memory",
-            "1g",
+            "3g",
             "--memory-swap",
-            "1g",
+            "3g",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
@@ -376,7 +376,7 @@ describe(`#runUiamContainer()`, () => {
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(91);
+    expect(execa.mock.calls.slice(1)).toHaveLength(92);
 
     execa.mockClear();
 
@@ -390,7 +390,7 @@ describe(`#runUiamContainer()`, () => {
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(91);
+    expect(execa.mock.calls.slice(1)).toHaveLength(92);
   });
 });
 
