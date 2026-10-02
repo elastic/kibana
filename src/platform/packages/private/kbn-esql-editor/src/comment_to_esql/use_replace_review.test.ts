@@ -11,6 +11,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { monaco } from '@kbn/code-editor';
 import { useReplaceReview } from './use_replace_review';
+import { ReviewActionsWidget } from './review_actions_widget';
 
 jest.mock('@kbn/code-editor', () => ({
   monaco: {
@@ -48,6 +49,9 @@ const buildEditor = () => {
     }
   );
   const executeEdits = jest.fn();
+  const focus = jest.fn();
+  const revealLineInCenter = jest.fn();
+  const editorDomNode = document.createElement('div');
 
   const editor = {
     changeViewZones: jest.fn((cb: (accessor: monaco.editor.IViewZoneChangeAccessor) => void) => {
@@ -59,6 +63,9 @@ const buildEditor = () => {
     createContextKey,
     addAction,
     executeEdits,
+    focus,
+    revealLineInCenter,
+    getDomNode: () => editorDomNode,
   } as unknown as monaco.editor.IStandaloneCodeEditor;
 
   return {
@@ -68,6 +75,9 @@ const buildEditor = () => {
     contextKeySet,
     getAction: (id: string) => registeredActions.get(id),
     executeEdits,
+    focus,
+    revealLineInCenter,
+    editorDomNode,
   };
 };
 
@@ -101,6 +111,48 @@ describe('useReplaceReview', () => {
       ...overrides,
     };
   };
+
+  describe('keyboard focus', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+      (document.activeElement as HTMLElement | null)?.blur();
+    });
+
+    it('moves keyboard focus to the review buttons instead of the editor caret', () => {
+      const params = makeParams();
+      const { editor, focus, revealLineInCenter } = buildEditor();
+      params.editorRef.current = editor;
+      params.editorModel.current = buildModel();
+      const widgetFocus = jest.spyOn(ReviewActionsWidget.prototype, 'focus');
+
+      const { result } = renderHook(() => useReplaceReview(params));
+
+      act(() => result.current.showReview(REVIEW_STATE));
+
+      expect(focus).not.toHaveBeenCalled();
+      expect(revealLineInCenter).toHaveBeenCalledWith(REVIEW_STATE.generatedLineEnd);
+      expect(widgetFocus).toHaveBeenCalled();
+    });
+
+    it('does not steal focus when the user moved it outside the editor', () => {
+      const params = makeParams();
+      const { editor, revealLineInCenter } = buildEditor();
+      params.editorRef.current = editor;
+      params.editorModel.current = buildModel();
+      const widgetFocus = jest.spyOn(ReviewActionsWidget.prototype, 'focus');
+      const outside = document.createElement('input');
+      document.body.appendChild(outside);
+      outside.focus();
+
+      const { result } = renderHook(() => useReplaceReview(params));
+
+      act(() => result.current.showReview(REVIEW_STATE));
+
+      expect(widgetFocus).not.toHaveBeenCalled();
+      expect(revealLineInCenter).not.toHaveBeenCalled();
+      outside.remove();
+    });
+  });
 
   it('showReview creates one decoration per original line and one per generated line', () => {
     const params = makeParams();

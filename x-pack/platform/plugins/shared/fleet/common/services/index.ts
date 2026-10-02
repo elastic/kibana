@@ -30,6 +30,7 @@ export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limite
 export {
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,
@@ -41,6 +42,10 @@ export {
   isAgentRequestDiagnosticsSupported,
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from './is_agent_request_diagnostics_supported';
+export {
+  isAgentRestartSupported,
+  MINIMUM_RESTART_AGENT_VERSION,
+} from './is_agent_restart_supported';
 export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,

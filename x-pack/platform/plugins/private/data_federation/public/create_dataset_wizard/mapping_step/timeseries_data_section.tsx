@@ -52,7 +52,7 @@ export function TimeseriesDataSection({
             <h3>
               <FormattedMessage
                 id="xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel"
-                defaultMessage="Timeseries data"
+                defaultMessage="Enable time-based filtering"
               />
             </h3>
           </EuiTitle>
@@ -62,7 +62,7 @@ export function TimeseriesDataSection({
             showLabel={false}
             label={i18n.translate(
               'xpack.dataFederation.createDatasetWizard.timeseriesToggleAriaLabel',
-              { defaultMessage: 'Timeseries data' }
+              { defaultMessage: 'Enable time-based filtering' }
             )}
             checked={isEnabled}
             onChange={(e) => onToggle(e.target.checked)}
@@ -76,7 +76,7 @@ export function TimeseriesDataSection({
           <>
             <FormattedMessage
               id="xpack.dataFederation.createDatasetWizard.timeseriesToggleEnabledHelp"
-              defaultMessage="Mapping {timestampField} is required so queries and dashboards can filter by time."
+              defaultMessage="Choose the date field to map to {timestampField}."
               values={{ timestampField: <EuiCode>{TIMESTAMP_LOGICAL_FIELD_NAME}</EuiCode> }}
             />
           </>
@@ -84,7 +84,7 @@ export function TimeseriesDataSection({
           <>
             <FormattedMessage
               id="xpack.dataFederation.createDatasetWizard.timeseriesToggleDisabledHelp"
-              defaultMessage="If you have timeseries data, you need to define {timestampField} in order to ensure we process your data correctly."
+              defaultMessage="Queries and dashboards can't filter by time without a field mapped to {timestampField}."
               values={{ timestampField: <EuiCode>{TIMESTAMP_LOGICAL_FIELD_NAME}</EuiCode> }}
             />
           </>
