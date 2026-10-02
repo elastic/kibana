@@ -76,13 +76,6 @@
     }
   },
   {
-    "id": "contextual-security",
-    "name": "Contextual Security",
-    "github": {
-      "team": "elastic/contextual-security"
-    }
-  },
-  {
     "id": "contextual-security-apps",
     "name": "Contextual Security Apps",
     "areas": [
