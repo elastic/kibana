@@ -11,23 +11,22 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 
 import {
   getPostCaseRequest,
+  getUnifiedFilesAttachmentReq,
   postCaseReq,
   postCommentAlertReq,
   postCommentUserReq,
-  postFileReq,
 } from '../../../../common/lib/mock';
 import {
+  bulkCreateAttachments,
   bulkDeleteAttachments,
   createCase,
   createComment,
-  createFileAttachment,
   deleteAllCaseItems,
   findCaseUserActions,
   getAllComments,
   getCase,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
-import { deleteAllFiles } from '../../../../common/lib/api/files';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -43,7 +42,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('bulk_delete_attachments', () => {
     afterEach(async () => {
-      await deleteAllFiles({ supertest });
       await deleteAllCaseItems(es);
     });
 
@@ -174,25 +172,30 @@ export default ({ getService }: FtrProviderContext): void => {
       it('returns a 400 and deletes nothing when one of the ids is a file attachment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
-        const theCase = await createComment({
+        const caseWithComment = await createComment({
           supertest,
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const caseWithFile = await createFileAttachment({
+        const userCommentId = caseWithComment.comments![0].id;
+
+        // Built as an attachment payload rather than a real upload: the file kind is only
+        // registered for the real plugin owners, not the fixture ones, and the route only cares
+        // that the attachment resolves to the `file` type.
+        const caseWithFile = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: postFileReq,
+          params: [getUnifiedFilesAttachmentReq()],
         });
 
-        const fileAttachment = caseWithFile.comments!.find(
-          (comment) => comment.id !== theCase.comments![0].id
-        )!;
+        const fileAttachmentId = caseWithFile.comments!.find(
+          (comment) => comment.id !== userCommentId
+        )!.id;
 
         await bulkDeleteAttachments({
           supertest,
           caseId: postedCase.id,
-          attachmentIds: [theCase.comments![0].id, fileAttachment.id],
+          attachmentIds: [userCommentId, fileAttachmentId],
           expectedHttpCode: 400,
         });
 
