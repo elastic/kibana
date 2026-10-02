@@ -118,6 +118,10 @@ export const INVESTIGATION_STATUSES = [
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
+/** Whether an investigation has settled and can no longer transition to another status. */
+export const isTerminalStatus = (status: InvestigationStatus): boolean =>
+  status === 'completed' || status === 'failed' || status === 'cancelled';
+
 export const UPDATABLE_INVESTIGATION_STATUSES = [
   'running',
   'completed',

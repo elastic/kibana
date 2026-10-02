@@ -87,17 +87,18 @@ describe('deliverInvestigationNotifications', () => {
         ),
     };
     const execute = jest.fn().mockResolvedValue(ok);
+    const getExecute = jest.fn().mockResolvedValue(execute);
     const controller = new AbortController();
     const deliver = () =>
       deliverInvestigationNotifications({
         investigation: record,
         investigationUrl: 'https://kibana.example.com/s/ops/app/r?l=investigation',
-        execute,
+        getExecute,
         client: client as never,
         signal: controller.signal,
         logger,
       });
-    return { record, client, execute, controller, deliver };
+    return { record, client, execute, getExecute, controller, deliver };
   };
 
   beforeEach(() => jest.clearAllMocks());
@@ -181,6 +182,42 @@ describe('deliverInvestigationNotifications', () => {
       priorAttempt,
       expect.objectContaining({ destination_index: 0, status: 'sent', message_ts: ok.data.ts }),
     ]);
+  });
+
+  it('counts existing and new unconfirmed attempts without re-reading the investigation', async () => {
+    const { record, client, execute, getExecute, deliver } = setup([
+      destination(),
+      destination(),
+      destination(),
+    ]);
+    record.notifications = [
+      {
+        destination_index: 0,
+        status: 'unconfirmed',
+        attempt_id: 'prior-attempt',
+        attempted_at: '2026-10-02T00:00:00.000Z',
+      },
+    ];
+    execute.mockResolvedValueOnce({ ...ok, data: {} });
+
+    await expect(deliver()).resolves.toEqual({ sent: 1, failed: 0, unconfirmed: 2 });
+    expect(client.get).not.toHaveBeenCalled();
+    expect(getExecute).toHaveBeenCalledTimes(1);
+    expect(getExecute.mock.invocationCallOrder[0]).toBeLessThan(
+      client.claimNotificationDestination.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('stops before claiming if cancelled during Actions setup', async () => {
+    const { controller, client, execute, getExecute, deliver } = setup();
+    getExecute.mockImplementation(async () => {
+      controller.abort();
+      return execute;
+    });
+
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+    expect(client.claimNotificationDestination).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
   });
 
   it('persists connector error responses as failed', async () => {
@@ -318,12 +355,12 @@ describe('deliverInvestigationNotifications', () => {
   });
 
   it('returns early for a running investigation', async () => {
-    const { record, client, execute, controller } = setup();
+    const { record, client, execute, getExecute, controller } = setup();
     await expect(
       deliverInvestigationNotifications({
         investigation: { ...record, status: 'running' },
         investigationUrl: '',
-        execute,
+        getExecute,
         client: client as never,
         signal: controller.signal,
         logger,

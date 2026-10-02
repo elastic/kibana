@@ -10,6 +10,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsClient } from '../../client/investigations_client';
 import type { GetInvestigationResponse, InvestigationNotificationOutcome } from '../../../common';
+import { isTerminalStatus } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
 import type { ExecuteConnector, NotifiableInvestigation } from './notification_delivery';
 
@@ -19,20 +20,13 @@ export interface DeliverInvestigationNotificationsResult {
   unconfirmed: number;
 }
 
-const TERMINAL_STATUSES: ReadonlyArray<GetInvestigationResponse['status']> = [
-  'completed',
-  'failed',
-  'cancelled',
-];
-
 const FALLBACK_DELIVERY_ERROR = 'Notification delivery failed';
 
 /** Claims and records each destination separately so replay never resends an uncertain attempt. */
 export const deliverInvestigationNotifications = async ({
   investigation,
   investigationUrl,
-  execute,
-  setupError,
+  getExecute,
   client,
   signal,
   logger,
@@ -43,28 +37,42 @@ export const deliverInvestigationNotifications = async ({
       'investigation_id' | 'notificationDestinations' | 'notifications'
     >;
   investigationUrl: string;
-  execute?: ExecuteConnector;
-  setupError?: string;
+  getExecute: () => Promise<ExecuteConnector>;
   client: Pick<
     NightshiftInvestigationsClient,
-    'claimNotificationDestination' | 'recordNotificationOutcome' | 'get'
+    'claimNotificationDestination' | 'recordNotificationOutcome'
   >;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
 }): Promise<DeliverInvestigationNotificationsResult> => {
-  const notificationDestinations = investigation.notificationDestinations ?? [];
-  const attemptedDestinationIndices = new Set(
-    (investigation.notifications ?? []).map(({ destination_index }) => destination_index)
-  );
   const result = { sent: 0, failed: 0, unconfirmed: 0 };
-  if (!TERMINAL_STATUSES.includes(investigation.status)) {
+  if (!isTerminalStatus(investigation.status)) {
     return result;
   }
 
-  for (const [destinationIndex, notificationDestination] of notificationDestinations.entries()) {
-    if (attemptedDestinationIndices.has(destinationIndex)) {
-      continue;
-    }
+  const notifications = investigation.notifications ?? [];
+  result.unconfirmed = notifications.filter(({ status }) => status === 'unconfirmed').length;
+  const attemptedDestinationIndices = new Set(
+    notifications.map(({ destination_index }) => destination_index)
+  );
+  const eligibleDestinations = (investigation.notificationDestinations ?? [])
+    .map((destination, index) => [index, destination] as const)
+    .filter(([index]) => !attemptedDestinationIndices.has(index));
+  if (!eligibleDestinations.length || signal.aborted) {
+    return result;
+  }
+
+  // Initialize Actions once before persisting any claims, including when setup fails.
+  let execute: ExecuteConnector | undefined;
+  let setupError: string | undefined;
+  try {
+    execute = await getExecute();
+  } catch (error) {
+    setupError =
+      error instanceof Error ? error.message : 'Could not initialize notification delivery';
+  }
+
+  for (const [destinationIndex, notificationDestination] of eligibleDestinations) {
     if (signal.aborted) {
       break;
     }
@@ -137,14 +145,12 @@ export const deliverInvestigationNotifications = async ({
       result.sent++;
     } else if (outcome.status === 'failed') {
       result.failed++;
+    } else {
+      result.unconfirmed++;
     }
     if (signal.aborted) {
       break;
     }
   }
-  const latest = await client.get(investigation.investigation_id);
-  result.unconfirmed = (latest.notifications ?? []).filter(
-    ({ status }) => status === 'unconfirmed'
-  ).length;
   return result;
 };

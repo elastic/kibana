@@ -169,6 +169,7 @@ describe('sendNotificationsStepDefinition', () => {
     const {
       definition,
       execute,
+      get,
       getInvestigationsClient,
       getActionsClientWithRequestInSpace,
       recordNotificationOutcome,
@@ -177,6 +178,7 @@ describe('sendNotificationsStepDefinition', () => {
     await expect(definition.handler(createContext(signal))).resolves.toEqual({
       output: { sent: 1, failed: 0, unconfirmed: 0 },
     });
+    expect(get).toHaveBeenCalledTimes(1);
     expect(getInvestigationsClient).toHaveBeenCalledWith(request, 'ops');
     expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, 'ops');
     expect(execute).toHaveBeenCalledWith(

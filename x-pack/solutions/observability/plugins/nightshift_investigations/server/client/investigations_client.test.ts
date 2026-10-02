@@ -1299,6 +1299,28 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
+  it('uses the stored pending record without recovering unused destination inputs', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'pending' }, { id: EXECUTION_ID, version: 'v1' })
+    );
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeEnsureExecution({ context: { inputs: { notificationDestinations: 'unused' } } })
+    );
+
+    await makeClient().ensureOrCreate(EXECUTION_ID);
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      patch: {
+        status: 'running',
+        started_at: '2024-01-01T00:00:00Z',
+        executed_by: 'workflow-user',
+      },
+      version: 'v1',
+    });
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
   it('treats a lost pending-to-running race as a no-op', async () => {
     repository.get.mockResolvedValue(
       makeRecord(
@@ -1909,14 +1931,14 @@ describe('Nightshift notification delivery claims', () => {
   );
 
   it.each(invalidNotificationDestinations)(
-    'rejects invalid persisted destinations before claiming (%j)',
+    'claims without revalidating or changing stored destination params (%j)',
     async (notificationDestination) => {
       stored = makeRecord({ notificationDestinations: [notificationDestination] });
-      await expect(makeClient().claimNotificationDestination('inv-1', 0, 'a')).rejects.toThrow(
-        InvalidNotificationDestinationError
+      await expect(makeClient().claimNotificationDestination('inv-1', 0, 'a')).resolves.toEqual(
+        expect.objectContaining({ destination_index: 0, attempt_id: 'a', status: 'unconfirmed' })
       );
-      expect(repository.update).not.toHaveBeenCalled();
-      expect(stored.notifications).toBeUndefined();
+      expect(stored.notificationDestinations).toEqual([notificationDestination]);
+      expect(stored.notifications).toHaveLength(1);
     }
   );
 

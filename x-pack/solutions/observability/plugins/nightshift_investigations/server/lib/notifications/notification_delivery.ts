@@ -54,7 +54,7 @@ const getNotificationHandler = (type: string): NotificationHandler => {
   throw new InvalidNotificationDestinationError(`Unsupported notification type "${type}"`);
 };
 
-/** Validates supported notification types and their destination params before execution or claims. */
+/** Validates supported notification types and their destination params at investigation input boundaries. */
 export const validateNotificationDestination = (
   notificationDestination: InvestigationNotificationDestination
 ): void => {
@@ -66,6 +66,11 @@ export const validateNotificationDestination = (
 export const prepareNotificationDelivery = (
   context: NotificationDeliveryContext
 ): NotificationDelivery => {
-  validateNotificationDestination(context.notificationDestination);
-  return getNotificationHandler(context.notificationDestination.type).prepareDelivery(context);
+  const notificationDestination = investigationNotificationDestinationSchema.parse(
+    context.notificationDestination
+  );
+  return getNotificationHandler(notificationDestination.type).prepareDelivery({
+    ...context,
+    notificationDestination,
+  });
 };

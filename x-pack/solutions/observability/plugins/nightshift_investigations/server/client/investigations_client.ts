@@ -47,6 +47,7 @@ import {
   freeFormContextSchema,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
+  isTerminalStatus,
 } from '../../common';
 import type {
   InvestigationAttributes,
@@ -73,10 +74,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
-}
-
-function isTerminalStatus(status: InvestigationStatus): boolean {
-  return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
 /** Used when persist omitted `error`. */
@@ -593,9 +590,6 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const { subject, title, triggerType, concurrencyKey, notificationDestinations } =
-      parseExecutionInvestigationMetadata(execution.context);
-
     const startedAt = execution.startedAt ?? new Date().toISOString();
 
     if (existing) {
@@ -607,6 +601,9 @@ export class NightshiftInvestigationsClient {
       });
       return;
     }
+
+    const { subject, title, triggerType, concurrencyKey, notificationDestinations } =
+      parseExecutionInvestigationMetadata(execution.context);
 
     if (!subject || !title) {
       throw new InvestigationMetadataMissingError(investigationId);
@@ -764,7 +761,7 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Reads the investigation and skips nonterminal runs, missing destinations, or existing attempts.
-   * Validates the destination, appends an unconfirmed attempt, and saves it before the caller posts.
+   * Appends an unconfirmed attempt and saves it before the caller posts the prepared notification.
    * The persisted attempt makes sequential replays skip delivery after a crash or result-write failure.
    * Assumes one sender per investigation; overlapping callers are not coordinated.
    */
@@ -787,7 +784,6 @@ export class NightshiftInvestigationsClient {
     ) {
       return undefined;
     }
-    validateNotificationDestination(notificationDestination);
     const notification: InvestigationNotification = {
       destination_index: destinationIndex,
       status: 'unconfirmed',

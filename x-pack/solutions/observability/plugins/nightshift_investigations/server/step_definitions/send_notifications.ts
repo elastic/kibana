@@ -13,7 +13,6 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationLocator } from '../../common/locators';
 import type { GetInvestigationsClient } from '../routes/types';
-import type { ExecuteConnector } from '../lib/notifications/notification_delivery';
 import { deliverInvestigationNotifications } from '../lib/notifications/deliver_investigation_notifications';
 
 const inputSchema = z.object({
@@ -56,42 +55,6 @@ export const sendNotificationsStepDefinition = ({
       // Reads the settled record rather than the agent output so the message matches Kibana.
       const client = getInvestigationsClient(request, spaceId);
       const investigation = await client.get(investigationId);
-      const terminal = ['completed', 'failed', 'cancelled'].includes(investigation.status);
-      const notifications = investigation.notifications ?? [];
-      const notificationDestinations = investigation.notificationDestinations ?? [];
-      const hasEligibleDestination = notificationDestinations.some(
-        (_destination, destinationIndex) =>
-          !notifications.some(({ destination_index }) => destination_index === destinationIndex)
-      );
-      if (!terminal || !hasEligibleDestination) {
-        return {
-          output: {
-            sent: 0,
-            failed: 0,
-            unconfirmed: terminal
-              ? notifications.filter(({ status }) => status === 'unconfirmed').length
-              : 0,
-          },
-        };
-      }
-      let execute: ExecuteConnector | undefined;
-      let setupError: string | undefined;
-      if (!context.abortSignal.aborted) {
-        try {
-          const actions = getActions();
-          if (!actions) {
-            throw new Error('actions plugin is not available');
-          }
-          const actionsClient = await actions.getActionsClientWithRequestInSpace(
-            request,
-            brandSpaceId(spaceId)
-          );
-          execute = (execution) => actionsClient.execute(execution);
-        } catch (error) {
-          setupError =
-            error instanceof Error ? error.message : 'Could not initialize notification delivery';
-        }
-      }
       // Without server.publicBaseUrl, the server locator returns a relative URL.
       const output = await deliverInvestigationNotifications({
         investigation,
@@ -100,8 +63,17 @@ export const sendNotificationsStepDefinition = ({
           kibanaUrl
         ).toString(),
         logger: context.logger,
-        execute,
-        setupError,
+        getExecute: async () => {
+          const actions = getActions();
+          if (!actions) {
+            throw new Error('actions plugin is not available');
+          }
+          const actionsClient = await actions.getActionsClientWithRequestInSpace(
+            request,
+            brandSpaceId(spaceId)
+          );
+          return (execution) => actionsClient.execute(execution);
+        },
         client,
         signal: context.abortSignal,
       });
