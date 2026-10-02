@@ -280,8 +280,9 @@ components:
           enum: [included]
           description: Must be the value "included"
 
-    BlocklistHashOrPathEntry:
+    BlocklistHashEntry:
       type: object
+      title: Blocklist hash entry
       required: [field, type, value, operator]
       properties:
         field:
@@ -290,19 +291,48 @@ components:
             - file.hash.md5
             - file.hash.sha1
             - file.hash.sha256
-            - file.path
-            - file.path.caseless
-          description: File hash or path field
+          description: File hash field
         type:
           type: string
           enum: [match_any]
-          description: Must be match_any for blocklists
+          description: Must be match_any for blocklist hash entries
         value:
           type: array
           items:
             type: string
           minItems: 1
-          description: Array of hash values or file paths
+          description: Array of hash values
+        operator:
+          type: string
+          enum: [included]
+          description: Must be the value "included"
+
+    BlocklistPathOrFileNameEntry:
+      type: object
+      title: Blocklist path or file name entry
+      required: [field, type, value, operator]
+      properties:
+        field:
+          type: string
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+          description: File path or file name field (available on all OS)
+        type:
+          type: string
+          enum: [match_any, wildcard]
+          description: |
+            Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)
+        value:
+          oneOf:
+            - type: string
+              description: Single value (used with wildcard)
+            - type: array
+              items:
+                type: string
+              minItems: 1
+              description: Array of values (used with match_any)
         operator:
           type: string
           enum: [included]
@@ -310,6 +340,7 @@ components:
 
     BlocklistWindowsCodeSignatureEntry:
       type: object
+      title: Blocklist Windows code signature entry
       required: [field, type, entries]
       properties:
         field:
@@ -926,11 +957,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
             * Code signature entry: only 1 allowed
           items:
             oneOf:
-              - $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/BlocklistHashEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameEntry'
               - $ref: '#/components/schemas/BlocklistWindowsCodeSignatureEntry'
         os_types:
           type: array
@@ -959,9 +991,11 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/BlocklistHashEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameEntry'
         os_types:
           type: array
           items:
@@ -989,9 +1023,11 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/BlocklistHashEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameEntry'
         os_types:
           type: array
           items:
