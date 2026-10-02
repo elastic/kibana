@@ -424,7 +424,6 @@ describe('ModelDetailFlyout', () => {
         'Zero Data Retention'
       );
       expect(screen.queryByTestId('modelDetailFlyoutDataRetentionTooltip')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('modelDetailFlyoutDataRetention')).not.toBeInTheDocument();
     });
 
     it('renders Retains data and a tooltip when metadata has no zero-data-retention property', async () => {
@@ -463,11 +462,12 @@ describe('ModelDetailFlyout', () => {
       );
     });
 
-    it('renders -- for data retention when metadata is absent', () => {
+    it('renders Retains data when metadata is absent', () => {
       renderFlyout();
 
-      expect(screen.getByTestId('modelDetailFlyoutDataRetention')).toHaveTextContent('--');
-      expect(screen.queryByTestId('modelDetailFlyoutDataRetentionBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('modelDetailFlyoutDataRetentionBadge')).toHaveTextContent(
+        'Retains data'
+      );
     });
   });
 });

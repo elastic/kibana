@@ -15,11 +15,7 @@ interface DataRetentionProps {
 }
 
 export const DataRetention = ({ metadata }: DataRetentionProps) => {
-  if (!metadata) {
-    return <span data-test-subj="modelDetailFlyoutDataRetention">--</span>;
-  }
-
-  if (metadata.heuristics?.properties?.includes('zero-data-retention')) {
+  if (metadata?.heuristics?.properties?.includes('zero-data-retention')) {
     return (
       <EuiBadge
         color="success"
