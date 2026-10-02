@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { LicenseType } from '@kbn/licensing-types';
 
 export type { DataSource, DataSourceType, DataSourceWithSecrets } from './datasource_types';
 export {
@@ -25,6 +26,8 @@ export {
 } from './valdiate_index_name';
 
 export const PLUGIN_ID = 'data_federation';
+
+export const MINIMUM_LICENSE_TYPE: LicenseType = 'enterprise';
 
 /** Base path for this plugin's HTTP APIs (internal). */
 export const INTERNAL_API_BASE_PATH = '/internal/data_federation' as const;

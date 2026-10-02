@@ -28,12 +28,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Comment } from '../types';
+import type { Comment, CommentReply } from '../types';
 import { CommentEditor } from './comment_editor';
 import { useComments, useCommentsState } from './comments_context';
 import { DisplayNameField, useDisplayName } from './display_name_field';
-import { useNow } from './hooks';
 import { SnapshotImage, useSnapshot } from './snapshot_image';
+
+const TIME: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
+const DAY_TIME: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', ...TIME };
+const FULL_DATE_TIME: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  ...DAY_TIME,
+  second: '2-digit',
+};
+const CLOCK_TIME: Intl.DateTimeFormatOptions = { ...TIME, second: '2-digit' };
 
 export interface ThreadContentProps {
   comment: Comment;
@@ -52,15 +60,12 @@ const CommentBody = ({ text }: { text: string }) => (
   </EuiMarkdownFormat>
 );
 
-export const TimeLabel = ({ at, tooltip = true }: { at: string; tooltip?: boolean }) => {
-  const { RelativeTime } = useComments().services;
-  // Rendered again every half minute, so that the host's relative time keeps up.
-  useNow();
-  const local = new Date(at).toLocaleString();
+/** When something happened: the time of day, with the date unless today's; in full as the tooltip. */
+export const TimeLabel = ({ at }: { at: string }) => {
+  const { formatDate } = useComments().services;
+  const today = new Date(at).toDateString() === new Date().toDateString();
   return (
-    <span title={tooltip ? local : undefined}>
-      {RelativeTime ? <RelativeTime value={at} /> : local}
-    </span>
+    <span title={formatDate(at, FULL_DATE_TIME)}>{formatDate(at, today ? TIME : DAY_TIME)}</span>
   );
 };
 
@@ -122,18 +127,15 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-/** When the comments were last fetched, and a way to fetch them again; drafts are kept. */
-const RefreshButton = ({
-  label,
-  'data-test-subj': dataTestSubj,
-}: {
-  /** What the button fetches again, as its tooltip. */
-  label: string;
-  'data-test-subj': string;
-}) => {
+/** When the thread was last fetched, with the list or on its own, and a way to fetch it again on its own; drafts are kept. */
+const RefreshButton = ({ id }: { id: string }) => {
   const controller = useComments();
-  const loadedAt = useCommentsState((state) => state.loadedAt);
-  const loading = useCommentsState((state) => state.loading);
+  const { formatDate } = controller.services;
+  const fetchedAt = useCommentsState((state) => state.refreshedAt[id] ?? state.loadedAt);
+  const refreshing = useCommentsState((state) => state.refreshingIds.has(id));
+  const label = i18n.translate('devComments.thread.refresh', {
+    defaultMessage: 'Refresh this thread',
+  });
   return (
     <EuiToolTip content={label}>
       <EuiButtonEmpty
@@ -141,18 +143,16 @@ const RefreshButton = ({
         color="text"
         iconType="refresh"
         flush="left"
-        isLoading={loading}
-        onClick={() => void controller.reload()}
-        data-test-subj={dataTestSubj}
+        isLoading={refreshing}
+        onClick={() => void controller.refresh(id)}
+        data-test-subj="devCommentsThreadRefresh"
       >
-        {loadedAt ? (
-          <>
-            {i18n.translate('devComments.refresh.updated', { defaultMessage: 'Updated' })}{' '}
-            <TimeLabel at={loadedAt} tooltip={false} />
-          </>
-        ) : (
-          i18n.translate('devComments.refresh.refresh', { defaultMessage: 'Refresh' })
-        )}
+        {fetchedAt
+          ? i18n.translate('devComments.refresh.updated', {
+              defaultMessage: 'Updated {time}',
+              values: { time: formatDate(fetchedAt, CLOCK_TIME) },
+            })
+          : i18n.translate('devComments.refresh.refresh', { defaultMessage: 'Refresh' })}
       </EuiButtonEmpty>
     </EuiToolTip>
   );
@@ -175,7 +175,6 @@ const CommentCard = ({
   resolved?: boolean;
 }>) => {
   const { euiTheme } = useEuiTheme();
-  // As in the panel's list: the name at the size of the text, what happened and when smaller.
   const nameFont = useEuiFontSize('xs');
   const metaFont = useEuiFontSize('xxs');
   const borderColor = resolved
@@ -240,19 +239,29 @@ const CommentCard = ({
   );
 };
 
-/** The first comment of a thread as an item of its timeline, with `children` in place of its text. */
-const RootComment = ({ comment, children }: PropsWithChildren<{ comment: Comment }>) => (
+/** A comment or reply as an item of the thread's timeline, `children` below its text. */
+const ThreadItem = ({
+  author,
+  text,
+  at,
+  label,
+  resolved,
+  children,
+}: PropsWithChildren<
+  Pick<CommentReply, 'author' | 'text'> & { at: string; label: string; resolved: boolean }
+>) => (
   <EuiComment
-    username={comment.author.displayName}
-    timelineAvatar={<EuiAvatar name={comment.author.displayName} initialsLength={1} />}
+    username={author.displayName}
+    timelineAvatar={<EuiAvatar name={author.displayName} initialsLength={1} />}
   >
     <CommentCard
-      name={comment.author.displayName}
-      actions={<CopyButton text={comment.text} />}
-      label={i18n.translate('devComments.thread.commented', { defaultMessage: 'commented' })}
-      at={comment.createdAt}
-      resolved={comment.resolved}
+      name={author.displayName}
+      actions={<CopyButton text={text} />}
+      label={label}
+      at={at}
+      resolved={resolved}
     >
+      <CommentBody text={text} />
       {children}
     </CommentCard>
   </EuiComment>
@@ -287,9 +296,9 @@ export const ThreadContent = ({ comment, onClose, showScreenshot = false }: Thre
     }
   };
 
-  // The screenshot, below the comment's text.
-  const context = comment.snapshot && (
+  const screenshot = comment.snapshot && (
     <>
+      <EuiSpacer size="xs" />
       <EuiButtonEmpty
         size="xs"
         iconType="image"
@@ -326,12 +335,7 @@ export const ThreadContent = ({ comment, onClose, showScreenshot = false }: Thre
       `}
     >
       <EuiFlexItem grow={false}>
-        <RefreshButton
-          label={i18n.translate('devComments.thread.refresh', {
-            defaultMessage: 'Refresh this thread',
-          })}
-          data-test-subj="devCommentsThreadRefresh"
-        />
+        <RefreshButton id={comment.id} />
       </EuiFlexItem>
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
@@ -360,31 +364,24 @@ export const ThreadContent = ({ comment, onClose, showScreenshot = false }: Thre
       })}
       gutterSize="m"
     >
-      <RootComment comment={comment}>
-        <CommentBody text={comment.text} />
-        {context && (
-          <>
-            <EuiSpacer size="xs" />
-            {context}
-          </>
-        )}
-      </RootComment>
+      <ThreadItem
+        author={comment.author}
+        text={comment.text}
+        at={comment.createdAt}
+        label={i18n.translate('devComments.thread.commented', { defaultMessage: 'commented' })}
+        resolved={comment.resolved}
+      >
+        {screenshot}
+      </ThreadItem>
       {comment.replies.map((item) => (
-        <EuiComment
+        <ThreadItem
           key={item.id}
-          username={item.author.displayName}
-          timelineAvatar={<EuiAvatar name={item.author.displayName} initialsLength={1} />}
-        >
-          <CommentCard
-            name={item.author.displayName}
-            actions={<CopyButton text={item.text} />}
-            label={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
-            at={item.createdAt}
-            resolved={comment.resolved}
-          >
-            <CommentBody text={item.text} />
-          </CommentCard>
-        </EuiComment>
+          author={item.author}
+          text={item.text}
+          at={item.createdAt}
+          label={i18n.translate('devComments.thread.replied', { defaultMessage: 'replied' })}
+          resolved={comment.resolved}
+        />
       ))}
     </EuiCommentList>
   );
@@ -407,10 +404,8 @@ export const ThreadContent = ({ comment, onClose, showScreenshot = false }: Thre
           ${euiScrollBarStyles(euiThemeContext)}
           /* Room for focus rings and the scrollbar. */
           padding: ${euiTheme.size.xs} ${euiTheme.size.xs} 0 0;
-          /* Under the popover's drop-shadow filter, Chrome hit-tests what is scrolled out of view
-             as if it were not clipped: a comment's copy button under the header takes the clicks
-             meant for the resolve button, and cards take those on the page above the popover.
-             A clip of the box itself is honored. */
+          /* Under the popover's drop-shadow filter, Chrome hit-tests content scrolled out of
+             view as if it were not clipped (it takes clicks meant for the header); a clip-path is honored. */
           clip-path: inset(0);
         `}
       >

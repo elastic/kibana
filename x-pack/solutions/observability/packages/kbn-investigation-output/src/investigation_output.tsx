@@ -36,7 +36,6 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   status,
   state,
   error,
-  getQueryHref,
 }) => {
   const hypotheses = state?.hypotheses ?? [];
   const header = buildHeader(status, state);
@@ -129,7 +128,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
                   padding: ${euiTheme.size.s} ${euiTheme.size.m};
                 `}
               >
-                <HypothesisRow hypothesis={hypothesis} getQueryHref={getQueryHref} />
+                <HypothesisRow hypothesis={hypothesis} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
