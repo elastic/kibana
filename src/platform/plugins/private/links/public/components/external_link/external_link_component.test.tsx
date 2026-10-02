@@ -96,6 +96,23 @@ describe('external link component', () => {
     expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('https://example.com');
   });
 
+  test('viewMode non-interactive disables the link and prevents navigation', async () => {
+    render(
+      <ExternalLinkComponent
+        link={defaultLinkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        viewMode="non-interactive"
+      />
+    );
+
+    const link = await screen.findByTestId('externalLink--https://example.com');
+    expect(link).toBeDisabled();
+
+    fireEvent.click(link);
+    expect(window.open).not.toHaveBeenCalled();
+    expect(coreServices.application.navigateToUrl).not.toHaveBeenCalled();
+  });
+
   test('disables link when url validation fails', async () => {
     const linkInfo = {
       ...defaultLinkInfo,

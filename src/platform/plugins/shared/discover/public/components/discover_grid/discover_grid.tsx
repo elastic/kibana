@@ -143,20 +143,23 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         {...props}
         {...(props.isInteractive ?? true
           ? {
-              enableInTableSearch: true,
               canDragAndDropColumns: true,
+              enableComparisonMode: true,
+              enableInTableSearch: true,
+              showSummaryColumnToggle: true,
               visibleCellActions: 3, // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
             }
           : {
-              isSortEnabled: false,
+              actions: false,
+              controlColumnIds: [],
               disableCellActions: true,
               disableColumnActions: true,
               isColumnSelectorEnabled: false,
-              showKeyboardShortcuts: false,
-              showDisplaySelector: false,
-              rowsPerPageOptions: [],
-              actions: false,
               isResizable: false,
+              isSortEnabled: false,
+              rowsPerPageOptions: [],
+              showDisplaySelector: false,
+              showKeyboardShortcuts: false,
             })}
         getRowIndicator={getRowIndicator}
       />

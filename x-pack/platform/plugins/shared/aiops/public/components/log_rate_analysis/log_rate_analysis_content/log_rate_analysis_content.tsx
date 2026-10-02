@@ -220,6 +220,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}
+          parentApi={parentApi}
           attachmentsMenu={
             <LogRateAnalysisAttachmentsMenu
               windowParameters={windowParameters}

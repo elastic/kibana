@@ -492,7 +492,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         >
           <Settings
             onBrushEnd={viewMode !== VIEW_MODE.BRUSH ? (onBrushEnd as BrushEndListener) : undefined}
-            onElementClick={onElementClick}
+            onElementClick={nonInteractive ? undefined : onElementClick}
             onProjectionAreaChange={({ projection }) => {
               setMlBrushMarginLeft(projection.left);
               setMlBrushWidth(projection.width);

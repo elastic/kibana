@@ -120,6 +120,34 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(1);
   });
 
+  test('viewMode non-interactive disables the link and prevents navigation', async () => {
+    const parentApi = createMockLinksParent({});
+    renderComponent({ parentApi, viewMode: 'non-interactive' });
+
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
+    expect(link).toBeDisabled();
+
+    fireEvent.click(link);
+    expect(parentApi.locator?.navigate).not.toHaveBeenCalled();
+    expect(window.open).not.toHaveBeenCalled();
+  });
+
+  test('viewMode non-interactive prevents window.open for open_in_new_tab links', async () => {
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, open_in_new_tab: true },
+      },
+      viewMode: 'non-interactive',
+    });
+
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
+    expect(link).toBeDisabled();
+
+    fireEvent.click(link);
+    expect(window.open).not.toHaveBeenCalled();
+  });
+
   test('modified click does not trigger event.preventDefault', async () => {
     renderComponent();
     const link = screen.getByTestId('dashboardLink--Dashboard 1');

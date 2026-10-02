@@ -260,7 +260,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
-    skippedColumns,
+    isInteractive ? skippedColumns : [...skippedColumns, 'Actions'],
     searchQuery,
     barColorOverride,
     barHighlightColorOverride
