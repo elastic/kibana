@@ -176,7 +176,6 @@ export const RunWorkflowPanel = ({
           ...(telemetry?.attachmentType !== undefined && {
             attachment_type: telemetry.attachmentType,
           }),
-          workflow_id: selectedId,
           succeeded,
           ...(workflowExecutionId && { workflow_execution_id: workflowExecutionId }),
           ...(telemetry?.itemCount !== undefined && { item_count: telemetry.itemCount }),
