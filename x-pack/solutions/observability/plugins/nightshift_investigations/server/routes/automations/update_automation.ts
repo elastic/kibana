@@ -28,6 +28,13 @@ const triggerRowSchema = z.discriminatedUnion('kind', [
     timezone: z.string().max(100).optional(),
     scopeQuery: z.string().max(10000).optional(),
   }),
+  z.object({
+    kind: z.literal('slack'),
+    event: z.enum(['message', 'mention', 'invite']),
+    channels: z.array(z.string().max(500)).max(100).optional(),
+    users: z.array(z.string().max(500)).max(100).optional(),
+    messageFilter: z.string().max(1000).optional(),
+  }),
 ]);
 
 export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
@@ -45,6 +52,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     body: z.object({
       name: z.string().min(1).max(500).optional(),
       description: z.string().max(5000).optional(),
+      tags: z.array(z.string().max(32)).max(50).optional(),
       isEnabled: z.boolean().optional(),
       trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
       execution: z
@@ -93,6 +101,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       ...existing.attributes,
       ...(params.body.name !== undefined && { name: params.body.name }),
       ...(params.body.description !== undefined && { description: params.body.description }),
+      ...(params.body.tags !== undefined && { tags: params.body.tags }),
       ...(params.body.isEnabled !== undefined && { isEnabled: params.body.isEnabled }),
       ...(params.body.trigger !== undefined && { trigger: params.body.trigger }),
       ...(params.body.execution !== undefined && {

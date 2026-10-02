@@ -28,6 +28,13 @@ const triggerRowSchema = z.discriminatedUnion('kind', [
     timezone: z.string().max(100).optional(),
     scopeQuery: z.string().max(10000).optional(),
   }),
+  z.object({
+    kind: z.literal('slack'),
+    event: z.enum(['message', 'mention', 'invite']),
+    channels: z.array(z.string().max(500)).max(100).optional(),
+    users: z.array(z.string().max(500)).max(100).optional(),
+    messageFilter: z.string().max(1000).optional(),
+  }),
 ]);
 
 const triggerSchema = z.object({
@@ -68,6 +75,8 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     body: z.object({
       name: z.string().min(1).max(500),
       description: z.string().max(5000).optional(),
+      tags: z.array(z.string().max(32)).max(50).optional(),
+      isEnabled: z.boolean().optional(),
       automationType: z.enum(['custom', 'managed']).optional(),
       trigger: triggerSchema,
       execution: executionSchema,
@@ -81,16 +90,18 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       throw serverUnavailable('Workflows management is not available');
     }
 
-    const spaceId =
-      (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+    const coreContext = await context.core;
+    const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
 
     const now = new Date().toISOString();
     const attributes: NightshiftAutomationAttributes = {
       name: params.body.name,
       description: params.body.description,
+      tags: params.body.tags,
+      author: coreContext.security.authc.getCurrentUser()?.username,
       automationType: params.body.automationType ?? 'custom',
-      isEnabled: true,
+      isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
       execution: params.body.execution,
       completion: params.body.completion,
