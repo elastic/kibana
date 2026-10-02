@@ -11,7 +11,8 @@ import { useAssignEscalation } from '../../../escalations/hooks/use_escalations_
 import { useAssignInvestigation } from '../../../investigations/hooks/use_investigations_api';
 import { CONNECTED_ASSIGNEES_LABELS } from './translations';
 import { useAssigneePickers } from './use_assignee_pickers';
-import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
+import { useCanManageInvestigations } from '../../../investigations/hooks/use_can_manage_investigations';
+import { useCanManageEscalations } from '../../../escalations/hooks/use_escalation_privileges';
 
 /**
  * Connected assignee picker for the investigation and escalation flyout headers.
@@ -31,7 +32,8 @@ const ConnectedAssigneesInner = ({
   refetchConversation,
   buttonIconSize,
 }: AssigneesSlotRenderProps) => {
-  const { manageEscalations, manageInvestigations } = useAgenticInvestigationsCapabilities();
+  const manageEscalations = useCanManageEscalations();
+  const manageInvestigations = useCanManageInvestigations();
 
   const canManage =
     (templateId === 'escalation' ? manageEscalations : manageInvestigations) && status !== 'closed';

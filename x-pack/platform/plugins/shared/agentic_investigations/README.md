@@ -49,14 +49,16 @@ One Kibana feature, `agenticInvestigations`.
 
 | Feature privilege | API | UI |
 | ----------------- | --- | -- |
-| `all`             | —   | —  |
-| `read`            | —   | —  |
+| `all`             | `read_investigations` | —  |
+| `read`            | `read_investigations` | —  |
 
 The feature carries `minimumLicense: 'enterprise'`.
 
 Sub-features are registered in this order: **Investigations**, then **Escalations**. That order drives placement in the Roles and Spaces feature pickers.
 
 Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalation create and update stay `includeIn: 'none'`, so All does not grant them. Escalation view is `includeIn: 'read'`, so base Read and All can list. Follow the sub-feature pattern for any new entity that is not intrinsic to an investigation.
+
+`read_investigations` is what the privileges probe reports as `investigations.read`; no route requires it yet.
 
 The shared `POST /internal/investigations/_suggest_user_profiles` route accepts either `manage_investigations` or `manage_escalations`, so both investigation and escalation managers can suggest assignees and collaborators without holding the other entity's privilege.
 
@@ -81,19 +83,18 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 The public plugin registers the conversation template UI for `investigation` and `escalation` once in `start`, through `registerTemplate` in `public/conversation_templates/registry/register_template.ts`, with one `TemplateDefinition` per template in `public/conversation_templates/templates/<template>/register.ts`. Solutions do not register these templates themselves; Agent Builder throws on a second registration.
 
 - **Registration** depends only on Agent Builder being available. It does not read any solution setting or capability, so a user who reaches an investigation through any solution (for example Nightshift) gets the same flyout.
-- **Write actions** are gated on this plugin's UI capabilities, read once at start:
+- **Write actions** are registered unconditionally and decide at render time, inside their lazy chunks, whether the user may use them. Each check passes on this plugin's UI capability or, without it, on the matching API privilege, so a user who holds the privilege through another feature (AlertZero and Nightshift grant some) gets the same actions:
 
-  | Action | Needs |
-  | ------ | ----- |
-  | Investigation status toggle, close modal | `agenticInvestigations.manageInvestigations` |
-  | Escalation modal | `agenticInvestigations.manageEscalations` |
-  | Escalation status toggle | `manageEscalations` and `manageInvestigations` |
-  | Linked investigations on an escalation | `agenticInvestigations.showEscalations` |
-  | Assignee pickers | rendered always; editable per the matching manage capability |
-  | Proposed actions | the optional `proposals` plugin; read-only without `proposals.decideProposals`, and deciding is authorized by the proposals API |
+  | Action | UI capability | or API privilege |
+  | ------ | ------------- | ---------------- |
+  | Investigation status toggle, assignees, close modal | `agenticInvestigations.manageInvestigations` | `manage_investigations` |
+  | Open escalation button and modal, escalation assignees | `agenticInvestigations.manageEscalations` | `manage_escalations` |
+  | Escalation status toggle | both of the above | `manage_escalations` and `manage_investigations` |
+  | Linked investigations on an escalation, existing escalations in the escalation modal | `agenticInvestigations.showEscalations` | `read_escalations` (or `manage_escalations`) |
+  | Proposed actions | the optional `proposals` plugin; read-only without `proposals.decideProposals`, and deciding is authorized by the proposals API | |
 
-- **No solution gates.** A solution's license or tier, its feature privileges and its settings do not gate the flyout. For example AlertZero's subscription check, its `alertzero` Read/All privileges and `securitySolution:enableAlertZero` gate AlertZero's own pages, routes and attachment renderers, not this flyout. A solution that needs stricter rules on its own pages narrows the capabilities there (AlertZero's queue also requires AlertZero All for manage actions).
-- **No fallback to API privileges yet.** UI capabilities belong to the feature that declares them, so a role that only grants `manage_investigations` through another feature (Nightshift `all` does) does not get `manageInvestigations`. Those users see a read-only flyout even though the API would accept their writes. Nightshift work (NS-1619 s5) has to either add a fallback or grant these capabilities to Nightshift users.
+  The status toggle and assignee pickers render disabled or read-only when the check fails; the other slots render nothing. When the UI capability is missing, the hooks (`useCanManageInvestigations`, `useCanManageEscalations`, `useCanReadEscalations`) ask `GET /internal/investigations/_privileges` once per page and share the answer; users with the capabilities never make that request. The route reports `{ investigations: { read, manage }, escalations: { read, manage } }` for the caller and needs no privilege of its own.
+- **No solution gates.** A solution's license or tier, its feature privileges and its settings do not gate the flyout. For example AlertZero's subscription check, its `securitySolution:enableAlertZero` setting and its `AccessBoundary` gate AlertZero's own pages, routes and attachment renderers, not this flyout. A solution that needs stricter rules on its own pages narrows the capabilities there (AlertZero's queue also requires AlertZero All for manage actions).
 - **Icons.** The investigation template uses the solution-neutral `magnifyExclamation` (AlertZero used the security-specific `securitySignalDetected`) and the escalation template `warning`, kept from AlertZero.
 
 The status and assignee signals and the shared query client in `public/` are module-level singletons. Solution pages must import them from `@kbn/agentic-investigations-plugin/public` so a change in the flyout reaches their queue views.

@@ -42,7 +42,7 @@ import {
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
 import { useOpenInChat } from '../../../hooks/use_open_in_chat';
 import { CreateEscalationForm } from './create_escalation_form';
-import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
+import { useCanReadEscalations } from '../../../escalations/hooks/use_escalation_privileges';
 
 const T = ESCALATION_MODAL_TRANSLATIONS;
 
@@ -64,7 +64,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       services: { notifications },
     } = useKibana<CoreStart>();
 
-    const { showEscalations } = useAgenticInvestigationsCapabilities();
+    const showEscalations = useCanReadEscalations();
 
     const { getChatHref, openChat } = useOpenInChat();
 

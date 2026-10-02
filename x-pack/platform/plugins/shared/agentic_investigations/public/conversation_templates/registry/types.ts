@@ -9,7 +9,6 @@ import type React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { RenderAssignees, RenderStatus } from '@kbn/agentic-investigations-common';
-import type { AgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import type { AgenticInvestigationsPublicStartDependencies } from '../../types';
 
 export type TemplateStartDependencies = AgenticInvestigationsPublicStartDependencies & {
@@ -33,7 +32,6 @@ export interface TemplateRegistrationContext {
   core: CoreStart;
   startDeps: TemplateStartDependencies;
   services: TemplateServices;
-  capabilities: AgenticInvestigationsCapabilities;
   makeLazyWithProviders: MakeLazyWithProviders;
   renderAssignees: RenderAssignees;
   renderStatus: RenderStatus;

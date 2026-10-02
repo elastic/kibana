@@ -26,7 +26,8 @@ import type {
   InvestigationClosePreviewResponse,
   EscalationClosePreviewResponse,
 } from '../../../../common';
-import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
+import { useCanManageInvestigations } from '../../../investigations/hooks/use_can_manage_investigations';
+import { useCanManageEscalations } from '../../../escalations/hooks/use_escalation_privileges';
 import { statusSignal } from './status_signal';
 import { getCloseErrorCode, isKnownCloseError, isPartialCloseError } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
@@ -211,7 +212,8 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
 }) => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
-  const { manageEscalations, manageInvestigations } = useAgenticInvestigationsCapabilities();
+  const manageEscalations = useCanManageEscalations();
+  const manageInvestigations = useCanManageInvestigations();
 
   // Closing an escalation requires both manage-escalations and manage-investigations.
   const canToggle =

@@ -13,11 +13,22 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useAssignEscalation } from '../../../escalations/hooks/use_escalations_api';
 import { useAssignInvestigation } from '../../../investigations/hooks/use_investigations_api';
 import { useUserProfiles, useSuggestUserProfiles } from '../../../user_profiles';
-import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
+import { useCanManageInvestigations } from '../../../investigations/hooks/use_can_manage_investigations';
+import { useCanManageEscalations } from '../../../escalations/hooks/use_escalation_privileges';
 import { ConnectedAssignees } from './connected_assignees';
 
-jest.mock('../../../hooks/use_agentic_investigations_capabilities');
-const mockUseCapabilities = useAgenticInvestigationsCapabilities as jest.Mock;
+jest.mock('../../../investigations/hooks/use_can_manage_investigations');
+jest.mock('../../../escalations/hooks/use_escalation_privileges');
+const mockPrivileges = ({
+  manageEscalations,
+  manageInvestigations,
+}: {
+  manageEscalations: boolean;
+  manageInvestigations: boolean;
+}) => {
+  (useCanManageEscalations as jest.Mock).mockReturnValue(manageEscalations);
+  (useCanManageInvestigations as jest.Mock).mockReturnValue(manageInvestigations);
+};
 
 jest.mock('../../../escalations/hooks/use_escalations_api', () => ({
   ...jest.requireActual('../../../escalations/hooks/use_escalations_api'),
@@ -81,8 +92,12 @@ const renderPicker = (
     capabilities?: { manageEscalations?: boolean; manageInvestigations?: boolean };
   } = {}
 ) => {
-  const { capabilities = { manageEscalations: true, manageInvestigations: true }, ...rest } = props;
-  mockUseCapabilities.mockReturnValue({ showEscalations: true, ...capabilities });
+  const { capabilities = {}, ...rest } = props;
+  mockPrivileges({
+    manageEscalations: true,
+    manageInvestigations: true,
+    ...capabilities,
+  });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(
@@ -107,8 +122,7 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: investigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseCapabilities.mockReturnValue({
-    showEscalations: true,
+  mockPrivileges({
     manageEscalations: true,
     manageInvestigations: true,
   });

@@ -34,12 +34,8 @@ jest.mock('../../../user_profiles', () => ({
   useSuggestUserProfiles: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_agentic_investigations_capabilities', () => ({
-  useAgenticInvestigationsCapabilities: jest.fn(() => ({
-    showEscalations: true,
-    manageEscalations: true,
-    manageInvestigations: true,
-  })),
+jest.mock('../../../escalations/hooks/use_escalation_privileges', () => ({
+  useCanReadEscalations: jest.fn(() => true),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -515,14 +511,10 @@ describe('ConnectedEscalationModal', () => {
     });
 
     it('does not fetch escalations when showEscalations is false', () => {
-      const { useAgenticInvestigationsCapabilities } = jest.requireMock(
-        '../../../hooks/use_agentic_investigations_capabilities'
+      const { useCanReadEscalations } = jest.requireMock(
+        '../../../escalations/hooks/use_escalation_privileges'
       );
-      (useAgenticInvestigationsCapabilities as jest.Mock).mockReturnValueOnce({
-        showEscalations: false,
-        manageEscalations: false,
-        manageInvestigations: true,
-      });
+      (useCanReadEscalations as jest.Mock).mockReturnValueOnce(false);
 
       renderModal();
 
