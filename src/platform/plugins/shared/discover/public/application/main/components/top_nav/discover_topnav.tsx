@@ -37,6 +37,7 @@ import {
   selectTab,
   selectTabCombinedFilters,
   useAppStateSelector,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -96,6 +97,7 @@ export const DiscoverTopNav = ({
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -109,14 +111,9 @@ export const DiscoverTopNav = ({
       // so it's visible but non-interactive until a query resolves a data view.
       return { disabled: true };
     }
-    const disabled =
-      (dataView.type !== 'esql' && !dataView.isTimeBased()) ||
-      (dataView.type === 'esql' && !dataView.timeFieldName);
-
-    return {
-      disabled,
-    };
-  }, [dataView]);
+    const isTimeBased = currentDataSource?.isTimeBased() ?? dataView.isTimeBased();
+    return { disabled: !isTimeBased };
+  }, [dataView, currentDataSource]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 

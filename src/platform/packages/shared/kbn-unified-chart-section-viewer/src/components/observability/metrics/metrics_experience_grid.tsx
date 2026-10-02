@@ -213,6 +213,7 @@ export const MetricsExperienceGrid = ({
           histogramCss={histogramCss}
           isDiscoverLoading={isDiscoverLoading}
           isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
         />
       </ChartsGrid>
       {isGridSettingsFlyoutOpen && (

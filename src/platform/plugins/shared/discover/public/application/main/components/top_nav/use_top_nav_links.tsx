@@ -10,6 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
@@ -19,7 +20,6 @@ import {
   dismissFlyouts,
   DiscoverFlyouts,
 } from '@kbn/discover-utils';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
