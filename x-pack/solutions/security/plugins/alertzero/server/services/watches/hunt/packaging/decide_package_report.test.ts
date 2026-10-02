@@ -6,7 +6,11 @@
  */
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import { buildProposalSubjectKey, decidePackageReport } from './decide_package_report';
+import {
+  buildProposalSubjectKey,
+  canFillRespondAction,
+  decidePackageReport,
+} from './decide_package_report';
 import type { CurrentRunState } from './types';
 
 const isolateHost: ActionCatalogEntry = {
@@ -50,6 +54,22 @@ const suspendProcess: ActionCatalogEntry = {
       parameters: { type: 'object' },
     },
     required: ['endpoint_ids', 'parameters'],
+  },
+};
+
+/** Required field `buildActionInput` has no way to supply — neither endpoint_ids nor parameters. */
+const quarantineFileWithJustification: ActionCatalogEntry = {
+  workflowId: 'system-security-action-quarantine-file',
+  name: 'Quarantine file',
+  category: 'respond',
+  impact: 'medium',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      endpoint_ids: { type: 'array', items: { type: 'string' } },
+      justification: { type: 'string' },
+    },
+    required: ['endpoint_ids', 'justification'],
   },
 };
 
@@ -218,6 +238,22 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({ processSelectors: [] }),
       catalog: { ok: true, actions: [killProcess, suspendProcess] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
+  it('treats a required field the builder cannot supply as unfillable', () => {
+    // `canFillRespondAction` only checked `parameters`; a schema requiring anything else
+    // (here `justification`) used to mint as executable anyway and fail after approval.
+    expect(canFillRespondAction({ entry: quarantineFileWithJustification })).toBe(false);
+  });
+
+  it('mints a recommendation instead of an executable proposal when a required field cannot be filled (trigger: no executable proposal at all)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState(),
+      catalog: { ok: true, actions: [quarantineFileWithJustification] },
     });
     expect(result.proposals).toHaveLength(1);
     expect(result.proposals[0].title).toBe('Analyst recommendation');
