@@ -233,13 +233,10 @@ export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  open: i18n.translate('xpack.significantEventsApp.significantEvent.status.open', {
-    defaultMessage: 'Open',
+  active: i18n.translate('xpack.significantEventsApp.significantEvent.status.active', {
+    defaultMessage: 'Active',
   }),
-  dismissed: i18n.translate('xpack.significantEventsApp.significantEvent.status.dismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  closed: i18n.translate('xpack.significantEventsApp.significantEvent.status.closed', {
-    defaultMessage: 'Closed',
+  inactive: i18n.translate('xpack.significantEventsApp.significantEvent.status.inactive', {
+    defaultMessage: 'Inactive',
   }),
 };
