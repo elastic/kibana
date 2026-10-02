@@ -201,7 +201,7 @@ describe('EntityPill – multiple entities', () => {
       />
     );
 
-    const path: string = mockGetUrlForApp.mock.calls[0][1].path;
+    const path = (mockGetUrlForApp.mock.calls[0][1] as { path: string }).path;
     const params = new URLSearchParams(path.replace(/^\?/, ''));
     const cspq = decode(params.get('cspq')!) as { query: { query: string } };
 
@@ -223,7 +223,7 @@ describe('EntityPill – multiple entities', () => {
       />
     );
 
-    const path: string = mockGetUrlForApp.mock.calls[0][1].path;
+    const path = (mockGetUrlForApp.mock.calls[0][1] as { path: string }).path;
     const params = new URLSearchParams(path.replace(/^\?/, ''));
     const cspq = decode(params.get('cspq')!) as { query: { query: string } };
 

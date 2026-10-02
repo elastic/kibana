@@ -153,7 +153,7 @@ describe('AlertsPill', () => {
       />
     );
 
-    const path: string = mockGetUrlForApp.mock.calls[0][1].path;
+    const path = (mockGetUrlForApp.mock.calls[0][1] as { path: string }).path;
     const params = new URLSearchParams(path.replace(/^\?/, ''));
 
     const filters = decode(params.get('filters')!) as Array<{
@@ -172,7 +172,7 @@ describe('AlertsPill', () => {
       />
     );
 
-    const path: string = mockGetUrlForApp.mock.calls[0][1].path;
+    const path = (mockGetUrlForApp.mock.calls[0][1] as { path: string }).path;
     const params = new URLSearchParams(path.replace(/^\?/, ''));
 
     const pageFilter = decode(params.get('pageFilters')!) as Array<{
@@ -200,7 +200,7 @@ describe('AlertsPill', () => {
     );
 
     const after = Date.now();
-    const path: string = mockGetUrlForApp.mock.calls[0][1].path;
+    const path = (mockGetUrlForApp.mock.calls[0][1] as { path: string }).path;
     const params = new URLSearchParams(path.replace(/^\?/, ''));
 
     const timerange = decode(params.get('timerange')!) as {
