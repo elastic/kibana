@@ -66,7 +66,10 @@ const setupMocks = ({
   isConfigurationFetched?: boolean;
   isConfigurationError?: boolean;
 } = {}) => {
-  useCasesContext.mockReturnValue({ permissions: { update: permissionsUpdate } });
+  useCasesContext.mockReturnValue({
+    owner: ['securitySolution'],
+    permissions: { update: permissionsUpdate },
+  });
   useCasesConfig.mockReturnValue({ runWorkflowsEnabled });
   mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow, canReadWorkflow });
   mockUseWorkflowsUIEnabledSetting.mockReturnValue(workflowsUIEnabled);
@@ -166,6 +169,15 @@ describe('useRunCaseWorkflow', () => {
           origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: basicCase.id },
         })
       );
+    });
+
+    it('reports the case-level origin over one case with the owner', () => {
+      const { result } = renderHookWithDefaults();
+      expect(result.current.telemetry).toEqual({
+        origin: CASE_WORKFLOW_ORIGIN_TYPE,
+        itemCount: 1,
+        owner: 'securitySolution',
+      });
     });
   });
 });

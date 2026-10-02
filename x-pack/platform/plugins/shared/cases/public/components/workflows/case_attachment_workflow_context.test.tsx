@@ -20,13 +20,11 @@ jest.mock('./use_run_case_workflow', () => ({
   useCanRunCaseWorkflow: jest.fn(),
 }));
 
-const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
-
-jest.mock('../../analytics/use_workflow_run_ebt', () => ({
-  useWorkflowRunTriggeredEBT: () => jest.fn(),
-  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
-    .getWorkflowRunOriginType,
+jest.mock('../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['securitySolution'] }),
 }));
+
+const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
 
 describe('useCaseAttachmentWorkflowContext', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -42,11 +40,12 @@ describe('useCaseAttachmentWorkflowContext', () => {
     expect(result.current).toEqual({ status: 'outside' });
   });
 
-  it('returns the case id and an executor factory inside a CaseAttachmentWorkflowProvider', () => {
+  it('returns the case id, owner, and an executor factory inside a CaseAttachmentWorkflowProvider', () => {
     const { result } = renderHook(() => useCaseAttachmentWorkflowContext(), { wrapper });
     expect(result.current).toEqual({
       status: 'available',
       caseId: 'case-1',
+      owner: 'securitySolution',
       createExecutor: expect.any(Function),
     });
   });
