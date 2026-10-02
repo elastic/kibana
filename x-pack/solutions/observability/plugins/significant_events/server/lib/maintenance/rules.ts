@@ -10,8 +10,7 @@ import type { SignificantEventsMaintenanceFailure } from '../../../common/mainte
 import { toMessage } from './to_message';
 
 /**
- * Toggle `enabled` on a set of alerting v2 signal rules. Rule pause/resume
- * targets the v2 engine only (v1 is being removed in a follow-up). Returns the
+ * Toggle `enabled` on a set of alerting v2 signal rules. Returns the
  * ids that were actually toggled (no error), the ids that failed for a non-not-found
  * reason, and one failure entry per fatal id. A missing rule is treated as
  * "already gone" and reported as neither toggled nor failed.
