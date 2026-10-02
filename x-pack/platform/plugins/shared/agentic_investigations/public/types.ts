@@ -18,5 +18,11 @@ export interface AgenticInvestigationsPublicStartDependencies {
   proposals?: ProposalsPublicPluginStart;
 }
 
+/** The part of `xpack.agenticInvestigations` exposed to the browser. */
+export interface AgenticInvestigationsPublicConfig {
+  /** Escalations are AlertZero-only for now; off on Observability serverless. */
+  escalations: { enabled: boolean };
+}
+
 export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;
 export type AgenticInvestigationsPublicPluginStart = Record<string, never>;

@@ -32,6 +32,8 @@ export interface TemplateRegistrationContext {
   core: CoreStart;
   startDeps: TemplateStartDependencies;
   services: TemplateServices;
+  /** When false, no template offers escalation actions. */
+  escalationsEnabled: boolean;
   makeLazyWithProviders: MakeLazyWithProviders;
   renderAssignees: RenderAssignees;
   renderStatus: RenderStatus;

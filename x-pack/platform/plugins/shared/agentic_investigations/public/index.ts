@@ -7,12 +7,16 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { AgenticInvestigationsPublicPlugin } from './plugin';
+import type { AgenticInvestigationsPublicConfig } from './types';
 
-export function plugin(_initializerContext: PluginInitializerContext) {
-  return new AgenticInvestigationsPublicPlugin();
+export function plugin(
+  initializerContext: PluginInitializerContext<AgenticInvestigationsPublicConfig>
+) {
+  return new AgenticInvestigationsPublicPlugin(initializerContext);
 }
 
 export type {
+  AgenticInvestigationsPublicConfig,
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
 } from './types';

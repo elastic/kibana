@@ -107,6 +107,17 @@ The status and assignee signals and the shared query client in `public/` are mod
 
 ## Escalations
 
+### Escalations are AlertZero-only for now
+
+`xpack.agenticInvestigations.escalations.enabled` (default `true`, exposed to the browser) turns escalations off. `config/serverless.oblt.yml` sets it to `false`, so Observability serverless projects (every tier) have no escalations; stateful deployments and Security serverless keep the default. When it is `false`:
+
+- The `agenticInvestigations` feature registers no Escalations sub-feature, so no role gets `read_escalations`, `manage_escalations`, `showEscalations` or `manageEscalations` from it.
+- No escalation route is registered, and `getEscalationsService()` on the start contract throws. The shared `POST /internal/investigations/_suggest_user_profiles` route stays, because the investigation assignee picker uses it.
+- The privileges probe reports `escalations: { read: false, manage: false }`, even when another feature grants the escalations API privileges.
+- The browser registers no `escalation` template UI, and the investigation template has no "Open escalation" button or escalation modal.
+
+It is a plugin flag rather than an `xpack.features.overrides` entry because an override that names an unregistered feature fails at startup, and the plugin is still disabled on Observability serverless.
+
 ### Model
 
 An **escalation** is a durable, shareable record that an analyst creates when a collection of investigations warrants formal escalation. Unlike proposals — which live in a bespoke index — escalations live in Agent Builder's `.chat-conversations` index as conversations with `template_id: 'escalation'`. That choice buys the full conversation stack: OCC-safe metadata writes, access control, space scoping, and Agent Builder's conversation template validation.

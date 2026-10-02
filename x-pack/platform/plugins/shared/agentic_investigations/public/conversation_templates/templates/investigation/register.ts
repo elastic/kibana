@@ -30,6 +30,7 @@ export const investigationTemplate: TemplateDefinition = {
     templateId,
     startDeps,
     services,
+    escalationsEnabled,
     makeLazyWithProviders,
     renderAssignees,
     renderStatus,
@@ -123,18 +124,23 @@ export const investigationTemplate: TemplateDefinition = {
       // The toggle itself disables when the user may not change the status.
       renderStatus,
       renderCloseInvestigationModal,
-      renderEscalationModal: (props) =>
-        React.createElement(
-          EscalationModalBoundary,
-          null,
-          React.createElement(LazyEscalationModal, props)
-        ),
-      wrapEscalationButton: (button) =>
-        React.createElement(
-          React.Suspense,
-          { fallback: null },
-          React.createElement(LazyManageEscalationsGate, null, button)
-        ),
+      // Without escalations the footer has no "Open escalation" button.
+      renderEscalationModal: escalationsEnabled
+        ? (props) =>
+            React.createElement(
+              EscalationModalBoundary,
+              null,
+              React.createElement(LazyEscalationModal, props)
+            )
+        : undefined,
+      wrapEscalationButton: escalationsEnabled
+        ? (button) =>
+            React.createElement(
+              React.Suspense,
+              { fallback: null },
+              React.createElement(LazyManageEscalationsGate, null, button)
+            )
+        : undefined,
       // Listing and deciding proposals needs the proposals plugin, which is optional here.
       renderProposedActions: proposals
         ? (props) =>

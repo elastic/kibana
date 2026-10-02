@@ -22,6 +22,11 @@ import {
 
 export interface InvestigationsPrivilegesDeps {
   getSecurity: () => Promise<SecurityPluginStart | undefined>;
+  /**
+   * `xpack.agenticInvestigations.escalations.enabled`. When false, escalations are reported as
+   * not held even if another feature grants their API privileges, because nothing serves them.
+   */
+  escalationsEnabled: boolean;
 }
 
 /** Reports the investigation and escalation API privileges a principal holds, for the UI. */
@@ -38,6 +43,7 @@ const NO_PRIVILEGES: ReadManagePrivileges = { read: false, manage: false };
  */
 export const createInvestigationsPrivilegesReader = ({
   getSecurity,
+  escalationsEnabled,
 }: InvestigationsPrivilegesDeps): InvestigationsPrivilegesReader => ({
   getPrivileges: async (request) => {
     const security = await getSecurity();
@@ -45,14 +51,14 @@ export const createInvestigationsPrivilegesReader = ({
       return { investigations: NO_PRIVILEGES, escalations: NO_PRIVILEGES };
     }
     const toAction = (privilege: string) => security.authz.actions.api.get(privilege);
-    const actions = {
-      investigationsRead: toAction(INVESTIGATIONS_API_PRIVILEGE_READ),
-      investigationsManage: toAction(INVESTIGATIONS_API_PRIVILEGE_MANAGE),
-      escalationsRead: toAction(ESCALATIONS_API_PRIVILEGE_READ),
-      escalationsManage: toAction(ESCALATIONS_API_PRIVILEGE_MANAGE),
-    };
+    const investigationsRead = toAction(INVESTIGATIONS_API_PRIVILEGE_READ);
+    const investigationsManage = toAction(INVESTIGATIONS_API_PRIVILEGE_MANAGE);
+    const escalationsRead = toAction(ESCALATIONS_API_PRIVILEGE_READ);
+    const escalationsManage = toAction(ESCALATIONS_API_PRIVILEGE_MANAGE);
     const response = await security.authz.checkPrivilegesDynamicallyWithRequest(request)({
-      kibana: Object.values(actions),
+      kibana: escalationsEnabled
+        ? [investigationsRead, investigationsManage, escalationsRead, escalationsManage]
+        : [investigationsRead, investigationsManage],
     });
     const held = new Set(
       (response.privileges?.kibana ?? [])
@@ -64,8 +70,10 @@ export const createInvestigationsPrivilegesReader = ({
       manage: held.has(manage),
     });
     return {
-      investigations: toReadManage(actions.investigationsRead, actions.investigationsManage),
-      escalations: toReadManage(actions.escalationsRead, actions.escalationsManage),
+      investigations: toReadManage(investigationsRead, investigationsManage),
+      escalations: escalationsEnabled
+        ? toReadManage(escalationsRead, escalationsManage)
+        : NO_PRIVILEGES,
     };
   },
 });

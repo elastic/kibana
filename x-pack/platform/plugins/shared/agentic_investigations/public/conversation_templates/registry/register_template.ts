@@ -19,6 +19,8 @@ import type {
 export interface RegisterTemplateOptions {
   core: CoreStart;
   startDeps: TemplateStartDependencies;
+  /** `xpack.agenticInvestigations.escalations.enabled`. */
+  escalationsEnabled: boolean;
   templates: readonly TemplateDefinition[];
 }
 
@@ -27,7 +29,12 @@ export interface RegisterTemplateOptions {
  * are gated at render time on the agentic investigations UI capabilities or, without them, on the
  * API privileges the privileges probe reports (see `PrivilegeGate`).
  */
-export const registerTemplate = ({ core, startDeps, templates }: RegisterTemplateOptions): void => {
+export const registerTemplate = ({
+  core,
+  startDeps,
+  escalationsEnabled,
+  templates,
+}: RegisterTemplateOptions): void => {
   const services: TemplateServices = { ...core, ...startDeps };
 
   // Every connected render prop mounts inside the Agent Builder flyout's own React root, so it
@@ -97,6 +104,7 @@ export const registerTemplate = ({ core, startDeps, templates }: RegisterTemplat
     core,
     startDeps,
     services,
+    escalationsEnabled,
     makeLazyWithProviders,
     renderAssignees,
     renderStatus,

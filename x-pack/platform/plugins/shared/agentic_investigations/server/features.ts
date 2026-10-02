@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
@@ -26,7 +27,48 @@ import {
   INVESTIGATIONS_API_PRIVILEGE_READ,
 } from './investigations/constants';
 
-export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
+/** Escalations are AlertZero-only for now, so the sub-feature is registered only when enabled. */
+const escalationsSubFeature: SubFeatureConfig = {
+  name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
+    defaultMessage: 'Escalations',
+  }),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          id: 'escalations_all',
+          name: i18n.translate('xpack.agenticInvestigations.escalationsAllPrivilegeName', {
+            defaultMessage: 'Manage escalations',
+          }),
+          includeIn: 'none',
+          api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+          savedObject: { all: [], read: [] },
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
+        },
+        {
+          id: 'escalations_read',
+          name: i18n.translate('xpack.agenticInvestigations.escalationsReadPrivilegeName', {
+            defaultMessage: 'View escalations',
+          }),
+          includeIn: 'read',
+          api: [ESCALATIONS_API_PRIVILEGE_READ],
+          savedObject: { all: [], read: [] },
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+        },
+      ],
+    },
+  ],
+};
+
+export const registerFeatures = ({
+  features,
+  escalationsEnabled,
+}: {
+  features: FeaturesPluginSetup;
+  /** `xpack.agenticInvestigations.escalations.enabled`. */
+  escalationsEnabled: boolean;
+}) => {
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
     name: i18n.translate('xpack.agenticInvestigations.featureName', {
@@ -75,38 +117,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           },
         ],
       },
-      {
-        name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
-          defaultMessage: 'Escalations',
-        }),
-        privilegeGroups: [
-          {
-            groupType: 'mutually_exclusive',
-            privileges: [
-              {
-                id: 'escalations_all',
-                name: i18n.translate('xpack.agenticInvestigations.escalationsAllPrivilegeName', {
-                  defaultMessage: 'Manage escalations',
-                }),
-                includeIn: 'none',
-                api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
-                savedObject: { all: [], read: [] },
-                ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
-              },
-              {
-                id: 'escalations_read',
-                name: i18n.translate('xpack.agenticInvestigations.escalationsReadPrivilegeName', {
-                  defaultMessage: 'View escalations',
-                }),
-                includeIn: 'read',
-                api: [ESCALATIONS_API_PRIVILEGE_READ],
-                savedObject: { all: [], read: [] },
-                ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
-              },
-            ],
-          },
-        ],
-      },
+      ...(escalationsEnabled ? [escalationsSubFeature] : []),
     ],
   });
 };

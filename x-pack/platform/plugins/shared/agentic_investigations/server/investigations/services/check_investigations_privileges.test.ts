@@ -73,7 +73,10 @@ describe('createInvestigationsPrivilegesReader', () => {
     ],
   ])('reports %s without throwing', async (_label, authorized, expected) => {
     const { security, checkPrivileges } = createSecurity(authorized);
-    const reader = createInvestigationsPrivilegesReader({ getSecurity: async () => security });
+    const reader = createInvestigationsPrivilegesReader({
+      getSecurity: async () => security,
+      escalationsEnabled: true,
+    });
 
     await expect(reader.getPrivileges(request)).resolves.toEqual(expected);
     expect(checkPrivileges).toHaveBeenCalledWith({
@@ -82,11 +85,34 @@ describe('createInvestigationsPrivilegesReader', () => {
   });
 
   it('reports nothing when security is unavailable', async () => {
-    const reader = createInvestigationsPrivilegesReader({ getSecurity: async () => undefined });
+    const reader = createInvestigationsPrivilegesReader({
+      getSecurity: async () => undefined,
+      escalationsEnabled: true,
+    });
 
     await expect(reader.getPrivileges(request)).resolves.toEqual({
       investigations: { read: false, manage: false },
       escalations: { read: false, manage: false },
+    });
+  });
+
+  it('reports no escalation privileges when escalations are disabled, whatever the role grants', async () => {
+    const { security, checkPrivileges } = createSecurity({
+      [INVESTIGATIONS_MANAGE]: true,
+      [ESCALATIONS_READ]: true,
+      [ESCALATIONS_MANAGE]: true,
+    });
+    const reader = createInvestigationsPrivilegesReader({
+      getSecurity: async () => security,
+      escalationsEnabled: false,
+    });
+
+    await expect(reader.getPrivileges(request)).resolves.toEqual({
+      investigations: { read: true, manage: true },
+      escalations: { read: false, manage: false },
+    });
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [INVESTIGATIONS_READ, INVESTIGATIONS_MANAGE],
     });
   });
 });
