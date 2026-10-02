@@ -214,6 +214,9 @@ export const AgentlessPackagePoliciesTable = ({
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string>();
   const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
   const [flyoutAgentPolicy, setFlyoutAgentPolicy] = useState<AgentPolicy>();
+  // Chosen when the flyout opens so an in-progress enrollment flow isn't swapped for the
+  // status details when the polled agent list picks up the newly enrolled agent.
+  const [flyoutType, setFlyoutType] = useState<'enrollment' | 'details'>('enrollment');
   const flyoutAgent = flyoutAgentPolicy?.id ? agentsByPolicyId[flyoutAgentPolicy.id] : undefined;
   const closeFlyout = () => {
     setFlyoutOpenForPolicyId(undefined);
@@ -230,6 +233,7 @@ export const AgentlessPackagePoliciesTable = ({
     if (flyoutPolicyIdFromQuery) {
       const pp = packagePolicies.find((p) => p.packagePolicy.id === flyoutPolicyIdFromQuery);
       if (pp) {
+        setFlyoutType('enrollment');
         setFlyoutOpenForPolicyId(flyoutPolicyIdFromQuery);
         setFlyoutPackagePolicy(pp.packagePolicy);
         setFlyoutAgentPolicy(pp.agentPolicies[0]);
@@ -387,6 +391,7 @@ export const AgentlessPackagePoliciesTable = ({
                     // Status badge click handler
                     const statusBadgeProps = {
                       onClick: () => {
+                        setFlyoutType(agent ? 'details' : 'enrollment');
                         setFlyoutOpenForPolicyId(packagePolicy.id);
                         setFlyoutPackagePolicy(packagePolicy);
                         setFlyoutAgentPolicy(agentPolicy);
@@ -515,7 +520,7 @@ export const AgentlessPackagePoliciesTable = ({
       />
       {flyoutOpenForPolicyId && flyoutPackagePolicy && (
         <>
-          {flyoutAgent ? (
+          {flyoutType === 'details' && flyoutAgent ? (
             <AgentlessStatusDetailsFlyout
               onClose={closeFlyout}
               policyName={flyoutPackagePolicy.name}

@@ -270,6 +270,32 @@ describe('AgentlessPackagePoliciesTable', () => {
     expect(result.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
   });
 
+  it('keeps the enrollment flyout open when the agent enrolls while it is open', async () => {
+    jest.useFakeTimers();
+    try {
+      mockSendGetAgents.mockResolvedValueOnce({
+        data: { items: [], total: 0, page: 1, perPage: 10000 },
+        error: null,
+      });
+      const renderer = createIntegrationsTestRendererMock();
+      const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+      const pendingBadge = await result.findByText('Pending');
+      await act(async () => {
+        fireEvent.click(pendingBadge);
+      });
+      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
+      // next poll returns the enrolled agent
+      await act(async () => {
+        jest.advanceTimersByTime(30000);
+      });
+      await waitFor(() => expect(result.getByText('Healthy')).toBeInTheDocument());
+      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
+      expect(result.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   describe('Details row action', () => {
     const agentlessProps = {
       ...defaultProps,
