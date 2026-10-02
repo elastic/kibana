@@ -260,7 +260,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                   instances: serviceSettings?.instances ?? [],
                   storedServiceVars,
                   globalRegion,
-                  namespace,
+                  namespace: DEFAULT_NAMESPACE,
                   authenticateAndDeployStep,
                   servicesMap: servicesMap ?? new Map(),
                   // Only override policy_ids when the selection drifted; otherwise a var-only redeploy

@@ -21,6 +21,7 @@ function makeGroup(instanceId: string, serviceId: string): DeployGroup {
       { instance: makeInstance(instanceId, serviceId), service: { id: serviceId } as never },
     ],
     isDuplicateGroup: false,
+    namespace: '',
   };
 }
 

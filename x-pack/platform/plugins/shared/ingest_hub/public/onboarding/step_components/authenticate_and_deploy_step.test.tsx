@@ -304,12 +304,14 @@ describe('AuthenticateAndDeployStep', () => {
           instanceIds: ['guardduty'],
           members: [original],
           isDuplicateGroup: false,
+          namespace: '',
         },
         {
           groupId: 'guardduty__dup-1',
           instanceIds: ['guardduty__dup-1'],
           members: [duplicate],
           isDuplicateGroup: true,
+          namespace: '',
         },
       ];
       const serviceVars = {
@@ -463,6 +465,7 @@ describe('AuthenticateAndDeployStep', () => {
             instanceIds: ['vpcflow'],
             members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
             isDuplicateGroup: false,
+            namespace: '',
           },
         ],
         isDeploying: false,
@@ -483,6 +486,7 @@ describe('AuthenticateAndDeployStep', () => {
             instanceIds: ['vpcflow'],
             members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
             isDuplicateGroup: false,
+            namespace: '',
           },
         ],
         isDeploying: false,
@@ -525,6 +529,7 @@ describe('AuthenticateAndDeployStep', () => {
           instanceIds: ['vpcflow'],
           members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
           isDuplicateGroup: false,
+          namespace: '',
         },
       ];
 
