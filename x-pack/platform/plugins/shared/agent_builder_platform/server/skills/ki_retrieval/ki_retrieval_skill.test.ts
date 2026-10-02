@@ -57,7 +57,7 @@ describe('kiRetrievalSkill', () => {
   });
 
   it('keeps retrieval to the AI indices assigned to the agent', () => {
-    expect(kiRetrievalSkill.content).toContain('search the AI indices assigned to you');
+    expect(kiRetrievalSkill.content).toContain('search the AI Indices assigned to you');
     expect(kiRetrievalSkill.content).toContain('`assigned_to_agent: true`');
   });
 
