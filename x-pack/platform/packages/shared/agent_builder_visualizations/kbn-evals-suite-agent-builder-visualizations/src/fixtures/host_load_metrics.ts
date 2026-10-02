@@ -80,7 +80,6 @@ export async function assertHostLoadMetricsReady(esClient: Client): Promise<void
 
 /** What the fixture owns, so cleanup never removes data it did not write. */
 export interface HostLoadFixture {
-  createdDataStream: boolean;
   /** Per-run `agent.id` on every seeded document. */
   runId: string;
 }
@@ -89,8 +88,12 @@ export async function seedHostLoadMetrics(
   esClient: Client,
   log: ToolingLog
 ): Promise<HostLoadFixture> {
+  // An empty stream left by an earlier run's cleanup holds nothing to skew the averages.
   const existed = await esClient.indices.exists({ index: HOST_METRICS_INDEX });
-  if (existed) {
+  const { count: existingCount } = existed
+    ? await esClient.count({ index: HOST_METRICS_INDEX })
+    : { count: 0 };
+  if (existingCount > 0) {
     log.warning(
       `${HOST_METRICS_INDEX} already exists; seeding ${HOST_NAME} documents alongside its data. ` +
         'Load averages in the eval window will include the pre-existing documents.'
@@ -105,7 +108,6 @@ export async function seedHostLoadMetrics(
   }).getClients({ clients: ['infraEsClient'] });
 
   const fixture: HostLoadFixture = {
-    createdDataStream: !existed,
     runId: `viz-eval-${randomUUID()}`,
   };
   try {
@@ -122,9 +124,9 @@ export async function seedHostLoadMetrics(
 }
 
 /**
- * Deletes the documents this run seeded, then drops the data stream only when
- * this run created it and nothing else has written to it since, so data from
- * earlier or concurrent runs (and real Beats data) is left untouched.
+ * Deletes only the documents this run seeded. The data stream is kept, even when
+ * empty: a concurrent run or Metricbeat can write to it at any moment, and no
+ * delete can be made conditional on it staying empty.
  */
 export async function cleanHostLoadMetrics(
   esClient: Client,
@@ -141,15 +143,6 @@ export async function cleanHostLoadMetrics(
       },
       refresh: true,
     });
-    if (!fixture.createdDataStream) {
-      return;
-    }
-    const { count } = await esClient.count({ index: HOST_METRICS_INDEX });
-    if (count > 0) {
-      log?.info(`Keeping ${HOST_METRICS_INDEX}: ${count} document(s) from other writers remain`);
-      return;
-    }
-    await esClient.indices.deleteDataStream({ name: HOST_METRICS_INDEX });
   } catch (error) {
     log?.warning(`Failed to clean ${HOST_METRICS_INDEX}: ${(error as Error).message}`);
   }

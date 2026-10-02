@@ -63,43 +63,16 @@ describe('cleanHostLoadMetrics', () => {
     refresh: true,
   };
 
-  const createEsClient = (remaining = 0) => ({
+  const createEsClient = () => ({
     indices: { deleteDataStream: jest.fn().mockResolvedValue({}) },
     deleteByQuery: jest.fn().mockResolvedValue({}),
-    count: jest.fn().mockResolvedValue({ count: remaining }),
+    count: jest.fn().mockResolvedValue({ count: 0 }),
   });
 
-  it('deletes the run documents, then the data stream it created once empty', async () => {
-    const esClient = createEsClient(0);
-
-    await cleanHostLoadMetrics(esClient as never, {
-      createdDataStream: true,
-      runId: 'viz-eval-run',
-    });
-
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith(RUN_QUERY);
-    expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: HOST_METRICS_INDEX });
-  });
-
-  it('keeps a data stream it created when another run has written to it', async () => {
-    const esClient = createEsClient(75);
-
-    await cleanHostLoadMetrics(esClient as never, {
-      createdDataStream: true,
-      runId: 'viz-eval-run',
-    });
-
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith(RUN_QUERY);
-    expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-  });
-
-  it('removes only the documents this run seeded from a pre-existing data stream', async () => {
+  it('removes only the documents this run seeded and keeps the data stream', async () => {
     const esClient = createEsClient();
 
-    await cleanHostLoadMetrics(esClient as never, {
-      createdDataStream: false,
-      runId: 'viz-eval-run',
-    });
+    await cleanHostLoadMetrics(esClient as never, { runId: 'viz-eval-run' });
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(RUN_QUERY);
     expect(esClient.count).not.toHaveBeenCalled();
@@ -112,11 +85,7 @@ describe('cleanHostLoadMetrics', () => {
     const log = { warning: jest.fn() };
 
     await expect(
-      cleanHostLoadMetrics(
-        esClient as never,
-        { createdDataStream: true, runId: 'viz-eval-run' },
-        log as never
-      )
+      cleanHostLoadMetrics(esClient as never, { runId: 'viz-eval-run' }, log as never)
     ).resolves.toBeUndefined();
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
