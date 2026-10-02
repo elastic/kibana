@@ -54,8 +54,8 @@ export const pendingProposalsLabel = (count: number): string =>
     values: { count },
   });
 
-export const moreSubjectsLabel = (count: number): string =>
-  i18n.translate('xpack.agenticInvestigations.investigations.moreSubjects', {
+export const moreEntitiesLabel = (count: number): string =>
+  i18n.translate('xpack.agenticInvestigations.investigations.moreEntities', {
     defaultMessage: '+{count}',
     values: { count },
   });

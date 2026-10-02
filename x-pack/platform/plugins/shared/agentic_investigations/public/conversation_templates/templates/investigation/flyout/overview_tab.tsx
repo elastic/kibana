@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   OverviewTab,
   conversationToInvestigation,
@@ -16,7 +15,7 @@ import {
 import type { Investigation } from '../../../../../common';
 import { HypothesesList } from '../../../../hypotheses/attachments/hypotheses_view';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
-import { SubjectRow } from '../../../../subjects/attachments/subject_view';
+import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 
 const readMetadataString = (value: unknown): string | undefined =>
@@ -37,16 +36,7 @@ export const toOverviewSections = (
   const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
 
   return {
-    subjects:
-      subjects.length > 0 ? (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {subjects.map((subject) => (
-            <EuiFlexItem key={`${subject.type}:${subject.id}`} grow={false}>
-              <SubjectRow subject={subject} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ) : undefined,
+    subjects: subjects.length > 0 ? <SubjectList subjects={subjects} /> : undefined,
     impact: hasImpact ? (
       <ImpactContent
         summary={impact.summary}

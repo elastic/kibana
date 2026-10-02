@@ -25,7 +25,7 @@ const investigation = (overrides: Partial<InvestigationSummary> = {}): Investiga
     {
       type: 'alert',
       id: 'alert-1',
-      snapshot: { rule_name: 'Checkout latency' },
+      snapshot: { rule_name: 'Latency rule' },
       created_at: '2026-07-28T14:00:00.000Z',
     },
     { type: 'alert', id: 'alert-2', created_at: '2026-07-28T14:00:00.000Z' },
@@ -53,7 +53,7 @@ const renderCard = (props: React.ComponentProps<typeof InvestigationCard>) =>
   );
 
 describe('InvestigationCard', () => {
-  it('shows the title, summary, first subject, impacted entities, and pending proposals', () => {
+  it('shows the title, summary, impacted entities, and pending proposals, but not the subjects', () => {
     renderCard({ investigation: investigation() });
 
     expect(screen.getByTestId('investigationCardTitle')).toHaveTextContent(
@@ -62,7 +62,7 @@ describe('InvestigationCard', () => {
     expect(screen.getByTestId('investigationCardSummary')).toHaveTextContent(
       'Checkout p99 tripled after a deploy.'
     );
-    expect(screen.getByTestId('investigationCardSubject')).toHaveTextContent('Checkout latency +1');
+    expect(screen.queryByText(/Latency rule/)).not.toBeInTheDocument();
     expect(screen.getAllByTestId('investigationCardEntity').map((el) => el.textContent)).toEqual([
       'checkout',
       'cart',
@@ -88,7 +88,6 @@ describe('InvestigationCard', () => {
 
     expect(screen.getByTestId('investigationCardRunning')).toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('investigationCardSubject')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
 
@@ -96,7 +95,7 @@ describe('InvestigationCard', () => {
     [
       'the first subject',
       investigation({ title: 'New conversation', title_pending: true }),
-      'Checkout latency',
+      'Latency rule',
     ],
     [
       "a Slack thread's question rather than its channel",
