@@ -101,7 +101,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: {
           description:
-            'The source of the execution. Possible values are: manual|help|history|starred|autocomplete|quick_search|quick_search_nl|search_button|time_filter',
+            'The source of the execution. Possible values are: manual|help|history|starred|autocomplete|quick_search_kql|quick_search_nl|search_button|time_filter',
         },
       },
       query_length: {
