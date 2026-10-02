@@ -9,7 +9,10 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
-import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
+import {
+  createConversationAlreadyExistsError,
+  DEFAULT_CONVERSATION_TITLE,
+} from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -31,7 +34,6 @@ import {
   InvestigationConflictError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
-  InvestigationMetadataMissingError,
   InvestigationQuotaDeniedError,
   InvestigationUnavailableError,
 } from './errors';
@@ -227,8 +229,9 @@ beforeEach(() => {
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   repository = createMockRepository();
   withConversations();
-  conversations.create.mockImplementation(async ({ id, title }: { id: string; title: string }) =>
-    makeConversation({ id, title })
+  // Like Agent Builder, a conversation created without a title carries the placeholder.
+  conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
+    makeConversation({ id, title: title ?? DEFAULT_CONVERSATION_TITLE })
   );
   conversations.getByOrigin.mockResolvedValue(undefined);
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
@@ -769,7 +772,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('passes the title as a workflow input', async () => {
+  it('passes a caller title on as a workflow input only', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
@@ -783,6 +786,20 @@ describe('NightshiftInvestigationsClient.start()', () => {
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.title).toBe('Checkout latency breach');
     expect(inputs.context).not.toHaveProperty('title');
+  });
+
+  it('starts without a title, which Agent Builder generates on the first round', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      message: 'Why is checkout slow?',
+      trigger_type: 'manual',
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs).not.toHaveProperty('title');
   });
 
   it.each([
@@ -1584,9 +1601,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       includeOutput: false,
       request: mockRequest,
     });
+    // Without a title, so Agent Builder generates one on the run's first round; the run's
+    // `title` input is not stored.
     expect(conversations.create).toHaveBeenCalledWith({
       id: 'inv-1',
-      title: 'Latency is too high',
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
@@ -1733,11 +1751,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     );
   });
 
-  it('throws InvestigationMetadataMissingError when the run carries no title', async () => {
-    withExecution({ inputs: { investigation_id: 'inv-1' } });
+  it('creates the conversation for a run that carries no title', async () => {
+    withExecution({ inputs: { investigation_id: 'inv-1', subjects } });
 
-    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      InvestigationMetadataMissingError
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.not.objectContaining({ title: expect.anything() })
     );
   });
 });
@@ -1783,6 +1802,18 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
       { type: 'slack_thread', id: THREAD_KEY },
     ]);
+  });
+
+  it("headlines an investigation Agent Builder has not titled yet with the thread's question", async () => {
+    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    withConversations(makeConversation({ id: 'inv-1', title: DEFAULT_CONVERSATION_TITLE }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      { ...threadSubject(), summary: 'why is checkout slow?' },
+    ]);
+
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
+    ).resolves.toEqual({ investigation_id: 'inv-1', title: 'why is checkout slow?' });
   });
 
   it('records a new status message on the thread subject', async () => {
@@ -1834,14 +1865,15 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
         subjects: [{ type: 'slack_thread', id: THREAD_KEY }],
       })
     );
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'inv-new',
-        title: 'why is checkout slow?',
-        templateId: 'investigation',
-        origin: { external_conversation_id: THREAD_KEY },
-      })
-    );
+    // The response headlines the question; the conversation is created without a title, so
+    // Agent Builder generates one on the first round.
+    expect(conversations.create).toHaveBeenCalledWith({
+      id: 'inv-new',
+      agentId: 'nightshift.investigation',
+      templateId: 'investigation',
+      accessControl: { access_mode: 'public' },
+      origin: { external_conversation_id: THREAD_KEY },
+    });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
       {
         type: 'slack_thread',

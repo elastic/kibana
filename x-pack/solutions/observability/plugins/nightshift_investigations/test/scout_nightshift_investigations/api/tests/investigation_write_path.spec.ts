@@ -98,9 +98,12 @@ apiTest.describe(
         expect(typeof id).toBe('string');
 
         const investigation = await waitForInvestigation(apiClient, cookieHeader, id);
+        // Created without a title: Agent Builder generates one when the first round ends, which
+        // the unresponsive LLM never lets it reach.
         expect(investigation).toMatchObject({
           id,
-          title: question,
+          title: 'New conversation',
+          title_pending: true,
           agent_id: 'nightshift.investigation',
           metadata: { status: 'open' },
           in_progress: true,
@@ -136,6 +139,8 @@ apiTest.describe(
           [first, second].sort()
         );
         expect(created.subjects[0].snapshot).toMatchObject({ rule_name: 'Scout latency rule' });
+        // The step's `title` is accepted but not stored; Agent Builder titles the investigation.
+        expect(created).toMatchObject({ title: 'New conversation', title_pending: true });
 
         await runAlertStartWorkflow(kbnClient, alertWorkflowId, [
           makeAlertSnapshot(second),
@@ -217,6 +222,7 @@ apiTest.describe(
           investigation_id: string;
           title: string;
         };
+        // Until Agent Builder titles the investigation, the route headlines the question.
         expect(title).toBe('why is checkout slow?');
 
         const recorded = await findOrCreateSlackThread(apiClient, cookieHeader, {
@@ -238,6 +244,7 @@ apiTest.describe(
         expect(listed).toHaveStatusCode(200);
         const [investigation] = (listed.body as { results: SharedInvestigation[] }).results;
         expect(investigation.id).toBe(id);
+        expect(investigation.title_pending).toBe(true);
         expect(investigation.subjects).toStrictEqual([
           expect.objectContaining({
             type: 'slack_thread',

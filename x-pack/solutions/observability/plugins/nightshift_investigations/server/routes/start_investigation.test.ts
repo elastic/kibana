@@ -40,15 +40,16 @@ it('loads the alert and builds the investigation context server-side', async () 
       params: { body: { subject: { type: 'alert', id: 'alert-1' } } },
     } as never)
   ).resolves.toEqual({ investigation_id: 'investigation-1' });
+  // Agent Builder titles the investigation, so no title is derived from the rule name.
   expect(start).toHaveBeenCalledWith({
     subject: { type: 'alert', id: 'alert-1' },
-    title: 'Test rule',
+    title: undefined,
     context: { alerts: [expect.objectContaining({ id: 'alert-1', rule_id: 'rule-1' })] },
     trigger_type: 'manual',
   });
 });
 
-it('keeps a caller-provided title', async () => {
+it('passes a caller-provided title on', async () => {
   await handler({
     request: {},
     getInvestigationsClient,
@@ -96,15 +97,12 @@ it('starts a manual investigation from the question alone', async () => {
     params: { body },
   } as never);
 
-  expect(start).toHaveBeenCalledWith(
-    expect.objectContaining({
-      subject: { type: 'manual', id: 'manual' },
-      // Derived from the question, since a manual run has no entity to name it after.
-      title: 'Why did checkout p99 spike?',
-      message: 'Why did checkout p99 spike?',
-      trigger_type: 'manual',
-    })
-  );
+  // Agent Builder titles the investigation, so the question is not made its title.
+  expect(start).toHaveBeenCalledWith({
+    subject: { type: 'manual', id: 'manual' },
+    message: 'Why did checkout p99 spike?',
+    trigger_type: 'manual',
+  });
 });
 
 it('forwards connector_id for a manual investigation', async () => {
@@ -124,21 +122,7 @@ it('forwards connector_id for a manual investigation', async () => {
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
 });
 
-it('collapses a multi-line question into a one-line manual title unless a title is given', async () => {
-  const derived = schema.parse({
-    subject: { type: 'manual' },
-    message: '  Why did checkout\n  p99 spike?  ',
-  });
-  await handler({
-    request: {},
-    getInvestigationsClient,
-    getAlertsClient,
-    params: { body: derived },
-  } as never);
-  expect(start).toHaveBeenLastCalledWith(
-    expect.objectContaining({ title: 'Why did checkout p99 spike?' })
-  );
-
+it('passes a manual investigation title on only when the caller gives one', async () => {
   const explicit = schema.parse({
     subject: { type: 'manual' },
     title: 'Checkout p99 spike',

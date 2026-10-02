@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from '.';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '../investigation';
 
 interface WorkflowStep {
@@ -119,6 +120,8 @@ describe('Nightshift Slack thread workflow', () => {
     });
     expect(investigate.with?.inputs).not.toHaveProperty('slack');
     expect(investigate.with?.inputs).not.toHaveProperty('conversation_id');
+    // Agent Builder titles the investigation, so the run passes no title.
+    expect(investigate.with?.inputs).not.toHaveProperty('title');
   });
 
   it("reports this run's result, not a previous run's record", () => {
@@ -130,6 +133,29 @@ describe('Nightshift Slack thread workflow', () => {
     expect(setResult?.result_text).not.toContain('get_investigation.output.status');
     expect(setResult?.result_text).toContain('steps.get_investigation.output.title');
     expect(setResult?.result_text).toContain('steps.get_investigation.output.metadata.summary');
+  });
+
+  it.each([
+    ['a generated title', { title: 'Checkout latency spike', title_pending: false }, true],
+    [
+      'a title Agent Builder has not generated yet',
+      { title: 'New conversation', title_pending: true },
+      false,
+    ],
+  ])('heads the result with %s only when it is generated', (_, titleFields, headed) => {
+    const resultText = requireStep('set_result').with?.result_text;
+    if (typeof resultText !== 'string') throw new Error('Expected set_result.result_text');
+
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(resultText, {
+      steps: {
+        investigate: { error: null },
+        get_investigation: { output: { ...titleFields, metadata: { summary: 'What happened' } } },
+      },
+      variables: { investigation_url: 'https://kibana/app/nightshift' },
+    });
+
+    expect(rendered.includes(`*${titleFields.title}*`)).toBe(headed);
+    expect(rendered).toContain('What happened');
   });
 
   it('reads the investigation from the shared investigations API', () => {

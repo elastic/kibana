@@ -19,6 +19,7 @@ import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigatio
 import type { InvestigationSubject as StoredInvestigationSubject } from '@kbn/agentic-investigations-plugin/common';
 import {
   INVESTIGATION_TEMPLATE_ID,
+  isInvestigationTitlePending,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
 } from '@kbn/agentic-investigations-plugin/common';
@@ -63,7 +64,6 @@ import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
-  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
@@ -135,12 +135,17 @@ export interface SlackThreadInvestigation {
   slack_message_ts?: string;
 }
 
+/**
+ * The investigation's title is Agent Builder's to generate on the first round. Until it has, the
+ * response's title is a headline from the thread's question.
+ */
 const toSlackThreadInvestigation = (
   { id, title }: InvestigationConversation,
-  slackMessageTs: string | undefined
+  slackMessageTs: string | undefined,
+  question: string | undefined
 ): SlackThreadInvestigation => ({
   investigation_id: id,
-  title,
+  title: isInvestigationTitlePending(title) ? toSlackThreadTitle(question) : title,
   ...(slackMessageTs ? { slack_message_ts: slackMessageTs } : {}),
 });
 
@@ -168,7 +173,7 @@ const collapseSlackText = (text: string | undefined): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
-/** A headline from the opening message. */
+/** A headline from the thread's question. */
 const toSlackThreadTitle = (text: string | undefined): string => {
   const collapsed = collapseSlackText(text);
   if (!collapsed) {
@@ -487,7 +492,9 @@ export class NightshiftInvestigationsClient {
             newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
           })
         : prepared.message,
-      title,
+      // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
+      // investigation from the first round instead.
+      ...(title ? { title } : {}),
       stream_names: stream_names ?? [],
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
@@ -658,19 +665,14 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    // A required workflow input, so the engine has already rejected a run without one.
-    const title = asString(inputs?.title);
-    if (!title) {
-      throw new InvestigationMetadataMissingError(investigationId);
-    }
-
+    // Agent Builder titles the conversation on the run's first round; the run's `title` input is
+    // not stored.
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
-      title,
     });
 
     if (!conversation.isOwner) {
@@ -755,13 +757,13 @@ export class NightshiftInvestigationsClient {
       );
       const recordedTs = threadSubject?.slack?.status_message_ts;
       if (!slackMessageTs || slackMessageTs === recordedTs) {
-        return toSlackThreadInvestigation(existing, recordedTs);
+        return toSlackThreadInvestigation(existing, recordedTs, threadSubject?.summary);
       }
       if (!existing.isOwner) {
         this.logger.warn(
           `Cannot record the Slack status message on investigation "${existing.id}": it is owned by another identity`
         );
-        return toSlackThreadInvestigation(existing, recordedTs);
+        return toSlackThreadInvestigation(existing, recordedTs, threadSubject?.summary);
       }
       await subjectsClient.upsertSubjects(existing.id, [
         {
@@ -769,7 +771,7 @@ export class NightshiftInvestigationsClient {
           slack: { channel, thread_ts: threadTs, status_message_ts: slackMessageTs },
         },
       ]);
-      return toSlackThreadInvestigation(existing, slackMessageTs);
+      return toSlackThreadInvestigation(existing, slackMessageTs, threadSubject?.summary);
     }
 
     if (!create) {
@@ -801,7 +803,6 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
-      title: toSlackThreadTitle(text),
       origin: { external_conversation_id: threadKey },
     });
     if (conversation.isOwner) {
@@ -819,7 +820,7 @@ export class NightshiftInvestigationsClient {
         },
       ]);
     }
-    return toSlackThreadInvestigation(conversation, slackMessageTs);
+    return toSlackThreadInvestigation(conversation, slackMessageTs, text);
   }
 
   private async findSlackThreadInvestigation({

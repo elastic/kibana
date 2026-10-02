@@ -101,7 +101,6 @@ steps:
         with:
           workflow-id: system-nightshift-investigation
           inputs:
-            title: '{{ steps.find_investigation.output.title }}'
             # ai.agent has no input for the round's author, so the Slack author goes in the text.
             message: |
               Slack user <@{{ event.sender }}> wrote in the investigation's thread:
@@ -111,7 +110,8 @@ steps:
         on-failure:
           continue: true
 
-      # The shared investigations API: the title and what the agent recorded as what happened.
+      # The shared investigations API: the title Agent Builder generated on the first round and what
+      # the agent recorded as what happened.
       - name: get_investigation
         type: kibana.request
         with:
@@ -130,7 +130,7 @@ steps:
           # This run's own message on the first run, the recorded one on every later run.
           status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
           result_text: |
-            {% if steps.investigate.error == null %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
+            {% if steps.investigate.error == null %}{% if steps.get_investigation.output.title and steps.get_investigation.output.title_pending != true %}*{{ steps.get_investigation.output.title }}*
 
             {% endif %}{{ steps.get_investigation.output.metadata.summary | default: 'The investigation finished without a summary.' }}{% else %}Investigation failed.{% endif %}
 

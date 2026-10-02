@@ -58,11 +58,12 @@ import type {
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
   /**
-   * Human-readable headline shown in the investigations list and the details flyout from the
-   * moment the record exists. Seeded by the caller (significant event title, alert rule name,
-   * chat-supplied headline) and refined by the agent's structured output on completion.
+   * Optional headline from the caller (significant event title, alert rule name). Accepted for
+   * compatibility and passed to the investigation workflow as its `title` input, but not stored
+   * as the investigation's title: Agent Builder generates that from the investigation's first
+   * round, and UIs name the investigation after its first subject until then.
    */
-  title: string;
+  title?: string;
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   /**
