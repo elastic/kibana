@@ -35,7 +35,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNaviga
   const currentAgentFromList = agents.find((a) => a.id === agentId);
   // If the agent isn't in the visible list (e.g. it's hidden), fetch it directly so the
   // selector still shows its name instead of "(Deleted agent)".
-  const { agent: currentAgentById } = useAgentBuilderAgentById(
+  const { agent: currentAgentById, isLoading: isLoadingById } = useAgentBuilderAgentById(
     !isLoading && !currentAgentFromList ? agentId : undefined
   );
   const currentAgent = currentAgentFromList ?? currentAgentById ?? undefined;
@@ -54,7 +54,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNaviga
       selectedAgent={currentAgent}
       onAgentChange={handleAgentChange}
       anchorPosition="downLeft"
-      fallbackLabel={!isLoading && !currentAgent ? deletedAgentLabel : undefined}
+      fallbackLabel={!isLoading && !isLoadingById && !currentAgent ? deletedAgentLabel : undefined}
     />
   );
 };
