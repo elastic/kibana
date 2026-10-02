@@ -49,6 +49,7 @@ export interface CanvasState {
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect';
   nodePositions: Record<string, XYPosition>;
+  confirmations: Record<string, boolean>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
   error?: Error;
@@ -89,4 +90,6 @@ export type CanvasUrlEvent =
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'flyout.open'; flyoutName: string }
   | { type: 'flyout.tab'; flyoutTab: string }
-  | { type: 'flyout.close' };
+  | { type: 'flyout.close' }
+  | { type: 'flyout.confirmation.prompt'; confirmation: string }
+  | { type: 'flyout.confirmation.answer'; confirmation: string };

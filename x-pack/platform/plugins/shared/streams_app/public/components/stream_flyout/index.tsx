@@ -45,7 +45,7 @@ import { ViewInDiscoverButton } from './discover_button';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
-import { StreamRemoveProcessingConfirmationModal } from './stream_remove_processing_confirm_modal';
+import { useCanvasEvents } from '../stream_management/data_management/stream_detail_canvas/state_management';
 
 const TABS = [
   {
@@ -181,7 +181,7 @@ function StreamFlyoutContent({
       ? requestedTab
       : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showConfirmRemoval, setShowConfirmRemoval] = useState(false);
+  const { showProcessingRemovalPrompt } = useCanvasEvents();
   const [isHeaderMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerId = useGeneratedHtmlId();
   const headerMenuId = useGeneratedHtmlId({ prefix: 'canvasFlyoutHeaderMenu' });
@@ -334,22 +334,13 @@ function StreamFlyoutContent({
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
         icon={isProcessingEnabled ? 'minus' : 'plus'}
-        disabled={loading || hasProcessingEnabled}
-        toolTipContent={
-          hasProcessingEnabled
-            ? i18n.translate('xpack.streams.flyout.tab.removeProcessingNotice', {
-                defaultMessage:
-                  'You will need to remove all conditions/processors first before you can toggle the tab off.',
-              })
-            : undefined
-        }
         onClick={() => {
           const showing = !isProcessingEnabled;
           if (showing) {
             selectTab('processing');
             setShowProcessing(showing);
           } else {
-            setShowConfirmRemoval(true);
+            showProcessingRemovalPrompt();
           }
           setHeaderMenuOpen(false);
         }}
@@ -489,16 +480,6 @@ function StreamFlyoutContent({
             {footer}
           </div>
         </EuiFlyoutFooter>
-      )}
-      {showConfirmRemoval && (
-        <StreamRemoveProcessingConfirmationModal
-          onClose={() => setShowConfirmRemoval(false)}
-          onConfirm={() => {
-            setShowConfirmRemoval(false);
-            setShowProcessing(false);
-            selectTab('overview');
-          }}
-        />
       )}
       {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
         <StreamDeleteModal
