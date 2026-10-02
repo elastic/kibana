@@ -16,10 +16,14 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { InvestigationSubject as StoredInvestigationSubject } from '@kbn/agentic-investigations-plugin/common';
+import type {
+  InvestigationSubject as StoredInvestigationSubject,
+  SlackThreadSubject,
+} from '@kbn/agentic-investigations-plugin/common';
 import {
   INVESTIGATION_TEMPLATE_ID,
   isInvestigationTitlePending,
+  MAX_SLACK_SEEN_EVENT_IDS,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
 } from '@kbn/agentic-investigations-plugin/common';
@@ -132,7 +136,9 @@ const DEFAULT_SLACK_THREAD_TITLE = 'Slack investigation';
 export interface SlackThreadInvestigation {
   investigation_id: string;
   title: string;
-  slack_message_ts?: string;
+  status_message_ts?: string;
+  /** The thread already handled this event, so the caller should not act on it again. */
+  duplicate?: true;
 }
 
 /**
@@ -141,30 +147,58 @@ export interface SlackThreadInvestigation {
  */
 const toSlackThreadInvestigation = (
   { id, title }: InvestigationConversation,
-  slackMessageTs: string | undefined,
-  question: string | undefined
+  {
+    statusMessageTs,
+    question,
+    duplicate,
+  }: { statusMessageTs: string | undefined; question: string | undefined; duplicate: boolean }
 ): SlackThreadInvestigation => ({
   investigation_id: id,
   title: isInvestigationTitlePending(title) ? toSlackThreadTitle(question) : title,
-  ...(slackMessageTs ? { slack_message_ts: slackMessageTs } : {}),
+  ...(statusMessageTs ? { status_message_ts: statusMessageTs } : {}),
+  ...(duplicate && { duplicate: true }),
 });
+
+/** What one call of the Slack thread workflow records on the thread. */
+interface SlackThreadActivity {
+  statusMessageTs?: string;
+  eventId?: string;
+}
+
+/**
+ * The thread subject's `slack` fields that change when it records `activity`, or undefined when
+ * nothing changes. An event is remembered once; the oldest remembered events make room.
+ */
+const toSlackThreadUpdate = (
+  recorded: SlackThreadSubject | undefined,
+  { statusMessageTs, eventId }: SlackThreadActivity
+): Pick<SlackThreadSubject, 'status_message_ts' | 'seen_event_ids'> | undefined => {
+  const seen = recorded?.seen_event_ids ?? [];
+  const recordEvent = eventId !== undefined && !seen.includes(eventId);
+  const recordStatusMessage =
+    statusMessageTs !== undefined && statusMessageTs !== recorded?.status_message_ts;
+  if (!recordEvent && !recordStatusMessage) {
+    return undefined;
+  }
+  return {
+    ...(recordStatusMessage && { status_message_ts: statusMessageTs }),
+    ...(recordEvent && { seen_event_ids: [...seen, eventId].slice(-MAX_SLACK_SEEN_EVENT_IDS) }),
+  };
+};
 
 /**
  * The key Agent Builder identifies a Slack thread's conversation by (its conversation origin),
- * which is also the thread's subject id.
+ * which is also the thread's subject id. Channel ids are only unique within a workspace.
  */
 export const toSlackThreadKey = ({
   workspace,
   channel,
   threadTs,
 }: {
-  workspace?: string;
+  workspace: string;
   channel: string;
   threadTs: string;
-}): string =>
-  [workspace ? `team:${workspace}` : undefined, `channel:${channel}`, `thread:${threadTs}`]
-    .filter(Boolean)
-    .join('/');
+}): string => `team:${workspace}/channel:${channel}/thread:${threadTs}`;
 
 /** The message text with Slack mentions and markup collapsed away. */
 const collapseSlackText = (text: string | undefined): string =>
@@ -719,8 +753,10 @@ export class NightshiftInvestigationsClient {
    * names some other conversation, by the thread's `slack_thread` subject. Without `create`, a
    * thread that has no investigation yet returns undefined. With `create`, the investigation is
    * created with that origin and the thread as its subject, as the identity that runs the Slack
-   * workflow, which also runs the investigation workflow on it. `slackMessageTs` records the
-   * thread's status message on the thread's subject.
+   * workflow, which also runs the investigation workflow on it. `statusMessageTs` records the
+   * thread's status message on the thread's subject. `eventId` records a delivered Slack event
+   * there; an event the thread already recorded comes back marked `duplicate`. The Slack thread
+   * workflow runs one call per thread at a time, so recording an event cannot race itself.
    */
   async findOrCreateSlackThread({
     workspace,
@@ -728,22 +764,32 @@ export class NightshiftInvestigationsClient {
     threadTs,
     text,
     create,
-    slackMessageTs,
+    statusMessageTs,
+    eventId,
   }: {
-    workspace?: string;
+    workspace: string;
     channel: string;
     threadTs: string;
     text?: string;
     create: boolean;
-    slackMessageTs?: string;
+    statusMessageTs?: string;
+    eventId?: string;
   }): Promise<SlackThreadInvestigation | undefined> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const threadKey = toSlackThreadKey({ workspace, channel, threadTs });
     const subjectKey = { type: 'slack_thread' as const, id: threadKey };
+    const activity = { statusMessageTs, eventId };
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
     const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const findThreadSubject = async (conversationId: string) =>
+      (await subjectsClient.listByConversationIds([conversationId])).find(
+        ({ subjectType, subjectId }) =>
+          subjectType === subjectKey.type && subjectId === subjectKey.id
+      );
+    const isDuplicate = (recorded: SlackThreadSubject | undefined) =>
+      eventId !== undefined && (recorded?.seen_event_ids ?? []).includes(eventId);
 
     const existing = await this.findSlackThreadInvestigation({
       conversations,
@@ -751,27 +797,35 @@ export class NightshiftInvestigationsClient {
       threadKey,
     });
     if (existing) {
-      const [threadSubject] = (await subjectsClient.listByConversationIds([existing.id])).filter(
-        ({ subjectType, subjectId }) =>
-          subjectType === subjectKey.type && subjectId === subjectKey.id
-      );
-      const recordedTs = threadSubject?.slack?.status_message_ts;
-      if (!slackMessageTs || slackMessageTs === recordedTs) {
-        return toSlackThreadInvestigation(existing, recordedTs, threadSubject?.summary);
+      const threadSubject = await findThreadSubject(existing.id);
+      const recorded = threadSubject?.slack;
+      const response = {
+        question: threadSubject?.summary,
+        duplicate: isDuplicate(recorded),
+      };
+      const update = toSlackThreadUpdate(recorded, activity);
+      if (!update) {
+        return toSlackThreadInvestigation(existing, {
+          ...response,
+          statusMessageTs: recorded?.status_message_ts,
+        });
       }
       if (!existing.isOwner) {
         this.logger.warn(
-          `Cannot record the Slack status message on investigation "${existing.id}": it is owned by another identity`
+          `Cannot record the Slack status message or event on investigation "${existing.id}": it is owned by another identity`
         );
-        return toSlackThreadInvestigation(existing, recordedTs, threadSubject?.summary);
+        return toSlackThreadInvestigation(existing, {
+          ...response,
+          statusMessageTs: recorded?.status_message_ts,
+        });
       }
       await subjectsClient.upsertSubjects(existing.id, [
-        {
-          ...subjectKey,
-          slack: { channel, thread_ts: threadTs, status_message_ts: slackMessageTs },
-        },
+        { ...subjectKey, slack: { channel, thread_ts: threadTs, ...update } },
       ]);
-      return toSlackThreadInvestigation(existing, slackMessageTs, threadSubject?.summary);
+      return toSlackThreadInvestigation(existing, {
+        ...response,
+        statusMessageTs: update.status_message_ts ?? recorded?.status_message_ts,
+      });
     }
 
     if (!create) {
@@ -805,22 +859,30 @@ export class NightshiftInvestigationsClient {
       id: investigationId,
       origin: { external_conversation_id: threadKey },
     });
-    if (conversation.isOwner) {
+    // The first create of the thread records it; a create that continues another reads it back.
+    const threadSubject = conversation.created
+      ? undefined
+      : await findThreadSubject(conversation.id);
+    const recorded = threadSubject?.slack;
+    const update = toSlackThreadUpdate(recorded, activity);
+    if (conversation.isOwner && (!threadSubject || update)) {
       const summary = collapseSlackText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
       await subjectsClient.upsertSubjects(conversation.id, [
         {
           ...subjectKey,
-          triggerType: 'manual',
-          slack: {
-            channel,
-            thread_ts: threadTs,
-            ...(slackMessageTs ? { status_message_ts: slackMessageTs } : {}),
-          },
-          ...(summary ? { summary } : {}),
+          ...(!threadSubject && {
+            triggerType: 'manual' as const,
+            ...(summary ? { summary } : {}),
+          }),
+          slack: { channel, thread_ts: threadTs, ...update },
         },
       ]);
     }
-    return toSlackThreadInvestigation(conversation, slackMessageTs, text);
+    return toSlackThreadInvestigation(conversation, {
+      statusMessageTs: update?.status_message_ts ?? recorded?.status_message_ts,
+      question: threadSubject?.summary ?? text,
+      duplicate: isDuplicate(recorded),
+    });
   }
 
   private async findSlackThreadInvestigation({
