@@ -48,15 +48,20 @@ spaceTest.describe('Data view editor — validation', { tag: tags.deploymentAgno
         }
       );
 
-      await spaceTest.step('save and clean up', async () => {
+      await spaceTest.step('save and verify no time field was persisted', async () => {
         await pageObjects.dataViewEditorFlyout.save();
+        await expect(pageObjects.dataViewDetail.container).toBeVisible();
+        await expect(pageObjects.dataViewDetail.currentTimeField).toBeHidden();
+      });
+
+      await spaceTest.step('clean up', async () => {
         await pageObjects.dataViewDetail.delete();
       });
     }
   );
 
   spaceTest(
-    'displays a form error when saving a pattern with no matching indices',
+    'displays a form error when saving a pattern with no matching indices and recovers once corrected',
     async ({ pageObjects }) => {
       const { dataViewEditorFlyout } = pageObjects;
 
@@ -74,8 +79,24 @@ spaceTest.describe('Data view editor — validation', { tag: tags.deploymentAgno
         await expect(dataViewEditorFlyout.flyout).toBeVisible();
       });
 
-      await spaceTest.step('close the flyout', async () => {
-        await dataViewEditorFlyout.close();
+      await spaceTest.step('correct the pattern in the same flyout and save', async () => {
+        await dataViewEditorFlyout.titleInput.fill('log*');
+        // The failed submit can still be pending and complete by itself with the corrected value,
+        // otherwise Save becomes enabled again; either way the error must not block saving.
+        await expect(async () => {
+          if (
+            (await dataViewEditorFlyout.flyout.isVisible()) &&
+            (await dataViewEditorFlyout.saveButton.isEnabled())
+          ) {
+            await dataViewEditorFlyout.saveButton.click();
+          }
+          await expect(dataViewEditorFlyout.flyout).toBeHidden({ timeout: 2_000 });
+        }).toPass({ timeout: 30_000 });
+        await expect(pageObjects.dataViewDetail.container).toBeVisible();
+      });
+
+      await spaceTest.step('clean up', async () => {
+        await pageObjects.dataViewDetail.delete();
       });
     }
   );

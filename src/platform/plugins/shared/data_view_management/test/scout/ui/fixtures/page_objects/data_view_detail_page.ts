@@ -25,6 +25,7 @@ export class DataViewDetailPage {
   readonly fieldEditorCancelButton;
   readonly popularityInput;
   readonly fieldEditorAdvancedToggle;
+  readonly currentTimeField;
 
   constructor(private readonly page: ScoutPage) {
     this.container = page.testSubj.locator('editIndexPattern');
@@ -42,6 +43,7 @@ export class DataViewDetailPage {
     this.fieldEditorCancelButton = this.fieldEditorFlyout.getByTestId('closeFlyoutButton');
     this.popularityInput = page.testSubj.locator('editorFieldCount');
     this.fieldEditorAdvancedToggle = page.testSubj.locator('toggleAdvancedSetting');
+    this.currentTimeField = page.testSubj.locator('currentIndexPatternTimeField');
   }
 
   async goto(dataViewId: string): Promise<void> {

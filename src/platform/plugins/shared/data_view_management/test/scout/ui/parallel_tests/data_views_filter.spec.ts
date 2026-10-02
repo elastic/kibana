@@ -104,9 +104,20 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
       let conflictDataViewId = '';
 
       await spaceTest.step(
-        'create an index with a conflicting mapping for the bytes field',
+        'create a data view that includes a not-yet-existing conflict index',
         async () => {
           await esClient.indices.delete({ index: conflictIndex(scoutSpace.id) }).catch(() => {});
+          const { data } = await apiServices.dataViews.create({
+            title: `logstash-*,${conflictIndex(scoutSpace.id)}`,
+            spaceId: scoutSpace.id,
+          });
+          conflictDataViewId = data.id;
+        }
+      );
+
+      await spaceTest.step(
+        'create the index with a conflicting mapping for the bytes field',
+        async () => {
           await esClient.indices.create({
             index: conflictIndex(scoutSpace.id),
             mappings: { properties: { bytes: { type: 'keyword' } } },
@@ -116,18 +127,17 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
             document: { bytes: 'wrong_value' },
             refresh: 'wait_for',
           });
-          const { data } = await apiServices.dataViews.create({
-            title: `logstash-*,${conflictIndex(scoutSpace.id)}`,
-            spaceId: scoutSpace.id,
-          });
-          conflictDataViewId = data.id;
         }
       );
 
-      await spaceTest.step('navigate to the data view and verify the conflict badge', async () => {
-        await pageObjects.dataViewDetail.goto(conflictDataViewId);
-        await expect(pageObjects.dataViewDetail.mappingConflictBadge).toBeVisible();
-      });
+      await spaceTest.step(
+        'open the existing data view, refresh its fields and verify the conflict badge',
+        async () => {
+          await pageObjects.dataViewDetail.goto(conflictDataViewId);
+          await pageObjects.dataViewDetail.refreshFieldList();
+          await expect(pageObjects.dataViewDetail.mappingConflictBadge).toBeVisible();
+        }
+      );
 
       await spaceTest.step(
         'set multiple filters so they are all active before pressing View conflicts',

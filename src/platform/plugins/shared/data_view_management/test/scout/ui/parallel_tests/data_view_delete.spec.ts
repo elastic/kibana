@@ -36,7 +36,7 @@ spaceTest.describe('Data view editor — delete flow', { tag: tags.deploymentAgn
       });
 
       await spaceTest.step('verify navigation returns to the data views list', async () => {
-        await expect(page).toHaveURL(/management\/kibana\/dataViews/);
+        await expect(page).toHaveURL(/\/management\/kibana\/dataViews\/?(?:[?#].*)?$/);
       });
     }
   );

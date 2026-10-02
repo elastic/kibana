@@ -109,7 +109,7 @@ spaceTest.describe('Data view editor — create flows', { tag: tags.deploymentAg
 
       await spaceTest.step('delete the data view', async () => {
         await pageObjects.dataViewDetail.delete();
-        await expect(page).toHaveURL(/management\/kibana\/dataViews/);
+        await expect(page).toHaveURL(/\/management\/kibana\/dataViews\/?(?:[?#].*)?$/);
       });
     }
   );

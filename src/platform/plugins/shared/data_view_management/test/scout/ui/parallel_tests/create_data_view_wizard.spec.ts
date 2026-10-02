@@ -27,8 +27,17 @@ spaceTest.describe('Create data view from index alias', { tag: tags.deploymentAg
     });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+  // Can read the alias but not its backing index, so resolving the alias must not need the index.
+  spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: {
+        cluster: [],
+        indices: [
+          { names: [aliasName(scoutSpace.id)], privileges: ['read', 'view_index_metadata'] },
+        ],
+      },
+      kibana: [{ base: ['all'], feature: {}, spaces: [scoutSpace.id] }],
+    });
   });
 
   spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
@@ -64,7 +73,7 @@ spaceTest.describe('Create data view from index alias', { tag: tags.deploymentAg
         'delete the data view and verify navigation returns to the data views list',
         async () => {
           await pageObjects.dataViewDetail.delete();
-          await expect(page).toHaveURL(/management\/kibana\/dataViews/);
+          await expect(page).toHaveURL(/\/management\/kibana\/dataViews\/?(?:[?#].*)?$/);
           await expect(pageObjects.dataViewsManagement.table).toBeVisible();
         }
       );

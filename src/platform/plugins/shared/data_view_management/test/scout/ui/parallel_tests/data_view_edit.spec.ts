@@ -12,6 +12,8 @@ import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { spaceTest } from '../fixtures';
 
+const NO_TIME_FIELD_OPTION = "--- I don't want to use the time filter ---";
+
 spaceTest.describe(
   'Data view editing — edit flows and field list updates',
   { tag: tags.deploymentAgnostic },
@@ -59,6 +61,28 @@ spaceTest.describe(
           await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText(
             'Logstash Star'
           );
+        });
+      }
+    );
+
+    spaceTest(
+      'can save a named data view again without changing its name',
+      async ({ pageObjects, page }) => {
+        const header = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
+
+        await spaceTest.step('name the data view', async () => {
+          await pageObjects.dataViewDetail.goto(dataViewId);
+          await pageObjects.dataViewDetail.openEditFlyout();
+          await pageObjects.dataViewEditorFlyout.setName('Logstash Star');
+          await pageObjects.dataViewEditorFlyout.save();
+          await expect(header).toContainText('Logstash Star');
+        });
+
+        await spaceTest.step('change the index expression and keep the same name', async () => {
+          await pageObjects.dataViewDetail.openEditFlyout();
+          await pageObjects.dataViewEditorFlyout.setTitle('logstash-*,hello_world*');
+          await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
+          await expect(header).toContainText('Logstash Star');
         });
       }
     );
@@ -148,6 +172,28 @@ spaceTest.describe(
             'utc_time'
           );
         });
+
+        await spaceTest.step('save the data view with no time field', async () => {
+          await pageObjects.dataViewDetail.openEditFlyout();
+          await pageObjects.dataViewEditorFlyout.setTitle('logstash-*');
+          await pageObjects.dataViewEditorFlyout.selectTimestampField(NO_TIME_FIELD_OPTION);
+          await pageObjects.dataViewEditorFlyout.setName('Just logs');
+          await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
+        });
+
+        await spaceTest.step(
+          'reopen the editor and verify no time field is prefilled',
+          async () => {
+            await pageObjects.dataViewDetail.openEditFlyout();
+            await expect
+              .poll(() => pageObjects.dataViewEditorFlyout.getTimestampFieldValue())
+              .toBe(NO_TIME_FIELD_OPTION);
+            await expect(pageObjects.dataViewEditorFlyout.nameInput).toHaveValue('Just logs');
+            await expect(pageObjects.dataViewEditorFlyout.titleInput).toHaveValue('logstash-*');
+            await pageObjects.dataViewEditorFlyout.close();
+            await expect(pageObjects.dataViewDetail.currentTimeField).toBeHidden();
+          }
+        );
       }
     );
   }
