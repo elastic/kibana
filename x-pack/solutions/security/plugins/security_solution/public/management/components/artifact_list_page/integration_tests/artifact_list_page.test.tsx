@@ -118,6 +118,15 @@ describe('When using the ArtifactListPage component', () => {
       expect(getByTestId('testPage-list-loader')).toBeTruthy();
     });
 
+    it('should not open flyout when show=view is present in the URL', async () => {
+      history.push('somepage?show=view&itemId=123');
+
+      const { queryByTestId } = await renderWithListData();
+
+      expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+      expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+    });
+
     it(`should show cards with results`, async () => {
       const { findAllByTestId, getByTestId } = await renderWithListData();
 

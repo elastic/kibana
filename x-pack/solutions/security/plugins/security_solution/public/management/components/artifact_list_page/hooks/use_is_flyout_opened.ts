@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import type { ArtifactListPageUrlParams } from '../types';
 
-const SHOW_VALUES: readonly string[] = ['create', 'edit', 'view'];
+const SHOW_VALUES: readonly string[] = ['create', 'edit'];
 
 export const useIsFlyoutOpened = (
   allowEdit: boolean = true,
@@ -20,8 +20,7 @@ export const useIsFlyoutOpened = (
     if (SHOW_VALUES.includes(showUrlParamValue)) {
       return (
         (showUrlParamValue === 'create' && allowCreate) ||
-        // `view` currently opens the same flyout as `edit`.
-        ((showUrlParamValue === 'edit' || showUrlParamValue === 'view') && allowEdit)
+        (showUrlParamValue === 'edit' && allowEdit)
       );
     }
 

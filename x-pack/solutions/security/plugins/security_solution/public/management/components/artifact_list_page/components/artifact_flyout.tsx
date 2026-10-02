@@ -238,8 +238,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [_labels]);
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
-    // `view` currently follows the edit flow until a dedicated view mode exists.
-    const isEditFlow = urlParams.show === 'edit' || urlParams.show === 'view';
+    const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
     const [submitError, setSubmitError] = useState<IHttpFetchError | undefined>(undefined);
