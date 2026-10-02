@@ -208,6 +208,37 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
     });
 
+    it('stops polling once online without a package policy, keeps polling to refresh component health with one', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: { data: { items: [{ status: 'online' }] } },
+      });
+      const renderer = createIntegrationsTestRendererMock();
+      const withoutPolicy = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
+      await waitFor(() => {
+        expect(withoutPolicy.getByText('Step 1 is complete')).toBeInTheDocument();
+      });
+      expect(mockUseGetAgentsQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchInterval: false })
+      );
+      withoutPolicy.unmount();
+
+      mockUseGetAgentsQuery.mockClear();
+      const withPolicy = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [] } as any}
+        />
+      );
+      await waitFor(() => {
+        expect(withPolicy.getByText('Step 1 is complete')).toBeInTheDocument();
+      });
+      expect(mockUseGetAgentsQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchInterval: expect.any(Number) })
+      );
+    });
+
     it('does not reset completed steps when a subsequent poll returns no data', async () => {
       // First render with agent online, then simulate a failed refetch returning no items
       mockUseGetAgentsQuery

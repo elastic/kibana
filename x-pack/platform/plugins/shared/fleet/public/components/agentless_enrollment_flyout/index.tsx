@@ -84,7 +84,9 @@ export const AgentlessEnrollmentFlyout = ({
   );
   const { data: agentsData } = useGetAgentsQuery(
     { kuery: agentKuery },
-    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
+    // Keep polling after the agent is online when component health is displayed, so the
+    // diagnostics reflect recoveries and later failures. Step statuses stay latched.
+    { refetchInterval: agentOnline && !packagePolicy ? false : REFRESH_INTERVAL_MS }
   );
   const agentData = agentsData?.data?.items?.[0];
   const agentsError = agentsData?.error;
