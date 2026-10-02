@@ -101,7 +101,31 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         request
       );
 
-      return Object.values(response).some((cluster) => cluster.matching_indices === true);
+      const clusters = Object.values(response);
+
+      if (clusters.some((cluster) => cluster.matching_indices === true)) {
+        return true;
+      }
+
+      /**
+       * No cluster positively reported a match, which is not the same as
+       * "there are no indices". `_resolve/cluster` answers HTTP 200 with a
+       * per-cluster `error` and no `matching_indices` when a remote is
+       * unreachable, and omits matches the caller cannot see when it lacks
+       * `view_index_metadata` on that remote. Verified against a live remote:
+       *
+       *   {"dead":{"connected":false,"skip_unavailable":true,
+       *            "error":"Request timed out before receiving a response ..."}}
+       *
+       * Nothing rejects in that case, so re-probe with `_search` — which needs
+       * only `read` — rather than reporting an onboarding-triggering `false`
+       * off the back of a cluster that never answered.
+       */
+      if (clusters.some((cluster) => cluster.matching_indices === undefined)) {
+        return this.hasIndicesViaSearch(requestContext, indexNames, request);
+      }
+
+      return false;
     } catch (err) {
       // A missing remote is a real answer about the source configuration and
       // must reach the caller, which renders a dedicated callout for it.

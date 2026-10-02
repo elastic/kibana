@@ -9,22 +9,14 @@
  * Unit tests for the two-phase hasData probe introduced to fix the >45s
  * latency on `GET /api/metrics/source/hasData?source=all`.
  *
- * The handler logic is tested through the `buildHasDataResult` helper that
- * encapsulates the two-phase sequence + CCS inconclusive-response guard.
- * This isolates the behaviour from framework/route wiring.
+ * These exercise the production `getHasData` directly with a mocked metrics
+ * client, so removing the second phase or the CCS guard fails these tests.
  */
 
 import type { estypes } from '@elastic/elasticsearch';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
+import { getHasData, HAS_DATA_RECENT_WINDOW } from './has_data';
 
-// ---------------------------------------------------------------------------
-// Helpers mirroring the production constants
-// ---------------------------------------------------------------------------
-const HAS_DATA_RECENT_WINDOW = 'now-24h/h';
-
-// ---------------------------------------------------------------------------
-// Minimal ES response factories
-// ---------------------------------------------------------------------------
 const makeHitsResponse = (
   total: number,
   opts: Partial<{
@@ -33,222 +25,165 @@ const makeHitsResponse = (
     clustersSkipped: number;
     clustersFailed: number;
   }> = {}
-): estypes.SearchResponse => ({
-  took: 1,
-  timed_out: opts.timed_out ?? false,
-  _shards: {
-    total: 1,
-    successful: 1 - (opts.shardsFailed ?? 0),
-    failed: opts.shardsFailed ?? 0,
-    skipped: 0,
-  },
-  ...(opts.clustersSkipped !== undefined || opts.clustersFailed !== undefined
-    ? {
-        _clusters: {
-          total: 2,
-          successful: 0,
-          skipped: opts.clustersSkipped ?? 0,
-          running: 0,
-          partial: 0,
-          failed: opts.clustersFailed ?? 0,
-          details: {},
-        } as unknown as estypes.ClusterStatistics,
-      }
-    : {}),
-  hits: {
-    total: { value: total, relation: 'eq' },
-    hits: [],
-  },
-});
-
-// ---------------------------------------------------------------------------
-// Pure reimplementation of the inconclusive-response guard (tests the logic,
-// not just the code path, so a logic change would break this test even if the
-// guard was moved or extracted).
-// ---------------------------------------------------------------------------
-const isInconclusiveResponse = (r: estypes.SearchResponse): boolean =>
-  r.timed_out === true ||
-  r._shards.failed > 0 ||
-  (r._clusters != null && (r._clusters.skipped > 0 || r._clusters.failed > 0));
-
-// ---------------------------------------------------------------------------
-// Two-phase probe test harness
-// ---------------------------------------------------------------------------
-
-/** Runs the two-phase probe logic with the given pair of mock responses. */
-const runProbe = async (
-  phase1Response: estypes.SearchResponse,
-  phase2Response?: estypes.SearchResponse
-): Promise<{ hasData: boolean }> => {
-  const search = jest
-    .fn()
-    .mockResolvedValueOnce(phase1Response)
-    .mockResolvedValueOnce(phase2Response ?? makeHitsResponse(0));
-
-  // Phase 1
-  const p1 = await search({
-    track_total_hits: 1,
-    terminate_after: 1,
-    size: 0,
-    allow_no_indices: true,
-    requestTimeout: '30s',
-    query: {
-      bool: {
-        filter: [
-          { range: { [TIMESTAMP_FIELD]: { gte: HAS_DATA_RECENT_WINDOW } } },
-          { bool: { must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }] } },
-        ],
-        should: [{ exists: { field: 'host.name' } }],
-        minimum_should_match: 1,
-      },
+): estypes.SearchResponse =>
+  ({
+    took: 1,
+    timed_out: opts.timed_out ?? false,
+    _shards: {
+      total: 1,
+      successful: 1 - (opts.shardsFailed ?? 0),
+      failed: opts.shardsFailed ?? 0,
+      skipped: 0,
     },
-  });
-
-  if (p1.hits.total.value > 0) {
-    return { hasData: true };
-  }
-
-  // Phase 2
-  const p2 = await search({
-    track_total_hits: 1,
-    terminate_after: 1,
-    size: 0,
-    allow_no_indices: true,
-    requestTimeout: '30s',
-    query: {
-      bool: {
-        should: [{ exists: { field: 'host.name' } }],
-        minimum_should_match: 1,
-      },
+    ...(opts.clustersSkipped !== undefined || opts.clustersFailed !== undefined
+      ? {
+          _clusters: {
+            total: 2,
+            successful: 0,
+            skipped: opts.clustersSkipped ?? 0,
+            running: 0,
+            partial: 0,
+            failed: opts.clustersFailed ?? 0,
+            details: {},
+          } as unknown as estypes.ClusterStatistics,
+        }
+      : {}),
+    hits: {
+      total: { value: total, relation: 'eq' },
+      hits: [],
     },
-  });
+  } as unknown as estypes.SearchResponse);
 
-  if (isInconclusiveResponse(p2)) {
-    throw new Error('inconclusive');
-  }
-
-  return { hasData: p2.hits.total.value > 0 };
+/** A metrics client whose `search` returns the given responses in order. */
+const createClient = (...responses: estypes.SearchResponse[]) => {
+  const search = jest.fn();
+  responses.forEach((response) => search.mockResolvedValueOnce(response));
+  return { client: { search } as any, search };
 };
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
+describe('getHasData', () => {
+  describe('phase 1 — fast path', () => {
+    it('returns hasData and skips phase 2 entirely when recent data exists', async () => {
+      const { client, search } = createClient(makeHitsResponse(1));
 
-describe('hasData two-phase probe', () => {
-  describe('phase 1 — fast path (recent window + hot/warm only)', () => {
-    it('returns hasData: true and does not call phase 2 when phase 1 finds a hit', async () => {
-      const search = jest.fn().mockResolvedValueOnce(makeHitsResponse(1));
-
-      const p1 = await search({});
-      let phase2Called = false;
-
-      if (p1.hits.total.value > 0) {
-        // Return early — phase 2 should not be called.
-      } else {
-        phase2Called = true;
-        await search({});
-      }
-
+      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+        hasData: true,
+      });
       expect(search).toHaveBeenCalledTimes(1);
-      expect(phase2Called).toBe(false);
     });
 
-    it('proceeds to phase 2 when phase 1 returns no hits', async () => {
-      const result = await runProbe(
-        makeHitsResponse(0), // phase 1: empty
-        makeHitsResponse(1) // phase 2: has data
+    it('bounds phase 1 by the rounded recent window and excludes cold/frozen tiers', async () => {
+      const { client, search } = createClient(makeHitsResponse(1));
+
+      await getHasData({ infraMetricsClient: client, source: 'all' });
+
+      const { query, requestTimeout, track_total_hits: trackTotalHits } = search.mock.calls[0][0];
+      expect(query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { range: { [TIMESTAMP_FIELD]: { gte: HAS_DATA_RECENT_WINDOW } } },
+          { bool: { must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }] } },
+        ])
       );
-      expect(result.hasData).toBe(true);
+      // Rounded date math is what makes the result shard-request-cache eligible.
+      expect(HAS_DATA_RECENT_WINDOW).toBe('now-24h/h');
+      expect(requestTimeout).toEqual(expect.any(String));
+      expect(trackTotalHits).toBe(1);
     });
   });
 
   describe('phase 2 — exact fallback', () => {
-    it('returns hasData: true when phase 2 finds a hit', async () => {
-      const result = await runProbe(makeHitsResponse(0), makeHitsResponse(1));
-      expect(result.hasData).toBe(true);
+    it('runs unbounded and reports data when phase 1 misses old or cold-tier data', async () => {
+      const { client, search } = createClient(makeHitsResponse(0), makeHitsResponse(1));
+
+      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+        hasData: true,
+      });
+      expect(search).toHaveBeenCalledTimes(2);
+
+      // Phase 2 must not carry the range or tier restriction, or it would miss
+      // exactly the dormant/cold data it exists to find.
+      const phase2Query = search.mock.calls[1][0].query;
+      expect(phase2Query.bool.filter).toBeUndefined();
+      expect(JSON.stringify(phase2Query)).not.toContain(TIMESTAMP_FIELD);
+      expect(JSON.stringify(phase2Query)).not.toContain('_tier');
     });
 
-    it('returns hasData: false when both phases return no hits and response is conclusive', async () => {
-      const result = await runProbe(makeHitsResponse(0), makeHitsResponse(0));
-      expect(result.hasData).toBe(false);
+    it('reports no data when both phases come back empty and complete', async () => {
+      const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0));
+
+      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+        hasData: false,
+      });
     });
   });
 
   describe('CCS inconclusive-response guard', () => {
-    it('throws when phase 2 times out instead of returning hasData: false', async () => {
-      await expect(
-        runProbe(makeHitsResponse(0), makeHitsResponse(0, { timed_out: true }))
-      ).rejects.toThrow('inconclusive');
+    it.each([
+      ['timed_out', { timed_out: true }],
+      ['shard failures', { shardsFailed: 1 }],
+      ['skipped CCS clusters', { clustersSkipped: 1 }],
+      ['failed CCS clusters', { clustersFailed: 1 }],
+    ])('throws rather than reporting no data on %s', async (_label, opts) => {
+      const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0, opts));
+
+      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).rejects.toThrow(
+        /inconclusive/i
+      );
     });
 
-    it('throws when phase 2 has shard failures', async () => {
-      await expect(
-        runProbe(makeHitsResponse(0), makeHitsResponse(0, { shardsFailed: 1 }))
-      ).rejects.toThrow('inconclusive');
+    it('does not throw when an incomplete phase 2 still found a hit', async () => {
+      // A positive hit conclusively proves data exists, so a partial CCS
+      // outage must not turn a correct `true` into an error.
+      const { client } = createClient(
+        makeHitsResponse(0),
+        makeHitsResponse(1, { clustersSkipped: 1, shardsFailed: 1 })
+      );
+
+      await expect(getHasData({ infraMetricsClient: client, source: 'all' })).resolves.toEqual({
+        hasData: true,
+      });
     });
 
-    it('throws when phase 2 has skipped CCS clusters', async () => {
-      await expect(
-        runProbe(makeHitsResponse(0), makeHitsResponse(0, { clustersSkipped: 1 }))
-      ).rejects.toThrow('inconclusive');
-    });
+    it('does not throw for a complete zero-hit response', async () => {
+      const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0));
 
-    it('throws when phase 2 has failed CCS clusters', async () => {
       await expect(
-        runProbe(makeHitsResponse(0), makeHitsResponse(0, { clustersFailed: 1 }))
-      ).rejects.toThrow('inconclusive');
-    });
-
-    it('does NOT throw when phase 2 is conclusive and empty (_clusters present but zero skipped/failed)', async () => {
-      const response = makeHitsResponse(0, { clustersSkipped: 0, clustersFailed: 0 });
-      const result = await runProbe(makeHitsResponse(0), response);
-      expect(result.hasData).toBe(false);
+        getHasData({ infraMetricsClient: client, source: 'all' })
+      ).resolves.not.toBeUndefined();
     });
   });
 
-  describe('phase 1 query shape', () => {
-    it('includes the recent-window range filter with rounded date math', () => {
-      // Verify the date-math constant is in the correct format for cache eligibility.
-      // It must be a rounded expression (ends with /h, /d etc.), not epoch millis,
-      // so that ES can cache the shard-level result across repeat calls.
-      expect(HAS_DATA_RECENT_WINDOW).toMatch(/^now-\d+[hdwMy]\/[hdwMy]$/);
+  describe('source parameter', () => {
+    it('matches host-specific clauses for source=host', async () => {
+      const { client, search } = createClient(makeHitsResponse(1));
+
+      await getHasData({ infraMetricsClient: client, source: 'host' });
+
+      const should = search.mock.calls[0][0].query.bool.should;
+      expect(should.length).toBeGreaterThan(0);
+      expect(JSON.stringify(should)).toContain('system');
     });
 
-    it('excludes cold and frozen tiers (not just include hot/warm) so data_content and untiered indices are covered', () => {
-      // The exclusion approach is deliberate: legacy metricbeat-* indices and
-      // self-managed clusters without tier roles land in data_content or have
-      // no _tier at all; an inclusion list would push them to the slow fallback.
-      const tierFilter = {
-        bool: { must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }] },
-      };
-      // Inclusion list (what we must NOT use):
-      const inclusionList = {
-        terms: { _tier: ['data_hot', 'data_warm'] },
-      };
-      expect(tierFilter).not.toEqual(inclusionList);
-      expect(tierFilter.bool.must_not[0].terms._tier).toEqual(['data_cold', 'data_frozen']);
-    });
-  });
+    it('matches all entity types for source=all', async () => {
+      const { client, search } = createClient(makeHitsResponse(1));
 
-  describe('isInconclusiveResponse guard unit', () => {
-    it('returns false for a clean response', () => {
-      expect(isInconclusiveResponse(makeHitsResponse(0))).toBe(false);
+      await getHasData({ infraMetricsClient: client, source: 'all' });
+
+      // One exists clause per supported entity type.
+      expect(search.mock.calls[0][0].query.bool.should).toHaveLength(7);
     });
 
-    it('returns true for timed_out', () => {
-      expect(isInconclusiveResponse(makeHitsResponse(0, { timed_out: true }))).toBe(true);
-    });
+    it('produces no entity clauses when source is omitted', async () => {
+      // Pre-existing behaviour: with no clauses and minimum_should_match: 1 the
+      // query matches nothing, so the answer is always false. Documented here
+      // so a future change to it is deliberate rather than accidental.
+      const { client, search } = createClient(makeHitsResponse(0), makeHitsResponse(0));
 
-    it('returns true for shard failures', () => {
-      expect(isInconclusiveResponse(makeHitsResponse(0, { shardsFailed: 2 }))).toBe(true);
-    });
-
-    it('returns true for skipped CCS clusters', () => {
-      expect(isInconclusiveResponse(makeHitsResponse(0, { clustersSkipped: 1 }))).toBe(true);
-    });
-
-    it('returns true for failed CCS clusters', () => {
-      expect(isInconclusiveResponse(makeHitsResponse(0, { clustersFailed: 1 }))).toBe(true);
+      await expect(getHasData({ infraMetricsClient: client, source: undefined })).resolves.toEqual({
+        hasData: false,
+      });
+      expect(search.mock.calls[0][0].query.bool.should).toEqual([]);
+      expect(search.mock.calls[0][0].query.bool.minimum_should_match).toBe(1);
     });
   });
 });

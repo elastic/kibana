@@ -152,6 +152,80 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
     });
   });
 
+  describe('hasIndices — inconclusive _resolve/cluster entries (HTTP 200)', () => {
+    /**
+     * `_resolve/cluster` answers 200 with a per-cluster `error` and no
+     * `matching_indices` when a remote is unreachable, or omits matches the
+     * caller cannot see without `view_index_metadata`. Shape verified against
+     * a live remote.
+     */
+    const unreachableRemote = {
+      dead: {
+        connected: false,
+        skip_unavailable: true,
+        error: 'Request timed out before receiving a response from the remote cluster',
+      },
+    };
+
+    it('falls back to _search when the only cluster entry is an error', async () => {
+      const callWithRequest = jest
+        .fn()
+        .mockResolvedValueOnce(unreachableRemote)
+        .mockResolvedValueOnce({ _shards: { total: 5 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(createRequestContext(), 'dead:metrics-*');
+
+      expect(result).toBe(true);
+      expect(callWithRequest).toHaveBeenCalledTimes(2);
+      expect(callWithRequest.mock.calls[1][1]).toBe('search');
+    });
+
+    it('falls back when a remote reports a security error alongside a non-matching local', async () => {
+      const callWithRequest = jest
+        .fn()
+        .mockResolvedValueOnce({
+          '(local)': { connected: true, skip_unavailable: false, matching_indices: false },
+          remote1: { connected: true, skip_unavailable: false, error: 'security_exception' },
+        })
+        .mockResolvedValueOnce({ _shards: { total: 2 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await expect(
+        adapter.hasIndices(createRequestContext(), 'metrics-*,remote1:metrics-*')
+      ).resolves.toBe(true);
+      expect(callWithRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('does NOT fall back when every cluster definitively reports no match', async () => {
+      // Guards the perf win: a conclusive negative must not pay for a second
+      // shard-fanning probe.
+      const callWithRequest = jest.fn().mockResolvedValue(makeResolveResponse(false));
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      expect(result).toBe(false);
+      expect(callWithRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('short-circuits on a positive match even when another cluster errored', async () => {
+      const callWithRequest = jest.fn().mockResolvedValue({
+        oblt: { connected: true, skip_unavailable: true, matching_indices: true },
+        ...unreachableRemote,
+      });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(
+        createRequestContext(),
+        'oblt:metrics-*,dead:metrics-*'
+      );
+
+      expect(result).toBe(true);
+      expect(callWithRequest).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('hasIndices — serverless', () => {
     // `_resolve/cluster` is not exposed in serverless Elasticsearch; calling it
     // there answers `api_not_available_exception`.
