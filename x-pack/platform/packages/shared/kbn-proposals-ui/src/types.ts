@@ -31,4 +31,5 @@ export type ApprovalProposal = Pick<
   | 'decidedAt'
   | 'dismissReason'
   | 'rationale'
+  | 'executionError'
 >;
