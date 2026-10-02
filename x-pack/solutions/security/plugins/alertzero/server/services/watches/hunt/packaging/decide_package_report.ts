@@ -80,9 +80,29 @@ const actionInputSchema = (entry: ActionCatalogEntry): JsonSchema | undefined =>
 const needsProcessParameters = (schema: JsonSchema | undefined): boolean =>
   !!schema && (schemaRequires(schema, 'parameters') || schemaHasProperty(schema, 'parameters'));
 
+/** Every field name `buildActionInput` below actually knows how to supply. */
+const FILLABLE_FIELDS = new Set(['endpoint_ids', 'parameters']);
+
+const requiredFields = (schema: JsonSchema | undefined): string[] => {
+  if (!schema || typeof schema !== 'object') {
+    return [];
+  }
+  const required = (schema as { required?: unknown }).required;
+  return Array.isArray(required)
+    ? required.filter((field): field is string => typeof field === 'string')
+    : [];
+};
+
 /**
  * True when the catalog entry's inputSchema can be fully filled from the given
  * host + optional process selector. Entries without inputSchema are unfillable.
+ *
+ * Checks the schema's `required` list as a whole, not only `endpoint_ids`/`parameters` in
+ * isolation: `buildActionInput` below only ever supplies those two fields, so a schema
+ * requiring anything else can never be filled regardless of host/process data, and offering
+ * it as executable would mint a proposal that fails after an analyst has already approved it.
+ * This also means a catalog action gaining a new required field in the future falls back to a
+ * recommendation automatically, rather than silently minting an unfillable proposal.
  */
 export const canFillRespondAction = ({
   entry,
@@ -96,6 +116,9 @@ export const canFillRespondAction = ({
   }
   const schema = actionInputSchema(entry);
   if (!schema) {
+    return false;
+  }
+  if (!requiredFields(schema).every((field) => FILLABLE_FIELDS.has(field))) {
     return false;
   }
   if (needsProcessParameters(schema)) {
