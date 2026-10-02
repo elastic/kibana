@@ -165,7 +165,8 @@ describe('useBackNavigation', () => {
       (route) => {
         const { result } = renderBackNavigation({
           initialEntry: route,
-          // Provide resolved status so /add-data-instructions does not suppress the button.
+          // The back button needs a resolved status with profiling enabled, and data for
+          // /add-data-instructions.
           initialStatus: withData,
         });
         expect(result.current.back).toEqual(pluginRootTarget);
@@ -175,6 +176,7 @@ describe('useBackNavigation', () => {
     it('ignores the query string when matching the route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/settings?rangeFrom=now-15m&rangeTo=now',
+        initialStatus: withData,
       });
       expect(result.current.back).toEqual(pluginRootTarget);
     });
@@ -182,6 +184,7 @@ describe('useBackNavigation', () => {
     it('always points at the plugin root regardless of the previously visited route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/flamegraphs/flamegraph?kuery=foo&rangeFrom=now-15m',
+        initialStatus: withData,
       });
       expect(result.current.back).toBeUndefined();
 
@@ -191,12 +194,49 @@ describe('useBackNavigation', () => {
     });
 
     it('drops the back button again when navigating to a content route', () => {
-      const { result } = renderBackNavigation({ initialEntry: '/storage-explorer' });
+      const { result } = renderBackNavigation({
+        initialEntry: '/storage-explorer',
+        initialStatus: withData,
+      });
       expect(result.current.back).toEqual(pluginRootTarget);
 
       act(() => result.current.history.push('/functions/topn'));
 
       expect(result.current.back).toBeUndefined();
+    });
+  });
+
+  describe('profiling status guard', () => {
+    const OTHER_BACK_NAVIGATION_ROUTES = ROUTES_WITH_BACK_NAVIGATION.filter(
+      (route) => route !== '/add-data-instructions'
+    );
+
+    it.each(OTHER_BACK_NAVIGATION_ROUTES)(
+      'returns undefined on %s while the status is unresolved',
+      (route) => {
+        const { result } = renderBackNavigation({ initialEntry: route });
+        expect(result.current.back).toBeUndefined();
+      }
+    );
+
+    it.each(OTHER_BACK_NAVIGATION_ROUTES)(
+      'returns undefined on %s when profiling is disabled in Elasticsearch',
+      (route) => {
+        const { result } = renderBackNavigation({
+          initialEntry: route,
+          initialStatus: { isEnabled: false },
+        });
+        expect(result.current.back).toBeUndefined();
+      }
+    );
+
+    it('transitions from undefined to the plugin root once the status resolves as enabled', () => {
+      const { result, updateStatus } = renderBackNavigation({ initialEntry: '/settings' });
+      expect(result.current.back).toBeUndefined();
+
+      updateStatus(withoutData);
+
+      expect(result.current.back).toEqual(pluginRootTarget);
     });
   });
 
