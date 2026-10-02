@@ -445,6 +445,9 @@ importers:
       '@elastic/search-ui-engines-connector':
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
+      '@elastic/statistics':
+        specifier: 0.0.2
+        version: 0.0.2
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -494,8 +497,8 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.9
-        version: 21.4.9
+        specifier: 21.4.10
+        version: 21.4.10
       '@hapi/inert':
         specifier: 7.1.2
         version: 7.1.2
@@ -4335,7 +4338,7 @@ importers:
         version: 3.0.0
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.9)
+        version: 6.0.0(@hapi/hapi@21.4.10)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -4840,9 +4843,6 @@ importers:
       semver:
         specifier: 7.8.5
         version: 7.8.5
-      simple-statistics:
-        specifier: 7.8.8
-        version: 7.8.8
       snakecase-keys:
         specifier: 8.0.1
         version: 8.0.1
@@ -11094,6 +11094,10 @@ packages:
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
 
+  '@elastic/statistics@0.0.2':
+    resolution: {integrity: sha512-KYhGGyP6/ddcfPzGjExy3V8S1dB0ZTOZqg8YL2/8R7uYKvgUFfq2tanv4NoEY9l+4gtcbFAkVnyx2/dWoJhn+A==}
+    engines: {node: '>=22'}
+
   '@elastic/transport@8.11.0':
     resolution: {integrity: sha512-1QD1j7gQF8+tVrf+UOcOrLF1LXnhBYwBnNl4xd+fYxkQONjaOjiTcfqXcALHesKezUv8wRzv3tedEnhtYLBmhw==}
     engines: {node: '>=18'}
@@ -11573,8 +11577,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.9':
-    resolution: {integrity: sha512-YnecZOVx2AD08VvPl0ZaFS0MjEHqg+InGRmBRli731ct+VwI++dpu3BIYA1Z4SMr6HUAnpyvbQ1aq5woe3fBWg==}
+  '@hapi/hapi@21.4.10':
+    resolution: {integrity: sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -24262,8 +24266,8 @@ packages:
   simple-sha256@1.1.0:
     resolution: {integrity: sha512-jMdj+5MR1dRiFbrQ8idmkPv+HCoJEmJVBBwc0vQQz4Gtg3PEkjdpVxUM4BSwK898zhNP/ub3vcP9edw47EHuLQ==}
 
-  simple-statistics@7.8.8:
-    resolution: {integrity: sha512-CUtP0+uZbcbsFpqEyvNDYjJCl+612fNgjT8GaVuvMG7tBuJg8gXGpsP5M7X658zy0IcepWOZ6nPBu1Qb9ezA1w==}
+  simple-statistics@7.12.1:
+    resolution: {integrity: sha512-LYRvHhZceO9MTzDw6ptt3PBoOHuiTqNU5Ew5MLjjcLwuzgfATMf1oMFdgDW7elVDGwZvi98pGoUoFhwuXTHTRA==}
 
   sinon@22.1.0:
     resolution: {integrity: sha512-n1ajF2rBWMTtEwbKcw4UdFg4nCnDdq/U6RDoxtOd7oapOlRoJ5ynwFx60owROyhDpA9QhMZi0pCO/xtmwFjG7w==}
@@ -28094,6 +28098,10 @@ snapshots:
       history: 4.9.0
       qs: 6.16.0
 
+  '@elastic/statistics@0.0.2':
+    dependencies:
+      simple-statistics: 7.12.1
+
   '@elastic/transport@8.11.0(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.9.1
@@ -28648,7 +28656,7 @@ snapshots:
       '@hapi/validate': 2.0.1
       '@hapi/wreck': 18.1.2
 
-  '@hapi/hapi@21.4.9':
+  '@hapi/hapi@21.4.10':
     dependencies:
       '@hapi/accept': 6.0.3
       '@hapi/ammo': 6.0.1
@@ -32560,7 +32568,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.9
+      '@hapi/hapi': 21.4.10
       '@types/node': 24.10.13
       joi: 17.13.8
 
@@ -34261,9 +34269,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.9):
+  brok@6.0.0(@hapi/hapi@21.4.10):
     dependencies:
-      '@hapi/hapi': 21.4.9
+      '@hapi/hapi': 21.4.10
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
@@ -43474,7 +43482,7 @@ snapshots:
 
   simple-sha256@1.1.0: {}
 
-  simple-statistics@7.8.8: {}
+  simple-statistics@7.12.1: {}
 
   sinon@22.1.0:
     dependencies:
