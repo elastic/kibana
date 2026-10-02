@@ -39,6 +39,9 @@ const OPTIONS: HeaderRowOption[] = [
   },
 ];
 
+export const getHeaderRowDisplayLabel = (value: boolean): string =>
+  OPTIONS.find((option) => option.value === String(value))?.label ?? String(value);
+
 export function HeaderRow({
   value,
   onChange,
