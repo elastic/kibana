@@ -19,12 +19,13 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { act } from 'react-dom/test-utils';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import { internalStateActions } from '../../state_management/redux';
+import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { EsqlSource } from '@kbn/data-source';
 import { METRIC_TYPE } from '@kbn/analytics';
 import * as savedSearchUrlConflictCallout from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
@@ -33,6 +34,8 @@ const setup = async ({
   hideSidebar,
   hideTable = false,
   isEsqlEnabled = false,
+  esqlSource,
+  documentsError,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
@@ -42,6 +45,8 @@ const setup = async ({
   hideSidebar?: boolean;
   hideTable?: boolean;
   isEsqlEnabled?: boolean;
+  esqlSource?: EsqlSource;
+  documentsError?: { error: Error; errorAfterMs: number };
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -98,15 +103,26 @@ const setup = async ({
     })
   );
 
-  dataStateContainer.data$.documents$.next({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
-  });
+  dataStateContainer.data$.documents$.next(
+    documentsError
+      ? { fetchStatus: FetchStatus.ERROR, ...documentsError }
+      : {
+          fetchStatus: FetchStatus.COMPLETE,
+          result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
+        }
+  );
   dataStateContainer.data$.totalHits$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
   });
   dataStateContainer.data$.main$.next(dataMainMsg);
+
+  if (esqlSource) {
+    selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
+    ).currentDataSource$.next(esqlSource);
+  }
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
@@ -211,6 +227,76 @@ describe('Discover component', () => {
       await waitFor(() => {
         expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
       });
+    }, 10000);
+  });
+
+  describe('loading', () => {
+    const loadingMainMsg: DataMainMsg = {
+      fetchStatus: FetchStatus.LOADING,
+      foundDocuments: false,
+    };
+
+    test('shows the full page loading spinner for a data view source', async () => {
+      await setup({ dataView: dataViewWithTimefieldMock, dataMainMsg: loadingMainMsg });
+      expect(screen.getByTestId('loadingSpinner')).toBeInTheDocument();
+    }, 10000);
+
+    test('shows the chart without the full page loading spinner for an ES|QL source', async () => {
+      const esqlSource = await EsqlSource.create({
+        query: 'FROM logs',
+        timeFieldName: '@timestamp',
+      });
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        dataMainMsg: loadingMainMsg,
+        esqlSource,
+      });
+      expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dscPanelsToggleInHistogram')).toBeInTheDocument();
+    }, 10000);
+  });
+
+  describe('documents error', () => {
+    const error = new Error('Documents failed');
+    const errorMainMsg: DataMainMsg = {
+      fetchStatus: FetchStatus.ERROR,
+      foundDocuments: false,
+      error,
+    };
+
+    test('shows a slow error in the documents panel and keeps the chart', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        dataMainMsg: errorMainMsg,
+        documentsError: { error, errorAfterMs: 5000 },
+      });
+      expect(screen.getByTestId('discoverDocumentsError')).toBeInTheDocument();
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('dscPanelsToggleInHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('dscPanelsToggleInPage')).not.toBeInTheDocument();
+    }, 10000);
+
+    test('shows a quick error full page', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        dataMainMsg: errorMainMsg,
+        documentsError: { error, errorAfterMs: 100 },
+      });
+      expect(screen.queryByTestId('discoverDocumentsError')).not.toBeInTheDocument();
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
+    }, 10000);
+
+    test('shows a slow error full page when the table is hidden', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        hideTable: true,
+        dataMainMsg: errorMainMsg,
+        documentsError: { error, errorAfterMs: 5000 },
+      });
+      expect(screen.queryByTestId('discoverDocumentsError')).not.toBeInTheDocument();
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
     }, 10000);
   });
 

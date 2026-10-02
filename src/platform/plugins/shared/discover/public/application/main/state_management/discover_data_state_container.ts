@@ -82,6 +82,10 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
   approximationApplied?: boolean;
+  /**
+   * Time in ms between the start of the documents request and its failure, set on errors
+   */
+  errorAfterMs?: number;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

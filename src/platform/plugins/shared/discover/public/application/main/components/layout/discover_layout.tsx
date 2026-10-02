@@ -20,16 +20,11 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  ErrorCallout,
-  SHOW_FIELD_STATISTICS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -44,6 +39,7 @@ import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
+import { ResultsErrorCallout } from './results_error_callout';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
@@ -86,10 +82,10 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   </QueryClientProvider>
 ));
 
+const DOCUMENTS_ERROR_IN_PANEL_MIN_MS = 1000;
+
 export function DiscoverLayout() {
   const {
-    core,
-    docLinks,
     trackUiMetric,
     capabilities,
     dataViews,
@@ -275,8 +271,17 @@ export function DiscoverLayout() {
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
-  const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isTableHidden = useAppStateSelector((state) => Boolean(state.hideTable));
+  // Quick documents errors replace the whole page. Slower ones are shown in the documents panel,
+  // so a chart that has been rendered in the meantime stays visible
+  const showDocumentsErrorInPanel =
+    resultState === 'none' &&
+    documentState.fetchStatus === FetchStatus.ERROR &&
+    (documentState.errorAfterMs ?? 0) >= DOCUMENTS_ERROR_IN_PANEL_MIN_MS &&
+    !isTableHidden;
+  const showFullPageResultState = resultState === 'none' && !showDocumentsErrorInPanel;
+  const contentCentered = resultState === 'uninitialized' || showFullPageResultState;
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -306,6 +311,8 @@ export function DiscoverLayout() {
   );
 
   const isSidebarHidden = resultState === 'uninitialized';
+  // ES|QL sources know their columns before fetching, so the chart can render while documents load
+  const showFullPageLoading = resultState === 'loading' && currentDataSource.kind !== 'esql';
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
@@ -323,11 +330,12 @@ export function DiscoverLayout() {
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
         />
-        {resultState === 'loading' && <LoadingSpinner />}
+        {showFullPageLoading && <LoadingSpinner />}
       </>
     );
   }, [
     resultState,
+    showFullPageLoading,
     dataView,
     currentColumns,
     viewMode,
@@ -439,26 +447,13 @@ export function DiscoverLayout() {
             }
             mainPanel={
               <div css={styles.dscPageContentWrapper}>
-                {resultState === 'none' ? (
+                {showFullPageResultState ? (
                   <>
                     <div css={styles.mainPanel}>
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
+                      <ResultsErrorCallout error={dataState.error} />
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
