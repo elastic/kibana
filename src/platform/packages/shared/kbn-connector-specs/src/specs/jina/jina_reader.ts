@@ -259,7 +259,12 @@ export const JinaReaderConnector: ConnectorSpec = {
         z.object({
           file: z.string().max(MAX_FILE_BASE64_LENGTH).describe('Base64-encoded file content'),
           filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
-          pageNumber: z.number().optional().describe('Page number to render (starting from 1)'),
+          pageNumber: z
+            .number()
+            .int()
+            .min(1)
+            .optional()
+            .describe('Page number to render (starting from 1)'),
           options: z
             .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
             .optional()
