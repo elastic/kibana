@@ -35,13 +35,16 @@ export class DataFederationServerPlugin
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup({ http, uiSettings }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {
+  public setup(
+    { http, uiSettings, docLinks }: CoreSetup,
+    { features }: { features: FeaturesPluginSetup }
+  ) {
     if (!this.config.enabled) {
       return;
     }
 
     this.license.setup({ pluginName: PLUGIN_NAME, logger: this.logger });
-    registerUiSettings({ uiSettings, isServerless: this.isServerless });
+    registerUiSettings({ uiSettings, docLinks, isServerless: this.isServerless });
 
     features.registerElasticsearchFeature({
       id: PLUGIN_ID,

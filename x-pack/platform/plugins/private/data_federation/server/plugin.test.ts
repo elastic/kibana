@@ -57,6 +57,7 @@ describe('DataFederationServerPlugin', () => {
 
     expect(registerUiSettings).toHaveBeenCalledWith({
       uiSettings: coreSetup.uiSettings,
+      docLinks: coreSetup.docLinks,
       isServerless: false,
     });
     expect(features.registerElasticsearchFeature).toHaveBeenCalled();
@@ -68,6 +69,7 @@ describe('DataFederationServerPlugin', () => {
 
     expect(registerUiSettings).toHaveBeenCalledWith({
       uiSettings: coreSetup.uiSettings,
+      docLinks: coreSetup.docLinks,
       isServerless: true,
     });
   });

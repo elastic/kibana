@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
@@ -14,15 +15,14 @@ import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids
 // a `shared-browser` package not consumable from plugin server code.
 const DATA_FEDERATION_CATEGORY = 'dataFederation';
 
-const DATA_FEDERATION_DOCUMENTATION_URL =
-  'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation';
-
 /** Registers the advanced setting that controls the visibility of the data federation management app. */
 export const registerUiSettings = ({
   uiSettings,
+  docLinks,
   isServerless,
 }: {
   uiSettings: UiSettingsServiceSetup;
+  docLinks: DocLinksServiceSetup;
   isServerless: boolean;
 }): void => {
   const licenseText = isServerless
@@ -43,7 +43,9 @@ export const registerUiSettings = ({
           'Display the ES|QL Data Federation management UI. Disabling this setting does not affect existing data sources or datasets. You can continue to manage them through the API and reference datasets in ES|QL queries. {licenseText} {learnMoreLink}',
         values: {
           licenseText,
-          learnMoreLink: `<a href="${DATA_FEDERATION_DOCUMENTATION_URL}" target="_blank" rel="noreferrer noopener">${i18n.translate(
+          learnMoreLink: `<a href="${
+            docLinks.links.dataFederation.overview
+          }" target="_blank" rel="noreferrer noopener">${i18n.translate(
             'xpack.dataFederation.uiSettings.enabled.learnMore',
             { defaultMessage: 'Learn more' }
           )}</a>.`,

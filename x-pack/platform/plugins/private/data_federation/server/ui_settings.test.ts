@@ -9,10 +9,12 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { DATA_FEDERATION_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerUiSettings } from './ui_settings';
 
+const { docLinks } = coreMock.createSetup();
+
 const getRegisteredSetting = (isServerless: boolean) => {
   const { uiSettings } = coreMock.createSetup();
 
-  registerUiSettings({ uiSettings, isServerless });
+  registerUiSettings({ uiSettings, docLinks, isServerless });
 
   expect(uiSettings.register).not.toHaveBeenCalled();
   return (uiSettings.registerGlobal as jest.Mock).mock.calls[0][0][
@@ -45,7 +47,7 @@ describe('registerUiSettings', () => {
 
   it.each([false, true])('links to the documentation (serverless: %s)', (isServerless) => {
     expect(getRegisteredSetting(isServerless).description).toContain(
-      'href="https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation"'
+      `href="${docLinks.links.dataFederation.overview}"`
     );
   });
 });
