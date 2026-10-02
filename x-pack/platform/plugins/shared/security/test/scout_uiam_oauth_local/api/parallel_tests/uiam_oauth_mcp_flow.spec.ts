@@ -117,7 +117,9 @@ apiTest.describe(
 
         const { resourceMetadataUrl } = extractWWWAuthenticateParams(response);
         expect(resourceMetadataUrl).toBeDefined();
-        expect(resourceMetadataUrl!.pathname).toBe('/.well-known/oauth-protected-resource');
+        expect(resourceMetadataUrl!.pathname).toBe(
+          `/.well-known/oauth-protected-resource/${MCP_ENDPOINT}`
+        );
 
         const body = await response.json();
         expect(body).toStrictEqual({

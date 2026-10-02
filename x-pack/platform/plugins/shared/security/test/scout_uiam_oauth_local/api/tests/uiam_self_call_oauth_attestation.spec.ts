@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
 import { apiTest, COMMON_HEADERS, COMMON_UNSAFE_HEADERS, TEST_USERNAME } from '../fixtures';
-import { MCP_ENDPOINT } from '../fixtures/oauth_providers';
 
 const ES_SELF_CALL_TARGET = '/internal/test_endpoints/self_client/fake_request';
 const OAUTH_SELF_CALL_TARGET = '/internal/test_endpoints/self_client/oauth_me';
@@ -22,7 +21,9 @@ apiTest.describe(
     apiTest(
       'OAuth ephemeral self-call stamp survives the token swap so the acceptUiamOAuth receiver skips a second exchange',
       async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
-        const audience = `${new URL(kbnUrl.get()).origin}/${MCP_ENDPOINT}`;
+        const audience = `${
+          new URL(kbnUrl.get()).origin
+        }/test_endpoints/self_client/as_scoped_oauth`;
         const oauthAccessToken = await createUiamOAuthAccessToken({
           username: '1234567890',
           organizationId: organizationId!,
