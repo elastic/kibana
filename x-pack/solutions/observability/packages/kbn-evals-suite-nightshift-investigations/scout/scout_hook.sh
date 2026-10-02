@@ -7,6 +7,11 @@
 # self-hosted sandbox). SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout
 # config set at kibana.sandbox.yml, which reads the credentials from the environment. Without an API
 # key it prints `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
+#
+# `SANDBOX_API_KEY` is the one exception to "config wins": if it's already exported in the shell, it
+# always overrides `sandbox.apiKey` in config, rather than merely filling a gap. This lets a run be
+# dispatched with a specific (e.g. personal, freshly-minted) credential that is guaranteed to be
+# used, regardless of whatever the profile's config carries.
 
 set -euo pipefail
 
@@ -33,9 +38,22 @@ resolve() {
   printf '%s' "${from_config:-${!env_name:-}}"
 }
 
+# Like `resolve`, but the named shell variable wins when set, regardless of config: lets whoever
+# dispatches a run (e.g. a Buildkite build triggered from a developer's machine) force which
+# sandbox credential is used via an injected env var, overriding any shared value a profile's
+# config carries.
+resolve_env_first() {
+  local env_name="$1" path="$2"
+  if [[ -n "${!env_name:-}" ]]; then
+    printf '%s' "${!env_name}"
+    return
+  fi
+  resolve "$env_name" "$path"
+}
+
 host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
 port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
-api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
+api_key="$(resolve_env_first SANDBOX_API_KEY '.sandbox.apiKey')"
 certificate="$(resolve SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
 key="$(resolve SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
 ca="$(resolve SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"

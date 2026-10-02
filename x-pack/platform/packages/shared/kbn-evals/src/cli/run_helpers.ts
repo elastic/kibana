@@ -26,12 +26,17 @@ import {
   envFromDatasetsProfile,
   envFromExportProfile,
   loadVaultConfig,
+  readVaultConfigFromFile,
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
 import { readCachedEisConnectors } from './eis_connectors_cache';
+import {
+  readCachedSandboxCredential,
+  writeCachedSandboxCredential,
+} from './sandbox_credential_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
@@ -236,9 +241,81 @@ export interface ResolveProfileEnvOverridesOptions {
 /**
  * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
  * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ *
+ * `sandbox` is the one field pulled from `config.local.json` regardless of profile: it's a personal
+ * credential (see sandbox_credential_cache.ts) that must never live in a team-shared Vault config, so
+ * a developer who puts it in their own local file gets it used no matter which profile (dev-vault,
+ * ci-prod, ...) supplies everything else.
  */
-const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object =>
-  loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object => {
+  const config = loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+  const localSandbox = (readVaultConfigFromFile(repoRoot, 'local') as { sandbox?: unknown })
+    ?.sandbox;
+  return localSandbox ? { ...config, sandbox: localSandbox } : config;
+};
+
+const NIGHTSHIFT_SANDBOX_SUITE_ID = 'nightshift-investigations';
+
+/** True when the resolved profile config already carries a real (non-placeholder) sandbox apiKey. */
+const configHasSandboxApiKey = (scoutHookConfig: object): boolean => {
+  const apiKey = (scoutHookConfig as { sandbox?: { apiKey?: unknown } }).sandbox?.apiKey;
+  return typeof apiKey === 'string' && apiKey.trim().length > 0 && !apiKey.includes('REPLACE_ME');
+};
+
+/**
+ * The nightshift-investigations sandbox authenticates per developer (no shared credential in the
+ * team's Vault config - see sandbox_credential_cache.ts). Populates `SANDBOX_API_KEY` from an
+ * already-exported env var, then the local cache, then (interactively) the developer directly; a
+ * developer who skips the prompt just runs that suite smoke-only, so this never blocks the run.
+ * Skipped entirely when the profile's own config already supplies a usable `sandbox.apiKey` (e.g. a
+ * developer who added their credential straight to `config.local.json`) - the hook will use that.
+ */
+const ensureNightshiftSandboxCredential = async (
+  log: ToolingLog,
+  scoutHookConfig: object
+): Promise<void> => {
+  if (process.env.SANDBOX_API_KEY) return;
+  if (configHasSandboxApiKey(scoutHookConfig)) return;
+
+  const cached = readCachedSandboxCredential();
+  if (cached) {
+    process.env.SANDBOX_API_KEY = cached;
+    log.info(
+      'Sandbox credential loaded from cache (~/.elastic/nightshift-sandbox-credential.json)'
+    );
+    return;
+  }
+
+  if (!isTTY()) {
+    log.warning(
+      'No SANDBOX_API_KEY set for nightshift-investigations; trace-only investigations will run smoke-only. ' +
+        'Set SANDBOX_API_KEY, or run with a TTY to be prompted.'
+    );
+    return;
+  }
+
+  const { value } = await inquirer.prompt<{ value: string }>({
+    type: 'password',
+    name: 'value',
+    mask: '*',
+    message:
+      'Sandbox dev credential for nightshift-investigations (username:password from ' +
+      "sandbox-service's ./scripts/add-dev-credential.py eval <username>; leave blank to skip):",
+  });
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    log.warning(
+      'No sandbox credential provided; trace-only investigations will run smoke-only this run. ' +
+        'Re-run `node scripts/evals init` once you have one.'
+    );
+    return;
+  }
+
+  process.env.SANDBOX_API_KEY = trimmed;
+  writeCachedSandboxCredential(trimmed);
+  log.info('Sandbox credential cached at ~/.elastic/nightshift-sandbox-credential.json');
+};
 
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
@@ -275,9 +352,29 @@ export const resolveProfileEnvOverrides = async ({
     }
   }
 
-  const suiteScoutEnv = suite?.scoutHook
-    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile))
-    : {};
+  const scoutHookConfig = suite?.scoutHook
+    ? loadScoutHookConfig(repoRoot, datasetsProfile)
+    : undefined;
+
+  if (suite?.id === NIGHTSHIFT_SANDBOX_SUITE_ID && scoutHookConfig) {
+    await ensureNightshiftSandboxCredential(log, scoutHookConfig);
+  }
+
+  const suiteScoutEnv =
+    suite?.scoutHook && scoutHookConfig
+      ? runScoutHook(repoRoot, suite.scoutHook, scoutHookConfig)
+      : {};
+
+  if (suite?.id === NIGHTSHIFT_SANDBOX_SUITE_ID) {
+    // suiteScoutEnv.SANDBOX_API_KEY is the hook's own resolved value (env override or config),
+    // so this reflects the actual credential in effect, not just what this process injected.
+    const [username] = (suiteScoutEnv.SANDBOX_API_KEY ?? '').split(':');
+    log.info(
+      username
+        ? `Sandbox username for nightshift-investigations: ${username}`
+        : 'No sandbox credential in use for nightshift-investigations; trace-only investigations will run smoke-only.'
+    );
+  }
 
   return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
 };
