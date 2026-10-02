@@ -62,6 +62,12 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
 
     try {
       const createMonitorBulkAPI = new CreateMonitorBulkAPI(routeContext);
+      const requestedSpacesAccessError = await createMonitorBulkAPI.validateRequestedSpacesAccess(
+        request.body.monitors as CreateMonitorPayLoad[]
+      );
+      if (requestedSpacesAccessError) {
+        return requestedSpacesAccessError;
+      }
       const preparedMonitors = await createMonitorBulkAPI.prepare(
         request.body.monitors as CreateMonitorPayLoad[]
       );
@@ -84,7 +90,21 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
         spaceId,
       });
 
+      const failedMonitorsById = new Map(
+        failedMonitors.map(({ monitor, error }) => [monitor.id, error])
+      );
       const result = newMonitors.map<BulkCreateMonitorResultEntry>((monitor) => {
+        const syncError = failedMonitorsById.get(monitor.id);
+        if (failedMonitorsById.has(monitor.id)) {
+          return {
+            id: monitor.id,
+            created: false,
+            error:
+              syncError instanceof Error
+                ? syncError.message
+                : 'Failed to sync monitor to private location',
+          };
+        }
         if (isSavedObjectErrorResult(monitor)) {
           return {
             id: monitor.id,
@@ -94,14 +114,6 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
         }
         return { id: monitor.id, created: true };
       });
-      result.push(
-        ...failedMonitors.map(({ monitor, error }) => ({
-          id: monitor.id,
-          created: false,
-          error:
-            error instanceof Error ? error.message : 'Failed to sync monitor to private location',
-        }))
-      );
 
       return errors && errors.length > 0 ? { result, errors } : { result };
     } catch (error) {

@@ -7,13 +7,18 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
+import type { KibanaRole } from '@kbn/scout-oblt';
 import {
   apiTest,
   LOCAL_PUBLIC_LOCATION,
   mergeSyntheticsApiHeaders,
-  SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
-import { bulkCreateMonitors, getMonitor } from '../../../common/fixtures/monitors';
+import {
+  bulkCreateMonitors,
+  deleteMonitors,
+  getMonitor,
+  listMonitors,
+} from '../../../common/fixtures/monitors';
 
 interface BulkCreateResult {
   id: string;
@@ -21,20 +26,39 @@ interface BulkCreateResult {
   error?: string;
 }
 
+const UPTIME_ALL_IN_DEFAULT_SPACE_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [],
+  },
+  kibana: [{ base: [], feature: { uptime: ['all'] }, spaces: ['default'] }],
+};
+
 apiTest.describe(
   'CreateMonitorBulkAPI',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     let editorHeaders: Record<string, string>;
+    let defaultSpaceOnlyHeaders: Record<string, string>;
+    const createdMonitorIds: string[] = [];
+    const spacesToCleanUp: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
+    apiTest.beforeAll(async ({ requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader, { Accept: 'application/json' });
+      const { apiKeyHeader: defaultSpaceOnlyKey } = await requestAuth.getApiKeyForCustomRole(
+        UPTIME_ALL_IN_DEFAULT_SPACE_ROLE
+      );
+      defaultSpaceOnlyHeaders = mergeSyntheticsApiHeaders(defaultSpaceOnlyKey, {
+        Accept: 'application/json',
+      });
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
+    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+      if (createdMonitorIds.length > 0) {
+        await deleteMonitors(apiClient, editorHeaders, createdMonitorIds, { ignoreErrors: true });
+      }
+      await Promise.all(spacesToCleanUp.map((spaceId) => kbnClient.spaces.delete(spaceId)));
     });
 
     apiTest('creates multiple monitors in one request', async ({ apiClient }) => {
@@ -50,6 +74,7 @@ apiTest.describe(
 
       expect(result).toHaveLength(monitors.length);
       expect(result.every((entry) => entry.created && entry.id)).toBe(true);
+      createdMonitorIds.push(...result.map(({ id }) => id));
 
       await Promise.all(
         result.map(async ({ id }, index) => {
@@ -76,7 +101,7 @@ apiTest.describe(
               },
               {
                 type: 'http',
-                name,
+                name: name.toUpperCase(),
                 url: 'https://example.com/two',
                 locations: [LOCAL_PUBLIC_LOCATION.id],
               },
@@ -86,6 +111,47 @@ apiTest.describe(
         );
 
         expect((response.body as { message: string }).message).toMatch(/already exists/i);
+        const listed = await listMonitors(
+          apiClient,
+          editorHeaders,
+          `query=${encodeURIComponent(name)}`
+        );
+        expect((listed.body as { total: number }).total).toBe(0);
+      }
+    );
+
+    apiTest(
+      'rejects a target space the caller cannot access before persisting monitors',
+      async ({ apiClient, kbnClient }) => {
+        const spaceId = `bulk-create-restricted-${uuidv4()}`;
+        const name = `restricted-bulk-create-${uuidv4()}`;
+        await kbnClient.spaces.create({ id: spaceId, name: `Bulk create restricted ${uuidv4()}` });
+        spacesToCleanUp.push(spaceId);
+
+        await bulkCreateMonitors(
+          apiClient,
+          defaultSpaceOnlyHeaders,
+          {
+            monitors: [
+              {
+                type: 'http',
+                name,
+                url: 'https://example.com/restricted',
+                locations: [LOCAL_PUBLIC_LOCATION.id],
+                spaces: [spaceId],
+              },
+            ],
+          },
+          { statusCode: 403 }
+        );
+
+        const listed = await listMonitors(
+          apiClient,
+          editorHeaders,
+          `query=${encodeURIComponent(name)}`,
+          { spaceId }
+        );
+        expect((listed.body as { total: number }).total).toBe(0);
       }
     );
   }

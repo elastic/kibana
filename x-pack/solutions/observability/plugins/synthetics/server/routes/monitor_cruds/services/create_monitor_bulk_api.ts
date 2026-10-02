@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { uniqBy } from 'lodash';
 import type { RouteContext } from '../../types';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -14,6 +15,7 @@ import type { MonitorFields, SyntheticsMonitor } from '../../../../common/runtim
 import { ConfigKey } from '../../../../common/runtime_types';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from '../monitor_validation';
 import { AddEditMonitorAPI, type CreateMonitorPayLoad } from '../add_monitor/add_monitor_api';
+import { invalidOriginError } from '../add_monitor';
 import { validatePermissions } from '../edit_monitor';
 import {
   assertCanPerformMonitorBulkActionInAllSpaces,
@@ -30,19 +32,35 @@ export interface BulkCreatePreprocessResult {
 export class CreateMonitorBulkAPI {
   constructor(private readonly routeContext: RouteContext) {}
 
+  /** Validates that the caller may create monitors in every requested space. */
+  async validateRequestedSpacesAccess(
+    monitors: CreateMonitorPayLoad[]
+  ): Promise<IKibanaResponse | undefined> {
+    const monitorSpaces = [
+      ...new Set(monitors.flatMap((monitor) => monitor[ConfigKey.KIBANA_SPACES] ?? [])),
+    ];
+    return assertCanPerformMonitorBulkActionInAllSpaces(
+      this.routeContext,
+      monitorSpaces,
+      undefined,
+      'bulk_create'
+    );
+  }
+
   async prepare(monitors: CreateMonitorPayLoad[]): Promise<BulkCreatePreprocessResult> {
     this.validateOrigins(monitors);
 
     const formattedMonitors = monitors.map((monitor) => this.formatMonitor(monitor));
-    const [privateLocations, maintenanceWindows] = await Promise.all([
-      this.getPrivateLocations(formattedMonitors),
+    const [privateLocationsByMonitor, maintenanceWindows] = await Promise.all([
+      this.getPrivateLocationsForMonitors(formattedMonitors),
       this.getMaintenanceWindows(formattedMonitors),
     ]);
     const normalizedMonitors = await this.normalizeMonitors(
       formattedMonitors,
       maintenanceWindows,
-      privateLocations
+      privateLocationsByMonitor
     );
+    const privateLocations = uniqBy(privateLocationsByMonitor.flat(), 'id');
 
     this.validateUniqueNames(normalizedMonitors);
     await this.validateNamesDoNotExist(normalizedMonitors);
@@ -54,7 +72,7 @@ export class CreateMonitorBulkAPI {
     };
   }
 
-  /** Validates the public-location, multi-space, and private-location access requirements. */
+  /** Validates public-location capability and private-location space coverage. */
   async validateCreateAccess({
     normalizedMonitors,
     privateLocations,
@@ -66,19 +84,6 @@ export class CreateMonitorBulkAPI {
     );
     if (locationPermissionError) {
       return response.forbidden({ body: { message: locationPermissionError } });
-    }
-
-    const monitorSpaces = [
-      ...new Set(normalizedMonitors.flatMap((monitor) => monitor[ConfigKey.KIBANA_SPACES] ?? [])),
-    ];
-    const spacePermissionError = await assertCanPerformMonitorBulkActionInAllSpaces(
-      this.routeContext,
-      monitorSpaces,
-      undefined,
-      'bulk_create'
-    );
-    if (spacePermissionError) {
-      return spacePermissionError;
     }
 
     const privateLocationsById = new Map(
@@ -103,9 +108,7 @@ export class CreateMonitorBulkAPI {
   private validateOrigins(monitors: CreateMonitorPayLoad[]) {
     const invalidMonitor = monitors.find((monitor) => monitor.origin && monitor.origin !== 'ui');
     if (invalidMonitor) {
-      throw bulkCreateValidationError(
-        `Unsupported origin type ${invalidMonitor.origin}, only ui type is supported via API.`
-      );
+      throw bulkCreateValidationError(invalidOriginError(invalidMonitor.origin!));
     }
   }
 
@@ -117,21 +120,24 @@ export class CreateMonitorBulkAPI {
     return formattedConfig as CreateMonitorPayLoad;
   }
 
-  private async getPrivateLocations(monitors: CreateMonitorPayLoad[]) {
+  private async getPrivateLocationsForMonitors(monitors: CreateMonitorPayLoad[]) {
     if (!monitors.some((monitor) => this.hasPrivateLocationInput(monitor))) {
-      return [];
-    }
-
-    const namespaces = new Set<string>([this.routeContext.spaceId]);
-    for (const monitor of monitors) {
-      for (const space of monitor[ConfigKey.KIBANA_SPACES] ?? []) {
-        namespaces.add(space);
-      }
+      return monitors.map(() => []);
     }
 
     const internalClient =
       this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-    return getPrivateLocationsForNamespaces(internalClient, [...namespaces]);
+    return Promise.all(
+      monitors.map((monitor) => {
+        if (!this.hasPrivateLocationInput(monitor)) {
+          return [];
+        }
+        const namespaces = [
+          ...new Set([this.routeContext.spaceId, ...(monitor[ConfigKey.KIBANA_SPACES] ?? [])]),
+        ];
+        return getPrivateLocationsForNamespaces(internalClient, namespaces);
+      })
+    );
   }
 
   private hasPrivateLocationInput(monitor: CreateMonitorPayLoad): boolean {
@@ -160,17 +166,17 @@ export class CreateMonitorBulkAPI {
   private async normalizeMonitors(
     monitors: CreateMonitorPayLoad[],
     maintenanceWindows: MaintenanceWindow[],
-    privateLocations: PrivateLocationAttributes[]
+    privateLocationsByMonitor: PrivateLocationAttributes[][]
   ) {
     const normalizedMonitors: SyntheticsMonitor[] = [];
-    for (const monitor of monitors) {
+    for (const [index, monitor] of monitors.entries()) {
       const addMonitorAPI = new AddEditMonitorAPI(this.routeContext);
       const normalizedMonitor = await addMonitorAPI.normalizeMonitor(
         monitor,
         monitor,
         undefined,
         maintenanceWindows,
-        privateLocations
+        privateLocationsByMonitor[index]
       );
       const validation = validateMonitor(
         normalizedMonitor,
@@ -189,10 +195,11 @@ export class CreateMonitorBulkAPI {
     const seenNames = new Set<string>();
     for (const monitor of monitors) {
       const name = monitor[ConfigKey.NAME];
-      if (seenNames.has(name)) {
+      const normalizedName = name.toLowerCase();
+      if (seenNames.has(normalizedName)) {
         throw bulkCreateValidationError(monitorNameExistsMessage(name));
       }
-      seenNames.add(name);
+      seenNames.add(normalizedName);
     }
   }
 

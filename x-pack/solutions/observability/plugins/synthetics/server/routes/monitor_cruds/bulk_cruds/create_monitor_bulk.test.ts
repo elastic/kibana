@@ -42,10 +42,15 @@ const mockRouteContext = (response = mockResponse()) =>
 
 const installPreprocessResult = (result: unknown) => {
   const { CreateMonitorBulkAPI } = jest.requireMock('../services/create_monitor_bulk_api');
+  const validateRequestedSpacesAccess = jest.fn().mockResolvedValue(undefined);
   const prepare = jest.fn().mockResolvedValue(result);
   const validateCreateAccess = jest.fn().mockResolvedValue(undefined);
-  CreateMonitorBulkAPI.mockImplementation(() => ({ prepare, validateCreateAccess }));
-  return { prepare, validateCreateAccess };
+  CreateMonitorBulkAPI.mockImplementation(() => ({
+    validateRequestedSpacesAccess,
+    prepare,
+    validateCreateAccess,
+  }));
+  return { validateRequestedSpacesAccess, prepare, validateCreateAccess };
 };
 
 const installSyncResult = (result: unknown) => {
@@ -93,11 +98,12 @@ describe('createSyntheticsMonitorBulkRoute', () => {
       { locations: [{ id: 'dev', isServiceManaged: true }], spaces: ['default'] },
       { locations: [{ id: 'dev', isServiceManaged: true }], spaces: ['default'] },
     ];
-    const { prepare, validateCreateAccess } = installPreprocessResult({
-      normalizedMonitors,
-      privateLocations: [],
-      maintenanceWindows: [],
-    });
+    const { validateRequestedSpacesAccess, prepare, validateCreateAccess } =
+      installPreprocessResult({
+        normalizedMonitors,
+        privateLocations: [],
+        maintenanceWindows: [],
+      });
     const sync = installSyncResult({
       newMonitors: [{ id: 'monitor-1' }, { id: 'monitor-2' }],
       failedMonitors: [],
@@ -108,6 +114,7 @@ describe('createSyntheticsMonitorBulkRoute', () => {
 
     const result = await route.handler(context);
 
+    expect(validateRequestedSpacesAccess).toHaveBeenCalledWith(context.request.body.monitors);
     expect(prepare).toHaveBeenCalledWith(context.request.body.monitors);
     expect(validateCreateAccess).toHaveBeenCalledWith({
       normalizedMonitors,
@@ -129,10 +136,68 @@ describe('createSyntheticsMonitorBulkRoute', () => {
     });
   });
 
+  it('rejects unauthorized target spaces before preparing monitors', async () => {
+    const { CreateMonitorBulkAPI } = jest.requireMock('../services/create_monitor_bulk_api');
+    const validateRequestedSpacesAccess = jest
+      .fn()
+      .mockResolvedValue({ status: 403, body: { message: 'missing space access' } });
+    const prepare = jest.fn();
+    CreateMonitorBulkAPI.mockImplementation(() => ({ validateRequestedSpacesAccess, prepare }));
+    const context = mockRouteContext();
+
+    const result = await route.handler(context);
+
+    expect(result).toEqual({ status: 403, body: { message: 'missing space access' } });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it('preserves input order when private-location synchronization fails', async () => {
+    const normalizedMonitors = [
+      { locations: [{ id: 'private-location', isServiceManaged: false }], spaces: ['default'] },
+      { locations: [{ id: 'dev', isServiceManaged: true }], spaces: ['default'] },
+    ];
+    installPreprocessResult({ normalizedMonitors, privateLocations: [], maintenanceWindows: [] });
+    installSyncResult({
+      newMonitors: [{ id: 'monitor-1' }, { id: 'monitor-2' }],
+      failedMonitors: [{ monitor: { id: 'monitor-1' }, error: new Error('sync failed') }],
+      errors: [],
+    });
+
+    const result = await route.handler(mockRouteContext());
+
+    expect(result).toEqual({
+      result: [
+        { id: 'monitor-1', created: false, error: 'sync failed' },
+        { id: 'monitor-2', created: true },
+      ],
+    });
+  });
+
+  it('reports a private-location synchronization failure without an error object', async () => {
+    const normalizedMonitors = [
+      { locations: [{ id: 'private-location', isServiceManaged: false }], spaces: ['default'] },
+    ];
+    installPreprocessResult({ normalizedMonitors, privateLocations: [], maintenanceWindows: [] });
+    installSyncResult({
+      newMonitors: [{ id: 'monitor-1' }],
+      failedMonitors: [{ monitor: { id: 'monitor-1' }, error: undefined }],
+      errors: [],
+    });
+
+    const result = await route.handler(mockRouteContext());
+
+    expect(result).toEqual({
+      result: [
+        { id: 'monitor-1', created: false, error: 'Failed to sync monitor to private location' },
+      ],
+    });
+  });
+
   it('returns bulk-validation errors as a 400 response', async () => {
     const context = mockRouteContext();
     const { CreateMonitorBulkAPI } = jest.requireMock('../services/create_monitor_bulk_api');
     CreateMonitorBulkAPI.mockImplementation(() => ({
+      validateRequestedSpacesAccess: jest.fn().mockResolvedValue(undefined),
       prepare: jest.fn().mockRejectedValue(
         new MonitorValidationError({
           valid: false,
