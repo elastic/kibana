@@ -29,7 +29,6 @@ import {
   CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS,
   CASE_BACKFILL_RESCHEDULE_DELAY_MS,
   CASE_BACKFILL_RUN_BUDGET_MS,
-  CASE_BACKFILL_SCAN_BUDGET,
   CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT,
   MAX_CASE_BACKFILL_FAILED_RUNS,
   MAX_CONCURRENT_MIGRATIONS,
@@ -282,14 +281,12 @@ export class TemplatesMigrationTaskManager {
     if (runBudgetExceeded()) {
       log.warn(
         `[${executionId}] Cases templates v2 migration run took ${durationMs}ms, over its ` +
-          `${CASE_BACKFILL_RUN_BUDGET_MS}ms run budget${
+          `${CASE_BACKFILL_RUN_BUDGET_MS}ms run budget (task timeout ` +
+          `${CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT}). ${
             backfill.complete
-              ? ' (the backfill still completed).'
-              : `, so it stopped before the ${CASE_BACKFILL_SCAN_BUDGET}-case scan budget and the ` +
-                'next run resumes from the persisted cursor.'
-          } The budget keeps the run inside the ${CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT} task ` +
-          `timeout, past which the resume cursor would be discarded. If this repeats every run, ` +
-          `lower CASE_BACKFILL_SCAN_BUDGET.`
+              ? 'The backfill still completed.'
+              : 'The backfill stopped early; the next run picks up the remaining cases.'
+          }`
       );
       this.migrationUsageCounter?.incrementCounter({
         counterName: 'caseBackfillRunBudgetExceeded',
