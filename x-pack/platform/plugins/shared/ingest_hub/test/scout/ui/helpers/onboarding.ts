@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { BrowserAuthFixture, ScoutPage } from '@kbn/scout';
+import type { BrowserAuthFixture, KbnClient, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ServiceVars } from '../../../../public/onboarding/step_components/service_settings_step/use_service_settings';
 import type { PersistedEcfLaunchStep } from '../../../../public/onboarding/step_components/ecf_deployment_section';
+import { AWS_SERVICES_STATIC } from '../../../../public/onboarding/aws_service_matrix';
 import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../../../common/core/constants';
 import { test } from '../fixtures';
 
@@ -211,4 +212,32 @@ export function useOnboardingFeatureFlag(extraOverrides: Record<string, boolean>
       'feature_flags.overrides': Object.fromEntries(keysToReset.map((key) => [key, null])),
     });
   });
+}
+
+/** Every package buildAwsServiceMatrix merges a manifest from; `aws` is the one that gates rendering. */
+const AWS_MATRIX_PACKAGE_NAMES = Array.from(
+  new Set(AWS_SERVICES_STATIC.map(({ packageName }) => packageName))
+);
+
+/**
+ * Fetches the AWS service matrix package manifests over the Fleet API, for suites that render the
+ * real matrix instead of mocking it with `mockAwsPackage`. Call it from `beforeAll`, which has a
+ * three minute budget, before any test navigates to the onboarding app.
+ *
+ * `full=true` makes Fleet download and unpack each package archive from the registry, and the
+ * onboarding shell shows a spinner until the `aws` manifest resolves — cold, that does not fit the
+ * 10s `expect` budget of the first navigation.
+ */
+export async function prefetchAwsPackageManifests(kbnClient: KbnClient): Promise<void> {
+  await Promise.all(
+    AWS_MATRIX_PACKAGE_NAMES.map((packageName) =>
+      kbnClient.request({
+        method: 'GET',
+        path: `/api/fleet/epm/packages/${packageName}`,
+        query: { full: true },
+        // Secondary packages may be absent from the registry; the UI falls back to static entries.
+        ignoreErrors: [404],
+      })
+    )
+  );
 }
