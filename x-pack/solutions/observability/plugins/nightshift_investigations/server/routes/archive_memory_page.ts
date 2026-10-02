@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
+import { conflict, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
-import { toMemoryDisplayTelemetry } from '../memory/page_store';
+import { MemoryVersionConflictError, toMemoryDisplayTelemetry } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 /**
@@ -41,9 +41,20 @@ export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute(
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 
     const store = getMemoryPageStore(request);
-    const page = params.body.archived
-      ? await store.archive(params.path.id, 'manual')
-      : await store.unarchive(params.path.id);
+    let page: Awaited<ReturnType<typeof store.archive>>;
+    try {
+      page = params.body.archived
+        ? await store.archive(params.path.id, 'manual')
+        : await store.unarchive(params.path.id);
+    } catch (err) {
+      // The store already retried its optimistic-concurrency guard and lost. A 409
+      // tells the operator the document moved rather than reporting a server fault
+      // for a write that was simply stale.
+      if (err instanceof MemoryVersionConflictError) {
+        throw conflict('The memory changed while you were reviewing it. Reload and try again.');
+      }
+      throw err;
+    }
 
     if (!page) {
       throw notFound(`Semantic Memory page ${params.path.id} was not found`);

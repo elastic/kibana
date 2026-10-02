@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { badRequest, notFound } from '@hapi/boom';
+import { badRequest, conflict, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
+import { MemoryVersionConflictError } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 /**
@@ -55,17 +56,29 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 
     const store = getMemoryPageStore(request);
-    const page = await store.get(params.path.id);
-    if (!page) {
+    // Read the version as well as the title, so the delete is conditional on the
+    // exact document the operator confirmed.
+    const versioned = await store.getVersioned(params.path.id);
+    if (!versioned) {
       throw notFound(`Semantic Memory page ${params.path.id} was not found`);
     }
-    if (page.title !== params.body.confirm_title) {
+    if (versioned.page.title !== params.body.confirm_title) {
       throw badRequest('confirm_title does not match the page title', {
-        title: page.title,
+        title: versioned.page.title,
       });
     }
 
-    await store.delete(params.path.id);
+    try {
+      await store.delete(params.path.id, versioned);
+    } catch (err) {
+      // The optimizer rewrote the document between the read and the delete. 409,
+      // not 500: the operator's intent was valid, the document they saw is not the
+      // one that would be removed, and retrying would delete unseen content.
+      if (err instanceof MemoryVersionConflictError) {
+        throw conflict('The memory changed while you were reviewing it. Reload and try again.');
+      }
+      throw err;
+    }
     return { deleted: true, id: params.path.id };
   },
 });

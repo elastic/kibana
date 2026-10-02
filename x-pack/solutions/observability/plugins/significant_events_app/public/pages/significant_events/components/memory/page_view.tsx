@@ -10,8 +10,10 @@ import {
   EuiButton,
   EuiConfirmModal,
   EuiEmptyPrompt,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiPanel,
@@ -58,6 +60,7 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
   const setArchived = useSetMemoryArchived();
   const deletePage = useDeleteMemoryPage();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [actionError, setActionError] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'memoryDeleteTitle' });
@@ -249,17 +252,24 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
               defaultMessage="Delete this memory permanently?"
             />
           }
-          onCancel={() => setConfirmingDelete(false)}
+          onCancel={() => {
+            setConfirmingDelete(false);
+            setDeleteConfirmation('');
+          }}
           confirmButtonText={
             <FormattedMessage
               id="xpack.significantEventsApp.memory.deleteConfirmButton"
               defaultMessage="Delete permanently"
             />
           }
+          // The route echoes the title back and refuses a mismatch, so the dialog
+          // makes the operator produce it rather than supplying it for them.
+          confirmButtonDisabled={deleteConfirmation !== page.title}
           buttonColor="danger"
           data-test-subj="nightshiftMemoryDeleteConfirm"
           onConfirm={() => {
             setConfirmingDelete(false);
+            setDeleteConfirmation('');
             return runAction(async () => {
               await deletePage(page.id, page.title);
               onDeleted();
@@ -273,6 +283,21 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
               values={{ title: page.title }}
             />
           </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.deleteConfirmFieldLabel"
+                defaultMessage="Type the memory title to confirm"
+              />
+            }
+          >
+            <EuiFieldText
+              value={deleteConfirmation}
+              onChange={(event) => setDeleteConfirmation(event.target.value)}
+              data-test-subj="nightshiftMemoryDeleteConfirmTitle"
+            />
+          </EuiFormRow>
         </EuiConfirmModal>
       )}
     </div>

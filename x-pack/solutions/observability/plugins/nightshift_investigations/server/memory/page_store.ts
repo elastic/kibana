@@ -56,6 +56,19 @@ const ARCHIVED_CLAUSE: object = {
 
 export type { CounterUpdate };
 
+/**
+ * A write lost its optimistic-concurrency race and could not be retried into
+ * success. Distinct from a generic failure so a route can answer 409: the
+ * document changed under the operator, and retrying blindly would apply their
+ * intent to a version they never saw.
+ */
+export class MemoryVersionConflictError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'MemoryVersionConflictError';
+  }
+}
+
 export type MemoryRetrieveMatch = 'context' | 'content';
 
 export interface VersionedMemoryPage {
@@ -132,7 +145,11 @@ export interface MemoryPageStore {
   ) => Promise<MemoryPage>;
   /** Clears `archive_reason`, returning the memory to active recall. */
   unarchive: (id: string) => Promise<MemoryPage | undefined>;
-  delete: (id: string) => Promise<void>;
+  /**
+   * Hard delete. Pass the version the caller read to make the delete conditional;
+   * without it the document is removed even if the optimizer has since rewritten it.
+   */
+  delete: (id: string, version?: VersionedMemoryPage) => Promise<void>;
 }
 
 const normalizeSlugText = (slug: string): string =>
@@ -951,9 +968,10 @@ export const createMemoryPageStore = ({
             throw err;
           }
           if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
-            throw new Error(`Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`, {
-              cause: err,
-            });
+            throw new MemoryVersionConflictError(
+              `Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`,
+              { cause: err }
+            );
           }
         }
       }
@@ -1005,7 +1023,7 @@ export const createMemoryPageStore = ({
             throw err;
           }
           if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
-            throw new Error(
+            throw new MemoryVersionConflictError(
               `Memory unarchive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`,
               { cause: err }
             );
@@ -1015,18 +1033,32 @@ export const createMemoryPageStore = ({
       return undefined;
     },
 
-    async delete(id) {
+    /**
+     * Hard delete, guarded on the version the caller read.
+     *
+     * The optimizer writes asynchronously after a round, so a blind delete can
+     * remove a document the operator never saw. Passing the version makes the
+     * delete conditional: if anything landed in between, Elasticsearch rejects it
+     * and the route answers 409 rather than destroying the newer content.
+     */
+    async delete(id, version) {
       const storedId = toStoredId(id);
       try {
         await esClient.delete(
           {
             index: MEMORY_INDEX,
             id: storedId,
+            ...(version ? { if_seq_no: version.seqNo, if_primary_term: version.primaryTerm } : {}),
             refresh: 'wait_for',
           },
           { signal }
         );
       } catch (err) {
+        if (isElasticsearchWriteConflict(err)) {
+          throw new MemoryVersionConflictError('Memory changed since it was read', {
+            cause: err,
+          });
+        }
         if (!isIndexNotFoundError(err) && (err as { statusCode?: number }).statusCode !== 404) {
           throw err;
         }

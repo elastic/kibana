@@ -132,4 +132,56 @@ describe('MemoryLineage', () => {
     await waitFor(() => expect(screen.getByText('A')).toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('draws the bounded chain the server returns rather than walking it again', async () => {
+    // The walk is the server's job and is capped there, so the client renders the
+    // trail it is handed instead of following each crumb's own parents — that would
+    // be an unbounded walk in the browser.
+    respondWith(
+      Array.from({ length: 5 }, (_unused, index) => ({
+        id: `memory_${index}`,
+        title: `Ancestor ${index}`,
+      }))
+    );
+    renderLineage(page({ merged_from: ['memory_0'] }));
+
+    await waitFor(() => expect(screen.getByText('Ancestor 0')).toBeInTheDocument());
+    expect(screen.getByText('Ancestor 4')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('fetches once for a memory that lists itself as its own source', async () => {
+    // A self-referencing `merged_from` is malformed, but it must not become a
+    // re-fetch loop: the request happens once and whatever comes back is drawn.
+    respondWith([]);
+    renderLineage(page({ merged_from: ['memory_canonical'] }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(screen.queryByTestId('nightshiftMemoryLineage')).not.toBeInTheDocument();
+  });
+
+  it('clears the trail without refetching when a page with no merges is selected', async () => {
+    const onSelectPage = jest.fn();
+    respondWith([{ id: 'memory_root', title: 'Root' }]);
+    const { rerender } = render(
+      <I18nProvider>
+        <MemoryLineage
+          page={page({ id: 'memory_a', merged_from: ['memory_root'] })}
+          onSelectPage={onSelectPage}
+        />
+      </I18nProvider>
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    rerender(
+      <I18nProvider>
+        <MemoryLineage page={page({ id: 'memory_b' })} onSelectPage={onSelectPage} />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('nightshiftMemoryLineage')).not.toBeInTheDocument()
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

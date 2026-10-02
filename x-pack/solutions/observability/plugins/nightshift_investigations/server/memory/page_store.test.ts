@@ -333,6 +333,125 @@ describe('createMemoryPageStore', () => {
     expect(search.mock.calls[0][0].search_after).toBeUndefined();
   });
 
+  it('rejects a cursor that decodes to the wrong shape, not just an unparseable one', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+    const encode = (value: unknown) =>
+      Buffer.from(JSON.stringify(value), 'utf8').toString('base64');
+
+    // A token of the wrong arity would resume from a partial sort key, and one
+    // carrying a nested object is not a `search_after` value at all.
+    for (const cursor of [
+      encode(['2026-01-01T00:00:00.000Z']),
+      encode([{ at: '2026-01-01T00:00:00.000Z' }, 'kafka-lag']),
+      encode([123, null]),
+      Buffer.from('not json at all', 'utf8').toString('base64'),
+    ]) {
+      const result = await store.listPaginated({ cursor });
+      expect(result.pages).toEqual([]);
+      expect(search.mock.calls[0][0].search_after).toBeUndefined();
+    }
+  });
+
+  it('takes total and stats from the whole filtered set, not from the page slice', async () => {
+    // The page query returns one row out of many, and the aggregation runs
+    // separately with no paging. If the header numbers came from the page slice
+    // they would shrink as the operator scrolls.
+    const search = jest.fn(({ size }: { size?: number }) =>
+      Promise.resolve(
+        size === 0
+          ? {
+              hits: { total: { value: 137, relation: 'eq' }, hits: [] },
+              aggregations: {
+                archived: { doc_count: 12 },
+                impressions: { value: 900 },
+                conversions: { value: 300 },
+              },
+            }
+          : {
+              hits: {
+                total: { value: 137, relation: 'eq' },
+                hits: [{ _id: 'space-a:memory_a', _source: source }],
+              },
+            }
+      )
+    );
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const result = await store.listPaginated({ size: 25 });
+
+    expect(result.pages).toHaveLength(1);
+    expect(result.total).toBe(137);
+    expect(result.stats).toEqual({
+      total: 137,
+      archived: 12,
+      decayed_impressions: 900,
+      decayed_conversions: 300,
+    });
+  });
+
+  it('sums the counters with a script, because sum is rejected on a flattened field', async () => {
+    // `attributes` is mapped `flattened`, so Elasticsearch refuses
+    // `sum: { field: 'attributes.impressions' }` with an illegal_argument_exception
+    // and the whole list route 500s. A script sum is the supported form.
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+      aggregations: { archived: { doc_count: 0 } },
+    });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.listPaginated();
+
+    const statsQuery = search.mock.calls[1][0];
+    expect(statsQuery.aggs.impressions).toEqual({
+      sum: { script: { source: expect.stringContaining("doc['attributes.impressions']") } },
+    });
+    expect(statsQuery.aggs.conversions).toEqual({
+      sum: { script: { source: expect.stringContaining("doc['attributes.conversions']") } },
+    });
+    expect(JSON.stringify(statsQuery.aggs)).not.toContain('"field":"attributes.impressions"');
+  });
+
+  it('reports empty stats rather than failing when the index does not exist yet', async () => {
+    const search = jest.fn().mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+      } as never)
+    );
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    // The index is created lazily, so an empty Semantic Memory is a 404 from
+    // Elasticsearch rather than an error the operator should see.
+    await expect(store.listPaginated()).resolves.toEqual({
+      pages: [],
+      stats: { total: 0, archived: 0, decayed_impressions: 0, decayed_conversions: 0 },
+      total: 0,
+    });
+  });
+
   it('decays display telemetry without rewriting stored last_impression_time', () => {
     const page = {
       id: 'memory_kafka-lag',

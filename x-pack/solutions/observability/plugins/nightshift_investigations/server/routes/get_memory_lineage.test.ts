@@ -122,6 +122,30 @@ describe('getMemoryLineageRoute', () => {
     expect(store.get).toHaveBeenCalledTimes(1);
   });
 
+  it('emits nothing for a memory that lists itself as its own source', async () => {
+    // Malformed but possible: a self-referencing `merged_from` must not make the
+    // walk chase its own tail, and the root is not its own ancestor.
+    const { store, result } = run(memory('memory_root', ['memory_root']), {});
+
+    await expect(result).resolves.toEqual({ ancestors: [], depth: 0 });
+    expect(store.getMany).not.toHaveBeenCalled();
+  });
+
+  it('stops at the cap even when a cycle would otherwise keep the walk going', async () => {
+    // A cycle with a long tail: the cap, not cycle detection, is the backstop.
+    const deep: Record<string, string[]> = {};
+    for (let i = 0; i < MAX_LINEAGE_DEPTH * 2; i++) {
+      deep[`memory_${i}`] = [`memory_${i + 1}`];
+    }
+    deep[`memory_${MAX_LINEAGE_DEPTH * 2}`] = ['memory_0'];
+    const { store, result } = run(memory('memory_root', ['memory_0']), deep);
+
+    const lineage = await result;
+
+    expect(lineage.depth).toBe(MAX_LINEAGE_DEPTH);
+    expect(store.getMany).toHaveBeenCalledTimes(MAX_LINEAGE_DEPTH);
+  });
+
   it('throws not found when the memory does not exist', async () => {
     const { result } = run(undefined, {});
     await expect(result).rejects.toEqual(

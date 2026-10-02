@@ -114,12 +114,53 @@ describe('MemorySidebar', () => {
     expect(onFilterChange).toHaveBeenCalledWith('archived');
   });
 
+  it.each<MemoryFilter>(['all', 'active', 'archived'])('offers the %s filter', async (filter) => {
+    const { onFilterChange } = renderSidebar({}, { kind: 'home' }, jest.fn(), jest.fn(), 'active');
+
+    await userEvent.click(screen.getByTestId(`nightshiftMemoryFilter-${filter}`));
+
+    expect(onFilterChange).toHaveBeenCalledWith(filter);
+  });
+
+  it('marks the active filter as selected, so the current view is legible', () => {
+    renderSidebar({}, { kind: 'home' }, jest.fn(), jest.fn(), 'archived');
+
+    expect(screen.getByTestId('nightshiftMemoryFilter-archived')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByTestId('nightshiftMemoryFilter-active')).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+  });
+
+  it('still lists an archived memory under the archived filter', () => {
+    // The filter is a server-side query, so the rows arrive already narrowed. The
+    // client must not drop them a second time.
+    renderSidebar({ pages: [summary({ archived: true, archive_reason: 'manual' })] });
+
+    expect(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag')).toBeInTheDocument();
+  });
+
   it('asks for the next page only when the server offered a cursor', async () => {
     const { onLoadMore } = renderSidebar({ pages: [summary()], hasNextPage: true });
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryLoadMore'));
 
     expect(onLoadMore).toHaveBeenCalled();
+  });
+
+  it('keeps the existing rows visible while the next page loads', async () => {
+    // Replacing the list with a spinner mid-scroll loses the operator's place.
+    renderSidebar({
+      pages: [summary()],
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    });
+
+    expect(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryLoadMore')).toBeDisabled();
   });
 
   it('offers no load-more control on the last page', () => {

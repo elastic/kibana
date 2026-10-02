@@ -36,7 +36,10 @@ export function MemoryTelemetryPanel({ page, usefulness, confidence }: MemoryTel
             defaultMessage="Usefulness"
           />
         </EuiText>
-        <EuiText size="s">
+        {/* No colour prop: 0% means "never surfaced", which is the normal state for
+            a new memory, so painting it as a warning would cry wolf on every cold
+            start. The data-test-subj is what a test asserts against. */}
+        <EuiText size="s" data-test-subj="nightshiftMemoryUsefulnessValue">
           <FormattedNumber value={asPercent(usefulness)} />%
         </EuiText>
       </EuiFlexItem>
@@ -47,7 +50,7 @@ export function MemoryTelemetryPanel({ page, usefulness, confidence }: MemoryTel
             defaultMessage="Confidence"
           />
         </EuiText>
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="nightshiftMemoryConfidenceValue">
           <FormattedNumber value={asPercent(confidence)} />%
         </EuiText>
       </EuiFlexItem>

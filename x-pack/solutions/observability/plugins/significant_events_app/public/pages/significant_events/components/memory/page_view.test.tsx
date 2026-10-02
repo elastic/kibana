@@ -33,7 +33,7 @@ const givenCapabilities = (nightshift: Record<string, boolean>) => {
     core: {
       application: { capabilities: { nightshift } },
       // The source-task link builds its href through basePath, so the shape has to
-      // be here even though the other tests do not assert on the link.
+      // be here even though these tests do not assert on the link.
       http: { basePath: { prepend: (path: string) => path } },
     },
   } as unknown as ReturnType<typeof useKibana>);
@@ -156,6 +156,49 @@ describe('MemoryPageView', () => {
     });
   });
 
+  it('round-trips archive then restore off the same toggle', async () => {
+    // The hook invalidates rather than patching, so the archived state comes back
+    // from the server. Model that by flipping what the query returns.
+    let archived = false;
+    mockUseMemoryPage.mockImplementation(() =>
+      asDetail(archived ? { archived: true, archive_reason: 'manual' as const } : {})
+    );
+    mockSetArchived.mockImplementation(async (_id: string, next: boolean) => {
+      archived = next;
+    });
+    renderView();
+
+    const toggle = () => screen.getByTestId('nightshiftMemoryArchiveToggle');
+    expect(toggle()).toHaveTextContent('Archive');
+
+    await userEvent.click(toggle());
+    await waitFor(() => expect(toggle()).toHaveTextContent('Restore'));
+    expect(mockSetArchived).toHaveBeenLastCalledWith('memory_kafka-lag', true);
+
+    await userEvent.click(toggle());
+    await waitFor(() => expect(toggle()).toHaveTextContent('Archive'));
+    expect(mockSetArchived).toHaveBeenLastCalledWith('memory_kafka-lag', false);
+    // Archived by a person carries the manual reason, and restoring clears it.
+    expect(mockSetArchived).toHaveBeenCalledTimes(2);
+  });
+
+  it('surfaces a failed restore rather than reporting the memory as active', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({ archived: true, archive_reason: 'manual' }));
+    mockSetArchived.mockRejectedValue(new Error('version conflict'));
+    renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
+
+    // The page on screen is unchanged, so the operator has to know the write failed
+    // rather than see a stale "archived" badge and assume it worked.
+    await waitFor(() => {
+      expect(screen.getByTestId('nightshiftMemoryActionError')).toHaveTextContent(
+        'version conflict'
+      );
+    });
+    expect(screen.getByTestId('nightshiftMemoryArchivedBadge')).toBeInTheDocument();
+  });
+
   it('does not delete without an explicit confirmation', async () => {
     mockUseMemoryPage.mockReturnValue(asDetail());
     renderView();
@@ -171,6 +214,10 @@ describe('MemoryPageView', () => {
     const { onDeleted } = renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    await userEvent.type(
+      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
+      'Kafka consumer lag'
+    );
     await userEvent.click(screen.getByText('Delete permanently'));
 
     await waitFor(() => {
@@ -178,6 +225,49 @@ describe('MemoryPageView', () => {
       expect(mockDelete).toHaveBeenCalledWith('memory_kafka-lag', 'Kafka consumer lag');
     });
     expect(onDeleted).toHaveBeenCalled();
+  });
+
+  it('keeps the destructive button disabled until the exact title is typed', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    const confirm = () => screen.getByRole('button', { name: 'Delete permanently' });
+    const field = screen.getByTestId('nightshiftMemoryDeleteConfirmTitle');
+
+    // Deleting is irreversible, so a reflexive click cannot destroy content: the
+    // operator has to name the memory first.
+    expect(confirm()).toBeDisabled();
+
+    // A near miss is still a miss — the route compares the whole title.
+    await userEvent.type(field, 'Kafka consumer lag ');
+    expect(confirm()).toBeDisabled();
+    expect(mockDelete).not.toHaveBeenCalled();
+
+    await userEvent.clear(field);
+    await userEvent.type(field, 'Kafka consumer lag');
+    expect(confirm()).toBeEnabled();
+
+    await userEvent.click(confirm());
+    await waitFor(() => expect(mockDelete).toHaveBeenCalled());
+  });
+
+  it('clears the typed title when the confirmation is cancelled', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    await userEvent.type(
+      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
+      'Kafka consumer lag'
+    );
+    const dialog = screen.getByRole('alertdialog', { name: /delete this memory permanently/i });
+    await userEvent.click(within(dialog).getByRole('button', { name: /closes this modal/i }));
+
+    // Reopening must not leave a stale confirmation armed from the last attempt.
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    expect(screen.getByTestId('nightshiftMemoryDeleteConfirmTitle')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Delete permanently' })).toBeDisabled();
   });
 
   it('cancelling the confirmation leaves the memory alone', async () => {
@@ -210,6 +300,62 @@ describe('MemoryPageView', () => {
         'version conflict'
       );
     });
+    // One attempt, not a retry loop: the store already exhausted its own OCC
+    // retries, and the UI must not paper over that with another one.
+    expect(mockSetArchived).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces a failed delete and leaves the page in place', async () => {
+    mockDelete.mockRejectedValue(new Error('version conflict'));
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    const { onDeleted } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    await userEvent.type(
+      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
+      'Kafka consumer lag'
+    );
+    await userEvent.click(screen.getByText('Delete permanently'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('nightshiftMemoryActionError')).toHaveTextContent(
+        'version conflict'
+      );
+    });
+    // The memory may well still be there — the store never confirmed the delete.
+    expect(onDeleted).not.toHaveBeenCalled();
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
+  });
+
+  it('keeps the actions hidden from a viewer with the show privilege alone', async () => {
+    // `show` lets the tab render; it is not `manage`, so neither write is offered.
+    givenCapabilities({ show: true });
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryArchiveToggle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
+  });
+
+  it('offers archive but not delete to a manager without configure', async () => {
+    // The tiers are not nested in the UI: delete needs configure, so a manager
+    // gets the reversible action only.
+    givenCapabilities({ show: true, manage: true });
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchiveToggle')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
+  });
+
+  it('offers both actions to a viewer with manage and configure', () => {
+    givenCapabilities({ show: true, manage: true, configure: true });
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchiveToggle')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryDeleteButton')).toBeInTheDocument();
   });
 
   it('links to the conversation that produced the memory', () => {
