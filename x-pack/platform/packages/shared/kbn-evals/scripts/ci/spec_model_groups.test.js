@@ -139,6 +139,19 @@ describe('evals.suites.json specModelGroups', () => {
     expect(problems).toEqual([]);
   });
 
+  it('puts every specModelGroups file of a sharded suite in some shard, or it never runs', () => {
+    const problems = suitesWithSpecModelGroups
+      .filter((suite) => (suite.shards?.length ?? 0) > 0)
+      .flatMap((suite) => {
+        const shardFiles = new Set(suite.shards.flatMap((shard) => shard.specFiles ?? []));
+        return suite.specModelGroups
+          .flatMap((spec) => spec.files ?? [])
+          .filter((specFile) => !shardFiles.has(specFile))
+          .map((specFile) => `${suite.id}: specModelGroups file "${specFile}" is not in any shard`);
+      });
+    expect(problems).toEqual([]);
+  });
+
   it('lists every spec on disk so a newly added one is not silently skipped in weekly runs', () => {
     // Per-spec suites run only the specs listed in evals.suites.json, so a new spec file that nobody
     // lists would silently never run. Guard directory-owning suites (see ownsSuiteDirectory) here.
