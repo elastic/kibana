@@ -10,6 +10,7 @@ import {
   ALERTING_V2_ALERTS_ALL_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
   buildAlertEvent,
+  buildCreateRuleData,
   test,
 } from '../fixtures';
 
@@ -19,22 +20,47 @@ import {
  * read-only users only get the read-safe "Open in Discover" action, while
  * editors get the mutating actions (resolve, ack, snooze, tag, assign, ...)
  * which collapse into the overflow actions menu.
+ *
+ * Open in Discover is omitted until the episode's rule resolves (PR #294703).
+ * The read role therefore also holds alerting_v2_rules read, and the suite
+ * seeds a saved rule so that action is eligible.
  */
+const ALERTS_V2_RULES_READ_ROLE = {
+  ...ALERTING_V2_ALERTS_READ_ROLE,
+  kibana: ALERTING_V2_ALERTS_READ_ROLE.kibana.map((privilege, index) =>
+    index === 0
+      ? {
+          ...privilege,
+          feature: {
+            ...privilege.feature,
+            alerting_v2_rules: ['read'],
+          },
+        }
+      : privilege
+  ),
+};
+
 test.describe(
   'Alerts page - read/write privileges',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    const RULE_ID = 'scout-alerts-privileges-rule';
+    let ruleId: string | undefined;
 
     test.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'scout-alerts-privileges-rule' },
+        })
+      );
+      ruleId = rule.id;
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
       // Seed a single active episode so the episodes table renders a row whose
       // leading action controls we can assert against. The default list filter
       // is "Active" over "now-24h", so the event must be recent and active.
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           '@timestamp': new Date().toISOString(),
-          rule: { id: RULE_ID, version: 1 },
+          rule: { id: ruleId, version: rule.version },
           group_hash: 'scout-alerts-privileges-group',
           alert: { id: 'scout-alerts-privileges-episode', status: 'active' },
         }),
@@ -42,7 +68,10 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });
+      if (ruleId) {
+        await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+        await apiServices.alertingV2.rules.delete(ruleId);
+      }
     });
 
     test('editor sees the mutating episode actions menu', async ({ browserAuth, pageObjects }) => {
@@ -58,7 +87,7 @@ test.describe(
       browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
+      await browserAuth.loginWithCustomRole(ALERTS_V2_RULES_READ_ROLE);
       const { alertEpisodesList } = pageObjects;
       await alertEpisodesList.goto();
       await expect(alertEpisodesList.pageContainer).toBeVisible();
