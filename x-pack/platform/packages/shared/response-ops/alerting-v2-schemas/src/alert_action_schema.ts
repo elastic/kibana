@@ -94,9 +94,7 @@ export type EpisodeAlertActionType = (typeof EPISODE_ALERT_ACTION_TYPES)[number]
 // request path (or the bulk item key), so the body carries no episode_id.
 const tagEpisodeActionSchema = z
   .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.TAG)
-      .describe("Replaces an alert's tags."),
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe("Replaces an alert's tags."),
     tags: tagsSchema.describe("Replaces the alert's tags. Send `[]` to clear."),
   })
   .strict()
@@ -104,9 +102,7 @@ const tagEpisodeActionSchema = z
 
 const ackEpisodeActionSchema = z
   .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.ACK)
-      .describe('Acknowledges an alert.'),
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
   })
   .strict()
   .meta({ id: 'alerting_ack_episode_action' });
@@ -129,9 +125,7 @@ const assignEpisodeActionSchema = z
       .string()
       .max(256)
       .nullable()
-      .describe(
-        'User profile UID of the assignee, or null to remove the assignee from the alert.'
-      ),
+      .describe('User profile UID of the assignee, or null to remove the assignee from the alert.'),
   })
   .strict()
   .meta({ id: 'alerting_assign_episode_action' });
