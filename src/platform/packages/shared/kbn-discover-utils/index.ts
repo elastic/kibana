@@ -48,6 +48,8 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getFieldValueWithFallback,
+  getStacktraceFields,
   getChartHidden,
   getTableHidden,
   getSidebarHidden,
@@ -117,6 +119,8 @@ export type {
   MetricsGridSortDirection,
   MetricsGridSortField,
   SimpleAggregation,
+  LogDocument,
+  ObservabilityIndexes,
 } from './src';
 
 export * from './src/types';

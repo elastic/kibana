@@ -16,11 +16,11 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     '@timestamp': '2026-01-01T00:00:00.000Z',
     event_id: 'evt-1',
     event_uuid: 'evt-uuid-1',
-    status: 'open',
+    status: 'active',
     stream_names: ['service-a'],
     title: 'Event',
     summary: 'Summary',
-    severity: '20-low',
+    severity: 'low',
     confidence: 0.9,
     ...overrides,
   } as SignificantEvent);
