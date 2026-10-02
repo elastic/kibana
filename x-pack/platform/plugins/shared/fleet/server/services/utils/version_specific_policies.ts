@@ -7,6 +7,8 @@
 
 import { coerce, satisfies } from 'semver';
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 
@@ -52,6 +54,7 @@ export function buildVariantAgentsKuery(
 }
 
 const MAX_VARIANT_POLICY_IDS_PER_PARENT = 1000;
+const POLICY_ID_DISCOVERY_PAGE_SIZE = 1000;
 
 /**
  * Lists the full variant policy ids (e.g. `"<parentId>#9.4"`) present in `.fleet-policies` for a
@@ -109,34 +112,56 @@ export async function getVariantAgentsKuery(
 export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
   esClient: ElasticsearchClient
 ): Promise<Map<string, string[]>> {
-  const response = await esClient.search<
-    unknown,
-    { policy_ids: { buckets: Array<{ key: string }> } }
-  >({
-    index: AGENTS_INDEX,
-    ignore_unavailable: true,
-    size: 0,
-    // Includes inactive/unenrolled agents: they would be stranded on a missing policy as well.
-    query: { bool: { must_not: [{ exists: { field: POLICY_BASE_ID_FIELD } }] } },
-    aggs: {
-      policy_ids: {
-        // `include` regex is a terms-aggregation option (not a query), so it is unaffected by
-        // `search.allow_expensive_queries: false`.
-        terms: {
-          field: 'policy_id',
-          size: MAX_VARIANT_POLICY_IDS_PER_PARENT,
-          include: `.*[${AGENT_POLICY_VERSION_SEPARATOR}].*`,
+  const byParent = new Map<string, string[]>();
+  let afterKey: Record<string, string> | undefined;
+
+  // Page through every distinct `policy_id` of agents lacking `policy_base_id` with a composite
+  // aggregation, so discovery is not capped to the top-N buckets. Versioned ids are picked out
+  // client-side (no `include` regex / wildcard query), keeping this compatible with
+  // `search.allow_expensive_queries: false`. After the startup backfill the set is tiny.
+  do {
+    const response: SearchResponse<
+      unknown,
+      {
+        policy_ids: {
+          buckets: Array<{ key: { policy_id: string } }>;
+          after_key?: Record<string, string>;
+        };
+      }
+    > = await esClient.search({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      // Unenrolled agents are excluded from reassignment, so they are not worth discovering.
+      query: {
+        bool: {
+          must_not: [
+            { exists: { field: POLICY_BASE_ID_FIELD } },
+            { exists: { field: 'unenrolled_at' } },
+          ],
         },
       },
-    },
-  });
+      aggs: {
+        policy_ids: {
+          composite: {
+            size: POLICY_ID_DISCOVERY_PAGE_SIZE,
+            sources: [{ policy_id: { terms: { field: 'policy_id' } } }],
+            ...(afterKey ? { after: afterKey } : {}),
+          },
+        },
+      },
+    });
 
-  const byParent = new Map<string, string[]>();
-  for (const { key } of response.aggregations?.policy_ids?.buckets ?? []) {
-    const { baseId, version } = splitVersionSuffixFromPolicyId(key);
-    if (version === null) continue;
-    byParent.set(baseId, [...(byParent.get(baseId) ?? []), key]);
-  }
+    const agg = response.aggregations?.policy_ids;
+    for (const { key } of agg?.buckets ?? []) {
+      const policyId = key.policy_id;
+      const { baseId, version } = splitVersionSuffixFromPolicyId(policyId);
+      if (version === null) continue;
+      byParent.set(baseId, [...(byParent.get(baseId) ?? []), policyId]);
+    }
+    afterKey = (agg?.buckets.length ?? 0) > 0 ? agg?.after_key : undefined;
+  } while (afterKey);
+
   return byParent;
 }
 

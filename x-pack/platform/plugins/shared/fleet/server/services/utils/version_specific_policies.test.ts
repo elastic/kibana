@@ -594,15 +594,20 @@ describe('getAgentCountsForVariantPolicyIds', () => {
 });
 
 describe('getVariantPolicyIdsFromAgentsWithoutBaseId', () => {
-  it('groups versioned policy ids of agents lacking policy_base_id by parent', async () => {
+  const page = (ids: string[], afterKey?: Record<string, string>) => ({
+    aggregations: {
+      policy_ids: {
+        buckets: ids.map((id) => ({ key: { policy_id: id } })),
+        ...(afterKey ? { after_key: afterKey } : {}),
+      },
+    },
+  });
+
+  it('groups versioned ids by parent, ignores non-versioned ids, and excludes unenrolled agents', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
-        aggregations: {
-          policy_ids: {
-            buckets: [{ key: 'policy1#9.4' }, { key: 'policy1#9.3' }, { key: 'policy2#8.19' }],
-          },
-        },
-      }),
+      search: jest
+        .fn()
+        .mockResolvedValue(page(['policy1#9.4', 'policy1#9.3', 'policy2#8.19', 'plain-policy'])),
     } as any;
 
     const result = await getVariantPolicyIdsFromAgentsWithoutBaseId(esClient);
@@ -613,11 +618,40 @@ describe('getVariantPolicyIdsFromAgentsWithoutBaseId', () => {
         ['policy2', ['policy2#8.19']],
       ])
     );
+    expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: '.fleet-agents',
-        query: { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
+        query: {
+          bool: {
+            must_not: [
+              { exists: { field: 'policy_base_id' } },
+              { exists: { field: 'unenrolled_at' } },
+            ],
+          },
+        },
       })
     );
+  });
+
+  it('pages through all distinct policy ids using the composite after_key', async () => {
+    const firstPage = Array.from({ length: 1000 }, (_, i) => `plain-${i}`);
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValueOnce(page(firstPage, { policy_id: 'plain-999' }))
+        .mockResolvedValueOnce(page(['late-policy#9.4'], { policy_id: 'late-policy#9.4' }))
+        .mockResolvedValueOnce(page([])),
+    } as any;
+
+    const result = await getVariantPolicyIdsFromAgentsWithoutBaseId(esClient);
+
+    expect(result).toEqual(new Map([['late-policy', ['late-policy#9.4']]]));
+    expect(esClient.search).toHaveBeenCalledTimes(3);
+    const afterOf = (call: number) =>
+      esClient.search.mock.calls[call][0].aggs.policy_ids.composite.after;
+    expect(afterOf(0)).toBeUndefined();
+    expect(afterOf(1)).toEqual({ policy_id: 'plain-999' });
+    expect(afterOf(2)).toEqual({ policy_id: 'late-policy#9.4' });
   });
 });

@@ -30,12 +30,12 @@ export default function (providerContext: FtrProviderContextWithServices) {
     return res.body.item;
   }
 
-  async function getFleetPolicies(policyIdPrefix: string) {
+  async function getFleetPolicies(baseId: string) {
     const res = await es.search({
       index: '.fleet-policies',
       query: {
-        prefix: {
-          policy_id: policyIdPrefix,
+        term: {
+          policy_base_id: baseId,
         },
       },
       size: 100,
@@ -449,6 +449,87 @@ export default function (providerContext: FtrProviderContextWithServices) {
       const variantDoc = fleetPolicies.find((p: any) => p.policy_id === outOfSetVariantId);
       expect(variantDoc).to.not.be(undefined);
       expect(variantDoc.revision_idx).to.be.greaterThan(0);
+    });
+
+    // Agents enrolled by a downlevel fleet-server after the last startup backfill have a versioned
+    // `policy_id` but no `policy_base_id`. The sweep must still reassign them when the parent no
+    // longer has version conditions, with `search.allow_expensive_queries` disabled.
+    describe('orphaned agents without policy_base_id (expensive queries disabled)', () => {
+      let parentId: string;
+      const variantId = () => `${parentId}${AGENT_POLICY_VERSION_SEPARATOR}9.4`;
+
+      async function indexVariantDoc() {
+        await es.index({
+          index: '.fleet-policies',
+          id: `${variantId()}:1`,
+          document: {
+            policy_id: variantId(),
+            policy_base_id: parentId,
+            revision_idx: 1,
+            '@timestamp': new Date().toISOString(),
+            data: { id: variantId(), revision: 1, inputs: [], agent: { monitoring: {} } },
+          },
+          refresh: 'wait_for',
+        });
+      }
+
+      before(async () => {
+        await es.cluster.putSettings({
+          persistent: { 'search.allow_expensive_queries': false },
+        });
+        // Parent has NO version conditions, so any variant left behind is an orphan.
+        const { body } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: `Orphan No Base Id ${Date.now()}`, namespace: 'default' })
+          .expect(200);
+        parentId = body.item.id;
+      });
+
+      after(async () => {
+        await es.cluster.putSettings({
+          persistent: { 'search.allow_expensive_queries': null },
+        });
+        await es.deleteByQuery({
+          index: '.fleet-policies',
+          refresh: true,
+          query: { term: { policy_base_id: parentId } },
+        });
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .send({ agentPolicyId: parentId })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('reassigns an agent without policy_base_id and deletes the variant doc', async () => {
+        await indexVariantDoc();
+        await createAgentDoc(providerContext, 'agent-no-base', variantId(), '9.4.0');
+        // Not an orphan: plain (non-versioned) policy id without policy_base_id.
+        await createAgentDoc(providerContext, 'agent-plain', parentId, '9.4.0');
+
+        await waitForTask();
+
+        await retry.tryForTime(30000, async () => {
+          const agent = await getAgent('agent-no-base');
+          expect(agent.policy_id).to.be(parentId);
+          const docs = await getFleetPolicies(parentId);
+          expect(docs.some((p: any) => p.policy_id === variantId())).to.be(false);
+        });
+        expect((await getAgent('agent-plain')).policy_id).to.be(parentId);
+      });
+
+      it('reassigns an agent without policy_base_id when its variant doc is already gone', async () => {
+        // No variant doc in `.fleet-policies` at all: parent is only discoverable via the agent.
+        await createAgentDoc(providerContext, 'agent-no-base-no-doc', variantId(), '9.4.0');
+
+        await waitForTask();
+
+        await retry.tryForTime(30000, async () => {
+          const agent = await getAgent('agent-no-base-no-doc');
+          expect(agent.policy_id).to.be(parentId);
+        });
+      });
     });
   });
 }
