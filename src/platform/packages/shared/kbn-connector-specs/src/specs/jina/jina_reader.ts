@@ -35,7 +35,6 @@ const JINA_READER_SEARCH_URL = 'https://s.jina.ai' as const;
 const MAX_URL_LENGTH = 2048;
 const MAX_OPTION_KEY_LENGTH = 200;
 const MAX_FILENAME_LENGTH = 255;
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((10 * 1024 * 1024) / 3);
 
 function mapPluginReturnFormatToReaderReturnFormat(returnFormat?: RETURN_FORMAT): string {
