@@ -160,7 +160,7 @@ export function RequestFlyoutOperations() {
           ),
           type: 'icon' as const,
           icon: 'discoverApp',
-          href: buildDiscoverHref,
+          href: (item: DependencyOperation) => buildDiscoverHref(item) ?? '',
           available: (item: DependencyOperation) => buildDiscoverHref(item) != null,
           'data-test-subj': 'requestFlyoutOperationViewInDiscover',
         },

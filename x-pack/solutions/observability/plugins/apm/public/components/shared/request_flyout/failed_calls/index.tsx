@@ -17,10 +17,14 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { asPercent } from '../../../../../common/utils/formatters';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getESQLQuery } from '../../links/discover_links/get_esql_query';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutFailedCalls } from './use_request_flyout_failed_calls';
@@ -84,6 +88,43 @@ export function RequestFlyoutFailedCalls() {
   const { link } = useApmRouter();
   const { buckets, totalFailed, totalCalls, isSampled, isLoading } = useRequestFlyoutFailedCalls();
 
+  // Discover link — built per-row using getESQLQuery (pure function).
+  const { indexSettings = [] } = useApmIndexSettingsContext();
+  const { share } = useApmPluginContext();
+  const discoverLocator = share?.url.locators.get(DISCOVER_APP_LOCATOR);
+
+  const buildDiscoverHref = useCallback(
+    (item: FailedCallBucket): string | undefined => {
+      // Use the target service for server-side errors; the source for everything else.
+      const serviceName =
+        item.type === 'server' && targetServiceName ? targetServiceName : sourceServiceName;
+      const esqlQuery = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName,
+          kuery: 'event.outcome : "failure"',
+          environment,
+          sortDirection: 'DESC',
+        },
+        indexSettings,
+      });
+      if (!esqlQuery || !discoverLocator) return undefined;
+      return discoverLocator.getRedirectUrl({
+        timeRange: { from: rangeFrom, to: rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [
+      sourceServiceName,
+      targetServiceName,
+      environment,
+      rangeFrom,
+      rangeTo,
+      indexSettings,
+      discoverLocator,
+    ]
+  );
+
   /**
    * Build a deep link to a specific APM error group page.
    * Only called when topErrorGroupId is non-null (i.e. the error came from a real APM doc).
@@ -94,7 +135,14 @@ export function RequestFlyoutFailedCalls() {
       bucketType === 'server' && targetServiceName ? targetServiceName : sourceServiceName;
     return link('/services/{serviceName}/errors/{groupId}', {
       path: { serviceName, groupId },
-      query: {},
+      query: {
+        environment,
+        rangeFrom,
+        rangeTo,
+        kuery: '',
+        serviceGroup: '',
+        comparisonEnabled: false,
+      },
     });
   }
 
@@ -181,8 +229,22 @@ export function RequestFlyoutFailedCalls() {
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '60px',
+      width: '80px',
       actions: [
+        {
+          name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.viewInDiscover', {
+            defaultMessage: 'View in Discover',
+          }),
+          description: i18n.translate(
+            'xpack.apm.requestFlyout.failedCalls.action.viewInDiscover.description',
+            { defaultMessage: 'Open failed traces for this failure category in Discover' }
+          ),
+          type: 'icon' as const,
+          icon: 'discoverApp',
+          href: (item: FailedCallBucket) => buildDiscoverHref(item) ?? '',
+          available: (item: FailedCallBucket) => buildDiscoverHref(item) != null,
+          'data-test-subj': 'requestFlyoutFailedCallsViewInDiscover',
+        },
         {
           name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.openTrace', {
             defaultMessage: 'Open a failed trace',

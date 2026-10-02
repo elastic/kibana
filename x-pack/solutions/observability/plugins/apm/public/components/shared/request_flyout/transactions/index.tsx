@@ -153,7 +153,7 @@ export function RequestFlyoutAffectedEndpoints({
           ),
           type: 'icon' as const,
           icon: 'discoverApp',
-          href: buildDiscoverHref,
+          href: (item: ConnectionTransactionGroup) => buildDiscoverHref(item) ?? '',
           available: (item: ConnectionTransactionGroup) => buildDiscoverHref(item) != null,
           'data-test-subj': 'requestFlyoutTransactionViewInDiscover',
         },
