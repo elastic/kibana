@@ -130,6 +130,7 @@ const createService = (
     update: jest.fn(),
     delete: jest.fn(),
     list: jest.fn(),
+    bulkCreate: jest.fn(),
   };
   const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
   return {
