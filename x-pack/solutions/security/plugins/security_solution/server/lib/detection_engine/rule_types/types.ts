@@ -103,6 +103,11 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  /**
+   * Every exception item of the rule that is not expired, before they are turned into `exceptionFilter`.
+   * Used by the ES|QL executor when `esqlNativeExceptionsEnabled` is on.
+   */
+  allExceptionItems?: ExceptionListItemSchema[];
   alertTimestampOverride: Date | undefined;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;

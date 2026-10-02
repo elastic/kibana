@@ -12,7 +12,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
+import {
+  buildExceptionFilter,
+  removeExpiredExceptions,
+} from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
@@ -425,6 +428,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
+                    allExceptionItems: removeExpiredExceptions(exceptionItems, startedAt),
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,
