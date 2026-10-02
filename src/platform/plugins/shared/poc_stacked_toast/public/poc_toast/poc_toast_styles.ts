@@ -25,8 +25,9 @@ export const getPocToastMotionColumnClassName = (isExpanded: boolean) =>
     display: flex;
     flex-direction: column;
     gap: ${isExpanded ? `${POC_TOAST_STACK_GAP}px` : '0'};
-    ${isExpanded
-      ? `
+    ${
+      isExpanded
+        ? `
       max-height: calc(100vh - ${POC_TOAST_SCROLL_SHADOW_ROOM * 2}px);
       overflow-x: hidden;
       overflow-y: auto;
@@ -42,7 +43,8 @@ export const getPocToastMotionColumnClassName = (isExpanded: boolean) =>
       padding: ${POC_TOAST_SCROLL_SHADOW_ROOM}px;
       margin: -${POC_TOAST_SCROLL_SHADOW_ROOM}px;
     `
-      : ''}
+        : ''
+    }
   `;
 
 /** Body longer than this shows a “Read more” control (collapsed uses line clamp). */
@@ -55,26 +57,34 @@ export const pocToastBodyClampClassName = emotionClassName`
   overflow: hidden;
 `;
 
-export const getPocToastMotionColumnWidthClassName = (stackWidth: number | undefined) =>
+/** Collapsed: sizes to the front toast. Expanded: locked to the front toast's collapsed width. */
+export const getPocToastMotionColumnWidthClassName = (expandedWidth: number | undefined) =>
   emotionClassName`
-    width: ${stackWidth !== undefined ? `${stackWidth}px` : 'max-content'};
+    width: ${expandedWidth !== undefined ? `${expandedWidth}px` : 'max-content'};
     max-width: 100%;
   `;
 
-export const getPocToastMotionCardLayoutClassName = (index: number, isHovered: boolean) =>
-  emotionClassName`
-    position: ${isHovered || index === 0 ? 'relative' : 'absolute'};
+export const getPocToastMotionCardLayoutClassName = (
+  index: number,
+  isHovered: boolean,
+  isPresent: boolean
+) => {
+  // Collapsed, only the front toast is in flow, so the column is exactly its size.
+  const isInFlow = isHovered || (index === 0 && isPresent);
+  const fillsFrontCardHeight = !isHovered && index > 0;
+
+  return emotionClassName`
+    position: ${isInFlow ? 'relative' : 'absolute'};
     top: 0;
+    ${fillsFrontCardHeight ? 'bottom: 0;' : ''}
     left: 0;
     width: 100%;
     flex-shrink: 0;
     transform-origin: bottom center;
   `;
+};
 
-export const getPocToastMotionCardInteractionClassName = (
-  index: number,
-  isHovered: boolean
-) =>
+export const getPocToastMotionCardInteractionClassName = (index: number, isHovered: boolean) =>
   emotionClassName`
     pointer-events: ${getPocToastPointerEventsEnabled(index, isHovered) ? 'auto' : 'none'};
   `;
@@ -126,19 +136,6 @@ export const pocToastStackStyles = css`
   pointer-events: auto;
 `;
 
-export const pocToastCardMeasureHiddenStyles = css`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  visibility: hidden;
-  pointer-events: none;
-  clip: rect(0, 0, 0, 0);
-  clip-path: inset(50%);
-  overflow: hidden;
-`;
-
 export const pocToastCardPeekStyles = ({ euiTheme, colorMode }: UseEuiTheme) => {
   const isDark = colorMode === 'DARK';
 
@@ -182,8 +179,7 @@ export const pocToastCardStyles = (
   { euiTheme, colorMode }: UseEuiTheme,
   toastType: PocToastType,
   useSolidBackground: boolean,
-  isPeekCard: boolean,
-  expandedStackWidth: number | undefined
+  isPeekCard: boolean
 ) => {
   const isDark = colorMode === 'DARK';
   const tintByType: Record<PocToastType, string> = {
@@ -201,23 +197,22 @@ export const pocToastCardStyles = (
     : '0 2px 6px rgba(0, 0, 0, 0.04), 0 0 24px rgba(0, 0, 0, 0.08)';
   const innerHighlight = `inset 0 1px 0 ${glassHighlight}`;
 
-  const widthStyles = `
-      width: 100%;
-      max-width: ${POC_TOAST_MAX_CARD_WIDTH}px;
-    `;
-
   return css`
     box-sizing: border-box;
-    ${widthStyles}
+    width: 100%;
+    max-width: ${POC_TOAST_MAX_CARD_WIDTH}px;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: ${euiTheme.size.m};
     padding: ${euiTheme.size.m} ${euiTheme.size.m};
     border-radius: ${euiTheme.size.m};
-    background:
-      ${typeGradient} padding-box,
-      linear-gradient(${useSolidBackground ? solidFill : glassFill}, ${useSolidBackground ? solidFill : glassFill}) padding-box,
+    background: ${typeGradient} padding-box,
+      linear-gradient(
+          ${useSolidBackground ? solidFill : glassFill},
+          ${useSolidBackground ? solidFill : glassFill}
+        )
+        padding-box,
       ${glassBorder} border-box;
     background-size: 200% 200%, auto, auto;
     background-position: 0% 0%, 0 0, 0 0;
@@ -235,8 +230,6 @@ export const pocToastCardStyles = (
     `}
     border: 1px solid transparent;
     box-shadow: ${innerHighlight}, ${shadow};
-    transform-origin: top center;
-    will-change: transform, opacity;
     position: relative;
     ${isPeekCard
       ? `
@@ -323,10 +316,7 @@ export const pocToastClearAllButtonStyles = ({ euiTheme, colorMode }: UseEuiThem
     letter-spacing: 0.025em;
     text-transform: none;
     color: ${isDark ? '#71717a' : '#a1a1aa'};
-    transition:
-      color 150ms ease,
-      background-color 150ms ease,
-      border-color 150ms ease,
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease,
       box-shadow 150ms ease;
 
     &:hover {

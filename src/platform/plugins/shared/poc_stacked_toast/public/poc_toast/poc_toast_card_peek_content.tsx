@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiIcon, type IconType, type UseEuiTheme } from '@elastic/eui';
 import type { PocToast } from './poc_toast_types';
 import { pocToastCardPeekStyles } from './poc_toast_styles';
@@ -29,11 +29,23 @@ export interface PocToastCardPeekContentProps {
   euiThemeContext: UseEuiTheme;
 }
 
-export const PocToastCardPeekContent = ({ toast, euiThemeContext }: PocToastCardPeekContentProps) => (
-  <div css={pocToastCardPeekStyles(euiThemeContext)}>
-    <span className="pocToastCardIcon">
-      <EuiIcon type={iconByType[toast.type]} color={colorByType[toast.type]} size="m" />
-    </span>
-    <p className="pocToastCardTitle">{toast.title}</p>
-  </div>
-);
+export const PocToastCardPeekContent = ({
+  toast,
+  euiThemeContext,
+}: PocToastCardPeekContentProps) => {
+  const peekStyles = useMemo(() => pocToastCardPeekStyles(euiThemeContext), [euiThemeContext]);
+
+  return (
+    <div css={peekStyles}>
+      <span className="pocToastCardIcon">
+        <EuiIcon
+          type={iconByType[toast.type]}
+          color={colorByType[toast.type]}
+          size="m"
+          aria-hidden={true}
+        />
+      </span>
+      <p className="pocToastCardTitle">{toast.title}</p>
+    </div>
+  );
+};

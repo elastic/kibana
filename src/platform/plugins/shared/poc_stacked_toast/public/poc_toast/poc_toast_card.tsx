@@ -7,26 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useLayoutEffect, useMemo, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { forwardRef, memo, useMemo } from 'react';
+import { motion, useIsPresent } from 'framer-motion';
 import {
   copyToClipboard,
   EuiButtonIcon,
   EuiIcon,
+  EuiToolTip,
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PocToast } from './poc_toast_types';
 import { createPocToastVariants } from './poc_toast_motion';
-import { measurePocToastCardSize } from './poc_toast_measure';
 import { PocToastCardContent } from './poc_toast_card_content';
 import { PocToastCardPeekContent } from './poc_toast_card_peek_content';
-import { usePocToastStackLayout } from './poc_toast_stack_layout_context';
 import {
   getPocToastMotionCardInteractionClassName,
   getPocToastMotionCardLayoutClassName,
-  pocToastCardMeasureHiddenStyles,
   pocToastCardStyles,
 } from './poc_toast_styles';
 
@@ -50,107 +48,42 @@ export interface PocToastCardProps {
   onDismiss: (id: string) => void;
 }
 
-export const PocToastCard = forwardRef<HTMLDivElement, PocToastCardProps>(function PocToastCard(
+const PocToastCardComponent = forwardRef<HTMLDivElement, PocToastCardProps>(function PocToastCard(
   { toast, index, arrayLength, isHovered, onDismiss },
   ref
 ) {
   const euiThemeContext = useEuiTheme();
-  const { frontCardHeight, expandedStackWidth, queueCardMetrics } = usePocToastStackLayout();
-  const measureRef = useRef<HTMLElement | null>(null);
+  const isPresent = useIsPresent();
   const isFrontCard = index === 0;
   const isPeekCard = !isHovered && index > 0;
-
-  useLayoutEffect(() => {
-    const element = measureRef.current;
-    if (!element) {
-      return;
-    }
-
-    const reportSize = () => {
-      const intrinsic = measurePocToastCardSize(element);
-      const update: { width: number; height: number } = {
-        width: intrinsic.width,
-        height:
-          isHovered && expandedStackWidth !== undefined
-            ? measurePocToastCardSize(element, expandedStackWidth).height
-            : intrinsic.height,
-      };
-
-      queueCardMetrics(toast.id, update);
-    };
-
-    reportSize();
-
-    const observer = new ResizeObserver(() => {
-      requestAnimationFrame(reportSize);
-    });
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [
-    expandedStackWidth,
-    isHovered,
-    queueCardMetrics,
-    toast.cta,
-    toast.id,
-    toast.text,
-    toast.title,
-  ]);
+  const useSolidBackground = isFrontCard || isHovered;
 
   const toastVariants = useMemo(
-    () =>
-      createPocToastVariants({
-        isHovered,
-        index,
-        maxToasts: arrayLength,
-      }),
+    () => createPocToastVariants({ isHovered, index, maxToasts: arrayLength }),
     [arrayLength, index, isHovered]
   );
 
-  const motionCardLayoutClassName = useMemo(
-    () => getPocToastMotionCardLayoutClassName(index, isHovered),
-    [index, isHovered]
+  const motionClassName = useMemo(
+    () =>
+      `${getPocToastMotionCardLayoutClassName(
+        index,
+        isHovered,
+        isPresent
+      )} ${getPocToastMotionCardInteractionClassName(index, isHovered)}`,
+    [index, isHovered, isPresent]
   );
 
-  const motionCardInteractionClassName = useMemo(
-    () => getPocToastMotionCardInteractionClassName(index, isHovered),
-    [index, isHovered]
-  );
+  const copyLabel = i18n.translate('pocStackedToast.copyToClipboard', {
+    defaultMessage: 'Copy to clipboard',
+  });
+  const dismissLabel = i18n.translate('pocStackedToast.dismiss', {
+    defaultMessage: 'Dismiss {title}',
+    values: { title: toast.title },
+  });
 
-  const fullCardChrome = (
-    <>
-      <div className="pocToastCardLeading">
-        <span className="pocToastCardIcon">
-          <EuiIcon type={iconByType[toast.type]} color={colorByType[toast.type]} size="m" />
-        </span>
-        <PocToastCardContent toast={toast} euiThemeContext={euiThemeContext} />
-      </div>
-      <div className="pocToastCardActions">
-        <EuiButtonIcon
-          iconType="copy"
-          size="xs"
-          color="text"
-          aria-label={i18n.translate('pocStackedToast.copyToClipboard', {
-            defaultMessage: 'Copy to clipboard',
-          })}
-          onClick={() => copyToClipboard([toast.title, toast.text].filter(Boolean).join('\n'))}
-          data-test-subj="pocToastCopyButton"
-        />
-        <EuiButtonIcon
-          iconType="cross"
-          size="xs"
-          color="text"
-          aria-label={i18n.translate('pocStackedToast.dismiss', {
-            defaultMessage: 'Dismiss {title}',
-            values: { title: toast.title },
-          })}
-          onClick={() => onDismiss(toast.id)}
-          data-test-subj="pocToastDismissButton"
-        />
-      </div>
-    </>
+  const cardStyles = useMemo(
+    () => pocToastCardStyles(euiThemeContext, toast.type, useSolidBackground, isPeekCard),
+    [euiThemeContext, isPeekCard, toast.type, useSolidBackground]
   );
 
   return (
@@ -161,17 +94,10 @@ export const PocToastCard = forwardRef<HTMLDivElement, PocToastCardProps>(functi
       initial="initial"
       animate="animate"
       exit="exit"
-      className={`${motionCardLayoutClassName} ${motionCardInteractionClassName}`}
-      style={isPeekCard ? { height: frontCardHeight } : undefined}
+      className={motionClassName}
     >
       <article
-        css={pocToastCardStyles(
-          euiThemeContext,
-          toast.type,
-          isFrontCard || isHovered,
-          isPeekCard,
-          expandedStackWidth
-        )}
+        css={cardStyles}
         role="status"
         aria-live={isPeekCard ? 'off' : 'polite'}
         aria-hidden={isPeekCard}
@@ -180,14 +106,47 @@ export const PocToastCard = forwardRef<HTMLDivElement, PocToastCardProps>(functi
         {isPeekCard ? (
           <PocToastCardPeekContent toast={toast} euiThemeContext={euiThemeContext} />
         ) : (
-          fullCardChrome
+          <>
+            <div className="pocToastCardLeading">
+              <span className="pocToastCardIcon">
+                <EuiIcon
+                  type={iconByType[toast.type]}
+                  color={colorByType[toast.type]}
+                  size="m"
+                  aria-hidden={true}
+                />
+              </span>
+              <PocToastCardContent toast={toast} euiThemeContext={euiThemeContext} />
+            </div>
+            <div className="pocToastCardActions">
+              <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copy"
+                  size="xs"
+                  color="text"
+                  aria-label={copyLabel}
+                  onClick={() =>
+                    copyToClipboard([toast.title, toast.text].filter(Boolean).join('\n'))
+                  }
+                  data-test-subj="pocToastCopyButton"
+                />
+              </EuiToolTip>
+              <EuiToolTip content={dismissLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  size="xs"
+                  color="text"
+                  aria-label={dismissLabel}
+                  onClick={() => onDismiss(toast.id)}
+                  data-test-subj="pocToastDismissButton"
+                />
+              </EuiToolTip>
+            </div>
+          </>
         )}
       </article>
-      <div css={pocToastCardMeasureHiddenStyles} aria-hidden>
-        <article ref={measureRef} css={pocToastCardStyles(euiThemeContext, toast.type, true, false, undefined)}>
-          {fullCardChrome}
-        </article>
-      </div>
     </motion.div>
   );
 });
+
+export const PocToastCard = memo(PocToastCardComponent);

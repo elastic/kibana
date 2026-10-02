@@ -13,9 +13,7 @@ import type { Transition, Variants } from 'framer-motion';
 export const POC_TOAST_STACK_GAP = 8;
 /** Vertical offset between collapsed stack cards (peek step). */
 export const POC_TOAST_COLLAPSED_Y_STEP = 12;
-/** Fallback before layout measure (offsets / peek only). */
-export const POC_TOAST_DEFAULT_CARD_HEIGHT = 48;
-/** Collapsed front toast width cap; expanded stack uses exactly this width. */
+/** Toast width cap; the expanded stack reuses the front toast's width. */
 export const POC_TOAST_MAX_CARD_WIDTH = 400;
 /** Dismiss / clear-all exit travels toward the top of the viewport. */
 export const POC_TOAST_EXIT_Y = -120;
@@ -63,52 +61,7 @@ export const createPocToastVariants = ({
   },
 });
 
-export const getPocToastHeight = (
-  cardHeights: Readonly<Record<string, number>>,
-  toastId: string
-): number => cardHeights[toastId] ?? POC_TOAST_DEFAULT_CARD_HEIGHT;
-
-/** Cumulative translateY for each toast (newest-first order). */
-export const getPocToastExpandedOffsets = (
-  toasts: ReadonlyArray<{ id: string }>,
-  cardHeights: Readonly<Record<string, number>>,
-  gap: number
-): number[] => {
-  let offset = 0;
-  const offsets: number[] = [];
-
-  for (let i = 0; i < toasts.length; i++) {
-    offsets.push(offset);
-    if (i < toasts.length - 1) {
-      offset += getPocToastHeight(cardHeights, toasts[i].id) + gap;
-    }
-  }
-
-  return offsets;
-};
-
-/** Extra space below the front card so peek/expanded stacks fit in layout. */
-export const getPocToastStackExtraHeightBelowFront = (
-  toasts: ReadonlyArray<{ id: string }>,
-  expandedOffsets: number[],
-  cardHeights: Readonly<Record<string, number>>
-): number => {
-  if (toasts.length <= 1) {
-    return 0;
-  }
-
-  const lastIndex = toasts.length - 1;
-  const frontHeight = getPocToastHeight(cardHeights, toasts[0].id);
-  const lastBottom =
-    expandedOffsets[lastIndex] + getPocToastHeight(cardHeights, toasts[lastIndex].id);
-
-  return Math.max(0, lastBottom - frontHeight);
-};
-
-export const getPocToastPointerEventsEnabled = (
-  index: number,
-  isHovered: boolean
-): boolean => {
+export const getPocToastPointerEventsEnabled = (index: number, isHovered: boolean): boolean => {
   if (isHovered) {
     return true;
   }
@@ -135,17 +88,4 @@ export const pocToastClearAllLayoutTransition: Transition = {
   type: 'tween',
   duration: 0.2,
   ease: 'easeOut',
-};
-
-export const getPocToastStackPeekPadding = (
-  arrayLength: number,
-  isHovered: boolean,
-  cardHeight: number,
-  gap: number
-): number => {
-  if (arrayLength <= 1) {
-    return 0;
-  }
-  const step = isHovered ? cardHeight + gap : POC_TOAST_COLLAPSED_Y_STEP;
-  return (arrayLength - 1) * step;
 };

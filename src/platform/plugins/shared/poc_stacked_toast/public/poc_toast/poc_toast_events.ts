@@ -13,5 +13,7 @@ export const POC_STACKED_TOAST_ADD_EVENT = 'poc-stacked-toast:add';
 export const POC_STACKED_TOAST_CTA_EVENT = 'poc-stacked-toast:cta';
 
 export const dispatchPocStackedToastAdd = (input: PocToastInput) => {
-  window.dispatchEvent(new CustomEvent<PocToastInput>(POC_STACKED_TOAST_ADD_EVENT, { detail: input }));
+  window.dispatchEvent(
+    new CustomEvent<PocToastInput>(POC_STACKED_TOAST_ADD_EVENT, { detail: input })
+  );
 };

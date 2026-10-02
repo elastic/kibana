@@ -100,10 +100,7 @@ export class PocStackedToastPlugin implements Plugin {
     const addRandomToast = () => this.addToast(createRandomPocToastInput());
 
     this.unregisterChromeTrigger = core.chrome.controls.aiButton.register({
-      content: toMountPoint(
-        <PocToastStackTrigger onAdd={addRandomToast} />,
-        core.rendering
-      ),
+      content: toMountPoint(<PocToastStackTrigger onAdd={addRandomToast} />, core.rendering),
     });
 
     return {};
