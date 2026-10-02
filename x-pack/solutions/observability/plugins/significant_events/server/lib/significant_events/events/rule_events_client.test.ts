@@ -180,7 +180,7 @@ describe('RuleEventsClient', () => {
 
       const { hits } = await client.findLatestByCurrentStatePaginated({});
 
-      expect(hits[0].status).toBe('closed');
+      expect(hits[0].status).toBe('inactive');
     });
 
     it('filters severity on top-level severity, translated from SIGNIFICANT_EVENTS_SEVERITY_MAP', async () => {
@@ -258,7 +258,7 @@ describe('RuleEventsClient', () => {
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
         search: 'checkout',
-        status: ['active'],
+        status: ['inactive'],
       });
 
       const { commands, params } = getPageRequest(query);
