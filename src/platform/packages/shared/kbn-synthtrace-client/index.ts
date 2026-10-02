@@ -54,3 +54,11 @@ export {
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
+export {
+  universalProfiling,
+  UNIVERSAL_PROFILING_EVENTS_INDEX,
+  UNIVERSAL_PROFILING_HOSTS_INDEX,
+  type UniversalProfilingDocument,
+  type UniversalProfilingEventDocument,
+  type UniversalProfilingHostDocument,
+} from './src/lib/universal_profiling';

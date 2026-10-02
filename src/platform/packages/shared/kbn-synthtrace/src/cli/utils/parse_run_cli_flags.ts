@@ -126,6 +126,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_service_names_with_colons.ts',
   trace_with_service_names_with_slashes:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_service_names_with_slashes.ts',
+  universal_profiling:
+    'x-pack/solutions/observability/plugins/profiling/test/scenarios/universal_profiling.ts',
   unstructured_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/unstructured_logs.ts',
   variance: 'x-pack/solutions/observability/plugins/apm/test/scenarios/variance.ts',
 };

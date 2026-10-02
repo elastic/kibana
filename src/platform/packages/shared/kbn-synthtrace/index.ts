@@ -25,6 +25,15 @@ export { ComponentTemplateName } from './src/lib/apm/client/apm_synthtrace_es_cl
 export type { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
 export type { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
 export type { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
+export type { UniversalProfilingSynthtraceEsClient } from './src/lib/universal_profiling/universal_profiling_synthtrace_es_client';
+export {
+  createUniversalProfilingStackTrace,
+  createUniversalProfilingStackTraces,
+  type UniversalProfilingCallTree,
+  type UniversalProfilingFrame,
+  type UniversalProfilingMetadataDocument,
+  type UniversalProfilingStackTrace,
+} from './src/lib/universal_profiling/stack_traces';
 export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,

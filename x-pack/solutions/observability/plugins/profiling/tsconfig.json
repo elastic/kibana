@@ -10,7 +10,8 @@
     "common/**/*.json",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts"
+    "server/**/*.ts",
+    "test/scenarios/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -64,7 +65,9 @@
     "@kbn/core-spaces-common",
     "@kbn/app-header",
     "@kbn/ui-callout",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/synthtrace",
+    "@kbn/synthtrace-client"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

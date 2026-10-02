@@ -894,6 +894,18 @@ Generates data for testing agent configuration.
 node scripts/synthtrace agent_config --live
 ```
 
+#### `universal_profiling`
+
+Generates Universal Profiling data for hosts that each run a Java service, a Python service, a native service and kernel workers, whose stacks are described as call trees in the scenario. Sets up the Universal Profiling resources through Kibana if needed. Re-runs only add new events; `--clean` deletes the Universal Profiling documents but keeps the setup. Stateful only.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace universal_profiling --live --scenarioOpts.hosts=3 --scenarioOpts.samplesPerSecond=20
+```
+
+`samplesPerSecond` is per host. The agent samples each CPU core 20 times per second.
+
 ### SRE Incident Scenarios
 
 Located in `sre_incidents/` directory:
