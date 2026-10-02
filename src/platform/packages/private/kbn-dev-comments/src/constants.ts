@@ -11,6 +11,11 @@ export const IGNORE_ATTR = 'data-devtool-ignore';
 
 export const IGNORE_SELECTOR = `[${IGNORE_ATTR}]`;
 
+/** The toolbar button that toggles comment mode; ignored for commenting, kept in screenshots. */
+export const COMMENTS_BUTTON_TEST_SUBJ = 'devCommentsButton';
+
+export const COMMENTS_BUTTON_SELECTOR = `[data-test-subj="${COMMENTS_BUTTON_TEST_SUBJ}"]`;
+
 /** Marks the panel's menus, which close themselves on Escape rather than leave comment mode. */
 export const MENU_ATTR = 'data-devtool-menu';
 
