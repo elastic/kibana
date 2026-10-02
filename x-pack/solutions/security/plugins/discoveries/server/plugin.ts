@@ -37,6 +37,7 @@ import {
 import { reportMisconfiguration } from '@kbn/discoveries/impl/lib/telemetry/report_misconfiguration';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
+import { preCreateDefaultAdhocAttackDiscoveryIndex } from './lib/attack_discovery/pre_create_default_adhoc_index';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
 import { registerRoutes } from './routes';
@@ -191,18 +192,11 @@ export class DiscoveriesPlugin
     this.adhocAttackDiscoveryDataClient =
       plugins.ruleRegistry.ruleDataService.initializeIndex(ruleDataServiceOptions);
 
-    // initializeIndex installs shared templates only. The concrete alias
-    // `.adhoc.alerts-security.attack.discovery.alerts-default` is created by
-    // getWriter(), which writes no documents. Do that here for the default
-    // space so a search does not 404 before the first ad-hoc attack. Not
-    // awaited: installation waits for Elasticsearch, and setup must not.
-    const defaultSpaceDataClient = this.adhocAttackDiscoveryDataClient;
-    void defaultSpaceDataClient.getWriter({ namespace: 'default' }).catch((error: unknown) => {
-      // e.g. RuleDataWriteDisabledError when rule-registry writes are disabled.
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        `Unable to pre-create ad-hoc Attack Discovery index for the default space: ${errorMessage}`
-      );
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core,
+      dataClient: this.adhocAttackDiscoveryDataClient,
+      frameworkAlerts: plugins.alerting.frameworkAlerts,
+      logger: this.logger,
     });
 
     const getStartServices = async () => {
