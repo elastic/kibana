@@ -134,7 +134,7 @@ export function MemoryKeywordTreemap({
           hasBorder
           hasShadow
           paddingSize="s"
-          radius="s"
+          borderRadius="m"
           data-test-subj="nightshiftMemoryTreemapTooltip"
         >
           <EuiText size="s">
