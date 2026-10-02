@@ -6,42 +6,54 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MockLocatorProvider } from '../../../test_utils/test_providers';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 const ELASTIC_UID = 'elastic_uid';
 const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
 
 const mockBulkGet = jest.fn();
+let mockCanReadRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-      };
-    }
-    if (token === 'settings') {
-      return {
-        client: { get: () => 'YYYY-MM-DD HH:mm' },
-      };
-    }
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
-    if (token === 'http') {
-      return {
-        basePath: { prepend: (path: string) => `/base${path}` },
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({
+          capabilities: { alerting_v2_rules: { read: mockCanReadRules } },
+        });
+      }
+      if (token === 'application') {
+        return {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        };
+      }
+      if (token === 'settings') {
+        return {
+          client: { get: () => 'YYYY-MM-DD HH:mm' },
+        };
+      }
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
+      if (token === 'http') {
+        return {
+          basePath: { prepend: (path: string) => `/base${path}` },
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 let mockIsLicenseValid = true;
 jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
@@ -55,6 +67,15 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_fetch_matching_rules', () => ({
+  useFetchMatchingRules: () => ({
+    data: { items: [], total: 0, page: 1, per_page: 10 },
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+  }),
+}));
+
 const TEST_SUBJ = {
   flyout: 'actionPolicyDetailsFlyout',
   closeIcon: 'euiFlyoutCloseButton',
@@ -65,7 +86,6 @@ const futureIso = (): string => new Date(Date.now() + 1000 * 60 * 60).toISOStrin
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
   enabled: true,
@@ -96,6 +116,7 @@ interface RenderProps {
   policy?: ActionPolicyResponse;
   canWrite?: boolean;
   isStateLoading?: boolean;
+  size?: 's' | 'm';
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -123,14 +144,17 @@ const renderFlyout = (props: RenderProps = {}) => {
 
   render(
     <QueryClientProvider client={createQueryClient()}>
-      <I18nProvider>
-        <ActionPolicyDetailsFlyout
-          policy={policy}
-          canWrite={props.canWrite ?? true}
-          isStateLoading={props.isStateLoading}
-          {...handlers}
-        />
-      </I18nProvider>
+      <MockLocatorProvider>
+        <I18nProvider>
+          <ActionPolicyDetailsFlyout
+            policy={policy}
+            canWrite={props.canWrite ?? true}
+            isStateLoading={props.isStateLoading}
+            size={props.size}
+            {...handlers}
+          />
+        </I18nProvider>
+      </MockLocatorProvider>
     </QueryClientProvider>
   );
 
@@ -141,6 +165,7 @@ describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsLicenseValid = true;
+    mockCanReadRules = true;
     mockBulkGet.mockResolvedValue([
       { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
     ]);
@@ -153,6 +178,16 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId(TEST_SUBJ.flyout)).toBeInTheDocument();
       expect(screen.getByText('Critical alerts policy')).toBeInTheDocument();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledBadge')).toBeInTheDocument();
+    });
+
+    it('accepts a "s" size override (used when nested inside another flyout)', () => {
+      // Regression test: this flyout is rendered nested inside the rule summary
+      // flyout (which uses size "m"). EUI's managed-flyout validation throws
+      // "Parent and child flyouts cannot both be size 'm'" if both resolve to
+      // the same size, so this flyout must stay able to render at size "s".
+      renderFlyout({ size: 's' });
+
+      expect(screen.getByTestId(TEST_SUBJ.flyout)).toBeInTheDocument();
     });
 
     it('renders a disabled state badge when the policy is disabled', () => {
@@ -377,6 +412,66 @@ describe('ActionPolicyDetailsFlyout', () => {
       const elements = await screen.findAllByText(ELASTIC_UID);
       expect(elements).toHaveLength(2);
       elements.forEach((element) => expect(element).toBeInTheDocument());
+    });
+  });
+
+  describe('affected rules', () => {
+    const tagScopedPolicy = createPolicy({
+      matcher: { tags: ['prod'], expression: 'data.severity : "critical"' },
+    });
+
+    it.each<[string, ActionPolicyResponse['matcher']]>([
+      ['rule tags', { tags: ['prod'] }],
+      [
+        'rule tags and a matching query',
+        { tags: ['prod'], expression: 'data.severity : "critical"' },
+      ],
+    ])('renders the See all affected rules link when the scope has %s', (_, matcher) => {
+      renderFlyout({ policy: createPolicy({ matcher }) });
+
+      expect(
+        within(screen.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).getByTestId(
+          'actionPolicyDetailsFlyoutSeeAffectedRulesLink'
+        )
+      ).toHaveTextContent('See all affected rules');
+    });
+
+    it.each<[string, ActionPolicyResponse['matcher']]>([
+      ['a catch-all policy', null],
+      [
+        'a policy with a matching query and no rule tags',
+        { expression: 'data.severity : "critical"' },
+      ],
+    ])('hides the link for %s', (_, matcher) => {
+      renderFlyout({ policy: createPolicy({ matcher }) });
+
+      expect(screen.getByText('Policy scope')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the link when the user cannot read rules', () => {
+      mockCanReadRules = false;
+      renderFlyout({ policy: tagScopedPolicy });
+
+      expect(screen.getByText('Policy scope')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens the Affected rules flyout when the link is clicked', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderFlyout({ policy: tagScopedPolicy });
+
+      await user.click(screen.getByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink'));
+
+      const affectedRulesFlyout = await screen.findByTestId('actionPolicyAffectedRulesFlyout');
+      expect(within(affectedRulesFlyout).getByText('Affected rules')).toBeInTheDocument();
+      expect(
+        within(affectedRulesFlyout).getByText('data.severity : "critical"')
+      ).toBeInTheDocument();
     });
   });
 

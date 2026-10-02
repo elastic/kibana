@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
-  updateRuleBodySchema,
+  updateRuleDataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
   ruleTagsResponseSchema,
@@ -22,12 +22,11 @@ import {
   stateTransitionSchema,
   scheduleSchema,
   metadataSchema,
-  ruleResponseMetadataSchema,
   groupingSchema,
 } from './rule_data_schema';
 import {
   createActionPolicyDataSchema,
-  updateActionPolicyBodySchema,
+  updateActionPolicyDataSchema,
   bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
   actionPolicyDestinationSchema,
@@ -70,6 +69,7 @@ import {
   matchedActionPolicySchema,
   matchActionPoliciesResponseSchema,
 } from './match_action_policies_schema';
+import { matchRulesBodySchema } from './match_rules_schema';
 import {
   ruleExecutionViewSchema,
   listRuleExecutionsResponseSchema,
@@ -102,7 +102,7 @@ const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // rules
   [createRuleDataSchema, 'alerting_new_rule'],
-  [updateRuleBodySchema, 'alerting_update_rule'],
+  [updateRuleDataSchema, 'alerting_update_rule'],
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],
   [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
@@ -116,11 +116,10 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [stateTransitionSchema, 'alerting_rule_state_transition'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
-  [ruleResponseMetadataSchema, 'alerting_rule_response_metadata'],
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],
-  [updateActionPolicyBodySchema, 'alerting_update_action_policy'],
+  [updateActionPolicyDataSchema, 'alerting_update_action_policy'],
   [bulkSnoozeActionPoliciesBodySchema, 'alerting_bulk_snooze_action_policies_request'],
   [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
   [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],
@@ -158,6 +157,8 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
   [matchedActionPolicySchema, 'alerting_matched_action_policy'],
   [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
+  // matched rules
+  [matchRulesBodySchema, 'alerting_match_rules_request'],
   // execution history
   [ruleExecutionViewSchema, 'alerting_rule_execution'],
   [listRuleExecutionsResponseSchema, 'alerting_rule_executions_response'],

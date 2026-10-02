@@ -80,6 +80,12 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | Failed attempt to update a knowledge base entry |
 | `knowledge_base_entry_delete` | `success` | User has deleted knowledge base entry [id=x] |
 | | `failure` | Failed attempt to delete a knowledge base entry |
+| `workflow_create` {applies_to}`stack: preview 9.4+` | `success` | User has created a workflow [id=x]. |
+| | `failure` | Failed attempt to create a workflow. |
+| `workflow_bulk_create` {applies_to}`stack: preview 9.4+` | `success` | User has created a workflow via bulk import [id=x]. One event is written per workflow. |
+| | `failure` | Failed attempt to create a workflow via bulk import. |
+| `workflow_clone` {applies_to}`stack: preview 9.4+` | `success` | User has cloned a workflow [sourceId=x] to [id=y]. |
+| | `failure` | Failed attempt to clone a workflow [id=x]. |
 
 #### Type: change
 
@@ -175,6 +181,22 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `ml_update_trained_model_deployment` | `success` | Updating trained model deployment. |
 | | `failure` | Failed to update trained model deployment. |
 | `product_documentation_update` | `unknown` | User requested to update the product documentation for use in AI Assistants. |
+| `workflow_update` {applies_to}`stack: preview 9.4+` | `success` | User has updated a workflow [id=x]. |
+| | `failure` | Failed attempt to update a workflow [id=x]. |
+| `workflow_restore` {applies_to}`stack: preview 9.5+` | `success` | User has restored a workflow from history [id=x]. |
+| | `failure` | Failed attempt to restore a workflow from history [id=x]. |
+| `workflow_run` {applies_to}`stack: preview 9.4+` | `success` | User has started a workflow execution [id=x] [executionId=y]. |
+| | `failure` | Failed attempt to run a workflow [id=x]. |
+| `workflow_test` {applies_to}`stack: preview 9.4+` | `success` | User has tested a workflow. |
+| | `failure` | Failed attempt to test a workflow. |
+| `workflow_test_step` {applies_to}`stack: preview 9.4+` | `success` | User has tested a workflow step [stepId=x]. |
+| | `failure` | Failed attempt to test a workflow step [stepId=x]. |
+| `workflow_execution_cancel` {applies_to}`stack: preview 9.4+` | `success` | User has canceled a workflow execution [executionId=x]. Canceling every active execution writes one event per execution. |
+| | `failure` | Failed attempt to cancel a workflow execution. |
+| `workflow_execution_resume` {applies_to}`stack: preview 9.4+` | `success` | User has resumed a workflow execution [executionId=x]. |
+| | `failure` | Failed attempt to resume a workflow execution [executionId=x]. |
+| `workflow_hitl_waiting` {applies_to}`stack: preview 9.5+` | `success` | A workflow execution is waiting for human input or approval [executionId=x]. |
+| `workflow_hitl_timed_out` {applies_to}`stack: preview 9.5+` | `success` | A workflow human-input or approval wait has timed out [executionId=x]. |
 
 #### Type: deletion
 
@@ -221,6 +243,10 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `ml_delete_trained_model` | `success` | Deleting trained model. |
 | | `failure` | Failed to delete trained model. |
 | `product_documentation_delete` | `unknown` | User requested to delete the product documentation for use in AI Assistants. |
+| `workflow_delete` {applies_to}`stack: preview 9.4+` | `success` | User has deleted a workflow [id=x]. A forced delete includes `(force)` in the message. |
+| | `failure` | Failed attempt to delete a workflow [id=x]. |
+| `workflow_bulk_delete` {applies_to}`stack: preview 9.4+` | `success` | User has deleted a workflow via bulk delete [id=x]. One event is written per workflow. |
+| | `failure` | Failed attempt to delete a workflow via bulk delete. |
 
 #### Type: access
 
@@ -304,6 +330,16 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | User is not authorized to access the connectors of a case. |
 | `ml_infer_trained_model` | `success` | Inferring using trained model. |
 | | `failure` | Failed to infer using trained model. |
+| `workflow_get` {applies_to}`stack: preview 9.4+` | `success` | User has accessed a workflow [id=x]. |
+| | `failure` | Failed attempt to read a workflow [id=x]. |
+| `workflow_mget` {applies_to}`stack: preview 9.4+` | `success` | User has requested workflows by id. The message includes the requested and returned counts. |
+| | `failure` | Failed attempt to read workflows by id. |
+| `workflow_export` {applies_to}`stack: preview 9.4+` | `success` | User has exported a workflow [id=x]. One event is written per workflow. |
+| | `failure` | Failed attempt to export workflows. |
+
+::::{note}
+Workflow events (`workflow_*`) are logged after the operation finishes, with `event.outcome` of `success` or `failure`. When no user request is available (for example a human-in-the-loop wait, timeout, or system cancel), the message actor is `System`. Managed workflows append `[managed=true]` to the message, plus `originalWorkflowId`, `ownerPlugin`, `space`, and `reason` when those values are present.
+::::
 
 ### Category: web
 

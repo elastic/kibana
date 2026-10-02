@@ -14,11 +14,12 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
-import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
@@ -190,6 +191,18 @@ const renderWithProviders = (
 
 const waitForAiIndexDetailLoaded = () => screen.findByTestId('contextAiIndexSourceRow');
 
+const confirmAutomationDelete = async () => {
+  const modal = await screen.findByTestId('contextAutomationDeleteConfirmModal');
+  fireEvent.click(within(modal).getByRole('button', { name: 'Remove' }));
+};
+
+const removeAutomationFromRow = async (rowIndex: number) => {
+  const actionButtons = screen.getAllByTestId('contextAutomationRowActionsButton');
+  fireEvent.click(actionButtons[rowIndex]);
+  fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
+  await confirmAutomationDelete();
+};
+
 describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
@@ -339,10 +352,10 @@ describe('AiIndexDetailPage', () => {
       '/api/context_engine/ai_index/my-ai-index',
       expect.objectContaining({ version: expect.any(String) })
     );
-    expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-ai-index');
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
-    expect(await screen.findByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -438,7 +451,7 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
-    await screen.findByTestId('contextAiIndexDetailPageTitle');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
@@ -624,47 +637,30 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
-  });
-
-  it('discards the draft when editing is cancelled', async () => {
-    const services = createServices();
-    services.http.get.mockResolvedValue({
-      ...aiIndex,
-      automations: [{ type: 'workflow', value: 'wf-1' }],
-    });
-    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
-
-    renderWithProviders(services);
-
-    await waitForAiIndexDetailLoaded();
-
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
-    fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
-    expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('contextCancelEditingAutomationsButton'));
-
-    expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('My workflow');
-    expect(services.http.put).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeEnabled();
   });
 
   it('keeps the rows rendered while the summaries for an edited list resolve', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue({
+    const indexWithTwoAutomations = {
       ...aiIndex,
       automations: [
         { type: 'workflow', value: 'wf-1' },
         { type: 'workflow', value: 'wf-2' },
       ],
+    };
+    services.http.get.mockResolvedValueOnce(indexWithTwoAutomations).mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
     });
+    services.http.put.mockResolvedValue({ status: 'updated' });
     mockMgetWorkflows.mockResolvedValue([
       { id: 'wf-1', name: 'My workflow', enabled: true },
       { id: 'wf-2', name: 'Another workflow', enabled: false },
@@ -675,12 +671,13 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(await screen.findAllByTestId('contextAiIndexAutomationRow')).toHaveLength(2);
 
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
     // Removing changes the summaries query key, which must not send the panel back to its loading state.
-    fireEvent.click(screen.getAllByTestId('contextRemoveAutomationButton')[1]);
+    await removeAutomationFromRow(1);
 
     expect(screen.queryByTestId('contextAiIndexAutomationsLoading')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('My workflow');
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('My workflow');
+    });
   });
 
   it('lists existing automations with the resolved workflow name and status', async () => {
@@ -711,6 +708,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
+    fireEvent.click(screen.getByTestId('contextAddAutomationButton'));
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
@@ -750,7 +748,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 
   it('shows all overview sections for managed AI indexes without setup locks', async () => {
@@ -784,7 +782,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
 
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
   });
 
   it('renders connector sources using the connector id when no name is resolved', async () => {
@@ -816,9 +814,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
-    fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
-    fireEvent.click(screen.getByTestId('contextSaveAutomationsButton'));
+    await removeAutomationFromRow(0);
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
@@ -869,7 +865,8 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
     expect(
       screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
     ).not.toBeInTheDocument();
@@ -888,7 +885,11 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 
@@ -906,7 +907,11 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 });
