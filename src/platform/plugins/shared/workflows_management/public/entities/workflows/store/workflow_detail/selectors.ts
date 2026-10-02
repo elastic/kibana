@@ -147,19 +147,6 @@ export const selectStepExecutions = createSelector(
   (execution) => execution?.stepExecutions
 );
 
-/**
- * Step execution docs used exclusively for duration chip computation.
- * For terminal executions with more than `WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE` docs,
- * `loadExecutionThunk` fetches a larger page (up to `WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE`)
- * and stores it here so chips cover steps beyond the step-tree's 1000-doc window.
- * Falls back to `execution.stepExecutions` when the big fetch hasn't run or wasn't needed.
- */
-export const selectDurationStepExecutions = createSelector(
-  selectDetail,
-  selectExecution,
-  (detail, execution) => detail.durationStepExecutions ?? execution?.stepExecutions
-);
-
 export const selectIsExecutionsTab = createSelector(
   selectActiveTab,
   (activeTab): activeTab is 'executions' => activeTab === 'executions'
@@ -267,7 +254,7 @@ export const selectIsEditorYamlExecutionSnapshot = createSelector(
  * Uses the same allow-list as the flyout tree so numbers always agree.
  */
 export const selectStepDurations = createSelector(
-  selectDurationStepExecutions,
+  selectStepExecutions,
   selectEditorWorkflowLookup,
   (stepExecutions, lookup) =>
     stepExecutions?.length && lookup

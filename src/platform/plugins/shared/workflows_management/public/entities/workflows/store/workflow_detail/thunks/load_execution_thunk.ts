@@ -15,12 +15,10 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   getOmittedStepExecutionsCount,
   WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT,
-  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
   WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
 } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { setDurationStepExecutions } from '../slice';
 import type { ComputedData } from '../types';
 import { performComputation } from '../utils/computation';
 
@@ -47,7 +45,7 @@ export const loadExecutionThunk = createAsyncThunk<
   'detail/loadExecutionThunk',
   async (
     { id, loadMore = false },
-    { dispatch, getState, requestId, signal, rejectWithValue, extra: { services } }
+    { getState, requestId, signal, rejectWithValue, extra: { services } }
   ) => {
     const { http, notifications } = services;
     const api = new WorkflowApi(http);
@@ -112,25 +110,6 @@ export const loadExecutionThunk = createAsyncThunk<
         );
         pages.push(...batch.map(({ results }) => results));
         total = batch[0].total;
-      }
-
-      // For terminal executions whose step count exceeds the UI page budget, fetch a larger page
-      // so duration chips cover steps beyond the step-tree's window (e.g. final_step in a long
-      // foreach run). Skipped for loadMore and in-progress executions; their data is still changing.
-      if (
-        !keepLoadedPages &&
-        total > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE &&
-        isTerminalStatus(execution.status)
-      ) {
-        try {
-          const durationsPage = await api.getExecutionSteps(id, {
-            page: 1,
-            size: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
-          });
-          dispatch(setDurationStepExecutions(durationsPage.results));
-        } catch {
-          // Degrade gracefully — chips still show from the main pages' data.
-        }
       }
 
       return {

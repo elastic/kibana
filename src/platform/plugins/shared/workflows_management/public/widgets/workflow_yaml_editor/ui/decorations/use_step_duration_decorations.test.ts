@@ -302,19 +302,48 @@ describe('useStepDurationDecorations', () => {
       expect(stepADec?.options.linesDecorationsClassName).toContain('dimmed');
     });
 
-    it('produces distinct CSS classes for <1ms and ~1ms labels (no collision)', () => {
-      // <1ms → labelClass('<1ms')  →  hex of '<','1','m','s'
-      // ~1ms → labelClass('~1ms')  →  hex of '~','1','m','s'
-      // Both must produce different class names so their ::before content rules don't overwrite.
-      const label1 = '<1ms';
-      const label2 = '~1ms';
+    it('gives steps with different labels distinct classes and content rules', () => {
+      const editor = createMockEditor();
+      const { result, store } = renderHookWithProviders(editor);
 
-      // Inline the same logic as the production labelClass for verification.
-      const BASE = 'step-duration-gutter';
-      const encode = (s: string) =>
-        `${BASE}-l-${Array.from(s, (c) => (c.codePointAt(0) ?? 0).toString(16)).join('')}`;
+      // '<1ms' and '1ms' differ only by a punctuation character, which a lossy label-to-class
+      // conversion would drop, letting one chip render the other's text.
+      act(() => {
+        store.dispatch(
+          setExecution(
+            makeExecution([
+              createMockStepExecutionDto({
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 0.5,
+              }),
+              createMockStepExecutionDto({
+                stepId: 'step-c',
+                stepType: 'action',
+                executionTimeMs: 1,
+              }),
+            ])
+          )
+        );
+      });
 
-      expect(encode(label1)).not.toBe(encode(label2));
+      const { set } = (editor as ReturnType<typeof createMockEditor>)._decorationsCollection;
+      const [decorations]: [monaco.editor.IModelDeltaDecoration[]] = set.mock.calls.at(-1)!;
+      const classOf = (line: number) =>
+        decorations
+          .find((d) => d.range.startLineNumber === line)
+          ?.options.linesDecorationsClassName?.split(' ')
+          .find((c) => c.startsWith('step-duration-gutter-l-'));
+
+      const stepAClass = classOf(5);
+      const stepCClass = classOf(17);
+      expect(stepAClass).toBeDefined();
+      expect(stepCClass).toBeDefined();
+      expect(stepAClass).not.toBe(stepCClass);
+
+      const { styles } = result.current.styles;
+      expect(styles).toContain(`.${stepAClass}::before{content:"<1ms";}`);
+      expect(styles).toContain(`.${stepCClass}::before{content:"1ms";}`);
     });
   });
 

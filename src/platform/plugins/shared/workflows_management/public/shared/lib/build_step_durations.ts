@@ -14,10 +14,7 @@ import { formatDuration } from './format_duration';
 export interface StepDuration {
   /** `executionTimeMs` summed over every counted (completed) run. Drives the chip colour. */
   totalMs: number;
-  /**
-   * 1 for `foreach`/`while` steps (they always show total, not N × avg).
-   * Otherwise: number of completed runs (docs with a valid executionTimeMs).
-   */
+  /** Number of completed runs (docs with a valid executionTimeMs). */
   runCount: number;
   /** True when at least one counted run has a valid `executionTimeMs`. */
   hasDuration: boolean;
@@ -83,15 +80,11 @@ export const buildStepDurations = (
   }
 
   // Build the final map.
-  // foreach/while steps always show their total wall clock (runCount=1) rather than N × avg,
-  // because each doc already spans the full loop duration — N × avg would misrepresent them.
   const result = new Map<string, StepDuration>();
   for (const [stepId, entry] of acc) {
-    const stepInfo = steps[stepId];
-    const isLoopStep = stepInfo?.stepType === 'foreach' || stepInfo?.stepType === 'while';
     result.set(stepId, {
       totalMs: entry.totalMs,
-      runCount: isLoopStep ? 1 : entry.runs,
+      runCount: entry.runs,
       hasDuration: entry.runs > 0,
       minMs: entry.runs > 0 ? entry.minMs : 0,
       maxMs: entry.runs > 0 ? entry.maxMs : 0,
@@ -127,11 +120,13 @@ export const getStepDurationTone = (totalMs: number, denominatorMs: number): Ste
 };
 
 // Per-character width estimate for the 11px tabular-nums chip font, plus 6px of horizontal
-// padding (3px each side). The floor/ceiling prevent the lane from being either too narrow
-// (clipping) or absurdly wide.
+// padding (3px each side) and the lane's 4px right padding. The floor/ceiling prevent the lane
+// from being either too narrow (clipping) or absurdly wide.
 // Note: Monaco adds its own 16px for the folding chevron on top of the value returned here.
 const CHARS_PX = 6.6;
 const CHIP_H_PADDING_PX = 6;
+// Mirrors `paddingRight` on the lane container in use_step_duration_decorations.ts.
+const LANE_RIGHT_PADDING_PX = 4;
 const GUTTER_MIN_PX = 34;
 const GUTTER_MAX_PX = 160;
 
@@ -145,6 +140,6 @@ export const getDurationGutterWidth = (labels: Iterable<string>): number => {
     if (label.length > maxLen) maxLen = label.length;
   }
   // Err wide: the lane has `overflow: hidden`, so a clipped number violates "always show".
-  const estimated = Math.ceil(maxLen * CHARS_PX) + CHIP_H_PADDING_PX;
+  const estimated = Math.ceil(maxLen * CHARS_PX) + CHIP_H_PADDING_PX + LANE_RIGHT_PADDING_PX;
   return Math.min(GUTTER_MAX_PX, Math.max(GUTTER_MIN_PX, estimated));
 };

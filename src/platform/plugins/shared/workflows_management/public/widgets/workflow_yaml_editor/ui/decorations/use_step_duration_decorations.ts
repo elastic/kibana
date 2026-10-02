@@ -58,9 +58,6 @@ const labelClass = (label: string): string =>
  * matches the snapshot). The chip text, colour, and lane width are all derived from the Redux
  * store and update automatically as the execution polls. Chips are hidden when the editor content
  * has diverged from the execution snapshot (`selectIsEditorYamlExecutionSnapshot` is false).
- * For terminal executions with more step docs than the UI page budget, `loadExecutionThunk`
- * fetches up to `WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE` (5000) docs for duration computation
- * only; chips therefore cover all steps for the vast majority of real executions.
  *
  * Returns `{ styles }` — an Emotion `css` object that must be applied to the editor wrapper so
  * that the decoration class names resolve correctly.
@@ -333,6 +330,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         // 16px left padding ensures chip text never overlaps the folding chevron that Monaco
         // renders at the left edge of the lines-decorations lane.
         paddingLeft: '16px',
+        // Mirrors LANE_RIGHT_PADDING_PX in build_step_durations.ts (lane width estimate).
         paddingRight: '4px',
         overflow: 'hidden',
         pointerEvents: 'none',

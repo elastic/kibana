@@ -146,7 +146,7 @@ describe('buildStepDurations', () => {
     expect(result.get('step_b')?.totalMs).toBe(120);
   });
 
-  it('foreach: loop step shows total (runCount=1), children show completed run count', () => {
+  it('foreach: top-level loop is one doc (runCount=1), children show completed run count', () => {
     // Loop step itself: one doc with the whole wall clock.
     // Children: one doc per iteration, each with a numeric scopeId on the loop frame.
     const steps = {
@@ -181,7 +181,7 @@ describe('buildStepDurations', () => {
 
     const result = buildStepDurations(execs, steps);
 
-    // Loop step: foreach stepType forces runCount=1 so the chip shows total wall clock, not ~avg.
+    // Loop step: a single doc spanning the whole wall clock → runCount=1.
     const loop = result.get('my_loop');
     expect(loop?.totalMs).toBe(867);
     expect(loop?.runCount).toBe(1);
@@ -290,11 +290,24 @@ describe('buildStepDurations', () => {
       makeExec('leaf', 'http.request', 50, makeScopeStack('1', '1')),
     ];
 
+    // The inner loop itself runs once per outer iteration → one doc per invocation.
+    execs.push(
+      makeExec('inner_loop', 'foreach', 100, makeScopeStack('0', '0').slice(0, 1)),
+      makeExec('inner_loop', 'foreach', 300, makeScopeStack('1', '0').slice(0, 1))
+    );
+
     const result = buildStepDurations(execs, steps);
     const leaf = result.get('leaf');
     expect(leaf?.totalMs).toBe(200);
     // 4 completed docs → runCount = 4.
     expect(leaf?.runCount).toBe(4);
+
+    // Inner loop: 2 invocations → run count and min/max are exposed for the tooltip.
+    const innerLoop = result.get('inner_loop');
+    expect(innerLoop?.runCount).toBe(2);
+    expect(innerLoop?.totalMs).toBe(400);
+    expect(innerLoop?.minMs).toBe(100);
+    expect(innerLoop?.maxMs).toBe(300);
   });
 
   it('retry attempts: non-numeric scopeId does not inflate iteration count', () => {
@@ -334,7 +347,7 @@ describe('buildStepDurations', () => {
     });
   });
 
-  it('zero-iteration loop: foreach/while always has runCount=1 (shows total)', () => {
+  it('zero-iteration loop: single doc gives runCount=1 (shows total)', () => {
     const steps = { my_loop: makeStepInfo('my_loop', 'foreach') };
     const execs = [makeExec('my_loop', 'foreach', 5)]; // Loop ran but had 0 iterations.
     const result = buildStepDurations(execs, steps);
@@ -450,19 +463,19 @@ describe('getStepDurationTone', () => {
 
 describe('getDurationGutterWidth', () => {
   it('returns the floor for an empty label set', () => {
-    // 0 chars: ceil(0 * 6.6) + 6 = 6 < 34 floor → 34.
+    // 0 chars: ceil(0 * 6.6) + 6 + 4 = 10 < 34 floor → 34.
     expect(getDurationGutterWidth([])).toBe(34);
   });
 
-  it('returns the floor for short labels', () => {
-    // '~1s' (3 chars): ceil(3 * 6.6) + 6 = 26 < 34 floor → 34.
+  it('returns the floor for short labels, and the estimate once it exceeds the floor', () => {
+    // '~1s' (3 chars): ceil(3 * 6.6) + 6 + 4 = 30 < 34 floor → 34.
     expect(getDurationGutterWidth(['~1s'])).toBe(34);
-    // '<1ms' (4 chars): ceil(4 * 6.6) + 6 = 33 < 34 floor → 34.
-    expect(getDurationGutterWidth(['<1ms'])).toBe(34);
+    // '<1ms' (4 chars): ceil(4 * 6.6) + 6 + 4 = 37 > 34 floor → 37.
+    expect(getDurationGutterWidth(['<1ms'])).toBe(37);
   });
 
   it('returns a wider value for long labels', () => {
-    // '~1m 30s' (7 chars): ceil(7 * 6.6) + 6 = 53 > 34 floor → 53.
+    // '~1m 30s' (7 chars): ceil(7 * 6.6) + 6 + 4 = 57 > 34 floor → 57.
     const w = getDurationGutterWidth(['~1m 30s']);
     expect(w).toBeGreaterThan(34);
     expect(w).toBeLessThanOrEqual(160);
@@ -475,7 +488,7 @@ describe('getDurationGutterWidth', () => {
 
   it('uses the longest label when multiple are present', () => {
     const wShort = getDurationGutterWidth(['~1s']); // 3 chars → 34 (floor)
-    const wLong = getDurationGutterWidth(['~1s', '~1m 30s']); // 7 chars → 53
+    const wLong = getDurationGutterWidth(['~1s', '~1m 30s']); // 7 chars → 57
     expect(wLong).toBeGreaterThan(wShort);
   });
 });

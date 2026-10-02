@@ -147,7 +147,6 @@ const workflowDetailSlice = createSlice({
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       if (!action.payload || action.payload.id !== state.execution?.id) {
         state.stepExecutionsTotal = 0;
-        state.durationStepExecutions = undefined;
         state.stepExecutionPages = [];
         state.executionRequest = undefined;
         state.executionError = undefined;
@@ -156,12 +155,6 @@ const workflowDetailSlice = createSlice({
     },
     setStepExecutionsTotal: (state, action: { payload: number }) => {
       state.stepExecutionsTotal = action.payload;
-    },
-    setDurationStepExecutions: (
-      state,
-      action: { payload: NonNullable<WorkflowExecutionDto['stepExecutions']> }
-    ) => {
-      state.durationStepExecutions = action.payload;
     },
     /** Sets loaded pages and their flattened view in `execution.stepExecutions`. */
     setStepExecutionPages: (state, action: { payload: WorkflowStepExecutionDto[][] }) => {
@@ -180,7 +173,6 @@ const workflowDetailSlice = createSlice({
       state.stepExecutionsTotal = 0;
       state.stepExecutionPages = [];
       state.computedExecution = undefined;
-      state.durationStepExecutions = undefined;
       state.executionRequest = undefined;
       state.executionError = undefined;
     },
@@ -314,7 +306,6 @@ export const {
   clearReplay,
   setConnectors,
   setWorkflows,
-  setDurationStepExecutions,
   setExecution,
   setStepExecutionsTotal,
   setStepExecutionPages,
