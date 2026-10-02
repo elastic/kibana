@@ -85,7 +85,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
         record.action_group_id,
         {
           lastNotified: new Date(record.last_notified),
-          episodeStatus: record.episode_status,
+          episodeStatus: record.alert_status,
         },
       ])
     );

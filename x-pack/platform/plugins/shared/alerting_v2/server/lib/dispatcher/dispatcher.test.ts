@@ -238,7 +238,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-1',
-          episode_id: 'episode-1',
+          alert_id: 'episode-1',
           should_suppress: false,
         },
         {
@@ -246,7 +246,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-2',
-          episode_id: 'episode-2',
+          alert_id: 'episode-2',
           should_suppress: false,
         },
       ];
@@ -374,7 +374,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-1',
-          episode_id: 'episode-1',
+          alert_id: 'episode-1',
           should_suppress: true,
         },
         {
@@ -382,7 +382,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-2',
-          episode_id: 'episode-2',
+          alert_id: 'episode-2',
           should_suppress: false,
         },
       ];
@@ -465,7 +465,11 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(
           createEpisodeSuppressionsResponse([
             createEpisodeSuppressionRow({ should_suppress: true }),
-            createEpisodeSuppressionRow(secondEpisode),
+            createEpisodeSuppressionRow({
+              rule_id: secondEpisode.rule_id,
+              group_hash: secondEpisode.group_hash,
+              alert_id: secondEpisode.episode_id,
+            }),
           ])
         )
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
@@ -674,7 +678,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-001-series-1',
-          episode_id: 'rule-001-series-1-episode-1',
+          alert_id: 'rule-001-series-1-episode-1',
           should_suppress: false,
           last_ack_action: 'unack',
         },
@@ -683,7 +687,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-002-series-1',
-          episode_id: 'rule-002-series-1-episode-1',
+          alert_id: 'rule-002-series-1-episode-1',
           should_suppress: true,
           last_ack_action: 'ack',
         },
@@ -692,7 +696,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-005-series-1',
-          episode_id: 'rule-005-series-1-episode-1',
+          alert_id: 'rule-005-series-1-episode-1',
           should_suppress: true,
           last_deactivate_action: 'deactivate',
         },
@@ -864,7 +868,7 @@ describe('DispatcherService', () => {
           source: 'pagerduty',
           space_id: 'space-a',
           group_hash: 'pd-incident-P1234567',
-          episode_id: 'pd-ep-1',
+          alert_id: 'pd-ep-1',
           should_suppress: true,
           last_ack_action: 'ack',
         },
@@ -953,7 +957,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-1',
-          episode_id: 'episode-critical',
+          alert_id: 'episode-critical',
           should_suppress: false,
         },
         {
@@ -961,7 +965,7 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-2',
-          episode_id: 'episode-low',
+          alert_id: 'episode-low',
           should_suppress: false,
         },
       ];

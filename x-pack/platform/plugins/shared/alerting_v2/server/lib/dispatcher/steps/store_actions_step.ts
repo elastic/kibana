@@ -106,7 +106,7 @@ export class StoreActionsStep implements DispatcherStep {
         space_id: spaceId,
       };
       if (groupingMode === 'per_episode') {
-        action.episode_status = firstEpisode?.episode_status;
+        action.alert_status = firstEpisode?.episode_status;
       }
       return action;
     });

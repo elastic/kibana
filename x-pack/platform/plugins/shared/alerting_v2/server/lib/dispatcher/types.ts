@@ -41,13 +41,13 @@ export interface AlertEpisode {
   data?: AlertEpisodeData;
 }
 
-/** Suppression fact read from `.alert-actions`; a null `episode_id` means series-scoped. */
+/** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
 export interface SuppressionRow {
   rule_id: RuleId | null;
   source: string | null;
   space_id: string | null;
   group_hash: string;
-  episode_id: string | null;
+  alert_id: string | null;
   should_suppress: boolean;
   last_ack_action?: string | null;
   last_deactivate_action?: string | null;
@@ -55,14 +55,14 @@ export interface SuppressionRow {
 }
 
 /** Row of the episode suppressions query: ack and deactivate state of one episode. */
-export type EpisodeSuppressionRow = Omit<SuppressionRow, 'episode_id' | 'last_snooze_action'> & {
-  episode_id: string;
+export type EpisodeSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze_action'> & {
+  alert_id: string;
 };
 
-/** Row of the series suppressions query: snooze state of a series, so it carries no `episode_id`. */
+/** Row of the series suppressions query: snooze state of a series, so it carries no `alert_id`. */
 export type SeriesSuppressionRow = Omit<
   SuppressionRow,
-  'episode_id' | 'last_ack_action' | 'last_deactivate_action'
+  'alert_id' | 'last_ack_action' | 'last_deactivate_action'
 >;
 
 export interface DispatcherExecutionParams {
@@ -156,7 +156,7 @@ export interface ActionPolicyWorkflowPayload {
 export interface LastNotifiedRecord {
   action_group_id: ActionGroupId;
   last_notified: string;
-  episode_status?: string;
+  alert_status?: string;
 }
 
 export interface LastNotifiedInfo {

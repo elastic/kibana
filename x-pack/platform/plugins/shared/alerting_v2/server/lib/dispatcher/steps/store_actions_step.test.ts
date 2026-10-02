@@ -210,12 +210,12 @@ describe('StoreActionsStep', () => {
       action_group_id: 'group-1',
       source: 'internal',
       reason: 'notified by policy policy-1',
-      episode_status: 'active',
+      alert_status: 'active',
       space_id: 'default',
     });
   });
 
-  it('includes episode_status on notified record for per_episode mode', async () => {
+  it('includes alert_status on notified record for per_episode mode', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
@@ -253,14 +253,15 @@ describe('StoreActionsStep', () => {
         action_type: 'notified',
         group_hash: 'hash-1',
         action_group_id: 'group-1',
-        episode_status: 'recovering',
+        alert_status: 'recovering',
         reason: 'notified by policy policy-1',
         space_id: 'default',
       })
     );
+    expect(notifiedDoc).not.toHaveProperty('episode_status');
   });
 
-  it('omits episode_status on notified record for all mode', async () => {
+  it('omits alert_status on notified record for all mode', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
@@ -299,7 +300,7 @@ describe('StoreActionsStep', () => {
       (d: Record<string, unknown>) => d.action_type === 'notified'
     );
     expect(notifiedDoc).toBeDefined();
-    expect(notifiedDoc?.episode_status).toBeUndefined();
+    expect(notifiedDoc?.alert_status).toBeUndefined();
   });
 
   it('handles combined suppressed, throttled, and dispatch arrays', async () => {
@@ -400,7 +401,7 @@ describe('StoreActionsStep', () => {
         rule_id: 'rule-dispatch',
         group_hash: 'hash-dispatch',
         action_group_id: 'dispatch-group',
-        episode_status: 'active',
+        alert_status: 'active',
         reason: 'notified by policy dispatch-policy',
         space_id: 'default',
       })

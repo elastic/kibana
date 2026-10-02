@@ -64,7 +64,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         space_id: 'default',
         assignee_uid: assigneeUid,
@@ -98,7 +98,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         assignee_uid: null,
       });
@@ -148,7 +148,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         assignee_uid: 'u_someone',
       });
     }
