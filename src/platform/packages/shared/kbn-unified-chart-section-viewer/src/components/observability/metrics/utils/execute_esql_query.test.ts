@@ -120,7 +120,7 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
       executionContextName: MetricsExecutionContextName.EXEMPLARS,
