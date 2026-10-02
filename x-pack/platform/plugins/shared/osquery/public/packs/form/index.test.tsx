@@ -1486,6 +1486,58 @@ describe('PackForm', () => {
       expect(getByTestId('update-pack-button')).toBeDisabled();
     });
 
+    it('should lock the Definition step but keep Policy assignment editable for a prebuilt pack', () => {
+      // A prebuilt pack is the one case where steps disagree: its content is
+      // immutable, but a writePacks user can still re-target its policies.
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            'policy-1': { id: 'policy-1', name: 'Alpha Policy', agents: 0 },
+          },
+        },
+        isFetching: false,
+        isError: false,
+      });
+
+      const { container, getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          isReadOnly={false}
+          isPrebuilt={true}
+          defaultValue={{
+            id: 'prebuilt-pack',
+            saved_object_id: 'prebuilt-pack',
+            name: 'Prebuilt Pack',
+            description: '',
+            enabled: true,
+            queries: {},
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            policy_ids: [],
+            references: [],
+          }}
+        />
+      );
+
+      expect(stepTitles(container)).toEqual(['Definition', 'Queries', 'Policy assignment']);
+
+      const definitionStep = getByTestId('osqueryPackFormStep-definition');
+      for (const fieldName of ['name', 'description']) {
+        expect(definitionStep.querySelector(`input[name="${fieldName}"]`)).toBeDisabled();
+      }
+
+      const policyStep = getByTestId('osqueryPackFormStep-policyAssignment');
+      expect(
+        within(policyStep).getByTestId('osqueryPackTypePolicy').querySelector('input[type="radio"]')
+      ).not.toBeDisabled();
+      expect(
+        within(policyStep).getByRole('checkbox', { name: 'Select policy Alpha Policy' })
+      ).not.toBeDisabled();
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+    });
+
     it('should label the create button "Create pack" and the edit button "Update pack"', () => {
       const { getByTestId, unmount } = renderWithContext(<PackForm editMode={false} />);
       expect(getByTestId('save-pack-button')).toHaveTextContent('Create pack');
