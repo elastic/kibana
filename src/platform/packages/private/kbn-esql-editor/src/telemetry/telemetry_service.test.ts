@@ -282,11 +282,11 @@ describe('ESQLEditorTelemetryService', () => {
 
   describe('trackVisorNlReviewed', () => {
     it.each([AiReviewAction.ACCEPT, AiReviewAction.REJECT])('tracks a %s action', (action) => {
-      telemetryService.trackVisorNlReviewed({ action, linesGenerated: 3 });
+      telemetryService.trackVisorNlReviewed({ action, linesChanged: 3 });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_REVIEWED, {
         action,
-        lines_generated: 3,
+        lines_changed: 3,
       });
     });
   });

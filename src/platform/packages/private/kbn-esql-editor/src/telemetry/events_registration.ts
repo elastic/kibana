@@ -293,7 +293,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: { description: 'User decision on the generated query. accept|reject' },
       },
-      lines_generated: {
+      lines_changed: {
         type: 'long',
         _meta: { description: 'Number of lines in the generated suggestion.' },
       },

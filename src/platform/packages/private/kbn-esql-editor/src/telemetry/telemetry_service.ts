@@ -308,10 +308,10 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackVisorNlReviewed(params: { action: AiReviewAction; linesGenerated: number }) {
+  public trackVisorNlReviewed(params: { action: AiReviewAction; linesChanged: number }) {
     this._reportEvent(ESQL_VISOR_NL_REVIEWED, {
       action: params.action,
-      lines_generated: params.linesGenerated,
+      lines_changed: params.linesChanged,
     });
   }
 

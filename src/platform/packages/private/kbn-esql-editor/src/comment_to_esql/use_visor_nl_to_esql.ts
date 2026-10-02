@@ -40,7 +40,7 @@ export const useVisorNlToEsql = ({
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.ACCEPT,
-        linesGenerated: generatedLineEnd - generatedLineStart + 1,
+        linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
       onSubmit(generatedContentRef.current);
     },
@@ -52,7 +52,7 @@ export const useVisorNlToEsql = ({
       if (isSupersedingRef.current) return;
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.REJECT,
-        linesGenerated: generatedLineEnd - generatedLineStart + 1,
+        linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
     },
     [telemetryService]
