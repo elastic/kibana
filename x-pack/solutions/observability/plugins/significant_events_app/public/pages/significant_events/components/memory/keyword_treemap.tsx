@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -126,7 +127,16 @@ export function MemoryKeywordTreemap({
       const cell = tooltipCell(values, cellsByKeyword);
       if (cell === undefined) return null;
       return (
-        <div data-test-subj="nightshiftMemoryTreemapTooltip">
+        // A panel of its own: the chart's tooltip surface is transparent over a
+        // treemap, so in the dark theme this text would otherwise sit on whatever
+        // cell it happened to be drawn over.
+        <EuiPanel
+          hasBorder
+          hasShadow
+          paddingSize="s"
+          radius="s"
+          data-test-subj="nightshiftMemoryTreemapTooltip"
+        >
           <EuiText size="s">
             <strong>{cell.display}</strong>
           </EuiText>
@@ -143,7 +153,7 @@ export function MemoryKeywordTreemap({
               values={{ count: cell.memories }}
             />
           </EuiText>
-        </div>
+        </EuiPanel>
       );
     },
     [cellsByKeyword]

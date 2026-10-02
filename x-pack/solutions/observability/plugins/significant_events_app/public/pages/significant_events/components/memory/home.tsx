@@ -82,7 +82,11 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
     [filteredPages]
   );
 
-  const total = stats?.total ?? 0;
+  // The header count follows the keyword selection, because the store-wide
+  // number would describe memories the lists below are not showing. The archived
+  // count stays store-wide: the archived list is not filtered by keywords.
+  const total =
+    (selectedKeywords.length > 0 ? keywordResult?.stats.total : stats?.total) ?? 0;
   const archived = stats?.archived ?? 0;
 
   return (
