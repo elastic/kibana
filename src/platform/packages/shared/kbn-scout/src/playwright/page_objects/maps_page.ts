@@ -145,10 +145,9 @@ export class MapsPage {
     await this.waitForLoadCycleIfNeeded();
 
     await expect
-      .poll(
-        () => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'),
-        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-      )
+      .poll(() => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'), {
+        timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+      })
       .toBe(false);
   }
 
@@ -159,8 +158,7 @@ export class MapsPage {
    * (e.g. the action required no re-fetch).
    */
   private async waitForLoadCycleIfNeeded() {
-    const alreadyLoading =
-      (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
+    const alreadyLoading = (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
     if (!alreadyLoading) {
       await this.page
         .waitForFunction(
