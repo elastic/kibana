@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_SLACK_SEEN_EVENT_IDS } from './constants';
 import {
   alertSubjectSnapshotSchema,
   investigationSubjectInputSchema,
@@ -81,6 +82,22 @@ describe('investigationSubjectInputSchema', () => {
         slack: { channel: 'C1', thread_ts: '1' },
       }).success
     ).toBe(false);
+  });
+
+  it('bounds the Slack event ids a thread remembers', () => {
+    const withSeen = (count: number) =>
+      investigationSubjectInputSchema.safeParse({
+        type: 'slack_thread',
+        id: 't',
+        slack: {
+          channel: 'C1',
+          thread_ts: '1',
+          seen_event_ids: Array.from({ length: count }, (_, index) => `Ev${index}`),
+        },
+      }).success;
+
+    expect(withSeen(MAX_SLACK_SEEN_EVENT_IDS)).toBe(true);
+    expect(withSeen(MAX_SLACK_SEEN_EVENT_IDS + 1)).toBe(false);
   });
 
   it('only accepts HTTPS Slack permalinks', () => {

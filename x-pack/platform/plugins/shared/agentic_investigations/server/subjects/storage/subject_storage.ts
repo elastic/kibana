@@ -40,6 +40,7 @@ export const subjectStorageSettings = {
           thread_ts: types.keyword({}),
           status_message_ts: types.keyword({}),
           permalink: types.keyword({ index: false }),
+          seen_event_ids: types.keyword({ index: false }),
         },
       }),
       createdAt: types.date({}),
