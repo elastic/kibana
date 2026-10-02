@@ -42,44 +42,24 @@ When given existing queries, modify only what the request asks to change. Keep t
 
 Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
 
-## Time picker compatibility
+## Time
 
-Visualization ES|QL must respond to the Kibana time picker. If a time field exists, use the event-time field.
+Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time series, omit \`LIMIT\`, \`SORT\`, and \`DATE_TRUNC\`.
 
-- Time series on \`@timestamp\`: \`STATS ... BY bucket = TBUCKET(100)\`. Do not add \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`, and do not pass \`?_tstart\` / \`?_tend\` into \`TBUCKET\`. Kibana adds the \`@timestamp\` filter, and \`TBUCKET\` sizes its buckets from that filter. \`TBUCKET\` only buckets \`@timestamp\`; it cannot take another field.
-- Time series on any other date field (for example \`order_date\` or \`timestamp\`): \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\`.
-- Categorical, metric, or any other chart that does not group by time: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
-- Do not hardcode absolute times or now()-based ranges.
-- Vega charts must still filter the raw source time field themselves. When the Vega time-range section is present, follow it: \`TBUCKET(100)\` for an \`@timestamp\` time series, and \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\` for any other date field.
-
-## Time Bucketing
-
-Use auto buckets, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
-Omit \`LIMIT\` and \`SORT\`; the time picker already bounds the results.
-
-### FROM
-
-\`@timestamp\`:
+\`@timestamp\` — \`TBUCKET(100)\` only. No timestamp \`WHERE\`, no \`?_tstart\` / \`?_tend\`, no \`TRANGE\`:
 
 \`\`\`esql
 FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100)
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100)
 \`\`\`
 
-Another date field:
+Any other date field:
 
 \`\`\`esql
 FROM orders | STATS count = COUNT() BY bucket = BUCKET(order_date, 100, ?_tstart, ?_tend)
 \`\`\`
 
-### TS
-
-The visualization framework automatically adds the \`@timestamp\` range for \`TS\` time series, so do not add \`TRANGE\` or pass \`?_tstart\` / \`?_tend\` to \`TBUCKET\`.
-
-\`\`\`esql
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100)
-\`\`\`
-
-Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
+Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
 
 ${seriesStatisticsEsqlGuidance}
 
@@ -87,7 +67,7 @@ ${seriesStatisticsEsqlGuidance}
 
 Only \`BY\` dimensions the user asked for:
 
-- **Time series** default: group by the time bucket alone (e.g. \`BY bucket = TBUCKET(100)\` for \`@timestamp\`, or \`BY bucket = BUCKET(order_date, 100, ?_tstart, ?_tend)\` for another date field). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
+- **Time series** default: group by the time bucket alone. Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
 - **Categorical charts**: \`BY\` only the category field(s) named in the request (plus no invented splits).
 - Index dimensions may be used in \`WHERE\` filters when the user scopes to a specific series; that is not a reason to put them in \`BY\`.
 
