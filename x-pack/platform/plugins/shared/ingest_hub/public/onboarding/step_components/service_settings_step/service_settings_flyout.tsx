@@ -25,6 +25,7 @@ import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_ma
 import { makeDsView } from '../../aws_service_matrix';
 import { shouldDefaultCollectS3Logs } from './field_config';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
+import { isServiceConfigIncomplete } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
 import {
   InstanceNamespaceField,
@@ -99,18 +100,25 @@ export function ServiceSettingsFlyout({
   const showNamespace = supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
+  const enabledDataStreams = service.dataStreams.filter((dsId) => {
+    const dsVars = draftByDs[dsId];
+    if (dsVars) return dsVars.enabledInputs.length > 0;
+    return (
+      getDefaultDsInputs(
+        service.varDefsByDataStream?.[dsId],
+        isSingleDs,
+        service.defaultEnabledInputs
+      ).length > 0
+    );
+  });
+  // Same rule as the Step 2 / Step 3 gates, so Save cannot persist a config those would reject.
+  const isDraftIncomplete = isServiceConfigIncomplete(service, {
+    enabledDataStreams,
+    varsByDataStream: draftByDs,
+    namespace,
+  });
+
   const handleApply = () => {
-    const enabledDataStreams = service.dataStreams.filter((dsId) => {
-      const dsVars = draftByDs[dsId];
-      if (dsVars) return dsVars.enabledInputs.length > 0;
-      return (
-        getDefaultDsInputs(
-          service.varDefsByDataStream?.[dsId],
-          isSingleDs,
-          service.defaultEnabledInputs
-        ).length > 0
-      );
-    });
     onApply(withCollectS3Defaults(service, draftByDs), enabledDataStreams, namespace);
   };
 
@@ -202,7 +210,7 @@ export function ServiceSettingsFlyout({
             <EuiButton
               fill
               onClick={handleApply}
-              isDisabled={isNamespaceInvalid}
+              isDisabled={isNamespaceInvalid || isDraftIncomplete}
               data-test-subj="serviceSettingsFlyout-saveButton"
             >
               <FormattedMessage

@@ -6,6 +6,7 @@
  */
 
 import {
+  getMissingSourceGroup,
   getRegionFieldName,
   getRequiredTextFields,
   getFlyoutFields,
@@ -287,5 +288,49 @@ describe('getFlyoutFields', () => {
       },
     });
     expect(getFlyoutFields(service, 'aws-s3')).toContain('queue_url');
+  });
+});
+
+describe('getMissingSourceGroup', () => {
+  const opt = (name: string) => makeVarDef(name, 'text', { required: false });
+  const agentView = makeService({
+    ecfSettings: { requiredConfig: [], dataStreams: [], inputs: [], defaultEnabledInputs: [] },
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: opt('bucket_arn'),
+        access_point_arn: opt('access_point_arn'),
+        queue_url: opt('queue_url'),
+      },
+      'aws-cloudwatch': {
+        log_group_arn: opt('log_group_arn'),
+        log_group_name: opt('log_group_name'),
+        log_group_name_prefix: opt('log_group_name_prefix'),
+      },
+    },
+  });
+
+  it.each([
+    ['aws-s3', ['bucket_arn', 'access_point_arn', 'queue_url'], 'queue_url'],
+    [
+      'aws-cloudwatch',
+      ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+      'log_group_name',
+    ],
+  ])('%s: reports the group while none is filled, and nothing once one is', (input, group, alt) => {
+    expect(getMissingSourceGroup(agentView, input, {})).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: '' })).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: [] })).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: ['arn:x'] })).toBeUndefined();
+    expect(getMissingSourceGroup(agentView, input, { [alt]: 'value' })).toBeUndefined();
+  });
+
+  it('does not apply to the ECF view, to non ECF-capable services or to other inputs', () => {
+    expect(
+      getMissingSourceGroup({ ...agentView, settingsScope: 'ecf' }, 'aws-s3', {})
+    ).toBeUndefined();
+    expect(
+      getMissingSourceGroup({ ...agentView, ecfSettings: undefined }, 'aws-s3', {})
+    ).toBeUndefined();
+    expect(getMissingSourceGroup(agentView, 'httpjson', {})).toBeUndefined();
   });
 });

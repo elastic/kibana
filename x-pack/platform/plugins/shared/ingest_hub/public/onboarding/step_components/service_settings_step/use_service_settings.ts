@@ -13,7 +13,12 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
+import {
+  getMissingSourceGroup,
+  getRequiredTextFields,
+  resolveFieldMeta,
+  toTyped,
+} from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
 export interface ServiceDataStreamVars {
@@ -139,6 +144,37 @@ function mergeVarsByDataStream(
  * reflect the selected deployment method (see the flow context), so the required set is
  * ARN-only under ECF and the full manifest set under agent-based.
  */
+export function isServiceConfigIncomplete(
+  service: AwsServiceMatrixEntry,
+  config: ServiceVars
+): boolean {
+  if (!isValidNamespace(config.namespace ?? '', true).valid) return true;
+  return config.enabledDataStreams.some((dsId) => {
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
+    const isSingleDs = service.dataStreams.length === 1;
+    const activeInputs = dsVars.enabledInputs.length
+      ? dsVars.enabledInputs
+      : isSingleDs
+      ? service.inputs ?? dsInfo?.inputs ?? []
+      : dsInfo?.defaultEnabledInputs?.length
+      ? dsInfo.defaultEnabledInputs
+      : dsInfo?.inputs?.slice(0, 1) ?? [];
+    const dsView = makeDsView(service, dsId);
+    return activeInputs.some(
+      (inp) =>
+        getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||
+        getRequiredTextFields(dsView, inp).some((f) => {
+          const meta = resolveFieldMeta(dsView, inp, f);
+          const raw = dsVars.varsByInput?.[inp]?.[f];
+          const effective = meta ? toTyped(raw, meta) : raw ?? '';
+          if (Array.isArray(effective)) return effective.length === 0;
+          return typeof effective === 'string' && effective.trim() === '';
+        })
+    );
+  });
+}
+
 export function getIncompleteInstances(
   instances: ServiceInstance[],
   serviceVars: Record<string, ServiceVars>,
@@ -153,29 +189,7 @@ export function getIncompleteInstances(
       enabledDataStreams: service.dataStreams,
       varsByDataStream: {},
     };
-    if (!isValidNamespace(config.namespace ?? '', true).valid) return true;
-    return config.enabledDataStreams.some((dsId) => {
-      const dsInfo = service.varDefsByDataStream?.[dsId];
-      const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
-      const isSingleDs = service.dataStreams.length === 1;
-      const activeInputs = dsVars.enabledInputs.length
-        ? dsVars.enabledInputs
-        : isSingleDs
-        ? service.inputs ?? dsInfo?.inputs ?? []
-        : dsInfo?.defaultEnabledInputs?.length
-        ? dsInfo.defaultEnabledInputs
-        : dsInfo?.inputs?.slice(0, 1) ?? [];
-      const dsView = makeDsView(service, dsId);
-      return activeInputs.some((inp) =>
-        getRequiredTextFields(dsView, inp).some((f) => {
-          const meta = resolveFieldMeta(dsView, inp, f);
-          const raw = dsVars.varsByInput?.[inp]?.[f];
-          const effective = meta ? toTyped(raw, meta) : raw ?? '';
-          if (Array.isArray(effective)) return effective.length === 0;
-          return typeof effective === 'string' && effective.trim() === '';
-        })
-      );
-    });
+    return isServiceConfigIncomplete(service, config);
   });
 }
 

@@ -433,6 +433,54 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
     };
     expect(getIncompleteInstances(instances, filled, map)).toEqual([]);
   });
+
+  it.each([
+    ['aws-s3', 'bucket_arn', 'queue_url'],
+    ['aws-cloudwatch', 'log_group_arn', 'log_group_name'],
+  ])(
+    'requires one %s source var for an ECF-capable service under agent-based',
+    (input, primary, alternative) => {
+      // The manifest marks every source var optional, so requiredConfig alone cannot catch this.
+      const optional = (name: string) => ({ name, type: 'text', required: false, show_user: true });
+      const service = {
+        ...base,
+        inputs: [input],
+        requiredConfig: [],
+        optionalConfig: [primary, alternative],
+        varDefsByInput: {
+          [input]: { [primary]: optional(primary), [alternative]: optional(alternative) },
+        },
+        ecfSettings: {
+          requiredConfig: [primary],
+          dataStreams: [],
+          inputs: [input],
+          defaultEnabledInputs: [],
+        },
+      } as unknown as AwsServiceMatrixEntry;
+      const map = new Map([['cloudtrail', service]]);
+      const withVars = (vars: Record<string, string | string[]>) => ({
+        cloudtrail: {
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: { enabledInputs: [input], varsByInput: { [input]: vars } },
+          },
+        },
+      });
+
+      expect(getIncompleteInstances(instances, withVars({ [primary]: '' }), map)).toHaveLength(1);
+      expect(getIncompleteInstances(instances, withVars({ [primary]: [] }), map)).toHaveLength(1);
+      expect(getIncompleteInstances(instances, withVars({ [primary]: ['x'] }), map)).toEqual([]);
+      expect(getIncompleteInstances(instances, withVars({ [alternative]: 'y' }), map)).toEqual([]);
+      // The ECF view keeps relying on the ARN-only requiredConfig.
+      expect(
+        getIncompleteInstances(
+          instances,
+          withVars({ [primary]: '' }),
+          new Map([['cloudtrail', { ...service, settingsScope: 'ecf' as const }]])
+        )
+      ).toEqual([]);
+    }
+  );
 });
 
 describe('useServiceSettings — handleNext', () => {

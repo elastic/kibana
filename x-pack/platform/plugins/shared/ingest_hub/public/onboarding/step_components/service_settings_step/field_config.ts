@@ -97,6 +97,48 @@ export function shouldDefaultCollectS3Logs(
 }
 
 /**
+ * Input types whose manifest marks every source var optional while documenting that at least one
+ * is mandatory (e.g. "Mandatory if the Collect logs via S3 Bucket switch is on"). Without one the
+ * input starts but can never collect anything. Keyed by input type; the manifest has no
+ * machinery to express "one of", so the groups live here (verified against aws@8.7.1).
+ */
+const SOURCE_VAR_GROUPS: Record<string, string[]> = {
+  'aws-s3': ['bucket_arn', 'access_point_arn', 'queue_url'],
+  'aws-cloudwatch': ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+};
+
+/**
+ * Whether the "at least one source" rule applies to `service` right now: ECF-capable services
+ * shown in the agent-based view, where Step 2 first collected only the trigger ARN. Widening the
+ * rule to more services only needs a change here.
+ */
+function appliesSourceRule(service: AwsServiceMatrixEntry): boolean {
+  return !!service.ecfSettings && service.settingsScope !== 'ecf';
+}
+
+/**
+ * The source vars of `input` when none of them is filled, otherwise undefined. The flyout hint
+ * and the Step 2 / Step 3 gates both use this, so they cannot disagree.
+ */
+export function getMissingSourceGroup(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[] | boolean> | undefined
+): string[] | undefined {
+  if (!appliesSourceRule(service)) return undefined;
+  const defs = service.varDefsByInput?.[input];
+  const group = (SOURCE_VAR_GROUPS[input] ?? []).filter((name) => defs?.[name]);
+  if (group.length < 2) return undefined;
+  const isFilled = (name: string) => {
+    const value = vars?.[name];
+    return Array.isArray(value)
+      ? value.some((v) => v.trim() !== '')
+      : typeof value === 'string' && value.trim() !== '';
+  };
+  return group.some(isFilled) ? undefined : group;
+}
+
+/**
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
