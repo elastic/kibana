@@ -210,6 +210,38 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Selects a field in a Lens field combobox and returns only once Lens has committed it.
+     *
+     * @param field - the desired field display name
+     * @param fieldComboBox - the selector of the field combobox
+     */
+    async selectFieldAndWaitForCommit(
+      field: string,
+      fieldComboBox = 'indexPattern-dimension-field'
+    ) {
+      // Closing or reading the editor too early discards the operation→field transition. Do not
+      // wait on the combobox input: setElement types `field` as a filter before the option is
+      // clicked. data-selected-field is the committed option display name and
+      // updates only after insertOrReplaceColumn. Independent of aria-invalid
+      // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
+      // Re-select on failure because EUI drops the option click under load, and the filter text
+      // setElement leaves behind makes both its own check and the input read back as `field`.
+      await retry.tryWithRetries(
+        `select field [${field}] in [${fieldComboBox}]`,
+        async () => {
+          await this.selectOptionFromComboBox(fieldComboBox, field);
+          await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
+            const fieldCombo = await testSubjects.find(fieldComboBox);
+            const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+            return committedLabel === field;
+          });
+        },
+        { retryCount: 3, timeout: 60_000 },
+        async () => comboBox.clearInputField(fieldComboBox)
+      );
+    },
+
+    /**
      * Changes the specified dimension to the specified operation and optionally the field.
      *
      * @param opts.dimension - the selector of the dimension being changed
@@ -243,26 +275,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        // Close too early discards the operation→field transition. Do not wait on the
-        // combobox input: setElement types `field` as a filter before the option is
-        // clicked. data-selected-field is the committed option display name and
-        // updates only after insertOrReplaceColumn. Independent of aria-invalid
-        // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-        // Re-select on failure because EUI drops the option click under load, and the filter text
-        // setElement leaves behind makes both its own check and the input read back as `field`.
-        await retry.tryWithRetries(
-          `configureDimension - select field [${field}]`,
-          async () => {
-            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
-            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
-              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-              return committedLabel === field;
-            });
-          },
-          { retryCount: 3, timeout: 60_000 },
-          async () => comboBox.clearInputField('indexPattern-dimension-field')
-        );
+        await this.selectFieldAndWaitForCommit(field);
       }
 
       if (opts.formula) {
@@ -305,9 +318,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (opts.field) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-reference-field-selection-row',
-          opts.field
+        await this.selectFieldAndWaitForCommit(
+          opts.field,
+          'indexPattern-reference-field-selection-row > indexPattern-dimension-field'
         );
       }
     },
