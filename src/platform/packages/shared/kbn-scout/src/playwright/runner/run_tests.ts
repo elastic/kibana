@@ -252,7 +252,6 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
     SCOUT_TARGET_LOCATION: 'local',
     SCOUT_TARGET_ARCH: 'stateful',
     SCOUT_TARGET_DOMAIN: 'classic',
-    // `--list` runs no test; its events would read as skips
     SCOUT_REPORTER_ENABLED: 'false',
   };
 
