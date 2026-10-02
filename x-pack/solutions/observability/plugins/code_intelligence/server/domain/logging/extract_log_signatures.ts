@@ -6,6 +6,7 @@
  */
 
 import type { SourceLocation } from '../source_location_codec';
+import { loggingIdiomPatterns } from './idiom_patterns';
 
 /** Maps normalized log levels to predictive-query severity scores. */
 const severityByLevel: Readonly<Record<string, number>> = {
@@ -21,6 +22,21 @@ const severityByLevel: Readonly<Record<string, number>> = {
 };
 /** Severity used for a recognized level without a dedicated mapping. */
 const defaultSeverity: number = 40;
+/** Level assigned to a log emission that the process exits right after. */
+const processExitLevel: string = 'fatal';
+/** Matches a process-exit call at the start of the statement that follows a logging call. */
+const processExitPattern: RegExp =
+  /^(?:os\.Exit|process\.exit|exitProcess|sys\.exit|System\.exit|(?:std::)?process::exit|exit)\s*\(/;
+/** Statement separators, whitespace, and line comments allowed between a log call and its exit. */
+const statementGapPattern: RegExp = /^(?:\s|;|\/\/[^\n]*)*/;
+/** Only a separator or comment may follow an unconditional exit call on its line. */
+const exitStatementTailPattern: RegExp = /^[ \t]*;?[ \t]*(?:(?:\/\/|#).*)?$/;
+/** Matches a chained method call that continues the same logging statement. */
+const chainedCallPattern: RegExp = /^\s*\??\.\s*[A-Za-z_][A-Za-z0-9_]*\s*\(/;
+/** Standard logging idioms locate the call on a classifier candidate's matched line. */
+const loggingIdiomExpressions: readonly RegExp[] = loggingIdiomPatterns.map(
+  (pattern) => new RegExp(pattern)
+);
 /** Minimum static text that is useful as a selective predictive anchor. */
 const minimumSegmentLength: number = 4;
 /** Builds a quoted-literal capture whose backtick semantics match the evidenced source language. */
@@ -100,6 +116,8 @@ export interface LoggingSignatureInput {
   readonly classified?: ClassifiedLogMessage;
   readonly content: string;
   readonly evidence?: readonly SourceLocation[];
+  /** Zero-based line in `content` that holds the discovered logging call. */
+  readonly matchedLineIndex?: number;
 }
 
 /** A level, severity, and useful static anchors retained from a logging call. */
@@ -368,6 +386,110 @@ export const staticSegmentsOf = (message: string): readonly string[] => {
   return segments;
 };
 
+/** Returns the index after the parenthesis that closes the one at `open`, skipping quoted text. */
+const closingParenthesisEnd = (
+  content: string,
+  open: number,
+  goRawBackticks: boolean
+): number | undefined => {
+  /** Nesting depth of unquoted parentheses since `open`. */
+  let depth: number = 0;
+  for (let index: number = open; index < content.length; index += 1) {
+    /** The current source character outside any quoted literal. */
+    const character: string = content[index];
+    if (character === '"' || character === "'" || character === '`') {
+      /** Go raw strings never treat a backslash as an escape. */
+      const raw: boolean = character === '`' && goRawBackticks;
+      index += 1;
+      while (index < content.length && content[index] !== character) {
+        if (content[index] === '\\' && !raw) index += 1;
+        index += 1;
+      }
+      // An unterminated literal means the window cannot prove where the call ends.
+      if (index >= content.length) return undefined;
+      continue;
+    }
+    if (character === '(') depth += 1;
+    if (character === ')') {
+      depth -= 1;
+      if (depth === 0) return index + 1;
+    }
+  }
+  return undefined;
+};
+
+/** Returns the leading whitespace of the line that contains `offset`. */
+const indentationAt = (content: string, offset: number): string => {
+  /** Offset where the containing line begins. */
+  const lineStart: number = content.lastIndexOf('\n', offset - 1) + 1;
+  return /^[ \t]*/.exec(content.slice(lineStart))?.[0] ?? '';
+};
+
+/** Returns whether the statement whose first call opens at `open` is directly followed by a process exit. */
+const isFollowedByProcessExit = (
+  content: string,
+  open: number,
+  goRawBackticks: boolean
+): boolean => {
+  /** End of the call chain that makes up the logging statement. */
+  let end: number | undefined = closingParenthesisEnd(content, open, goRawBackticks);
+  while (end !== undefined) {
+    /** A chained call keeps the same statement open. */
+    const chained: RegExpExecArray | null = chainedCallPattern.exec(content.slice(end));
+    if (chained === null) break;
+    end = closingParenthesisEnd(content, end + chained[0].length - 1, goRawBackticks);
+  }
+  if (end === undefined) return false;
+  /** The next statement must be the exit; a closing brace or other code in between disqualifies it. */
+  const gap: number = (statementGapPattern.exec(content.slice(end))?.[0] ?? '').length;
+  /** Offset of the statement that follows the logging call. */
+  const exitStart: number = end + gap;
+  /** The candidate exit call, anchored at the following statement. */
+  const exit: RegExpExecArray | null = processExitPattern.exec(content.slice(exitStart));
+  if (exit === null) return false;
+  // A new line must keep the logging line's indentation so a dedented exit outside the block does not count.
+  if (content.slice(end, exitStart).includes('\n')) {
+    if (indentationAt(content, exitStart) !== indentationAt(content, open)) return false;
+  }
+  /** End of the exit call's argument list. */
+  const exitEnd: number | undefined = closingParenthesisEnd(
+    content,
+    exitStart + exit[0].length - 1,
+    goRawBackticks
+  );
+  if (exitEnd === undefined) return false;
+  /** Rest of the exit line; a trailing condition such as a Python `if` makes the exit conditional. */
+  const tail: string = content.slice(exitEnd).split('\n', 1)[0];
+  return exitStatementTailPattern.test(tail);
+};
+
+/** Returns the first call parenthesis of the logging call on a candidate's matched line. */
+const matchedCallParenthesis = (content: string, matchedLineIndex: number): number | undefined => {
+  /** Source lines of the bounded window. */
+  const lines: readonly string[] = content.split('\n');
+  if (matchedLineIndex < 0 || matchedLineIndex >= lines.length) return undefined;
+  /** Character offset where the matched line begins. */
+  const lineStart: number = lines
+    .slice(0, matchedLineIndex)
+    .reduce((offset, line) => offset + line.length + 1, 0);
+  /** The matched line alone decides which call the classifier described. */
+  const line: string = lines[matchedLineIndex];
+  /** Earliest standard idiom on the line; the line start is the fallback for custom patterns. */
+  const callStart: number = loggingIdiomExpressions.reduce((earliest, expression) => {
+    const index: number = line.search(expression);
+    return index >= 0 && index < earliest ? index : earliest;
+  }, line.length);
+  /** The opening parenthesis of the first call at or after the idiom. */
+  const open: number = line.indexOf('(', callStart === line.length ? 0 : callStart);
+  return open < 0 ? undefined : lineStart + open;
+};
+
+/** Raises a level to fatal when the process exits right after the log emission. */
+const levelWithProcessExit = (level: string, exitsProcess: boolean): string =>
+  exitsProcess && severityForLevel(normalizeLogLevel(level)) < severityForLevel(processExitLevel)
+    ? processExitLevel
+    : level;
+
 /** Builds a signature only when at least one stable static anchor is available. */
 const signatureFor = ({
   evidence,
@@ -401,11 +523,21 @@ const signatureFor = ({
 
 /** Extracts deterministic signatures from source or classifier-supplied static messages. */
 export const extractLogSignatures = (input: LoggingSignatureInput): readonly LogSignature[] => {
+  /** Go raw backticks use delimiter semantics that differ from JavaScript template literals. */
+  const goRawBackticks: boolean = extensionOf(input.evidence ?? []) === 'go';
   if (input.classified !== undefined) {
+    /** The classifier describes the call on the matched line, so only that call's exit counts. */
+    const open: number | undefined =
+      input.matchedLineIndex === undefined
+        ? undefined
+        : matchedCallParenthesis(input.content, input.matchedLineIndex);
     /** A trusted classifier message handles methods such as panic without a level token. */
     const signature: LogSignature | undefined = signatureFor({
       evidence: input.evidence ?? [],
-      level: input.classified.level,
+      level: levelWithProcessExit(
+        input.classified.level,
+        open !== undefined && isFollowedByProcessExit(input.content, open, goRawBackticks)
+      ),
       message: input.classified.staticMessage,
     });
     return signature === undefined ? [] : [signature];
@@ -430,17 +562,20 @@ export const extractLogSignatures = (input: LoggingSignatureInput): readonly Log
         ([, value]) => value !== undefined
       );
       if (matchedLiteral === undefined || matchedLiteral[1] === undefined) continue;
+      /** The level call's parenthesis is the first one directly followed by the captured literal. */
+      const open: number = match.index + match[0].search(/\(\s*["'`]/);
       calls.push({
         index: match.index,
-        level: normalizeLogLevel(match[1]),
+        level: levelWithProcessExit(
+          normalizeLogLevel(match[1]),
+          isFollowedByProcessExit(input.content, open, goRawBackticks)
+        ),
         message: matchedLiteral[1],
         quote: matchedLiteral[0],
       });
     }
     return calls;
   };
-  /** Go raw backticks use delimiter semantics that differ from JavaScript template literals. */
-  const goRawBackticks: boolean = extensionOf(input.evidence ?? []) === 'go';
   /** Merging before extraction preserves source order across method and macro regex families. */
   const calls: readonly SourceLogCall[] = [
     ...collectMatches(methodCallPattern(goRawBackticks)),

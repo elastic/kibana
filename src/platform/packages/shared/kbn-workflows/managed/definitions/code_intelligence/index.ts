@@ -34,7 +34,7 @@ const MANAGEMENT = {
 export const CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW = {
   id: CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
   pluginId: 'codeIntelligence',
-  version: 3,
+  version: 4,
   billable: true,
   yamlTemplate: ({ connectorId }) =>
     renderTemplate(CLASSIFY_LOGGING_CANDIDATES_YAML, { connectorId }),

@@ -481,6 +481,45 @@ describe('extractOtelSignalsFromWindows', () => {
     );
   });
 
+  it.each([
+    ['attribute.Int("demo.payment.card_cvv", int(req.GetCreditCard().GetCreditCardCvv()))', 'id'],
+    ['attribute.Int("fetch", int(n.Fetch))', 'id'],
+    ['attribute.Int("skip", int(n.Skip))', 'id'],
+    ['attribute.Int("try", try)', 'id'],
+    ['attribute.Int("rule.position", i)', 'id'],
+    ['attribute.Int64("shop.retry_num", retryNum)', 'id'],
+    ['AttributeKey.longKey("shop.orderNumber")', 'id'],
+    ['attribute.Int64("request.size", n)', 'number'],
+    ['attribute.Int("shop.retry_count", i)', 'number'],
+    ['attribute.Int("num_predicates", len(n.Predicates))', 'number'],
+    ['attribute.Float64("value", e.Val)', 'number'],
+    ['attribute.Int("feature.flag", enabled)', 'id'],
+    ['attribute.Int("cache.enabled", on)', 'id'],
+    ['attribute.Int("cache.isHit", hit)', 'id'],
+    ['attribute.Int("batch.cardinality", len(i))', 'number'],
+    ['attribute.Int("batch.position", int64(i))', 'id'],
+  ])('separates identifier-like numeric constructors from measures: %s', (source, valueHint) => {
+    /** A typed numeric constructor is the only attribute in each fixture. */
+    const signals = extract({ 'src/telemetry.go': `span.SetAttributes(${source})` });
+
+    expect(
+      signals.filter(({ kind, templated }) => kind === 'attr_key' && templated !== true)
+    ).toEqual([expect.objectContaining({ valueHint })]);
+  });
+
+  it('treats a numeric literal on an identifier-like setter key as an identifier', () => {
+    /** Setter values with a digit literal used to be classified as measures regardless of key. */
+    const signals = extract({
+      'src/telemetry.ts':
+        'span.setAttribute("shop.page", 3); span.setAttribute("shop.queue.length", 3)',
+    });
+
+    expect(signals.filter(({ kind }) => kind === 'attr_key')).toEqual([
+      expect.objectContaining({ value: 'shop.page', valueHint: 'id' }),
+      expect.objectContaining({ value: 'shop.queue.length', valueHint: 'number' }),
+    ]);
+  });
+
   it('attaches multiline exception evidence to the call line and deduplicates overlapping windows', () => {
     /** Holds local test or extraction state. */
     const signals = extractOtelSignalsFromWindows([

@@ -453,10 +453,11 @@ export const extractRepository = async (
         ...(decision.level !== undefined && decision.staticMessage !== undefined
           ? {
               classified: { level: decision.level, staticMessage: decision.staticMessage },
-              content: candidate.source.excerpt,
+              content: candidate.source.sourceWindow,
             }
-          : { content: candidate.source.excerpt }),
+          : { content: candidate.source.sourceWindow }),
         evidence: candidate.source.evidence,
+        matchedLineIndex: candidate.source.matchedLineIndex,
       });
       loggingTemplates.push(...generateLogTemplates({ context, signatures }));
     }
