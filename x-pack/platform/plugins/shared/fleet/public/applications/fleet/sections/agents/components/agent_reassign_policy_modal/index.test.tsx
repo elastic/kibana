@@ -11,11 +11,7 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import {
-  sendPostAgentReassign,
-  useGetAgentPolicies,
-  useStartServices,
-} from '../../../../hooks';
+import { sendPostAgentReassign, useGetAgentPolicies, useStartServices } from '../../../../hooks';
 
 import { AgentReassignAgentPolicyModal } from '.';
 
