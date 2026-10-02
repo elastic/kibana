@@ -13,11 +13,14 @@ import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
 import { WorkerSelectionDescription } from './worker_selection_description';
 
 describe('WorkerSelectionDescription', () => {
-  const renderDescription = (onWatchSettingsClick = jest.fn()) => {
+  const renderDescription = (onWatchSettingsClick = jest.fn(), isSaving = false) => {
     render(
       <I18nProvider>
         <EuiProvider>
-          <WorkerSelectionDescription onWatchSettingsClick={onWatchSettingsClick} />
+          <WorkerSelectionDescription
+            isSaving={isSaving}
+            onWatchSettingsClick={onWatchSettingsClick}
+          />
         </EuiProvider>
       </I18nProvider>
     );
@@ -33,6 +36,14 @@ describe('WorkerSelectionDescription', () => {
     const { onWatchSettingsClick } = renderDescription();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingWatchSettingsLink'));
     expect(onWatchSettingsClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the Watch settings link while saving', () => {
+    const { onWatchSettingsClick } = renderDescription(jest.fn(), true);
+    const link = screen.getByTestId('alertZeroOnboardingWatchSettingsLink');
+    expect(link).toBeDisabled();
+    fireEvent.click(link);
+    expect(onWatchSettingsClick).not.toHaveBeenCalled();
   });
 
   it('renders the Read more link in the same paragraph, opening the docs URL in a new tab', () => {

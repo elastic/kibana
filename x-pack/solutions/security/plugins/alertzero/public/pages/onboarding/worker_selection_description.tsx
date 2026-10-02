@@ -12,10 +12,11 @@ import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
 import * as i18n from './translations';
 
 interface Props {
+  isSaving: boolean;
   onWatchSettingsClick: () => void;
 }
 
-export const WorkerSelectionDescription: React.FC<Props> = ({ onWatchSettingsClick }) => (
+export const WorkerSelectionDescription: React.FC<Props> = ({ isSaving, onWatchSettingsClick }) => (
   <EuiText>
     <p>
       <FormattedMessage
@@ -25,6 +26,7 @@ export const WorkerSelectionDescription: React.FC<Props> = ({ onWatchSettingsCli
           watchSettingsLink: (
             <EuiLink
               onClick={onWatchSettingsClick}
+              disabled={isSaving}
               data-test-subj="alertZeroOnboardingWatchSettingsLink"
             >
               {i18n.WATCH_SETTINGS}

@@ -220,6 +220,9 @@ describe('OnboardingPage', () => {
         expect(screen.getByRole('button', { name: 'Enable and run' })).toHaveAttribute('disabled')
       );
 
+      // The Watch settings link must not navigate away mid-save.
+      expect(screen.getByTestId('alertZeroOnboardingWatchSettingsLink')).toBeDisabled();
+
       // A second click while in-flight must not trigger additional requests.
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
       expect(httpPatch).toHaveBeenCalledTimes(6);

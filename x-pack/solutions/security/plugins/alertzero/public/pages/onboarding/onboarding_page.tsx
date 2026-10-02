@@ -89,7 +89,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           <h2>{i18n.ONBOARDING_INTRO_HEADING}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <WorkerSelectionDescription onWatchSettingsClick={() => history.push('/watches')} />
+        <WorkerSelectionDescription
+          isSaving={isSaving}
+          onWatchSettingsClick={() => history.push('/watches')}
+        />
         <EuiSpacer size="l" />
 
         <ScanFailureCallout />
