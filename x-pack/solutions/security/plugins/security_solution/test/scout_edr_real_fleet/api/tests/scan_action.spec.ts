@@ -134,11 +134,8 @@ apiTest.describe('Real agent scan response action', { tag: ['@local-stateful-cla
           )
           .toBe(expectedCode);
 
-        if (!completed) {
-          throw new Error(`Action ${actionId} completed without a stored response`);
-        }
-
-        return completed;
+        expect(completed, `Action ${actionId} completed without a stored response`).toBeDefined();
+        return completed as ScanActionBody['data'];
       };
 
       await apiTest.step('scan an existing file', async () => {
