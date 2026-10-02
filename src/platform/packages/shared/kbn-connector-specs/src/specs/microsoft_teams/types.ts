@@ -12,7 +12,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // =============================================================================
 // Shared limits
 // =============================================================================
-const MAX_FREEFORM = 10000;
+// Teams caps a chat or channel post at approximately 100 KB, and lets at most
+// 200 members be added to a group chat at once:
+// https://learn.microsoft.com/en-us/microsoftteams/limits-specifications-teams
+const TEAMS_MAX_POST_SIZE = 100 * 1024;
+const TEAMS_MAX_CHAT_MEMBERS_ADDED_AT_ONCE = 200;
 const MAX_ID = 200;
 const MAX_TITLE = 255;
 
@@ -154,7 +158,7 @@ export const SendChannelMessageInputSchema = lazySchema(() =>
       ),
     content: z
       .string()
-      .max(MAX_FREEFORM)
+      .max(TEAMS_MAX_POST_SIZE)
       .describe(
         'The message body text to send. Supports plain text or HTML when contentType is set to "html".'
       ),
@@ -185,7 +189,7 @@ export const SendChatMessageInputSchema = lazySchema(() =>
       ),
     content: z
       .string()
-      .max(MAX_FREEFORM)
+      .max(TEAMS_MAX_POST_SIZE)
       .describe(
         'The message body text to send. Supports plain text or HTML when contentType is set to "html".'
       ),
@@ -233,7 +237,7 @@ export const UpdateMessageInputSchema = lazySchema(() =>
         ),
       content: z
         .string()
-        .max(MAX_FREEFORM)
+        .max(TEAMS_MAX_POST_SIZE)
         .describe('The new message body text to replace the existing content.'),
       contentType: z
         .enum(['text', 'html'])
@@ -274,7 +278,7 @@ export const CreateChatInputSchema = lazySchema(() =>
     memberIds: z
       .array(z.string().max(MAX_ID))
       .min(2)
-      .max(20)
+      .max(TEAMS_MAX_CHAT_MEMBERS_ADDED_AT_ONCE)
       .describe(
         'User IDs (GUIDs or UPNs) of all chat members, including yourself. For "oneOnOne" provide exactly two IDs (your own and the other person\'s); for "group" provide three or more. Use getUser to resolve an email or UPN to a GUID.'
       ),

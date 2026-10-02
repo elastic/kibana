@@ -103,7 +103,7 @@ describe('BraveSearchConnector', () => {
       await BraveSearchConnector.actions.webSearch.handler(mockContext, {
         q: 'test query',
         count: 10,
-        offset: 10,
+        offset: 1,
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -112,7 +112,7 @@ describe('BraveSearchConnector', () => {
           params: {
             q: 'test query',
             count: 10,
-            offset: 10,
+            offset: 1,
           },
           headers: {
             Accept: 'application/json',

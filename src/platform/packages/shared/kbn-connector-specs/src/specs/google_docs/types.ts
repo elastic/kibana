@@ -9,6 +9,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// Google Docs documents no limit on subrequests or payload size per batchUpdate. These
+// ceilings sit well above rewriting a full document (Docs caps documents at 1.02M characters).
+// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
+const MAX_BATCH_UPDATE_REQUESTS = 10_000;
+const MAX_BATCH_UPDATE_BYTES = 10 * 1024 * 1024;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -68,12 +74,13 @@ export const UpdateDocInputSchema = lazySchema(() =>
         })
       )
       .min(1)
-      .max(100)
-      .refine((arr) => new TextEncoder().encode(JSON.stringify(arr)).byteLength <= 102_400, {
-        message: 'Total size of requests must not exceed 100 KB',
-      })
+      .max(MAX_BATCH_UPDATE_REQUESTS)
+      .refine(
+        (arr) => new TextEncoder().encode(JSON.stringify(arr)).byteLength <= MAX_BATCH_UPDATE_BYTES,
+        { message: 'Total size of requests must not exceed 10 MB' }
+      )
       .describe(
-        'Array of batch update request objects for the Google Docs batchUpdate API. Each object must contain exactly ' +
+        `Array of 1-${MAX_BATCH_UPDATE_REQUESTS} batch update request objects for the Google Docs batchUpdate API (up to 10 MB serialized). Each object must contain exactly ` +
           'one key identifying the operation type, plus its parameters. ' +
           'Examples: ' +
           '{"replaceAllText": {"containsText": {"text": "old"}, "replaceText": "new"}} — find and replace; ' +

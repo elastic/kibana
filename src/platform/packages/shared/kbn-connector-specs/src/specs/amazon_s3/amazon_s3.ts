@@ -35,6 +35,8 @@ const BUCKET_NAME_MAX_LENGTH = 63;
 const OBJECT_KEY_MAX_LENGTH = 1024;
 const REGION_MAX_LENGTH = 64;
 const CONTINUATION_TOKEN_MAX_LENGTH = 2048;
+// ListObjectsV2 returns at most 1,000 keys per page: https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
+const LIST_OBJECTS_MAX_KEYS = 1000;
 
 export const AmazonS3: ConnectorSpec = {
   metadata: {
@@ -154,11 +156,12 @@ export const AmazonS3: ConnectorSpec = {
             .number()
             .int()
             .positive()
+            .max(LIST_OBJECTS_MAX_KEYS)
             .optional()
             .describe(
-              'Maximum number of object keys to return in a single page. Defaults to 1000. Maximum allowed is 1000.'
+              `Maximum number of object keys to return in a single page. Defaults to ${LIST_OBJECTS_MAX_KEYS}. Maximum allowed is ${LIST_OBJECTS_MAX_KEYS}.`
             )
-            .default(1000),
+            .default(LIST_OBJECTS_MAX_KEYS),
         })
       ),
       handler: async (ctx, input: ActionListBucketObjectsInput) => {

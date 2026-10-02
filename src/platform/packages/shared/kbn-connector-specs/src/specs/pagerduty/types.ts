@@ -9,6 +9,14 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// PagerDuty MCP server query models: MAXIMUM_PAGINATION_LIMIT and MAX_RESULTS (incidents).
+const PAGERDUTY_MAX_PAGE_SIZE = 100;
+const PAGERDUTY_MAX_INCIDENT_RESULTS = 1000;
+// PagerDuty documents no limit on ID lists; sized so a full page from a list action can be passed back.
+const MAX_ID_LIST_ITEMS = PAGERDUTY_MAX_PAGE_SIZE;
+// PagerDuty documents no length limit on incident body details or responder request messages.
+const MAX_FREE_TEXT_LENGTH = 65_536;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -27,7 +35,13 @@ export const ListSchedulesInputSchema = lazySchema(() =>
       .describe(
         'Free-text search string across name and description fields (e.g., "primary" or "weekend")'
       ),
-    limit: z.number().optional().describe('Maximum number of schedules to return'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_PAGE_SIZE)
+      .optional()
+      .describe('Maximum number of schedules to return (1-100)'),
     offset: z.number().optional().describe('Offset to start pagination at'),
     include: z
       .array(z.string().max(100))
@@ -38,12 +52,12 @@ export const ListSchedulesInputSchema = lazySchema(() =>
       ),
     team_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter schedules to those belonging to these team IDs (e.g., ["P123ABC"])'),
     user_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter schedules to those containing these user IDs (e.g., ["P456DEF"])'),
   })
@@ -59,15 +73,21 @@ export const ListEscalationPoliciesInputSchema = lazySchema(() =>
       .describe(
         'Free-text search string across name and description fields (e.g., "production" or "on-call")'
       ),
-    limit: z.number().optional().describe('Maximum number of escalation policies to return'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_PAGE_SIZE)
+      .optional()
+      .describe('Maximum number of escalation policies to return (1-100)'),
     user_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter escalation policies by user IDs (e.g., ["P123ABC"])'),
     team_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter escalation policies by team IDs (e.g., ["P456DEF"])'),
   })
@@ -78,7 +98,9 @@ export const ListIncidentsInputSchema = lazySchema(() =>
   z.object({
     limit: z
       .number()
-      .max(1000)
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_INCIDENT_RESULTS)
       .default(25)
       .describe('Maximum number of incidents to return (max 1000, default 25)'),
     status: z
@@ -90,12 +112,12 @@ export const ListIncidentsInputSchema = lazySchema(() =>
       ),
     service_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter incidents to those belonging to these service IDs (e.g., ["P123ABC"])'),
     user_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe(
         'Filter incidents assigned to these user IDs (e.g., ["P456DEF"]). Only used when request_scope is "assigned"'
@@ -136,24 +158,27 @@ export const ListOncallsInputSchema = lazySchema(() =>
   z.object({
     limit: z
       .number()
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
       .default(20)
-      .describe('Maximum number of on-call results to return (default 20)'),
+      .describe('Maximum number of on-call results to return (1-100, default 20)'),
     schedule_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe(
         'Filter on-call results to these schedule IDs (e.g., ["P123ABC", "P456DEF"]). Use this to find who is on call for specific schedules.'
       ),
     user_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter on-call results to these user IDs (e.g., ["P789GHI"])'),
     escalation_policy_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe(
         'Filter on-call results to these escalation policy IDs (e.g., ["PABCDEF"]). Use this to find who is on call for a specific escalation policy.'
@@ -198,7 +223,13 @@ export const ListUsersInputSchema = lazySchema(() =>
       .describe(
         'Free-text search across name and email fields (e.g., "alice" or "alice@example.com")'
       ),
-    limit: z.number().optional().describe('Maximum number of users to return'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_PAGE_SIZE)
+      .optional()
+      .describe('Maximum number of users to return (1-100)'),
   })
 );
 export type ListUsersInput = z.infer<typeof ListUsersInputSchema>;
@@ -210,7 +241,13 @@ export const ListTeamsInputSchema = lazySchema(() =>
       .max(2000)
       .optional()
       .describe('Free-text search across name and description fields (e.g., "platform" or "sre")'),
-    limit: z.number().optional().describe('Maximum number of teams to return'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_PAGE_SIZE)
+      .optional()
+      .describe('Maximum number of teams to return (1-100)'),
   })
 );
 export type ListTeamsInput = z.infer<typeof ListTeamsInputSchema>;
@@ -304,7 +341,7 @@ export const TriggerIncidentInputSchema = lazySchema(() =>
       ),
     body: z
       .string()
-      .max(2000)
+      .max(MAX_FREE_TEXT_LENGTH)
       .optional()
       .describe('Detailed description or runbook context to include in the incident body'),
     escalation_policy_id: z
@@ -316,7 +353,7 @@ export const TriggerIncidentInputSchema = lazySchema(() =>
       ),
     assignment_user_ids: z
       .array(z.string().max(200))
-      .max(10)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe(
         'User IDs to assign the incident to directly; overrides escalation policy routing when provided (e.g., ["P123ABC"])'
@@ -386,7 +423,7 @@ export const UpdateIncidentInputSchema = lazySchema(() =>
         .describe('ID of a PagerDuty priority to attach to the incident'),
       assignment_user_ids: z
         .array(z.string().max(200))
-        .max(10)
+        .max(MAX_ID_LIST_ITEMS)
         .optional()
         .describe('Reassign the incident to these user IDs (replaces current assignments)'),
     })
@@ -414,12 +451,14 @@ export const ListServicesInputSchema = lazySchema(() =>
       .describe('Free-text search across service name and description fields'),
     limit: z
       .number()
-      .max(100)
+      .int()
+      .min(1)
+      .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
       .describe('Maximum number of services to return (max 100)'),
     team_ids: z
       .array(z.string().max(200))
-      .max(25)
+      .max(MAX_ID_LIST_ITEMS)
       .optional()
       .describe('Filter to services belonging to these team IDs (e.g., ["P123ABC"])'),
   })
@@ -449,16 +488,16 @@ export const AddRespondersInputSchema = lazySchema(() =>
         ),
       message: z
         .string()
-        .max(2000)
+        .max(MAX_FREE_TEXT_LENGTH)
         .describe('Message sent to requested responders explaining why their help is needed'),
       responder_user_ids: z
         .array(z.string().max(200))
-        .max(25)
+        .max(MAX_ID_LIST_ITEMS)
         .optional()
         .describe('IDs of users to request as responders (e.g., ["P456DEF"])'),
       responder_escalation_policy_ids: z
         .array(z.string().max(200))
-        .max(10)
+        .max(MAX_ID_LIST_ITEMS)
         .optional()
         .describe(
           'IDs of escalation policies whose on-call users to notify as responders (e.g., ["PABCDEF"])'

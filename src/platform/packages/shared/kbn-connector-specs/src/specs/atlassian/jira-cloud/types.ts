@@ -9,6 +9,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// Jira Cloud rejects descriptions and comments longer than 32,767 characters.
+const JIRA_MAX_TEXT_FIELD_LENGTH = 32_767;
+// The REST API documents no per-issue label limit (the UI stops at 55, but the API
+// accepts more), and updateIssue replaces the whole set returned by getIssue.
+const JIRA_MAX_LABELS = 1000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -143,7 +149,7 @@ export const CreateIssueInputSchema = lazySchema(() =>
       ),
     description: z
       .string()
-      .max(32768)
+      .max(JIRA_MAX_TEXT_FIELD_LENGTH)
       .optional()
       .describe('Issue body in plain text. Newlines become separate paragraphs in Jira.'),
     priority: z
@@ -153,7 +159,7 @@ export const CreateIssueInputSchema = lazySchema(() =>
       .describe('Priority name (e.g. Highest, High, Medium, Low, Lowest).'),
     labels: z
       .array(z.string().max(255))
-      .max(50)
+      .max(JIRA_MAX_LABELS)
       .optional()
       .describe('Labels to apply. Labels cannot contain spaces.'),
     assigneeAccountId: z
@@ -182,7 +188,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
       summary: z.string().min(1).max(255).optional().describe('New summary / title for the issue.'),
       description: z
         .string()
-        .max(32768)
+        .max(JIRA_MAX_TEXT_FIELD_LENGTH)
         .optional()
         .describe('New description in plain text. Replaces the existing description entirely.'),
       issueType: z.string().max(255).optional().describe('New issue type name or numeric ID.'),
@@ -193,7 +199,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
         .describe('New priority name (e.g. High, Medium, Low).'),
       labels: z
         .array(z.string().max(255))
-        .max(50)
+        .max(JIRA_MAX_LABELS)
         .optional()
         .describe('Replacement label set. Replaces all existing labels.'),
       assigneeAccountId: z
@@ -230,7 +236,7 @@ export const AddCommentInputSchema = lazySchema(() =>
     body: z
       .string()
       .min(1)
-      .max(32768)
+      .max(JIRA_MAX_TEXT_FIELD_LENGTH)
       .describe('Comment text in plain text. Newlines become separate paragraphs.'),
   })
 );
@@ -324,6 +330,7 @@ export const AddAttachmentInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to attach the file to.'),
+    // Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
     file: z.string().base64().max(10_000_000).describe('Base64-encoded file content.'),
     filename: z.string().max(255).describe('Filename including extension (e.g. screenshot.png).'),
   })
@@ -361,7 +368,7 @@ export const LinkIssuesInputSchema = lazySchema(() =>
       ),
     comment: z
       .string()
-      .max(32768)
+      .max(JIRA_MAX_TEXT_FIELD_LENGTH)
       .optional()
       .describe('Optional comment to add to the link in plain text.'),
   })

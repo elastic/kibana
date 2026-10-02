@@ -31,7 +31,7 @@ The Tavily connector has the following actions:
 Search
 :   Search the web for current information on any topic.
     - `query` (required): The search query to execute.
-    - `max_results` (optional): Maximum number of results to return. Defaults to 10.
+    - `max_results` (optional): Maximum number of results to return (1–20). Defaults to 10.
     - `search_depth` (optional): `basic`, `advanced`, `fast`, or `ultra-fast`. Advanced returns more thorough results; fast and ultra-fast optimize for lower latency.
     - `topic` (optional): Search category — `general`.
     - `include_images` (optional): Whether to include images in the response. Defaults to false.
@@ -45,8 +45,8 @@ Extract
 Crawl
 :   Crawl a website starting from a URL, extracting content from pages with configurable depth and breadth.
     - `url` (required): The root URL to begin the crawl.
-    - `max_depth` (optional): Maximum depth of the crawl. Defaults to 1.
-    - `max_breadth` (optional): Maximum number of links to follow per page. Defaults to 20.
+    - `max_depth` (optional): Maximum depth of the crawl (1–5). Defaults to 1.
+    - `max_breadth` (optional): Maximum number of links to follow per page (1–500). Defaults to 20.
     - `limit` (optional): Total number of links to process before stopping. Defaults to 50.
     - `instructions` (optional): Natural language instructions specifying which types of pages to return.
     - `extract_depth` (optional): `basic` or `advanced`. Defaults to basic.
@@ -54,8 +54,8 @@ Crawl
 Map
 :   Map a website's structure by returning a list of URLs found starting from a base URL.
     - `url` (required): The root URL to begin the mapping.
-    - `max_depth` (optional): Maximum depth of the mapping. Defaults to 1.
-    - `max_breadth` (optional): Maximum number of links to follow per page. Defaults to 20.
+    - `max_depth` (optional): Maximum depth of the mapping (1–5). Defaults to 1.
+    - `max_breadth` (optional): Maximum number of links to follow per page (1–500). Defaults to 20.
     - `limit` (optional): Total number of links to process before stopping. Defaults to 50.
     - `instructions` (optional): Natural language instructions for the crawler.
 

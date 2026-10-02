@@ -16,6 +16,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const URL_MAX_LENGTH = 2048;
 const QUERY_MAX_LENGTH = 2000;
 const UUID_LENGTH = 36;
+const MAX_WAIT_FOR_MS = 60_000;
 
 const MAX_MARKDOWN_LENGTH_DESCRIBE =
   'Maximum characters of markdown to return. Default 100000; max 500000 to avoid context overflow. Only set a lower value if you already got truncated output and need to fit within a smaller context.';
@@ -38,10 +39,11 @@ export const ScrapeInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(0)
+      .max(MAX_WAIT_FOR_MS)
       .optional()
       .default(0)
       .describe(
-        'Milliseconds to wait before scraping, to allow JavaScript-rendered content to load. e.g. 2000 to wait 2 seconds. Default 0.'
+        'Milliseconds to wait before scraping, to allow JavaScript-rendered content to load. e.g. 2000 to wait 2 seconds. Default 0; max 60000.'
       ),
     maxMarkdownLength: z
       .number()

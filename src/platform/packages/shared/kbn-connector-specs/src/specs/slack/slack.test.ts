@@ -251,7 +251,7 @@ describe('Slack', () => {
         params: {
           types: 'public_channel',
           exclude_archived: true,
-          limit: 1000,
+          limit: 999,
         },
       });
       expect(result).toEqual({
@@ -296,14 +296,14 @@ describe('Slack', () => {
         1,
         'https://slack.com/api/conversations.list',
         {
-          params: { types: 'public_channel', exclude_archived: true, limit: 1000 },
+          params: { types: 'public_channel', exclude_archived: true, limit: 999 },
         }
       );
       expect(mockClient.get).toHaveBeenNthCalledWith(
         2,
         'https://slack.com/api/conversations.list',
         {
-          params: { types: 'public_channel', exclude_archived: true, limit: 1000, cursor: 'c2' },
+          params: { types: 'public_channel', exclude_archived: true, limit: 999, cursor: 'c2' },
         }
       );
       expect(result).toMatchObject({
@@ -355,7 +355,7 @@ describe('Slack', () => {
         params: {
           types: 'public_channel',
           exclude_archived: true,
-          limit: 1000,
+          limit: 999,
         },
       });
       expect(result).toEqual({
@@ -1046,7 +1046,7 @@ describe('Slack', () => {
         params: {
           types: 'public_channel,private_channel,im,mpim',
           exclude_archived: true,
-          limit: 1000,
+          limit: 999,
           user: 'U123',
         },
       });
@@ -1075,7 +1075,7 @@ describe('Slack', () => {
         params: {
           types: 'public_channel,private_channel,im,mpim',
           exclude_archived: true,
-          limit: 1000,
+          limit: 999,
         },
       });
     });

@@ -9,6 +9,10 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+const MAX_ITEM_NAME_LENGTH = 255;
+// monday.com documents no limit on update bodies.
+const MAX_UPDATE_BODY_LENGTH = 100_000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // All schemas use lazySchema() — do not use bare z.object().
@@ -143,7 +147,7 @@ export const CreateItemInputSchema = lazySchema(() =>
     itemName: z
       .string()
       .min(1)
-      .max(500)
+      .max(MAX_ITEM_NAME_LENGTH)
       .describe('The name (title) of the new item. Example: "Fix login bug" or "Q4 planning".'),
     groupId: z
       .string()
@@ -198,7 +202,11 @@ export const CreateSubitemInputSchema = lazySchema(() =>
       .int()
       .positive()
       .describe('The integer ID of the parent item to create the subitem under.'),
-    subitemName: z.string().min(1).max(500).describe('The name (title) of the new subitem.'),
+    subitemName: z
+      .string()
+      .min(1)
+      .max(MAX_ITEM_NAME_LENGTH)
+      .describe('The name (title) of the new subitem.'),
     columnValues: z
       .record(z.string().max(200), z.unknown())
       .optional()
@@ -258,7 +266,7 @@ export const CreateUpdateInputSchema = lazySchema(() =>
     body: z
       .string()
       .min(1)
-      .max(10000)
+      .max(MAX_UPDATE_BODY_LENGTH)
       .describe('The text content of the update (comment). Supports basic markdown formatting.'),
   })
 );
@@ -302,7 +310,7 @@ export const EditUpdateInputSchema = lazySchema(() =>
     body: z
       .string()
       .min(1)
-      .max(10000)
+      .max(MAX_UPDATE_BODY_LENGTH)
       .describe('The new text content for the update. Replaces the existing body.'),
   })
 );

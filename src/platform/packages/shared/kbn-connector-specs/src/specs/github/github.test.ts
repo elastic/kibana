@@ -443,6 +443,56 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('input bounds', () => {
+    const repo = { owner: 'elastic', repo: 'kibana' };
+
+    it('accepts titles up to the 256 characters GitHub allows', () => {
+      expect(() => parse('createIssue', { ...repo, title: 'a'.repeat(256) })).not.toThrow();
+      expect(() => parse('createIssue', { ...repo, title: 'a'.repeat(257) })).toThrow();
+      expect(() =>
+        parse('createPullRequest', { ...repo, title: 'a'.repeat(256), head: 'f', base: 'main' })
+      ).not.toThrow();
+    });
+
+    it('limits assignees to the 10 GitHub allows', () => {
+      const logins = (n: number) => Array.from({ length: n }, (_, i) => `user${i}`);
+      expect(() =>
+        parse('addAssignee', { ...repo, issueNumber: 1, assignees: logins(10) })
+      ).not.toThrow();
+      expect(() =>
+        parse('addAssignee', { ...repo, issueNumber: 1, assignees: logins(11) })
+      ).toThrow();
+    });
+
+    it('accepts merge commit messages longer than 2,000 characters', () => {
+      expect(() =>
+        parse('mergePullRequest', { ...repo, pullNumber: 1, commitMessage: 'a'.repeat(10000) })
+      ).not.toThrow();
+    });
+
+    it('accepts Base64 content larger than 100,000 characters', () => {
+      expect(() =>
+        parse('createOrUpdateFile', {
+          ...repo,
+          path: 'big.txt',
+          message: 'add',
+          content: 'A'.repeat(1_500_000),
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts workflow_dispatch input values up to the 65,535 character payload limit', () => {
+      expect(() =>
+        parse('triggerWorkflow', {
+          ...repo,
+          workflowId: 'ci.yml',
+          ref: 'main',
+          inputs: { payload: 'a'.repeat(65535) },
+        })
+      ).not.toThrow();
+    });
+  });
+
   describe('listTools action', () => {
     it('returns the list of available tools', async () => {
       const result = await GithubConnector.actions.listTools.handler(mockContext, {});

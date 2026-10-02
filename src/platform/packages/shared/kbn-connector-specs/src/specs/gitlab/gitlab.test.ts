@@ -801,6 +801,41 @@ describe('Gitlab connector', () => {
         Gitlab.actions.getMergeRequest.input.parse({ projectId: '123', mrIid: 'abc' })
       ).toThrow();
     });
+
+    it('accepts titles up to the 255 characters GitLab allows', () => {
+      expect(() =>
+        parse('createIssue', { projectId: '123', title: 'a'.repeat(255) })
+      ).not.toThrow();
+      expect(() => parse('createIssue', { projectId: '123', title: 'a'.repeat(256) })).toThrow();
+    });
+
+    it('limits descriptions to the 1 MiB GitLab default, measured in bytes', () => {
+      expect(() =>
+        parse('createIssue', { projectId: '123', title: 'x', description: 'a'.repeat(1048576) })
+      ).not.toThrow();
+      expect(() =>
+        parse('createIssue', { projectId: '123', title: 'x', description: 'é'.repeat(524289) })
+      ).toThrow();
+    });
+
+    it('accepts notes up to the 1,000,000 characters GitLab allows', () => {
+      expect(() =>
+        parse('addIssueNote', { projectId: '123', issueIid: '1', body: 'a'.repeat(1000000) })
+      ).not.toThrow();
+    });
+
+    it('accepts up to 200 assignees or reviewers', () => {
+      const ids = Array.from({ length: 200 }, (_, i) => i + 1);
+      expect(() =>
+        parse('createIssue', { projectId: '123', title: 'x', assigneeIds: ids })
+      ).not.toThrow();
+      expect(() =>
+        parse('requestMergeRequestReview', { projectId: '123', mrIid: '1', reviewerIds: ids })
+      ).not.toThrow();
+      expect(() =>
+        parse('createIssue', { projectId: '123', title: 'x', assigneeIds: [...ids, 201] })
+      ).toThrow();
+    });
   });
 
   // =========================================================================

@@ -15,16 +15,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // All z.string() fields must have .max(N).
 // =============================================================================
 
-/**
- * Max length for a GraphQL query/mutation document string.
- * GraphQL operations can be large (e.g. deeply nested selections or fragments),
- * but 100 000 chars is a generous cap that prevents DoS while accommodating
- * real-world use cases.
- */
-const MAX_QUERY_LENGTH = 100_000;
-
-/** Max length for an operation name. GraphQL spec limits identifiers to ~255 chars. */
+// The GraphQL spec sets no limit on document size, name length, or variable count;
+// these are generous DoS ceilings. Servers may enforce their own, lower limits.
+// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
+const MAX_QUERY_LENGTH = 1_000_000;
 const MAX_OPERATION_NAME_LENGTH = 255;
+const MAX_VARIABLES = 1000;
 
 export const QueryInputSchema = lazySchema(() =>
   z.object({
@@ -39,8 +35,8 @@ export const QueryInputSchema = lazySchema(() =>
       ),
     variables: z
       .record(z.string().max(MAX_OPERATION_NAME_LENGTH), z.unknown())
-      .refine((obj) => Object.keys(obj).length <= 100, {
-        message: 'A maximum of 100 variables is allowed.',
+      .refine((obj) => Object.keys(obj).length <= MAX_VARIABLES, {
+        message: `A maximum of ${MAX_VARIABLES} variables is allowed.`,
       })
       .optional()
       .describe(
@@ -72,8 +68,8 @@ export const MutationInputSchema = lazySchema(() =>
       ),
     variables: z
       .record(z.string().max(MAX_OPERATION_NAME_LENGTH), z.unknown())
-      .refine((obj) => Object.keys(obj).length <= 100, {
-        message: 'A maximum of 100 variables is allowed.',
+      .refine((obj) => Object.keys(obj).length <= MAX_VARIABLES, {
+        message: `A maximum of ${MAX_VARIABLES} variables is allowed.`,
       })
       .optional()
       .describe(

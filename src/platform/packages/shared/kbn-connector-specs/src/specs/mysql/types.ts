@@ -9,6 +9,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// Server default for max_allowed_packet, which bounds a single SQL statement; servers may raise it.
+// https://dev.mysql.com/doc/refman/8.4/en/packet-too-large.html
+// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
+const MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES = 64 * 1024 * 1024;
+// https://dev.mysql.com/doc/refman/8.4/en/column-count-limit.html
+const MYSQL_MAX_COLUMNS_PER_TABLE = 4096;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -18,7 +25,7 @@ export const QueryInputSchema = lazySchema(() =>
     sql: z
       .string()
       .min(1)
-      .max(10000)
+      .max(MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES)
       .describe(
         'Read-only SQL SELECT or WITH query to execute. Include a LIMIT clause to bound results (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 100). Do not include a trailing semicolon.'
       ),
@@ -77,7 +84,7 @@ export const SearchRowsInputSchema = lazySchema(() =>
     columns: z
       .array(z.string().min(1).max(64))
       .min(1)
-      .max(50)
+      .max(MYSQL_MAX_COLUMNS_PER_TABLE)
       .describe(
         'Column names to search in (e.g. ["name", "email", "notes"]). At least one column is required. Use describeTable to discover available columns.'
       ),
@@ -105,7 +112,7 @@ export const ExecuteSqlInputSchema = lazySchema(() =>
     sql: z
       .string()
       .min(1)
-      .max(10000)
+      .max(MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES)
       .describe(
         'SQL statement to execute. Any statement type is permitted (SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, etc.). Use with caution — this action is unrestricted.'
       ),

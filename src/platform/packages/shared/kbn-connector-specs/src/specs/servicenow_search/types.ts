@@ -162,6 +162,10 @@ export type DescribeTableInput = z.infer<typeof DescribeTableInputSchema>;
 // Write action input schemas & inferred types
 // =============================================================================
 
+// The Table API documents no per-record field limit, and getRecord can return every
+// column of wide tables (e.g. CMDB CI classes inherit hundreds of fields).
+const MAX_RECORD_FIELDS = 1000;
+
 export const CreateRecordInputSchema = lazySchema(() =>
   z.object({
     table: z.string().max(200).describe(TABLE_DESCRIPTION),
@@ -170,8 +174,8 @@ export const CreateRecordInputSchema = lazySchema(() =>
       .refine((v) => Object.keys(v).length >= 1, {
         message: 'At least one field must be provided',
       })
-      .refine((v) => Object.keys(v).length <= 100, {
-        message: 'Maximum 100 fields per record',
+      .refine((v) => Object.keys(v).length <= MAX_RECORD_FIELDS, {
+        message: `Maximum ${MAX_RECORD_FIELDS} fields per record`,
       })
       .describe(
         'Key-value map of ServiceNow field names to values for the new record ' +
@@ -190,8 +194,8 @@ export const UpdateRecordInputSchema = lazySchema(() =>
       .refine((v) => Object.keys(v).length >= 1, {
         message: 'At least one field must be provided to update',
       })
-      .refine((v) => Object.keys(v).length <= 100, {
-        message: 'Maximum 100 fields per record',
+      .refine((v) => Object.keys(v).length <= MAX_RECORD_FIELDS, {
+        message: `Maximum ${MAX_RECORD_FIELDS} fields per record`,
       })
       .describe(
         'Key-value map of ServiceNow field names to their new values. Only provide fields that need to change.'
@@ -477,6 +481,7 @@ export const UploadAttachmentInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .describe('MIME type of the file (e.g., application/pdf, image/png, text/plain)'),
+    // Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
     base64Content: z
       .string()
       .max(10_000_000)
