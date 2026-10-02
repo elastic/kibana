@@ -85,16 +85,19 @@ export const fetchAlertSourcesByIds = async ({
 };
 
 /**
- * Fetches the mapped fields of each selected document with a single `fields: ['*']` search.
+ * Fetches the mapped fields of each selected document with one `fields: ['*']` sub-search per
+ * selected index, sent together as a single `msearch`.
  *
  * Deliberately not `mget`: reading through the `fields` API yields dotted field paths with array
  * values, the shape the Security tables embed today, and includes runtime fields defined in the
  * index mappings. Runtime fields that exist only on a Kibana data view are not included — the
  * server has no data view to read them from.
  *
- * Each index gets its own `ids` clause so the query matches exactly the requested pairs. A single
- * `ids` query over every selected index would also match an id in an index it was not selected
- * for, and those extra hits would compete for the `size` window with the pairs actually asked for.
+ * Each sub-search targets one selected index with only the ids selected for it, so a hit can be
+ * attributed to the pair that asked for it even when the index is an alias or data stream and the
+ * hit reports a concrete backing index. Expanded documents carry that concrete index. Index names
+ * travel in the request body, so a selection spread over many indices cannot outgrow the
+ * request-line limit a single search's URL path would hit.
  *
  * The caller must pass an `asCurrentUser` client so the read stays scoped to the requesting
  * user's index privileges and space. Pairs that resolve to nothing are logged and skipped rather
@@ -116,45 +119,53 @@ export const fetchDocumentFieldsByIds = async ({
 
   assertWithinRunLimit(selections.length, 'documents');
 
-  const requested = new Set(selections.map(selectionKey));
   const idsByIndex = new Map<string, Set<string>>();
   for (const { _id, _index } of selections) {
     const ids = idsByIndex.get(_index) ?? new Set<string>();
     ids.add(_id);
     idsByIndex.set(_index, ids);
   }
+  const requestedIndices = [...idsByIndex];
 
   try {
-    const response = await esClient.search<never>({
-      index: [...idsByIndex.keys()],
-      size: requested.size,
-      _source: false,
-      fields: ['*'],
-      query: {
-        bool: {
-          should: [...idsByIndex].map(([index, ids]) => ({
-            bool: { filter: [{ term: { _index: index } }, { ids: { values: [...ids] } }] },
-          })),
-          minimum_should_match: 1,
-        },
-      },
-      ignore_unavailable: true,
+    const { responses } = await esClient.msearch<never>({
+      searches: requestedIndices.flatMap(([index, ids]) => [
+        { index, ignore_unavailable: true },
+        { size: ids.size, _source: false, fields: ['*'], query: { ids: { values: [...ids] } } },
+      ]),
     });
 
     const documents: FetchedFields[] = [];
     const found = new Set<string>();
-    // `_id` is optional on the client's hit type even though a concrete search hit always has one.
-    const identifiedHits = response.hits.hits.filter(
-      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
-    );
-    for (const hit of identifiedHits) {
-      const key = selectionKey({ _id: hit._id, _index: hit._index });
-      // A hit reported under a different index name than the one selected (e.g. the concrete
-      // index behind an alias) is not the pair that was asked for. Keep only exact pairs.
-      if (requested.has(key)) {
-        found.add(key);
-        documents.push({ _id: hit._id, _index: hit._index, fields: hit.fields ?? {} });
+    const failures: string[] = [];
+    responses.forEach((response, position) => {
+      const [requestedIndex, requestedIds] = requestedIndices[position];
+      if ('error' in response) {
+        failures.push(`${requestedIndex}: ${response.error.reason ?? response.error.type}`);
+        return;
       }
+      // `_id` is optional on the client's hit type even though a concrete search hit always has one.
+      const requestedHits = response.hits.hits.filter(
+        (hit): hit is typeof hit & { _id: string } =>
+          hit._id !== undefined && requestedIds.has(hit._id)
+      );
+      for (const { _id, _index, fields } of requestedHits) {
+        // Keyed by the index that was selected, not the one reported: behind an alias or data
+        // stream they differ. The first hit wins if an alias exposes the same id more than once.
+        const key = selectionKey({ _id, _index: requestedIndex });
+        if (!found.has(key)) {
+          found.add(key);
+          documents.push({ _id, _index, fields: fields ?? {} });
+        }
+      }
+    });
+
+    // With every sub-search failed this is an Elasticsearch problem, not an empty selection.
+    if (failures.length === requestedIndices.length) {
+      throw new Error(`Every index search failed (${failures.join('; ')})`);
+    }
+    for (const failure of failures) {
+      logger.warn(`Failed to search index ${failure}`);
     }
 
     for (const selection of selections) {

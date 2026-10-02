@@ -98,10 +98,11 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): Docume
  * Reads the (id, index) pairs from `inputs.event.documents` and `inputs.event.documentIds`.
  *
  * Pre-expanded `documents` are forwarded verbatim to the workflow engine, while `documentIds` are
- * expanded by the workflows server, which keeps only hits that exactly match a requested pair.
- * Either way, these pairs are the full set of documents the workflow receives, so checking them
- * against the case prevents a caller from referencing documents outside it. Content of forwarded
- * `documents` remains client-supplied; activity enrichment is derived server-side from the case.
+ * expanded by the workflows server, which returns only documents reachable through a requested
+ * pair (an alias or data stream resolves to its backing indices). Either way, these pairs are the
+ * full set of documents the workflow receives, so checking them against the case prevents a caller
+ * from referencing documents outside it. Content of forwarded `documents` remains client-supplied;
+ * activity enrichment is derived server-side from the case.
  *
  * Malformed entries are rejected, never skipped. A nullish or missing value is treated as
  * "no document inputs".

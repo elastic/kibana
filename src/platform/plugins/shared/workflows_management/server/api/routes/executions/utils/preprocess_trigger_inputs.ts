@@ -28,11 +28,19 @@ export const ALL_TRIGGER_SELECTION_KINDS: readonly TriggerSelectionKind[] = [
  */
 export const MAX_EXPANDED_EVENT_BYTES = 10 * 1024 * 1024;
 
+const BYTES_PER_MB = 1024 * 1024;
+
+/** Rounds up to one decimal so a size just over the limit never reads as equal to it. */
+const toMegabytes = (bytes: number): string =>
+  (Math.ceil((bytes / BYTES_PER_MB) * 10) / 10).toFixed(1);
+
 const assertWithinExpandedEventBudget = (event: unknown): void => {
   const bytes = Buffer.byteLength(JSON.stringify(event) ?? '', 'utf8');
   if (bytes > MAX_EXPANDED_EVENT_BYTES) {
     throw new WorkflowTriggerInputError(
-      `The selection expands to ${bytes} bytes, above the ${MAX_EXPANDED_EVENT_BYTES}-byte limit for a workflow run. Select fewer alerts or documents.`
+      `The selection expands to ${toMegabytes(bytes)} MB, above the ${
+        MAX_EXPANDED_EVENT_BYTES / BYTES_PER_MB
+      } MB limit for a workflow run. Select fewer alerts or documents.`
     );
   }
 };
