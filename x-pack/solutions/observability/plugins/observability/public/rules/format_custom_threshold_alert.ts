@@ -20,12 +20,8 @@ import type {
 } from '../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../components/custom_threshold/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
+import { getDataViewId } from '../../common/custom_threshold_rule/helpers/get_data_view_id';
 import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
-
-const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedReferenceType) =>
-  typeof searchConfiguration?.index === 'string'
-    ? searchConfiguration.index
-    : searchConfiguration?.index?.title;
 
 export const formatCustomThresholdAlert = (
   fields: Record<string, unknown>,

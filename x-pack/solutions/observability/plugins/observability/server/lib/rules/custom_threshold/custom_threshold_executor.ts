@@ -32,6 +32,7 @@ import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import type { AlertsLocatorParams } from '../../../../common';
 import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { getDataViewId } from '../../../../common/custom_threshold_rule/helpers/get_data_view_id';
 import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import {
@@ -338,10 +339,7 @@ export const createCustomThresholdExecutor = ({
 
         const indexedStartedAt = start ?? startedAt.toISOString();
         scheduledActionsCount++;
-        const dataViewIdTitle =
-          typeof params.searchConfiguration?.index === 'string'
-            ? params.searchConfiguration?.index
-            : params.searchConfiguration?.index?.title;
+        const dataViewIdTitle = getDataViewId(params.searchConfiguration);
         const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
@@ -393,11 +391,7 @@ export const createCustomThresholdExecutor = ({
         | undefined;
       const recoveredSearchConfiguration = recoveredParams?.searchConfiguration;
       const recoveredCriteria = recoveredParams?.criteria ?? params.criteria;
-      const recoveredDataViewIdTitle = recoveredSearchConfiguration
-        ? typeof recoveredSearchConfiguration.index === 'string'
-          ? recoveredSearchConfiguration.index
-          : recoveredSearchConfiguration.index?.title
-        : undefined;
+      const recoveredDataViewIdTitle = getDataViewId(recoveredSearchConfiguration);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),

@@ -6,9 +6,9 @@
  */
 
 import type { Rule } from '@kbn/alerts-ui-shared';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ALERT_GROUPING, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { getViewInAppLocatorParams } from '../../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { getDataViewId } from '../../../../../../common/custom_threshold_rule/helpers/get_data_view_id';
 import { getGroupsFromGroupingObject } from '../../../../../../common/custom_threshold_rule/helpers/get_group';
 import type {
   CustomThresholdExpressionMetric,
@@ -40,24 +40,14 @@ export const getCustomThresholdRuleData = ({ alert }: { rule: Rule; alert: TopAl
   }
 
   const criteria = toCriteria(ruleParams?.criteria);
-  const { index } = searchConfiguration;
-  let dataViewId: string | undefined;
-  if (typeof index === 'string') {
-    dataViewId = index;
-  } else if (index) {
-    dataViewId = index.title;
-  }
+  const dataViewId = getDataViewId(searchConfiguration);
 
   return {
     discoverAppLocatorParams: getViewInAppLocatorParams({
       dataViewId,
       groups: getGroupsFromGroupingObject(alert.fields[ALERT_GROUPING]),
       metrics: criteria.flatMap((criterion) => criterion.metrics ?? []),
-      searchConfiguration: {
-        index: searchConfiguration.index as DataViewSpec | string,
-        query: searchConfiguration.query,
-        filter: searchConfiguration.filter,
-      },
+      searchConfiguration,
     }),
   };
 };
