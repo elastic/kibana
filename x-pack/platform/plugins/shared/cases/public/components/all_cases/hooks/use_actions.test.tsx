@@ -19,6 +19,7 @@ import * as api from '../../../containers/api';
 import { CaseStatuses } from '../../../../common/types/domain';
 import {
   noDeleteCasesPermissions,
+  noUpdateCasesPermissions,
   onlyDeleteCasesPermission,
   allCasesPermissions,
   readCasesPermissions,
@@ -27,9 +28,27 @@ import {
 } from '../../../common/mock';
 import React from 'react';
 import * as i18n from '../translations';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 jest.mock('../../../containers/api');
 jest.mock('../../../containers/user_profiles/api');
+
+const mockCanExecuteWorkflow = jest.fn(() => false);
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useWorkflowsCapabilities: () => ({
+      ...actual.useWorkflowsCapabilities(),
+      canExecuteWorkflow: mockCanExecuteWorkflow(),
+    }),
+  };
+});
+
+jest.mock('../../workflows/run_case_workflow_modal', () => ({
+  RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+}));
 
 describe('useActions', () => {
   let user: UserEvent;
@@ -677,6 +696,68 @@ describe('useActions', () => {
       });
 
       expect(result.current.actions).toBe(null);
+    });
+  });
+
+  describe('Run workflow', () => {
+    let getConfigSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ runWorkflows: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+      mockCanExecuteWorkflow.mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      getConfigSpy.mockRestore();
+      mockCanExecuteWorkflow.mockReturnValue(false);
+    });
+
+    const openRowActions = async (permissions = allCasesPermissions()) => {
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: (props) => <TestProviders {...props} permissions={permissions} />,
+      });
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      renderWithTestingProviders(comp, { wrapperProps: { permissions } });
+
+      await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
+    };
+
+    it('shows the run workflow action and opens the modal', async () => {
+      await openRowActions();
+
+      expect(screen.queryByTestId('cases-run-workflow-modal')).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId('cases-bulk-action-run-workflow'));
+
+      expect(await screen.findByTestId('cases-run-workflow-modal')).toBeInTheDocument();
+    });
+
+    it('does not show the run workflow action when running workflows is disabled', async () => {
+      getConfigSpy.mockReturnValue(undefined);
+
+      await openRowActions();
+
+      expect(screen.queryByTestId('cases-bulk-action-run-workflow')).not.toBeInTheDocument();
+    });
+
+    it('does not show the run workflow action without update permissions', async () => {
+      await openRowActions(noUpdateCasesPermissions());
+
+      expect(screen.queryByTestId('cases-bulk-action-run-workflow')).not.toBeInTheDocument();
+    });
+
+    it('does not show the run workflow action when the user cannot execute workflows', async () => {
+      mockCanExecuteWorkflow.mockReturnValue(false);
+
+      await openRowActions();
+
+      expect(screen.queryByTestId('cases-bulk-action-run-workflow')).not.toBeInTheDocument();
     });
   });
 });

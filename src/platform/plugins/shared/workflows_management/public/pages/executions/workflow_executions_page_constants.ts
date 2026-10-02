@@ -42,7 +42,7 @@ export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
   },
   {
     title: i18n.translate('workflowsManagement.executionsPage.filterExecutedBy', {
-      defaultMessage: 'Executed by',
+      defaultMessage: 'Triggered by',
     }),
     field_name: 'executedBy',
   },

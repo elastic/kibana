@@ -11,7 +11,9 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
@@ -45,7 +47,7 @@ const significantEventsTabs = [
   'knowledge_indicators',
   'queries',
   'detections',
-  'significant_events',
+  SIGNIFICANT_EVENTS_TAB,
   'cortex',
   'decision_trees',
 ] as const;
@@ -73,6 +75,7 @@ export function SignificantEventsPage() {
   } = useKibana();
 
   const { canShow, canManage, canConfigure } = getNightshiftCapabilities(nightshift);
+  const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const isCortexEnabled = useCortexEnabled();
@@ -134,7 +137,7 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
-  const tabs = useMemo(
+  const allTabs = useMemo(
     () => [
       {
         id: 'streams',
@@ -168,14 +171,15 @@ export function SignificantEventsPage() {
         }),
         href: router.link('/{tab}', { path: { tab: 'detections' } }),
         isSelected: tab === 'detections',
+        badge: { iconType: 'code' },
       },
       {
-        id: 'significant_events',
+        id: SIGNIFICANT_EVENTS_TAB,
         label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
           defaultMessage: 'Significant Events',
         }),
-        href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
-        isSelected: tab === 'significant_events',
+        href: router.link('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB } }),
+        isSelected: tab === SIGNIFICANT_EVENTS_TAB,
       },
       ...(isCortexEnabled
         ? [
@@ -204,6 +208,10 @@ export function SignificantEventsPage() {
     ],
     [tab, router, isCortexEnabled, isDecisionTreesEnabled]
   );
+  const tabs = useMemo(
+    () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
+    [allTabs, isDeveloperMode]
+  );
 
   if (isAvailabilityLoading) {
     return <SignificantEventsAppLoading />;
@@ -220,7 +228,7 @@ export function SignificantEventsPage() {
 
   // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
@@ -345,7 +353,7 @@ export function SignificantEventsPage() {
             </KiGenerationProvider>
           )}
           {tab === 'detections' && <DetectionsTab />}
-          {tab === 'significant_events' && <SignificantEventsTab />}
+          {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
           {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
         </SignificantEventsAppPageTemplate.Body>

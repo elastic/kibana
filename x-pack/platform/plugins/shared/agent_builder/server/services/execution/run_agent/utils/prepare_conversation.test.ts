@@ -29,11 +29,16 @@ import { prepareConversation as prepareConversationFromTimeline } from './prepar
 import { eventsForContext, groupTimelineRounds, roundResponse } from './context_timeline';
 import {
   TIMELINE_FIXTURE_AUTHOR,
+  customEventFixture,
   eventsNativeConversation,
   pausedAndResumedRoundTimeline,
   roundsOfTimeline,
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
+import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server';
+import type { AgentHandlerContext } from '@kbn/agent-builder-server';
+import { isHumanMessage } from '@langchain/core/messages';
+import { prepareMessages } from './to_langchain_messages';
 
 type PrepareParams = Parameters<typeof prepareConversationFromTimeline>[0];
 
@@ -1314,6 +1319,194 @@ describe('prepareConversation', () => {
         attachments: [],
         author: { id: 'u1', username: 'user1' },
       });
+    });
+  });
+
+  describe('custom conversation events', () => {
+    const noteDefinition = (
+      format?: ConversationEventTypeDefinition['format']
+    ): ConversationEventTypeDefinition =>
+      ({
+        type: 'text_note',
+        payloadSchema: {} as ConversationEventTypeDefinition['payloadSchema'],
+        ...(format ? { format } : {}),
+      } as ConversationEventTypeDefinition);
+
+    const timelineWithNote = () => [
+      ...timelineFromRounds([
+        createRound({
+          id: 'a',
+          input: { message: 'first' },
+          started_at: '2026-01-01T00:00:00.000Z',
+        }),
+      ]),
+      customEventFixture({
+        id: 'note',
+        created_at: '2026-01-01T00:01:00.000Z',
+        data: { title: 'Deploy freeze', text: 'No deploys this week.' },
+      }),
+      ...timelineFromRounds([
+        createRound({
+          id: 'b',
+          input: { message: 'second' },
+          started_at: '2026-01-01T00:02:00.000Z',
+        }),
+      ]),
+    ];
+
+    it('resolves the representation through the registered definition and keeps timeline order', async () => {
+      const format = jest.fn(({ data }: { data: any }) => ({
+        type: 'text' as const,
+        value: `${data.title}\n${data.text}`,
+      }));
+      mockContext.conversationEvents.getDefinition.mockReturnValue(noteDefinition(format));
+
+      const result = await prepareConversationFromTimeline({
+        timeline: timelineWithNote(),
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.map((event) => event.id)).toEqual([
+        'a::user_message',
+        'a::execution_started',
+        'a::execution_terminated',
+        'note',
+        'b::user_message',
+        'b::execution_started',
+        'b::execution_terminated',
+      ]);
+      expect(result.timeline[3]).toEqual({
+        ...customEventFixture({
+          id: 'note',
+          created_at: '2026-01-01T00:01:00.000Z',
+          data: { title: 'Deploy freeze', text: 'No deploys this week.' },
+        }),
+        representation: { type: 'text', value: 'Deploy freeze\nNo deploys this week.' },
+      });
+      expect(mockContext.conversationEvents.getDefinition).toHaveBeenCalledWith('text_note');
+      expect(format).toHaveBeenCalledWith(expect.objectContaining({ id: 'note' }), {
+        request: mockContext.request,
+        spaceId: mockContext.spaceId,
+      });
+    });
+
+    it('awaits an async format', async () => {
+      mockContext.conversationEvents.getDefinition.mockReturnValue(
+        noteDefinition(async () => ({ type: 'text', value: 'async note' }))
+      );
+
+      const result = await prepareConversationFromTimeline({
+        timeline: timelineWithNote(),
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.find((event) => event.id === 'note')).toEqual(
+        expect.objectContaining({ representation: { type: 'text', value: 'async note' } })
+      );
+    });
+
+    it('skips an event whose type is not registered', async () => {
+      mockContext.conversationEvents.getDefinition.mockReturnValue(undefined);
+
+      const result = await prepareConversationFromTimeline({
+        timeline: timelineWithNote(),
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.some((event) => event.id === 'note')).toBe(false);
+      expect(roundsOfTimeline(result.timeline).map((round) => round.id)).toEqual(['a', 'b']);
+      expect(mockContext.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('is not registered')
+      );
+    });
+
+    it('skips an event whose type defines no format, silently (opting out is by design)', async () => {
+      mockContext.conversationEvents.getDefinition.mockReturnValue(noteDefinition());
+
+      const result = await prepareConversationFromTimeline({
+        timeline: timelineWithNote(),
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.some((event) => event.id === 'note')).toBe(false);
+      expect(mockContext.logger.debug).not.toHaveBeenCalled();
+      expect(mockContext.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('skips an event whose format throws, without failing the round', async () => {
+      mockContext.conversationEvents.getDefinition.mockReturnValue(
+        noteDefinition(() => {
+          throw new Error('boom');
+        })
+      );
+
+      const result = await prepareConversationFromTimeline({
+        timeline: timelineWithNote(),
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.some((event) => event.id === 'note')).toBe(false);
+      expect(roundsOfTimeline(result.timeline).map((round) => round.id)).toEqual(['a', 'b']);
+      expect(mockContext.logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+
+    it('skips every custom event when the context carries no event types service', async () => {
+      const { conversationEvents, ...contextWithout } = mockContext;
+
+      const result = await prepareConversationFromTimeline({
+        timeline: timelineWithNote(),
+        nextInput: { message: 'third' },
+        context: contextWithout as AgentHandlerContext,
+      });
+
+      expect(result.timeline.some((event) => event.id === 'note')).toBe(false);
+    });
+
+    it('renders the event to the LLM between the rounds (eventsForContext → prepareConversation → prepareMessages)', async () => {
+      mockContext.conversationEvents.getDefinition.mockReturnValue(
+        noteDefinition(({ data }: { data: any }) => ({ type: 'text', value: data.text }))
+      );
+      const conversation = eventsNativeConversation([
+        ...timelineFromRounds([
+          createRound({
+            id: 'a',
+            input: { message: 'first' },
+            started_at: '2026-01-01T00:00:00.000Z',
+          }),
+          createRound({
+            id: 'b',
+            input: { message: 'second' },
+            started_at: '2026-01-01T00:02:00.000Z',
+          }),
+        ]),
+        // stored at the tail, as addCustomEvents appends it
+        customEventFixture({
+          id: 'note',
+          created_at: '2026-01-01T00:01:00.000Z',
+          data: { text: 'No deploys this week.' },
+        }),
+      ] as TimelineEvent[]);
+
+      const processed = await prepareConversationFromTimeline({
+        timeline: eventsForContext(conversation),
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+      const messages = await prepareMessages({ conversation: processed });
+
+      // user a, assistant a, note, user b, assistant b, next input
+      expect(messages).toHaveLength(6);
+      expect(isHumanMessage(messages[2])).toBe(true);
+      expect(messages[2].content).toBe(
+        '<conversation_event type="text_note" timestamp="2026-01-01T00:01:00Z">No deploys this week.</conversation_event>'
+      );
+      expect(messages[1].content).toBe('Response');
+      expect(messages[3].content).toContain('second');
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
@@ -42,13 +42,14 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
+    getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
-    server: {} as StreamsServer,
+    server: {} as SignificantEventsServer,
     logger: loggingSystemMock.createLogger(),
     telemetry: telemetry as never,
   });

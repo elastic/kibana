@@ -1,5 +1,5 @@
 {
-  "sha1": "d60dee66472401f4c420097cae939b668eb9e14e",
+  "sha1": "b1c6b0401b8a10ac8f960c15c3d3cd12d01a5a13",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -396,7 +396,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 192,
+        "line": 190,
         "column": 32
       }
     },

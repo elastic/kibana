@@ -15,8 +15,9 @@ import { useConversationId } from '../../../../../context/conversation/use_conve
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useConversationFlyoutSessionProps } from '../../../../../hooks/use_conversation_flyout_session_props';
 import { AttachmentHeader } from './attachment_header';
-import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
+import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 import { useCanvasContext } from './canvas_context';
 
 const DEFAULT_CANVAS_WIDTH = '50vw';
@@ -43,6 +44,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const flyoutSessionProps = useConversationFlyoutSessionProps(FLYOUT_ARIA_LABEL);
 
   const openSidebarConversation = useCallback(() => {
     openSidebarConversationInternal({ conversationId });
@@ -160,6 +162,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       type={flyoutType}
       hideCloseButton
       paddingSize="none"
+      {...flyoutSessionProps}
     >
       <AttachmentHeader
         icon={header?.icon}
@@ -172,7 +175,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         isCanvas
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <AttachmentRenderErrorBoundary
+        <TimelineRenderErrorBoundary
           key={`${attachment.id}:${attachment.versionData?.version ?? 'latest'}`}
         >
           {() =>
@@ -189,7 +192,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
               }
             )
           }
-        </AttachmentRenderErrorBoundary>
+        </TimelineRenderErrorBoundary>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

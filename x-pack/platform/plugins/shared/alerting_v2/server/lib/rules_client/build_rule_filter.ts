@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -161,4 +161,20 @@ export const buildRuleSoFilter = (apiFilter: string): string => {
   const ast = fromKueryExpression(apiFilter);
   const rewrittenAst = rewriteNode(ast);
   return toKqlExpression(rewrittenAst);
+};
+
+/**
+ * Builds the API filter for the alert rules with at least one of the given tags,
+ * or for every alert rule when no tags are given.
+ */
+export const buildMatchingRulesFilter = (tags: string[]): string => {
+  const alertRules = nodeBuilder.is('kind', 'alert');
+  if (tags.length === 0) {
+    return toKqlExpression(alertRules);
+  }
+
+  const anyTag = nodeBuilder.or(
+    tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
+  );
+  return toKqlExpression(nodeBuilder.and([alertRules, anyTag]));
 };

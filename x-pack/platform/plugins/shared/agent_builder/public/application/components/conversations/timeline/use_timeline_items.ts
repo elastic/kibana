@@ -59,7 +59,7 @@ export const useTimelineItems = (): TimelineItem[] => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const liveEvents = useLiveEvents();
-  const { attachmentsService } = useAgentBuilderServices();
+  const { attachmentsService, conversationEventsService } = useAgentBuilderServices();
   const conversationAttachments = conversation?.attachments;
 
   const { pendingMessage, pendingAttachments } = useStreamRecord(conversationId);
@@ -124,9 +124,17 @@ export const useTimelineItems = (): TimelineItem[] => {
         {
           attachments: conversationAttachments,
           attachmentsService,
+          conversationEventsService,
         }
       ),
-    [events, isPendingUnsaved, pendingUserMessageId, conversationAttachments, attachmentsService]
+    [
+      events,
+      isPendingUnsaved,
+      pendingUserMessageId,
+      conversationAttachments,
+      attachmentsService,
+      conversationEventsService,
+    ]
   );
 
   return useMemo(() => {

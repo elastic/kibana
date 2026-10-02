@@ -14,24 +14,22 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
+import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { cloneDeep } from 'lodash';
 import {
   fromStoredSearchEmbeddable,
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
-  fromStoredGrid,
-  fromStoredRowHeight,
-  toDiscoverSessionEmbeddableOverrides,
-  fromStoredSort,
-  fromStoredTab,
   toStoredSearchEmbeddable,
   toStoredSearchEmbeddableByRef,
   toStoredSearchEmbeddableByValue,
-  toStoredGrid,
-  toStoredHeight,
-  fromDiscoverSessionEmbeddableOverrides,
-  toStoredSort,
   toStoredTab,
 } from './transform_utils';
+import { toByValuePanelState } from './transform_utils.fixtures';
+import {
+  fromStoredTableSettings,
+  toStoredTableSettings,
+} from '../session/search_and_table_mapping';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
@@ -47,6 +45,7 @@ import {
 } from './constants';
 import { SavedSearchType, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabTypeState } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 
@@ -692,53 +691,8 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredGrid', () => {
-    it('maps saved grid.columns to column_settings', () => {
-      expect(
-        fromStoredGrid({
-          columns: {
-            message: { width: 100 },
-            '@timestamp': { width: 200 },
-          },
-        })
-      ).toEqual({
-        message: { width: 100 },
-        '@timestamp': { width: 200 },
-      });
-    });
-
-    it('returns empty object when grid has no column entries', () => {
-      expect(fromStoredGrid({ columns: {} })).toEqual({});
-      expect(fromStoredGrid({})).toEqual({});
-    });
-  });
-
-  describe('toStoredGrid', () => {
-    it('builds saved grid from non-empty column_settings', () => {
-      expect(
-        toStoredGrid({
-          message: { width: 100 },
-          '@timestamp': { width: 200 },
-        })
-      ).toEqual({
-        columns: {
-          message: { width: 100 },
-          '@timestamp': { width: 200 },
-        },
-      });
-    });
-
-    it('returns empty object when column_settings is empty', () => {
-      expect(toStoredGrid({})).toEqual({});
-    });
-
-    it('returns empty object when column_settings is undefined (default)', () => {
-      expect(toStoredGrid()).toEqual({});
-    });
-  });
-
-  describe('toDiscoverSessionEmbeddableOverrides', () => {
-    it('converts stored state with all fields to embeddable overrides', () => {
+  describe('fromStoredTableSettings', () => {
+    it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
@@ -756,7 +710,7 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const result = toDiscoverSessionEmbeddableOverrides(storedState);
+      const result = fromStoredTableSettings(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message', '@timestamp'],
@@ -782,7 +736,7 @@ describe('search embeddable transform utils', () => {
         columns: ['message'],
         grid: { columns: {} },
       };
-      const result = toDiscoverSessionEmbeddableOverrides(storedState);
+      const result = fromStoredTableSettings(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message'],
@@ -803,7 +757,7 @@ describe('search embeddable transform utils', () => {
         rowHeight: 5,
         headerRowHeight: 2,
       };
-      const result = toDiscoverSessionEmbeddableOverrides(storedState);
+      const result = fromStoredTableSettings(storedState);
       expect(result.row_height).toBe(5);
       expect(result.header_row_height).toBe(2);
     });
@@ -813,14 +767,55 @@ describe('search embeddable transform utils', () => {
         rowHeight: -1,
         headerRowHeight: -1,
       };
-      const result = toDiscoverSessionEmbeddableOverrides(storedState);
+      const result = fromStoredTableSettings(storedState);
       expect(result.row_height).toBe('auto');
       expect(result.header_row_height).toBe('auto');
     });
+
+    it.each([
+      {
+        name: 'sort pairs',
+        sort: [
+          ['@timestamp', 'desc'],
+          ['message', 'asc'],
+        ],
+        expected: [
+          { name: '@timestamp', direction: 'desc' },
+          { name: 'message', direction: 'asc' },
+        ],
+      },
+      {
+        name: 'an unknown direction as desc',
+        sort: [['field', 'other']],
+        expected: [{ name: 'field', direction: 'desc' }],
+      },
+      {
+        name: 'the legacy single sort pair',
+        sort: ['@timestamp', 'desc'],
+        expected: [{ name: '@timestamp', direction: 'desc' }],
+      },
+    ])('converts $name to API sort objects', ({ sort, expected }) => {
+      expect(fromStoredTableSettings({ sort }).sort).toStrictEqual(expected);
+    });
+
+    it('omits column settings when the stored grid has no columns', () => {
+      expect(fromStoredTableSettings({ grid: {} })).toStrictEqual({});
+    });
   });
 
-  describe('fromDiscoverSessionEmbeddableOverrides', () => {
-    it('converts embeddable overrides with all fields to stored state', () => {
+  describe('toStoredTableSettings', () => {
+    it('distinguishes absent overrides from explicitly empty sort and columns', () => {
+      expect(toStoredTableSettings({})).toStrictEqual({});
+      expect(
+        toStoredTableSettings({
+          sort: [],
+          column_order: [],
+          column_settings: {},
+        })
+      ).toStrictEqual({ sort: [], columns: [] });
+    });
+
+    it('converts panel overrides with all fields to stored state', () => {
       const apiState = {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
         column_order: ['message', '@timestamp'],
@@ -834,7 +829,7 @@ describe('search embeddable transform utils', () => {
         wrap_lines: false,
         default_rendered_nodes: 2,
       };
-      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
+      const result = toStoredTableSettings(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
@@ -857,7 +852,7 @@ describe('search embeddable transform utils', () => {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
         column_order: ['message'],
       };
-      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
+      const result = toStoredTableSettings(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message'],
@@ -874,7 +869,7 @@ describe('search embeddable transform utils', () => {
         row_height: 'auto' as const,
         header_row_height: 'auto' as const,
       };
-      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
+      const result = toStoredTableSettings(apiState);
       expect(result.rowHeight).toBe(-1);
       expect(result.headerRowHeight).toBe(-1);
     });
@@ -884,12 +879,26 @@ describe('search embeddable transform utils', () => {
         row_height: 5,
         header_row_height: 2,
       };
-      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
+      const result = toStoredTableSettings(apiState);
       expect(result.rowHeight).toBe(5);
       expect(result.headerRowHeight).toBe(2);
     });
 
-    it('round-trips with toDiscoverSessionEmbeddableOverrides', () => {
+    it('converts every API sort object to a stored sort pair', () => {
+      expect(
+        toStoredTableSettings({
+          sort: [
+            { name: '@timestamp', direction: 'desc' },
+            { name: 'message', direction: 'asc' },
+          ],
+        }).sort
+      ).toStrictEqual([
+        ['@timestamp', 'desc'],
+        ['message', 'asc'],
+      ]);
+    });
+
+    it('round-trips with fromStoredTableSettings', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [
           ['@timestamp', 'desc'],
@@ -907,8 +916,8 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const overrides = toDiscoverSessionEmbeddableOverrides(storedState);
-      const back = fromDiscoverSessionEmbeddableOverrides(overrides);
+      const overrides = fromStoredTableSettings(storedState);
+      const back = toStoredTableSettings(overrides);
       expect(back.sort).toEqual(storedState.sort);
       expect(back.columns).toEqual(storedState.columns);
       expect(back.rowHeight).toBe(storedState.rowHeight);
@@ -920,78 +929,9 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredSort', () => {
-    it('converts array of [field, direction] to sort objects', () => {
-      const sort = [
-        ['@timestamp', 'desc'],
-        ['message', 'asc'],
-      ];
-      const result = fromStoredSort(sort);
-      expect(result).toEqual([
-        { name: '@timestamp', direction: 'desc' },
-        { name: 'message', direction: 'asc' },
-      ]);
-    });
-
-    it('defaults direction to desc when not asc or desc', () => {
-      const sort = [['field', 'other' as 'desc']];
-      const result = fromStoredSort(sort);
-      expect(result).toEqual([{ name: 'field', direction: 'desc' }]);
-    });
-
-    it('converts legacy flat sort [field, direction] to a single sort entry', () => {
-      const result = fromStoredSort(['@timestamp', 'desc']);
-      expect(result).toEqual([{ name: '@timestamp', direction: 'desc' }]);
-    });
-  });
-
-  describe('toStoredSort', () => {
-    it('converts sort objects to array of [name, direction]', () => {
-      const sort = [
-        { name: '@timestamp', direction: 'desc' as const },
-        { name: 'message', direction: 'asc' as const },
-      ];
-      const result = toStoredSort(sort);
-      expect(result).toEqual([
-        ['@timestamp', 'desc'],
-        ['message', 'asc'],
-      ]);
-    });
-
-    it('returns empty array when sort is undefined (default)', () => {
-      expect(toStoredSort()).toEqual([]);
-    });
-
-    it('returns empty array when sort is empty', () => {
-      expect(toStoredSort([])).toEqual([]);
-    });
-  });
-
-  describe('fromStoredRowHeight', () => {
-    it('returns numeric height as-is', () => {
-      expect(fromStoredRowHeight(3)).toBe(3);
-      expect(fromStoredRowHeight(5)).toBe(5);
-    });
-
-    it('returns "auto" when height is -1', () => {
-      expect(fromStoredRowHeight(-1)).toBe('auto');
-    });
-  });
-
-  describe('toStoredHeight', () => {
-    it('returns numeric height as-is', () => {
-      expect(toStoredHeight(3)).toBe(3);
-      expect(toStoredHeight(5)).toBe(5);
-    });
-
-    it('returns -1 when height is "auto"', () => {
-      expect(toStoredHeight('auto')).toBe(-1);
-    });
-  });
-
-  describe('fromStoredTab', () => {
+  describe('stored tab conversion in by-value panels', () => {
     it('converts stored tab with dataView id to API tab', () => {
-      const storedTab = {
+      const storedTab: DiscoverSessionTabAttributes = {
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
         grid: { columns: { '@timestamp': { width: 200 } } },
@@ -1002,14 +942,21 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
         hideChart: false,
+        hideTable: false,
         isTextBasedQuery: false,
         kibanaSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
             query: { language: 'kuery', query: '' },
-            index: 'data-view-1',
+            indexRefName: 'tab_classic.kibanaSavedObjectMeta.searchSourceJSON.index',
             filter: [
               {
-                meta: { index: 'data-view-1', alias: null, negate: false, disabled: false },
+                meta: {
+                  indexRefName:
+                    'tab_classic.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                },
                 query: { match_phrase: { 'log.level': 'error' } },
               },
             ],
@@ -1018,15 +965,24 @@ describe('search embeddable transform utils', () => {
       };
       const references: SavedObjectReference[] = [
         {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          name: 'tab_classic.kibanaSavedObjectMeta.searchSourceJSON.index',
           type: 'index-pattern',
           id: 'data-view-1',
         },
+        {
+          name: 'tab_classic.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+          id: 'foreign-data-view',
+        },
       ];
-      const result = fromStoredTab(
-        storedTab as unknown as Parameters<typeof fromStoredTab>[0],
+      const originalTab = cloneDeep(storedTab);
+      const originalReferences = cloneDeep(references);
+
+      const [result] = fromStoredSearchEmbeddableByValue(
+        toByValuePanelState(storedTab),
         references
-      );
+      ).tabs;
+
       expect(result.sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
       expect(result.column_order).toEqual(['message', '@timestamp']);
       expect(result.column_settings).toEqual({ '@timestamp': { width: 200 } });
@@ -1040,11 +996,14 @@ describe('search embeddable transform utils', () => {
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
       expect('filters' in result && result.filters).toHaveLength(1);
       expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
+      expect(result).toMatchObject({ filters: [{ data_view_id: 'foreign-data-view' }] });
+      expect(storedTab).toStrictEqual(originalTab);
+      expect(references).toStrictEqual(originalReferences);
     });
 
     it('converts stored ES|QL tab to API tab with data_source.type esql', () => {
       const esql = 'FROM logs-* | LIMIT 100';
-      const storedTab = {
+      const storedTab: DiscoverSessionTabAttributes = {
         sort: [],
         columns: ['@timestamp'],
         grid: {},
@@ -1060,7 +1019,7 @@ describe('search embeddable transform utils', () => {
           }),
         },
       };
-      const result = fromStoredTab(storedTab, []);
+      const [result] = fromStoredSearchEmbeddableByValue(toByValuePanelState(storedTab)).tabs;
       expect(result.data_source).toEqual({
         type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
         query: esql,
@@ -1070,11 +1029,31 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('toStoredTab', () => {
-    it('converts API classic tab to stored tab with references', () => {
+    it('adds table defaults when converting a minimal tab', () => {
+      const { state, references } = toStoredTab({
+        sort: [],
+        data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+      });
+
+      expect(state).toStrictEqual({
+        sort: [],
+        columns: [],
+        grid: {},
+        hideChart: false,
+        hideTable: false,
+        isTextBasedQuery: true,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({ query: { esql: 'FROM logs-*' } }),
+        },
+      });
+      expect(references).toStrictEqual([]);
+    });
+
+    it('converts API classic tab to stored tab with data view and filter references', () => {
       const apiTab: DiscoverSessionApiEmbeddableTab = {
         type: DiscoverTabType.Default,
         column_order: ['message', '@timestamp'],
-        column_settings: { '@timestamp': { width: 200 } },
+        column_settings: { '@timestamp': { width: 0 } },
         sort: [{ name: '@timestamp', direction: 'desc' }],
         view_mode: VIEW_MODE.DOCUMENT_LEVEL,
         density: DataGridDensity.COMPACT,
@@ -1090,42 +1069,78 @@ describe('search embeddable transform utils', () => {
             },
             disabled: false,
             negate: false,
+            data_view_id: 'foreign-data-view',
           },
         ],
         query: { language: 'kql', expression: '' },
         rows_per_page: 100,
         sample_size: 500,
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
+        documents_display_mode: 'json',
+        hide_nulls: false,
+        wrap_lines: true,
+        default_rendered_nodes: 10,
       };
+      const originalTab = cloneDeep(apiTab);
+
       const { state, references } = toStoredTab(apiTab);
-      expect(references).toContainEqual({
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-        id: 'data-view-1',
-      });
+
+      expect(references).toStrictEqual([
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'data-view-1',
+        },
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+          id: 'foreign-data-view',
+        },
+      ]);
       expect(state.sort).toEqual([['@timestamp', 'desc']]);
       expect(state.columns).toEqual(['message', '@timestamp']);
+      expect(state.grid).toStrictEqual({ columns: { '@timestamp': { width: 0 } } });
       expect(state.rowHeight).toBe(-1);
       expect(state.headerRowHeight).toBe(-1);
       expect(state.density).toBe(DataGridDensity.COMPACT);
       expect(state.hideChart).toBe(false);
+      expect(state.hideTable).toBe(false);
       expect(state.isTextBasedQuery).toBe(false);
       expect(state.tabTypeState).toBeUndefined();
-      const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
-      expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
+      expect(state.sampleSize).toBe(500);
+      expect(state.rowsPerPage).toBe(100);
+      expect(state.documentsDisplayMode).toBe('json');
+      expect(state.jsonModeSettings).toStrictEqual({
+        hideNulls: false,
+        wrapLines: true,
+        defaultRenderedNodes: 10,
+      });
+      const searchSource = parseSearchSourceJSON(state.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource).toHaveProperty(
+        'indexRefName',
+        'kibanaSavedObjectMeta.searchSourceJSON.index'
+      );
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
       expect(searchSource.filter).toHaveLength(1);
+      expect(searchSource.filter).toMatchObject([
+        {
+          meta: {
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          },
+          query: { match_phrase: { 'log.level': 'error' } },
+        },
+      ]);
+      expect(searchSource.filter?.[0].meta.index).toBeUndefined();
+      expect(apiTab).toStrictEqual(originalTab);
     });
 
-    it('round-trips all fields through toStoredTab → fromStoredTab', () => {
-      const references: SavedObjectReference[] = [
-        { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
-      ];
+    it('preserves classic search and table settings through a by-value panel', () => {
       const apiTab: DiscoverSessionApiEmbeddableTab = {
         type: DiscoverTabType.Default,
-        column_order: [],
-        sort: [],
+        column_order: ['message', '@timestamp'],
+        column_settings: { message: { width: 250 } },
+        sort: [{ name: '@timestamp', direction: 'desc' }],
         view_mode: VIEW_MODE.DOCUMENT_LEVEL,
         density: DataGridDensity.COMPACT,
         header_row_height: 3,
@@ -1142,16 +1157,31 @@ describe('search embeddable transform utils', () => {
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'dv-1' },
       };
 
-      const { state } = toStoredTab(apiTab);
-      const result = fromStoredTab(state, references);
+      const { state, references } = toStoredTab(apiTab);
+      const [result] = fromStoredSearchEmbeddableByValue(
+        toByValuePanelState(state),
+        references
+      ).tabs;
 
-      expect('data_source' in result && result.data_source).toEqual({
-        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        ref_id: 'dv-1',
+      expect(result).toStrictEqual({
+        type: DiscoverTabType.Default,
+        column_order: ['message', '@timestamp'],
+        column_settings: { message: { width: 250 } },
+        sort: [{ name: '@timestamp', direction: 'desc' }],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        density: DataGridDensity.COMPACT,
+        header_row_height: 3,
+        row_height: 3,
+        query: { language: 'kql', expression: '' },
+        filters: [
+          {
+            type: ASCODE_FILTER_TYPE.CONDITION,
+            condition: { field: 'log.level', operator: ASCODE_FILTER_OPERATOR.IS, value: 'error' },
+            disabled: false,
+          },
+        ],
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'dv-1' },
       });
-      expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-      expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
-      expect('filters' in result && result.filters).toHaveLength(1);
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {
