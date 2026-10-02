@@ -62,7 +62,6 @@ export type EventsWriteInput = Pick<
 
 export interface EventsWriteResult {
   index: number;
-  event_uuid: string;
   event_id: string;
   status: SignificantEvent['status'];
   written: true;
@@ -104,7 +103,6 @@ interface DedupCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
-  eventUuid: string;
   /** Retained separately so the dedup scan can narrow by rule identity. */
   ruleUuids: string[];
 }
@@ -114,7 +112,6 @@ interface SnapshotCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
-  eventUuid: string;
 }
 
 type WriteCandidate = DedupCandidate | SnapshotCandidate;
@@ -178,7 +175,6 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
         index,
         input: normalizedInput,
         eventId: uuidv4(),
-        eventUuid: uuidv4(),
         ruleUuids,
       };
     }
@@ -188,7 +184,6 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
       index,
       input: normalizedInput,
       eventId: normalizedEventId,
-      eventUuid: uuidv4(),
     };
   });
 
@@ -336,11 +331,9 @@ const fetchPriorDocsByEventId = async (
   candidates: WriteCandidate[]
 ): Promise<{
   latestByEventId: Map<string, SignificantEvent>;
-  latestLegacyByEventId: Map<string, SignificantEvent>;
   priorDocsByEventId: Map<string, SignificantEvent[]>;
 }> => {
   const latestByEventId = new Map<string, SignificantEvent>();
-  const latestLegacyByEventId = new Map<string, SignificantEvent>();
   const priorDocsByEventId = new Map<string, SignificantEvent[]>();
   await Promise.all(
     candidates
@@ -367,30 +360,27 @@ const fetchPriorDocsByEventId = async (
           : await eventClient.findByEventId(c.eventId);
         const legacyHits = legacyResult ? legacyResult.hits : hits;
         priorDocsByEventId.set(c.eventId, hits);
-        const latest = hits.at(-1);
+        // `.rule-events` is dual-written asynchronously and can lag the write store. Use the
+        // canonical predecessor for fields copied into the new version (especially
+        // investigations), while retaining the read-store history for episode-context merging.
+        const latest = legacyHits.at(-1);
         if (latest !== undefined) {
           latestByEventId.set(c.eventId, latest);
         }
-        const latestLegacy = legacyHits.at(-1);
-        if (latestLegacy !== undefined) {
-          latestLegacyByEventId.set(c.eventId, latestLegacy);
-        }
       })
   );
-  return { latestByEventId, latestLegacyByEventId, priorDocsByEventId };
+  return { latestByEventId, priorDocsByEventId };
 };
 
 const buildPendingWrite = (
   candidate: WriteCandidate,
   timestamp: string,
   latestByEventId: Map<string, SignificantEvent>,
-  latestLegacyByEventId: Map<string, SignificantEvent>,
   priorDocsByEventId: Map<string, SignificantEvent[]>
 ) => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
   const latestEvent = latestByEventId.get(candidate.eventId);
-  const latestLegacyEvent = latestLegacyByEventId.get(candidate.eventId);
   const isContinuation = candidate.input.event_id !== undefined;
 
   const signals = isContinuation
@@ -434,10 +424,8 @@ const buildPendingWrite = (
           }
         : {}),
       '@timestamp': timestamp,
-      event_uuid: candidate.eventUuid,
       event_id: candidate.eventId,
-      previous_event_uuid: latestLegacyEvent?.event_uuid,
-      investigations: latestLegacyEvent?.investigations,
+      investigations: latestEvent?.investigations,
       signals,
       stream_names: episodeContext.streamNames,
       causal_features: episodeContext.causalFeatures,
@@ -468,7 +456,6 @@ const applyBulkResults = (
     } else {
       const result: EventsWriteResult = {
         index: candidate.index,
-        event_uuid: candidate.eventUuid,
         event_id: candidate.eventId,
         status,
         written: true,
@@ -564,15 +551,18 @@ export async function eventsWriteBulkHandler({
   const activeEvents = client !== eventClient ? canonicalActiveEvents : searchClientActiveEvents;
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =
-    await fetchPriorDocsByEventId(client, eventClient, toWrite);
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
+    client,
+    eventClient,
+    toWrite
+  );
   const calibrated = toWrite.map((candidate) => ({
     ...candidate,
     input: {
       ...candidate.input,
       severity: getCalibratedSeverity({
         source,
-        latestEvent: latestLegacyByEventId.get(candidate.eventId),
+        latestEvent: latestByEventId.get(candidate.eventId),
         proposedSeverity: candidate.input.severity,
         proposedStatus: candidate.input.status,
         proposedSignals: candidate.input.signals,
@@ -583,7 +573,7 @@ export async function eventsWriteBulkHandler({
     if (
       candidate.mode === 'snapshot' &&
       shouldSkipAsNoOp(
-        latestLegacyByEventId.get(candidate.eventId),
+        latestByEventId.get(candidate.eventId),
         candidate,
         priorDocsByEventId.get(candidate.eventId) ?? []
       )
@@ -606,13 +596,7 @@ export async function eventsWriteBulkHandler({
   }
 
   const pendingToWrite = remaining.map((candidate) =>
-    buildPendingWrite(
-      candidate,
-      timestamp,
-      latestByEventId,
-      latestLegacyByEventId,
-      priorDocsByEventId
-    )
+    buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
   );
 
   let response;
@@ -645,9 +629,9 @@ export async function eventsWriteBulkHandler({
       // Use the canonical predecessor (legacy write store) rather than the read-store view:
       // .rule-events is dual-written fire-and-forget (no refresh guarantee), so it may lag and
       // yield undefined — emitting a spurious eventCreated for an existing event. The read-store
-      // client also decodes dismissed → closed, corrupting the status comparison used to decide
+      // client may decode statuses differently, corrupting the status comparison used to decide
       // whether to emit eventStatusChanged.
-      priorSignificantEvent: latestLegacyByEventId.get(candidate.eventId),
+      priorSignificantEvent: latestByEventId.get(candidate.eventId),
     });
     if (alertEventsClient && dualWriteLimit) {
       return [
