@@ -407,8 +407,9 @@ await repository.register({ esClient, log, repoName, verify: true });
 5. Create an ingest pipeline that transforms `@timestamp` fields:
    - The latest timestamp from the data becomes "now"
    - All other timestamps are adjusted by the same offset, preserving relative timing
-6. Create each destination data stream with the mappings of its restored indices, so field types such as
-   TSDB counters and histograms survive the reindex
+6. Create each destination data stream and copy the TSDB metric field mappings (counters, gauges,
+   histograms) of its restored indices onto it, so those types survive the reindex; a stream that cannot be
+   created or updated is reported and left to the reindex
 7. Reindex through the pipeline to the target data streams
 8. Clean up temporary indices, pipeline, and repository
 

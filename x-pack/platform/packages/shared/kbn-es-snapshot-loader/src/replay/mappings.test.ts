@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import { copySourceMappings, metricProperties } from './mappings';
 
@@ -21,7 +22,16 @@ const sourceMapping = {
     priority: 20,
     properties: { 'http.status_code': { type: 'keyword', time_series_dimension: true } },
   },
-  metrics: { properties: { requests_total: counter, latency: histogram } },
+  metrics: {
+    type: 'passthrough',
+    priority: 10,
+    dynamic: 'true',
+    properties: { requests_total: counter, latency: histogram },
+  },
+} as Record<string, MappingProperty>;
+
+const keptMapping = {
+  metrics: { type: 'passthrough', properties: { requests_total: counter, latency: histogram } },
 };
 
 const createMockEsClient = (mappingsByIndex: Record<string, Record<string, unknown>>): Client =>
@@ -35,19 +45,22 @@ const createMockEsClient = (mappingsByIndex: Record<string, Record<string, unkno
     },
   } as unknown as Client);
 
+const metricsSource = (generation: string) =>
+  `snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-${generation}`;
+const metricsOriginal = (generation: string) =>
+  `.ds-metrics-app.otel-2026-04-19-2026.04.19-${generation}`;
+
 describe('metricProperties', () => {
-  it('keeps only fields with a time_series_metric declaration, inside their parent objects', () => {
-    expect(metricProperties(sourceMapping as never)).toEqual({
-      metrics: { properties: { requests_total: counter, latency: histogram } },
-    });
+  it('keeps only time_series_metric fields, with the parent type and children only', () => {
+    expect(metricProperties(sourceMapping)).toEqual(keptMapping);
   });
 });
 
 describe('copySourceMappings', () => {
-  it('creates each destination data stream and copies the metric mappings of its backing indices', async () => {
+  it('creates each destination data stream and copies the metric mappings once per distinct mapping', async () => {
     const esClient = createMockEsClient({
-      'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.18-000003': sourceMapping,
-      'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002': sourceMapping,
+      [metricsSource('000001')]: sourceMapping,
+      [metricsSource('000002')]: sourceMapping,
       'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001': { message: { type: 'text' } },
     });
 
@@ -55,29 +68,29 @@ describe('copySourceMappings', () => {
       esClient,
       log,
       restoredIndices: [
-        'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.18-000003',
-        'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002',
+        metricsSource('000001'),
+        metricsSource('000002'),
         'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001',
       ],
       originalIndices: [
-        '.ds-metrics-app.otel-2026-04-19-2026.04.18-000003',
-        '.ds-metrics-app.otel-2026-04-19-2026.04.19-000002',
+        metricsOriginal('000001'),
+        metricsOriginal('000002'),
         '.ds-logs-app-default-2024.01.01-000001',
       ],
     });
 
     expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(2);
-    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'metrics-app.otel-2026-04-19',
-      properties: { metrics: { properties: { requests_total: counter, latency: histogram } } },
+      properties: keptMapping,
     });
   });
 
   it('skips plain indices and tolerates an existing destination data stream', async () => {
     const esClient = createMockEsClient({
       'snapshot-loader-temp-metrics-plain': sourceMapping,
-      'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002': sourceMapping,
+      [metricsSource('000001')]: sourceMapping,
     });
     (esClient.indices.createDataStream as jest.Mock).mockRejectedValue(
       new Error('resource_already_exists_exception: data stream already exists')
@@ -86,33 +99,58 @@ describe('copySourceMappings', () => {
     await copySourceMappings({
       esClient,
       log,
-      restoredIndices: [
-        'snapshot-loader-temp-metrics-plain',
-        'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002',
-      ],
-      originalIndices: ['metrics-plain', '.ds-metrics-app.otel-2026-04-19-2026.04.19-000002'],
+      restoredIndices: ['snapshot-loader-temp-metrics-plain', metricsSource('000001')],
+      originalIndices: ['metrics-plain', metricsOriginal('000001')],
     });
 
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
   });
 
-  it('names source and destination when a mapping cannot be copied', async () => {
-    const esClient = createMockEsClient({
-      'snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002': sourceMapping,
-    });
-    (esClient.indices.putMapping as jest.Mock).mockRejectedValue(
-      new Error('illegal_argument_exception: mapper [metrics.latency] cannot be changed')
+  it('leaves a stream to the reindex when the cluster has no template for it', async () => {
+    const esClient = createMockEsClient({ [metricsSource('000001')]: sourceMapping });
+    (esClient.indices.createDataStream as jest.Mock).mockRejectedValue(
+      new Error('illegal_argument_exception: no matching index template found for data stream')
     );
 
-    await expect(
-      copySourceMappings({
-        esClient,
-        log,
-        restoredIndices: ['snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002'],
-        originalIndices: ['.ds-metrics-app.otel-2026-04-19-2026.04.19-000002'],
-      })
-    ).rejects.toThrow(
-      'Failed to copy mappings from snapshot-loader-temp-.ds-metrics-app.otel-2026-04-19-2026.04.19-000002 to metrics-app.otel-2026-04-19: illegal_argument_exception: mapper [metrics.latency] cannot be changed'
-    );
+    await copySourceMappings({
+      esClient,
+      log,
+      restoredIndices: [metricsSource('000001')],
+      originalIndices: [metricsOriginal('000001')],
+    });
+
+    expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('continues with the other streams when a mapping cannot be applied', async () => {
+    const esClient = createMockEsClient({
+      [metricsSource('000001')]: sourceMapping,
+      'snapshot-loader-temp-.ds-metrics-other.otel-default-2026.04.19-000001': sourceMapping,
+    });
+    (esClient.indices.putMapping as jest.Mock)
+      .mockRejectedValueOnce(
+        new Error('illegal_argument_exception: mapper [metrics.latency] cannot be changed')
+      )
+      .mockResolvedValue({ acknowledged: true });
+
+    await copySourceMappings({
+      esClient,
+      log,
+      restoredIndices: [
+        metricsSource('000001'),
+        'snapshot-loader-temp-.ds-metrics-other.otel-default-2026.04.19-000001',
+      ],
+      originalIndices: [
+        metricsOriginal('000001'),
+        '.ds-metrics-other.otel-default-2026.04.19-000001',
+      ],
+    });
+
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putMapping).toHaveBeenLastCalledWith({
+      index: 'metrics-other.otel-default',
+      properties: keptMapping,
+    });
   });
 });

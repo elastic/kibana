@@ -17,6 +17,8 @@ type Properties = Record<string, MappingProperty>;
  * Creates each destination data stream and copies the time-series metric fields of its restored
  * indices onto it. Reindexing re-derives every other field type from the documents, but whether a
  * number is a counter, a gauge or a histogram was declared by the original writer and is not in the data.
+ * A stream that cannot be created or updated is reported and left to the reindex, which then maps it
+ * dynamically as before.
  */
 export async function copySourceMappings({
   esClient,
@@ -39,33 +41,44 @@ export async function copySourceMappings({
   });
 
   for (const [dataStream, sources] of sourcesByDestination) {
-    await ensureDataStream({ esClient, log, dataStream });
+    if (!(await ensureDataStream({ esClient, log, dataStream }))) {
+      continue;
+    }
+    const applied = new Set<string>();
     for (const source of sources) {
       const response = await esClient.indices.getMapping({ index: source });
       const properties = metricProperties(response[source]?.mappings?.properties ?? {});
-      if (Object.keys(properties).length === 0) {
+      const key = JSON.stringify(properties);
+      if (Object.keys(properties).length === 0 || applied.has(key)) {
         continue;
       }
+      applied.add(key);
       log.debug(`Copying metric mappings from ${source} to ${dataStream}`);
       try {
         await esClient.indices.putMapping({ index: dataStream, properties });
       } catch (error) {
-        throw new Error(
-          `Failed to copy mappings from ${source} to ${dataStream}: ${getErrorMessage(error)}`
+        log.warning(
+          `Could not copy metric mappings from ${source} to ${dataStream}; its metric fields will be mapped dynamically: ${getErrorMessage(
+            error
+          )}`
         );
+        break;
       }
     }
   }
 }
 
-/** Fields with a `time_series_metric` declaration, kept inside their parent objects. */
+/** Fields with a `time_series_metric` declaration, kept inside their parent objects (type and children only). */
 export function metricProperties(properties: Properties): Properties {
   const kept: Properties = {};
   for (const [name, property] of Object.entries(properties)) {
     if ('properties' in property && property.properties) {
       const nested = metricProperties(property.properties as Properties);
       if (Object.keys(nested).length > 0) {
-        kept[name] = { ...property, properties: nested } as MappingProperty;
+        kept[name] = {
+          ...('type' in property ? { type: property.type } : {}),
+          properties: nested,
+        } as MappingProperty;
       }
     } else if ('time_series_metric' in property) {
       kept[name] = property;
@@ -74,6 +87,7 @@ export function metricProperties(properties: Properties): Properties {
   return kept;
 }
 
+/** True when the data stream exists or was created; false (with a warning) when the cluster has no template for it. */
 async function ensureDataStream({
   esClient,
   log,
@@ -82,14 +96,19 @@ async function ensureDataStream({
   esClient: Client;
   log: ToolingLog;
   dataStream: string;
-}): Promise<void> {
+}): Promise<boolean> {
   try {
     await esClient.indices.createDataStream({ name: dataStream });
     log.debug(`Created data stream ${dataStream}`);
+    return true;
   } catch (error) {
-    if (getErrorMessage(error).includes('resource_already_exists_exception')) {
-      return;
+    const message = getErrorMessage(error);
+    if (message.includes('resource_already_exists_exception')) {
+      return true;
     }
-    throw error;
+    log.warning(
+      `Could not create data stream ${dataStream}; replay will reindex without it: ${message}`
+    );
+    return false;
   }
 }

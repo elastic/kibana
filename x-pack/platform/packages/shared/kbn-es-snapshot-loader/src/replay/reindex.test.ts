@@ -313,6 +313,72 @@ describe('replaySnapshot', () => {
     expect(esClient.cluster.health).not.toHaveBeenCalled();
   });
 
+  it('copies metric mappings after beforeReindex and before reindexing', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+      'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001': {
+        mappings: {
+          properties: {
+            metrics: {
+              properties: { requests_total: { type: 'double', time_series_metric: 'counter' } },
+            },
+          },
+        },
+      },
+    });
+    const beforeReindex = jest.fn().mockResolvedValue(undefined);
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+      beforeReindex,
+    });
+
+    const order = (fn: unknown) => (fn as jest.Mock).mock.invocationCallOrder[0];
+    expect(order(beforeReindex)).toBeLessThan(order(esClient.indices.putMapping));
+    expect(order(esClient.indices.putMapping)).toBeLessThan(order(esClient.reindex));
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: 'logs-app-default',
+      properties: {
+        metrics: {
+          properties: { requests_total: { type: 'double', time_series_metric: 'counter' } },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('still reindexes when metric mappings cannot be copied', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+      'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001': {
+        mappings: {
+          properties: {
+            metrics: { properties: { x: { type: 'double', time_series_metric: 'gauge' } } },
+          },
+        },
+      },
+    });
+    (esClient.indices.putMapping as jest.Mock).mockRejectedValue(
+      new Error('illegal_argument_exception: mapper [metrics.x] cannot be changed')
+    );
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+    });
+
+    expect(esClient.reindex).toHaveBeenCalledTimes(1);
+    expect(result.success).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
   it('invokes beforeReindex with correct params after restore and before reindex', async () => {
     const esClient = createFullMockEsClient();
     const beforeReindex = jest.fn();
