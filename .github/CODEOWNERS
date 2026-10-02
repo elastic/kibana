@@ -1402,7 +1402,6 @@ x-pack/solutions/search/plugins/search_assistant @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_getting_started @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_homepage @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_navigation @elastic/search-ml-ux
-x-pack/solutions/search/plugins/search_notebooks @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_query_rules @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-ml-ux
 x-pack/solutions/search/plugins/serverless_search @elastic/search-ml-ux
@@ -3849,6 +3848,11 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 /.agents/skills/codeql/** @elastic/kibana-security
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
 /.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
+
+# Agent Builder tool review
+/.agents/skills/agent-builder-tool-review/** @elastic/workchat-eng
+/.github/skills/agent-builder-tool-review/** @elastic/workchat-eng
+/.libra/specialists/agent-builder-tools.md @elastic/workchat-eng
 
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility

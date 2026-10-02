@@ -112,7 +112,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     expect(update.statusCode).toBe(404);
   });
 
-  apiTest('logExtraction is mandatory on update', async ({ apiClient }) => {
+  apiTest('update requires logExtraction or historySnapshot', async ({ apiClient }) => {
     await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
@@ -162,6 +162,129 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       body: {},
     });
   });
+
+  apiTest(
+    'Update should change history snapshot interval and retention',
+    async ({ apiClient, kbnClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { historySnapshot: { frequency: '24h', retentionDays: 30 } },
+      });
+
+      const afterInstall = await kbnClient.savedObjects.get({
+        type: 'entity-store-global-state',
+        id: 'entity-store-global-state-default',
+      });
+      const logsExtractionAfterInstall = afterInstall.attributes?.logsExtraction;
+
+      // Update both history snapshot configs
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { historySnapshot: { frequency: '12h', retentionDays: 90 } },
+      });
+      expect(update.statusCode).toBe(200);
+
+      const globalState = await kbnClient.savedObjects.get({
+        type: 'entity-store-global-state',
+        id: 'entity-store-global-state-default',
+      });
+      expect(globalState.attributes?.historySnapshot?.status).toBe('started');
+      expect(globalState.attributes?.historySnapshot?.frequency).toBe('12h');
+      expect(globalState.attributes?.historySnapshot?.retentionDays).toBe(90);
+      expect(globalState.attributes?.logsExtraction).toStrictEqual(logsExtractionAfterInstall);
+
+      const task = await kbnClient.savedObjects.get({
+        type: 'task',
+        id: 'entity_store:v2:history_snapshot_task:default',
+      });
+      expect(task.attributes?.schedule?.interval).toBe('12h');
+
+      // Update frequency only
+      const frequencyOnly = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { historySnapshot: { frequency: '6h' } },
+      });
+      expect(frequencyOnly.statusCode).toBe(200);
+
+      const afterFrequencyUpdate = await kbnClient.savedObjects.get({
+        type: 'entity-store-global-state',
+        id: 'entity-store-global-state-default',
+      });
+      expect(afterFrequencyUpdate.attributes?.historySnapshot?.frequency).toBe('6h');
+      expect(afterFrequencyUpdate.attributes?.historySnapshot?.retentionDays).toBe(90);
+
+      const taskAfterFrequencyUpdate = await kbnClient.savedObjects.get({
+        type: 'task',
+        id: 'entity_store:v2:history_snapshot_task:default',
+      });
+      expect(taskAfterFrequencyUpdate.attributes?.schedule?.interval).toBe('6h');
+
+      // Update retention days only
+      const retentionOnly = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { historySnapshot: { retentionDays: 15 } },
+      });
+      expect(retentionOnly.statusCode).toBe(200);
+
+      const afterRetentionUpdate = await kbnClient.savedObjects.get({
+        type: 'entity-store-global-state',
+        id: 'entity-store-global-state-default',
+      });
+      expect(afterRetentionUpdate.attributes?.historySnapshot?.frequency).toBe('6h');
+      expect(afterRetentionUpdate.attributes?.historySnapshot?.retentionDays).toBe(15);
+      const taskAfterRetentionUpdate = await kbnClient.savedObjects.get({
+        type: 'task',
+        id: 'entity_store:v2:history_snapshot_task:default',
+      });
+      expect(taskAfterRetentionUpdate.attributes?.schedule?.interval).toBe('6h');
+
+      // Update log extraction settings
+      const logExtractionUpdate = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '2m', lookbackPeriod: '1h' } },
+      });
+      expect(logExtractionUpdate.statusCode).toBe(200);
+
+      const afterLogExtractionUpdate = await kbnClient.savedObjects.get({
+        type: 'entity-store-global-state',
+        id: 'entity-store-global-state-default',
+      });
+      expect(afterLogExtractionUpdate.attributes?.logsExtraction?.frequency).toBe('2m');
+      expect(afterLogExtractionUpdate.attributes?.logsExtraction?.lookbackPeriod).toBe('1h');
+      // history snapshot settings must be unchanged
+      expect(afterLogExtractionUpdate.attributes?.historySnapshot?.frequency).toBe('6h');
+      expect(afterLogExtractionUpdate.attributes?.historySnapshot?.retentionDays).toBe(15);
+      expect(afterLogExtractionUpdate.attributes?.historySnapshot?.status).toBe('started');
+      const taskAfterLogExtractionUpdate = await kbnClient.savedObjects.get({
+        type: 'task',
+        id: 'entity_store:v2:history_snapshot_task:default',
+      });
+      expect(taskAfterLogExtractionUpdate.attributes?.schedule?.interval).toBe('6h');
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'update rejects a history snapshot interval shorter than 1 hour',
+    async ({ apiClient }) => {
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { historySnapshot: { frequency: '30m' } },
+      });
+      expect(update.statusCode).toBe(400);
+    }
+  );
 
   apiTest('install rejects unknown body keys', async ({ apiClient }) => {
     const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
