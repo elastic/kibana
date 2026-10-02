@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/ui-shared-deps-src'
   - '@kbn/repo-info'
   - '@kbn/dev-cli-runner'
+  - '@kbn/tooling-log'
   - '@kbn/core-theme-browser'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
