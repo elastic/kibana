@@ -46,7 +46,10 @@ describe('auditConfigSets', () => {
 
   it('loads sets that need the connectors env variable and removes the placeholder after', async () => {
     (loadRawServerConfig as jest.Mock).mockImplementation(async () => {
-      if (!process.env[CONNECTORS_ENV]) throw new Error('env variable is not set');
+      const value = process.env[CONNECTORS_ENV];
+      if (!value) throw new Error('env variable is not set');
+      // Same decoding as the agent_builder_smoke config, so an invalid placeholder fails here too.
+      JSON.parse(Buffer.from(value, 'base64').toString('utf8'));
       return { kbnTestServer: { serverArgs: [] }, esTestCluster: { serverArgs: [] } };
     });
 
