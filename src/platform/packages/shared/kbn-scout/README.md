@@ -848,7 +848,7 @@ On merge commits, Scout tests run in a non-blocking mode.
 Test events from every framework (Jest, FTR, Cypress and Scout/Playwright) are shipped to the AppEx QA cluster. The `discover-flaky-tests` command aggregates them into a ranked list of flaky and consistently failing tests and stores it under `.scout/flaky_tests.json`:
 
 ```bash
-# Last 14 days of kibana-on-merge, all frameworks
+# Last 28 days of kibana-on-merge, all frameworks
 node scripts/scout discover-flaky-tests
 
 # Include PR builds, restrict to Jest and FTR
@@ -860,6 +860,17 @@ node scripts/scout discover-flaky-tests --classifications flaky
 # Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
 node scripts/scout discover-flaky-tests --summaryLimit 25
 ```
+
+Qualification uses one test, pipeline, branch, config and target at a time. By default, 2 separate
+failure episodes or 2 retry-recovered builds within the latest 200 builds / 14 days qualify
+as flaky. A historical path also catches 3 episodes on 3 UTC dates within 28 days, without the
+200-build cap. The latest 2 terminal failures qualify as consistently failing. Both lists
+can contain the same test when different contexts qualify differently.
+
+The report records every qualifying context and reason, flags failures within 24 hours as fresh,
+and retains broad job failures (10 or more failing tests) as suspected incidents. These annotations
+do not suppress historical evidence or automatically request fixes. Thresholds are configurable;
+shortening `--lookbackDays` also shortens the available historical evidence.
 
 The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.
 

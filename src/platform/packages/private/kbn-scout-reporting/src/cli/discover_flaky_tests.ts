@@ -88,9 +88,9 @@ export const discoverFlakyTests: Command<void> = {
   Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
-  The thresholds apply per pipeline and branch, over the latest runs there: a test is flaky
-  when one of them failed it in separate episodes, with passes in between, so neither a clean
-  branch nor a single breakage decides it.
+  Qualify each pipeline, branch, config and target independently. Recent episodes, repeated
+  retry recovery and historical recurrence identify flakiness; consecutive terminal failures
+  identify persistent breakage. The JSON retains all qualifying contexts and suspected incidents.
 
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
@@ -119,6 +119,12 @@ export const discoverFlakyTests: Command<void> = {
       'frameworks',
       'classifications',
       'minEpisodes',
+      'minRetryRecoveries',
+      'minConsecutiveFailures',
+      'recentDays',
+      'minHistoricalEpisodes',
+      'minHistoricalFailureDays',
+      'freshFailureHours',
       'maxRuns',
       'incidentFailures',
       'maxTests',
@@ -137,6 +143,12 @@ export const discoverFlakyTests: Command<void> = {
       pipelines: DEFAULT_PIPELINES,
       classifications: ALL_CLASSIFICATIONS,
       minEpisodes: String(DEFAULT_MIN_EPISODES),
+      minRetryRecoveries: String(defaults.thresholds.minRetryRecoveries),
+      minConsecutiveFailures: String(defaults.thresholds.minConsecutiveFailures),
+      recentDays: String(defaults.thresholds.recentDays),
+      minHistoricalEpisodes: String(defaults.thresholds.minHistoricalEpisodes),
+      minHistoricalFailureDays: String(defaults.thresholds.minHistoricalFailureDays),
+      freshFailureHours: String(defaults.thresholds.freshFailureHours),
       maxRuns: String(DEFAULT_MAX_RUNS),
       incidentFailures: String(DEFAULT_INCIDENT_FAILURES),
       maxTests: String(DEFAULT_MAX_TESTS),
@@ -154,9 +166,15 @@ export const discoverFlakyTests: Command<void> = {
     --branches           (optional)  Comma-separated branches; no filter when omitted
     --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
     --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
-    --minEpisodes        (optional)  Separate failure episodes a pipeline and branch must have to qualify a test as flaky [default: ${DEFAULT_MIN_EPISODES}]
-    --maxRuns            (optional)  Latest runs per pipeline and branch the thresholds are checked against [default: ${DEFAULT_MAX_RUNS}]
-    --incidentFailures   (optional)  Failed tests that make a Buildkite job an incident, whose runs are left out [default: ${DEFAULT_INCIDENT_FAILURES}]
+    --minRetryRecoveries (optional)  Recovered builds in the recent window [default: ${defaults.thresholds.minRetryRecoveries}]
+    --minConsecutiveFailures (optional) Consecutive terminal failures [default: ${defaults.thresholds.minConsecutiveFailures}]
+    --recentDays         (optional)  Recent qualification window in days [default: ${defaults.thresholds.recentDays}]
+    --minHistoricalEpisodes (optional) Episodes across the full lookback [default: ${defaults.thresholds.minHistoricalEpisodes}]
+    --minHistoricalFailureDays (optional) Distinct UTC episode-start days [default: ${defaults.thresholds.minHistoricalFailureDays}]
+    --freshFailureHours  (optional)  Freshness annotation; does not discard history [default: ${defaults.thresholds.freshFailureHours}]
+    --minEpisodes        (optional)  Separate failure episodes an execution context must have to qualify a test as flaky [default: ${DEFAULT_MIN_EPISODES}]
+    --maxRuns            (optional)  Latest runs per context the thresholds are checked against [default: ${DEFAULT_MAX_RUNS}]
+    --incidentFailures   (optional)  Failed tests that flag a suspected incident; executions remain in the report [default: ${DEFAULT_INCIDENT_FAILURES}]
     --maxTests           (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
     --samplesPerTest     (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
     --outputPath         (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
@@ -211,6 +229,12 @@ export const discoverFlakyTests: Command<void> = {
         classifications,
         thresholds: {
           minEpisodes: flagsReader.requiredNumber('minEpisodes'),
+          minRetryRecoveries: flagsReader.requiredNumber('minRetryRecoveries'),
+          minConsecutiveFailures: flagsReader.requiredNumber('minConsecutiveFailures'),
+          recentDays: flagsReader.requiredNumber('recentDays'),
+          minHistoricalEpisodes: flagsReader.requiredNumber('minHistoricalEpisodes'),
+          minHistoricalFailureDays: flagsReader.requiredNumber('minHistoricalFailureDays'),
+          freshFailureHours: flagsReader.requiredNumber('freshFailureHours'),
           maxRuns: flagsReader.requiredNumber('maxRuns'),
           incidentFailures: flagsReader.requiredNumber('incidentFailures'),
           maxTests: flagsReader.requiredNumber('maxTests'),

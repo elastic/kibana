@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_FLAKY_TEST_REPORT_OPTIONS } from '../reporting/flaky_tests';
 import stripAnsi from 'strip-ansi';
 import { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -77,6 +78,7 @@ const entry = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEntry => ({
     episodes: 2,
   },
   latestRun: { status: 'passed', timestamp: new Date('2026-09-07T09:00:00.000Z'), branch: 'main' },
+  qualifications: [],
   sampleFailures: [],
   errors: [],
   ...overrides,
@@ -119,7 +121,7 @@ describe('formatAge', () => {
 describe('qualifyingBranch', () => {
   // 9.2 has the highest raw rate but, with a single failed build, is not what qualified the test
   const byBranch = [
-    branch({ branch: 'main', builds: 100, failedBuilds: 3, buildFailRate: 0.03 }),
+    branch({ branch: 'main', builds: 1000, failedBuilds: 3, buildFailRate: 0.003 }),
     branch({ branch: '9.2', builds: 10, failedBuilds: 1, buildFailRate: 0.1 }),
   ];
   const flakiestBranchOnMain = {
@@ -131,12 +133,15 @@ describe('qualifyingBranch', () => {
     episodes: 3,
   };
 
-  it('returns the per-branch stats of the branch the test qualified on', () => {
-    expect(qualifyingBranch({ byBranch, flakiestBranch: flakiestBranchOnMain })).toBe(byBranch[0]);
+  it('uses qualifying context counts while retaining branch details', () => {
+    expect(qualifyingBranch({ byBranch, flakiestBranch: flakiestBranchOnMain })).toEqual({
+      ...byBranch[0],
+      ...flakiestBranchOnMain,
+    });
   });
 
   it('shows the recorded counts when the per-branch stats lack that branch', () => {
-    expect(qualifyingBranch({ byBranch: [], flakiestBranch: flakiestBranchOnMain })).toBe(
+    expect(qualifyingBranch({ byBranch: [], flakiestBranch: flakiestBranchOnMain })).toEqual(
       flakiestBranchOnMain
     );
   });
@@ -327,6 +332,7 @@ describe('buildTopFailingTable', () => {
 describe('displaySummary', () => {
   const report: FlakyTestReport = {
     schemaVersion: 2,
+    suspectedIncidents: [],
     generatedAt: now,
     window: {
       lookbackDays: 7,
@@ -340,6 +346,7 @@ describe('displaySummary', () => {
       classifications: ['flaky', 'consistently-failing'],
     },
     thresholds: {
+      ...DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds,
       minEpisodes: 2,
       maxRuns: 200,
       incidentFailures: 10,
@@ -414,7 +421,7 @@ describe('displaySummary', () => {
     expect(output).toContain('Incident failures : 10');
     expect(output).toContain('Max tests         : 200 per list');
     expect(output).toContain(
-      'Consistently failing = latest 3 runs failed without passing on a retry'
+      'Consistently failing = latest 2 runs failed without passing on a retry'
     );
     expect(output).toContain('Flaky                : 2 (jest: 2)');
     expect(output).toContain(

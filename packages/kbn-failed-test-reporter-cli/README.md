@@ -57,15 +57,25 @@ that could be about it. The matching rules then decide which suite an issue is r
 - `moved`: same test and file name at another location, i.e. the file moved since;
 - `file`: it only names the same file, for another test; it never counts as tracking the suite.
 
-A test counts as flaky when, over its latest `maxRuns` runs (default 200) on a single pipeline and
-branch within the report window, it failed in at least `minEpisodes` separate episodes (default
-2): runs of consecutive failed builds with a passing build in between. A breakage fails every
-build until it is fixed, so it is one episode however long it lasts. Runs in incident jobs, where
-at least `incidentFailures` tests failed (default 10), are left out. Thresholds apply per pipeline
-and branch so that a clean one cannot dilute a flaky one, and bounding the runs rather than the
-days holds `main` and the Elastic Cloud pipelines, which run a few times a day, to the same
-evidence; the branch a test qualified on is recorded as `flakiestBranch`. Tests whose latest runs
-failed without passing on a retry are consistently failing rather than flaky and are not reported.
+Qualification is evaluated independently for each test, pipeline, branch, config and deployment
+target. The default rules are:
+
+- **Recent flakiness:** at least 2 failure episodes separated by a clean build, or 2 builds that
+  failed and then recovered on retry. Both use the latest 200 builds within 14 days.
+- **Historical recurrence:** at least 3 episodes starting on 3 distinct UTC dates within 28 days,
+  without the 200-build cap.
+- **Consistently failing:** the latest 2 builds failed without recovery. This takes precedence
+  over flakiness in that context; another context can still qualify the same test as flaky.
+
+The JSON preserves all qualifying contexts, reasons and timestamps. A failure in the last 24 hours
+sets `freshFailure`; older evidence remains visible. Jobs with at least 10 distinct failing tests
+are annotated as suspected incidents, including their affected test IDs; their executions remain
+in the evidence. This does not establish an infrastructure cause.
+
+The report includes both classifications by default. This command creates issues only for the
+`flaky` list; incident flags and freshness do not yet gate issue creation or AI fixes. Urgent
+persistent-failure issues and faster pipeline scheduling are separate follow-ups. The preferred
+context for each classification remains available as `flakiestBranch` for existing consumers.
 
 ```bash
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge --lookbackDays 7 --classifications flaky

@@ -23,11 +23,11 @@ spec:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
         # Inputs of .buildkite/scripts/steps/report_flaky_tests.sh. Schedules may override
         # them to produce different reports (other pipelines, consistently failing tests, ...).
-        # The Elastic Cloud pipelines run a few times a day; the thresholds count runs rather than
-        # days, so a pipeline and branch is judged on its latest runs within the lookback
-        FLAKY_TESTS_PIPELINES: 'kibana-on-merge,appex-qa-serverless-kibana-ftr-tests,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-ftr-tests,appex-qa-stateful-kibana-scout-tests'
-        FLAKY_TESTS_LOOKBACK_DAYS: '14'
-        FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
+        # Each pipeline, branch, config and target is judged independently. Recent rules use up to
+        # 200 builds in 14 days; historical recurrence uses the full 28-day window.
+        FLAKY_TESTS_PIPELINES: 'kibana-on-merge,kibana-security-solution-on-merge,appex-qa-serverless-kibana-ftr-tests,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-ftr-tests,appex-qa-stateful-kibana-scout-tests'
+        FLAKY_TESTS_LOOKBACK_DAYS: '28'
+        FLAKY_TESTS_CLASSIFICATIONS: 'flaky,consistently-failing'
         # Repository .buildkite/scripts/steps/report_flaky_test_issues.sh files the suite issues in.
         # The AppEx QA sandbox while the issues are being tried out; suites that a failed-test
         # issue in elastic/kibana is already about get none there. Flip to elastic/kibana to go

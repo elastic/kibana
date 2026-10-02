@@ -13,7 +13,6 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
-  CONSISTENTLY_FAILING_RUNS,
   formatCounts,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
@@ -125,7 +124,9 @@ export const qualifyingBranch = (
     return undefined;
   }
   const { branch } = entry.flakiestBranch;
-  return entry.byBranch.find((stats) => stats.branch === branch) ?? entry.flakiestBranch;
+  const details = entry.byBranch.find((stats) => stats.branch === branch);
+  // Use qualified context counts; branch totals mix other pipelines and targets.
+  return { ...details, ...entry.flakiestBranch };
 };
 
 const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
@@ -278,13 +279,17 @@ export const displaySummary = (
     ],
     [
       dedent(`\
-        Thresholds (per pipeline and branch: one of them must clear them on its own)
+        Thresholds (per pipeline, branch, config and target: each context qualifies independently)
           Min episodes      : ${thresholds.minEpisodes} (separate failure episodes, passes in between)
-          Max runs          : ${thresholds.maxRuns} (latest runs checked per pipeline and branch)
-          Incident failures : ${thresholds.incidentFailures} (failed tests that make a job an incident, left out)
+          Max runs          : ${thresholds.maxRuns} (latest runs per context in the recent window)
+          Incident failures : ${thresholds.incidentFailures} (failed tests flagging a suspected incident; retained)
           Max tests         : ${thresholds.maxTests} per list
-          Flaky                = failed in at least ${thresholds.minEpisodes} separate episodes
-          Consistently failing = latest ${CONSISTENTLY_FAILING_RUNS} runs failed without passing on a retry
+          Recent days       : ${thresholds.recentDays}; retry recoveries: ${thresholds.minRetryRecoveries}
+          Historical        : ${thresholds.minHistoricalEpisodes} episodes on ${thresholds.minHistoricalFailureDays} UTC days
+          Fresh failure     : within ${thresholds.freshFailureHours} hours (annotation only)
+          Suspected incidents: ${report.suspectedIncidents.length} jobs retained in JSON
+          Flaky                = recent episodes, retry recovery, or historical recurrence
+          Consistently failing = latest ${thresholds.minConsecutiveFailures} runs failed without passing on a retry
           Ranking              = failed builds, then fail rate on the flakiest branch, then latest failure
         `),
     ],

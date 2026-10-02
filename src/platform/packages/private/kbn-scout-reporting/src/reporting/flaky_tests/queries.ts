@@ -13,6 +13,7 @@ import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from './esql';
 import { buildExecutionModels } from './execution_model';
 import type {
   FlakyTestBranchStats,
+  FlakyTestIncident,
   FlakyTestError,
   FlakyTestPipelineStats,
   FlakyTestSampleFailure,
@@ -190,8 +191,7 @@ export const buildBranchStatsQuery = (
 
 /**
  * Buildkite jobs in which at least `minFailedTests` distinct tests failed. A job failing that
- * broadly points at its environment rather than at its tests, so its runs are not counted as
- * evidence. Failure documents only, so it stays cheap.
+ * broadly suggests a shared incident, without establishing its cause. Retain the affected tests.
  */
 export const buildIncidentJobsQuery = (
   scope: FlakyTestQueryScope,
@@ -201,20 +201,14 @@ export const buildIncidentJobsQuery = (
   [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
-    'STATS failed_tests = COUNT_DISTINCT(test.id) BY buildkite.job_id',
+    'STATS failed_tests = COUNT_DISTINCT(test.id), test_ids = VALUES(test.id) BY buildkite.job_id',
     `WHERE failed_tests >= ${minFailedTests}`,
     'RENAME buildkite.job_id AS job_id',
-    'KEEP job_id',
+    'KEEP job_id, failed_tests, test_ids',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 
-/**
- * The builds each of the given tests of one execution model ran in, per pipeline and branch,
- * split into those it failed in and those it passed in; a build is in both when a retry passed.
- * Build numbers are what orders runs within a pipeline, which counts cannot, so they are listed
- * rather than counted. Runs in incident jobs are left out. This is what the thresholds are checked
- * against; it runs for every test whose totals may qualify it, before ranking.
- */
+/** Timestamped build outcomes per execution context, including suspected incident runs. */
 export const buildBranchRunsQuery = (
   scope: FlakyTestQueryScope,
   frameworks: readonly TestFramework[],
@@ -222,20 +216,32 @@ export const buildBranchRunsQuery = (
   incidentJobIds: readonly string[]
 ): string => {
   const [model] = buildExecutionModels(frameworks);
-
+  const context =
+    'test.id, buildkite.pipeline.slug, buildkite.branch, config_path, target_mode, target_type';
+  const incident =
+    incidentJobIds.length > 0 ? `CASE(buildkite.job_id IN (${inList(incidentJobIds)}), 1, 0)` : '0';
   return [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[
       ...scopeClauses(scope),
       model.executionFilter,
       `test.id IN (${inList(testIds)})`,
-      ...(incidentJobIds.length > 0 ? [`buildkite.job_id NOT IN (${inList(incidentJobIds)})`] : []),
     ].join(' AND ')}`,
     `EVAL failed = ${model.failedExpression}, retry_flake = ${model.retryFlakeExpression},` +
-      ' build = TO_INTEGER(buildkite.build.number)',
-    'STATS failed_builds = VALUES(build) WHERE failed == 1,' +
-      ' passed_builds = VALUES(build) WHERE failed == 0 OR retry_flake == 1' +
-      ' BY test.id, buildkite.pipeline.slug, buildkite.branch',
+      ' build = TO_INTEGER(buildkite.build.number),' +
+      ' config_path = COALESCE(test_run.config.file.path, "unknown"),' +
+      ' target_mode = COALESCE(test_run.target.mode, "unknown"),' +
+      ' target_type = COALESCE(test_run.target.type, "unknown"),' +
+      ` incident = ${incident}`,
+    'EVAL hard = CASE(failed == 1 AND retry_flake == 0, 1, 0)',
+    'STATS failed = MAX(failed), hard = LAST(hard, @timestamp),' +
+      ' timestamp = MAX(@timestamp), last_failed_at = MAX(@timestamp) WHERE failed == 1,' +
+      ` incident = MAX(incident) BY ${context}, build`,
+    // Pack correlated scalar fields before VALUES: separate arrays lose timestamp/outcome pairing.
+    // One result row per context avoids the row limit truncating individual builds in its history.
+    'EVAL run = CONCAT(TO_STRING(build), "|", TO_STRING(timestamp), "|",' +
+      ' COALESCE(TO_STRING(last_failed_at), ""), "|", TO_STRING(failed), "|", TO_STRING(hard), "|", TO_STRING(incident))',
+    `STATS runs = VALUES(run) BY ${context}`,
     'RENAME test.id AS test_id, buildkite.pipeline.slug AS pipeline, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
@@ -421,81 +427,112 @@ export const fetchBranchStats = async (
   return byTest;
 };
 
-/** Ids of the incident jobs in scope, whose runs the thresholds leave out. */
+/** Returns suspected incident jobs and their affected tests without discarding their executions. */
 export const fetchIncidentJobs = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
   frameworks: readonly TestFramework[],
   minFailedTests: number
-): Promise<string[]> => {
-  const records = await runEsql<{ job_id: string | null }>(
-    es,
-    buildIncidentJobsQuery(scope, frameworks, minFailedTests)
+): Promise<FlakyTestIncident[]> => {
+  const records = await runEsql<{
+    job_id: string | null;
+    failed_tests: number;
+    test_ids: string | string[];
+  }>(es, buildIncidentJobsQuery(scope, frameworks, minFailedTests));
+  if (records.length >= ESQL_ROW_LIMIT) {
+    throw new Error(`Incident jobs query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope`);
+  }
+  return records.flatMap(({ job_id: jobId, failed_tests: failedTests, test_ids: testIds }) =>
+    jobId ? [{ jobId, failedTests, testIds: asArray(testIds) }] : []
   );
-  return records.flatMap((record) => (record.job_id ? [record.job_id] : []));
 };
 
-/** One build a test ran in; `hard` when it failed without also passing on a retry in that build. */
 export interface BranchRun {
   build: number;
+  timestamp: Date;
+  lastFailedAt?: Date;
   failed: boolean;
   hard: boolean;
+  suspectedIncident: boolean;
 }
 
-/** The runs of one test on one pipeline and branch, oldest first. */
 export interface BranchRuns {
   pipeline: string;
   branch: string;
+  configPath: string;
+  targetMode: string;
+  targetType: string;
   runs: BranchRun[];
 }
 
-/**
- * Runs of the given tests per pipeline and branch, keyed by test id. A test whose rows were cut
- * off by the row limit would pass for one that qualifies nowhere, so unlike the lookups that only
- * add detail this one fails rather than return a truncated result.
- */
+const parseRun = (value: string): BranchRun => {
+  const fields = value.split('|');
+  const [build, timestamp, failedAt, failed, hard, incident] = fields;
+  const at = new Date(timestamp);
+  const lastFailedAt = failedAt ? new Date(failedAt) : undefined;
+  if (
+    fields.length !== 6 ||
+    !Number.isInteger(Number(build)) ||
+    build === '' ||
+    !Number.isFinite(at.getTime()) ||
+    (lastFailedAt && !Number.isFinite(lastFailedAt.getTime())) ||
+    ![failed, hard, incident].every((flag) => flag === '0' || flag === '1') ||
+    (failed === '1' && !lastFailedAt)
+  ) {
+    throw new Error('Invalid timestamped build outcome returned by the qualification query');
+  }
+  return {
+    build: Number(build),
+    timestamp: at,
+    lastFailedAt,
+    failed: failed === '1',
+    hard: hard === '1',
+    suspectedIncident: incident === '1',
+  };
+};
+
+/** Reads complete execution histories independently for each pipeline, branch, config and target. */
 export const fetchBranchRuns = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
   tests: ReadonlyArray<{ testId: string; framework: TestFramework }>,
   incidentJobIds: readonly string[]
 ): Promise<Map<string, BranchRuns[]>> => {
-  if (tests.length === 0) {
-    return new Map();
-  }
-
+  if (tests.length === 0) return new Map();
   const results = await Promise.all(
     groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
       runEsql<{
         test_id: string;
         pipeline: string | null;
         branch: string | null;
-        failed_builds: number | number[] | null;
-        passed_builds: number | number[] | null;
+        config_path: string;
+        target_mode: string;
+        target_type: string;
+        runs: string | string[];
       }>(es, buildBranchRunsQuery(scope, frameworks, testIds, incidentJobIds))
     )
   );
   if (results.some((records) => records.length >= ESQL_ROW_LIMIT)) {
     throw new Error(
-      `Per-branch runs query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope with --branches`
+      `Per-context runs query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope with --branches`
     );
   }
-
   const byTest = new Map<string, BranchRuns[]>();
   for (const record of results.flat()) {
     if (record.pipeline === null || record.branch === null) continue;
-    const failed = new Set(asArray(record.failed_builds));
-    const passed = new Set(asArray(record.passed_builds));
-    const runs = [...new Set([...failed, ...passed])]
-      .sort((a, b) => a - b)
-      .map((build) => ({
-        build,
-        failed: failed.has(build),
-        hard: failed.has(build) && !passed.has(build),
-      }));
+    const runs = asArray(record.runs)
+      .map(parseRun)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime() || a.build - b.build);
     byTest.set(record.test_id, [
       ...(byTest.get(record.test_id) ?? []),
-      { pipeline: record.pipeline, branch: record.branch, runs },
+      {
+        pipeline: record.pipeline,
+        branch: record.branch,
+        configPath: record.config_path,
+        targetMode: record.target_mode,
+        targetType: record.target_type,
+        runs,
+      },
     ]);
   }
   return byTest;
