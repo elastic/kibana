@@ -37,6 +37,10 @@ export const defaultValueFormatter = (value: unknown) => {
   return renderToString(<>{content}</>);
 };
 
+// Only multiple values are kept as an array. A single value is unwrapped and an empty
+// result stays undefined.
+const toPreviewValue = (values: unknown[]): unknown => (values.length > 1 ? values : values[0]);
+
 interface PreviewControllerArgs {
   dataView: DataViewLazy;
   dataViewToUpdate: DataView | DataViewLazy;
@@ -669,7 +673,7 @@ export class PreviewController {
     type: Params['type'],
     format: Params['format']
   ) => {
-    const [value] = values;
+    const value = toPreviewValue(values);
     const formattedValue = this.valueFormatter({ value, type, format });
 
     this.setPreviewResponse({
@@ -698,7 +702,7 @@ export class PreviewController {
         const { 1: fieldName } = key.split('composite_field.');
         updatedFieldsInScript.push(fieldName);
 
-        const [value] = values;
+        const value = toPreviewValue(values);
         const formattedValue = this.valueFormatter({ value, type, format });
 
         return {
@@ -707,7 +711,7 @@ export class PreviewController {
             : `${fieldName$Value ?? ''}.${fieldName}`,
           value,
           formattedValue,
-          type: valueTypeToSelectedType(value),
+          type: valueTypeToSelectedType(values[0]),
         };
       })
       .filter(filterSubfield)
