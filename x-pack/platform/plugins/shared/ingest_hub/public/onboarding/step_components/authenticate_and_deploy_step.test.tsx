@@ -1111,7 +1111,12 @@ describe('AuthenticateAndDeployStep', () => {
         {
           globalRegion: 'us-east-1',
           instances: [
-            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'x', isDuplicate: false },
+            {
+              instanceId: 'cloudtrail',
+              serviceId: 'cloudtrail',
+              name: 'AWS CloudTrail',
+              isDuplicate: false,
+            },
           ],
           serviceVars: {
             cloudtrail: {
@@ -1135,6 +1140,16 @@ describe('AuthenticateAndDeployStep', () => {
       arrange({ settingsMethod: 'managed_integration' });
       renderStep();
       expect(screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout')).toBeVisible();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('names the services with missing settings after Step 2 was continued under agent-based', () => {
+      // Settings are no longer "out of date" (Step 2 was confirmed under agent-based) but a
+      // required value was removed afterwards: the warning must still say which service.
+      arrange({ settingsMethod: 'agent_based', queueUrl: '' });
+      renderStep();
+      const callout = screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout');
+      expect(callout).toHaveTextContent('AWS CloudTrail');
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
     });
 

@@ -160,17 +160,24 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         : [],
     [isAgentBased, serviceSettingsMethod, ecfCapableServiceIds, awsServicesMap]
   );
-  const incompleteAgentSettingsCount = useMemo(
+  const incompleteAgentInstances = useMemo(
     () =>
       isAgentBased
         ? getIncompleteInstances(
             ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
             serviceVars,
             awsServicesMap
-          ).length
-        : 0,
+          )
+        : [],
     [isAgentBased, ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
   );
+  const incompleteAgentSettingsCount = incompleteAgentInstances.length;
+  // Name the services that need attention: the incomplete ones while Next is blocked, otherwise
+  // the ones whose settings were collected under the previous method.
+  const calloutServiceNames =
+    incompleteAgentSettingsCount > 0
+      ? [...new Set(incompleteAgentInstances.map((inst) => inst.name))]
+      : settingsOutOfDateServiceNames;
   // Warning while required agent-based settings are missing (Next is blocked), info otherwise.
   const SettingsChangedCallout =
     incompleteAgentSettingsCount > 0 ? KbnWarningCallout : KbnInfoCallout;
@@ -661,13 +668,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.incompleteBody"
                     defaultMessage="Agent-based deployment requires more settings than managed deployment. Complete the required settings in Service Settings for {services} to continue."
-                    values={{ services: settingsOutOfDateServiceNames.join(', ') }}
+                    values={{ services: calloutServiceNames.join(', ') }}
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.body"
                     defaultMessage="Agent-based deployment uses different settings than managed deployment. Review the settings in Service Settings for {services}."
-                    values={{ services: settingsOutOfDateServiceNames.join(', ') }}
+                    values={{ services: calloutServiceNames.join(', ') }}
                   />
                 )}
               </p>
