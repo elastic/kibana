@@ -35,6 +35,7 @@
  * THE SOFTWARE.
  */
 
+import $ from 'jquery';
 import './lib/jquery_flot';
 import './lib/jquery_flot_canvas';
 import './lib/jquery_flot_time';
@@ -47,3 +48,5 @@ import './lib/jquery_flot_threshold';
 import './lib/jquery_flot_fillbetween';
 import './lib/jquery_flot_log';
 import './lib/jquery_flot_axislabels';
+
+export default $;

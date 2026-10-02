@@ -40,6 +40,8 @@ interface AgentErrorInfo {
   wasCanceled: boolean;
   cancelType: string; // Either `manual` or `action`
   cancelActionId: string; // value may be an empty string
+  wasDuplicate: boolean; // If action was rejected because it appeared to be a duplicate of another already running
+  duplicateOfActionId: string; // value may be empty string
 }
 
 // logic for determining agent host/errors info
@@ -65,6 +67,8 @@ const getAgentErrors = (action: MaybeImmutable<ActionDetails>, agentId?: string)
         wasCanceled: agentState?.wasCanceled ?? action.wasCanceled,
         cancelType: endpointAgentOutput?.content?.canceled_by || '',
         cancelActionId: endpointAgentOutput?.content?.canceled_id || '',
+        wasDuplicate: Boolean(endpointAgentOutput?.content?.duplicate_of_id),
+        duplicateOfActionId: endpointAgentOutput?.content?.duplicate_of_id ?? '',
       };
 
       if (
@@ -154,7 +158,15 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
                           data-test-subj={getTestId('canceledMessage')}
                         />
                       )}
+
                       {agentErrorInfo.errors.join(' | ')}
+
+                      {agentErrorInfo.wasDuplicate && (
+                        <DuplicateActionMessage
+                          duplicateOfActionId={agentErrorInfo.duplicateOfActionId}
+                          data-test-subj={getTestId('duplicateMessage')}
+                        />
+                      )}
                     </>
                   }
                 />
@@ -170,7 +182,15 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
                   data-test-subj={getTestId('canceledMessage')}
                 />
               )}
+
               {allAgentErrors[0].errors.join(' | ')}
+
+              {allAgentErrors[0].wasDuplicate && (
+                <DuplicateActionMessage
+                  duplicateOfActionId={allAgentErrors[0].duplicateOfActionId}
+                  data-test-subj={getTestId('duplicateMessage')}
+                />
+              )}
             </>
           )}
         </>
@@ -206,3 +226,31 @@ const CanceledMessage = memo<CanceledMessageProps>(
   }
 );
 CanceledMessage.displayName = 'CanceledMessage';
+
+/** @private */
+export interface DuplicateActionMessageProps {
+  /**
+   * The ID of the action that was already running on the endpoint when this one was received.
+   */
+  duplicateOfActionId: string;
+
+  'data-test-subj'?: string;
+}
+
+/** @private */
+export const DuplicateActionMessage = memo<DuplicateActionMessageProps>(
+  ({ duplicateOfActionId, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    return (
+      <div data-test-subj={getTestId()}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpointActionFailureMessage.duplicateMessage"
+          defaultMessage="An identical (duplicate) action (ID: {duplicateOfActionId}) was already running on the host"
+          values={{ duplicateOfActionId }}
+        />
+      </div>
+    );
+  }
+);
+DuplicateActionMessage.displayName = 'DuplicateActionMessage';

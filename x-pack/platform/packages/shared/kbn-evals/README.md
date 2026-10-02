@@ -51,6 +51,7 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
 | `--grep <pattern>`  | Filter tests by name                                                   |
 | `--repetitions <n>` | Repeat each example N times                                            |
+| `--concurrency <n>` | Examples each experiment runs at once (default 5)                      |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
 | `--skip-init`       | Skip config and connector setup                                        |
@@ -72,14 +73,19 @@ Use `--datasets-profile` when dataset credentials should come from the shared go
 node scripts/evals start --suite agent-builder --datasets-profile dev-vault
 ```
 
-#### Filtering, model selection, judge, repetitions
+#### Filtering, model selection, judge, repetitions, concurrency
 
 ```bash
 node scripts/evals start --suite agent-builder --grep "product documentation"
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
 node scripts/evals start --suite agent-builder --repetitions 3
+node scripts/evals start --suite agent-builder --concurrency 8
 ```
+
+`--concurrency` (or `EVAL_CONCURRENCY`) sets how many examples each experiment runs at once. It falls back to the `concurrency` passed to `createPlaywrightEvalsConfig`, then 5. A spec that passes its own `concurrency` to `runExperiment` still wins, and the run logs a warning when that overrides the value you asked for. Server-side limits such as Task Manager capacity stay with the suite's Scout config set.
+
+> **Rate limits:** Concurrent LLM calls are roughly workers × concurrency. Connectors such as EIS and OpenRouter enforce requests-per-minute limits, so a high `--concurrency` can cause 429 (rate limit) errors. If they occur, reduce `--concurrency` or set `KBN_EVALS_HTTP_RETRIES` to retry `fetch` requests (off by default).
 
 #### Advanced options
 
@@ -221,6 +227,7 @@ Run a suite on any branch without a PR:
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
 | `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
 | `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
@@ -265,6 +272,21 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package contains a Playwright config, evaluation specs, and optionally custom fixtures.
 
 To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
+
+### Suite-owned secrets (`scoutHook`)
+
+A suite whose Scout server needs secrets from the evals config can map them into env with a hook in its own package, rather than teaching the shared evals tooling about them. Point `scoutHook` in its `evals.suites.json` entry at a repo-relative bash script:
+
+```json
+{
+  "id": "my-suite",
+  "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
+  "serverConfigSet": "evals_my_suite",
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+}
+```
+
+The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
 
 ### Playwright config
 

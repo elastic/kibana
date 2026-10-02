@@ -6,7 +6,6 @@
  */
 
 import {
-  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
@@ -18,6 +17,7 @@ import type {
 import { z } from '@kbn/zod/v4';
 import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  MAX_ESCALATION_ASSIGNEES,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
   MAX_ESCALATIONS_PAGE_SIZE,
   MAX_ESCALATIONS_RESULT_WINDOW,
@@ -32,51 +32,36 @@ export type EscalationConversation = Conversation;
 const conversationIdSchema = z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH);
 
 /** A user profile uid, bounded to the length the conversation ACL enforces. */
-const collaboratorIdSchema = z
-  .string()
-  .min(1)
-  .max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
+const assigneeIdSchema = z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
 
 export const escalationVisibilitySchema = z.enum(['private', 'public']);
 export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;
 
-export const createEscalationRequestSchema = z
-  .object({
-    /**
-     * The investigation to escalate. A single id, not an array: an escalation is opened
-     * *from* one investigation. Further investigations are attached through the update
-     * route afterwards.
-     */
-    linked_investigation_id: conversationIdSchema,
-    /** Escalation title. Defaults to the linked investigation's title if omitted. */
-    title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
-    visibility: escalationVisibilitySchema,
-    /**
-     * List of user profile uids to add as collaborators. Required when
-     * visibility is "private"; must be omitted (or empty) when "public".
-     */
-    collaborators: z
-      .array(collaboratorIdSchema)
-      .max(CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES)
-      .default([]),
-  })
-  .superRefine((value, ctx) => {
-    if (value.visibility === 'private' && value.collaborators.length === 0) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['collaborators'],
-        message: 'collaborators is required when visibility is "private"',
-      });
-    }
+/**
+ * The open/closed status of an escalation. Values must stay in sync with the `status`
+ * field options in the escalation conversation template
+ * (`agent_builder_platform/server/conversation_templates/escalation.ts`).
+ */
+export const escalationStatusSchema = z.enum(['open', 'closed']);
+export type EscalationStatus = z.infer<typeof escalationStatusSchema>;
 
-    if (value.visibility === 'public' && value.collaborators.length > 0) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['collaborators'],
-        message: 'collaborators must not be set when visibility is "public"',
-      });
-    }
-  });
+export const createEscalationRequestSchema = z.object({
+  /**
+   * The investigation to escalate. A single id, not an array: an escalation is opened
+   * *from* one investigation. Further investigations are attached through the update
+   * route afterwards.
+   */
+  linked_investigation_id: conversationIdSchema,
+  /** Escalation title. Defaults to the linked investigation's title if omitted. */
+  title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
+  visibility: escalationVisibilitySchema,
+  /**
+   * User profile uids to assign to the escalation. At least one is required (typically
+   * the creator). Stored in `metadata.assignees`. For private escalations, these uids
+   * are also used as the ACL entries so assignees can see the escalation.
+   */
+  assignees: z.array(assigneeIdSchema).min(1).max(MAX_ESCALATION_ASSIGNEES),
+});
 
 export type CreateEscalationRequest = z.infer<typeof createEscalationRequestSchema>;
 
@@ -102,7 +87,9 @@ export const updateEscalationRequestSchema = z
   .refine(
     (value) =>
       value.title !== undefined || value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined,
-    { message: 'at least one of title or linked_investigations must be provided' }
+    {
+      message: 'at least one of title or linked_investigations must be provided',
+    }
   )
   .refine(
     (value) =>
@@ -122,6 +109,9 @@ export type UpdateEscalationRequest = z.infer<typeof updateEscalationRequestSche
  * The `page * per_page` refinement mirrors agent_builder's `_search` route guard:
  * results beyond MAX_ESCALATIONS_RESULT_WINDOW are unreachable through offset
  * pagination, so requesting them is always an error rather than an empty page.
+ *
+ * `status` defaults to `'open'` to preserve backward compatibility for callers
+ * that do not send the parameter. `'all'` is provided for admin / diagnostic use.
  */
 export const listEscalationsQuerySchema = z
   .object({
@@ -132,7 +122,15 @@ export const listEscalationsQuerySchema = z
       .min(1)
       .max(MAX_ESCALATIONS_PAGE_SIZE)
       .default(MAX_ESCALATIONS_PAGE_SIZE),
+    status: z.enum(['open', 'closed', 'all']).default('open'),
     search: z.string().max(256).optional(),
+    /**
+     * When set, only escalations that have this investigation id in their
+     * `metadata.linked_investigations` array are returned. Useful for checking
+     * whether an investigation is already part of one or more escalations before
+     * opening the escalation creation modal.
+     */
+    linked_investigation_id: conversationIdSchema.optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,
@@ -148,4 +146,24 @@ export type EscalationConversationSummary = ConversationWithoutRoundsWithPermiss
 export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };
   results: EscalationConversationSummary[];
+}
+
+/**
+ * A brief summary of an investigation linked to an escalation, as returned by the
+ * `GET /escalations/{id}/linked_investigations` route.
+ *
+ * `status` follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+ */
+export interface LinkedInvestigationSummary {
+  /** Investigation conversation id. */
+  id: string;
+  title: string;
+  /** Open/closed status derived from `metadata.status`. */
+  status: 'open' | 'closed';
+  /** Agent Builder agent id, used for deep-linking to the conversation. */
+  agent_id: string;
+}
+
+export interface ListLinkedInvestigationsResponse {
+  results: LinkedInvestigationSummary[];
 }

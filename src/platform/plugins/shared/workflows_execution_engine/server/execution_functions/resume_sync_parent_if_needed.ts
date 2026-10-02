@@ -49,6 +49,7 @@ export async function resumeSyncParentIfNeeded({
   stepExecutionRepository,
   workflowTaskManager,
   logger,
+  throwOnFailure = false,
 }: {
   childExecution: EsWorkflowExecution;
   spaceId: string;
@@ -57,15 +58,16 @@ export async function resumeSyncParentIfNeeded({
   stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager?: WorkflowTaskManager;
   logger: Logger;
+  throwOnFailure?: boolean;
 }): Promise<void> {
-  if (
-    !internalResumeWorkflowExecution ||
-    !isTerminalStatus(childExecution.status) ||
-    !isSyncParentInvocation(childExecution.context)
-  ) {
+  if (!isTerminalStatus(childExecution.status) || !isSyncParentInvocation(childExecution.context)) {
     return;
   }
 
+  if (!internalResumeWorkflowExecution) {
+    if (throwOnFailure) throw new Error('Parent resume handler is unavailable.');
+    return;
+  }
   const parentExecId = childExecution.context.parentWorkflowExecutionId;
 
   for (let attempt = 1; attempt <= PARENT_WAKE_ATTEMPTS; attempt++) {
@@ -106,6 +108,7 @@ export async function resumeSyncParentIfNeeded({
     stepExecutionRepository,
     workflowTaskManager,
     logger,
+    throwOnFailure,
   });
 }
 
@@ -118,6 +121,7 @@ async function failClosedIfParentStillWaiting({
   stepExecutionRepository,
   workflowTaskManager,
   logger,
+  throwOnFailure,
 }: {
   parentExecId: string;
   childExecutionId: string;
@@ -127,12 +131,14 @@ async function failClosedIfParentStillWaiting({
   stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager?: WorkflowTaskManager;
   logger: Logger;
+  throwOnFailure: boolean;
 }): Promise<void> {
   if (!workflowExecutionRepository) {
     logger.error(
       `Cannot fail-close parent ${parentExecId} after child ${childExecutionId} completion: ` +
         `workflow execution repository is unavailable. The parent may remain in WAITING_FOR_CHILD.`
     );
+    if (throwOnFailure) throw new Error('Parent workflow execution repository is unavailable.');
     return;
   }
 
@@ -141,7 +147,24 @@ async function failClosedIfParentStillWaiting({
       parentExecId,
       spaceId
     );
-    if (!parent || isTerminalStatus(parent.status) || parent.status === ExecutionStatus.RUNNING) {
+    if (!parent || parent.status === ExecutionStatus.RUNNING) return;
+    if (isTerminalStatus(parent.status)) {
+      if (
+        throwOnFailure &&
+        isSyncParentInvocation(parent.context) &&
+        parent.context.parentWorkflowExecutionId !== parentExecId
+      ) {
+        await resumeSyncParentIfNeeded({
+          childExecution: parent,
+          spaceId,
+          internalResumeWorkflowExecution,
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          workflowTaskManager,
+          logger,
+          throwOnFailure,
+        });
+      }
       return;
     }
 
@@ -165,6 +188,7 @@ async function failClosedIfParentStillWaiting({
               wakeErr
             )}). Leaving it to fire.`
         );
+        if (throwOnFailure) throw wakeErr;
       }
       return;
     }
@@ -178,6 +202,7 @@ async function failClosedIfParentStillWaiting({
         `Cannot fail-close parent ${parentExecId} after child ${childExecutionId} completion: ` +
           `step execution repository is unavailable. The parent may remain in WAITING_FOR_CHILD.`
       );
+      if (throwOnFailure) throw new Error('Parent step execution repository is unavailable.');
       return;
     }
 
@@ -207,6 +232,7 @@ async function failClosedIfParentStillWaiting({
         stepExecutionRepository,
         workflowTaskManager,
         logger,
+        throwOnFailure,
       });
     }
   } catch (failErr) {
@@ -215,5 +241,6 @@ async function failClosedIfParentStillWaiting({
         failErr
       )}`
     );
+    if (throwOnFailure) throw failErr;
   }
 }

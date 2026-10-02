@@ -213,6 +213,8 @@ export function EpisodeDetailsPage() {
           expressions: services.expressions,
           spaces: services.spaces,
           queryClient,
+          isRuleAvailable: (selectedRuleId) =>
+            isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
           getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,

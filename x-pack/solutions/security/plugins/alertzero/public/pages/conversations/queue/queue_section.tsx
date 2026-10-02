@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
+  matchesEntityFilter,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
@@ -17,7 +18,7 @@ import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
   section: QueueSectionState;
-  surfaceFilter: string | null;
+  entityFilter: string | null;
   /** Conversation behind the open flyout; its cards are marked as current. */
   selectedConversationId?: string;
   onClickAction: BaseActionsProps['onClickAction'];
@@ -26,11 +27,15 @@ export interface QueueSectionProps {
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
   canManageEscalations?: boolean;
+  /** When true the "Close investigation" action is shown on each card. */
+  canCloseInvestigation?: boolean;
+  /** Optional: render the assignee picker widget for each non-closed card. */
+  renderAssignees: (investigation: Investigation) => React.ReactNode;
 }
 
 export const QueueSection = ({
   section,
-  surfaceFilter,
+  entityFilter,
   selectedConversationId,
   ...handlers
 }: QueueSectionProps) => {
@@ -54,10 +59,10 @@ export const QueueSection = ({
 
   const briefingList = useMemo(
     () =>
-      surfaceFilter
-        ? investigations.filter(({ affectedSurface }) => affectedSurface === surfaceFilter)
+      entityFilter
+        ? investigations.filter((investigation) => matchesEntityFilter(investigation, entityFilter))
         : investigations,
-    [investigations, surfaceFilter]
+    [investigations, entityFilter]
   );
 
   const selectedIds = useMemo(
@@ -92,7 +97,7 @@ export const QueueSection = ({
       onShowMore={loadMore}
       isLoadingMore={isLoadingMore}
       hasLoadMoreError={hasLoadMoreError}
-      isFiltered={Boolean(surfaceFilter)}
+      isFiltered={Boolean(entityFilter)}
       selectedIds={selectedIds}
       getOutcomeLabel={getOutcomeLabel}
       {...handlers}

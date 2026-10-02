@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -99,6 +100,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -115,7 +117,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'custom_content_update_panel',
 
   // Platform – Context Engine
-  `${internalNamespaces.platformContextEngine}.save_automation`,
+  contextEngineAutomationTools.installAutomationTemplate,
+  contextEngineAutomationTools.saveAutomation,
+  contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
@@ -125,10 +129,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_write_file',
 
   // Nightshift – Decision trees
-  'submit_optimizer_result',
-  'record_system_learning',
-  'record_tool_learning',
-  'record_remediation',
+  'nightshift_submit_optimizer_result',
+  'nightshift_record_system_learning',
+  'nightshift_record_tool_learning',
+  'nightshift_record_remediation',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -170,12 +174,12 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
  */
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
-  `${internalNamespaces.platformSignificantEvents}.investigation-type`,
-  `${internalNamespaces.platformSignificantEvents}.deductive-investigation-type`,
+  `${internalNamespaces.platformNightshift}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
+  `${internalNamespaces.platformSignificantEvents}.ki-query-generation-type`,
   `${internalNamespaces.platformContextEngine}.setup-type`,
 ] as const;
 
@@ -205,7 +209,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'action-policy-management',
 
   // Platform – Dashboard
-  'dashboard-management',
+  'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',
@@ -220,6 +224,12 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'knowledge-indicators-management',
   'ki-identification-management',
   'feature-identification',
+  'ki-query-generation',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Context Engine
   'ki-retrieval',
@@ -233,6 +243,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Evals
   'eval-experiment-authoring',
+  'eval-dataset-management',
 
   // Security Solution
   'entity-analytics-leads',
@@ -253,6 +264,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'investigate-rule',
   'siem-readiness',
   'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-install-rules',
   'automatic-migration-rules-summarize',
   'automatic-migration-rules-stop-migration',
   'automatic-migration-rules-update-migration',
@@ -262,7 +274,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-workflow-troubleshooting',
 
   // O11Y
-  'observability.rca',
   'observability.investigation',
   'observability.service-map',
   'observability.investigate-service-map',
@@ -354,6 +365,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Security Solution
   'security.alert',
+  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
@@ -373,6 +385,11 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.attack_discovery',
   'security.attack_discovery.verdict',
 
+  // Security Solution – AlertZero (Hunt Watch)
+  // gated behind xpack.alertzero.enabled
+  'security.threat',
+  'security.significant_security_event',
+
   // Observability
   'observability.ai_insight',
   'observability.error',
@@ -388,11 +405,19 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'observability.service-map',
   'observability.service-map-context',
 
+  // ML
+  'ml.anomaly_swimlane',
+  'ml.anomaly_charts',
+  'ml.single_metric_viewer',
+
   // Platform – Custom Content
   'platform.custom_content.panel_context',
 
+  // Platform – Proposals
+  'platform.proposal',
+
   // Platform – Agentic Investigations
-  'investigation_proposal',
+  'investigation_impact',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

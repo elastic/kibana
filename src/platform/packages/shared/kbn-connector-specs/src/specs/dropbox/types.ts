@@ -45,6 +45,7 @@ export const SearchInputSchema = lazySchema(() =>
       .describe('Maximum number of results to return (1–100, default 20)'),
     fileExtensions: z
       .array(z.string().max(50))
+      .max(50)
       .optional()
       .describe(
         'Filter results to specific file extensions. Example: ["pdf", "docx", "xlsx"]. Leave empty to match all file types.'
@@ -63,6 +64,7 @@ export const SearchInputSchema = lazySchema(() =>
           'others',
         ])
       )
+      .max(9)
       .optional()
       .describe(
         'Filter results to specific file categories: "image", "document", "spreadsheet", "presentation", "audio", "video", "folder", "paper", or "others"'

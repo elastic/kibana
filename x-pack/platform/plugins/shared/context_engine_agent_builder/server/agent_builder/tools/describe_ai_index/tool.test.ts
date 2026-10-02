@@ -9,6 +9,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
+import { AiIndexNotReadableError } from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import { CONTEXT_ENGINE_READ_DENIED_MESSAGE } from '../ai_index_read_service';
 import { createAiIndexToolDepsMock } from '../ai_index_read_service.mock';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
@@ -68,6 +69,20 @@ describe('describe_ai_index tool', () => {
     expect(result).toEqual({
       results: [{ type: ToolResultType.error, data: { message: "AI index 'missing' not found" } }],
     });
+  });
+
+  it('logs and returns an error result when the backing index is not readable', async () => {
+    const { deps, readService } = createAiIndexToolDepsMock();
+    const error = new AiIndexNotReadableError('parks');
+    readService.describe.mockRejectedValue(error);
+
+    const ctx = agentBuilderMocks.tools.createHandlerContext();
+    const result = await createDescribeAiIndexTool(deps).handler({ ai_index_id: 'parks' }, ctx);
+
+    expect(result).toEqual({
+      results: [{ type: ToolResultType.error, data: { message: error.message } }],
+    });
+    expect(ctx.logger.error).toHaveBeenCalled();
   });
 
   it('returns an error result when the caller lacks the read privilege', async () => {
