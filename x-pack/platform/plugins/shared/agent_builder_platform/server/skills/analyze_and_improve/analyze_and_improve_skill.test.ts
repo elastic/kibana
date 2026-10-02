@@ -527,4 +527,13 @@ describe('analyzeAndImproveSkill', () => {
       /omits `attributes\.esql` rather than carrying a query that answers nothing/
     );
   });
+
+  it('says a verified query was parsed and run, so a later failure points at data drift', () => {
+    const prose = analyzeAndImproveSkill.content.replace(/\s+/g, ' ');
+
+    expect(prose).not.toMatch(/passed `verifyKi`, which only parses/);
+    expect(prose).toMatch(
+      /passed the verifiers, which parse it and run it, so a failure since then points at the data changing under it/
+    );
+  });
 });

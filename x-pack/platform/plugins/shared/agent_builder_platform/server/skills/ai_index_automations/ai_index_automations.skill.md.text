@@ -54,10 +54,12 @@ Whatever the strategy, a generated workflow has to:
   workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
   step. Use a different connector only when the user names one; they can change it after the save,
   in the workflow editor, without your involvement.
-- **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
-  jitter. Rate limits, transient connector errors and a structured output that failed to parse
-  once are the ordinary failures of a model call, and without the retry each one costs the unit
-  it was profiling. The templates carry it; keep it on any `ai.prompt` you add.
+- **Retry `ai.prompt` outside a `parallel` branch**: `on-failure.retry` with three attempts,
+  exponential delay and jitter. Rate limits, transient connector errors and a structured output
+  that failed to parse once are the ordinary failures of a model call, and without the retry each
+  one costs the unit it was profiling. A `parallel` branch cannot hold `on-failure`. The templates'
+  loops are all `parallel`, so they run their model calls without it: a failed call costs that one
+  item until the next run, and a pilot that wrote fewer KIs than it covered shows it.
 - **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and pass
   `verifiers` to every `context-engine.createKi` so an indicator whose ES|QL fails to parse is
   reported rather than persisted.
@@ -234,8 +236,12 @@ handle any corpus size up to the ES|QL row cap:
 ```
 
 A branch reads `{{ foreach.item }}` and its own earlier steps exactly as a sequential iteration
-does. Two things a branch still cannot hold: a step-level `timeout:`, and a step that waits on a
-human. Both are compile-time errors rather than surprises at runtime.
+does. A branch cannot hold a step-level `timeout:` or `on-failure`, an `if`, a nested `foreach`,
+`while` or `switch`, or a step that waits on a human: each is a compile-time error rather than a
+surprise at runtime. Verify inside `context-engine.createKi` with `verifiers` rather than gating
+the write with an `if`.
+
+Outside a branch, any step can carry `on-failure` with a retry, a fallback and `continue`:
 
 ```yaml
 on-failure:
@@ -293,9 +299,9 @@ look for one and do not invent a name; start from the shape of `unit-profile-tem
 the YAML the install tool provides for the Cumulative strategy. It is a
 complete workflow that runs as it stands, and it already carries the parts a fresh draft gets
 wrong: the grounding, the prompt's output schema, the single `data.set` that builds the indicator
-so verification and the write see the same document, the `verifyKi` gate, the `ki_id` scheme that
-makes a re-run replace rather than duplicate, the retry on the model call, and the
-`attributes.esql` wiring the verifiers read.
+so verification and the write see the same document, the `verifiers` on `createKi`, the `ki_id`
+scheme that makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the
+verifiers read.
 
 It opens with a comment saying what to change and what to leave, and declares what varies in
 `consts` at the top — the AI Index id, the source index, the fields the strategy turns on. The
@@ -489,7 +495,7 @@ automation that has been run. Read it, fill in its `consts` block, and add the g
 strategy needs. That is the draft. Authoring one from nothing is a long generate-and-repair loop
 that arrives somewhere worse, because the template already encodes the things a fresh draft gets
 wrong and a run does not catch: the single `data.set` that builds the indicator so verification and
-the write see the same document, the `verifyKi` gate, the `ki_id` scheme that makes a re-run
+the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a re-run
 replace rather than duplicate, and the `attributes.esql` wiring that decides what the verifiers
 actually check.
 

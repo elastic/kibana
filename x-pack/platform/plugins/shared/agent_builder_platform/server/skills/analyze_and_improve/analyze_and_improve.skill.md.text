@@ -475,8 +475,8 @@ stays in `attributes.error_text`.
   calls when trace details are available. Determine whether the agent composed the query or followed
   an access pattern from a previously retrieved KI. If the KI contains the malformed query, inspect
   its producing workflow and propose correcting the generation step — and note that a query in
-  `attributes.esql` passed `verifyKi`, which only parses, so a query can be syntactically valid and
-  still fail on unknown fields at execution time.
+  `attributes.esql` passed the verifiers, which parse it and run it, so a failure since then points
+  at the data changing under it: a renamed field, a dropped index, a mapping change.
 - **Repeated `coverage_gap` on the same raw index, especially with `fell_back_to_raw`.** Agents
   keep reaching for data no indicator covers, and the raw queries tell you what an automation
   should be producing. Check the corpus filter first — the data may be excluded rather than

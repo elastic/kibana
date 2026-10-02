@@ -207,9 +207,30 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/what is not in the brief is not in the KI/i);
     });
 
-    it('requires retry on every ai.prompt and says why', () => {
-      expect(content).toMatch(/\*\*Retry every `ai\.prompt`\*\*/);
-      expect(content).toMatch(/three attempts, exponential delay and\s+jitter/);
+    it('retries ai.prompt in a sequential loop only, since a parallel branch cannot hold it', () => {
+      const prose = content.replace(/\s+/g, ' ');
+
+      expect(prose).toMatch(/\*\*Retry `ai\.prompt` outside a `parallel` branch\*\*/);
+      expect(prose).toMatch(/three attempts, exponential delay and jitter/);
+      expect(prose).toMatch(
+        /The templates' loops are all `parallel`, so they run their model calls without it/
+      );
+      expect(prose).not.toMatch(/The templates carry it; keep it on any `ai\.prompt` you add/);
+    });
+
+    it('lists everything a parallel branch rejects, with the on-failure example outside it', () => {
+      const prose = content.replace(/\s+/g, ' ');
+
+      expect(prose).toMatch(
+        /A branch cannot hold a step-level `timeout:` or `on-failure`, an `if`, a nested `foreach`, `while` or `switch`, or a step that waits on a human/
+      );
+      expect(prose).not.toMatch(/Two things a branch still cannot hold/);
+    });
+
+    it('describes the template safeguards as verifiers on createKi, not a verifyKi gate or a retry', () => {
+      expect(content).not.toMatch(/the `verifyKi` gate/);
+      expect(content).not.toMatch(/the retry on the model call/);
+      expect(content.replace(/\s+/g, ' ')).toMatch(/the `verifiers` on `createKi`/);
     });
 
     it('points at the shared references for the shape and the catalog instead of restating them', () => {
