@@ -39,15 +39,6 @@ triggers:
           type: string
           enum: [on_hits, always, never]
           default: on_hits
-        technology:
-          type: string
-          description: >
-            One of the HuntTechnology values, to pin the hunt to that technology's
-            index scope. Leave it unset (renders as "") and the coordinator
-            resolves every technology whose required indices exist in the space
-            and hunts them all. No enum: a workflow trigger input can't be
-            omitted, so it must accept "" here; the coordinator route validates
-            the real value and 400s on anything else.
       required:
         - reportId
         - investigationConversationId
@@ -72,9 +63,9 @@ outputs:
 steps:
   # The coordinator's request body is snake_case (report_id, run_id, trigger)
   # and does not know about Investigations; this step is the camelCase ->
-  # snake_case mapping layer so no other caller has to repeat it. An unset
-  # `technology` input renders as "", which the coordinator treats the same as
-  # omitted: resolve the technologies from the environment.
+  # snake_case mapping layer so no other caller has to repeat it. The coordinator
+  # reads what to search (the space's default data view) itself; nothing here
+  # scopes the hunt.
   - name: run_hunt_coordinator
     type: kibana.request
     # No Investigation to attach findings to (the Worker's find_or_create
@@ -94,7 +85,6 @@ steps:
         run_id: "{{ inputs.runId }}"
         trigger: "{{ inputs.trigger }}"
         tier2_when: "{{ inputs.tier2_when }}"
-        technology: "{{ inputs.technology }}"
     on-failure:
       fallback:
         - name: emit_coordinator_failed

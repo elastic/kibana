@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { HuntForThreatResult, HuntIoc, ResolvedIndexScope } from '@kbn/alertzero-common';
+import type { HuntForThreatResult, HuntIoc, HuntScope } from '@kbn/alertzero-common';
 
 export interface HuntForThreatParams {
   /**
-   * The resolved index scope from A2 (required and optional patterns, plus
-   * row_limit/window defaults). Accepts a single-technology scope or the merged
-   * multi-technology hunt scope; Tier 1 never reads the technology itself.
-   * `baseline` joins the search set and the confirming set alongside
-   * `required`.
+   * What Tier 1 searches: a list of index patterns and nothing else. Every searched
+   * index counts towards the hit bar. `window` and `row_limit` are the defaults the
+   * run's `time_range` and `size` override.
    */
-  scope: Omit<ResolvedIndexScope, 'technology'> & { baseline: string[] };
+  scope: Pick<HuntScope, 'window' | 'row_limit'> & { search_patterns: string[] };
   iocs?: HuntIoc[];
   techniques?: string[];
   /** Overrides the scope's window when the caller wants a narrower/wider range for this run. */

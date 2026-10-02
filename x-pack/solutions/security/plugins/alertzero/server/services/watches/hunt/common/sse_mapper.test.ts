@@ -22,16 +22,16 @@ const huntResultOf = (entry: ReturnType<typeof buildSseData>[number]) => {
 
 jest.mock('./resolve_index_scope', () => ({
   resolveHuntScope: jest.fn().mockResolvedValue({
-    technologies: ['aws_iam'],
     status: 'ok',
-    // A wildcard pattern matching what resolveIndexScope returns in production
+    resolution: 'universe',
+    // A wildcard pattern matching what resolveHuntScope returns in production
     // (`logs-aws.*`), not a concrete `_index` bucket name. The fixture must use
     // the pattern so `matchesRequired`'s regex logic is exercised correctly.
-    required: ['logs-aws.*'],
-    baseline: [],
-    tier2_targets: ['logs-aws.*'],
-    optional: ['.alerts-security.alerts-default'],
+    index_patterns: ['logs-aws.*'],
     missing: [],
+    discovered: [],
+    report_matches: ['logs-aws.*'],
+    actionable_indices: ['logs-endpoint.events.process-*'],
     window: { from: 'now-24h', to: 'now' },
     row_limit: 100,
   }),
@@ -69,13 +69,11 @@ const HIT_TIER1_RESULT = {
       index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
       hit_count: 3,
       required: true,
-      confirming: true,
     },
     {
       index: '.alerts-security.alerts-default',
       hit_count: 1,
-      required: false,
-      confirming: false,
+      required: true,
     },
   ],
 };
@@ -169,10 +167,17 @@ const esClient = {} as ElasticsearchClient;
 /** Truthy stand-in so the coordinator does not skip Tier 2 with `no_inference`. */
 const mockModel = {} as ScopedModel;
 
+const DEFAULT_INDEX_PATTERNS = ['logs-aws.*'];
+
 const runCoordinator = (
-  params: Parameters<typeof huntCoordinator>[3]
+  params: Omit<Parameters<typeof huntCoordinator>[3], 'indexPatterns'> & {
+    indexPatterns?: string[];
+  }
 ): ReturnType<typeof huntCoordinator> =>
-  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, params);
+  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+    indexPatterns: DEFAULT_INDEX_PATTERNS,
+    ...params,
+  });
 
 type TestBehavior = NonNullable<HuntCoordinatorCoreResult['tier2']>['behaviors'][number];
 
@@ -182,9 +187,10 @@ const tier1Result = (
 ): HuntCoordinatorCoreResult => ({
   status: 'tier1_only',
   run_id: 'run-1',
-  technologies: ['aws_iam'],
   index_patterns: ['logs-aws.*'],
   tier2_targets: ['logs-aws.*'],
+  tier2_target_sources: ['report_match'],
+  actionable_indices: ['logs-endpoint.events.process-*'],
   has_confirmed_hit: true,
   completeness: 'complete',
   completed_successfully: true,
@@ -202,9 +208,7 @@ const tier1Result = (
     counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
     hits: [],
     affected_assets: { hosts: [], users: [], services: [] },
-    per_index: [
-      { index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true, confirming: true },
-    ],
+    per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true }],
     ...over,
   },
 });
@@ -335,13 +339,11 @@ describe('buildSseData', () => {
         index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
         hit_count: 3,
         required: true,
-        confirming: true,
       },
       {
         index: '.alerts-security.alerts-default',
         hit_count: 1,
-        required: false,
-        confirming: false,
+        required: true,
       },
     ]);
     expect(huntResultOf(entry).tier1.resolved_iocs).toEqual([
@@ -402,15 +404,18 @@ describe('buildSseData', () => {
       },
     ]);
 
-    // The hunted technologies ride along as technology indicators.
-    const technologyIndicators = entry.data.security_knowledge_indicators.filter(
-      (i) => i.type === 'technology'
+    // Discovery-first hunts no longer emit technology indicators from the result.
+    expect(entry.data.security_knowledge_indicators.some((i) => i.type === 'technology')).toBe(
+      false
     );
-    expect(technologyIndicators).toEqual([{ type: 'technology', value: 'aws_iam' }]);
 
     // `report_id` is its own top-level field (asserted separately below);
     // it's no longer duplicated into `security_knowledge_indicators`.
     expect(entry.data.report_id).toBe('tr-aws-iam-assumerole-2026-07-28');
+
+    // Actionable process-bearing indices ride along when the scope named any.
+    expect(huntResultOf(entry).actionable_indices).toEqual(['logs-endpoint.events.process-*']);
+    expect(huntResultOf(entry).tier2_targets).toEqual(expect.arrayContaining(['logs-aws.*']));
 
     const iocIndicator = entry.data.security_knowledge_indicators.find((i) => i.type === 'ioc');
     expect(iocIndicator?.ioc).toEqual({ type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' });
@@ -700,7 +705,6 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
             index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
             hit_count: 1,
             required: true,
-            confirming: true,
           },
         ],
       },
@@ -737,7 +741,6 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
             index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
             hit_count: 1,
             required: true,
-            confirming: true,
           },
         ],
       },
@@ -791,13 +794,11 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
             index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
             hit_count: 1,
             required: true,
-            confirming: true,
           },
           {
             index: '.alerts-security.alerts-default',
             hit_count: 1,
             required: false,
-            confirming: false,
           },
         ],
       },
@@ -941,25 +942,57 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     ).toThrow(/time_range/);
   });
 
-  it('keeps required per_index buckets when Tier 1 returns more than the schema cap', () => {
-    // Tier 1 aggregates up to 500 `_index` buckets; the schema accepts 20.
+  it('keeps Tier 1 per_index order when the list overflows the schema cap', () => {
+    // Tier 1 aggregates up to 500 `_index` buckets; the schema accepts 20. The mapper
+    // no longer reorders confirming-first: it keeps Tier 1's order and truncates.
     const perIndex = Array.from({ length: 25 }, (_, i) => ({
       index: `.ds-logs-aws.cloudtrail-default-2026.07.${String(i + 1).padStart(2, '0')}-000001`,
-      hit_count: 1,
-      required: i >= 5,
-      confirming: i >= 5,
+      hit_count: 25 - i,
+      required: true,
     }));
     const result = tier1Result({
       per_index: perIndex,
-      counts: { total_hits: 25, returned_hits: 25, affected_hosts: 0, affected_users: 0 },
+      counts: { total_hits: 325, returned_hits: 25, affected_hosts: 0, affected_users: 0 },
     });
 
     expect(schemaIssues(result)).toEqual([]);
     const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
     const kept = huntResultOf(entry).tier1.per_index;
     expect(kept).toHaveLength(20);
-    expect(kept.every((row) => row.required)).toBe(true);
+    expect(kept.map((row) => row.index)).toEqual(perIndex.slice(0, 20).map((row) => row.index));
     expect(huntResultOf(entry).tier1.per_index_truncated).toBe(true);
+  });
+
+  it('writes actionable_indices when present and omits them when empty', () => {
+    const withActionable = tier1Result({});
+    const [withEntry] = buildSseData(withActionable, 'tr-1', { spaceId: 'default' });
+    expect(huntResultOf(withEntry).actionable_indices).toEqual(['logs-endpoint.events.process-*']);
+
+    const withoutActionable: HuntCoordinatorCoreResult = {
+      ...tier1Result({}),
+      actionable_indices: [],
+    };
+    const [withoutEntry] = buildSseData(withoutActionable, 'tr-1', { spaceId: 'default' });
+    expect(huntResultOf(withoutEntry).actionable_indices).toBeUndefined();
+  });
+
+  it('caps actionable_indices at 64', () => {
+    const patterns = Array.from({ length: 70 }, (_, i) => `logs-endpoint.events.process-${i}-*`);
+    const result: HuntCoordinatorCoreResult = {
+      ...tier1Result({}),
+      actionable_indices: patterns,
+    };
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    expect(huntResultOf(entry).actionable_indices).toEqual(patterns.slice(0, 64));
+  });
+
+  it('never emits a technology security_knowledge_indicator', () => {
+    const [entry] = buildSseData(tier1Result({}), 'tr-1', { spaceId: 'default' });
+    expect(
+      entry.data.security_knowledge_indicators.some((indicator) => indicator.type === 'technology')
+    ).toBe(false);
   });
 
   it('caps resolved IOCs and keeps the technique indicator ahead of the IOC echo', () => {
@@ -1097,9 +1130,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
       tier1Result({
         hits,
         counts: { total_hits: 50, returned_hits: 50, affected_hosts: 0, affected_users: 0 },
-        per_index: [
-          { index: 'logs-aws.cloudtrail-default', hit_count: 50, required: true, confirming: true },
-        ],
+        per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 50, required: true }],
       }),
       [
         behaviorFixture({
@@ -1201,9 +1232,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
         { id: 'evt-datemath', index: 'logs-aws.cloudtrail-default', timestamp: 'now-1d' },
       ],
       counts: { total_hits: 4, returned_hits: 4, affected_hosts: 0, affected_users: 0 },
-      per_index: [
-        { index: 'logs-aws.cloudtrail-default', hit_count: 4, required: true, confirming: true },
-      ],
+      per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 4, required: true }],
     });
 
     expect(schemaIssues(result)).toEqual([]);

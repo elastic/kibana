@@ -57,7 +57,7 @@ export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
 /** Internal route namespace for the hunt services. */
 export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
 
-/** Tier 1 index-scope projection: which telemetry indices exist per technology. */
+/** The hunt scope for the space: the default data view Tier 1 searches and what resolved in it. */
 export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
 
 /** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */

@@ -78,6 +78,7 @@ const MAX_ENTITY_NAME_LENGTH = 512;
 const MAX_BEHAVIORS = 20;
 /** Matches the SSE schema's `hunt_result.tier2_targets` cap. */
 const MAX_TIER2_TARGETS = 64;
+const MAX_ACTIONABLE_INDICES = 64;
 
 /**
  * Window bounds: the SSE schema requires `.datetime()` (ISO 8601, UTC `Z`), while
@@ -178,9 +179,7 @@ const buildSecurityKnowledgeIndicators = (
   onlyTechniqueId?: string
 ): SseSecurityKnowledgeIndicator[] => {
   const { tier1, tier2 } = result;
-  const indicators: SseSecurityKnowledgeIndicator[] = result.technologies.map(
-    (technology): SseSecurityKnowledgeIndicator => ({ type: 'technology', value: technology })
-  );
+  const indicators: SseSecurityKnowledgeIndicator[] = [];
 
   // Techniques go before the IOC echo: each SSE is 1:1 with a Proposal, so its
   // technique indicator must survive the cap, while the IOCs (up to 100 from the
@@ -552,19 +551,13 @@ const buildHuntResult = (
     tier1RefCount,
   });
 
-  // Confirming indices (required or baseline) set the hit bar, so when the
-  // bucket list overflows the schema cap they are the rows to keep;
-  // optional-index buckets fill the rest. `sort` is stable, so Tier 1's
-  // doc-count order survives within each group.
-  const perIndex = [...tier1.per_index]
-    .sort((a, b) => Number(b.confirming) - Number(a.confirming))
-    .slice(0, MAX_PER_INDEX)
-    .map((entry) => ({
-      index: entry.index,
-      hit_count: entry.hit_count,
-      required: entry.required,
-      confirming: entry.confirming,
-    }));
+  // Tier 1 orders its buckets by doc count, so a list that overflows the schema cap
+  // keeps the indices with the most hits.
+  const perIndex = tier1.per_index.slice(0, MAX_PER_INDEX).map((entry) => ({
+    index: entry.index,
+    hit_count: entry.hit_count,
+    required: entry.required,
+  }));
 
   return {
     has_confirmed_hit,
@@ -596,6 +589,9 @@ const buildHuntResult = (
       : undefined,
     ...(result.tier2_targets.length > 0
       ? { tier2_targets: result.tier2_targets.slice(0, MAX_TIER2_TARGETS) }
+      : {}),
+    ...(result.actionable_indices.length > 0
+      ? { actionable_indices: result.actionable_indices.slice(0, MAX_ACTIONABLE_INDICES) }
       : {}),
   };
 };

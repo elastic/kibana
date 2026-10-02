@@ -9,6 +9,11 @@ import { v5 as uuidv5 } from 'uuid';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { JsonSchema } from '@kbn/workflows';
 import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
+import {
+  buildProposalComment,
+  buildProposalTitle,
+  buildRecommendationComment,
+} from './proposal_copy';
 import type {
   CurrentRunHost,
   CurrentRunState,
@@ -149,42 +154,25 @@ const buildClosureSummary = (state: CurrentRunState): string => {
   return `${title}. Confirmed hit.${hostPart}${evidence}`;
 };
 
-/** Every fillable respond action today is an Elastic Defend action; naming that plainly in the
- *  title is what tells an executable proposal apart from the recommendation below. */
-const DEFEND_TITLE_PREFIX = 'Defend';
-
-const titleCase = (value: string): string => value.replace(/\b\w/g, (c) => c.toUpperCase());
-
-/** Per-host variant so proposals fanned out across hosts read as distinct, not duplicates. */
-const buildHostClosureSummary = (state: CurrentRunState, host: CurrentRunHost): string => {
-  const title = state.titles[0] ?? `Hunt run ${state.runId}`;
-  const evidence =
-    state.evidenceLines.length > 0
-      ? ` Evidence: ${state.evidenceLines.slice(0, 5).join('; ')}.`
-      : '';
-  return `${title}. Confirmed hit. Host: ${host.name}.${evidence}`;
-};
-
-/** What the Proposal's `title` shows in the queue row, attachment card, and agent prompt. */
-const buildHostActionTitle = (host: CurrentRunHost, actionName: string): string =>
-  `${DEFEND_TITLE_PREFIX} ${titleCase(actionName)}: ${host.name}`;
-
 /** Why the recommendation fired, one line per reason that actually held. */
 const buildRecommendationReasonLines = ({
   hasExecutable,
   unenrolledHosts,
-  notHostScoped,
+  nonHostEvidence,
+  evidenceOutsideActionable,
   processUncovered,
 }: {
   hasExecutable: boolean;
   unenrolledHosts: CurrentRunHost[];
-  notHostScoped: boolean;
+  nonHostEvidence: boolean;
+  evidenceOutsideActionable: boolean;
   processUncovered: boolean;
 }): string[] => {
   const lines: string[] = [];
   if (!hasExecutable) {
     lines.push('No respond action could be filled for this finding.');
-  } else if (unenrolledHosts.length > 0) {
+  }
+  if (unenrolledHosts.length > 0) {
     lines.push(
       `${unenrolledHosts.length === 1 ? 'Host' : 'Hosts'} ${unenrolledHosts
         .map((h) => h.name)
@@ -193,9 +181,18 @@ const buildRecommendationReasonLines = ({
       } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
     );
   }
-  if (notHostScoped) {
+  if (nonHostEvidence) {
     lines.push(
       'Part of the evidence for this finding is not host-scoped, so a host action would not close it.'
+    );
+  }
+  // Says what was observed -- an event whose index is not among the run's `actionable_indices` --
+  // rather than concluding the finding is not host-scoped. An empty actionable set also means
+  // the mapping classifier was degraded, and the run cannot tell that apart from a customer
+  // with no process telemetry; neither reading would justify the stronger claim.
+  if (evidenceOutsideActionable) {
+    lines.push(
+      'Some evidence came from indices not known to carry a process identity to act on, so a host action would not close it on its own.'
     );
   }
   if (processUncovered) {
@@ -215,10 +212,14 @@ const buildRecommendationProposal = ({
 }): PackageReportMintPayload => ({
   subjectKey: buildRecommendationSubjectKey(conversationId),
   conversationId,
-  // Fixed, not per-host/per-action like buildHostActionTitle above: this Proposal isn't scoped
+  // Fixed, not per-host/per-action like buildProposalTitle below: this Proposal isn't scoped
   // to one host or action, so there's no single subject to name in a dynamic title.
   title: 'Analyst recommendation',
-  comment: [...reasonLines, ...state.manualRemediation, buildClosureSummary(state)].join('\n\n'),
+  comment: buildRecommendationComment({
+    reasonLines,
+    manualRemediation: state.manualRemediation,
+    state,
+  }),
   // TODO: give this its own queue category once the UI has a place to show it separately
   // from executable proposals; a stored keyword move, not a schema change.
   category: 'respond',
@@ -258,9 +259,7 @@ export const decidePackageReport = ({
       const hostProcessSelectors = state.processSelectors.filter(
         (selector) => selector.hostName === host.name
       );
-      const hostClosureSummary = buildHostClosureSummary(state, host);
       for (const entry of respondActions) {
-        const title = buildHostActionTitle(host, entry.name);
         const schema = actionInputSchema(entry);
         const processScoped = needsProcessParameters(schema);
 
@@ -283,11 +282,10 @@ export const decidePackageReport = ({
             proposals.push({
               subjectKey,
               conversationId,
-              title,
-              // The selector's own summary distinguishes two process-scoped proposals on the
-              // same host (e.g. kill-process for two different pids) that would otherwise share
-              // an identical comment.
-              comment: `${hostClosureSummary}\n\n${processSelector.summary}`,
+              // Per-process title so two process-scoped proposals on the same host (e.g.
+              // kill-process for two different pids) read as distinct, not duplicates.
+              title: buildProposalTitle({ entry, host, processSelector }),
+              comment: buildProposalComment({ entry, host, state, processSelector }),
               category: entry.category ?? 'respond',
               impact: entry.impact,
               actionWorkflowId: entry.workflowId,
@@ -314,8 +312,8 @@ export const decidePackageReport = ({
         proposals.push({
           subjectKey,
           conversationId,
-          title,
-          comment: hostClosureSummary,
+          title: buildProposalTitle({ entry, host }),
+          comment: buildProposalComment({ entry, host, state }),
           category: entry.category ?? 'respond',
           impact: entry.impact,
           actionWorkflowId: entry.workflowId,
@@ -328,7 +326,7 @@ export const decidePackageReport = ({
 
   const hasExecutable = proposals.length > 0;
   const notHostScoped =
-    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsWithinBaseline;
+    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsActionable;
   // Only worth flagging once something else did mint for a host with process evidence;
   // "nothing minted at all" is already covered by `!hasExecutable` above.
   const processUncovered =
@@ -343,7 +341,8 @@ export const decidePackageReport = ({
     const reasonLines = buildRecommendationReasonLines({
       hasExecutable,
       unenrolledHosts: unenrolled,
-      notHostScoped,
+      nonHostEvidence: state.hasNonHostEntity || state.hasIocIndicator,
+      evidenceOutsideActionable: !state.allEventsActionable,
       processUncovered,
     });
     proposals.push(buildRecommendationProposal({ conversationId, state, reasonLines }));

@@ -75,13 +75,11 @@ const huntResult = {
         index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
         hit_count: 8,
         required: true,
-        confirming: true,
       },
       {
         index: 'logs-endpoint.events.network-default',
         hit_count: 4,
         required: false,
-        confirming: false,
       },
     ],
     resolved_iocs: [],

@@ -50,11 +50,8 @@ describe('makeRehydrateProcessSelectors', () => {
       pid: 4312,
       processKey: 'entity_id:ent-1',
       observedAt: '2026-09-26T10:00:00.000Z',
+      processName: 'powershell.exe',
     });
-    expect(selectors[0].summary).toContain('powershell.exe');
-    expect(selectors[0].summary).toContain('pid 4312');
-    expect(selectors[0].summary).toContain('entity_id ent-1');
-    expect(selectors[0].summary).toContain('may have exited');
   });
 
   it('prefers entity_id over pid when both are present, and derives processKey from it', async () => {
@@ -160,7 +157,7 @@ describe('makeRehydrateProcessSelectors', () => {
       ],
     });
     expect(selectors).toHaveLength(1);
-    expect(selectors[0].summary).toContain('new.exe');
+    expect(selectors[0].processName).toBe('new.exe');
   });
 
   it('prefers a technique-attributed ref over a plain sample ref regardless of recency', async () => {
@@ -186,7 +183,39 @@ describe('makeRehydrateProcessSelectors', () => {
       ],
     });
     expect(selectors).toHaveLength(1);
-    expect(selectors[0].summary).toContain('confirmed.exe');
+    expect(selectors[0].processName).toBe('confirmed.exe');
+  });
+
+  it('carries the matched technique id onto the selector', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'confirmed.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('logs-endpoint.events-default', 'ev-1', 'T1059.001')],
+    });
+    expect(selectors[0].techniqueId).toBe('T1059.001');
+  });
+
+  it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'sample.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('logs-endpoint.events-default', 'ev-1')],
+    });
+    expect(selectors[0].techniqueId).toBeUndefined();
   });
 
   it('caps at 5 selectors per host, keeping the newest', async () => {

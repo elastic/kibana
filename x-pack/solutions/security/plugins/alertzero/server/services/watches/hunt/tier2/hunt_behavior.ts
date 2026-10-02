@@ -18,7 +18,6 @@ import type {
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
-import { getKnownHuntIndexPatterns } from '../common/resolve_index_scope';
 import {
   huntBehaviorLlmExtractionSchema,
   EXTRACTION_PROMPT,
@@ -200,7 +199,7 @@ const executeValidatedEsql = async ({
   esql,
   window,
   row_limit,
-  requiredIndices,
+  allowedIndices,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -208,7 +207,7 @@ const executeValidatedEsql = async ({
   esql: string;
   window: { from: string; to: string };
   row_limit: number;
-  requiredIndices: string[];
+  allowedIndices: string[];
 }): Promise<{
   execution: BehaviorExecution;
   affected_hosts?: string[];
@@ -217,11 +216,11 @@ const executeValidatedEsql = async ({
   affected_users_truncated?: boolean;
   hits?: HuntForThreatHit[];
 }> => {
-  const matchesRequired = buildMatchesRequired(requiredIndices);
+  const matchesRequired = buildMatchesRequired(allowedIndices);
 
   try {
     const prepared = prepareEsqlForExecute(esql);
-    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, requiredIndices);
+    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices);
     if (!sourcesAllowed.ok) {
       logger.warn(
         `[hunt:esql] execute for ${techniqueId} refused — ${sourcesAllowed.reason}. ` +
@@ -353,16 +352,16 @@ const executeValidatedEsql = async ({
 
 /**
  * Target for `generateEsql`: one query over the full allowed scope
- * (`tier2_targets`, threaded through as `requiredIndices`), not narrowed to
+ * (`tier2_targets`, threaded through as `allowedIndices`), not narrowed to
  * whichever concrete index Tier 1's per-index buckets happened to hit. A
  * coincidental IOC match landing in an unrelated dataset that shares a
- * baseline wildcard can no longer misdirect the FROM this way, since the FROM
+ * wildcard can no longer misdirect the FROM this way, since the FROM
  * always covers the whole allowed scope regardless of which specific bucket
  * confirmed the hit. Per-behavior host-vs-cloud target choice is future work.
  */
-const resolveGenerationIndex = (requiredIndices: string[]): string => {
+const resolveGenerationIndex = (allowedIndices: string[]): string => {
   // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
-  const positives = requiredIndices.filter((pattern) => !pattern.startsWith('-'));
+  const positives = allowedIndices.filter((pattern) => !pattern.startsWith('-'));
   return positives.length > 0 ? positives.join(',') : DEFAULT_GENERATION_INDEX;
 };
 
@@ -410,7 +409,7 @@ const generateGroundedEsql = async ({
   text,
   iocs,
   articleContext,
-  requiredIndices,
+  allowedIndices,
   rowLimit,
 }: {
   model: ScopedModel;
@@ -420,18 +419,15 @@ const generateGroundedEsql = async ({
   text: string;
   iocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
-  requiredIndices: string[];
+  allowedIndices: string[];
   rowLimit: number;
 }): Promise<Map<string, string>> => {
-  const index = resolveGenerationIndex(requiredIndices);
+  const index = resolveGenerationIndex(allowedIndices);
   const additionalContext = buildGenerationContext({ text, iocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
-  const probeClient = scopedEsqlProbeClient(
-    esClient,
-    requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
-  );
+  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
 
   const entries = await pMap(
     behaviors,
@@ -545,14 +541,14 @@ export const huntBehavior = async (
     window,
     size,
     row_limit: rowLimitFromParams,
-    required_indices: requiredIndices = [],
+    allowed_indices: allowedIndices = [],
   } = params;
 
   const rowLimit = size ?? rowLimitFromParams;
   const canExecute =
     window !== undefined &&
     rowLimit !== undefined &&
-    requiredIndices.length > 0 &&
+    allowedIndices.length > 0 &&
     esClient !== undefined;
 
   const structured = model.chatModel.withStructuredOutput(huntBehaviorLlmExtractionSchema);
@@ -716,7 +712,7 @@ export const huntBehavior = async (
       text,
       iocs,
       articleContext,
-      requiredIndices,
+      allowedIndices,
       rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
     });
     for (const behavior of validated) {
@@ -738,13 +734,9 @@ export const huntBehavior = async (
       // grounded and authoritative to whoever picks it up in Investigation, so a
       // query reaching outside the indices a hunt may read must not be handed on
       // as one — it keeps the non-executable placeholder instead. The allowlist is
-      // the one generation was steered by: the required scope when there is one,
-      // every known technology pattern otherwise, since a caller that passed no
-      // scope still never asked for `.kibana-*` or `*`.
-      const sourcesAllowed = assertEsqlSourcesAllowed(
-        prepareEsqlForExecute(esql),
-        requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
-      );
+      // the one generation was steered by; an empty one allows nothing, so a caller
+      // that passed no scope cannot reach `.kibana-*` or `*`.
+      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), allowedIndices);
       if (!sourcesAllowed.ok) {
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
@@ -791,7 +783,7 @@ export const huntBehavior = async (
         esql,
         window: window!,
         row_limit: rowLimit!,
-        requiredIndices,
+        allowedIndices,
       });
       behavior.execution = executed.execution;
       const executeReason = executed.execution.inconclusive_reason;

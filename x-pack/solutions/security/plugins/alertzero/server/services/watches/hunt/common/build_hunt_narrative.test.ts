@@ -71,9 +71,10 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   status: 'tier1_and_tier2',
   report_id: 'ti-report-aws-iam-historic-01',
   run_id: 'run-1',
-  technologies: ['aws_iam'],
-  index_patterns: [],
-  tier2_targets: [],
+  index_patterns: ['logs-*', '-logs-elastic_agent*'],
+  tier2_targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-*'],
+  tier2_target_sources: ['report_match', 'tier1_hits', 'actionable'],
+  actionable_indices: ['logs-endpoint.events.process-*'],
   tier1: tier1(),
   message: 'Tier 1: no_environment_hits.',
   next_step: 'n/a',
@@ -117,27 +118,25 @@ const hitTier1 = (): HuntCoordinatorTier1 =>
       services: [{ name: 'escalated-role', hit_count: 6 }],
     },
     per_index: [
-      { index: 'logs-aws.cloudtrail.2026.09.25', hit_count: 20, required: true, confirming: true },
+      { index: 'logs-aws.cloudtrail.2026.09.25', hit_count: 20, required: true },
       {
         index: '.internal.alerts-security.alerts-default-000001',
         hit_count: 33,
-        required: false,
-        confirming: false,
+        required: true,
       },
       {
         index: 'logs-endpoint.events.f56865fe.2026.09.25',
         hit_count: 68,
-        required: false,
-        confirming: false,
+        required: true,
       },
     ],
   });
 
 const ctx = {
   reportTitle: 'CloudTrail retrospective: AdministratorAccess attach',
-  requiredIndexPatterns: ['logs-aws.*'],
-  optionalIndexPatterns: ['logs-endpoint.events.*', '.alerts-security.alerts-default'],
 };
+
+const TECHNOLOGY_WORD = /technolog/i;
 
 describe('buildHuntNarrative', () => {
   it('tells the Tier 1 and Tier 2 story for a run both tiers confirmed, as markdown sections', () => {
@@ -161,20 +160,21 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toBe(
       [
         '### Hunt Watch confirmed a hit',
-        'Hunt Watch confirmed a hit for threat report **"CloudTrail retrospective: AdministratorAccess attach"** (`ti-report-aws-iam-historic-01`) in `aws_iam` telemetry: Tier 1 matched the report\'s indicators in the environment and Tier 2 confirmed 1 behavior derived from the report text.',
+        'Hunt Watch confirmed a hit for threat report **"CloudTrail retrospective: AdministratorAccess attach"** (`ti-report-aws-iam-historic-01`): Tier 1 matched the report\'s indicators in the environment and Tier 2 confirmed 1 behavior derived from the report text.',
         [
           '**What was searched**',
           '- **Window:** 2026-08-26T00:00:00.000Z to 2026-09-25T00:00:00.000Z',
-          '- **Indices:** `logs-aws.*` (required); `logs-endpoint.events.*`, `.alerts-security.alerts-default` (optional)',
+          '- **Indices:** `logs-*` and `-logs-elastic_agent*`',
+          "- **Tier 2 targets:** `logs-aws.cloudtrail-*` and `logs-endpoint.events.process-*` (from the report's vendor or product, Tier 1 hits and process telemetry)",
           '- **Indicators (3):** ip `192.0.2.30` and `192.0.2.31`; email `dev-user@corp.example`',
           '- **ATT&CK techniques (2):** `T1078.004` and `T1562.008`',
         ].join('\n'),
         [
           '**Tier 1: indicator and technique search**',
-          'Tier 1 matched 121 documents across 3 indices. 20 matches landed in a required or baseline index, which confirms the hit.',
+          'Tier 1 matched 121 documents across 3 indices, which confirms the hit.',
           '- `logs-endpoint.events.f56865fe.2026.09.25`: 68',
           '- `.internal.alerts-security.alerts-default-000001`: 33',
-          '- `logs-aws.cloudtrail.2026.09.25` (required): 20',
+          '- `logs-aws.cloudtrail.2026.09.25`: 20',
           '- **Indicators seen in the sample:** `192.0.2.30`',
           '- **Alerts tagged with:** `T1078.004`',
           '- **Affected hosts:** `WIN-ANALYST01` (20) and `ci-runner-03` (4)',
@@ -183,24 +183,32 @@ describe('buildHuntNarrative', () => {
         ].join('\n'),
         [
           '**Tier 2: behavior hunts derived from the report**',
-          'Tier 2 derived 2 behaviors from the report text and validated them against the ATT&CK catalog; 2 executed as ES|QL against the required indices and 1 matched live activity.',
+          'Tier 2 derived 2 behaviors from the report text and validated them against the ATT&CK catalog; 2 executed as ES|QL against the Tier 2 targets and 1 matched live activity.',
           '- **T1078.004 Cloud Accounts** ("AssumeRole into escalated-role", critical, confidence 90%): executed and matched 5 rows involving host `WIN-ANALYST01` and users `dev-user` and `escalated-role`.',
           '- **T1562.008 Disable or Modify Cloud Logs** ("StopLogging", critical, confidence 90%): executed and matched no rows in the hunt window.',
         ].join('\n'),
         '_Hunt run `run-1`._',
       ].join('\n\n')
     );
+    expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
-  it('lists baseline patterns next to required and optional under "What was searched"', () => {
-    const narrative = buildHuntNarrative(result({ tier1: hitTier1(), tier2: tier2([]) }), {
-      ...ctx,
-      baselineIndexPatterns: ['logs-endpoint.events.*', 'logs-system.security-*'],
-    });
+  it('names the Tier 2 target sources on the searched section', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        tier1: hitTier1(),
+        tier2: tier2([]),
+        tier2_targets: ['logs-aws.cloudtrail-*'],
+        tier2_target_sources: ['model'],
+        has_confirmed_hit: true,
+      }),
+      ctx
+    );
 
     expect(narrative).toContain(
-      '- **Indices:** `logs-aws.*` (required); `logs-endpoint.events.*`, `logs-system.security-*` (baseline); `logs-endpoint.events.*`, `.alerts-security.alerts-default` (optional)'
+      '- **Tier 2 targets:** `logs-aws.cloudtrail-*` (from a model match)'
     );
+    expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
   it('names a Tier 1 only hit and says Tier 2 found nothing to execute', () => {
@@ -215,6 +223,7 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toContain(
       '**Tier 2: behavior hunts derived from the report**\nTier 2 read the report text and derived no behaviors to hunt.'
     );
+    expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
   it('names a Tier 2 only hit when Tier 1 found nothing', () => {
@@ -234,33 +243,7 @@ describe('buildHuntNarrative', () => {
       '**Tier 1: indicator and technique search**\nTier 1 found no documents matching those indicators or techniques in the window.'
     );
     expect(narrative).toContain('- **Indicators:** none searchable');
-  });
-
-  it('is honest about optional-only Tier 1 matches on a clean run', () => {
-    const narrative = buildHuntNarrative(
-      result({
-        tier1: tier1({
-          status: 'environment_hits_found',
-          resolved_iocs: [{ type: 'ip', value: '192.0.2.30' }],
-          counts: { total_hits: 5, returned_hits: 5, affected_hosts: 1, affected_users: 0 },
-          per_index: [
-            {
-              index: '.internal.alerts-security.alerts-default-000001',
-              hit_count: 5,
-              required: false,
-              confirming: false,
-            },
-          ],
-        }),
-        tier2: tier2([]),
-      }),
-      ctx
-    );
-
-    expect(narrative).toContain('### Hunt Watch found no confirmed hits');
-    expect(narrative).toContain(
-      'Tier 1 matched 5 documents across 1 index. None of those matches were in a required or baseline index, so Tier 1 did not confirm the hit on its own.'
-    );
+    expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
@@ -274,6 +257,9 @@ describe('buildHuntNarrative', () => {
     expect(skipped('no_inference')).toContain('no GenAI connector was available');
     expect(skipped('no_report_text')).toContain('no body text to derive behaviors from');
     expect(skipped('no_searchable_input')).toContain('exposed nothing to search for');
+    expect(skipped('no_tier2_targets')).toContain(
+      'no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry'
+    );
   });
 
   it('carries the Tier 2 failure message when Tier 2 threw', () => {
@@ -298,7 +284,10 @@ describe('buildHuntNarrative', () => {
     const narrative = buildHuntNarrative(
       result({
         status: 'blocked',
-        technologies: ['fortigate'],
+        index_patterns: [],
+        tier2_targets: [],
+        tier2_target_sources: [],
+        actionable_indices: [],
         tier1: tier1({ status: 'scope_blocked' }),
         tier2_skipped_reason: 'scope_blocked',
         completed_successfully: false,
@@ -309,17 +298,21 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toBe(
       [
         '### Hunt Watch could not hunt this report',
-        'Hunt Watch could not hunt threat report **"CloudTrail retrospective: AdministratorAccess attach"** (`ti-report-aws-iam-historic-01`): no required index for `fortigate` exists in this space, so nothing was searched.',
+        'Hunt Watch could not hunt threat report **"CloudTrail retrospective: AdministratorAccess attach"** (`ti-report-aws-iam-historic-01`): no index in the space\'s default data view is visible to this hunt, so nothing was searched.',
         '_Hunt run `run-1`._',
       ].join('\n\n')
     );
+    expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
   it('says the report was not visible when it was not found', () => {
     const narrative = buildHuntNarrative(
       result({
         status: 'tier1_only',
-        technologies: [],
+        index_patterns: [],
+        tier2_targets: [],
+        tier2_target_sources: [],
+        actionable_indices: [],
         tier1: tier1({ status: 'no_searchable_terms' }),
         tier2_skipped_reason: 'report_not_found',
         completed_successfully: false,
@@ -331,12 +324,13 @@ describe('buildHuntNarrative', () => {
     );
   });
 
-  it('falls back to the report id when no title is known and to the environment when no technology resolved', () => {
-    const narrative = buildHuntNarrative(result({ technologies: [], tier2: tier2([]) }));
+  it('falls back to the report id when no title is known', () => {
+    const narrative = buildHuntNarrative(result({ tier2: tier2([]) }));
 
     expect(narrative).toContain(
-      'Hunt Watch found no confirmed hits for threat report `ti-report-aws-iam-historic-01` in the environment.'
+      'Hunt Watch found no confirmed hits for threat report `ti-report-aws-iam-historic-01`.'
     );
+    expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
   it('narrates at most eight behaviors and counts the rest', () => {
@@ -393,7 +387,7 @@ describe('buildHuntHeadline', () => {
     ).toBe('no confirmed hits: Tier 1 found no matches; Tier 2 skipped');
   });
 
-  it('flags optional-only Tier 1 matches and a Tier 2 with no behaviors', () => {
+  it('summarizes Tier 1 matches without optional-only wording', () => {
     expect(
       buildHuntHeadline(
         result({
@@ -404,9 +398,7 @@ describe('buildHuntHeadline', () => {
           tier2: tier2([]),
         })
       )
-    ).toBe(
-      'no confirmed hits: Tier 1 matched 5 documents in optional indices only; Tier 2 derived no behaviors'
-    );
+    ).toBe('no confirmed hits: Tier 1 matched 5 documents; Tier 2 derived no behaviors');
   });
 
   it('names a blocked scope and a missing report', () => {
@@ -414,11 +406,14 @@ describe('buildHuntHeadline', () => {
       buildHuntHeadline(
         result({
           status: 'blocked',
-          technologies: ['aws_iam'],
+          index_patterns: [],
+          tier2_targets: [],
+          tier2_target_sources: [],
+          actionable_indices: [],
           tier2_skipped_reason: 'scope_blocked',
         })
       )
-    ).toBe('hunt blocked, no required index for aws_iam');
+    ).toBe("hunt blocked, no index in the space's default data view is visible to this hunt");
     expect(
       buildHuntHeadline(result({ status: 'tier1_only', tier2_skipped_reason: 'report_not_found' }))
     ).toBe('hunt failed, the report is not visible in this space');

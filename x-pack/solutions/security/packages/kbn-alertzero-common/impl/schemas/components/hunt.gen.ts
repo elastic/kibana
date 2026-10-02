@@ -17,15 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Supported technologies. Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
- */
-export const HuntTechnology = lazySchema(() => z.enum(['aws_iam', 'fortigate']));
-export type HuntTechnology = z.infer<typeof HuntTechnology>;
-export type HuntTechnologyEnum = typeof HuntTechnology.enum;
-export const HuntTechnologyEnum = HuntTechnology.enum;
-
-/**
- * `ok`: every required/optional pattern resolved. `degraded`: every required pattern resolved but an optional one did not. `blocked`: a required pattern resolved to nothing; the hunt must not run.
+ * `ok`: the hunt universe resolved and every list derived from it fit its bounds. `degraded`: the universe resolved but a derived list could not be computed or had to collapse (the `_field_caps` call failed, or a bounded list outgrew the request path). `blocked`: nothing in the universe is visible to this hunt, or resolving it failed; the hunt must not run.
  */
 export const IndexScopeStatus = lazySchema(() => z.enum(['ok', 'degraded', 'blocked']));
 export type IndexScopeStatus = z.infer<typeof IndexScopeStatus>;
@@ -104,20 +96,55 @@ export const IndexScopeWindow = lazySchema(() =>
 export type IndexScopeWindow = z.infer<typeof IndexScopeWindow>;
 
 /**
- * `required`/`optional` list every pattern checked for the technology; `missing` lists every pattern from either list that resolved to zero indices.
+ * How the hunt scope was produced. `universe`: at least one pattern of the space's default data view resolves, and Tier 1 searches the list as given. `blocked:empty_universe`: nothing under any universe pattern is visible to this hunt. `blocked:discovery_failed`: `_resolve/index` failed, so the scope stays blocked rather than guessing.
  */
-export const ResolvedIndexScope = lazySchema(() =>
+export const HuntScopeResolution = lazySchema(() =>
+  z.enum(['universe', 'blocked:empty_universe', 'blocked:discovery_failed'])
+);
+export type HuntScopeResolution = z.infer<typeof HuntScopeResolution>;
+export type HuntScopeResolutionEnum = typeof HuntScopeResolution.enum;
+export const HuntScopeResolutionEnum = HuntScopeResolution.enum;
+
+/**
+ * What a hunt searches and where an action could land. `index_patterns` is the universe Tier 1 searches: the space's Security Solution default data view patterns, exclusions included, never an alerts index. `blocked` scopes carry an empty `index_patterns`.
+ */
+export const HuntScope = lazySchema(() =>
   z.object({
-    technology: HuntTechnology,
     status: IndexScopeStatus,
-    required: z.array(z.string()),
-    optional: z.array(z.string()),
-    missing: z.array(z.string()),
+    resolution: HuntScopeResolution,
+    /**
+     * The universe as searched by Tier 1. Empty when the scope is blocked.
+     */
+    index_patterns: z
+      .array(z.string())
+      .describe('The universe as searched by Tier 1. Empty when the scope is blocked.'),
+    /**
+     * Universe patterns that resolved to nothing. Informational.
+     */
+    missing: z
+      .array(z.string())
+      .describe('Universe patterns that resolved to nothing. Informational.'),
+    /**
+     * `*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched.
+     */
+    report_matches: z
+      .array(z.string())
+      .describe(
+        "`*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched."
+      ),
+    /**
+     * `*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.
+     */
+    actionable_indices: z
+      .array(z.string())
+      .describe(
+        '`*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.'
+      ),
     window: IndexScopeWindow,
     row_limit: z.number().int(),
   })
 );
-export type ResolvedIndexScope = z.infer<typeof ResolvedIndexScope>;
+export type HuntScope = z.infer<typeof HuntScope>;
 
 /**
  * IOC kinds Tier 1 knows how to map to ECS fields.
@@ -193,21 +220,21 @@ export const HuntForThreatResult = lazySchema(() =>
   z.object({
     status: HuntForThreatStatus,
     /**
-     * A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.
+     * A confirmed event match in the searched universe inside the window. Never set by an out-of-window match.
      */
     has_confirmed_hit: z
       .boolean()
       .describe(
-        'A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.'
+        'A confirmed event match in the searched universe inside the window. Never set by an out-of-window match.'
       ),
     /**
-     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or a required pattern resolved to no index.
+     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or a required pattern resolved to no index.'
+        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index.'
       ),
     searched_iocs: z.number().int(),
     searched_techniques: z.number().int(),
@@ -234,20 +261,12 @@ export const HuntForThreatResult = lazySchema(() =>
         index: z.string(),
         hit_count: z.number().int(),
         /**
-         * Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`), computed once by Tier 1, not re-derived downstream.
+         * Always true: every searched index counts towards the hit bar, because the hunt searches one universe and no bucket is non-confirming. The field predates that and stays for the SSE.
          */
         required: z
           .boolean()
           .describe(
-            "Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`), computed once by Tier 1, not re-derived downstream."
-          ),
-        /**
-         * Regex match of this concrete `_index` bucket against `required ∪ baseline`. This, not `required`, is what sets `has_confirmed_hit` and steers Tier 2: a baseline-only match (host telemetry) confirms a hunt the same way a required-index match does; an alerts-alias-only match still does not.
-         */
-        confirming: z
-          .boolean()
-          .describe(
-            'Regex match of this concrete `_index` bucket against `required ∪ baseline`. This, not `required`, is what sets `has_confirmed_hit` and steers Tier 2: a baseline-only match (host telemetry) confirms a hunt the same way a required-index match does; an alerts-alias-only match still does not.'
+            'Always true: every searched index counts towards the hit bar, because the hunt searches one universe and no bucket is non-confirming. The field predates that and stays for the SSE.'
           ),
       })
     ),

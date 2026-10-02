@@ -78,9 +78,10 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
   hasNonHostEntity: false,
   hasIocIndicator: false,
-  allEventsWithinBaseline: true,
+  allEventsActionable: true,
   hasProcessBearingEvent: false,
   manualRemediation: [],
+  evidence: { tier1HitCount: 4, tier2Confirmed: [] },
   ...overrides,
 });
 
@@ -118,15 +119,15 @@ describe('decidePackageReport', () => {
     expect(result.proposals.every((p) => p.actionInput?.endpoint_ids)).toBe(true);
     expect(new Set(result.proposals.map((p) => p.subjectKey)).size).toBe(2);
     expect(result.proposals.map((p) => p.title).sort()).toEqual([
-      'Defend Isolate Host: host-a',
-      'Defend Isolate Host: host-b',
+      'Isolate host host-a',
+      'Isolate host host-b',
     ]);
   });
 
   it('does not drop or duplicate subject keys when catalog order changes', () => {
     const state = baseHitState({
       processSelectors: [
-        { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', summary: 'proc.exe (pid 4242)' },
+        { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', processName: 'proc.exe' },
       ],
     });
     const a = decidePackageReport({
@@ -185,7 +186,7 @@ describe('decidePackageReport', () => {
     });
     expect(result.proposals).toHaveLength(2);
     expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
-    expect(result.proposals.some((p) => p.title === 'Defend Isolate Host: host-a')).toBe(true);
+    expect(result.proposals.some((p) => p.title === 'Isolate host host-a')).toBe(true);
     const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
     expect(recommendation).toBeDefined();
     expect(recommendation?.comment).toContain('ghost');
@@ -234,10 +235,24 @@ describe('decidePackageReport', () => {
     expect(recommendation?.comment).toContain('could not be resolved to a live process');
   });
 
-  it('mints executable plus a recommendation when evidence is not host-scoped (trigger: not host-scoped)', () => {
+  it('mints executable plus a recommendation when evidence fell outside the actionable indices', () => {
     const result = decidePackageReport({
       conversationId,
-      state: baseHitState({ allEventsWithinBaseline: false }),
+      state: baseHitState({ allEventsActionable: false }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    // Names what was observed; an empty actionable set is also what a degraded mapping
+    // classifier leaves behind, so the line must not conclude the finding is not host-scoped.
+    expect(recommendation?.comment).toContain('not known to carry a process identity');
+    expect(recommendation?.comment).not.toContain('is not host-scoped');
+  });
+
+  it('mints executable plus a recommendation when evidence really is not host-scoped', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hasNonHostEntity: true }),
       catalog: { ok: true, actions: [isolateHost] },
     });
     expect(result.proposals).toHaveLength(2);
@@ -284,12 +299,12 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', summary: 'a.exe (pid 100)' },
+          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
           {
             entityId: 'ent-9',
             processKey: 'entity:ent-9',
             hostName: 'host-a',
-            summary: 'b.exe (entity_id ent-9)',
+            processName: 'b.exe',
           },
         ],
       }),
@@ -299,12 +314,12 @@ describe('decidePackageReport', () => {
     expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(true);
     expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
     expect(result.proposals[1].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
-    // Same title on both (same host, same action); the selector's own summary in the comment
-    // is what keeps the two proposals from reading as duplicates.
-    expect(result.proposals[0].title).toBe('Defend Kill Process: host-a');
-    expect(result.proposals[1].title).toBe('Defend Kill Process: host-a');
-    expect(result.proposals[0].comment).toContain('a.exe (pid 100)');
-    expect(result.proposals[1].comment).toContain('b.exe (entity_id ent-9)');
+    // Distinct titles: each process gets its own title, so two kill-process proposals on the
+    // same host read as distinct, not duplicates.
+    expect(result.proposals[0].title).toBe('Kill a.exe (PID 100) on host-a');
+    expect(result.proposals[1].title).toBe('Kill b.exe on host-a');
+    expect(result.proposals[0].comment).toContain('a.exe');
+    expect(result.proposals[1].comment).toContain('b.exe');
   });
 
   it('never applies a process selector observed on one host to a different host', () => {
@@ -316,7 +331,7 @@ describe('decidePackageReport', () => {
           { name: 'host-b', enrolled: true, agentId: 'agent-b' },
         ],
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', summary: 'a.exe (pid 100)' },
+          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },

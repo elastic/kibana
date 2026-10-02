@@ -242,7 +242,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
                 index: 'logs-endpoint.events.process-default',
                 hit_count: 0,
                 required: true,
-                confirming: true,
               },
             ],
             resolved_iocs: [{ type: 'hash', value: 'abc123' }],
@@ -326,7 +325,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
               index: `${index}`.padEnd(256, 'i'),
               hit_count: 1,
               required: true,
-              confirming: true,
             })),
             resolved_iocs: Array.from({ length: 50 }, () => ({
               type: 'hash' as const,
