@@ -97,7 +97,7 @@ export class LocalBareGitSourceReader implements SourceReader {
   private readonly scanSlotWaiters: Array<() => void> = [];
 
   /** Binds source reads to explicit repositories and local resource limits. */
-  public constructor(options: LocalBareGitOptions) {
+  constructor(options: LocalBareGitOptions) {
     this.configuration = new LocalBareGitConfiguration(options);
   }
 

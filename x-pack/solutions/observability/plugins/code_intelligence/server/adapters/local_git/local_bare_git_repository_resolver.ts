@@ -31,7 +31,7 @@ export class LocalBareGitRepositoryResolver implements RepositoryResolver {
   private readonly configuration: LocalBareGitConfiguration;
 
   /** Binds resolution to explicit local mappings. */
-  public constructor(options: LocalBareGitOptions) {
+  constructor(options: LocalBareGitOptions) {
     this.configuration = new LocalBareGitConfiguration(options);
   }
 

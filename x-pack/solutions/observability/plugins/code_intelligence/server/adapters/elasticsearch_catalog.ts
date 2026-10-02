@@ -76,10 +76,7 @@ const failure = (code: string, message: string): OperationResult<CatalogWriteRes
 export class ElasticsearchCatalogWriter implements CatalogWriter {
   private indexReady: Promise<void> | undefined;
 
-  public constructor(
-    private readonly client: ElasticsearchClient,
-    private readonly index: string
-  ) {}
+  constructor(private readonly client: ElasticsearchClient, private readonly index: string) {}
 
   private ensureIndex(): Promise<void> {
     this.indexReady ??= this.createIndex();

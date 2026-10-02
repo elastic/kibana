@@ -24,10 +24,7 @@ export class GitBatchBlobReader {
   private idleTimer: NodeJS.Timeout | undefined;
 
   /** Binds one reusable batch session to a trusted bare repository. */
-  public constructor(
-    private readonly bareRepositoryPath: string,
-    private readonly timeoutMs: number
-  ) {}
+  constructor(private readonly bareRepositoryPath: string, private readonly timeoutMs: number) {}
 
   /** Serializes protocol requests because batch responses carry no independent request identifier. */
   public read(
