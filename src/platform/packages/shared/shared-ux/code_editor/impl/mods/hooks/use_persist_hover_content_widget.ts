@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import { monaco as monacoEditor, type monaco } from '@kbn/monaco';
 import { useCallback } from 'react';
 
 /**
- * Grace margin (px) around the hover widget within which the pointer is treated as heading
- * for the widget rather than away from it — deliberately far more forgiving than the ±3px
- * Monaco applies at leave time.
+ * Default grace margin (px) around the hover widget within which the pointer is treated as heading
+ * for the widget rather than away from it.
+ * See https://github.com/microsoft/vscode/pull/294091 for the original PR that introduced this value.
  */
-const HOVER_KEEP_OPEN_GRACE_PX = 24;
+const DEFAULT_MONACO_HOVER_KEEP_OPEN_GRACE_PX = 3;
+
+/**
+ * Kibana-specific horizontal grace margin (px) around the hover widget within which the pointer is treated as heading
+ * for the widget rather than away from it — deliberately far more forgiving than the ±3px
+ * Monaco applies at leave time. Specifically needed because we render widgets in a separate DOM node,
+ * leveraging the `overflowWidgetsDomNode` portal.
+ */
+const KIBANA_HOVER_KEEP_OPEN_GRACE_PX = 24;
 
 /**
  * Monaco's own `_onEditorMouseLeave` decides whether to hide the hover widget with a
@@ -47,35 +55,77 @@ export function usePersistHoverContentWidget() {
       }
 
       let armed: monaco.IDisposable | undefined;
+      let keepOpenSetByUs = false;
+
+      const setKeepOpen = (keepOpen: boolean) => {
+        hoverController.shouldKeepOpenOnEditorMouseMoveOrLeave = keepOpen;
+        keepOpenSetByUs = keepOpen;
+      };
 
       const disarm = () => {
         armed?.dispose();
         armed = undefined;
-        // Never leave this latched on: Monaco short-circuits `_shouldKeepCurrentHover` while
-        // it's true, which would stop every subsequent hover from being computed at all.
-        hoverController.shouldKeepOpenOnEditorMouseMoveOrLeave = false;
+
+        // we only reset the flag if we set it, especially that we share the flag with Monaco's own accessible-hover view
+        if (keepOpenSetByUs) {
+          setKeepOpen(false);
+        }
       };
+
+      /**
+       * The states `_shouldKeepCurrentHover` refuses to dismiss on — Monaco's rule for mouse
+       * movement *within* the editor. Only applies where we dismiss something Monaco has no
+       * equivalent handler for, since it is more preserving than Monaco's leave-time rule.
+       */
+      const shouldPreserveHover = () => {
+        const contentWidget = hoverController._contentWidget;
+
+        if (!contentWidget) {
+          return false;
+        }
+
+        const isSticky = editor.getOption(monacoEditor.editor.EditorOption.hover).sticky;
+
+        return Boolean(
+          contentWidget.isFocused ||
+            contentWidget.isResizing ||
+            (isSticky && contentWidget.isVisibleFromKeyboard)
+        );
+      };
+
+      /**
+       * `_shouldKeepHoverWidgetVisible`, the narrower rule Monaco applies when the pointer leaves
+       * the editor. Notably it does *not* preserve focused or keyboard-opened hovers — only a
+       * resize in progress — so dismissing those on a leave matches Monaco rather than overriding it.
+       */
+      const shouldPreserveHoverOnLeave = () => Boolean(hoverController._contentWidget?.isResizing);
 
       const arm = () => {
         const hoverNode = hoverController._contentWidget?.getDomNode();
 
-        if (armed || !hoverNode) {
+        // Keyboard-driven hovers are Monaco's to manage: it already keeps them open across mouse
+        // movement, and our dismissal paths would only fight that.
+        if (armed || !hoverNode || shouldPreserveHover()) {
           return;
         }
 
         // Monaco reports pointer positions in page coordinates (`posx`/`posy` are `pageX`/
-        // `pageY`), so the widget's viewport rect has to be converted to match — comparing the
-        // two directly would skew the test by the page's scroll offset.
+        // `pageY`), so the widget's viewport rect has to be converted to
+        // match — comparing the two directly would skew the test by the page's scroll offset.
+        // The margin is deliberately asymmetric. Reaching the widget is a vertical move onto
+        // something already sitting a few pixels from the pointer's path, so Monaco's own tolerance
+        // is enough on the Y axis — widening it would cover the text line itself, such that if there was
+        // a neigbouring token the current hover would not be dismissed to reveal the new one.
         const isWithinGraceMargin = (pageX: number, pageY: number) => {
           const rect = hoverNode.getBoundingClientRect();
           const left = rect.left + window.scrollX;
           const top = rect.top + window.scrollY;
 
           return (
-            pageX >= left - HOVER_KEEP_OPEN_GRACE_PX &&
-            pageX <= left + rect.width + HOVER_KEEP_OPEN_GRACE_PX &&
-            pageY >= top - HOVER_KEEP_OPEN_GRACE_PX &&
-            pageY <= top + rect.height + HOVER_KEEP_OPEN_GRACE_PX
+            pageX >= left - KIBANA_HOVER_KEEP_OPEN_GRACE_PX &&
+            pageX <= left + rect.width + KIBANA_HOVER_KEEP_OPEN_GRACE_PX &&
+            pageY >= top - DEFAULT_MONACO_HOVER_KEEP_OPEN_GRACE_PX &&
+            pageY <= top + rect.height + DEFAULT_MONACO_HOVER_KEEP_OPEN_GRACE_PX
           );
         };
 
@@ -88,10 +138,7 @@ export function usePersistHoverContentWidget() {
             return;
           }
 
-          hoverController.shouldKeepOpenOnEditorMouseMoveOrLeave = isWithinGraceMargin(
-            e.event.posx,
-            e.event.posy
-          );
+          setKeepOpen(isWithinGraceMargin(e.event.posx, e.event.posy));
         });
 
         // Covers the pointer leaving the editor near the widget and then wandering off without
@@ -115,7 +162,12 @@ export function usePersistHoverContentWidget() {
           }
 
           disarm();
-          hoverController.hideContentHover();
+
+          // The hover was only still open because of our flag — Monaco's leave path short-circuits
+          // on it before reaching its own checks. Hiding here just completes what it would have done.
+          if (!shouldPreserveHoverOnLeave()) {
+            hoverController.hideContentHover();
+          }
         };
 
         document.addEventListener('mousemove', onDocumentMouseMove);
@@ -124,7 +176,11 @@ export function usePersistHoverContentWidget() {
         // sits outside Monaco's editor-scoped mouse tracking, so nothing else will.
         const onWidgetMouseLeave = () => {
           disarm();
-          hoverController.hideContentHover();
+
+          // A hover the user focused or resized stays until they dismiss it, matching Monaco.
+          if (!shouldPreserveHover()) {
+            hoverController.hideContentHover();
+          }
         };
 
         hoverNode.addEventListener('mouseleave', onWidgetMouseLeave, { once: true });
