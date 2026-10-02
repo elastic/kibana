@@ -13,7 +13,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const GITLAB_TITLE_MAX_LENGTH = 255;
 // Default of the `description_and_note_max_size` setting, enforced in bytes: https://docs.gitlab.com/api/settings/
 const GITLAB_DESCRIPTION_MAX_BYTES = 1048576;
-// https://docs.gitlab.com/api/notes/
+// https://docs.gitlab.com/api/notes/; notes are also subject to `description_and_note_max_size`.
 const GITLAB_NOTE_MAX_LENGTH = 1000000;
 // `Issuable::MAX_NUMBER_OF_ASSIGNEES_OR_REVIEWERS` in app/models/concerns/issuable.rb
 const GITLAB_MAX_ASSIGNEES_OR_REVIEWERS = 200;
@@ -61,6 +61,16 @@ const descriptionField = () =>
     .refine((v) => Buffer.byteLength(v, 'utf8') <= GITLAB_DESCRIPTION_MAX_BYTES, {
       message: `description must be at most ${GITLAB_DESCRIPTION_MAX_BYTES} bytes`,
     });
+
+const noteBodyField = () =>
+  z
+    .string()
+    .min(1)
+    .max(GITLAB_NOTE_MAX_LENGTH)
+    .refine((v) => Buffer.byteLength(v, 'utf8') <= GITLAB_DESCRIPTION_MAX_BYTES, {
+      message: `body must be at most ${GITLAB_DESCRIPTION_MAX_BYTES} bytes`,
+    })
+    .describe('The comment body in Markdown format.');
 
 const pageField = () =>
   z
@@ -337,11 +347,7 @@ export const AddIssueNoteInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
     issueIid: issueIidField(),
-    body: z
-      .string()
-      .min(1)
-      .max(GITLAB_NOTE_MAX_LENGTH)
-      .describe('The comment body in Markdown format.'),
+    body: noteBodyField(),
   })
 );
 export type AddIssueNoteInput = z.infer<typeof AddIssueNoteInputSchema>;
@@ -568,11 +574,7 @@ export const AddMergeRequestNoteInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
     mrIid: mrIidField(),
-    body: z
-      .string()
-      .min(1)
-      .max(GITLAB_NOTE_MAX_LENGTH)
-      .describe('The comment body in Markdown format.'),
+    body: noteBodyField(),
   })
 );
 export type AddMergeRequestNoteInput = z.infer<typeof AddMergeRequestNoteInputSchema>;

@@ -46,7 +46,7 @@ export const SearchFilesKeywordInputSchema = lazySchema(() =>
       .max(BOX_SEARCH_MAX_OFFSET)
       .optional()
       .describe(
-        'Pagination offset (0–10000). Pass the next offset from a previous response to get subsequent pages.'
+        `Pagination offset (0–${BOX_SEARCH_MAX_OFFSET}). Pass the next offset from a previous response to get subsequent pages.`
       ),
     folderId: z
       .string()

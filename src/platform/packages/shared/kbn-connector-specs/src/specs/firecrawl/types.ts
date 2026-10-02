@@ -43,7 +43,7 @@ export const ScrapeInputSchema = lazySchema(() =>
       .optional()
       .default(0)
       .describe(
-        'Milliseconds to wait before scraping, to allow JavaScript-rendered content to load. e.g. 2000 to wait 2 seconds. Default 0; max 60000.'
+        `Milliseconds to wait before scraping, to allow JavaScript-rendered content to load. e.g. 2000 to wait 2 seconds. Default 0; max ${MAX_WAIT_FOR_MS}.`
       ),
     maxMarkdownLength: z
       .number()

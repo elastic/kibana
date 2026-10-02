@@ -163,6 +163,25 @@ describe('BraveSearchConnector', () => {
     });
   });
 
+  describe('webSearch input bounds', () => {
+    const isValid = (input: Record<string, unknown>) =>
+      BraveSearchConnector.actions.webSearch.input.safeParse(input).success;
+
+    it('accepts up to 50 words, ignoring repeated and surrounding whitespace', () => {
+      const words = (n: number) => Array.from({ length: n }, (_, i) => `w${i}`);
+      expect(isValid({ q: `  ${words(50).join(' \t\n ')}  ` })).toBe(true);
+      expect(isValid({ q: words(51).join('   ') })).toBe(false);
+    });
+
+    it.each([
+      [0, true],
+      [9, true],
+      [10, false],
+    ])('offset %d valid=%s', (offset, expected) => {
+      expect(isValid({ q: 'kibana', offset })).toBe(expected);
+    });
+  });
+
   describe('test handler', () => {
     const testSpec = BraveSearchConnector.test;
 

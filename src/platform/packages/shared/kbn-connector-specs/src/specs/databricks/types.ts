@@ -16,7 +16,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // =============================================================================
 
 // https://docs.databricks.com/api/workspace/statementexecution/executestatement
-const MAX_STATEMENT_BYTES = 16 * 1024 * 1024;
+const MAX_STATEMENT_MIB = 16;
+const MAX_STATEMENT_BYTES = MAX_STATEMENT_MIB * 1024 * 1024;
 // https://docs.databricks.com/aws/en/jobs/#limitations
 const MAX_JOB_TASKS = 1000;
 const MAX_JOB_PARAMETER_VALUE_LENGTH = 10_000;
@@ -29,7 +30,7 @@ const StatementSchema = lazySchema(() =>
     .min(1)
     .max(MAX_STATEMENT_BYTES)
     .refine((statement) => Buffer.byteLength(statement, 'utf8') <= MAX_STATEMENT_BYTES, {
-      message: `Statement must not exceed the Databricks ${MAX_STATEMENT_BYTES} byte (16 MiB) query text size limit`,
+      message: `Statement must not exceed the Databricks ${MAX_STATEMENT_BYTES} byte (${MAX_STATEMENT_MIB} MiB) query text size limit`,
     })
 );
 
@@ -39,7 +40,8 @@ export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
 export const RunQueryInputSchema = lazySchema(() =>
   z.object({
     statement: StatementSchema.describe(
-      'The read-only SQL query to execute (up to 16 MiB). Only SELECT, SHOW, DESCRIBE, DESC, EXPLAIN, and WITH queries are allowed — ' +
+      `The read-only SQL query to execute (up to ${MAX_STATEMENT_MIB} MiB). ` +
+        'Only SELECT, SHOW, DESCRIBE, DESC, EXPLAIN, and WITH queries are allowed — ' +
         'INSERT, UPDATE, DELETE, and DDL are blocked. ' +
         'Use SHOW and DESCRIBE to discover available catalogs, schemas, tables, and columns. ' +
         'Example: "SELECT * FROM main.default.customers LIMIT 10" or "SHOW TABLES IN main.default"'
@@ -51,7 +53,8 @@ export type RunQueryInput = z.infer<typeof RunQueryInputSchema>;
 export const ExecuteStatementInputSchema = lazySchema(() =>
   z.object({
     statement: StatementSchema.describe(
-      'The SQL statement to execute (up to 16 MiB). Supports DML (INSERT, UPDATE, DELETE), ' +
+      `The SQL statement to execute (up to ${MAX_STATEMENT_MIB} MiB). ` +
+        'Supports DML (INSERT, UPDATE, DELETE), ' +
         'DDL (CREATE, ALTER, DROP), SHOW, DESCRIBE, and other SQL dialects supported by Databricks SQL. ' +
         'For long-running queries, returns a statement_id — use the pollResponse action to retrieve results. ' +
         'Example: "INSERT INTO main.default.users VALUES (1, \'Alice\')" or "CREATE TABLE main.default.t (id INT)"'

@@ -818,10 +818,13 @@ describe('Gitlab connector', () => {
       ).toThrow();
     });
 
-    it('accepts notes up to the 1,000,000 characters GitLab allows', () => {
-      expect(() =>
-        parse('addIssueNote', { projectId: '123', issueIid: '1', body: 'a'.repeat(1000000) })
-      ).not.toThrow();
+    it.each([
+      ['addIssueNote', { projectId: '123', issueIid: '1' }],
+      ['addMergeRequestNote', { projectId: '123', mrIid: '1' }],
+    ])('%s accepts 1,000,000 characters but at most 1 MiB of UTF-8', (action, target) => {
+      expect(() => parse(action, { ...target, body: 'a'.repeat(1000000) })).not.toThrow();
+      expect(() => parse(action, { ...target, body: 'a'.repeat(1000001) })).toThrow();
+      expect(() => parse(action, { ...target, body: 'é'.repeat(524289) })).toThrow();
     });
 
     it('accepts up to 200 assignees or reviewers', () => {

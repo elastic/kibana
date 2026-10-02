@@ -545,6 +545,14 @@ export const RequestReviewersInputSchema = lazySchema(() =>
         (v.teamReviewers !== undefined && v.teamReviewers.length > 0),
       { message: 'At least one of reviewers or teamReviewers must be provided and non-empty' }
     )
+    .refine(
+      ({ reviewers = [], teamReviewers = [] }) =>
+        reviewers.length + teamReviewers.length <= GITHUB_MAX_REQUESTED_REVIEWERS,
+      {
+        message: `reviewers and teamReviewers must total at most ${GITHUB_MAX_REQUESTED_REVIEWERS}`,
+        path: ['reviewers'],
+      }
+    )
 );
 export type RequestReviewersInput = z.infer<typeof RequestReviewersInputSchema>;
 
@@ -562,6 +570,9 @@ export const TriggerWorkflowInputSchema = lazySchema(() =>
       .record(z.string().max(200), z.string().max(WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD))
       .refine((v) => Object.keys(v).length <= WORKFLOW_DISPATCH_MAX_INPUTS, {
         message: `inputs must have at most ${WORKFLOW_DISPATCH_MAX_INPUTS} entries`,
+      })
+      .refine((v) => JSON.stringify(v).length <= WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD, {
+        message: `inputs must serialize to at most ${WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD} characters`,
       })
       .optional()
       .describe(

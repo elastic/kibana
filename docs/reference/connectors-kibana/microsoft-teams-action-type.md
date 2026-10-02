@@ -97,14 +97,14 @@ The Microsoft Teams connector has the following actions:
 :   Posts a new message to a channel. Requires the `ChannelMessage.Send` delegated permission or `ChannelMessage.ReadWrite.All` application permission.
     - `teamId` (required): The ID of the team containing the channel.
     - `channelId` (required): The ID of the channel to post to.
-    - `content` (required): The message body text (plain text or HTML, up to 102,400 characters; Teams caps a post at approximately 100 KB).
+    - `content` (required): The message body text (plain text or HTML, up to 102,400 bytes as UTF-8; Teams caps a post at approximately 100 KB).
     - `contentType` (optional): `"text"` (default) or `"html"`.
     - `subject` (optional): Optional subject line displayed as a message header.
 
 **Send chat message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Posts a new message to an existing chat (1:1 or group). Requires the `Chat.ReadWrite` delegated permission or `Chat.ReadWrite.All` application permission.
     - `chatId` (required): The ID of the chat to send the message to.
-    - `content` (required): The message body text (plain text or HTML, up to 102,400 characters; Teams caps a post at approximately 100 KB).
+    - `content` (required): The message body text (plain text or HTML, up to 102,400 bytes as UTF-8; Teams caps a post at approximately 100 KB).
     - `contentType` (optional): `"text"` (default) or `"html"`.
 
 **Update message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
@@ -113,7 +113,7 @@ The Microsoft Teams connector has the following actions:
     - `teamId` (optional, channel messages): The team ID. Must be provided together with `channelId`.
     - `channelId` (optional, channel messages): The channel ID. Must be provided together with `teamId`.
     - `chatId` (optional, chat messages): The chat ID. Mutually exclusive with `teamId` and `channelId`.
-    - `content` (required): The new message body text.
+    - `content` (required): The new message body text (up to 102,400 bytes as UTF-8).
     - `contentType` (optional): `"text"` (default) or `"html"`.
 
 **Get user** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`

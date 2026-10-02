@@ -15,9 +15,17 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // Teams caps a chat or channel post at approximately 100 KB, and lets at most
 // 200 members be added to a group chat at once:
 // https://learn.microsoft.com/en-us/microsoftteams/limits-specifications-teams
-const TEAMS_MAX_POST_SIZE = 100 * 1024;
+const TEAMS_MAX_POST_BYTES = 100 * 1024;
 const TEAMS_MAX_CHAT_MEMBERS_ADDED_AT_ONCE = 200;
 const MAX_ID = 200;
+
+const postContentField = () =>
+  z
+    .string()
+    .max(TEAMS_MAX_POST_BYTES)
+    .refine((value) => Buffer.byteLength(value, 'utf8') <= TEAMS_MAX_POST_BYTES, {
+      message: `Message content must not exceed ${TEAMS_MAX_POST_BYTES} bytes (UTF-8).`,
+    });
 const MAX_TITLE = 255;
 
 // =============================================================================
@@ -156,12 +164,9 @@ export const SendChannelMessageInputSchema = lazySchema(() =>
       .describe(
         'The ID of the channel to post to. Obtain this from listChannels (the "id" field on each channel object).'
       ),
-    content: z
-      .string()
-      .max(TEAMS_MAX_POST_SIZE)
-      .describe(
-        'The message body text to send. Supports plain text or HTML when contentType is set to "html".'
-      ),
+    content: postContentField().describe(
+      'The message body text to send. Supports plain text or HTML when contentType is set to "html".'
+    ),
     contentType: z
       .enum(['text', 'html'])
       .default('text')
@@ -187,12 +192,9 @@ export const SendChatMessageInputSchema = lazySchema(() =>
       .describe(
         'The ID of the chat (1:1 or group) to send a message to. Obtain this from listChats (the "id" field) or from createChat.'
       ),
-    content: z
-      .string()
-      .max(TEAMS_MAX_POST_SIZE)
-      .describe(
-        'The message body text to send. Supports plain text or HTML when contentType is set to "html".'
-      ),
+    content: postContentField().describe(
+      'The message body text to send. Supports plain text or HTML when contentType is set to "html".'
+    ),
     contentType: z
       .enum(['text', 'html'])
       .default('text')
@@ -235,10 +237,9 @@ export const UpdateMessageInputSchema = lazySchema(() =>
         .describe(
           'The chat ID — required when updating a chat message. Obtain this from listChats. Mutually exclusive with teamId + channelId.'
         ),
-      content: z
-        .string()
-        .max(TEAMS_MAX_POST_SIZE)
-        .describe('The new message body text to replace the existing content.'),
+      content: postContentField().describe(
+        'The new message body text to replace the existing content.'
+      ),
       contentType: z
         .enum(['text', 'html'])
         .default('text')

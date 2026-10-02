@@ -481,15 +481,18 @@ describe('GithubConnector', () => {
       ).not.toThrow();
     });
 
-    it('accepts workflow_dispatch input values up to the 65,535 character payload limit', () => {
-      expect(() =>
-        parse('triggerWorkflow', {
+    it('bounds workflow_dispatch inputs by the 65,535 character payload of all inputs together', () => {
+      const dispatch = (inputs: Record<string, string>) =>
+        GithubConnector.actions.triggerWorkflow.input.safeParse({
           ...repo,
           workflowId: 'ci.yml',
           ref: 'main',
-          inputs: { payload: 'a'.repeat(65535) },
-        })
-      ).not.toThrow();
+          inputs,
+        }).success;
+      const overhead = JSON.stringify({ payload: '' }).length;
+      expect(dispatch({ payload: 'a'.repeat(65_535 - overhead) })).toBe(true);
+      expect(dispatch({ payload: 'a'.repeat(65_536 - overhead) })).toBe(false);
+      expect(dispatch({ first: 'a'.repeat(40_000), second: 'b'.repeat(40_000) })).toBe(false);
     });
   });
 
@@ -884,6 +887,19 @@ describe('GithubConnector', () => {
           pullNumber: 42,
         })
       ).toThrow();
+    });
+
+    it('bounds users and teams together by the 100 requested reviewers allowed per pull request', () => {
+      const request = (users: number, teams: number) =>
+        GithubConnector.actions.requestReviewers.input.safeParse({
+          owner: 'elastic',
+          repo: 'kibana',
+          pullNumber: 42,
+          reviewers: Array.from({ length: users }, (_, i) => `user-${i}`),
+          teamReviewers: Array.from({ length: teams }, (_, i) => `team-${i}`),
+        }).success;
+      expect(request(50, 50)).toBe(true);
+      expect(request(60, 60)).toBe(false);
     });
   });
 

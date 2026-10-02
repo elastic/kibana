@@ -272,7 +272,7 @@ export const SlackCreateConversationInputSchema = lazySchema(() =>
       .min(1)
       .max(SLACK_MAX_CHANNEL_NAME_LENGTH)
       .describe(
-        'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.'
+        `Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be ${SLACK_MAX_CHANNEL_NAME_LENGTH} characters or fewer.`
       ),
     isPrivate: z
       .boolean()

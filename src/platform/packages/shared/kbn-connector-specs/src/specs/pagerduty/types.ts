@@ -41,7 +41,7 @@ export const ListSchedulesInputSchema = lazySchema(() =>
       .min(1)
       .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
-      .describe('Maximum number of schedules to return (1-100)'),
+      .describe(`Maximum number of schedules to return (1-${PAGERDUTY_MAX_PAGE_SIZE})`),
     offset: z.number().optional().describe('Offset to start pagination at'),
     include: z
       .array(z.string().max(100))
@@ -79,7 +79,7 @@ export const ListEscalationPoliciesInputSchema = lazySchema(() =>
       .min(1)
       .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
-      .describe('Maximum number of escalation policies to return (1-100)'),
+      .describe(`Maximum number of escalation policies to return (1-${PAGERDUTY_MAX_PAGE_SIZE})`),
     user_ids: z
       .array(z.string().max(200))
       .max(MAX_ID_LIST_ITEMS)
@@ -102,7 +102,9 @@ export const ListIncidentsInputSchema = lazySchema(() =>
       .min(1)
       .max(PAGERDUTY_MAX_INCIDENT_RESULTS)
       .default(25)
-      .describe('Maximum number of incidents to return (max 1000, default 25)'),
+      .describe(
+        `Maximum number of incidents to return (max ${PAGERDUTY_MAX_INCIDENT_RESULTS}, default 25)`
+      ),
     status: z
       .array(z.string().max(50))
       .max(3)
@@ -163,7 +165,9 @@ export const ListOncallsInputSchema = lazySchema(() =>
       .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
       .default(20)
-      .describe('Maximum number of on-call results to return (1-100, default 20)'),
+      .describe(
+        `Maximum number of on-call results to return (1-${PAGERDUTY_MAX_PAGE_SIZE}, default 20)`
+      ),
     schedule_ids: z
       .array(z.string().max(200))
       .max(MAX_ID_LIST_ITEMS)
@@ -229,7 +233,7 @@ export const ListUsersInputSchema = lazySchema(() =>
       .min(1)
       .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
-      .describe('Maximum number of users to return (1-100)'),
+      .describe(`Maximum number of users to return (1-${PAGERDUTY_MAX_PAGE_SIZE})`),
   })
 );
 export type ListUsersInput = z.infer<typeof ListUsersInputSchema>;
@@ -247,7 +251,7 @@ export const ListTeamsInputSchema = lazySchema(() =>
       .min(1)
       .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
-      .describe('Maximum number of teams to return (1-100)'),
+      .describe(`Maximum number of teams to return (1-${PAGERDUTY_MAX_PAGE_SIZE})`),
   })
 );
 export type ListTeamsInput = z.infer<typeof ListTeamsInputSchema>;
@@ -455,7 +459,7 @@ export const ListServicesInputSchema = lazySchema(() =>
       .min(1)
       .max(PAGERDUTY_MAX_PAGE_SIZE)
       .optional()
-      .describe('Maximum number of services to return (max 100)'),
+      .describe(`Maximum number of services to return (max ${PAGERDUTY_MAX_PAGE_SIZE})`),
     team_ids: z
       .array(z.string().max(200))
       .max(MAX_ID_LIST_ITEMS)

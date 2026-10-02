@@ -29,7 +29,7 @@ export const SearchInputSchema = lazySchema(() =>
       .min(1)
       .max(DROPBOX_SEARCH_QUERY_MAX_LENGTH)
       .describe(
-        'Full-text search query across file names and content (up to 1000 characters). Example: "Q3 budget report" or "product roadmap"'
+        `Full-text search query across file names and content (up to ${DROPBOX_SEARCH_QUERY_MAX_LENGTH} characters). Example: "Q3 budget report" or "product roadmap"`
       ),
     path: z
       .string()
