@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { chunk } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import {
   fetchMonitorListAction,
@@ -34,29 +35,39 @@ export interface MonitorIntegrationStatus {
 
 interface UseMonitorIntegrationHealthOptions {
   configIds?: string[];
+  /** Checks every monitor on these private locations, not just the current monitor list page. */
+  locationIds?: string[];
 }
+
+// Matches the server-side cap on bulk reset ids.
+const RESET_BATCH_SIZE = 500;
 
 const getPrivateLocationMonitorIds = (monitors: EncryptedSyntheticsSavedMonitor[]): string[] =>
   monitors
     .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
     .map((m) => m[ConfigKey.CONFIG_ID]);
 
-const getMonitorIdsFetchKey = ({
+const getHealthQueryKey = ({
   explicitConfigIdsKey,
+  locationIdsKey,
   listLoaded,
   listMonitors,
 }: {
   explicitConfigIdsKey: string | undefined;
+  locationIdsKey: string | undefined;
   listLoaded: boolean;
   listMonitors: EncryptedSyntheticsSavedMonitor[];
-}): string => {
+}): { key: 'monitorIds' | 'locationIds'; ids: string } => {
+  if (locationIdsKey !== undefined) {
+    return { key: 'locationIds', ids: locationIdsKey };
+  }
   if (explicitConfigIdsKey !== undefined) {
-    return explicitConfigIdsKey;
+    return { key: 'monitorIds', ids: explicitConfigIdsKey };
   }
   if (!listLoaded) {
-    return '';
+    return { key: 'monitorIds', ids: '' };
   }
-  return getPrivateLocationMonitorIds(listMonitors).join(',');
+  return { key: 'monitorIds', ids: getPrivateLocationMonitorIds(listMonitors).join(',') };
 };
 
 interface UseMonitorIntegrationHealthReturn {
@@ -78,7 +89,8 @@ interface UseMonitorIntegrationHealthReturn {
 export const useMonitorIntegrationHealth = (
   options?: UseMonitorIntegrationHealthOptions
 ): UseMonitorIntegrationHealthReturn => {
-  const { configIds } = options ?? {};
+  const { configIds, locationIds } = options ?? {};
+  const usesMonitorList = !configIds && !locationIds;
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -92,33 +104,36 @@ export const useMonitorIntegrationHealth = (
   const { data: healthData, loading: healthLoading } = useSelector(selectMonitorHealth);
 
   useEffect(() => {
-    if (!configIds && !listLoaded && !listLoading) {
+    if (usesMonitorList && !listLoaded && !listLoading) {
       dispatch(fetchMonitorListAction.get(getMonitorListPageStateWithDefaults()));
     }
-  }, [dispatch, configIds, listLoaded, listLoading]);
+  }, [dispatch, usesMonitorList, listLoaded, listLoading]);
 
   // Compare by joined ids — callers often pass inline arrays (e.g. [configId]).
   const explicitConfigIdsKey = configIds?.join(',');
+  const locationIdsKey = locationIds?.join(',');
 
-  const monitorIdsFetchKey = useMemo(
+  const { key: queryKey, ids: queryIdsKey } = useMemo(
     () =>
-      getMonitorIdsFetchKey({
+      getHealthQueryKey({
         explicitConfigIdsKey,
+        locationIdsKey,
         listLoaded,
         listMonitors,
       }),
-    [explicitConfigIdsKey, listLoaded, listMonitors]
+    [explicitConfigIdsKey, locationIdsKey, listLoaded, listMonitors]
   );
 
-  const monitorIdsToFetch = useMemo(
-    () => (monitorIdsFetchKey ? monitorIdsFetchKey.split(',') : []),
-    [monitorIdsFetchKey]
-  );
+  const healthQuery = useMemo(() => {
+    if (!queryIdsKey) return null;
+    const ids = queryIdsKey.split(',');
+    return queryKey === 'locationIds' ? { locationIds: ids } : { monitorIds: ids };
+  }, [queryKey, queryIdsKey]);
 
   useEffect(() => {
-    if (monitorIdsToFetch.length === 0) return;
-    dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
-  }, [dispatch, lastRefresh, monitorIdsToFetch]);
+    if (!healthQuery) return;
+    dispatch(fetchMonitorHealthAction.get(healthQuery));
+  }, [dispatch, lastRefresh, healthQuery]);
 
   const statuses = useMemo(() => {
     const map = new Map<string, MonitorIntegrationStatus[]>();
@@ -191,7 +206,7 @@ export const useMonitorIntegrationHealth = (
   const getUnhealthyMonitorsForLocation = useCallback(
     (locationId: string): Array<{ configId: string; name: string }> => {
       const monitorNameMap = new Map(
-        listMonitors.map((m) => [m[ConfigKey.CONFIG_ID], m[ConfigKey.NAME]])
+        (healthData?.monitors ?? []).map((m) => [m.configId, m.monitorName])
       );
       const monitors: Array<{ configId: string; name: string }> = [];
 
@@ -207,14 +222,14 @@ export const useMonitorIntegrationHealth = (
 
       return monitors;
     },
-    [statuses, listMonitors]
+    [statuses, healthData]
   );
 
   const refetchHealth = useCallback(() => {
-    if (monitorIdsToFetch.length > 0) {
-      dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
+    if (healthQuery) {
+      dispatch(fetchMonitorHealthAction.get(healthQuery));
     }
-  }, [dispatch, monitorIdsToFetch]);
+  }, [dispatch, healthQuery]);
 
   const resetMonitor = useCallback(
     async (configId: string): Promise<{ error?: Error }> => {
@@ -236,8 +251,11 @@ export const useMonitorIntegrationHealth = (
     async (ids: string[]): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
-        const response = await resetMonitorBulkAPI({ ids });
-        const hasFailures = response.result.some((r) => !r.reset);
+        let hasFailures = false;
+        for (const batch of chunk(ids, RESET_BATCH_SIZE)) {
+          const response = await resetMonitorBulkAPI({ ids: batch });
+          hasFailures = hasFailures || response.result.some((r) => !r.reset);
+        }
         if (hasFailures) {
           return { error: new Error('Failed to reset one or more monitors') };
         }
@@ -252,7 +270,7 @@ export const useMonitorIntegrationHealth = (
     [refetchHealth]
   );
 
-  const loading = configIds ? healthLoading : !listLoaded || healthLoading;
+  const loading = usesMonitorList ? !listLoaded || healthLoading : healthLoading;
 
   return {
     statuses,

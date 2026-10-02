@@ -23,6 +23,7 @@ import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_priv
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type { SyntheticsServerSetup } from '../types';
 import type { MonitorConfigRepository } from './monitor_config_repository';
+import { parseArrayFilters } from '../routes/common';
 
 const STATUS_REASONS: Record<
   Exclude<PrivateLocationHealthStatusValue, PrivateLocationHealthStatusValue.Healthy>,
@@ -67,17 +68,60 @@ export class MonitorIntegrationHealthApi {
 
   async getHealth(monitorIds: string[]): Promise<MonitorsHealthResponse> {
     const privateLocationAPI = new SyntheticsPrivateLocation(this.server);
-
-    // Resolve the union of every space that may host a relevant monitor or
-    // package policy. Computed up-front so monitor and package-policy lookups
-    // can both look across spaces — see Kibana issue #270477.
-    const allSpacesWithMonitors = await privateLocationAPI.getAllSpacesWithMonitors();
-    const allSpaces = new Set([this.spaceId, ...allSpacesWithMonitors]);
+    const allSpaces = await this.getAllSpaces(privateLocationAPI);
 
     const { foundMonitors, errors } = await this.fetchMonitors(monitorIds, allSpaces);
 
+    return {
+      monitors: await this.computeHealth(foundMonitors, allSpaces, privateLocationAPI),
+      errors,
+    };
+  }
+
+  /**
+   * Health of every monitor in the current space that runs on one of the given private locations.
+   */
+  async getHealthForLocations(locationIds: string[]): Promise<MonitorsHealthResponse> {
+    const privateLocationAPI = new SyntheticsPrivateLocation(this.server);
+    const allSpaces = await this.getAllSpaces(privateLocationAPI);
+
+    const { filtersStr } = parseArrayFilters({ locations: locationIds });
+    const { saved_objects: monitors } =
+      await this.monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+        filter: filtersStr,
+        perPage: 10_000,
+        fields: [
+          ConfigKey.NAME,
+          ConfigKey.LOCATIONS,
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.MONITOR_SOURCE_TYPE,
+        ],
+      });
+
+    return {
+      monitors: await this.computeHealth(
+        monitors.map((so) => ({ id: so.id, so })),
+        allSpaces,
+        privateLocationAPI
+      ),
+      errors: [],
+    };
+  }
+
+  // Every space that may host a relevant monitor or package policy, so monitor
+  // and package-policy lookups can both look across spaces — see issue #270477.
+  private async getAllSpaces(privateLocationAPI: SyntheticsPrivateLocation) {
+    const allSpacesWithMonitors = await privateLocationAPI.getAllSpacesWithMonitors();
+    return new Set([this.spaceId, ...allSpacesWithMonitors]);
+  }
+
+  private async computeHealth(
+    foundMonitors: FoundMonitor[],
+    allSpaces: Set<string>,
+    privateLocationAPI: SyntheticsPrivateLocation
+  ): Promise<MonitorHealthStatus[]> {
     if (foundMonitors.length === 0) {
-      return { monitors: [], errors };
+      return [];
     }
 
     const allPrivateLocations = await getPrivateLocationsForNamespaces(this.savedObjectsClient, [
@@ -201,7 +245,7 @@ export class MonitorIntegrationHealthApi {
       };
     });
 
-    return { monitors, errors };
+    return monitors;
   }
 
   private async fetchMonitors(monitorIds: string[], allSpaces: Set<string>) {

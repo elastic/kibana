@@ -252,5 +252,38 @@ describe('useMonitorIntegrationHealth', () => {
       expect(mockedResetMonitorBulkAPI).toHaveBeenCalledWith({ ids: ['mon-2'] });
       expect(result.current.isResetting).toBe(false);
     });
+
+    it('splits large resets into batches the API accepts', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetMonitorBulkAPI.mockResolvedValue({ result: [] });
+      const ids = Array.from({ length: 1200 }, (_, i) => `mon-${i}`);
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      await act(async () => {
+        await result.current.resetMonitors(ids);
+      });
+
+      expect(mockedResetMonitorBulkAPI.mock.calls.map(([{ ids: batch }]) => batch.length)).toEqual([
+        500, 500, 200,
+      ]);
+    });
+  });
+
+  describe('locationIds', () => {
+    it('fetches health by location without loading the monitor list', () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+
+      const { result } = renderHook(() =>
+        useMonitorIntegrationHealth({ locationIds: ['loc-1', 'loc-2'] })
+      );
+
+      const actionTypes = dispatchSpy.mock.calls.map(([action]: any) => action.type);
+      expect(actionTypes).toEqual(['[MONITOR HEALTH] GET']);
+      expect(dispatchSpy.mock.calls[0][0].payload).toEqual({ locationIds: ['loc-1', 'loc-2'] });
+      expect(result.current.getUnhealthyMonitorsForLocation('loc-1')).toEqual([
+        { configId: 'mon-2', name: 'Monitor 2' },
+      ]);
+    });
   });
 });
