@@ -115,7 +115,6 @@ export function NightshiftPage(): React.ReactElement | null {
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       pageSectionProps={{
-        // color: 'subdued',
         paddingSize: 'none',
       }}
     >
@@ -139,7 +138,6 @@ export function NightshiftPage(): React.ReactElement | null {
       />
       <EuiPageTemplate.Section
         component="div"
-        // color="subdued"
         restrictWidth={pathname.endsWith('/automations') ? false : '900px'}
       >
         {canUseInvestigationsPage ? (

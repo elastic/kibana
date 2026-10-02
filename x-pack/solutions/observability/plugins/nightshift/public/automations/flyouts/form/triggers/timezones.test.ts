@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { TIMEZONE_OPTIONS } from './timezones';
 
 describe('TIMEZONE_OPTIONS', () => {
-  it('lists common abbreviations first with their GMT offset', () => {
-    expect(TIMEZONE_OPTIONS.slice(0, 3)).toEqual([
-      { value: 'UTC', label: 'UTC', help: 'GMT' },
-      { value: 'GMT', label: 'GMT', help: 'GMT' },
-      { value: 'IST', label: 'IST', help: 'GMT+5.5' },
-    ]);
+  it('lists UTC first, then IANA timezones with their current GMT offset', () => {
+    expect(TIMEZONE_OPTIONS[0].value).toBe('UTC');
+    expect(TIMEZONE_OPTIONS).toContainEqual({
+      value: 'Asia/Tokyo',
+      label: 'Asia/Tokyo',
+      help: 'GMT+9',
+    });
   });
 
-  it('includes IANA timezones once', () => {
+  it('only lists timezones that moment recognizes, once each', () => {
     const values = TIMEZONE_OPTIONS.map(({ value }) => value);
-    expect(values).toContain('Europe/Madrid');
+    expect(values.filter((value) => !moment.tz.zone(value))).toEqual([]);
     expect(new Set(values).size).toBe(values.length);
   });
 });

@@ -8,19 +8,19 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CreateFlyoutFooter } from './create_flyout_footer';
+import { AutomationFlyoutFooter } from './automation_flyout_footer';
 
-const renderFooter = (props: Partial<React.ComponentProps<typeof CreateFlyoutFooter>> = {}) => {
+const renderFooter = (props: Partial<React.ComponentProps<typeof AutomationFlyoutFooter>> = {}) => {
   const handlers = { onEnabledChange: jest.fn(), onSave: jest.fn() };
   render(
     <I18nProvider>
-      <CreateFlyoutFooter isEnabled={false} canSave isSaving={false} {...handlers} {...props} />
+      <AutomationFlyoutFooter isEnabled={false} canSave isSaving={false} {...handlers} {...props} />
     </I18nProvider>
   );
   return handlers;
 };
 
-describe('CreateFlyoutFooter', () => {
+describe('AutomationFlyoutFooter', () => {
   it('shows the disabled state and toggles it', () => {
     const { onEnabledChange } = renderFooter();
 

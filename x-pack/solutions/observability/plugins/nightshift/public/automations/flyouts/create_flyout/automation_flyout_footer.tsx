@@ -33,7 +33,7 @@ const labels = {
   save: i18n.translate('xpack.nightshift.automations.flyout.save', { defaultMessage: 'Save' }),
 };
 
-export const CreateFlyoutFooter = ({
+export const AutomationFlyoutFooter = ({
   isEnabled,
   canSave,
   isSaving,

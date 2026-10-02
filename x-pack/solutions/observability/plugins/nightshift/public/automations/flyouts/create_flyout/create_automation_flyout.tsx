@@ -29,7 +29,7 @@ import { AutomationActionsSection } from '../form/actions/automation_actions_sec
 import { AutomationInstructions } from '../form/instructions/automation_instructions';
 import { AutomationTriggerSection } from '../form/triggers/trigger_section';
 import { AutomationTagsField, tagLabels } from '../form/tags_field';
-import { CreateFlyoutFooter } from './create_flyout_footer';
+import { AutomationFlyoutFooter } from './automation_flyout_footer';
 import { toAutomationRequestBody } from '../form/to_automation_request';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
 
@@ -190,7 +190,7 @@ export const CreateAutomationFlyout = ({
           onSlackActionChange={(slackAction) => update({ slackAction })}
         />
       </EuiFlyoutBody>
-      <CreateFlyoutFooter
+      <AutomationFlyoutFooter
         isEnabled={values.isEnabled}
         canSave={canSave}
         isSaving={createAutomation.isLoading}
