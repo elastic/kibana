@@ -23,7 +23,7 @@ export interface AgentlessComponentHealthProps {
   /** Display name used in the callout text. */
   policyName: string;
   agent: Agent;
-  /** Must include `package_policies` so the per-integration accordion can render. */
+  /** Only `id` is read, for the agent policy link. The accordion is not rendered without it. */
   agentPolicy?: AgentPolicy;
   packagePolicy: PackagePolicy;
   /** Set to false when the caller already shows its own failure callout. */

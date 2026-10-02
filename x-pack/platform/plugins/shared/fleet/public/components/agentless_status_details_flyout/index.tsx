@@ -30,9 +30,8 @@ export interface AgentlessStatusDetailsFlyoutProps {
   /** The enrolled agentless agent whose integration health should be shown. */
   agent: Agent;
   /**
-   * The agent policy associated with the agent. Must include `package_policies`
-   * (use `useGetOneAgentPolicy` which expands them) so that
-   * `AgentDetailsIntegration` can render the per-integration accordion.
+   * The agent policy associated with the agent. Only its `id` is needed (for the
+   * agent policy link in the per-integration accordion), so a minimal policy is fine.
    */
   agentPolicy?: AgentPolicy;
   /** The specific package policy whose health status to display. */
