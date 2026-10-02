@@ -10,7 +10,7 @@
 import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -19,6 +19,12 @@ import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
+import {
+  RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+  type RunWorkflowExecutedEvent,
+  type RunWorkflowTelemetry,
+  UNKNOWN_RUN_WORKFLOW_ORIGIN,
+} from './telemetry';
 import * as i18n from './translations';
 import type { RunWorkflowOptions } from '../../api/types';
 import { useRunWorkflow } from '../../hooks/use_run_workflow';
@@ -88,9 +94,12 @@ export interface RunWorkflowPanelProps {
    * report the outcome itself (e.g. a multi-target run). Defaults to true.
    */
   showSuccessToast?: boolean;
+  /** Surface context attached to the run telemetry event. Origin is `unknown` when omitted. */
+  telemetry?: RunWorkflowTelemetry;
 }
 
 interface RunWorkflowPanelServices {
+  analytics?: AnalyticsServiceStart;
   application: ApplicationStart;
   notifications: NotificationsStart;
   rendering?: ToMountPointParams;
@@ -113,9 +122,10 @@ export const RunWorkflowPanel = ({
   onExecute,
   onExecutionSettled,
   showSuccessToast = true,
+  telemetry,
 }: RunWorkflowPanelProps) => {
   const {
-    services: { application, notifications, rendering },
+    services: { analytics, application, notifications, rendering },
   } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
@@ -159,7 +169,28 @@ export const RunWorkflowPanel = ({
 
       const mergedInputs = { ...extraInputs, ...inputs };
 
+      // Reported regardless of mount state, so dismissing the panel mid-run still counts the run.
+      const reportRunExecuted = (succeeded: boolean, workflowExecutionId?: string) => {
+        const event: RunWorkflowExecutedEvent = {
+          origin: telemetry?.origin ?? UNKNOWN_RUN_WORKFLOW_ORIGIN,
+          workflow_id: selectedId,
+          succeeded,
+          ...(workflowExecutionId && { workflow_execution_id: workflowExecutionId }),
+          ...(telemetry?.itemCount !== undefined && { item_count: telemetry.itemCount }),
+          ...(telemetry?.owner !== undefined && { owner: telemetry.owner }),
+        };
+        analytics?.reportEvent(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, event);
+      };
+
+      const onError = (err: unknown) => {
+        reportRunExecuted(false);
+        notifications.toasts.addError(getWorkflowExecutionError(err), {
+          title: i18n.WORKFLOW_START_FAILED_TOAST,
+        });
+      };
+
       const onSuccess = (data: RunWorkflowResponseDto) => {
+        reportRunExecuted(true, data.workflowExecutionId);
         if (!showSuccessToast) return;
         notifications.toasts.addSuccess({
           title: i18n.WORKFLOW_START_SUCCESS_TOAST,
@@ -194,28 +225,17 @@ export const RunWorkflowPanel = ({
       if (runWorkflowExecutor) {
         void Promise.resolve()
           .then(() => runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs }))
-          .then(onSuccess, (err: unknown) => {
-            notifications.toasts.addError(getWorkflowExecutionError(err), {
-              title: i18n.WORKFLOW_START_FAILED_TOAST,
-            });
-          })
+          .then(onSuccess, onError)
           .finally(onSettled);
       } else {
         runDefaultWorkflow(
           { id: selectedId, inputs: mergedInputs },
-          {
-            onSuccess,
-            onError: (err) => {
-              notifications.toasts.addError(getWorkflowExecutionError(err), {
-                title: i18n.WORKFLOW_START_FAILED_TOAST,
-              });
-            },
-            onSettled,
-          }
+          { onSuccess, onError, onSettled }
         );
       }
     },
     [
+      analytics,
       application,
       selectedId,
       runDefaultWorkflow,
@@ -227,6 +247,7 @@ export const RunWorkflowPanel = ({
       onExecute,
       onExecutionSettled,
       showSuccessToast,
+      telemetry,
     ]
   );
 

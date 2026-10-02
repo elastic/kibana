@@ -12,6 +12,7 @@ import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
 import type { RunWorkflowExecutor, RunWorkflowPanelProps } from './run_workflow_panel';
+import { RUN_WORKFLOW_EXECUTED_EVENT_TYPE } from './telemetry';
 import * as i18n from './translations';
 import type { WorkflowSelectorConfig } from '../workflow_selector/workflow_utils';
 
@@ -21,6 +22,7 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({ canReadManagedWorkflow: tr
 const mockNavigateToApp = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const mockReportEvent = jest.fn();
 
 interface MockWorkflowSelectorProps {
   config: WorkflowSelectorConfig;
@@ -123,6 +125,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...actual,
     useKibana: () => ({
       services: {
+        analytics: { reportEvent: mockReportEvent },
         application: { navigateToApp: mockNavigateToApp },
         rendering: {},
         notifications: {
@@ -558,6 +561,156 @@ describe('RunWorkflowPanel', () => {
       expect(runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
         inputs: { ticketId: 'ABC', alert_ids: ['alert-1'] },
+      });
+    });
+  });
+  describe('run telemetry', () => {
+    const telemetry = { origin: 'alert_bulk', itemCount: 3, owner: 'securitySolution' };
+
+    it('reports a succeeded run with the execution id on the default path', () => {
+      renderComponent({ telemetry });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+
+      const { onSuccess } = mockMutate.mock.calls[0][1];
+      onSuccess({ workflowExecutionId: 'exec-123' });
+
+      expect(mockReportEvent).toHaveBeenCalledTimes(1);
+      expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
+        origin: 'alert_bulk',
+        workflow_id: 'test-workflow-id',
+        workflow_execution_id: 'exec-123',
+        item_count: 3,
+        succeeded: true,
+        owner: 'securitySolution',
+      });
+    });
+
+    it('reports a failed run without an execution id on the default path', () => {
+      renderComponent({ telemetry });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      const { onError } = mockMutate.mock.calls[0][1];
+      onError(new Error('boom'));
+
+      expect(mockReportEvent).toHaveBeenCalledTimes(1);
+      expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
+        origin: 'alert_bulk',
+        workflow_id: 'test-workflow-id',
+        item_count: 3,
+        succeeded: false,
+        owner: 'securitySolution',
+      });
+    });
+
+    it('reports the run even when the success toast is suppressed', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest
+        .fn()
+        .mockResolvedValue({ workflowExecutionId: 'injected-exec-1' });
+
+      renderComponent({ runWorkflow, telemetry, showSuccessToast: false });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      await waitFor(() =>
+        expect(mockReportEvent).toHaveBeenCalledWith(
+          RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+          expect.objectContaining({ workflow_execution_id: 'injected-exec-1', succeeded: true })
+        )
+      );
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed run when the injected executor rejects', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest.fn().mockRejectedValue(new Error('nope'));
+
+      renderComponent({ runWorkflow, telemetry });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      await waitFor(() => expect(mockReportEvent).toHaveBeenCalledTimes(1));
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+        expect.not.objectContaining({ workflow_execution_id: expect.anything() })
+      );
+      expect(mockReportEvent.mock.calls[0][1].succeeded).toBe(false);
+    });
+
+    it('reports a run that settles after the panel was dismissed', async () => {
+      let resolveExecution: (value: { workflowExecutionId: string }) => void = () => {};
+      const runWorkflow: RunWorkflowExecutor = jest.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveExecution = resolve;
+          })
+      );
+
+      const { unmount } = renderComponent({ runWorkflow, telemetry });
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+      await waitFor(() => expect(runWorkflow).toHaveBeenCalled());
+      unmount();
+
+      await act(async () => {
+        resolveExecution({ workflowExecutionId: 'exec-after-dismiss' });
+      });
+
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+        expect.objectContaining({ workflow_execution_id: 'exec-after-dismiss', succeeded: true })
+      );
+    });
+
+    it('does not report when the panel is closed without running', () => {
+      const { unmount } = renderComponent({ telemetry });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      unmount();
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports on inputs modal submit, not when the modal opens', () => {
+      mockWorkflowsData = [requiredInputsWorkflow];
+      renderComponent({ telemetry });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+      expect(screen.getByTestId('run-workflow-inputs-modal')).toBeInTheDocument();
+      expect(mockMutate).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('inputs-modal-submit'));
+      const { onSuccess } = mockMutate.mock.calls[0][1];
+      onSuccess({ workflowExecutionId: 'exec-inputs' });
+
+      expect(mockReportEvent).toHaveBeenCalledTimes(1);
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+        expect.objectContaining({ workflow_execution_id: 'exec-inputs' })
+      );
+    });
+
+    it('reports an unknown origin when no telemetry context is provided', () => {
+      renderComponent();
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      const { onSuccess } = mockMutate.mock.calls[0][1];
+      onSuccess({ workflowExecutionId: 'exec-123' });
+
+      expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
+        origin: 'unknown',
+        workflow_id: 'test-workflow-id',
+        workflow_execution_id: 'exec-123',
+        succeeded: true,
       });
     });
   });
