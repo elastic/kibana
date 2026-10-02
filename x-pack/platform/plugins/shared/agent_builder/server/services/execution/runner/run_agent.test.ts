@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getAgentFromRunContext, type ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
+import {
+  getAgentFromRunContext,
+  type AgentHandlerContext,
+  type ScopedRunnerRunAgentParams,
+} from '@kbn/agent-builder-server';
 import { ConversationOriginType, ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 import { RunnerManager } from './runner';
@@ -19,6 +23,8 @@ import {
   createScopedRunnerDepsMock,
   createMockedInternalAgent,
   createMockedAgentRegistry,
+  createConversationClientMock,
+  createConversationServiceMock,
   createEmptyConversation,
   createRound,
 } from '../../../test_utils';
@@ -292,6 +298,64 @@ describe('runAgent', () => {
 
     expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
       projectRouting: 'space',
+    });
+  });
+
+  describe('conversation client on the handler context', () => {
+    let conversationService: ReturnType<typeof createConversationServiceMock>;
+    const handlerContext = () => agentHandler.mock.calls[0][1] as AgentHandlerContext;
+
+    beforeEach(() => {
+      conversationService = createConversationServiceMock();
+      runnerDeps.conversationService = conversationService;
+    });
+
+    it('scopes the client as the conversation owner, not the request principal', async () => {
+      // A Task Manager run arrives on an API-key fake request whose principal has no stable id,
+      // so a request-scoped client fails every `access: 'owner'` write (e.g. set_conversation_metadata).
+      const ownerClient = createConversationClientMock();
+      conversationService.getScopedClientAsUser.mockResolvedValue(ownerClient);
+
+      await runAgent({
+        agentExecutionParams: {
+          agentId: 'test-agent',
+          agentParams: {
+            nextInput: { message: 'bar' },
+            conversation: createEmptyConversation({
+              id: 'conversation-1',
+              agent_id: 'test-agent',
+              user: { id: 'owner-id', username: 'owner' },
+            }),
+          },
+        },
+        parentManager: runnerManager,
+      });
+
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+        request: runnerDeps.request,
+        user: { id: 'owner-id', username: 'owner', isAdmin: false },
+      });
+      expect(conversationService.getScopedClient).not.toHaveBeenCalled();
+      expect(handlerContext().conversationClient).toBe(ownerClient);
+    });
+
+    it('falls back to the request-scoped client when the run has no conversation', async () => {
+      const requestClient = createConversationClientMock();
+      conversationService.getScopedClient.mockResolvedValue(requestClient);
+
+      await runAgent({
+        agentExecutionParams: {
+          agentId: 'test-agent',
+          agentParams: { nextInput: { message: 'bar' } },
+        },
+        parentManager: runnerManager,
+      });
+
+      expect(conversationService.getScopedClient).toHaveBeenCalledWith({
+        request: runnerDeps.request,
+      });
+      expect(conversationService.getScopedClientAsUser).not.toHaveBeenCalled();
+      expect(handlerContext().conversationClient).toBe(requestClient);
     });
   });
 });

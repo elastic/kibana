@@ -66,7 +66,14 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
   const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
-  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  // Scoped as the owner: the run's (fake) request principal may have no stable user id.
+  const owner = agentExecutionParams.agentParams?.conversation?.user;
+  const conversationClient = owner
+    ? await manager.deps.conversationService.getScopedClientAsUser({
+        request,
+        user: { ...owner, isAdmin: false },
+      })
+    : await manager.deps.conversationService.getScopedClient({ request });
 
   const { filesystemService, bashService } = await createFilesystemServices({
     manager,
