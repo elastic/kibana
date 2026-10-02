@@ -14,6 +14,10 @@ const MAX_QUERY_LENGTH = 2000;
 const MAX_ID_LENGTH = 64;
 const MAX_CURSOR_LENGTH = 1024;
 const MAX_RULE_ITEMS = 100;
+// Sentry's RuleSerializer: name max_length=256, frequency 5 to 60 * 24 * 30 minutes.
+const SENTRY_MAX_RULE_NAME_LENGTH = 256;
+const SENTRY_MIN_RULE_FREQUENCY_MINUTES = 5;
+const SENTRY_MAX_RULE_FREQUENCY_MINUTES = 43_200;
 export const SentryListIssuesInputSchema = z.object({
   project: z
     .string()
@@ -221,7 +225,11 @@ export const SentryCreateIssueAlertRuleInputSchema = z.object({
     .min(1)
     .max(MAX_SLUG_LENGTH)
     .describe('The project slug to create the alert rule in.'),
-  name: z.string().min(1).max(200).describe('Display name for the alert rule.'),
+  name: z
+    .string()
+    .min(1)
+    .max(SENTRY_MAX_RULE_NAME_LENGTH)
+    .describe('Display name for the alert rule.'),
   actionMatch: z
     .enum(['all', 'any', 'none'])
     .default('all')
@@ -243,10 +251,11 @@ export const SentryCreateIssueAlertRuleInputSchema = z.object({
   frequency: z
     .number()
     .int()
-    .min(5)
+    .min(SENTRY_MIN_RULE_FREQUENCY_MINUTES)
+    .max(SENTRY_MAX_RULE_FREQUENCY_MINUTES)
     .optional()
     .describe(
-      'Minutes to wait before the rule can trigger again for the same issue. Defaults to 30.'
+      `Minutes to wait before the rule can trigger again for the same issue (${SENTRY_MIN_RULE_FREQUENCY_MINUTES}-${SENTRY_MAX_RULE_FREQUENCY_MINUTES}). Defaults to 30.`
     ),
 });
 export type SentryCreateIssueAlertRuleInput = z.infer<typeof SentryCreateIssueAlertRuleInputSchema>;
@@ -262,7 +271,11 @@ export const SentryUpdateIssueAlertRuleInputSchema = z.object({
     .min(1)
     .max(MAX_ID_LENGTH)
     .describe('The alert rule ID, returned by listIssueAlertRules.'),
-  name: z.string().max(200).optional().describe('New display name for the alert rule.'),
+  name: z
+    .string()
+    .max(SENTRY_MAX_RULE_NAME_LENGTH)
+    .optional()
+    .describe('New display name for the alert rule.'),
   actionMatch: z
     .enum(['all', 'any', 'none'])
     .optional()
@@ -280,9 +293,12 @@ export const SentryUpdateIssueAlertRuleInputSchema = z.object({
   frequency: z
     .number()
     .int()
-    .min(5)
+    .min(SENTRY_MIN_RULE_FREQUENCY_MINUTES)
+    .max(SENTRY_MAX_RULE_FREQUENCY_MINUTES)
     .optional()
-    .describe('Minutes to wait before the rule can trigger again for the same issue.'),
+    .describe(
+      `Minutes to wait before the rule can trigger again for the same issue (${SENTRY_MIN_RULE_FREQUENCY_MINUTES}-${SENTRY_MAX_RULE_FREQUENCY_MINUTES}).`
+    ),
 });
 export type SentryUpdateIssueAlertRuleInput = z.infer<typeof SentryUpdateIssueAlertRuleInputSchema>;
 

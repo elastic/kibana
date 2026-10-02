@@ -11,6 +11,7 @@ import type { ActionContext } from '../../connector_spec';
 import { createRecordingAxiosClient } from '../../lib/recording_axios_client';
 import { getConnectorSpec } from '../../..';
 import { AzureMonitor } from './azure_monitor';
+import { CreateOrUpdateAlertProcessingRuleInputSchema } from './types';
 
 const ARM_BASE = 'https://management.azure.com';
 const SUB_ID = '11111111-1111-1111-1111-111111111111';
@@ -486,6 +487,21 @@ describe('AzureMonitor', () => {
       expect(body.properties.actions).toEqual([
         { actionType: 'AddActionGroups', actionGroupIds: ['ag1'] },
       ]);
+    });
+
+    it('accepts at most five values per condition, matching the Azure filter limit', () => {
+      const input = (values: string[]) => ({
+        resourceGroupName: 'rg1',
+        ruleName: 'rule1',
+        scopes: [`/subscriptions/${SUB_ID}`],
+        actionType: 'RemoveAllActionGroups',
+        conditions: [{ field: 'Severity', operator: 'Equals', values }],
+      });
+      const schema = CreateOrUpdateAlertProcessingRuleInputSchema;
+      expect(schema.safeParse(input(['Sev0', 'Sev1', 'Sev2', 'Sev3', 'Sev4'])).success).toBe(true);
+      expect(
+        schema.safeParse(input(['Sev0', 'Sev1', 'Sev2', 'Sev3', 'Sev4', 'Sev0'])).success
+      ).toBe(false);
     });
 
     it('enables/disables an alert processing rule via PATCH', async () => {

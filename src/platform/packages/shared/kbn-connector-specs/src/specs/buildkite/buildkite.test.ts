@@ -403,6 +403,27 @@ describe('Buildkite', () => {
         },
       });
     });
+
+    it('accepts a body up to 1 MiB and rejects one over 1 MiB in UTF-8 bytes', () => {
+      const base = { pipelineSlug: 'my-pipeline', buildNumber: '42' };
+      expect(() =>
+        parse('createBuildAnnotation', { ...base, body: 'x'.repeat(1024 * 1024) })
+      ).not.toThrow();
+      expect(() =>
+        parse('createBuildAnnotation', { ...base, body: '€'.repeat(400_000) })
+      ).toThrow();
+    });
+
+    it('rejects a context longer than 100 characters', () => {
+      expect(() =>
+        parse('createBuildAnnotation', {
+          pipelineSlug: 'my-pipeline',
+          buildNumber: '42',
+          body: 'ok',
+          context: 'c'.repeat(101),
+        })
+      ).toThrow();
+    });
   });
 
   describe('listBuildAnnotations action', () => {

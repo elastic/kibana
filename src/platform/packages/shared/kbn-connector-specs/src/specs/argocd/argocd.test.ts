@@ -270,6 +270,17 @@ describe('ArgocdConnector', () => {
         })
       );
     });
+
+    it('accepts a selective sync of more than 100 resources', () => {
+      const resources = Array.from({ length: 500 }, (_, i) => ({
+        kind: 'ConfigMap',
+        name: `cm-${i}`,
+        namespace: 'demo',
+      }));
+      expect(() =>
+        ArgocdConnector.actions.syncApplication.input.parse({ name: 'demo', resources })
+      ).not.toThrow();
+    });
   });
 
   describe('listClusters', () => {

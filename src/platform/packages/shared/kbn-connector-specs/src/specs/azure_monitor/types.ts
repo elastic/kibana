@@ -105,6 +105,15 @@ const DAYS_OF_WEEK_VALUES = [
 ] as const;
 const ISO_DATETIME_NO_TZ_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/;
 
+// Log Analytics documents no limit on KQL query text, so this is only a generous ceiling.
+const MAX_LOG_QUERY_LENGTH = 100_000;
+// https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-processing-rules
+const ALERT_PROCESSING_RULE_MAX_FILTER_VALUES = 5;
+// https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/service-limits
+const ALERT_PROCESSING_RULE_MAX_DESCRIPTION_LENGTH = 2048;
+// Azure documents no limit on alert processing rule scopes, so this is only a generous ceiling.
+const ALERT_PROCESSING_RULE_MAX_SCOPES = 1000;
+
 // =============================================================================
 // Alerts (Alerts Management API)
 // =============================================================================
@@ -403,7 +412,7 @@ export const RunLogQueryInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
-      .max(10000)
+      .max(MAX_LOG_QUERY_LENGTH)
       .describe(
         'The KQL (Kusto Query Language) query to run, e.g. "AzureActivity | summarize count() by Category".'
       ),
@@ -537,9 +546,9 @@ const AlertProcessingRuleConditionSchema = z.object({
   values: z
     .array(z.string().max(500))
     .min(1)
-    .max(50)
+    .max(ALERT_PROCESSING_RULE_MAX_FILTER_VALUES)
     .describe(
-      'Values to compare the field against. The condition matches if the field matches any of these values.'
+      `Values to compare the field against (at most ${ALERT_PROCESSING_RULE_MAX_FILTER_VALUES}). The condition matches if the field matches any of these values.`
     ),
 });
 
@@ -637,7 +646,7 @@ export const CreateOrUpdateAlertProcessingRuleInputSchema = lazySchema(() =>
       scopes: z
         .array(z.string().max(500))
         .min(1)
-        .max(50)
+        .max(ALERT_PROCESSING_RULE_MAX_SCOPES)
         .describe(
           'ARM resource IDs the rule applies to (a subscription, resource group, or individual resource). Alerts firing on, or under, any of these scopes are affected.'
         ),
@@ -660,7 +669,7 @@ export const CreateOrUpdateAlertProcessingRuleInputSchema = lazySchema(() =>
         .describe('Whether the rule is active. Defaults to true.'),
       description: z
         .string()
-        .max(500)
+        .max(ALERT_PROCESSING_RULE_MAX_DESCRIPTION_LENGTH)
         .optional()
         .describe('Human-readable description of what the rule does.'),
       conditions: z

@@ -277,8 +277,19 @@ describe('Dynatrace', () => {
       );
     });
 
-    it('rejects more than 50 event properties', () => {
-      const props = Object.fromEntries(Array.from({ length: 51 }, (_, i) => [`k${i}`, `v${i}`]));
+    it('accepts 100 event properties', () => {
+      const props = Object.fromEntries(Array.from({ length: 100 }, (_, i) => [`k${i}`, `v${i}`]));
+      expect(() =>
+        DynatraceIngestEventInputSchema.parse({
+          eventType: 'CUSTOM_INFO',
+          title: 'max',
+          properties: props,
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects more than 100 event properties', () => {
+      const props = Object.fromEntries(Array.from({ length: 101 }, (_, i) => [`k${i}`, `v${i}`]));
       expect(() =>
         DynatraceIngestEventInputSchema.parse({
           eventType: 'CUSTOM_INFO',

@@ -9,6 +9,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// NRQL query strings must be under 4 KB:
+// https://docs.newrelic.com/docs/nrql/get-started/introduction-nrql-new-relics-query-language/
+const NRQL_MAX_LENGTH = 4000;
+// https://docs.newrelic.com/docs/alerts/admin/rules-limits-alerts/
+const ALERT_POLICY_NAME_MAX_LENGTH = 128;
+const ALERT_CONDITION_NAME_MAX_LENGTH = 128;
+
 const MutingRuleConditionSchema = z.object({
   attribute: z
     .string()
@@ -34,9 +41,11 @@ const MutingRuleConditionSchema = z.object({
     ])
     .describe('Comparison operator applied to the attribute.'),
   values: z
-    .array(z.string().max(500))
+    .array(z.string().max(NRQL_MAX_LENGTH))
     .max(500)
-    .describe('Values to compare the attribute against, e.g. ["123456"].'),
+    .describe(
+      'Values to compare the attribute against, e.g. ["123456"]. Up to 500 values; a "nrqlQuery" value may be a full NRQL query.'
+    ),
 });
 
 const MutingRuleConditionGroupSchema = z.object({
@@ -203,7 +212,7 @@ export const NewRelicRunNrqlQueryInputSchema = lazySchema(() =>
   z.object({
     nrql: z
       .string()
-      .max(4000)
+      .max(NRQL_MAX_LENGTH)
       .describe('The NRQL query string, e.g. "SELECT count(*) FROM Transaction SINCE 1 HOUR AGO".'),
     timeoutSeconds: z
       .number()
@@ -288,7 +297,11 @@ export type NewRelicListNrqlConditionsInput = z.infer<typeof NewRelicListNrqlCon
 
 export const NewRelicCreateAlertPolicyInputSchema = lazySchema(() =>
   z.object({
-    name: z.string().max(200).describe('Name of the new alert policy.'),
+    name: z
+      .string()
+      .min(1)
+      .max(ALERT_POLICY_NAME_MAX_LENGTH)
+      .describe(`Name of the new alert policy (1-${ALERT_POLICY_NAME_MAX_LENGTH} characters).`),
     incidentPreference: z
       .enum(['PER_POLICY', 'PER_CONDITION', 'PER_CONDITION_AND_TARGET'])
       .optional()
@@ -300,10 +313,14 @@ export type NewRelicCreateAlertPolicyInput = z.infer<typeof NewRelicCreateAlertP
 export const NewRelicCreateNrqlConditionInputSchema = lazySchema(() =>
   z.object({
     policyId: z.string().max(200).describe('ID of the alert policy to attach the condition to.'),
-    name: z.string().max(200).describe('Name of the NRQL condition.'),
+    name: z
+      .string()
+      .min(1)
+      .max(ALERT_CONDITION_NAME_MAX_LENGTH)
+      .describe(`Name of the NRQL condition (1-${ALERT_CONDITION_NAME_MAX_LENGTH} characters).`),
     nrql: z
       .string()
-      .max(4000)
+      .max(NRQL_MAX_LENGTH)
       .describe(
         'The NRQL query the condition evaluates, e.g. "SELECT count(*) FROM TransactionError".'
       ),

@@ -9,6 +9,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// PostHog documents no length limit for HogQL queries.
+const MAX_HOGQL_QUERY_LENGTH = 100_000;
+
 const ISSUE_STATUSES = ['active', 'resolved', 'archived', 'suppressed', 'pending_release'] as const;
 
 export const PostHogListIssuesInputSchema = lazySchema(() =>
@@ -113,7 +116,7 @@ export const PostHogRunQueryInputSchema = lazySchema(() =>
   z.object({
     query: z
       .string()
-      .max(8000)
+      .max(MAX_HOGQL_QUERY_LENGTH)
       .describe(
         'The HogQL (SQL-like) query string to run, e.g. "select event, count() from events where event = \'$exception\' group by event".'
       ),

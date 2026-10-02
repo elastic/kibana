@@ -208,6 +208,27 @@ describe('GoogleCloudMonitoring', () => {
       });
       expect(parsed.success).toBe(false);
     });
+
+    it('should accept up to 16 notification channels, the per-policy limit', () => {
+      const { input } = GoogleCloudMonitoring.actions.updateAlertPolicy;
+      const channels = (count: number) => Array.from({ length: count }, (_, i) => `${i}`);
+      expect(input.safeParse({ policyName: '1', notificationChannels: channels(16) }).success).toBe(
+        true
+      );
+      expect(input.safeParse({ policyName: '1', notificationChannels: channels(17) }).success).toBe(
+        false
+      );
+    });
+
+    it('should bound documentationSubject at 10,240 UTF-8 bytes', () => {
+      const { input } = GoogleCloudMonitoring.actions.updateAlertPolicy;
+      expect(
+        input.safeParse({ policyName: '1', documentationSubject: 'a'.repeat(10_240) }).success
+      ).toBe(true);
+      expect(
+        input.safeParse({ policyName: '1', documentationSubject: 'é'.repeat(5_121) }).success
+      ).toBe(false);
+    });
   });
 
   describe('createSnooze', () => {

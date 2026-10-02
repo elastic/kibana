@@ -9,6 +9,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// The AKS run command API documents no limit on the command text, so this is only a generous ceiling.
+const MAX_RUN_COMMAND_LENGTH = 100_000;
+
 /**
  * Every action below except `listSubscriptions` needs a subscription ID.
  * It normally comes from the connector's configured `subscriptionId`, but an
@@ -167,7 +170,7 @@ export const RunCommandInputSchema = lazySchema(() =>
     command: z
       .string()
       .min(1)
-      .max(2000)
+      .max(MAX_RUN_COMMAND_LENGTH)
       .describe(
         'Shell command to execute inside the cluster via a temporary privileged pod (e.g. "kubectl get pods -A" or "helm list -A"). Requires the "run-command" RBAC permission on the cluster.'
       ),

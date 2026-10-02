@@ -462,6 +462,33 @@ describe('Prometheus', () => {
       });
       expect(result).toEqual([{ __name__: 'up', job: 'node' }]);
     });
+
+    it('accepts any series selector that queryPrometheus accepts', () => {
+      const selector = `up{instance=~"${Array.from({ length: 200 }, (_, i) => `host-${i}`).join(
+        '|'
+      )}"}`;
+      expect(() =>
+        Prometheus.actions.queryPrometheus.input.parse({ query: selector })
+      ).not.toThrow();
+      expect(() =>
+        Prometheus.actions.getPrometheusSeries.input.parse({ match: [selector] })
+      ).not.toThrow();
+    });
+  });
+
+  describe('Alertmanager filter expressions', () => {
+    it('accepts a filter on any label value createAlerts can write', () => {
+      const value = '"'.repeat(1000);
+      expect(() =>
+        Prometheus.actions.createAlerts.input.parse({
+          alerts: [{ labels: { alertname: 'X', detail: value } }],
+        })
+      ).not.toThrow();
+      const escaped = value.replace(/"/g, '\\"');
+      expect(() =>
+        Prometheus.actions.listAlerts.input.parse({ filter: [`detail="${escaped}"`] })
+      ).not.toThrow();
+    });
   });
 
   describe('listPrometheusLabelValues action', () => {

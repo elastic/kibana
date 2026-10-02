@@ -10,7 +10,11 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Zabbix } from './zabbix';
-import { CreateMaintenanceInputSchema, UpdateMaintenanceInputSchema } from './types';
+import {
+  AddProblemMessageInputSchema,
+  CreateMaintenanceInputSchema,
+  UpdateMaintenanceInputSchema,
+} from './types';
 
 const RPC_URL = 'https://zabbix.example.com/api_jsonrpc.php';
 
@@ -373,6 +377,22 @@ describe('Zabbix', () => {
       expect(() =>
         CreateMaintenanceInputSchema.parse({ ...validInput, activeSince: 2000, activeTill: 1000 })
       ).toThrow(/activeTill must be after activeSince/);
+    });
+
+    it('accepts as many host IDs as one getHosts page returns', () => {
+      const hostIds = Array.from({ length: 1000 }, (_, i) => String(10000 + i));
+      expect(() => CreateMaintenanceInputSchema.parse({ ...validInput, hostIds })).not.toThrow();
+    });
+  });
+
+  describe('AddProblemMessageInputSchema validation', () => {
+    it('accepts a message up to the 2048-character acknowledges.message column', () => {
+      expect(() =>
+        AddProblemMessageInputSchema.parse({ eventIds: ['1'], message: 'm'.repeat(2048) })
+      ).not.toThrow();
+      expect(() =>
+        AddProblemMessageInputSchema.parse({ eventIds: ['1'], message: 'm'.repeat(2049) })
+      ).toThrow();
     });
   });
 

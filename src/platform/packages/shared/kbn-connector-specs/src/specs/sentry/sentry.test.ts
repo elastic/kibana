@@ -10,7 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Sentry } from './sentry';
-import { SentryBulkUpdateIssuesInputSchema } from './types';
+import { SentryBulkUpdateIssuesInputSchema, SentryCreateIssueAlertRuleInputSchema } from './types';
 
 describe('Sentry', () => {
   const mockClient = {
@@ -406,6 +406,28 @@ describe('Sentry', () => {
           frequency: 30,
         }
       );
+    });
+
+    it('should accept the vendor limits for name length and frequency and reject values beyond them', () => {
+      const base = {
+        project: 'backend',
+        conditions: [{ id: 'sentry.rules.conditions.first_seen_event.FirstSeenEventCondition' }],
+        actions: [{ id: 'sentry.rules.actions.notify_event.NotifyEventAction' }],
+      };
+      expect(
+        SentryCreateIssueAlertRuleInputSchema.safeParse({
+          ...base,
+          name: 'a'.repeat(256),
+          frequency: 43200,
+        }).success
+      ).toBe(true);
+      expect(
+        SentryCreateIssueAlertRuleInputSchema.safeParse({ ...base, name: 'a'.repeat(257) }).success
+      ).toBe(false);
+      expect(
+        SentryCreateIssueAlertRuleInputSchema.safeParse({ ...base, name: 'n', frequency: 43201 })
+          .success
+      ).toBe(false);
     });
   });
 
