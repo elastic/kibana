@@ -64,8 +64,8 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
         expect(Date.parse(item.started_at)).toBeGreaterThan(0);
         expect(Date.parse(item.ended_at)).toBeGreaterThan(0);
         expect(['success', 'failure']).toContain(item.outcome);
-        expect(Number.isInteger(item.timings.duration)).toBe(true);
-        expect(Number.isInteger(item.timings.scheduled_delay)).toBe(true);
+        expect(Number.isInteger(item.timings.duration_ms)).toBe(true);
+        expect(Number.isInteger(item.timings.scheduled_delay_ms)).toBe(true);
       }
 
       const successful = response.body.items.find(
@@ -151,7 +151,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects unknown outcome values', async ({ apiClient }) => {
-    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcome=cancelled`, {
+    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcomes=cancelled`, {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);

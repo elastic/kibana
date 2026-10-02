@@ -42,13 +42,13 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 
-  it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {
+  it('computes last_snooze_action and snoozed_until grouped by group_hash', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(
       /last_snooze_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("snooze",\s*"unsnooze"\)\)/
     );
     expect(esql).toMatch(
-      /snooze_expiry\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
+      /snoozed_until\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
     );
   });
 

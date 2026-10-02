@@ -20,6 +20,7 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
@@ -701,6 +702,7 @@ describe('Attack Discovery worker chain', () => {
 
     it.each([
       ['resolve_investigation_id', 'data.set'],
+      ['resolve_display_text', 'kibana.request'],
       ['open_investigation', 'ai.conversation.create'],
       ['verify_investigation', 'ai.conversation.metadata.read'],
       ['attach_discovery', 'ai.attachment.add'],
@@ -865,10 +867,13 @@ describe('Attack Discovery worker chain', () => {
 
       // #19022 asks for the narrative on the Investigation itself, not only in an
       // attachment, so it is readable without resolving anything.
+      // Plain text, because the Investigation list and overview show it as-is.
       it('seeds the attack narrative into summary', () => {
         const metadata = open?.with?.metadata as Record<string, string> | undefined;
 
-        expect(metadata?.summary).toBe('{{ inputs.summary_markdown }}');
+        expect(metadata?.summary).toBe(
+          "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
+        );
       });
 
       // kibana-q0t5. The Investigation id is a pure function of the attack, so every
@@ -927,11 +932,167 @@ describe('Attack Discovery worker chain', () => {
       // review-side lookup. A regrouped alert set, and Kibana scheduled AD vs this
       // Worker (`ownerId` differs; `generation_source` is not passed yet), are
       // intentional producer splits.
-      it('derives the Investigation id first, with no lookup before it', () => {
-        expect(review.steps.map((step) => step.name).slice(0, 2)).toEqual([
+      // The only step between them reads the DISCOVERY's display text, not the
+      // Investigation, so there is still no Investigation lookup before the create.
+      it('derives the Investigation id first, with no Investigation lookup before it', () => {
+        expect(review.steps.map((step) => step.name).slice(0, 3)).toEqual([
           'resolve_investigation_id',
+          'resolve_display_text',
           'open_investigation',
         ]);
+      });
+    });
+
+    // The inputs are the persisted, anonymized text with `{{ field value }}` tokens,
+    // which plain text and plain markdown surfaces would show raw. Every surface an
+    // analyst reads takes the display text instead, and falls back to the inputs
+    // when the step failed.
+    describe('display text', () => {
+      const HOST_UUID = '2911864a-7591-4fdd-8c40-be92b7c5507f';
+      const anonymizedInputs = {
+        alert_ids: ['alert-1'],
+        summary_markdown: `OneNote file on {{ host.name ${HOST_UUID} }} ran curl`,
+        title: `Qbot on ${HOST_UUID}`,
+      };
+      // As the find API returns it: field values as inline code, original values restored.
+      const displayText = {
+        summary_markdown: 'OneNote file on `SRVWIN04` ran curl',
+        title: 'Qbot on SRVWIN04',
+      };
+      const render = (template: unknown, discovery?: Record<string, string>) =>
+        createWorkflowLiquidEngine().parseAndRender(String(template), {
+          consts: review.consts,
+          inputs: anonymizedInputs,
+          steps: {
+            resolve_analysis: { output: { verdict: 'inconclusive' } },
+            resolve_display_text: discovery != null ? { output: { data: [discovery] } } : {},
+          },
+        });
+      const open = () => asWith(stepIn(reviewSteps, 'open_investigation'));
+      const metadata = () => open().metadata as unknown as Record<string, string>;
+      const comment = () => asWith(stepIn(reviewSteps, 'resolve_escalation')).comment;
+
+      // The public find API, so the text is rendered and de-anonymized by the product
+      // itself, under the workflow identity's privileges.
+      it('reads the discovery under review from the find API, in its space', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.with).toEqual({
+          headers: { 'elastic-api-version': '2023-10-31' },
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/api/attack_discovery/_find',
+          query: { ids: '{{ inputs.attack_discovery_id }}', include_all_authors: 'true' },
+        });
+      });
+
+      // One retry, since a transient failure leaves the fallback text in place for good, and
+      // then the review continues on the inputs.
+      it('retries once, then continues when the display text cannot be read', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.['on-failure']).toEqual({
+          continue: true,
+          retry: { delay: '5s', 'max-attempts': 1 },
+        });
+      });
+
+      it('bounds each attempt well below the transport default', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.timeout).toBe('30s');
+      });
+
+      it.each([
+        ['the Investigation title', () => open().title, displayText.title],
+        [
+          'the Investigation summary',
+          () => metadata().summary,
+          'OneNote file on SRVWIN04 ran curl',
+        ],
+      ])('uses the display text for %s', async (_, template, expected) => {
+        expect(await render(template(), displayText)).toBe(expected);
+      });
+
+      it.each([
+        ['the Investigation title', () => open().title, anonymizedInputs.title],
+        ['the Investigation summary', () => metadata().summary, anonymizedInputs.summary_markdown],
+      ])('falls back to the inputs for %s', async (_, template, expected) => {
+        expect(await render(template())).toBe(expected);
+      });
+
+      it('falls back to the inputs when the find API returns no discovery', async () => {
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(String(open().title), {
+          inputs: anonymizedInputs,
+          steps: { resolve_display_text: { output: { data: [] } } },
+        });
+
+        expect(rendered).toBe(anonymizedInputs.title);
+      });
+
+      it('keeps the Investigation summary within the discovery bound', async () => {
+        const rendered = await render(metadata().summary, {
+          ...displayText,
+          summary_markdown: 'a'.repeat(9000),
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(8000);
+      });
+
+      it('names the discovery by its display title in the journal', async () => {
+        const journal = asInputs(stepIn(reviewSteps, 'journal_review_started')).message;
+
+        expect(await render(journal, displayText)).toContain(`"${displayText.title}"`);
+      });
+
+      // A re-review cannot repair the Investigation title or summary, because its create
+      // 409s, so the journal is the only record that the fallback was used.
+      describe('journal fallback note', () => {
+        const NOTE = 'shown anonymized';
+        const journal = () =>
+          String(asInputs(stepIn(reviewSteps, 'journal_review_started')).message);
+
+        it('says the text is anonymized when the display text could not be read', async () => {
+          expect(await render(journal())).toContain(NOTE);
+        });
+
+        it('says nothing about it when the display text was read', async () => {
+          const rendered = await render(journal(), displayText);
+
+          expect(rendered).not.toContain(NOTE);
+          expect(rendered).toContain(`"${displayText.title}". 1 correlated detection alert(s).`);
+        });
+
+        it('keeps the sentences separated when the note is shown', async () => {
+          expect(await render(journal())).toContain(
+            `"${anonymizedInputs.title}". Could not read the discovery's display text, so names and values below are shown anonymized. 1 correlated detection alert(s).`
+          );
+        });
+      });
+
+      // The AlertZero queue row shows the proposal's title as its summary.
+      it('titles the proposal with the display title', async () => {
+        const title = asInputs(stepIn(reviewSteps, 'escalation_gate')).title;
+
+        expect(await render(title, displayText)).toBe(displayText.title);
+      });
+
+      it('falls back to the input title for the proposal', async () => {
+        const title = asInputs(stepIn(reviewSteps, 'escalation_gate')).title;
+
+        expect(await render(title)).toBe(anonymizedInputs.title);
+      });
+
+      it('shows the display title and summary in the proposal comment, with no tokens', async () => {
+        const rendered = await render(comment(), displayText);
+
+        expect(rendered).toContain(`## ${displayText.title}`);
+        expect(rendered).toContain(displayText.summary_markdown);
+        expect(rendered).not.toContain('{{');
+      });
+
+      // The proposal record bounds its comment at 8192 characters.
+      it('keeps the proposal comment within the proposal bound at the largest title and summary', async () => {
+        const rendered = await render(comment(), {
+          ...displayText,
+          summary_markdown: 'a'.repeat(8000),
+          title: 't'.repeat(1024),
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(8192);
       });
     });
 
@@ -1353,7 +1514,9 @@ describe('Attack Discovery worker chain', () => {
 
     it('creates exactly one proposal', () => {
       expect(
-        reviewSteps.filter((step) => step.with?.['workflow-id'] === 'system-create-proposal')
+        reviewSteps.filter(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+        )
       ).toHaveLength(1);
     });
 
@@ -1364,6 +1527,18 @@ describe('Attack Discovery worker chain', () => {
       );
 
       expect(rendered.trim()).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+    });
+
+    // This workflow's trigger allows 1024 characters, while the proposal step
+    // caps titles at 256: forwarding one unbounded fails the escalation for an
+    // otherwise valid discovery.
+    it('bounds the proposal title it forwards', async () => {
+      const rendered = await createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'escalation_gate')).title,
+        { inputs: { title: 'A'.repeat(1024) } }
+      );
+
+      expect(rendered.length).toBeLessThanOrEqual(256);
     });
 
     it('installs the action it points at', () => {
