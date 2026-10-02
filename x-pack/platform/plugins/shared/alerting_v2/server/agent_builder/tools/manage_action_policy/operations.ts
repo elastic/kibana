@@ -50,10 +50,10 @@ export const setMatcherOperationSchema = z
     operation: z.literal('set_matcher'),
     matcher: policyMatcherSchema
       .nullable()
-      .describe('Structured matcher for alert episodes, or null for a catch-all.'),
+      .describe('Structured matcher for alerts, or null for a catch-all.'),
   })
   .describe(
-    'Use `set_matcher` to limit which alert episodes this policy notifies on. An empty or null matcher matches all episodes in the space.'
+    'Use `set_matcher` to limit which alerts this policy notifies on. An empty or null matcher matches all alerts in the space.'
   );
 
 export const setGroupingOperationSchema = z
@@ -68,7 +68,7 @@ export const setGroupingOperationSchema = z
       .describe('Fields used to group alerts (required when groupingMode is per_field).'),
   })
   .describe(
-    'Use `set_grouping` to batch matched episodes into notifications — one per episode, one for all matching episodes, or grouped by field.'
+    'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_alert`), one for all matching alerts, or grouped by field.'
   );
 
 export const setThrottleOperationSchema = z

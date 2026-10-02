@@ -23,7 +23,7 @@ import {
   generateRuleOperationsDoc,
   generateRuleOperationsUsageList,
   generateRuleKindDoc,
-  generateEpisodeLifecycleDoc,
+  generateAlertLifecycleDoc,
   generateStateTransitionDoc,
   getDescribedVariants,
   generateRecoveryStrategyDoc,
@@ -574,14 +574,14 @@ describe('schema_to_skill_docs', () => {
     it('links sibling references without a ./references/ prefix', () => {
       const doc = generateNotificationsOverviewDoc();
       expect(doc).toContain('(./rule-kind.md)');
-      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).toContain('(./alert-lifecycle.md)');
       expect(doc).not.toContain('./references/');
     });
   });
 
-  describe('generateEpisodeLifecycleDoc', () => {
+  describe('generateAlertLifecycleDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
-      expect(generateEpisodeLifecycleDoc()).toMatchSnapshot();
+      expect(generateAlertLifecycleDoc()).toMatchSnapshot();
     });
   });
 
@@ -619,7 +619,7 @@ describe('schema_to_skill_docs', () => {
 
     it('links sibling references without a ./references/ prefix', () => {
       const doc = generateRecoveryStrategyDoc();
-      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).toContain('(./alert-lifecycle.md)');
       expect(doc).toContain('(./rule-kind.md)');
       expect(doc).not.toContain('./references/');
     });
@@ -880,7 +880,7 @@ describe('schema_to_skill_docs', () => {
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
       ['manage_rule operation usage list', generateRuleOperationsUsageList],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
-      ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
+      ['generateEnumTable (alert status from spec)', generateAlertLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
       ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],

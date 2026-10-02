@@ -8,11 +8,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  HUNT_DISCOVERY_PATTERN,
   MAX_NAMESPACE_PATTERNS_PER_DATASET,
   discoverHuntDatasets,
   parseDataStreamName,
 } from './discover_hunt_datasets';
+
+const UNIVERSE = ['logs-*'];
 
 const resolveIndexMock = jest.fn();
 const esClient = {
@@ -79,7 +80,7 @@ describe('discoverHuntDatasets', () => {
   it('returns one entry per dataset with vendor and index pattern', async () => {
     mockDataStreams(['logs-okta.system-default']);
 
-    await expect(discoverHuntDatasets({ esClient })).resolves.toEqual([
+    await expect(discoverHuntDatasets({ esClient, patterns: UNIVERSE })).resolves.toEqual([
       {
         index_pattern: 'logs-okta.system-*',
         dataset: 'okta.system',
@@ -92,7 +93,7 @@ describe('discoverHuntDatasets', () => {
 
   it('stops the vendor token at a dash, so a dashed namespace that leaked into the dataset cannot hide the vendor', async () => {
     mockDataStreams(['logs-okta-prod-eu', 'logs-okta-prod-us']);
-    const [okta] = await discoverHuntDatasets({ esClient });
+    const [okta] = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(okta.dataset).toBe('okta-prod');
     expect(okta.vendor).toBe('okta');
   });
@@ -104,7 +105,7 @@ describe('discoverHuntDatasets', () => {
       'logs-windows-defender-default',
       'logs-okta.system-default',
     ]);
-    const datasets = await discoverHuntDatasets({ esClient });
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     const byDataset = new Map(datasets.map((d) => [d.dataset, d]));
 
     // `logs-windows-*` would swallow `logs-windows-defender-*`, so windows searches per namespace.
@@ -120,7 +121,7 @@ describe('discoverHuntDatasets', () => {
   it('uses the whole dataset as vendor when it has no dot', async () => {
     mockDataStreams(['logs-cisco_asa-default']);
 
-    const [entry] = await discoverHuntDatasets({ esClient });
+    const [entry] = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(entry.vendor).toBe('cisco_asa');
     expect(entry.dataset).toBe('cisco_asa');
   });
@@ -132,7 +133,7 @@ describe('discoverHuntDatasets', () => {
       'logs-aws.cloudtrail-default',
     ]);
 
-    await expect(discoverHuntDatasets({ esClient })).resolves.toEqual([
+    await expect(discoverHuntDatasets({ esClient, patterns: UNIVERSE })).resolves.toEqual([
       {
         index_pattern: 'logs-aws.cloudtrail-*',
         dataset: 'aws.cloudtrail',
@@ -151,14 +152,14 @@ describe('discoverHuntDatasets', () => {
       'logs-okta.system-default',
     ]);
 
-    const result = await discoverHuntDatasets({ esClient });
+    const result = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(result.map((entry) => entry.dataset)).toEqual(['okta.system']);
   });
 
   it('skips names that are not data stream names', async () => {
     mockDataStreams(['logs-okta', 'logs-okta.system-default']);
 
-    const result = await discoverHuntDatasets({ esClient });
+    const result = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(result.map((entry) => entry.index_pattern)).toEqual(['logs-okta.system-*']);
   });
 
@@ -169,7 +170,7 @@ describe('discoverHuntDatasets', () => {
       'logs-fortinet.fortigate-default',
     ]);
 
-    const result = await discoverHuntDatasets({ esClient });
+    const result = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(result.map((entry) => entry.index_pattern)).toEqual([
       'logs-aws.cloudtrail-*',
       'logs-fortinet.fortigate-*',
@@ -177,35 +178,45 @@ describe('discoverHuntDatasets', () => {
     ]);
   });
 
-  it('resolves the default pattern against open, non-hidden targets with no result cap', async () => {
+  it('resolves the patterns against open, non-hidden targets with no result cap', async () => {
     mockDataStreams([]);
-    await discoverHuntDatasets({ esClient });
+    await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(resolveIndexMock).toHaveBeenCalledTimes(1);
     expect(resolveIndexMock).toHaveBeenCalledWith({
-      name: [HUNT_DISCOVERY_PATTERN],
+      name: ['logs-*'],
       allow_no_indices: true,
       expand_wildcards: ['open'],
     });
   });
 
-  it('passes a custom pattern through', async () => {
+  it('passes a pattern list through with its exclusions', async () => {
     mockDataStreams([]);
-    await discoverHuntDatasets({ esClient, pattern: 'logs-okta*' });
-    expect(resolveIndexMock).toHaveBeenCalledWith(
-      expect.objectContaining({ name: ['logs-okta*'] })
-    );
+    const patterns = ['logs-*', 'filebeat-*', '-*elastic-cloud-logs-*'];
+    await discoverHuntDatasets({ esClient, patterns });
+    expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: patterns }));
+  });
+
+  it('makes no call when handed the resolve response for the same patterns', async () => {
+    const resolved = {
+      data_streams: [{ name: 'logs-okta.system-default' }, { name: '.logs-hidden.system-default' }],
+    };
+
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE, resolved });
+
+    expect(resolveIndexMock).not.toHaveBeenCalled();
+    expect(datasets.map((d) => d.dataset)).toEqual(['okta.system']);
   });
 
   it('drops hidden, dot-prefixed data streams', async () => {
     mockDataStreams(['.logs-hidden.system-default', 'logs-okta.system-default']);
-    const datasets = await discoverHuntDatasets({ esClient });
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(datasets.map((d) => d.dataset)).toEqual(['okta.system']);
   });
 
   it('returns an empty list when nothing matches', async () => {
     mockDataStreams([]);
 
-    await expect(discoverHuntDatasets({ esClient })).resolves.toEqual([]);
+    await expect(discoverHuntDatasets({ esClient, patterns: UNIVERSE })).resolves.toEqual([]);
   });
 
   it('falls back to the plain pattern when a dataset has too many namespaces to isolate stream by stream', async () => {
@@ -219,7 +230,7 @@ describe('discoverHuntDatasets', () => {
       'logs-windows-defender-default',
     ]);
 
-    const datasets = await discoverHuntDatasets({ esClient, logger });
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE, logger });
     const windows = datasets.find((d) => d.dataset === 'windows');
 
     // The scope's targets travel in the request path; hundreds of per-namespace patterns
@@ -234,7 +245,7 @@ describe('discoverHuntDatasets', () => {
     const logger = loggerMock.create();
     mockDataStreams(['logs-windows-default', 'logs-windows-default-prod']);
 
-    const datasets = await discoverHuntDatasets({ esClient, logger });
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE, logger });
     const windows = datasets.find((d) => d.dataset === 'windows');
 
     // Best available pattern is kept; the overlap is surfaced rather than hidden.
@@ -251,7 +262,9 @@ describe('discoverHuntDatasets', () => {
     const error = new Error('cluster unavailable');
     resolveIndexMock.mockRejectedValue(error);
 
-    await expect(discoverHuntDatasets({ esClient, logger })).rejects.toBe(error);
+    await expect(discoverHuntDatasets({ esClient, patterns: UNIVERSE, logger })).rejects.toBe(
+      error
+    );
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
   });
@@ -260,6 +273,6 @@ describe('discoverHuntDatasets', () => {
     const error = new Error('boom');
     resolveIndexMock.mockRejectedValue(error);
 
-    await expect(discoverHuntDatasets({ esClient })).rejects.toBe(error);
+    await expect(discoverHuntDatasets({ esClient, patterns: UNIVERSE })).rejects.toBe(error);
   });
 });
