@@ -173,15 +173,10 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
   }),
 };
 
-export interface EsqlFailureTooltip {
-  title: string;
-  message: string;
-}
-
 /** Builds tooltip content for a conversion failure */
 export const getFailureTooltip = (
   reason: EsqlConversionFailureReason | undefined
-): EsqlFailureTooltip => ({
+): { title: string; message: string } => ({
   title: esqlConversionFailureTitle,
   message:
     esqlConversionFailureReasonMessages[reason ?? 'unknown'] ??

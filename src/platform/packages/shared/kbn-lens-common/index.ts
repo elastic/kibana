@@ -468,10 +468,7 @@ export {
 } from './esql/operations';
 export { parseTimeShiftWrapper, resolveTimeShift } from './esql/time_shift';
 export { convertToAbsoluteDateRange } from './esql/date_range';
-export type {
-  EsqlConversionFailureReason,
-  EsqlFailureTooltip,
-} from './esql/to_esql_failure_reasons';
+export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
 export {
   esqlConversionFailureReasonMessages,
   esqlConversionFailureTitle,
