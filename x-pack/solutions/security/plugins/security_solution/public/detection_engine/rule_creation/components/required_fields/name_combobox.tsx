@@ -17,7 +17,7 @@ interface NameComboBoxProps {
   field: FieldHook<RequiredFieldInput>;
   itemId: string;
   autoFocus?: boolean;
-  availableFieldNames: string[];
+  getAvailableFieldNames: () => string[];
   typesByFieldName: Record<string, string[] | undefined>;
   nameWarning: string;
   nameError: { message: string } | undefined;
@@ -27,7 +27,7 @@ export function NameComboBox({
   field,
   itemId,
   autoFocus,
-  availableFieldNames,
+  getAvailableFieldNames,
   typesByFieldName,
   nameWarning,
   nameError,
@@ -37,21 +37,28 @@ export function NameComboBox({
 
   /*
     Building options for all available field names is expensive with long required fields lists
-    since every row has its own combobox. Options are built only once the user interacts with the combobox.
+    since every row has its own combobox. Available field names are read only when the user
+    focuses the combobox, so changes in other rows don't re-render this one.
   */
-  const [shouldBuildAllOptions, setShouldBuildAllOptions] = useState(Boolean(autoFocus));
-  const handleFocus = useCallback(() => setShouldBuildAllOptions(true), []);
+  const [availableFieldNames, setAvailableFieldNames] = useState<string[]>(() =>
+    autoFocus ? getAvailableFieldNames() : []
+  );
+  const handleFocus = useCallback(
+    () => setAvailableFieldNames(getAvailableFieldNames()),
+    [getAvailableFieldNames]
+  );
 
   const selectableNameOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       /* Not adding an empty string to the list of selectable field names */
       (value.name ? [value.name] : [])
-        .concat(shouldBuildAllOptions ? availableFieldNames : [])
+        /* Available field names might be read before this row's name changed */
+        .concat(availableFieldNames.filter((name) => name !== value.name))
         .map((name) => ({
           label: name,
           value: name,
         })),
-    [availableFieldNames, value.name, shouldBuildAllOptions]
+    [availableFieldNames, value.name]
   );
 
   /*

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewFieldBase } from '@kbn/es-query';
@@ -16,6 +16,7 @@ import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { RequiredFieldRow } from './required_fields_row';
+import type { RequiredFieldWarnings } from './required_fields_row';
 import { getFlattenedArrayFieldNames } from '../utils';
 import * as i18n from './translations';
 
@@ -115,17 +116,6 @@ const RequiredFieldsList = ({
     [typesByFieldName]
   );
 
-  const isSubfieldOfFlattenedField = (fieldName: string): boolean => {
-    const parts = fieldName.split('.');
-    for (let i = parts.length - 1; i > 0; i--) {
-      const parentPath = parts.slice(0, i).join('.');
-      if (esFlattenedFieldNames.has(parentPath)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   const allFieldNamesSet = useMemo(() => new Set(allFieldNames), [allFieldNames]);
 
   const selectedFieldNamesKey = fieldValue.map(({ name }) => name).join('\u0000');
@@ -136,36 +126,36 @@ const RequiredFieldsList = ({
     return allFieldNames.filter((name) => !selectedFieldNames.has(name));
   }, [allFieldNames, selectedFieldNamesKey]);
 
-  const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
-    if (
-      !isIndexPatternLoading &&
-      /* Creating a warning only if "name" value is filled in */
-      name !== '' &&
-      !allFieldNamesSet.has(name) &&
-      !isSubfieldOfFlattenedField(name)
-    ) {
-      warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
-    }
-    return warnings;
-  }, {});
+  /*
+    Rows read available field names via a stable getter so editing one row's name
+    doesn't re-render every other row. Name comboboxes read it when focused.
+  */
+  const availableFieldNamesRef = useRef(availableFieldNames);
+  availableFieldNamesRef.current = availableFieldNames;
+  const getAvailableFieldNames = useCallback(() => availableFieldNamesRef.current, []);
 
-  const typeWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name, type }) => {
-    if (
-      !isIndexPatternLoading &&
-      /* Creating a warning for "type" only if "name" value is filled in */
-      name !== '' &&
-      typesByFieldName[name] &&
-      !typesByFieldName[name].includes(type)
-    ) {
-      warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
-    }
-    return warnings;
-  }, {});
+  /* Stable across row value changes, so rows can compute their own warnings without re-rendering each other */
+  const getWarnings = useCallback(
+    ({ name, type }: RequiredFieldInput): RequiredFieldWarnings => {
+      /* Creating warnings only if "name" value is filled in */
+      if (isIndexPatternLoading || name === '') {
+        return NO_WARNINGS;
+      }
 
-  const getWarnings = ({ name, type }: { name: string; type: string }) => ({
-    nameWarning: nameWarnings[name] || '',
-    typeWarning: typeWarnings[`${name}-${type}`] || '',
-  });
+      const typesForName = typesByFieldName[name];
+      const isNameFound =
+        allFieldNamesSet.has(name) || isSubfieldOfFlattenedField(name, esFlattenedFieldNames);
+
+      return {
+        nameWarning: isNameFound ? '' : i18n.FIELD_NAME_NOT_FOUND_WARNING(name),
+        typeWarning:
+          typesForName && !typesForName.includes(type)
+            ? i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type)
+            : '',
+      };
+    },
+    [isIndexPatternLoading, typesByFieldName, allFieldNamesSet, esFlattenedFieldNames]
+  );
 
   const hasEmptyFieldName = fieldValue.some(({ name }) => name === '');
 
@@ -180,7 +170,11 @@ const RequiredFieldsList = ({
     ? 0
     : items.filter((item, index) => isRowFolded({ item, index, isExpanded })).length;
 
-  const hasWarnings = Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
+  const hasWarnings = fieldValue.some((value) => {
+    const { nameWarning, typeWarning } = getWarnings(value);
+
+    return nameWarning !== '' || typeWarning !== '';
+  });
 
   return (
     <>
@@ -231,7 +225,7 @@ const RequiredFieldsList = ({
               removeItem={removeItem}
               getWarnings={getWarnings}
               typesByFieldName={typesByFieldName}
-              availableFieldNames={availableFieldNames}
+              getAvailableFieldNames={getAvailableFieldNames}
               parentFieldPath={path}
             />
           ))}
@@ -279,3 +273,22 @@ const isRowFolded = ({
   index: number;
   isExpanded: boolean;
 }): boolean => !isExpanded && index >= MAX_UNFOLDED_ROWS && !item.isNew;
+
+const NO_WARNINGS: RequiredFieldWarnings = { nameWarning: '', typeWarning: '' };
+
+const isSubfieldOfFlattenedField = (
+  fieldName: string,
+  esFlattenedFieldNames: Set<string>
+): boolean => {
+  const parts = fieldName.split('.');
+
+  for (let i = parts.length - 1; i > 0; i--) {
+    const parentPath = parts.slice(0, i).join('.');
+
+    if (esFlattenedFieldNames.has(parentPath)) {
+      return true;
+    }
+  }
+
+  return false;
+};

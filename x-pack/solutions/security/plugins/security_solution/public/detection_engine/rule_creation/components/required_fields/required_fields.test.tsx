@@ -187,6 +187,34 @@ describe('RequiredFields form part', () => {
     expect(firstRowNameOptions).toEqual(['field1', 'field3']);
   });
 
+  it('user can select a field name freed up in another row', async () => {
+    const initialState = [
+      { name: 'field1', type: 'string' },
+      { name: 'field2', type: 'keyword' },
+    ];
+
+    const indexPatternFields: DataViewFieldBase[] = [
+      createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
+      createIndexPatternField({ name: 'field2', esTypes: ['keyword'] }),
+      createIndexPatternField({ name: 'field3', esTypes: ['date'] }),
+    ];
+
+    render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
+
+    const secondRowNameOptions = await getDropdownOptions(getSelectToggleButtonForName('field2'));
+    expect(secondRowNameOptions).toEqual(['field2', 'field3']);
+
+    await selectEuiComboBoxOption({
+      comboBoxToggleButton: getSelectToggleButtonForName('field1'),
+      optionText: 'field3',
+    });
+
+    const updatedSecondRowNameOptions = await getDropdownOptions(
+      getSelectToggleButtonForName('field2')
+    );
+    expect(updatedSecondRowNameOptions).toEqual(['field2', 'field1']);
+  });
+
   it('adding a new required field is disabled when index patterns are loading', async () => {
     render(<TestForm indexPatternFields={undefined} isIndexPatternLoading={true} />);
 

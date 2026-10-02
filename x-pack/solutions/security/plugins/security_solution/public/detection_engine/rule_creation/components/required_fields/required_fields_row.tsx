@@ -26,30 +26,36 @@ import type {
   RequiredFieldInput,
 } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 
+export interface RequiredFieldWarnings {
+  nameWarning: string;
+  typeWarning: string;
+}
+
 interface RequiredFieldRowProps {
   item: ArrayItem;
   isFolded: boolean;
   onFoldedRowError: () => void;
   removeItem: (id: number) => void;
   typesByFieldName: Record<string, string[] | undefined>;
-  availableFieldNames: string[];
-  getWarnings: ({ name, type }: { name: string; type: string }) => {
-    nameWarning: string;
-    typeWarning: string;
-  };
+  getAvailableFieldNames: () => string[];
+  getWarnings: (value: RequiredFieldInput) => RequiredFieldWarnings;
   parentFieldPath: string;
 }
 
-export const RequiredFieldRow = ({
+/*
+  Rows and their fields are memoized and receive only referentially stable props,
+  so a change in one row or in the form state doesn't re-render all the other rows.
+*/
+export const RequiredFieldRow = React.memo(function RequiredFieldRow({
   item,
   isFolded,
   onFoldedRowError,
   removeItem,
   typesByFieldName,
-  availableFieldNames,
+  getAvailableFieldNames,
   getWarnings,
   parentFieldPath,
-}: RequiredFieldRowProps) => {
+}: RequiredFieldRowProps) {
   const handleRemove = useCallback(() => removeItem(item.id), [removeItem, item.id]);
 
   const rowFieldConfig: FieldConfig<RequiredField | RequiredFieldInput, {}, RequiredFieldInput> =
@@ -61,6 +67,27 @@ export const RequiredFieldRow = ({
       [parentFieldPath]
     );
 
+  const componentProps = useMemo(
+    () => ({
+      onError: onFoldedRowError,
+      itemId: item.id,
+      autoFocus: item.isNew,
+      onRemove: handleRemove,
+      typesByFieldName,
+      getWarnings,
+      getAvailableFieldNames,
+    }),
+    [
+      onFoldedRowError,
+      item.id,
+      item.isNew,
+      handleRemove,
+      typesByFieldName,
+      getWarnings,
+      getAvailableFieldNames,
+    ]
+  );
+
   return (
     <UseField
       key={item.id}
@@ -68,41 +95,30 @@ export const RequiredFieldRow = ({
       config={rowFieldConfig}
       component={isFolded ? FoldedRequiredFieldField : RequiredFieldField}
       readDefaultValueOnForm={!item.isNew}
-      componentProps={{
-        onError: onFoldedRowError,
-        itemId: item.id,
-        autoFocus: item.isNew,
-        onRemove: handleRemove,
-        typesByFieldName,
-        getWarnings,
-      }}
-      availableFieldNames={availableFieldNames}
+      componentProps={componentProps}
     />
   );
-};
+});
 
 interface RequiredFieldFieldProps {
   field: FieldHook<RequiredFieldInput>;
   onRemove: () => void;
   autoFocus?: boolean;
   typesByFieldName: Record<string, string[] | undefined>;
-  availableFieldNames: string[];
-  getWarnings: ({ name, type }: { name: string; type: string }) => {
-    nameWarning: string;
-    typeWarning: string;
-  };
+  getAvailableFieldNames: () => string[];
+  getWarnings: (value: RequiredFieldInput) => RequiredFieldWarnings;
   itemId: string;
 }
 
-const RequiredFieldField = ({
+const RequiredFieldField = React.memo(function RequiredFieldField({
   field,
   typesByFieldName,
   onRemove,
   autoFocus,
-  availableFieldNames,
+  getAvailableFieldNames,
   getWarnings,
   itemId,
-}: RequiredFieldFieldProps) => {
+}: RequiredFieldFieldProps) {
   const { nameWarning, typeWarning } = getWarnings(field.value);
   const warningMessage = nameWarning || typeWarning;
 
@@ -141,7 +157,7 @@ const RequiredFieldField = ({
             field={field}
             itemId={itemId}
             autoFocus={autoFocus}
-            availableFieldNames={availableFieldNames}
+            getAvailableFieldNames={getAvailableFieldNames}
             typesByFieldName={typesByFieldName}
             nameWarning={nameWarning}
             nameError={nameError}
@@ -173,7 +189,7 @@ const RequiredFieldField = ({
       </EuiFlexGroup>
     </EuiFormRow>
   );
-};
+});
 
 interface FoldedRequiredFieldFieldProps {
   field: FieldHook<RequiredFieldInput>;
