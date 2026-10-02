@@ -346,6 +346,7 @@ function StreamFlyoutContent({
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
         icon={isProcessingEnabled ? 'minus' : 'plus'}
+        disabled={loading}
         onClick={() => {
           const showing = !isProcessingEnabled;
           if (showing) {
@@ -377,6 +378,7 @@ function StreamFlyoutContent({
         key="delete-stream"
         icon="trash"
         color="danger"
+        disabled={loading}
         onClick={() => {
           setShowDeleteModal(true);
           setHeaderMenuOpen(false);
