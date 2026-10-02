@@ -188,7 +188,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * Required Slack App scopes:
  * - channels:read, groups:read, im:read, mpim:read - list public channels, private channels, DMs, and group DMs
  * - channels:history, groups:history, im:history, mpim:history - read message history from each conversation type
- * - chat:write - send messages
+ * - chat:write - send messages and edit the messages it sent
  * - groups:write - create private channels and invite users
  * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
  * - files:read - look up file metadata (getFileInfo, listFiles) and file references on messages
@@ -203,7 +203,7 @@ export const Slack: ConnectorSpec = {
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
-        'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send messages in Slack',
+        'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send and edit messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -1170,7 +1170,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Edit a message this app posted earlier, replacing its text. Identify it by channel and the ts that sendMessage returned (messageTs). With a bot token the channel must be a conversation ID, not a name. This overwrites the existing message, so confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
+        'Edit a message this app posted earlier, replacing its text (at most 4,000 characters). Identify it by channel and the ts that sendMessage returned (messageTs). The channel must be a conversation ID, not a name, except on the Elastic Slack app. This overwrites the existing message, and Slack removes any blocks it had, so a Block Kit or richly formatted message comes back as plain text. Confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
       input: SlackUpdateMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackUpdateMessageInput = SlackUpdateMessageInputSchema.parse(input);
@@ -1259,7 +1259,7 @@ export const Slack: ConnectorSpec = {
     'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
-    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text, so confirm with the user first.',
+    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text (at most 4,000 characters) and removes any blocks, so confirm with the user first.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
     'To read messages from a channel or DM, use getConversationHistory with a channel ID. Returns messages newest-first; pass nextCursor from the previous response (or use oldest/latest timestamps) to walk further back in time.',
     'getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation’s details.',
