@@ -170,7 +170,6 @@ export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
 
-
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 
