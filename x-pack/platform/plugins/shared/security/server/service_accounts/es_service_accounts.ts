@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import { i18n } from '@kbn/i18n';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -456,11 +457,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         });
 
         if (undeletedTokens.length > 0) {
+          // Translated here because callers show it as is. Kibana's locale is set for the whole
+          // deployment, so this matches the language of the UI that shows it.
           warnings.push(
-            `Service account [${id}] was deleted, but its tokens [${undeletedTokens.join(
-              ', '
-            )}] could not be. They can no longer authenticate, but an account named [${name}] ` +
-              'cannot be created again until they are deleted.'
+            i18n.translate('xpack.security.serviceAccounts.delete.undeletedTokensWarning', {
+              defaultMessage:
+                'Service account [{id}] was deleted, but its tokens [{tokenNames}] could not be. They can no longer authenticate, but an account named [{name}] cannot be created again until they are deleted.',
+              values: { id, name, tokenNames: undeletedTokens.join(', ') },
+            })
           );
         }
       } catch (e) {
