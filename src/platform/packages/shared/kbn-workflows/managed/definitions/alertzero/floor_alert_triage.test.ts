@@ -8,9 +8,17 @@
  */
 
 import { parse } from 'yaml';
-import ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML from './actions/action_close_alerts_false_positive.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
+import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
+import type { WorkflowYaml } from '../../../spec/schema';
+import {
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+} from '../../../spec/schema';
+import { ExecutionStatus } from '../../../types/latest';
+import ALERT_ANALYSIS_WORKFLOW_YAML from '../alert_analysis/alert_analysis_workflow.yaml';
 
 interface YamlStep {
   name: string;
@@ -25,7 +33,6 @@ interface YamlStep {
 }
 
 const parsed = parse(FLOOR_ALERT_TRIAGE_YAML) as {
-  settings: { timeout: string };
   steps: YamlStep[];
 };
 
@@ -105,252 +112,6 @@ describe('floor_alert_triage — compute_fp_candidates', () => {
     const ids = computeFpCandidateIds(mixedVerdictBatch, 0) as string[];
     expect(ids).not.toContain('true-positive');
     expect(ids).not.toContain('inconclusive');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Dismiss mapping: map_dismiss_reason_to_tag
-// ---------------------------------------------------------------------------
-
-const mapDismissReasonToTag = stepByName('map_dismiss_reason_to_tag');
-const dismissedTagTemplate = mapDismissReasonToTag?.with?.dismissed_tag as string;
-
-const evaluateDismissedTag = (dismissReason: string | undefined): string => {
-  const context = {
-    steps: {
-      get_proposal: {
-        output: { dismissReason },
-      },
-    },
-  };
-  return renderString(dismissedTagTemplate, context).trim();
-};
-
-describe('floor_alert_triage — dismiss mapping', () => {
-  it('maps dismissReason "wrong" to az:true_positive', () => {
-    expect(evaluateDismissedTag('wrong')).toBe('az:true_positive');
-  });
-
-  it.each([
-    'duplicate',
-    'insufficient_evidence',
-    'low_value',
-    'out_of_scope',
-    'already_handled',
-    'other',
-  ])('maps dismissReason "%s" to az:inconclusive', (reason) => {
-    expect(evaluateDismissedTag(reason)).toBe('az:inconclusive');
-  });
-
-  it('maps a missing dismissReason (undefined) to az:inconclusive', () => {
-    expect(evaluateDismissedTag(undefined)).toBe('az:inconclusive');
-  });
-
-  it('remove_fp_tag and add_dismissed_tag never share a tag', () => {
-    const removeFp = stepByName('remove_fp_tag')?.with?.tags as {
-      tags_to_remove?: string[];
-      tags_to_add?: string[];
-    };
-    const addDismissed = stepByName('add_dismissed_tag')?.with?.tags as {
-      tags_to_remove?: string[];
-      tags_to_add?: string[];
-    };
-
-    expect(removeFp?.tags_to_add).toEqual([]);
-    expect(addDismissed?.tags_to_remove).toEqual([]);
-    const removed = new Set(removeFp?.tags_to_remove ?? []);
-    const added = new Set(addDismissed?.tags_to_add ?? []);
-    // No static overlap (dynamic dismissed_tag is a variable, not a literal here)
-    for (const tag of added) {
-      expect(removed.has(tag)).toBe(false);
-    }
-  });
-});
-
-describe('floor_alert_triage — guard_get_proposal_readable', () => {
-  it('retries get_proposal before continue: true takes over', () => {
-    const getProposal = stepByName('get_proposal');
-    expect(getProposal?.type).toBe('proposals.getProposal');
-    expect(getProposal?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(getProposal?.['on-failure']?.continue).toBe(true);
-  });
-
-  it('gates the retag/close on the read having succeeded, with a preserve-and-warn else', () => {
-    const guard = stepByName('guard_get_proposal_readable');
-    expect(guard?.condition).toBe('${{ steps.get_proposal.error == blank }}');
-    expect(guard?.condition).not.toContain('|');
-
-    expect(guard?.steps?.some((s) => s.name === 'map_dismiss_reason_to_tag')).toBe(true);
-    expect(guard?.steps?.some((s) => s.name === 'retag_dismissed_alerts')).toBe(true);
-    expect(guard?.steps?.some((s) => s.name === 'close_investigation_after_dismissal')).toBe(true);
-    expect(guard?.else?.some((s) => s.name === 'post_comment_dismissed_read_failed')).toBe(true);
-  });
-
-  it('evaluates the guard true on success and false after a failed read', () => {
-    expect(
-      evalExpr('${{ steps.get_proposal.error == blank }}', { steps: { get_proposal: {} } })
-    ).toBe(true);
-    expect(
-      evalExpr('${{ steps.get_proposal.error == blank }}', {
-        steps: { get_proposal: { error: { message: 'timeout' } } },
-      })
-    ).toBe(false);
-  });
-
-  it('reports the read failure without claiming any alert was re-tagged', () => {
-    const comment = stepByName('post_comment_dismissed_read_failed');
-    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
-    const rendered = renderString(template, {
-      steps: { get_proposal: { error: { message: 'timeout after 3 attempts' } } },
-      variables: { fp_candidate_count: 4 },
-    });
-
-    expect(rendered).toContain('could not be read after');
-    expect(rendered).toContain('timeout after 3 attempts');
-    expect(rendered).toContain('4 alerts remain tagged az:false_positive and untouched');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// post_comment_outcome_dismissed — rationale truncation and escaping
-// ---------------------------------------------------------------------------
-
-const dismissedComment = stepByName('post_comment_outcome_dismissed');
-const dismissedInputTemplate = (dismissedComment?.with as Record<string, unknown>)
-  ?.message as string;
-
-const renderDismissedComment = ({
-  dismissReason = 'wrong',
-  rationale,
-  decidedBy,
-  dismissedTag = 'az:true_positive',
-  fpCandidateCount = 2,
-  failedRetagCount = 0,
-}: {
-  dismissReason?: string;
-  rationale?: string;
-  decidedBy?: { username: string };
-  dismissedTag?: string;
-  fpCandidateCount?: number;
-  failedRetagCount?: number;
-}): string => {
-  return renderString(dismissedInputTemplate, {
-    steps: {
-      get_proposal: {
-        output: { decision: 'dismissed', dismissReason, rationale, decidedBy },
-      },
-    },
-    variables: {
-      dismissed_tag: dismissedTag,
-      fp_candidate_count: fpCandidateCount,
-      failed_retag_count: failedRetagCount,
-    },
-  });
-};
-
-describe('floor_alert_triage — post_comment_outcome_dismissed', () => {
-  it('includes the dismiss reason', () => {
-    const comment = renderDismissedComment({ dismissReason: 'wrong' });
-    expect(comment).toContain('wrong');
-  });
-
-  it('truncates a long rationale to 500 characters', () => {
-    const longRationale = 'x'.repeat(5000);
-    const comment = renderDismissedComment({ rationale: longRationale });
-    // Liquid truncate: 500 appends "..." making total ≤ 500
-    const rationaleSection = comment.match(/Rationale: "(.+?)"\./)?.[1];
-    expect(rationaleSection).toBeDefined();
-    expect((rationaleSection ?? '').length).toBeLessThanOrEqual(500);
-  });
-
-  it('escapes HTML in the rationale', () => {
-    const comment = renderDismissedComment({ rationale: '<script>alert(1)</script>' });
-    expect(comment).not.toContain('<script>');
-    expect(comment).toContain('&lt;script&gt;');
-  });
-
-  it('omits the rationale section when rationale is blank', () => {
-    const comment = renderDismissedComment({ rationale: '' });
-    expect(comment).not.toContain('Rationale');
-  });
-
-  it('names the decider when decidedBy is present', () => {
-    const comment = renderDismissedComment({ decidedBy: { username: 'analyst1' } });
-    expect(comment).toContain('@analyst1');
-  });
-
-  it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
-    const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 0 });
-    expect(comment).toContain('3 alerts re-tagged');
-    expect(comment).not.toContain('failed after retries');
-  });
-
-  it('reports the shortfall instead of claiming full success when a retag failed', () => {
-    const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 1 });
-    expect(comment).toContain('2 of 3 alerts re-tagged');
-    expect(comment).toContain('1 failed after retries and needs manual re-tagging');
-  });
-
-  it('says "alert" rather than "alerts" for a single FP candidate', () => {
-    const comment = renderDismissedComment({ fpCandidateCount: 1, failedRetagCount: 0 });
-    expect(comment).toContain('1 alert re-tagged');
-    expect(comment).not.toContain('alerts');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// retag_dismissed_alerts — per-alert tag-update failures are counted, not
-// silently swallowed by `continue: true` on the tag steps
-// ---------------------------------------------------------------------------
-
-describe('floor_alert_triage — retag_dismissed_alerts failure tracking', () => {
-  it('initializes the failure counter alongside the dismissed_tag mapping', () => {
-    const mapStep = stepByName('map_dismiss_reason_to_tag');
-    expect(mapStep?.with?.failed_retag_count).toBe(0);
-  });
-
-  it('retries remove_fp_tag and add_dismissed_tag, then continues past a persistent failure', () => {
-    const removeFpTag = stepByName('remove_fp_tag');
-    const addDismissedTag = stepByName('add_dismissed_tag');
-
-    expect(removeFpTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(removeFpTag?.['on-failure']?.continue).toBe(true);
-    expect(addDismissedTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(addDismissedTag?.['on-failure']?.continue).toBe(true);
-  });
-
-  // `continue: true` on a foreach exits the whole loop at the first inner failure, so the
-  // remaining candidates would never be re-tagged and record_retag_failure would never run.
-  it('does not put continue on the loop itself, which would abandon the remaining candidates', () => {
-    const loop = stepByName('retag_dismissed_alerts');
-
-    expect(loop?.['on-failure']).toBeUndefined();
-  });
-
-  it('increments the counter when either tag call recorded an error', () => {
-    const recordFailure = stepByName('record_retag_failure');
-    expect(recordFailure?.type).toBe('data.set');
-    expect(recordFailure?.if).toBe(
-      '${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}'
-    );
-
-    const noError = { steps: { remove_fp_tag: {}, add_dismissed_tag: {} } };
-    const removeFailed = {
-      steps: { remove_fp_tag: { error: { message: 'x' } }, add_dismissed_tag: {} },
-    };
-    const addFailed = {
-      steps: { remove_fp_tag: {}, add_dismissed_tag: { error: { message: 'x' } } },
-    };
-
-    expect(evalExpr(recordFailure!.if!, noError)).toBe(false);
-    expect(evalExpr(recordFailure!.if!, removeFailed)).toBe(true);
-    expect(evalExpr(recordFailure!.if!, addFailed)).toBe(true);
-
-    expect(
-      evalExpr(recordFailure!.with!.failed_retag_count as string, {
-        variables: { failed_retag_count: 1 },
-      })
-    ).toBe(2);
   });
 });
 
@@ -707,186 +468,173 @@ describe('floor_alert_triage — if-conditions', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ai.conversation.metadata.patch — required experimental-features gating
-//
-// The step handler errors when `agentBuilder:experimentalFeatures` is off
-// (see agent_builder/server/workflows/steps/update_conversation_metadata.ts).
-// Every "close the Investigation" step must survive that: `fallback` alone still
-// re-throws the original error afterwards (on_failure/README.md — "workflow still
-// fails after fallback execution"), so `continue: true` is required alongside it,
-// or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
+// az: tags — written in bulk and in chunks, never one call per alert
 // ---------------------------------------------------------------------------
-describe('floor_alert_triage — ai.conversation.metadata.patch failure handling', () => {
-  const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+const AZ_TAG_WRITES = [
+  {
+    step: 'set_az_true_positive_tags',
+    idsVariable: 'az_true_positive_ids',
+    tagToAdd: 'az:true_positive',
+  },
+  {
+    step: 'set_az_false_positive_tags',
+    idsVariable: 'az_false_positive_ids',
+    tagToAdd: 'az:false_positive',
+  },
+  {
+    step: 'set_az_inconclusive_tags',
+    idsVariable: 'az_inconclusive_ids',
+    tagToAdd: 'az:inconclusive',
+  },
+] as const;
 
-  it('finds every conversation-close step this workflow defines', () => {
-    expect(patchSteps.map((step) => step.name).sort()).toEqual([
-      'close_investigation_after_approval',
-      'close_investigation_after_dismissal',
-      'close_investigation_after_expiry',
-      'close_no_fp',
-    ]);
-  });
+const AZ_TAG_STEPS = AZ_TAG_WRITES.map(({ step }) => step);
 
-  it.each([
-    'close_no_fp',
-    'close_investigation_after_approval',
-    'close_investigation_after_dismissal',
-    'close_investigation_after_expiry',
-  ])(
-    '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
-    (name) => {
-      const step = stepByName(name);
-      expect(step?.['on-failure']?.continue).toBe(true);
-      expect(step?.['on-failure']?.fallback?.length).toBeGreaterThan(0);
-    }
-  );
-});
+describe('floor_alert_triage — az: tags', () => {
+  const idsStep = stepByName('compute_az_tag_ids');
 
-// ---------------------------------------------------------------------------
-// Proposal gate outcomes
-//
-// `system-create-alertzero-proposal` completes normally on every outcome, including an unanswered
-// deadline, so a timeout never reaches `create_fp_proposal`'s on-failure fallback. Each
-// outcome therefore needs its own branch, and an expiry must not be read as a dismissal.
-// ---------------------------------------------------------------------------
-describe('floor_alert_triage — proposal outcomes', () => {
-  const outcomeTemplate = stepByName('resolve_proposal_outcome')?.with?.proposal_outcome as string;
-  const resolveOutcome = (output: { status?: string; decision?: string }): string =>
-    renderString(outcomeTemplate, { steps: { create_fp_proposal: { output } } }).trim();
+  const verdicts = [
+    { alert_id: 'tp-1', classification: 'true_positive' },
+    { alert_id: 'fp-1', classification: 'false_positive' },
+    { alert_id: 'fp-2', classification: 'false_positive' },
+    { alert_id: 'inc-1', classification: 'inconclusive' },
+  ];
 
-  it.each([
-    [{ status: 'succeeded', decision: 'approved' }, 'approved'],
-    [{ status: 'no_action', decision: 'dismissed' }, 'dismissed'],
-    [{ status: 'expired', decision: '' }, 'expired'],
-    [{ status: 'pending', decision: '' }, 'unknown'],
-    [{}, 'unknown'],
-  ])('resolves %j to "%s"', (output, expected) => {
-    expect(resolveOutcome(output)).toBe(expected);
-  });
-
-  it.each([
-    ['handle_approved', 'approved'],
-    ['handle_dismissed', 'dismissed'],
-    ['handle_expired', 'expired'],
-    ['handle_unknown_outcome', 'unknown'],
-  ])('"%s" runs only for the "%s" outcome', (branchName, outcome) => {
-    expect(stepByName(branchName)?.condition).toBe(
-      `\${{ variables.proposal_outcome == '${outcome}' }}`
+  const computeIds = (batch: typeof verdicts): Record<string, unknown> => {
+    const context = { steps: { classify_alerts: { output: { verdicts: batch } } } };
+    return Object.fromEntries(
+      Object.entries(idsStep?.with ?? {}).map(([key, expr]) => [
+        key,
+        evalExpr(expr as string, context),
+      ])
     );
+  };
+
+  const loopOf = (name: string) => stepByName(name) as YamlStep;
+  const callOf = (name: string) => loopOf(name).steps?.[0];
+
+  const makeIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `alert-${i + 1}`);
+
+  const renderChunks = (name: string, idsVariable: string, ids: string[]): string[][] =>
+    JSON.parse(
+      renderString((loopOf(name).foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+        variables: { [idsVariable]: ids },
+      })
+    );
+
+  const chunkSizeOf = (name: string): number =>
+    Number(/chunk: (\d+)/.exec(loopOf(name).foreach ?? '')?.[1]);
+
+  it('walks each id list in chunks, with one SetAlertTags call per chunk', () => {
+    AZ_TAG_WRITES.forEach(({ step }) => {
+      expect(loopOf(step).type).toBe('foreach');
+      expect(loopOf(step).foreach).toContain('| chunk:');
+      expect(loopOf(step).steps).toHaveLength(1);
+      expect(callOf(step)?.type).toBe('kibana.SetAlertTags');
+      expect(callOf(step)?.name).toBe(`${step}_call`);
+      expect(callOf(step)?.with?.ids).toBe('${{ foreach.item }}');
+    });
   });
 
-  const branchStepNames = (branchName: string) =>
-    flatten(stepByName(branchName)?.steps ?? []).map((step) => step.name);
-
-  it('closes the Investigation after an approval, a dismissal, and an expiry', () => {
-    expect(branchStepNames('handle_approved')).toContain('close_investigation_after_approval');
-    expect(branchStepNames('handle_dismissed')).toContain('close_investigation_after_dismissal');
-    expect(branchStepNames('handle_expired')).toContain('close_investigation_after_expiry');
+  it('partitions the alert ids by classification, every id landing in exactly one class', () => {
+    expect(computeIds(verdicts)).toEqual({
+      az_true_positive_ids: ['tp-1'],
+      az_false_positive_ids: ['fp-1', 'fp-2'],
+      az_inconclusive_ids: ['inc-1'],
+    });
   });
 
-  it('re-tags alerts only on a dismissal, never on an expiry', () => {
-    expect(branchStepNames('handle_dismissed')).toContain('retag_dismissed_alerts');
-    expect(branchStepNames('handle_expired')).not.toContain('retag_dismissed_alerts');
-    expect(
-      flatten(stepByName('handle_expired')?.steps ?? []).some(
-        (step) => step.type === 'kibana.SetAlertTags'
-      )
-    ).toBe(false);
+  it('chunks each list at the size the closure review re-tags with', () => {
+    const reviewChunkSize = Number(/chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]);
+    expect(reviewChunkSize).toBeGreaterThan(0);
+    AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));
   });
 
-  it.each([
-    [1, 'is tagged az:false_positive', 'it is still open'],
-    [3, 'are tagged az:false_positive', 'they are still open'],
-  ])(
-    'post_comment_outcome_expired does not claim %i candidate alert(s) are still open',
-    (count, tagged, stillOpen) => {
-      // A closure attempt that partially succeeded before the proposal expired can leave some
-      // candidates already closed, so the comment must not assert they all remain open.
-      const comment = stepByName('post_comment_outcome_expired');
-      const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
-      const rendered = renderString(template, { variables: { fp_candidate_count: count } });
-
-      expect(rendered).toContain(tagged);
-      expect(rendered).toContain('may already be closed');
-      expect(rendered).toContain(`rather than assuming ${stillOpen}`);
-      expect(rendered).not.toContain('remain open');
-      // Expiry also follows an approved close that failed and was re-parked, so the comment
-      // must not claim nobody decided.
-      expect(rendered).not.toContain('No decision was made');
+  it.each(AZ_TAG_WRITES)(
+    '"$step" splits a large list into bounded chunks that keep every id exactly once',
+    ({ step, idsVariable }) => {
+      const size = chunkSizeOf(step);
+      const ids = makeIds(size * 2 + 200);
+      const chunks = renderChunks(step, idsVariable, ids);
+      expect(chunks.map((chunk) => chunk.length)).toEqual([size, size, 200]);
+      expect(chunks.flat()).toEqual(ids);
     }
   );
 
-  it('leaves the Investigation open on an unexpected outcome', () => {
-    expect(
-      flatten(stepByName('handle_unknown_outcome')?.steps ?? []).some(
-        (step) => step.type === 'ai.conversation.metadata.patch'
-      )
-    ).toBe(false);
-  });
-
-  it('post_comment_outcome_unknown reports ambiguity instead of claiming every candidate remains open', () => {
-    // action_close_alerts_false_positive's fail_incomplete_close can fire after some alerts
-    // already closed (conflicts: proceed), so this outcome must not assert a specific
-    // closed/open count it cannot actually observe.
-    const comment = stepByName('post_comment_outcome_unknown');
-    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
-    const rendered = renderString(template, {
-      steps: { create_fp_proposal: { output: { status: 'failed' } } },
-      variables: { fp_candidate_count: 2 },
-    });
-
-    expect(rendered).not.toContain('2 alert(s) remain open');
-    expect(rendered).toContain('may already be closed');
-    expect(rendered).toContain('check each alert');
-  });
-
-  it.each([
-    ['close_investigation_after_approval', 'false_positive'],
-    ['close_investigation_after_dismissal', 'other'],
-    ['close_investigation_after_expiry', 'other'],
-  ])('"%s" closes with close_reason "%s"', (name, closeReason) => {
-    expect(stepByName(name)?.with?.updates).toEqual({
-      status: 'closed',
-      close_reason: closeReason,
+  it('sends a single call when the list fits in one chunk', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(renderChunks(step, idsVariable, makeIds(3))).toEqual([makeIds(3)]);
     });
   });
-});
 
-// ---------------------------------------------------------------------------
-// Autonomy: Supervised must actually auto-close
-// ---------------------------------------------------------------------------
-describe('floor_alert_triage — autonomy', () => {
-  const autoApproveExpr = (
-    (stepByName('create_fp_proposal')?.with?.inputs as Record<string, unknown>)
-      ?.autoApprove as string
-  ).trim();
-
-  it.each([
-    ['supervised', true],
-    ['manual', false],
-  ])('autonomy "%s" sets autoApprove to %s', (autonomy, expected) => {
-    expect(evalExpr(autoApproveExpr, { consts: { worker_settings: { autonomy } } })).toBe(expected);
+  it('makes a bounded number of calls for a large batch, not one per alert', () => {
+    const alertCount = 1200;
+    const ids = makeIds(alertCount);
+    // Every alert is a false positive: only the false-positive write has any chunks.
+    const calls = AZ_TAG_WRITES.map(({ step, idsVariable }) => {
+      const list = step === 'set_az_false_positive_tags' ? ids : [];
+      return renderChunks(step, idsVariable, list).length;
+    });
+    expect(calls).toEqual([0, 3, 0]);
+    expect(calls.reduce((sum, count) => sum + count, 0)).toBeLessThan(alertCount);
   });
 
-  // The proposal gate forces a human decision for an `always-gate` action regardless of
-  // `autoApprove`, which would make Supervised behave exactly like Manual.
-  it('the close action defers to autonomy instead of always gating', () => {
-    const action = parse(ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML) as {
-      consts: { actionMetadata: { approvalPolicy: string } };
-    };
-    expect(action.consts.actionMetadata.approvalPolicy).toBe('autonomy-dependent');
+  it('never sends an empty `ids`, since a list with no ids chunks to no calls', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(renderChunks(step, idsVariable, [])).toEqual([]);
+    });
+    const ids = computeIds([]);
+    expect(Object.values(ids)).toEqual([[], [], []]);
   });
-});
 
-// ---------------------------------------------------------------------------
-// Run timeout
-// ---------------------------------------------------------------------------
-describe('floor_alert_triage — settings.timeout', () => {
-  // The Worker Investigation lifecycle contract puts the proposal gate's ceiling at 168 h.
-  it('outlives the proposal gate ceiling', () => {
-    const hours = Number(/^(\d+)h$/.exec(parsed.settings.timeout)?.[1]);
-    expect(hours).toBeGreaterThan(168);
+  it('only writes a class tag for the alerts of that class', () => {
+    const ids = computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }]);
+    const chunksFor = (variable: string, step: string) =>
+      renderChunks(step, variable, ids[variable] as string[]);
+    expect(chunksFor('az_false_positive_ids', 'set_az_false_positive_tags')).toEqual([['fp-1']]);
+    expect(chunksFor('az_true_positive_ids', 'set_az_true_positive_tags')).toEqual([]);
+    expect(chunksFor('az_inconclusive_ids', 'set_az_inconclusive_tags')).toEqual([]);
+  });
+
+  // The three writes run in order and the last one wins, so an alert id in two classes would end
+  // with the last class's tag. The sub-workflow rules that out by failing on duplicate ids.
+  it('relies on the analysis sub-workflow failing the run on duplicate alert ids', () => {
+    const { steps } = parse(ALERT_ANALYSIS_WORKFLOW_YAML) as { steps: YamlStep[] };
+    const reject = flatten(steps).find(({ name }) => name === 'fail_duplicate_caller_alert_ids');
+    expect(reject?.type).toBe('workflow.fail');
+  });
+
+  it('reads each loop from the list its tag belongs to', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(loopOf(step).foreach).toContain(`variables.${idsVariable} `);
+    });
+  });
+
+  it('adds its own class tag and removes the other two in the same call, never the one it adds', () => {
+    const all = ['az:true_positive', 'az:false_positive', 'az:inconclusive'];
+    AZ_TAG_WRITES.forEach(({ step, tagToAdd }) => {
+      const { tags } = callOf(step)?.with as {
+        tags: { tags_to_remove: string[]; tags_to_add: string[] };
+      };
+      expect(tags.tags_to_add).toEqual([tagToAdd]);
+      expect([...tags.tags_to_remove, ...tags.tags_to_add].sort()).toEqual([...all].sort());
+    });
+  });
+
+  it('retries each write and fails the run when one still fails', () => {
+    AZ_TAG_STEPS.forEach((step) => {
+      expect(callOf(step)?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+      expect(callOf(step)?.['on-failure']?.continue).toBeUndefined();
+    });
+  });
+
+  it('runs before the verdict notes and the review dispatch', () => {
+    const names = parsed.steps.map((step) => step.name);
+    expect(names.indexOf('compute_az_tag_ids')).toBeLessThan(names.indexOf(AZ_TAG_STEPS[0]));
+    AZ_TAG_STEPS.forEach((step) => {
+      expect(names.indexOf(step)).toBeLessThan(names.indexOf('add_verdict_notes'));
+    });
   });
 });
 
@@ -894,7 +642,7 @@ describe('floor_alert_triage — settings.timeout', () => {
 // add_verdict_notes — the only verdict note on the Worker path
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage — add_verdict_notes', () => {
-  const noteTemplate = (stepByName('add_verdict_notes')?.with?.body as { note: { note: string } })
+  const noteTemplate = (stepByName('add_verdict_note')?.with?.body as { note: { note: string } })
     .note.note;
 
   const renderNote = (contributingFactors: string[]) =>
@@ -929,5 +677,475 @@ describe('floor_alert_triage — add_verdict_notes', () => {
   it('tells the sub-workflow it is called by the Worker, which suppresses its own note', () => {
     const inputs = stepByName('classify_alerts')?.with?.inputs as Record<string, unknown>;
     expect(inputs.calledByWorker).toBe(true);
+  });
+
+  describe('writing the notes in parallel chunks', () => {
+    const loop = stepByName('add_verdict_notes') as YamlStep & {
+      concurrency?: { max: number };
+      mode?: string;
+    };
+    const parallel = stepByName('write_note_chunk') as YamlStep & {
+      concurrency?: { max: number };
+      mode?: string;
+    };
+    const verdicts = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        alert_id: `alert-${i + 1}`,
+        classification: 'false_positive',
+      }));
+
+    const renderChunks = (count: number): Array<Array<{ alert_id: string }>> =>
+      JSON.parse(
+        renderString((loop.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+          steps: { classify_alerts: { output: { verdicts: verdicts(count) } } },
+        })
+      );
+
+    it('loops over chunks of verdicts and fans each chunk out in a parallel step', () => {
+      expect(loop.type).toBe('foreach');
+      expect(loop.foreach).toContain('chunk: 20');
+      expect(parallel.type).toBe('parallel');
+      expect(parallel.steps?.map((step) => step.name)).toEqual(['add_verdict_note']);
+    });
+
+    it('splits the verdicts into chunks that keep every alert exactly once', () => {
+      const chunks = renderChunks(45);
+      expect(chunks.map((chunk) => chunk.length)).toEqual([20, 20, 5]);
+      expect(chunks.flat().map(({ alert_id: id }) => id)).toEqual(
+        verdicts(45).map(({ alert_id: id }) => id)
+      );
+    });
+
+    it('writes no notes for a run without verdicts', () => {
+      expect(renderChunks(0)).toEqual([]);
+    });
+
+    // A fan-out that is no larger than the concurrency finishes in one tick; a larger one runs in
+    // waves, and every wave reloads the execution state.
+    it('keeps each chunk within the concurrency so it finishes in one tick', () => {
+      const chunkSize = Number(/chunk: (\d+)/.exec(loop.foreach ?? '')?.[1]);
+      expect(parallel.concurrency?.max).toBeGreaterThanOrEqual(chunkSize);
+      // The schema ceilings for a parallel step.
+      expect(parallel.concurrency?.max).toBeLessThanOrEqual(DEFAULT_PARALLEL_MAX_CONCURRENCY);
+      expect(chunkSize).toBeLessThanOrEqual(DEFAULT_PARALLEL_MAX_FAN_OUT);
+    });
+
+    // The schema accepts a branch with `on-failure` or `if`; only building the graph rejects it,
+    // and in the engine that rejection would be a failed run rather than a failed test.
+    it('builds an execution graph, which rejects flow control inside a branch', () => {
+      expect(() => convertToWorkflowGraph(parsed as unknown as WorkflowYaml)).not.toThrow();
+    });
+
+    it('lets every note in a chunk run even when one fails', () => {
+      expect(parallel.mode).toBe('settled');
+    });
+
+    it('reads the verdicts for the fan-out from a step output, not from the chunk scope', () => {
+      expect(stepByName('current_note_chunk')?.with?.verdicts).toBe('${{ foreach.item }}');
+      expect(parallel.foreach).toBe('${{ steps.current_note_chunk.output.verdicts }}');
+    });
+
+    // A parallel branch is a straight line of atomic steps: flow control, including `on-failure`
+    // and `if`, is rejected when the graph is built.
+    it('keeps the branch body free of flow control', () => {
+      (parallel.steps ?? []).forEach((step) => {
+        expect(step['on-failure']).toBeUndefined();
+        expect(step.if).toBeUndefined();
+        expect(step.foreach).toBeUndefined();
+      });
+    });
+
+    describe('retrying the notes that did not complete', () => {
+      const collectExpr = stepByName('collect_chunk_failed_notes')?.with
+        ?.chunk_failed_verdicts as string;
+      const recordExpr = stepByName('record_failed_verdict_notes')?.with
+        ?.failed_note_verdicts as string;
+      const retry = stepByName('retry_failed_verdict_notes');
+
+      const failedVerdictsOf = (results: unknown[]): unknown =>
+        evalExpr(collectExpr, { steps: { write_note_chunk: { output: { results } } } });
+
+      it('collects the verdict of every branch that did not complete', () => {
+        const [a, b, c, d] = verdicts(4);
+        expect(
+          failedVerdictsOf([
+            { index: 0, key: a, status: 'completed' },
+            { index: 1, key: b, status: 'failed' },
+            { index: 2, key: c, status: 'completed' },
+            { index: 3, key: d, status: 'timed_out' },
+          ])
+        ).toEqual([b, d]);
+      });
+
+      it('collects nothing when every note completed', () => {
+        const [a, b] = verdicts(2);
+        expect(
+          failedVerdictsOf([
+            { index: 0, key: a, status: 'completed' },
+            { index: 1, key: b, status: 'completed' },
+          ])
+        ).toEqual([]);
+      });
+
+      const accumulate = (
+        accumulated: unknown[],
+        chunkFailed: unknown[],
+        staleVariable: unknown[] = []
+      ): unknown =>
+        evalExpr(recordExpr, {
+          variables: { failed_note_verdicts: accumulated, chunk_failed_verdicts: staleVariable },
+          steps: { collect_chunk_failed_notes: { output: { chunk_failed_verdicts: chunkFailed } } },
+        });
+
+      it('accumulates the failures across chunks', () => {
+        const [a, b, c] = verdicts(3);
+        expect(accumulate([a], [b, c])).toEqual([a, b, c]);
+        expect(accumulate([a], [])).toEqual([a]);
+      });
+
+      // `variables` is a merge of every data.set output in run order, and an empty value does not
+      // reliably shadow the previous chunk's, so a clean chunk after a failed one must not
+      // re-add the failed one: the step output is what the accumulator has to read.
+      it('does not re-add the failures of an earlier chunk when a later chunk is clean', () => {
+        const [a, b] = verdicts(2);
+        const afterFailedChunk = accumulate([a], [b]);
+        expect(afterFailedChunk).toEqual([a, b]);
+        expect(accumulate(afterFailedChunk as unknown[], [], [b])).toEqual([a, b]);
+      });
+
+      it('reads the failures from the collecting step, not from a variable', () => {
+        expect(recordExpr).toContain(
+          'steps.collect_chunk_failed_notes.output.chunk_failed_verdicts'
+        );
+        expect(recordExpr).not.toContain('variables.chunk_failed_verdicts');
+      });
+
+      it('starts the accumulator empty before the first chunk', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(stepByName('init_failed_verdict_notes')?.with?.failed_note_verdicts).toEqual([]);
+        expect(names.indexOf('init_failed_verdict_notes')).toBeLessThan(
+          names.indexOf('add_verdict_notes')
+        );
+      });
+
+      it('retries each failed note serially, with the retry the notes always had', () => {
+        const retryStep = stepByName('retry_verdict_note');
+        expect(retry?.type).toBe('foreach');
+        expect(retry?.foreach).toContain('variables.failed_note_verdicts');
+        expect(retryStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+        // A note that still fails fails the run, as it did before the notes ran in parallel.
+        expect(retryStep?.['on-failure']?.continue).toBeUndefined();
+      });
+
+      it('runs after the notes and before the review is started', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(names.indexOf('retry_failed_verdict_notes')).toBeGreaterThan(
+          names.indexOf('add_verdict_notes')
+        );
+        expect(names.indexOf('gate_fp_close')).toBeGreaterThan(
+          names.indexOf('retry_failed_verdict_notes')
+        );
+      });
+
+      it('writes the same note as the first attempt', () => {
+        expect(stepByName('retry_verdict_note')?.with).toEqual(
+          stepByName('add_verdict_note')?.with
+        );
+      });
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ai.conversation.metadata.patch — required experimental-features gating
+//
+// The step handler errors when `agentBuilder:experimentalFeatures` is off
+// (see agent_builder/server/workflows/steps/update_conversation_metadata.ts).
+// Every "close the Investigation" step must survive that: `fallback` alone still
+// re-throws the original error afterwards (on_failure/README.md — "workflow still
+// fails after fallback execution"), so `continue: true` is required alongside it,
+// or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage — ai.conversation.metadata.patch failure handling', () => {
+  const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+
+  it('finds every conversation-close step this workflow defines', () => {
+    expect(patchSteps.map((step) => step.name).sort()).toEqual([
+      'close_investigation_review_limit',
+      'close_no_fp',
+    ]);
+  });
+
+  it.each(['close_no_fp', 'close_investigation_review_limit'])(
+    '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
+    (name) => {
+      const step = stepByName(name);
+      expect(step?.['on-failure']?.continue).toBe(true);
+      expect(step?.['on-failure']?.fallback?.length).toBeGreaterThan(0);
+    }
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Closure review hand-off
+//
+// The closure proposal waits for an analyst, so it lives in its own workflow started with
+// `workflow.executeAsync`. This run must not wait for it, must start it only after the tags and
+// notes exist, and must close the Investigation of a batch whose review the per-rule limit
+// skipped, because no review runs to do that.
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage — closure review hand-off', () => {
+  const review = parse(FLOOR_ALERT_TRIAGE_REVIEW_YAML) as {
+    settings: { concurrency: { max: number } };
+  };
+  const stepIndex = (name: string) => parsed.steps.findIndex((step) => step.name === name);
+
+  it('never waits for the closure proposal or its outcome', () => {
+    const types = allSteps.map((step) => step.type);
+    expect(types).not.toContain('proposals.getProposal');
+    expect(
+      allSteps.some((step) => step.with?.['workflow-id'] === 'system-create-alertzero-proposal')
+    ).toBe(false);
+    expect(stepByName('start_fp_review')?.type).toBe('workflow.executeAsync');
+  });
+
+  it('starts the review after every alert has its az: tag and its note', () => {
+    const gate = stepIndex('gate_fp_close');
+    AZ_TAG_STEPS.forEach((name) => expect(gate).toBeGreaterThan(stepIndex(name)));
+    expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
+  });
+
+  it('only starts a review when there is something to close', () => {
+    expect(stepByName('gate_fp_close')?.condition).toBe('${{ variables.fp_candidate_count > 0 }}');
+    expect(stepByName('gate_fp_close')?.steps?.map((step) => step.name)).toContain(
+      'start_fp_review'
+    );
+  });
+
+  it('hands the review everything it needs and resolves the autonomy mapping itself', () => {
+    const start = stepByName('start_fp_review');
+    expect(start?.with?.['workflow-id']).toBe('system-security-floor-alert-triage-review');
+    const inputs = start?.with?.inputs as Record<string, string>;
+    expect(Object.keys(inputs).sort()).toEqual(
+      [
+        'autonomy',
+        'conversation_id',
+        'confidence_floor',
+        'fp_candidate_ids',
+        'rule_id',
+        'rule_name',
+      ].sort()
+    );
+
+    const context = {
+      event: { rule: { id: 'rule-1', name: 'Noisy rule' } },
+      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      variables: { fp_candidate_ids: ['a', 'b'] },
+      consts: {
+        worker_settings: { autonomy: 'supervised', autoCloseConfidenceScoreMinThreshold: 0.9 },
+      },
+    };
+    expect(renderString(inputs.rule_id, context)).toBe('rule-1');
+    expect(renderString(inputs.conversation_id, context)).toBe('conv-1');
+    expect(renderString(inputs.autonomy, context)).toBe('supervised');
+    expect(evalExpr(inputs.fp_candidate_ids, context)).toEqual(['a', 'b']);
+    expect(evalExpr(inputs.confidence_floor, context)).toBe(0.9);
+  });
+
+  it('fails the run, after saying so, when the review cannot be started at all', () => {
+    const fallback = stepByName('start_fp_review')?.['on-failure']?.fallback ?? [];
+    expect(fallback.map((step) => step.name)).toEqual(['post_comment_review_not_started']);
+    expect(stepByName('start_fp_review')?.['on-failure']?.continue).toBeUndefined();
+  });
+
+  describe('reading the review status', () => {
+    const outcomeTemplate = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
+    const resolveDispatch = (status: string): string =>
+      renderString(outcomeTemplate, {
+        steps: { start_fp_review: { output: { status } } },
+      }).trim();
+
+    // The status comes from `workflow.executeAsync` itself. A separate read of the execution
+    // would need extra privileges and retries, and would add a branch for "could not read".
+    it('takes the status from the executeAsync output and never reads the execution again', () => {
+      expect(
+        allSteps.some(
+          (step) =>
+            step.type === 'kibana.request' &&
+            /executions/.test(String((step.with as { path?: string })?.path))
+        )
+      ).toBe(false);
+      expect(JSON.stringify(parsed)).not.toContain('read_review_execution');
+    });
+
+    it.each([
+      ['skipped', 'limit'],
+      ['failed', 'failed'],
+      ['cancelled', 'failed'],
+      ['timed_out', 'failed'],
+      ['pending', 'started'],
+      ['running', 'started'],
+      ['waiting_for_child', 'started'],
+      ['completed', 'started'],
+    ])('resolves the status "%s" to "%s"', (status, expected) => {
+      expect(resolveDispatch(status)).toBe(expected);
+    });
+
+    // The Worker matches the review's status by string. Tie each literal to the engine's enum so a
+    // rename there fails here instead of silently sending every batch down the "started" branch.
+    it('only matches statuses the engine can report', () => {
+      const matched = [...outcomeTemplate.matchAll(/status == '([a-z_]+)'/g)].map(
+        ([, status]) => status
+      );
+      expect(matched).toEqual(expect.arrayContaining(['skipped', 'failed']));
+      matched.forEach((status) => {
+        expect(Object.values(ExecutionStatus)).toContain(status);
+      });
+    });
+
+    it.each([
+      ['handle_review_started', 'started'],
+      ['handle_review_limit', 'limit'],
+      ['handle_review_failed', 'failed'],
+    ])('"%s" runs only for the "%s" dispatch', (branchName, dispatch) => {
+      expect(stepByName(branchName)?.condition).toBe(
+        `\${{ variables.review_dispatch == '${dispatch}' }}`
+      );
+    });
+  });
+
+  describe('a batch skipped by the per-rule limit', () => {
+    const branchStepNames = (branchName: string) =>
+      flatten(stepByName(branchName)?.steps ?? []).map((step) => step.name);
+
+    it('closes the Investigation, since no review is left to do it', () => {
+      expect(branchStepNames('handle_review_limit')).toContain('close_investigation_review_limit');
+      expect(stepByName('close_investigation_review_limit')?.with?.updates).toEqual({
+        status: 'closed',
+      });
+    });
+
+    it('leaves the Investigation open when the review failed', () => {
+      expect(
+        flatten(stepByName('handle_review_failed')?.steps ?? []).some(
+          (step) => step.type === 'ai.conversation.metadata.patch'
+        )
+      ).toBe(false);
+    });
+
+    it('fails the run for a review that ended without a decision, after commenting', () => {
+      const names = branchStepNames('handle_review_failed');
+      expect(names).toEqual(['post_comment_review_failed', 'abort_review_failed']);
+      expect(stepByName('abort_review_failed')?.type).toBe('workflow.fail');
+    });
+
+    const renderReviewFailed = (autonomy: string, count: number): string => {
+      const template = (stepByName('post_comment_review_failed')?.with as { message: string })
+        .message;
+      return renderString(template, {
+        steps: { start_fp_review: { output: { status: 'failed' } } },
+        variables: { fp_candidate_count: count },
+        consts: { worker_settings: { autonomy } },
+      });
+    };
+
+    it.each([
+      [1, 'is tagged az:false_positive', 'it is still open'],
+      [3, 'are tagged az:false_positive', 'they are still open'],
+    ])(
+      'does not claim %i candidate alert(s) are still open when a supervised review failed',
+      (count, tagged, stillOpen) => {
+        // At supervised autonomy the review can approve and start closing before the Worker
+        // reads its status, and a failed close may leave some candidates already closed.
+        const rendered = renderReviewFailed('supervised', count);
+
+        expect(rendered).toContain('status: failed');
+        expect(rendered).toContain(tagged);
+        expect(rendered).toContain('some may already be closed');
+        expect(rendered).toContain(`rather than assuming ${stillOpen}`);
+        expect(rendered).not.toContain('remain open');
+      }
+    );
+
+    it.each([
+      [1, '1 alert remains open'],
+      [3, '3 alerts remain open'],
+    ])(
+      'says %i candidate alert(s) are still open when a manual review failed',
+      (count, expected) => {
+        // Manual autonomy closes nothing without a human decision, so a review that ended
+        // without one cannot have closed any candidate.
+        const rendered = renderReviewFailed('manual', count);
+
+        expect(rendered).toContain('status: failed');
+        expect(rendered).toContain(expected);
+        expect(rendered).toContain('tagged az:false_positive');
+        expect(rendered).not.toContain('may already be closed');
+      }
+    );
+
+    it.each([
+      [1, 'stays open', '1 alert classified'],
+      [4, 'stay open', '4 alerts classified'],
+    ])(
+      'says why no proposal exists for %i alert(s), and that they stay open',
+      (count, stays, counted) => {
+        const template = (stepByName('post_comment_review_limit')?.with as { message: string })
+          .message;
+        const rendered = renderString(template, {
+          event: { rule: { name: 'Noisy rule' } },
+          variables: { fp_candidate_count: count },
+          consts: { worker_settings: { autoCloseConfidenceScoreMinThreshold: 0.85 } },
+        });
+
+        expect(rendered).toContain('No closure proposal was created');
+        expect(rendered).toContain('Rule "Noisy rule"');
+        expect(rendered).toContain(counted);
+        expect(rendered).toContain(stays);
+        expect(rendered).toContain('tagged az:false_positive');
+      }
+    );
+
+    // The number in the comment is typed by hand; the limit is enforced by the review.
+    it('quotes the limit the review enforces', () => {
+      const template = (stepByName('post_comment_review_limit')?.with as { message: string })
+        .message;
+      expect(template).toContain(
+        `already has ${review.settings.concurrency.max} closure proposals`
+      );
+    });
+
+    // Every other message that mentions the limit does so without a number, so the one above is
+    // the only one that can go stale.
+    it('does not hard-code the limit in any other hand-off message', () => {
+      const messagesOf = (steps: YamlStep[] | undefined): string[] =>
+        (steps ?? []).flatMap((step) => [
+          ...(typeof step.with?.message === 'string' ? [step.with.message] : []),
+          ...messagesOf(step.steps),
+          ...messagesOf(step['on-failure']?.fallback),
+        ]);
+      const others = messagesOf(stepByName('gate_fp_close')?.steps).filter(
+        (message) => !message.includes('closure proposals waiting for a decision')
+      );
+      expect(others.length).toBeGreaterThan(0);
+      others.forEach((message) => {
+        expect(message).not.toMatch(new RegExp(`\\b${review.settings.concurrency.max}\\b`));
+      });
+    });
+  });
+
+  it('does not claim the proposal was decided when the hand-off comment is written', () => {
+    const template = (stepByName('post_comment_review_started')?.with as { message: string })
+      .message;
+    const rendered = renderString(template, {
+      variables: { fp_candidate_count: 2 },
+      consts: {
+        worker_settings: { autonomy: 'manual', autoCloseConfidenceScoreMinThreshold: 0.85 },
+      },
+    });
+
+    expect(rendered).toContain('handed to the closure review');
+    expect(rendered).toContain('A human decision is required.');
+    expect(rendered).toContain('The outcome is posted here');
   });
 });

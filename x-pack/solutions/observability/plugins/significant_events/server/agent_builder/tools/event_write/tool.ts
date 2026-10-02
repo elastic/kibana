@@ -107,15 +107,15 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
       });
     }
     // Continuations inherit prior severity; this cycle's signals may be
     // inconclusive (telemetry gap, errored query) without a new confirms.
     if (
       item.event_id === undefined &&
-      item.status === 'open' &&
-      (item.severity === '60-high' || item.severity === '80-critical') &&
+      item.status === 'active' &&
+      (item.severity === 'high' || item.severity === 'critical') &&
       grounded.length > 0 &&
       !hasConfirms &&
       !hasOffTopicObservedError
@@ -123,7 +123,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-open status.',
+          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
       });
     }
   });
@@ -289,7 +289,7 @@ export function createEventsWriteTool({
       Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
       investigation makes the stored severity authoritative. It is preserved unless Discovery
-      closes or dismisses the event, reopens a closed or dismissed event, or submits a confirmed
+      marks the event inactive, reactivates an inactive event, or submits a confirmed
       rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 

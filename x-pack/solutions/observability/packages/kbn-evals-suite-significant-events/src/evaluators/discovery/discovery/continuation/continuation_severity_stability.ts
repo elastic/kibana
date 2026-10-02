@@ -10,7 +10,7 @@ import { severityRank } from '../severity/severity_rank';
 
 const openEventsWithSeverity = (cycle: ContinuationCycle) =>
   (cycle.producedEvents ?? []).filter(
-    (event) => event.event_id && event.status === 'open' && event.severity
+    (event) => event.event_id && event.status === 'active' && event.severity
   );
 
 export interface ContinuationSeverityStabilityResult {
@@ -21,7 +21,7 @@ export interface ContinuationSeverityStabilityResult {
 }
 
 /**
- * Scores whether continued open events keep or raise severity relative to the establishing cycle.
+ * Scores whether continued active events keep or raise severity relative to the establishing cycle.
  * Downgrades on unchanged reuse paths are failures; escalations are allowed.
  */
 export const scoreContinuationSeverityStability = (
@@ -94,7 +94,7 @@ export const scoreContinuationSeverityStability = (
       explanation:
         issues.length > 0
           ? `No comparable continued events with severity: ${issues.join('; ')}`
-          : 'No continued open events with severity to compare against the establishing cycle',
+          : 'No continued active events with severity to compare against the establishing cycle',
     };
   }
 
@@ -112,7 +112,7 @@ export const scoreContinuationSeverityStability = (
   };
 };
 
-/** CODE evaluator: continued open events must not downgrade severity on reuse paths. */
+/** CODE evaluator: continued active events must not downgrade severity on reuse paths. */
 export const continuationSeverityStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_severity_stability',
   kind: 'CODE',
