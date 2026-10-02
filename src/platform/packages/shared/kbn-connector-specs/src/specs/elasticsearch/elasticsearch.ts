@@ -19,6 +19,7 @@ import {
   ListIndicesInputSchema,
   RequestInputSchema,
   SearchInputSchema,
+  toSearchPath,
   type EsqlInput,
   type GetMappingInput,
   type ListIndicesInput,
@@ -116,7 +117,6 @@ export const Elasticsearch: ConnectorSpec = {
         'Search documents in one or more Elasticsearch indices using the Query DSL. Returns matching hits with source, score, and metadata. Supports aggregations, sorting, field filtering, and pagination. Use listIndices first if you do not know the index name, and getMapping to understand available fields.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        const indexParam = Array.isArray(input.index) ? input.index.join(',') : input.index;
         const body: Record<string, unknown> = {
           query: input.query,
           size: input.size,
@@ -127,7 +127,7 @@ export const Elasticsearch: ConnectorSpec = {
         if (input._source !== undefined) body._source = input._source;
         if (input.aggs) body.aggs = input.aggs;
         if (input.runtimeMappings) body.runtime_mappings = input.runtimeMappings;
-        return callEsApi(ctx, 'POST', `/${encodeURIComponent(indexParam)}/_search`, { body });
+        return callEsApi(ctx, 'POST', toSearchPath(input.index), { body });
       },
     },
 

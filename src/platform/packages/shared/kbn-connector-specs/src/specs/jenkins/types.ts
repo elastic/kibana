@@ -77,6 +77,13 @@ export const TriggerBuildWithParametersInputSchema = lazySchema(() =>
       .refine((value) => Object.keys(value).length <= MAX_PARAMETERS, {
         message: `parameters must contain at most ${MAX_PARAMETERS} entries`,
       })
+      .refine(
+        (value) =>
+          Buffer.byteLength(new URLSearchParams(value).toString(), 'utf8') <= MAX_FORM_CONTENT_SIZE,
+        {
+          message: `parameters must not exceed ${MAX_FORM_CONTENT_SIZE} bytes once form-encoded`,
+        }
+      )
       .describe(
         'Build parameter name/value pairs, matching the parameter names defined on the Jenkins ' +
           'job (see getJob). All values are sent as strings, so booleans and numbers must be ' +

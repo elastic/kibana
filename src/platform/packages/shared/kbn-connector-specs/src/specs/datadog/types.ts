@@ -318,7 +318,9 @@ export const PostEventInputSchema = z.object({
     .string()
     .min(1)
     .max(DATADOG_EVENT_TEXT_MAX_LENGTH)
-    .describe('Event body text (max 4000 characters). Supports markdown.'),
+    .describe(
+      `Event body text (max ${DATADOG_EVENT_TEXT_MAX_LENGTH} characters). Supports markdown.`
+    ),
   tags: tagsSchema
     .optional()
     .describe('Optional tags for the event. Example: ["env:prod", "source:kibana"].'),
@@ -330,7 +332,9 @@ export const PostEventInputSchema = z.object({
     .string()
     .max(DATADOG_EVENT_AGGREGATION_KEY_MAX_LENGTH)
     .optional()
-    .describe('Optional key (max 100 characters) used to aggregate related events in the stream.'),
+    .describe(
+      `Optional key (max ${DATADOG_EVENT_AGGREGATION_KEY_MAX_LENGTH} characters) used to aggregate related events in the stream.`
+    ),
   dateHappened: z
     .number()
     .int()

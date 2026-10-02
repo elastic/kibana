@@ -13,6 +13,7 @@ const DEFAULT_MAX_RESULTS = 1000;
 const MAX_RESULTS_LIMIT = 10000;
 const MAX_TIMEOUT_MS = 300000;
 const MAX_UNRESOLVED_QUERY_BYTES = 1024 * 1024;
+const MAX_UNRESOLVED_QUERY_MB = MAX_UNRESOLVED_QUERY_BYTES / (1024 * 1024);
 const MAX_LOCATION_LENGTH = 64;
 const MAX_PROJECT_ID_LENGTH = 200;
 const MAX_JOB_ID_LENGTH = 1024;
@@ -23,10 +24,10 @@ const QuerySchema = z
   .min(1)
   .max(MAX_UNRESOLVED_QUERY_BYTES)
   .refine((query) => Buffer.byteLength(query, 'utf8') <= MAX_UNRESOLVED_QUERY_BYTES, {
-    message: `Query must not exceed BigQuery's ${MAX_UNRESOLVED_QUERY_BYTES} byte (1 MB) unresolved query length limit`,
+    message: `Query must not exceed BigQuery's ${MAX_UNRESOLVED_QUERY_BYTES} byte (${MAX_UNRESOLVED_QUERY_MB} MB) unresolved query length limit`,
   })
   .describe(
-    'GoogleSQL query text to execute in BigQuery (up to 1 MB). Use fully-qualified table names such as `project.dataset.table`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.'
+    `GoogleSQL query text to execute in BigQuery (up to ${MAX_UNRESOLVED_QUERY_MB} MB). Use fully-qualified table names such as \`project.dataset.table\`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.`
   );
 
 const CommonQueryInputSchema = lazySchema(() =>

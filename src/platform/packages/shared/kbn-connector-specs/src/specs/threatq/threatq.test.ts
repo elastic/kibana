@@ -609,6 +609,14 @@ describe('ThreatQ input schemas', () => {
     ).toBe(false);
   });
 
+  it('accepts a value at the write limit both when creating and when searching for it', () => {
+    const value = 'a'.repeat(10_000);
+    expect(CreateIndicatorInputSchema.safeParse({ value, typeId: 7, statusId: 4 }).success).toBe(
+      true
+    );
+    expect(SearchIndicatorsInputSchema.safeParse({ criteria: { value } }).success).toBe(true);
+  });
+
   it('bounds query depth, entry counts, and total query size', () => {
     const deep = { a: { a: { a: { a: { a: { a: { a: 'x' } } } } } } };
     expect(SearchIndicatorsInputSchema.safeParse({ criteria: deep }).success).toBe(false);

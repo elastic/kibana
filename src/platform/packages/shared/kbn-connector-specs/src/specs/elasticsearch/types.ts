@@ -12,6 +12,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // Default `http.max_initial_line_length` (4kb, `HttpTransportSettings`); the request line
 // carries the path and query string.
 const HTTP_MAX_INITIAL_LINE_LENGTH = 4096;
+// The request line is `<METHOD> <request-target> HTTP/1.1`.
+const REQUEST_LINE_OVERHEAD = 'POST  HTTP/1.1'.length;
 // Default `index.max_result_window`, which bounds from + size.
 // https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules
 const MAX_RESULT_WINDOW = 10_000;
@@ -21,6 +23,27 @@ const ESQL_MAX_QUERY_LENGTH = 1_000_000;
 // fields, aggregations, runtime mappings, or ES|QL params.
 const MAX_SEARCH_TARGETS = 100;
 const MAX_REQUEST_ITEMS = 1000;
+
+const fitsRequestLine = (requestTarget: string): boolean =>
+  requestTarget.length + REQUEST_LINE_OVERHEAD <= HTTP_MAX_INITIAL_LINE_LENGTH;
+
+/** Builds the `_search` path for one or more search targets. */
+export const toSearchPath = (index: string | readonly string[]): string => {
+  const target = typeof index === 'string' ? index : index.join(',');
+  return `/${encodeURIComponent(target)}/_search`;
+};
+
+/** Approximates the request target the HTTP client sends for a path and its query params. */
+export const toRequestTarget = (
+  path: string,
+  queryParams?: Record<string, string | number | boolean>
+): string => {
+  const query = new URLSearchParams(
+    Object.entries(queryParams ?? {}).map(([key, value]) => [key, String(value)])
+  ).toString();
+  if (!query) return path;
+  return `${path}${path.includes('?') ? '&' : '?'}${query}`;
+};
 
 // ============================================================================
 // search
@@ -33,6 +56,9 @@ export const SearchInputSchema = lazySchema(() =>
         z.string().min(1).max(HTTP_MAX_INITIAL_LINE_LENGTH),
         z.array(z.string().min(1).max(512)).min(1).max(MAX_SEARCH_TARGETS),
       ])
+      .refine((index) => fitsRequestLine(toSearchPath(index)), {
+        message: `The URL-encoded search targets must fit the ${HTTP_MAX_INITIAL_LINE_LENGTH}-byte HTTP request line.`,
+      })
       .describe(
         'Index name, comma-separated index names, or an array of index names. Wildcards and aliases are supported.'
       ),
@@ -48,7 +74,7 @@ export const SearchInputSchema = lazySchema(() =>
       .max(MAX_RESULT_WINDOW)
       .default(10)
       .describe(
-        'Maximum number of hits to return (0–10000; from + size must not exceed 10000). Keep this small (for example 10–50) to limit response size.'
+        `Maximum number of hits to return (0–${MAX_RESULT_WINDOW}; from + size must not exceed ${MAX_RESULT_WINDOW}). Keep this small (for example 10–50) to limit response size.`
       ),
     from: z
       .number()
@@ -166,21 +192,28 @@ export type GetMappingInput = z.infer<typeof GetMappingInputSchema>;
 // ============================================================================
 
 export const RequestInputSchema = lazySchema(() =>
-  z.object({
-    path: z
-      .string()
-      .min(1)
-      .max(HTTP_MAX_INITIAL_LINE_LENGTH)
-      .regex(/^\//, 'Path must start with "/".')
-      .describe(
-        'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
-      ),
-    queryParams: z
-      .record(z.string().max(200), z.union([z.string().max(2048), z.number(), z.boolean()]))
-      .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 query parameters.' })
-      .optional()
-      .describe('Query string parameters as key-value pairs, merged with any params in the path.'),
-  })
+  z
+    .object({
+      path: z
+        .string()
+        .min(1)
+        .max(HTTP_MAX_INITIAL_LINE_LENGTH)
+        .regex(/^\//, 'Path must start with "/".')
+        .describe(
+          'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
+        ),
+      queryParams: z
+        .record(z.string().max(200), z.union([z.string().max(2048), z.number(), z.boolean()]))
+        .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 query parameters.' })
+        .optional()
+        .describe(
+          'Query string parameters as key-value pairs, merged with any params in the path.'
+        ),
+    })
+    .refine(({ path, queryParams }) => fitsRequestLine(toRequestTarget(path, queryParams)), {
+      message: `The path and URL-encoded query parameters must fit the ${HTTP_MAX_INITIAL_LINE_LENGTH}-byte HTTP request line.`,
+      path: ['path'],
+    })
 );
 export type RequestInput = z.infer<typeof RequestInputSchema>;
 

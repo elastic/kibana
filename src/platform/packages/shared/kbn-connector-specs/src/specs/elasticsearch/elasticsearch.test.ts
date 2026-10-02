@@ -373,6 +373,19 @@ describe('Elasticsearch connector', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts an array of 100 indices', () => {
+      const indices = Array.from({ length: 100 }, (_, i) => `index-${i}`);
+      const result = SearchInputSchema.safeParse({ index: indices });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects comma-separated index names whose URL-encoded path exceeds the request line', () => {
+      // 16 x 255 characters + 15 commas is 4095 raw, but each comma encodes to %2C.
+      const indices = Array.from({ length: 16 }, (_, i) => `${i}`.padEnd(255, 'a'));
+      expect(SearchInputSchema.safeParse({ index: indices.join(',') }).success).toBe(false);
+      expect(SearchInputSchema.safeParse({ index: indices }).success).toBe(false);
+    });
+
     it('rejects arrays of more than 100 indices', () => {
       const tooManyIndices = Array.from({ length: 101 }, (_, i) => `index-${i}`);
       const result = SearchInputSchema.safeParse({ index: tooManyIndices });
@@ -405,6 +418,19 @@ describe('Elasticsearch connector', () => {
     it('rejects a path that could redirect requests to another host', () => {
       const result = RequestInputSchema.safeParse({ path: '@evil.com/_search' });
       expect(result.success).toBe(false);
+    });
+
+    it('rejects query parameters that push the request line past 4096 bytes', () => {
+      const queryParams = { a: 'x'.repeat(2048), b: 'x'.repeat(2048) };
+      expect(RequestInputSchema.safeParse({ path: '/_cat/indices', queryParams }).success).toBe(
+        false
+      );
+      expect(
+        RequestInputSchema.safeParse({
+          path: '/_cat/indices',
+          queryParams: { a: 'x'.repeat(2048) },
+        }).success
+      ).toBe(true);
     });
   });
 });

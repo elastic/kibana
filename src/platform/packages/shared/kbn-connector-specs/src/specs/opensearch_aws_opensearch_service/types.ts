@@ -126,7 +126,7 @@ const MonitorTriggersSchema = lazySchema(() =>
     .max(MAX_TRIGGERS_PER_MONITOR)
     .describe(
       "The monitor's trigger(s), following the OpenSearch monitor definition. " +
-        'OpenSearch allows 10 triggers per monitor by default (plugins.alerting.monitor.max_triggers, up to 50). ' +
+        `OpenSearch allows 10 triggers per monitor by default (plugins.alerting.monitor.max_triggers, up to ${MAX_TRIGGERS_PER_MONITOR}). ` +
         'For query_level_monitor: [{ "name": "...", "severity": "1", "condition": { "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" } }, "actions": [...] }]. ' +
         'For bucket_level_monitor, wrap the same shape under a "bucket_level_trigger" key; for doc_level_monitor, under a "document_level_trigger" key. ' +
         'The "actions" array (notification destinations) may be left empty ([]) if no notification is needed.'

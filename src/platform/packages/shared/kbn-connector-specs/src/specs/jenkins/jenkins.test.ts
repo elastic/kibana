@@ -238,6 +238,23 @@ describe('Jenkins connector', () => {
         })
       ).not.toThrow();
     });
+
+    it.each([
+      ['a body of exactly 200,000 bytes', { P: 'a'.repeat(200_000 - 'P='.length) }, true],
+      ['a value that percent-encoding expands past the limit', { P: '&'.repeat(70_000) }, false],
+      [
+        'parameters that only exceed the limit together',
+        { A: 'a'.repeat(100_000), B: 'b'.repeat(100_000) },
+        false,
+      ],
+    ])('bounds the form-encoded body at 200,000 bytes: %s', (_label, parameters, valid) => {
+      expect(
+        Jenkins.actions.triggerBuildWithParameters.input.safeParse({
+          jobName: 'deploy',
+          parameters,
+        }).success
+      ).toBe(valid);
+    });
   });
 
   describe('getQueueItem', () => {

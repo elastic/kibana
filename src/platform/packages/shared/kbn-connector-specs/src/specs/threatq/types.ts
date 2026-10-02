@@ -184,7 +184,7 @@ export const CreateIndicatorInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_VALUE_LENGTH)
       .describe(
-        'Indicator value, for example example.com or 192.0.2.1; at most 10,000 characters.'
+        `Indicator value, for example example.com or 192.0.2.1; at most ${MAX_VALUE_LENGTH} characters.`
       ),
     typeId: IdSchema.describe(
       'Indicator type ID from listIndicatorTypes; do not assume IDs are the same across instances.'
@@ -220,7 +220,7 @@ export const AddAttributeInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_VALUE_LENGTH)
       .describe(
-        'Attribute value, for example High or a triage finding; at most 10,000 characters.'
+        `Attribute value, for example High or a triage finding; at most ${MAX_VALUE_LENGTH} characters.`
       ),
     sources: SourcesSchema.optional(),
   })
