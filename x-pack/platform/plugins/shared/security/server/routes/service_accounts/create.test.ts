@@ -228,6 +228,7 @@ describe('Create service account route', () => {
       const { routeConfig } = setup({ serverless });
       const body = {
         name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
+        description: '\u0000'.repeat(1000),
         roles: Array.from({ length: maxRoles }, (_, i) => `${i}`.padEnd(maxRoleNameLength, '"')),
       };
 
@@ -244,8 +245,11 @@ describe('Create service account route', () => {
       const uiam = uiamServiceMock.create();
       uiam.createServiceAccount.mockResolvedValue({
         ...serviceAccount,
-        type: 'project',
+        type: 'organization',
+        scope: 'project',
         organization_id: 'organization-id',
+        project_type: 'security',
+        project_id: 'project-id',
         role_assignments: {},
         assumable_by: [],
       });

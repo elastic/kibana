@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common/chat/conversation';
-import { ChatEventType } from '@kbn/agent-builder-common/chat/events';
-import type { ChatEvent } from '@kbn/agent-builder-common/chat/events';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -32,46 +31,42 @@ const mockOpenChat = jest.fn();
 const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
 const mockUseKibana = useKibana as jest.Mock;
 
-let mockChat$: Subject<ChatEvent>;
+let mockActiveConversation$: BehaviorSubject<ActiveConversation | null>;
 
 const defaultProps = {
   esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
   onEsqlQueryChange: jest.fn(),
 };
 
-const createRoundCompleteEvent = ({
-  attachments,
-  roundId,
-}: {
-  attachments?: ChatEvent extends { data: infer D }
-    ? D extends { attachments?: infer A }
-      ? A
-      : never
-    : never;
-  roundId: string;
-}): ChatEvent => ({
-  data: {
-    attachments,
-    round: {
-      id: roundId,
-      input: { message: '' },
-      model_usage: { connector_id: '', input_tokens: 0, llm_calls: 0, output_tokens: 0 },
-      response: { message: '' },
-      started_at: new Date().toISOString(),
-      status: ConversationRoundStatus.completed,
-      steps: [],
-      time_to_first_token: 0,
-      time_to_last_token: 0,
-    },
-  },
-  type: ChatEventType.roundComplete,
+const createActiveConversation = (id: string, query: string): ActiveConversation => ({
+  conversation: {
+    attachments: [
+      {
+        active: true,
+        current_version: 1,
+        hidden: false,
+        id: 'esql-1',
+        type: AttachmentType.esql,
+        versions: [
+          {
+            content_hash: 'hash',
+            created_at: new Date().toISOString(),
+            data: { description: 'ES|QL', query },
+            estimated_tokens: 10,
+            version: 1,
+          },
+        ],
+      },
+    ],
+  } as Conversation,
+  id,
 });
 
 describe('EditWithAi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockChat$ = new Subject<ChatEvent>();
+    mockActiveConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
 
     mockUseAgentBuilderAvailability.mockReturnValue({
       hasAgentBuilderPrivilege: true,
@@ -83,7 +78,7 @@ describe('EditWithAi', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          events: { chat$: mockChat$.asObservable() },
+          events: { ui: { activeConversation$: mockActiveConversation$.asObservable() } },
           openChat: mockOpenChat,
         },
         telemetry: { reportEvent: jest.fn() },
@@ -415,27 +410,8 @@ describe('EditWithAi', () => {
     expect(secondOnEsqlQueryChange).toHaveBeenCalledWith('FROM .alerts | LIMIT 300');
   });
 
-  describe('onRoundComplete auto-apply from attachments', () => {
-    const esqlAttachments = [
-      {
-        active: true,
-        current_version: 1,
-        hidden: false,
-        id: 'esql-1',
-        type: AttachmentType.esql,
-        versions: [
-          {
-            content_hash: 'hash',
-            created_at: new Date().toISOString(),
-            data: { description: 'ES|QL', query: 'FROM .alerts | LIMIT 200' },
-            estimated_tokens: 10,
-            version: 1,
-          },
-        ],
-      },
-    ];
-
-    it('auto-applies ES|QL from attachments when no explicit tool call occurred in the round', async () => {
+  describe('auto-apply from the ES|QL attachment', () => {
+    it('applies the attachment query when it differs from the query that was sent', async () => {
       const onEsqlQueryChange = jest.fn();
 
       render(
@@ -447,16 +423,21 @@ describe('EditWithAi', () => {
       await userEvent.click(screen.getByTestId('editWithAiButton'));
 
       act(() => {
-        mockChat$.next(
-          createRoundCompleteEvent({ attachments: esqlAttachments, roundId: 'round-1' })
+        mockActiveConversation$.next({ id: undefined });
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', 'FROM .alerts | LIMIT 200')
         );
       });
 
       expect(onEsqlQueryChange).toHaveBeenCalledWith('FROM .alerts | LIMIT 200');
     });
 
-    it('does NOT auto-apply from attachments when an explicit tool call already updated the query', async () => {
+    it('ignores the active conversation until Edit with AI is clicked', () => {
       const onEsqlQueryChange = jest.fn();
+
+      mockActiveConversation$.next(
+        createActiveConversation('conversation-1', 'FROM .alerts | LIMIT 200')
+      );
 
       render(
         <TestProviders>
@@ -464,45 +445,39 @@ describe('EditWithAi', () => {
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('editWithAiButton'));
-
-      const callArgs = mockOpenChat.mock.calls[0][0];
-      const updateTool = callArgs.browserApiTools[0];
-
-      updateTool.handler({ query: 'FROM .alerts | WHERE status = "open" | LIMIT 200' });
-
-      onEsqlQueryChange.mockClear();
-
       act(() => {
-        mockChat$.next(
-          createRoundCompleteEvent({
-            attachments: [
-              {
-                active: true,
-                current_version: 1,
-                hidden: false,
-                id: 'esql-1',
-                type: AttachmentType.esql,
-                versions: [
-                  {
-                    content_hash: 'hash',
-                    created_at: new Date().toISOString(),
-                    data: { description: 'ES|QL', query: 'FROM .alerts | LIMIT 100' },
-                    estimated_tokens: 10,
-                    version: 1,
-                  },
-                ],
-              },
-            ],
-            roundId: 'round-1',
-          })
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', 'FROM .alerts | LIMIT 300')
         );
       });
 
       expect(onEsqlQueryChange).not.toHaveBeenCalled();
     });
 
-    it('resets the explicit tool call flag between rounds', async () => {
+    it('ignores conversations other than the one opened by Edit with AI', async () => {
+      const onEsqlQueryChange = jest.fn();
+
+      render(
+        <TestProviders>
+          <EditWithAi {...defaultProps} onEsqlQueryChange={onEsqlQueryChange} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('editWithAiButton'));
+
+      act(() => {
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', defaultProps.esqlQuery)
+        );
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-2', 'FROM .alerts | LIMIT 200')
+        );
+      });
+
+      expect(onEsqlQueryChange).not.toHaveBeenCalled();
+    });
+
+    it('does not put the sent query back after the tool updated the query', async () => {
       const onEsqlQueryChange = jest.fn();
 
       render(
@@ -518,42 +493,49 @@ describe('EditWithAi', () => {
 
       updateTool.handler({ query: 'FROM .alerts | WHERE status = "open" | LIMIT 200' });
 
+      onEsqlQueryChange.mockClear();
+
       act(() => {
-        mockChat$.next(createRoundCompleteEvent({ attachments: [], roundId: 'round-1' }));
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', defaultProps.esqlQuery)
+        );
       });
+
+      expect(onEsqlQueryChange).not.toHaveBeenCalled();
+    });
+
+    it('applies a later attachment change after the tool updated the query', async () => {
+      const onEsqlQueryChange = jest.fn();
+
+      render(
+        <TestProviders>
+          <EditWithAi {...defaultProps} onEsqlQueryChange={onEsqlQueryChange} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('editWithAiButton'));
+
+      const callArgs = mockOpenChat.mock.calls[0][0];
+      const updateTool = callArgs.browserApiTools[0];
+
+      updateTool.handler({ query: 'FROM .alerts | WHERE status = "open" | LIMIT 200' });
 
       onEsqlQueryChange.mockClear();
 
       act(() => {
-        mockChat$.next(
-          createRoundCompleteEvent({
-            attachments: [
-              {
-                active: true,
-                current_version: 1,
-                hidden: false,
-                id: 'esql-1',
-                type: AttachmentType.esql,
-                versions: [
-                  {
-                    content_hash: 'hash',
-                    created_at: new Date().toISOString(),
-                    data: { description: 'ES|QL', query: 'FROM .alerts | LIMIT 300' },
-                    estimated_tokens: 10,
-                    version: 1,
-                  },
-                ],
-              },
-            ],
-            roundId: 'round-2',
-          })
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', defaultProps.esqlQuery)
+        );
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', 'FROM .alerts | LIMIT 300')
         );
       });
 
+      expect(onEsqlQueryChange).toHaveBeenCalledTimes(1);
       expect(onEsqlQueryChange).toHaveBeenCalledWith('FROM .alerts | LIMIT 300');
     });
 
-    it('does not auto-apply when the attachment query matches the last applied query', async () => {
+    it('does not re-apply the same attachment query when the conversation is published again', async () => {
       const onEsqlQueryChange = jest.fn();
 
       render(
@@ -565,8 +547,8 @@ describe('EditWithAi', () => {
       await userEvent.click(screen.getByTestId('editWithAiButton'));
 
       act(() => {
-        mockChat$.next(
-          createRoundCompleteEvent({ attachments: esqlAttachments, roundId: 'round-1' })
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', 'FROM .alerts | LIMIT 200')
         );
       });
 
@@ -575,8 +557,8 @@ describe('EditWithAi', () => {
       onEsqlQueryChange.mockClear();
 
       act(() => {
-        mockChat$.next(
-          createRoundCompleteEvent({ attachments: esqlAttachments, roundId: 'round-2' })
+        mockActiveConversation$.next(
+          createActiveConversation('conversation-1', 'FROM .alerts | LIMIT 200')
         );
       });
 

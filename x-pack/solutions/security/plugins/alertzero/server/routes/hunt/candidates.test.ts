@@ -58,7 +58,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
   const context = {
-    core: Promise.resolve({ elasticsearch: { client: { asCurrentUser, asInternalUser } } }),
+    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    core: Promise.resolve({
+      uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
+      elasticsearch: { client: { asCurrentUser, asInternalUser } },
+    }),
   };
 
   return {
@@ -171,17 +175,20 @@ describe('registerCandidatesRoute', () => {
 
     it('keeps an executing proposal past its deadline, so containment in flight still blocks a re-hunt', async () => {
       const { handler, context, list } = makeDeps();
-      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+      const request = requestFor();
+      await handler(context, request, httpServerMock.createResponseFactory());
 
       await readerOf()('default');
 
       expect(list).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'pending', excludeExpired: true }),
-        'default'
+        'default',
+        request
       );
       expect(list).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'executing', excludeExpired: false }),
-        'default'
+        'default',
+        request
       );
     });
 

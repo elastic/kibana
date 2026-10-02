@@ -25,7 +25,7 @@ module.exports = {
   meta: {
     schema: [],
   },
-  create: (context) => ({
+  createOnce: (context) => ({
     ClassBody(_) {
       const node = /** @type {ClassBody} */ (_);
 

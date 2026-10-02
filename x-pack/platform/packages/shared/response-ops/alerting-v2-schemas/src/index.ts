@@ -24,6 +24,8 @@ export {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
+  composeEsqlQuery,
   parseDurationToMs,
 } from './validation';
 export * from './policy_matcher_schema';
@@ -39,6 +41,7 @@ export * from './rule_execution_history_schema';
 export * from './rule_change_history_schema';
 export * from './rule_event_fields_schema';
 export * from './match_action_policies_schema';
+export * from './match_rules_schema';
 export * from './severity';
 export * from './create_alert_event_data_schema';
 export * from './rule_template_schema';

@@ -7,15 +7,17 @@
 
 import type { CandidatesResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import type { KibanaRequest } from '@kbn/core/server';
 import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
 import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
-export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
+export { CANDIDATES_URL };
 
 /**
  * An "active" Hunt Proposal, per the selection contract: awaiting a decision, or
@@ -40,7 +42,8 @@ type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
  */
 const readAllOpenProposalConversationIds = async (
   proposalsService: ProposalsService,
-  space: string
+  space: string,
+  request: KibanaRequest
 ): Promise<Set<string>> => {
   const conversationIds = new Set<string>();
   for (const status of OPEN_PROPOSAL_STATUSES) {
@@ -69,7 +72,8 @@ const readAllOpenProposalConversationIds = async (
           size: MAX_PROPOSALS_PAGE_SIZE,
           from,
         },
-        space
+        space,
+        request
       );
       for (const proposal of page.proposals) {
         conversationIds.add(proposal.conversationId);
@@ -110,7 +114,7 @@ export const registerCandidatesRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
           // Internal user: `.kibana-threat-reports` is a plugin-owned hidden index and
@@ -125,7 +129,7 @@ export const registerCandidatesRoute = ({
 
           const proposalsService = getHuntServices().getProposalsService();
           const readOpenProposalConversationIds: OpenProposalConversationIdsReader = (space) =>
-            readAllOpenProposalConversationIds(proposalsService, space);
+            readAllOpenProposalConversationIds(proposalsService, space, request);
 
           const body: CandidatesResponse = await buildCandidateQuery(
             esClient,
@@ -147,6 +151,6 @@ export const registerCandidatesRoute = ({
             body: { message: 'Failed to build candidate query' },
           });
         }
-      }
+      })
     );
 };

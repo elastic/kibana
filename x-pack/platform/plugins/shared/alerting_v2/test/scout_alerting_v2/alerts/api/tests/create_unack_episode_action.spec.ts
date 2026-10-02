@@ -43,7 +43,7 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       }),
     ]);
     const response = await apiClient.post(getUnackEpisodeActionUrl(episodeId), {
@@ -85,13 +85,13 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -114,18 +114,15 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     }
   );
 
-  apiTest(
-    'schema: rejects episode_id in the body (strict mode) with 400',
-    async ({ apiClient }) => {
-      // The episode id moved to the path; the unack body must be empty.
-      const response = await apiClient.post(getUnackEpisodeActionUrl('any-episode'), {
-        headers: writerHeaders,
-        body: { episode_id: 'any-episode' },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
+  apiTest('schema: rejects alert_id in the body (strict mode) with 400', async ({ apiClient }) => {
+    // The episode id moved to the path; the unack body must be empty.
+    const response = await apiClient.post(getUnackEpisodeActionUrl('any-episode'), {
+      headers: writerHeaders,
+      body: { alert_id: 'any-episode' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getUnackEpisodeActionUrl('any-episode'), {
@@ -136,7 +133,7 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects alert_id over 150 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getUnackEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: {},
@@ -145,14 +142,14 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+  apiTest('returns 404 when alert_id matches no events', async ({ apiClient }) => {
     const response = await apiClient.post(getUnackEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: {},
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(

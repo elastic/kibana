@@ -13,6 +13,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -20,6 +21,7 @@ import { createImpactPrivilegesChecker } from './impact/services/check_impact_pr
 import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
+import { registerInvestigationStepDefinitions } from './investigations/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
@@ -51,6 +53,7 @@ export class AgenticInvestigationsPlugin
   private investigationStatusService?: InvestigationStatusService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
+  private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -62,7 +65,10 @@ export class AgenticInvestigationsPlugin
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features });
 
-    registerImpactAttachment(agentBuilder);
+    registerImpactAttachment(agentBuilder, {
+      getImpactService: () => this.requireImpactService(),
+      logger: this.logger,
+    });
 
     registerImpactStepDefinitions({
       workflowsExtensions,
@@ -75,6 +81,8 @@ export class AgenticInvestigationsPlugin
         getSecurity: async () => (await coreSetup.getStartServices())[1].security,
         logger: this.logger,
       }),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     const router = coreSetup.http.createRouter();
@@ -85,6 +93,8 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     registerEscalationRoutes({
@@ -103,6 +113,12 @@ export class AgenticInvestigationsPlugin
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
     });
 
+    registerInvestigationStepDefinitions({
+      workflowsExtensions,
+      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
     return {};
   }
 
@@ -111,6 +127,7 @@ export class AgenticInvestigationsPlugin
     plugins: AgenticInvestigationsStartDependencies
   ): AgenticInvestigationsPluginStart {
     this.spaces = plugins.spaces;
+    this.agentBuilder = plugins.agentBuilder;
     this.resolveUser = createUserResolver({
       userProfile: coreStart.userProfile,
       security: coreStart.security,
@@ -138,6 +155,8 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
+      getAttachmentsClient: (request) =>
+        plugins.agentBuilder.attachments.getScopedClient({ request }),
       conversationTemplates: plugins.agentBuilder.conversationTemplates,
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
     });
@@ -200,6 +219,28 @@ export class AgenticInvestigationsPlugin
 
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+  }
+
+  /**
+   * Agent Builder stays required because escalations and assignments are
+   * conversations. Callers resolve these clients before the impact index write,
+   * so a missing client fails the attach.
+   */
+  private requireAgentBuilder(): NonNullable<AgenticInvestigationsPlugin['agentBuilder']> {
+    if (!this.agentBuilder) {
+      throw new Error(
+        'Agent Builder is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.agentBuilder;
+  }
+
+  private async getAttachmentClient(request: KibanaRequest): Promise<AttachmentPublicClient> {
+    return this.requireAgentBuilder().attachments.getScopedClient({ request });
+  }
+
+  private async getConversationClient(request: KibanaRequest): Promise<ConversationPublicClient> {
+    return this.requireAgentBuilder().conversations.getScopedClient({ request });
   }
 
   /**
