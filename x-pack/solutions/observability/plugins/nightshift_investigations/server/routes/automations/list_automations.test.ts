@@ -33,8 +33,8 @@ describe('list automations', () => {
 
     expect(result).toEqual({
       automations: [
-        expect.objectContaining({ id: 'with-author', author: { username: 'alice' } }),
-        expect.objectContaining({ id: 'without-author', author: { username: 'System' } }),
+        expect.objectContaining({ id: 'with-author', author: 'alice' }),
+        expect.objectContaining({ id: 'without-author', author: 'System' }),
       ],
       total: 2,
     });
@@ -54,6 +54,6 @@ describe('get automation', () => {
       context: createRouteContext(),
     } as never);
 
-    expect(result).toMatchObject({ id: 'automation-1', author: { username: 'bob' } });
+    expect(result).toMatchObject({ id: 'automation-1', author: 'bob' });
   });
 });

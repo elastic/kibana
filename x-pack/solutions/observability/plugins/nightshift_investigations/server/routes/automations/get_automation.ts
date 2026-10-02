@@ -37,7 +37,7 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
     return {
       id: so.id,
       ...so.attributes,
-      author: { username: so.attributes.author ?? 'System' },
+      author: so.attributes.author ?? 'System',
     };
   },
 });

@@ -9,7 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createAutomationRoute } from './create_automation';
 import { createRouteContext } from './test_helpers';
 
-const { handler } = createAutomationRoute['POST /internal/nightshift/automations'];
+const { handler, params } = createAutomationRoute['POST /internal/nightshift/automations'];
 
 const soClient = { create: jest.fn(), update: jest.fn(), delete: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
@@ -78,4 +78,23 @@ it('removes the automation when the workflow cannot be created', async () => {
 
   await expect(call()).rejects.toThrow('Failed to create backing workflow: invalid yaml');
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
+});
+
+describe('request validation', () => {
+  const slackRow = {
+    kind: 'slack',
+    event: 'mention',
+    channels: ['#oncall'],
+    users: ['U123'],
+    messageFilter: 'outage',
+  };
+  const parseRows = (rows: unknown[]) => params.parse({ body: { ...body, trigger: { rows } } });
+
+  it('accepts Slack trigger rows and keeps their fields', () => {
+    expect(parseRows([slackRow]).body.trigger.rows).toEqual([slackRow]);
+  });
+
+  it('rejects an unknown Slack event', () => {
+    expect(() => parseRows([{ ...slackRow, event: 'reaction' }])).toThrow();
+  });
 });

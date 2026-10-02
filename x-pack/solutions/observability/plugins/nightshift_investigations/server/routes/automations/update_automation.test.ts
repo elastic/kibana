@@ -9,7 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { updateAutomationRoute } from './update_automation';
 import { createRouteContext } from './test_helpers';
 
-const { handler } = updateAutomationRoute['PUT /internal/nightshift/automations/{id}'];
+const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/automations/{id}'];
 
 const soClient = { get: jest.fn(), update: jest.fn() };
 const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
@@ -68,5 +68,25 @@ it('merges partial nested updates', async () => {
     tags: ['oncall'],
     isEnabled: false,
     execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
+  });
+});
+
+describe('request validation', () => {
+  const slackRow = {
+    kind: 'slack',
+    event: 'message',
+    channels: ['#alerts'],
+    users: ['U123'],
+    messageFilter: 'error',
+  };
+  const parseRows = (rows: unknown[]) =>
+    params.parse({ path: { id: 'automation-1' }, body: { trigger: { rows } } });
+
+  it('accepts Slack trigger rows and keeps their fields', () => {
+    expect(parseRows([slackRow]).body.trigger?.rows).toEqual([slackRow]);
+  });
+
+  it('rejects an unknown Slack event', () => {
+    expect(() => parseRows([{ ...slackRow, event: 'reaction' }])).toThrow();
   });
 });
