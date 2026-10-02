@@ -85,7 +85,7 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
-import type { AlertStatusChangedV1Payload } from '../common/workflows/triggers';
+import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';

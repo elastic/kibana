@@ -4516,7 +4516,7 @@ describe('Task Runner', () => {
   // ---------------------------------------------------------------------------
 
   describe('alerting.v1.alertStatusChanged workflow trigger', () => {
-    const mockBus = { publish: jest.fn() };
+    const mockBus = { publish: jest.fn(), subscribe: jest.fn() };
 
     /** Minimal alert stub — only the methods task_runner.ts calls for the payload. */
     const makeMockAlert = (opts: {
@@ -4548,7 +4548,6 @@ describe('Task Runner', () => {
       mockBus.publish.mockClear();
       ruleType.autoRecoverAlerts = true;
       ruleType.executor.mockResolvedValue({ state: {} });
-      mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       alertsClient.getRawAlertInstancesForState.mockReturnValue({
         rawActiveAlerts: {},
@@ -4560,7 +4559,7 @@ describe('Task Runner', () => {
       mockedRawRuleSO.attributes.enabled = true;
       // Use a rule with no actions so ActionScheduler is a no-op and won't
       // call methods on our minimal alert stubs.
-      mockGetRuleFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, actions: [] });
+      mockGetRuleFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, actions: [] } as Rule);
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
       alertsClient.getProcessedAlerts.mockReturnValue({});
     });
