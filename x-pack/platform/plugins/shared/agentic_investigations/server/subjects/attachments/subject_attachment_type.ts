@@ -69,6 +69,8 @@ export const subjectAttachment = defineInvestigationAttachment<
   storageSettings: subjectStorageSettings,
   schema: investigationSubjectSchema,
   maxDocumentsPerConversation: MAX_SUBJECTS_PER_CONVERSATION,
+  // The investigation overview shows subjects; the chat does not.
+  hiddenInConversation: true,
   format: formatSubjectForAgent,
   describe: (subject) => `${SUBJECT_TYPE_LABELS[subject.subjectType]}: ${subject.subjectId}`,
   agentDescription:
