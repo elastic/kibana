@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/management-settings-ids'
   - '@kbn/ui-callout'
-  - '@kbn/es-ui-shared-plugin'
   - '@kbn/storybook'
   - '@kbn/i18n-react'
   - '@kbn/utility-types'

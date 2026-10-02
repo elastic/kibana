@@ -87,6 +87,19 @@ describe('ServiceAccountsTable', () => {
     );
   };
 
+  const openRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await screen.findByTestId('euiSelectableList');
+  };
+
+  const clickRoleOption = (role: string) =>
+    fireEvent.click(within(screen.getByTestId('euiSelectableList')).getByText(role));
+
+  const closeRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await waitFor(() => expect(screen.queryByTestId('euiSelectableList')).not.toBeInTheDocument());
+  };
+
   it('renders directory metadata without unavailable follow-up actions', () => {
     renderTable();
 
@@ -120,21 +133,18 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by the selected role and restores them when cleared', async () => {
     renderTable();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    const viewerOption = await screen.findByRole('option', { name: 'viewer' });
-    await waitFor(() => expect(viewerOption).toBeVisible());
-    fireEvent.click(viewerOption);
+    await openRoleFilter();
+    clickRoleOption('viewer');
 
     expect(screen.getByText('nightshift-relay')).toBeVisible();
     expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole('option', { name: 'viewer' }));
+    clickRoleOption('viewer');
 
     expect(screen.getByText('incident-responder')).toBeVisible();
     expect(screen.getByText('nightshift-relay')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await waitFor(() => expect(viewerOption).not.toBeVisible());
+    await closeRoleFilter();
   });
 
   it.each([
@@ -215,16 +225,13 @@ describe('ServiceAccountsTable', () => {
     renderPaginatedTable();
 
     fireEvent.click(screen.getByTestId('pagination-button-next'));
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    const editorOption = await screen.findByRole('option', { name: 'editor' });
-    await waitFor(() => expect(editorOption).toBeVisible());
-    fireEvent.click(editorOption);
+    await openRoleFilter();
+    clickRoleOption('editor');
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await waitFor(() => expect(editorOption).not.toBeVisible());
+    await closeRoleFilter();
   });
 
   it('offers to retry when loading the next cursor page fails', () => {
