@@ -35,6 +35,7 @@ import {
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
   ESQL_VISOR_NL_SUBMITTED,
+  ESQL_VISOR_NL_REVIEWED,
   ESQL_COMMENT_TO_ESQL_SUBMITTED,
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
@@ -304,6 +305,13 @@ export class ESQLEditorTelemetryService {
       ...(params.generatedQueryLength !== undefined
         ? { generated_query_length: params.generatedQueryLength }
         : {}),
+    });
+  }
+
+  public trackVisorNlReviewed(params: { action: AiReviewAction; linesGenerated: number }) {
+    this._reportEvent(ESQL_VISOR_NL_REVIEWED, {
+      action: params.action,
+      lines_generated: params.linesGenerated,
     });
   }
 

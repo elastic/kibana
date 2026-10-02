@@ -692,7 +692,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
 
   const visorNlOnSubmit = useCallback(
-    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH),
+    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH_NL),
     [onUpdateAndSubmitQuery]
   );
 
@@ -701,6 +701,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
+    telemetryService,
   });
 
   useEffect(() => {

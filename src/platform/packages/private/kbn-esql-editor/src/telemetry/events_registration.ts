@@ -27,6 +27,7 @@ export const ESQL_CONTROL_SAVED = 'esql.control_saved';
 export const ESQL_RESOURCE_BROWSER_OPENED = 'esql.resource_browser_opened';
 export const ESQL_RESOURCE_BROWSER_ITEM_TOGGLED = 'esql.resource_browser_item_toggled';
 export const ESQL_VISOR_NL_SUBMITTED = 'esql.visor_nl_submitted';
+export const ESQL_VISOR_NL_REVIEWED = 'esql.visor_nl_reviewed';
 export const ESQL_COMMENT_TO_ESQL_SUBMITTED = 'esql.comment_to_esql_submitted';
 export const ESQL_COMMENT_TO_ESQL_REVIEWED = 'esql.comment_to_esql_reviewed';
 export const ESQL_FIX_WITH_AI_SUBMITTED = 'esql.fix_with_ai_submitted';
@@ -100,7 +101,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: {
           description:
-            'The source of the execution. Possible values are: manual|help|history|starred|autocomplete|quick_search|search_button|time_filter',
+            'The source of the execution. Possible values are: manual|help|history|starred|autocomplete|quick_search|quick_search_nl|search_button|time_filter',
         },
       },
       query_length: {
@@ -281,6 +282,20 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
           optional: true,
           description: 'Character count of the generated query on success.',
         },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_VISOR_NL_REVIEWED,
+    schema: {
+      action: {
+        type: 'keyword',
+        _meta: { description: 'User decision on the generated query. accept|reject' },
+      },
+      lines_generated: {
+        type: 'long',
+        _meta: { description: 'Number of lines in the generated suggestion.' },
       },
     },
   });
