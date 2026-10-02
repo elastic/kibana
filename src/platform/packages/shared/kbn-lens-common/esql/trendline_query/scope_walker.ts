@@ -71,6 +71,17 @@ const keepTransfer: CommandTransfer = (command, state, { ensureKept }) => {
   return state;
 };
 
+/** Removes the tracked column from DROP so it remains available downstream. */
+const dropTransfer: CommandTransfer = (command, state, { ensureKept }) => {
+  if (!ensureKept) return state;
+
+  const droppedColumnIndex = command.args.findIndex(
+    (arg) => isColumn(arg) && arg.name === state.name
+  );
+  if (droppedColumnIndex !== -1) command.args.splice(droppedColumnIndex, 1);
+  return state;
+};
+
 /**
  * Carries the tracked column across an aggregation boundary by adding it to
  * STATS BY. This keeps a time bucket produced upstream available downstream.
@@ -118,6 +129,7 @@ const identityTransfer: CommandTransfer = (_command, state) => state;
 const transferFns: Record<string, CommandTransfer> = {
   rename: renameTransfer,
   keep: keepTransfer,
+  drop: dropTransfer,
   stats: statsTransfer,
 };
 
@@ -131,15 +143,17 @@ const walkColumn = (
   commands: ESQLCommand[],
   columnName: string,
   { ensureKept, ensureGrouped }: TransferContext
-): TrackedColumnState =>
-  commands.reduce<TrackedColumnState>(
-    (state, command) =>
-      (transferFns[command.name] ?? identityTransfer)(command, state, {
+): TrackedColumnState => {
+  let state = { name: columnName };
+  for (let index = 0; index < commands.length; index++) {
+    const command = commands[index];
+    state = (transferFns[command.name] ?? identityTransfer)(command, state, {
       ensureKept,
       ensureGrouped,
-      }),
-    { name: columnName }
-  );
+    });
+  }
+  return state;
+};
 
 /**
  * Resolves the final name of a column after walking pipeline commands.
@@ -158,5 +172,19 @@ export const resolveTrackedColumn = (
 export const trackColumnAndEnsureKept = (
   commands: ESQLCommand[],
   columnName: string,
-  { ensureGrouped = false }: { ensureGrouped?: boolean } = {}
-): TrackedColumnState => walkColumn(commands, columnName, { ensureKept: true, ensureGrouped });
+  {
+    ensureGrouped = false,
+    containingCommands = commands,
+  }: { ensureGrouped?: boolean; containingCommands?: ESQLCommand[] } = {}
+): TrackedColumnState => {
+  const state = walkColumn(commands, columnName, { ensureKept: true, ensureGrouped });
+  // Removing the only DROP argument leaves invalid ES|QL. Use object identity
+  // to remove that command from its containing pipeline when walking a slice.
+  const emptiedDrops = new Set(
+    commands.filter((command) => command.name === 'drop' && command.args.length === 0)
+  );
+  for (let index = containingCommands.length - 1; index >= 0; index--) {
+    if (emptiedDrops.has(containingCommands[index])) containingCommands.splice(index, 1);
+  }
+  return state;
+};

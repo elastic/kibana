@@ -83,6 +83,14 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       metricFields: ['avg_total'],
     },
     {
+      description: 'FROM query carrying a BUCKET through DROP and a later STATS',
+      sourceQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | DROP bucket | STATS avg_total = AVG(total)`,
+      expectedQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY bucket`,
+      expectedTimeField: 'bucket',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
+    },
+    {
       description: 'FROM query carrying an aliased BUCKET through an aliased later STATS grouping',
       sourceQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY time_bucket = bucket`,
       expectedQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY time_bucket = bucket`,

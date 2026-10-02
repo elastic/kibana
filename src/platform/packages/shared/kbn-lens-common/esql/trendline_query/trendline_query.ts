@@ -95,6 +95,7 @@ const rewriteTrendlineAst = (
     const commandsAfterStats = root.commands.slice(root.commands.indexOf(tsStatsCommand) + 1);
     return trackColumnAndEnsureKept(commandsAfterStats, tbucketColumn, {
       ensureGrouped: true,
+      containingCommands: root.commands,
     }).name;
   }
 
@@ -107,6 +108,7 @@ const rewriteTrendlineAst = (
     const commandsAfterStats = root.commands.slice(root.commands.indexOf(tbucketStatsCommand) + 1);
     return trackColumnAndEnsureKept(commandsAfterStats, tbucketColumn, {
       ensureGrouped: true,
+      containingCommands: root.commands,
     }).name;
   }
 
@@ -136,10 +138,18 @@ const rewriteTrendlineAst = (
     // available to the trendline layer.
     const statsIndex = root.commands.indexOf(statsCmd);
     const timeResultColumn = getBucketResultColumnForField(statsCmd, timeField) ?? bucketExpr;
-    trackColumnAndEnsureKept(root.commands.slice(0, statsIndex), timeField);
-    return trackColumnAndEnsureKept(root.commands.slice(statsIndex + 1), timeResultColumn, {
-      ensureGrouped: true,
-    }).name;
+    const finalTimeColumn = trackColumnAndEnsureKept(
+      root.commands.slice(statsIndex + 1),
+      timeResultColumn,
+      {
+        ensureGrouped: true,
+        containingCommands: root.commands,
+      }
+    );
+    trackColumnAndEnsureKept(root.commands.slice(0, statsIndex), timeField, {
+      containingCommands: root.commands,
+    });
+    return finalTimeColumn.name;
   }
 
   trackColumnAndEnsureKept(root.commands, timeField);

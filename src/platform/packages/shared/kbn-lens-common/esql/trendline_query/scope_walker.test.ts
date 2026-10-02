@@ -61,6 +61,20 @@ describe('trackColumnAndEnsureKept', () => {
     );
   });
 
+  it('removes the tracked column from DROP commands', () => {
+    const root = parse('FROM index | DROP bytes, time_bucket');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket');
+    expect(BasicPrettyPrinter.print(root)).toBe('FROM index | DROP bytes');
+  });
+
+  it('removes a DROP command when it only drops the tracked column', () => {
+    const root = parse('FROM index | DROP time_bucket | STATS total = COUNT(*)');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
+
   it('adds a BY clause to STATS when grouping is required', () => {
     const root = parse('FROM index | STATS total = COUNT(*)');
     trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
