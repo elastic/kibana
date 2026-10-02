@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
 
@@ -21,12 +23,24 @@ const createPlugin = () =>
 
 const createSetupDeps = () =>
   ({
+    share: { url: new MockUrlService() },
     taskManager: {
       registerTaskDefinitions: jest.fn(),
     },
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
+  it('registers the investigation locator on the server', async () => {
+    const dependencies = createSetupDeps();
+    createPlugin().setup(coreMock.createSetup(), dependencies);
+    const locator = dependencies.share.url.locators.get(NIGHTSHIFT_INVESTIGATION_LOCATOR_ID);
+    expect(await locator?.getLocation({ investigationId: 'inv/1' })).toEqual({
+      app: 'nightshift',
+      path: '?investigationId=inv%2F1',
+      state: {},
+    });
+  });
+
   it('accepts one investigation quota callback', () => {
     const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
     const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });

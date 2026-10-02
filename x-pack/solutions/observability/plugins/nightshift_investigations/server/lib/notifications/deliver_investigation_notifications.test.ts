@@ -6,25 +6,27 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InvestigationNotification, InvestigationNotificationOutcome } from '../../../common';
-import {
-  buildInvestigationUrl,
-  deliverInvestigationNotifications,
-} from './deliver_investigation_notifications';
+import type {
+  InvestigationNotification,
+  InvestigationNotificationDestination,
+  InvestigationNotificationOutcome,
+} from '../../../common';
+import { InvalidNotificationDestinationError } from '../../client/errors';
+import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
 
 const destination = (
-  overrides: Partial<InvestigationNotification> = {}
-): InvestigationNotification => ({
+  overrides: Partial<InvestigationNotificationDestination> = {}
+): InvestigationNotificationDestination => ({
   type: 'slack',
   connector_id: 'elastic-apps-slack',
-  channel: '#alerts',
+  params: { channel: '#alerts' },
   automation_id: 'auto-1',
   automation_name: 'Prod alerts',
   ...overrides,
 });
 
 const investigation = (
-  notifications: InvestigationNotification[],
+  notificationDestinations: InvestigationNotificationDestination[],
   status = 'completed' as const
 ) => ({
   investigation_id: 'inv-1',
@@ -32,7 +34,8 @@ const investigation = (
   status,
   severity: '60-high' as const,
   summary: 'Latency rose after a deploy.',
-  notifications,
+  notificationDestinations,
+  notifications: [] as InvestigationNotification[],
 });
 
 const ok = {
@@ -41,38 +44,26 @@ const ok = {
   data: { ok: true, ts: '1759190400.000100' },
 };
 
-describe('buildInvestigationUrl', () => {
-  it('omits the space prefix for the default space', () => {
-    expect(buildInvestigationUrl('https://kibana.example.com/', 'default', 'inv-1')).toBe(
-      'https://kibana.example.com/app/nightshift?investigationId=inv-1'
-    );
-  });
-
-  it('prefixes a non-default space and encodes the id', () => {
-    expect(buildInvestigationUrl('https://kibana.example.com', 'team a', 'inv/1')).toBe(
-      'https://kibana.example.com/s/team%20a/app/nightshift?investigationId=inv%2F1'
-    );
-  });
-});
-
 describe('deliverInvestigationNotifications', () => {
   const logger = loggerMock.create();
-  const setup = (notifications: InvestigationNotification[] = [destination()]) => {
-    const record = investigation(structuredClone(notifications));
+  const setup = (
+    notificationDestinations: InvestigationNotificationDestination[] = [destination()]
+  ) => {
+    const record = investigation(structuredClone(notificationDestinations));
     const client = {
       get: jest.fn().mockImplementation(async () => record),
-      claimNotification: jest
+      claimNotificationDestination: jest
         .fn()
         .mockImplementation(async (_id: string, index: number, attemptId: string) => {
-          const notification = record.notifications[index];
-          if (notification.status !== undefined) return undefined;
+          if (record.notifications.some(({ destination_index }) => destination_index === index))
+            return undefined;
           const claim = {
-            ...notification,
+            destination_index: index,
             status: 'unconfirmed' as const,
             attempt_id: attemptId,
             attempted_at: new Date().toISOString(),
           };
-          record.notifications[index] = claim;
+          record.notifications.push(claim);
           return claim;
         }),
       recordNotificationOutcome: jest
@@ -80,11 +71,18 @@ describe('deliverInvestigationNotifications', () => {
         .mockImplementation(
           async (
             _id: string,
-            index: number,
-            _attemptId: string,
+            destinationIndex: number,
+            attemptId: string,
             outcome: InvestigationNotificationOutcome
           ) => {
-            record.notifications[index] = { ...record.notifications[index], ...outcome };
+            const notificationIndex = record.notifications.findIndex(
+              ({ destination_index, attempt_id }) =>
+                destination_index === destinationIndex && attempt_id === attemptId
+            );
+            record.notifications[notificationIndex] = {
+              ...record.notifications[notificationIndex],
+              ...outcome,
+            };
           }
         ),
     };
@@ -93,8 +91,7 @@ describe('deliverInvestigationNotifications', () => {
     const deliver = () =>
       deliverInvestigationNotifications({
         investigation: record,
-        kibanaUrl: 'https://kibana.example.com',
-        spaceId: 'ops',
+        investigationUrl: 'https://kibana.example.com/s/ops/app/r?l=investigation',
         execute,
         client: client as never,
         signal: controller.signal,
@@ -105,10 +102,26 @@ describe('deliverInvestigationNotifications', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
+  it.each([
+    destination({ type: 'unsupported', params: {} }),
+    destination({ params: {} }),
+    destination({ params: { channel: '' } }),
+    destination({ params: { channel: '#alerts', status: 'sent' } }),
+  ])(
+    'rejects invalid destination params before any claim or post (%j)',
+    async (notificationDestination) => {
+      const { record, client, execute, deliver } = setup([notificationDestination]);
+      await expect(deliver()).rejects.toThrow(InvalidNotificationDestinationError);
+      expect(client.claimNotificationDestination).not.toHaveBeenCalled();
+      expect(execute).not.toHaveBeenCalled();
+      expect(record.notifications).toEqual([]);
+    }
+  );
+
   it('claims before posting, passes cancellation, and persists each result immediately', async () => {
     const { record, client, execute, controller, deliver } = setup([
       destination(),
-      destination({ channel: '#oncall', thread_ts: '1.1' }),
+      destination({ params: { channel: '#oncall', thread_ts: '1.1' } }),
     ]);
     execute.mockImplementation(async () => {
       const index = execute.mock.calls.length - 1;
@@ -133,7 +146,7 @@ describe('deliverInvestigationNotifications', () => {
       expect.objectContaining({
         channel: '#oncall',
         threadTs: '1.1',
-        text: expect.stringContaining('/s/ops/app/nightshift'),
+        text: expect.stringContaining('https://kibana.example.com/s/ops/app/r?l=investigation'),
       })
     );
     expect(client.recordNotificationOutcome).toHaveBeenCalledWith(
@@ -146,6 +159,28 @@ describe('deliverInvestigationNotifications', () => {
         sent_at: expect.any(String),
       })
     );
+  });
+
+  it('sends an unattempted destination when another destination was attempted first', async () => {
+    const { record, execute, deliver } = setup([
+      destination(),
+      destination({ params: { channel: '#oncall' } }),
+    ]);
+    const priorAttempt: InvestigationNotification = {
+      destination_index: 1,
+      status: 'unconfirmed',
+      attempt_id: 'prior-attempt',
+      attempted_at: '2026-10-02T00:00:00.000Z',
+    };
+    record.notifications.push(priorAttempt);
+
+    await expect(deliver()).resolves.toEqual({ sent: 1, failed: 0, unconfirmed: 1 });
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0].params.subActionParams.channel).toBe('#alerts');
+    expect(record.notifications).toEqual([
+      priorAttempt,
+      expect.objectContaining({ destination_index: 0, status: 'sent', message_ts: ok.data.ts }),
+    ]);
   });
 
   it('persists connector error responses as failed', async () => {
@@ -167,7 +202,7 @@ describe('deliverInvestigationNotifications', () => {
       const { record, execute, deliver } = setup();
       execute.mockResolvedValue({ ...ok, data: { ts } });
       await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
-      expect(record.notifications[0].error).toContain('timestamp');
+      expect(record.notifications[0].error).toContain('message ID');
     }
   );
 
@@ -178,20 +213,28 @@ describe('deliverInvestigationNotifications', () => {
     expect(record.notifications[0].error).toHaveLength(10000);
   });
 
-  it('never replays sent, failed, or unconfirmed destinations', async () => {
-    const notifications = ['sent', 'failed', 'unconfirmed'].map((status) =>
-      destination({ status: status as InvestigationNotification['status'] })
+  it('never replays sent, failed, or unconfirmed attempts and leaves destinations unchanged', async () => {
+    const notificationDestinations = [destination(), destination(), destination()];
+    const { record, client, execute, deliver } = setup(notificationDestinations);
+    record.notifications = (['sent', 'failed', 'unconfirmed'] as const).map(
+      (status, destination_index) => ({
+        status,
+        destination_index,
+        attempt_id: `attempt-${destination_index}`,
+        attempted_at: '2026-10-02T00:00:00.000Z',
+      })
     );
-    const { record, client, execute, deliver } = setup(notifications);
+    const originalNotifications = structuredClone(record.notifications);
     await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
-    expect(client.claimNotification).not.toHaveBeenCalled();
+    expect(client.claimNotificationDestination).not.toHaveBeenCalled();
     expect(execute).not.toHaveBeenCalled();
-    expect(record.notifications).toEqual(notifications);
+    expect(record.notifications).toEqual(originalNotifications);
+    expect(record.notificationDestinations).toEqual(notificationDestinations);
   });
 
   it('retains a crash-after-claim marker and skips it on replay', async () => {
     const { client, execute, deliver } = setup();
-    await client.claimNotification('inv-1', 0, 'crashed-attempt');
+    await client.claimNotificationDestination('inv-1', 0, 'crashed-attempt');
     await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
     expect(execute).not.toHaveBeenCalled();
   });
@@ -199,13 +242,13 @@ describe('deliverInvestigationNotifications', () => {
   it('stops after successful post/result-write failure and skips that attempt on replay', async () => {
     const { record, client, execute, deliver } = setup([
       destination(),
-      destination({ channel: '#oncall' }),
+      destination({ params: { channel: '#oncall' } }),
     ]);
     client.recordNotificationOutcome.mockRejectedValueOnce(new Error('storage unavailable'));
     await expect(deliver()).rejects.toThrow('storage unavailable');
     expect(execute).toHaveBeenCalledTimes(1);
     expect(record.notifications[0].status).toBe('unconfirmed');
-    expect(record.notifications[1].status).toBeUndefined();
+    expect(record.notifications).toHaveLength(1);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(record.notifications[0].attempt_id ?? '')
     );
@@ -216,13 +259,13 @@ describe('deliverInvestigationNotifications', () => {
 
   it('stops before posting when claim persistence fails', async () => {
     const { client, execute, deliver } = setup([destination(), destination()]);
-    client.claimNotification.mockRejectedValueOnce(new Error('storage unavailable'));
+    client.claimNotificationDestination.mockRejectedValueOnce(new Error('storage unavailable'));
     await expect(deliver()).rejects.toThrow('storage unavailable');
     expect(execute).not.toHaveBeenCalled();
-    expect(client.claimNotification).toHaveBeenCalledTimes(1);
+    expect(client.claimNotificationDestination).toHaveBeenCalledTimes(1);
   });
 
-  it('concurrent deliveries post once and count unresolved claims', async () => {
+  it('skips a persisted claim while its connector execution is still in progress', async () => {
     const { execute, deliver } = setup();
     let finish: (value: typeof ok) => void = () => {};
     execute.mockImplementation(
@@ -243,15 +286,16 @@ describe('deliverInvestigationNotifications', () => {
     const { controller, client, execute, deliver } = setup();
     controller.abort();
     await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
-    expect(client.claimNotification).not.toHaveBeenCalled();
+    expect(client.claimNotificationDestination).not.toHaveBeenCalled();
     expect(execute).not.toHaveBeenCalled();
   });
 
   it('records cancellation after a claim without invoking the connector', async () => {
     const { controller, client, record, execute, deliver } = setup();
     const claim =
-      client.claimNotification.getMockImplementation() ?? (() => Promise.resolve(undefined));
-    client.claimNotification.mockImplementation(async (...args) => {
+      client.claimNotificationDestination.getMockImplementation() ??
+      (() => Promise.resolve(undefined));
+    client.claimNotificationDestination.mockImplementation(async (...args) => {
       const result = await claim(...args);
       controller.abort();
       return result;
@@ -269,7 +313,7 @@ describe('deliverInvestigationNotifications', () => {
     });
     await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
     expect(record.notifications[0].error).toContain('Cancelled during');
-    expect(record.notifications[1].status).toBeUndefined();
+    expect(record.notifications).toHaveLength(1);
     expect(execute).toHaveBeenCalledTimes(1);
   });
 
@@ -278,8 +322,7 @@ describe('deliverInvestigationNotifications', () => {
     await expect(
       deliverInvestigationNotifications({
         investigation: { ...record, status: 'running' },
-        kibanaUrl: '',
-        spaceId: 'ops',
+        investigationUrl: '',
         execute,
         client: client as never,
         signal: controller.signal,

@@ -15,9 +15,8 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
   inactive: 'recovered',
 };
 
-// ponytail: mirrors ELASTIC_APPS_SLACK_CONNECTOR_ID in significant_events/server/lib/slack_app/service.ts,
-// which this plugin cannot import (significant_events depends on this plugin). Move to
-// @kbn/connector-specs slack/constants.ts if a third consumer appears.
+// Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
+// Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
 const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 // Maps our OverlapPolicy type to workflow engine concurrency strategy strings.
@@ -51,7 +50,7 @@ export function generateWorkflowYaml(
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
-  const notifications = buildNotifications(automationId, automation);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation);
 
   const workflowObj: Record<string, unknown> = {
     name: automation.name,
@@ -79,7 +78,7 @@ export function generateWorkflowYaml(
           ...(automation.execution.promptTemplate
             ? { message: automation.execution.promptTemplate }
             : {}),
-          ...(notifications ? { notifications } : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
     ],
@@ -95,7 +94,7 @@ export function generateWorkflowYaml(
  * which no current trigger row provides; rendering those on an alert trigger would produce empty
  * strings and the investigation step would reject the run.
  */
-function buildNotifications(
+function buildNotificationDestinations(
   automationId: string,
   automation: NightshiftAutomationAttributes
 ): InvestigationNotificationDestination[] | undefined {
@@ -111,7 +110,7 @@ function buildNotifications(
     {
       type: 'slack',
       connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
-      channel: completion.destination,
+      params: { channel: completion.destination },
       automation_id: automationId,
       automation_name: automation.name,
     },

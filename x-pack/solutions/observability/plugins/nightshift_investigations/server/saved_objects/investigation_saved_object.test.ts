@@ -90,7 +90,7 @@ describe('nightshift investigation saved object model version 5', () => {
     expect(modelVersion5?.schemas?.forwardCompatibility).toBeDefined();
   });
 
-  it('accepts Slack notification destinations with delivery results', () => {
+  it('accepts immutable destinations and separate delivery attempts', () => {
     const create = modelVersion5?.schemas?.create as { validate: (value: unknown) => unknown };
     expect(() =>
       create.validate({
@@ -101,14 +101,19 @@ describe('nightshift investigation saved object model version 5', () => {
         trigger_type: 'automatic',
         created_at: '2026-09-30T00:00:00.000Z',
         impact: { summary: 'Checkout latency rose.', evidence: { description: 'Latency chart' } },
-        notifications: [
+        notificationDestinations: [
           {
             type: 'slack',
             connector_id: 'elastic-apps-slack',
-            channel: '#alerts',
+            params: { channel: '#alerts' },
             automation_id: 'auto-1',
             automation_name: 'Prod alerts',
-            status: 'unconfirmed',
+          },
+        ],
+        notifications: [
+          {
+            destination_index: 0,
+            status: 'sent',
             attempt_id: 'attempt-1',
             attempted_at: '2026-09-30T00:04:00.000Z',
             message_ts: '1759190400.000100',

@@ -23,6 +23,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { NightshiftInvestigationsConfig } from './config';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
@@ -36,7 +37,7 @@ import {
   isInvestigationRunAvailable,
 } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
-import { notifyInvestigationStepDefinition } from './step_definitions/notify_investigation';
+import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
@@ -126,6 +127,9 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
+    const investigationLocator = plugins.share.url.locators.create(
+      new InvestigationLocatorDefinition()
+    );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
@@ -300,7 +304,8 @@ export class NightshiftInvestigationsPlugin
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          notifyInvestigationStepDefinition({
+          sendNotificationsStepDefinition({
+            investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
           })

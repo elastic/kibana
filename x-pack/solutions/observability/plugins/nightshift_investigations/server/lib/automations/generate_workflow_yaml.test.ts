@@ -186,11 +186,11 @@ describe('generateWorkflowYaml', () => {
         destination: '#prod-alerts',
       };
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.steps[0].with.notifications).toEqual([
+      expect(yaml.steps[0].with.notificationDestinations).toEqual([
         {
           type: 'slack',
           connector_id: 'elastic-apps-slack',
-          channel: '#prod-alerts',
+          params: { channel: '#prod-alerts' },
           automation_id: 'auto-123',
           automation_name: 'Test automation',
         },
@@ -206,8 +206,11 @@ describe('generateWorkflowYaml', () => {
         connectorId: 'my-slack-bot',
       };
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.steps[0].with.notifications[0]).toEqual(
-        expect.objectContaining({ connector_id: 'my-slack-bot', channel: 'C0123456789' })
+      expect(yaml.steps[0].with.notificationDestinations[0]).toEqual(
+        expect.objectContaining({
+          connector_id: 'my-slack-bot',
+          params: { channel: 'C0123456789' },
+        })
       );
     });
 
@@ -220,11 +223,11 @@ describe('generateWorkflowYaml', () => {
         { action: 'post_to_slack', targetMode: 'thread' },
       ],
       ['channel mode without a destination', { action: 'post_to_slack', targetMode: 'channel' }],
-    ] as const)('omits notifications for %s', (_label, completion) => {
+    ] as const)('omits notificationDestinations for %s', (_label, completion) => {
       const automation = baseAutomation();
       automation.completion = { ...completion };
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.steps[0].with.notifications).toBeUndefined();
+      expect(yaml.steps[0].with.notificationDestinations).toBeUndefined();
     });
 
     it('does not include execution.id anywhere in the output', () => {

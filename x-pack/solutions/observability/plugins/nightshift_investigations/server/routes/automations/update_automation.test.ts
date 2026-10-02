@@ -65,7 +65,7 @@ it('validates merged completion and preserves omitted connector and action field
   );
   expect(updateWorkflow).toHaveBeenCalledWith(
     'wf-1',
-    { yaml: expect.stringContaining('notifications:') },
+    { yaml: expect.stringContaining('notificationDestinations:') },
     'ops',
     request
   );

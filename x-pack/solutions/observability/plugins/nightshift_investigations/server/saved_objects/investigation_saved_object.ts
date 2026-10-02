@@ -114,6 +114,7 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
 });
 
 const investigationAttributesSchemaV5 = investigationAttributesSchemaV4.extends({
+  notificationDestinations: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
   notifications: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
 });
 

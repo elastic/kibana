@@ -6,12 +6,7 @@
  */
 
 import type { Severity } from '@kbn/significant-events-schema';
-import type { GetInvestigationResponse } from '../../../common';
-
-export type NotifiableInvestigation = Pick<
-  GetInvestigationResponse,
-  'title' | 'status' | 'severity' | 'summary' | 'impact' | 'recommendations' | 'error'
->;
+import type { NotifiableInvestigation } from './notification_delivery';
 
 /** Slack truncates long messages; a channel post is a pointer, the detail lives in Kibana. */
 const MAX_SUMMARY_LENGTH = 1500;

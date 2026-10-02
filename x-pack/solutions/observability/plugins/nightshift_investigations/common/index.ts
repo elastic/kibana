@@ -93,8 +93,8 @@ export interface StartInvestigationRequest {
    */
   concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
-  /** Slack destinations to post the outcome to once the investigation settles. */
-  notifications?: InvestigationNotificationDestination[];
+  /** Destinations to send the outcome to once the investigation settles. */
+  notificationDestinations?: InvestigationNotificationDestination[];
 }
 
 export interface StartInvestigationResponse {
@@ -158,7 +158,9 @@ export interface GetInvestigationResponse extends InvestigationStructuredOutput 
   executed_by?: string;
   error?: string;
   conversation_id?: string;
-  /** Slack destinations and their delivery results, when an automation asked to be notified. */
+  /** Immutable destinations recorded when the investigation starts. */
+  readonly notificationDestinations?: readonly InvestigationNotificationDestination[];
+  /** Delivery attempts and their results, linked to a destination by destination_index. */
   notifications?: InvestigationNotification[];
 }
 

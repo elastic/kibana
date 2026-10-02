@@ -6,7 +6,7 @@
  */
 
 import { formatInvestigationSlackMessage } from './format_investigation_slack_message';
-import type { NotifiableInvestigation } from './format_investigation_slack_message';
+import type { NotifiableInvestigation } from './notification_delivery';
 
 const URL = 'https://kibana.example.com/app/nightshift?investigationId=inv-1';
 

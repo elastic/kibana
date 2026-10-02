@@ -11,8 +11,9 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
+import type { InvestigationLocator } from '../../common/locators';
 import type { GetInvestigationsClient } from '../routes/types';
-import type { ExecuteConnector } from '../lib/notifications/deliver_investigation_notifications';
+import type { ExecuteConnector } from '../lib/notifications/notification_delivery';
 import { deliverInvestigationNotifications } from '../lib/notifications/deliver_investigation_notifications';
 
 const inputSchema = z.object({
@@ -20,22 +21,24 @@ const inputSchema = z.object({
     .string()
     .min(1)
     .max(MAX_KEYWORD_LENGTH)
-    .describe('The settled investigation whose recorded Slack destinations should be notified'),
+    .describe('The settled investigation whose recorded destinations should receive notifications'),
 });
 
-export const notifyInvestigationStepDefinition = ({
+export const sendNotificationsStepDefinition = ({
+  investigationLocator,
   getInvestigationsClient,
   getActions,
 }: {
+  investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
   getActions: () => ActionsPluginStart | undefined;
 }) =>
   createServerStepDefinition({
-    id: 'nightshift.notifyInvestigation',
-    label: 'Notify Nightshift Investigation Destinations',
+    id: 'nightshift.sendNotifications',
+    label: 'Send Nightshift Notifications',
     category: StepCategory.Ai,
     description:
-      'Posts the outcome of a settled investigation to every Slack destination recorded on it and stores each delivery result on the investigation. A Slack failure is recorded, not thrown, so it never fails the run.',
+      'Sends the outcome of a settled investigation to its recorded destinations and stores each delivery attempt on the investigation.',
     inputSchema,
     outputSchema: z.object({
       sent: z.number().describe('Destinations that received the message in this run'),
@@ -55,7 +58,12 @@ export const notifyInvestigationStepDefinition = ({
       const investigation = await client.get(investigationId);
       const terminal = ['completed', 'failed', 'cancelled'].includes(investigation.status);
       const notifications = investigation.notifications ?? [];
-      if (!terminal || !notifications.some(({ status }) => status === undefined)) {
+      const notificationDestinations = investigation.notificationDestinations ?? [];
+      const hasEligibleDestination = notificationDestinations.some(
+        (_destination, destinationIndex) =>
+          !notifications.some(({ destination_index }) => destination_index === destinationIndex)
+      );
+      if (!terminal || !hasEligibleDestination) {
         return {
           output: {
             sent: 0,
@@ -71,7 +79,9 @@ export const notifyInvestigationStepDefinition = ({
       if (!context.abortSignal.aborted) {
         try {
           const actions = getActions();
-          if (!actions) throw new Error('actions plugin is not available');
+          if (!actions) {
+            throw new Error('actions plugin is not available');
+          }
           const actionsClient = await actions.getActionsClientWithRequestInSpace(
             request,
             brandSpaceId(spaceId)
@@ -79,13 +89,16 @@ export const notifyInvestigationStepDefinition = ({
           execute = (execution) => actionsClient.execute(execution);
         } catch (error) {
           setupError =
-            error instanceof Error ? error.message : 'Could not initialize Slack delivery';
+            error instanceof Error ? error.message : 'Could not initialize notification delivery';
         }
       }
+      // Without server.publicBaseUrl, the server locator returns a relative URL.
       const output = await deliverInvestigationNotifications({
         investigation,
-        kibanaUrl,
-        spaceId,
+        investigationUrl: new URL(
+          investigationLocator.getRedirectUrl({ investigationId }, { spaceId }),
+          kibanaUrl
+        ).toString(),
         logger: context.logger,
         execute,
         setupError,

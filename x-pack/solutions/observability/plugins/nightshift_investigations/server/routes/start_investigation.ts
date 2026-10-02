@@ -56,7 +56,7 @@ const startInvestigationBodySchema = z.union([
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
-    notifications: investigationNotificationDestinationsSchema.optional(),
+    notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),
   // A manual investigation is defined by its question, so `message` is required and the
   // subject id is optional: there is no entity to point at, only the prompt. The title is
@@ -76,7 +76,7 @@ const startInvestigationBodySchema = z.union([
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
     ...startInvestigationModel,
-    notifications: investigationNotificationDestinationsSchema.optional(),
+    notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),
 ]);
 
@@ -126,7 +126,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),
-          ...(body.notifications ? { notifications: body.notifications } : {}),
+          ...(body.notificationDestinations
+            ? { notificationDestinations: body.notificationDestinations }
+            : {}),
         });
       }
       return await client.start({

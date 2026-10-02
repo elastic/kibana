@@ -119,9 +119,9 @@ describe('Nightshift investigation workflow', () => {
     expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
   });
 
-  it('notifies destinations from the settled record without failing the run on a Slack error', () => {
+  it('sends notifications from the settled record without failing the run on a delivery error', () => {
     const notify = requireStep('notify_destinations');
-    expect(notify.type).toBe('nightshift.notifyInvestigation');
+    expect(notify.type).toBe('nightshift.sendNotifications');
     expect(notify.with).toEqual({ investigation_id: '{{ execution.id }}' });
     expect(notify['on-failure']).toEqual({ continue: true });
     expect(notify.if).toBeUndefined();
@@ -140,57 +140,68 @@ describe('Nightshift investigation workflow', () => {
     expect(result.success ? null : result.error.issues).toBeNull();
   });
 
-  it('accepts Slack destinations as a run input and rejects malformed ones', () => {
-    // Same path as the execution engine's validateWorkflowInputs.
-    const validator = buildFieldsZodValidator(
-      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
-    );
-    const base = { message: 'Investigate checkout latency', title: 'Checkout latency' };
-    const destination = {
-      type: 'slack',
-      connector_id: 'elastic-apps-slack',
-      channel: '#alerts',
-      automation_id: 'auto-1',
-      automation_name: 'Prod alerts',
-    };
-
-    expect(validator.safeParse({ ...base, notifications: [destination] }).success).toBe(true);
-    expect(validator.safeParse({ ...base }).success).toBe(true);
-    expect(
-      validator.safeParse({ ...base, notifications: [{ type: 'slack', channel: '#alerts' }] })
-        .success
-    ).toBe(false);
-    expect(
-      validator.safeParse({ ...base, notifications: [{ ...destination, type: 'email' }] }).success
-    ).toBe(false);
-    expect(
-      validator.safeParse({ ...base, notifications: [{ ...destination, status: 'sent' }] }).success
-    ).toBe(false);
-  });
-
-  it('enforces notification bounds and rejects delivery fields in workflow input', () => {
+  it('accepts generic destinations and leaves connector-specific validation to runtime', () => {
     const validator = buildFieldsZodValidator(
       getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
     );
     const base = { message: 'Investigate', title: 'Test' };
-    const destination = { type: 'slack', connector_id: 'slack', channel: '#alerts' };
-    const valid = (notifications: object[]) =>
-      validator.safeParse({ ...base, notifications }).success;
-    for (const field of ['connector_id', 'channel']) {
-      for (const value of [undefined, '', 'x'.repeat(501)])
-        expect(valid([{ ...destination, [field]: value }])).toBe(false);
-      expect(valid([{ ...destination, [field]: 'x'.repeat(500) }])).toBe(true);
-    }
+    const destination = {
+      type: 'slack',
+      connector_id: 'slack',
+      params: { channel: '#alerts', thread_ts: '1.2' },
+    };
+    expect(validator.safeParse({ ...base, notificationDestinations: [destination] }).success).toBe(
+      true
+    );
+    expect(
+      validator.safeParse({
+        ...base,
+        notificationDestinations: [
+          { type: 'future-connector', connector_id: 'c', params: { recipient: 'user' } },
+        ],
+      }).success
+    ).toBe(true);
+    expect(
+      validator.safeParse({ ...base, notificationDestinations: [{ ...destination, params: {} }] })
+        .success
+    ).toBe(true);
+    expect(validator.safeParse(base).success).toBe(true);
+  });
+
+  it('enforces envelope bounds and rejects fields outside params', () => {
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
+    );
+    const base = { message: 'Investigate', title: 'Test' };
+    const destination = { type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } };
+    const valid = (notificationDestinations: object[]) =>
+      validator.safeParse({ ...base, notificationDestinations }).success;
     for (const [field, limit] of [
-      ['thread_ts', 100],
-      ['automation_id', 500],
-      ['automation_name', 500],
+      ['type', 100],
+      ['connector_id', 500],
     ] as const) {
-      expect(valid([{ ...destination, [field]: '' }])).toBe(true);
+      for (const value of [undefined, '', 'x'.repeat(limit + 1)])
+        expect(valid([{ ...destination, [field]: value }])).toBe(false);
       expect(valid([{ ...destination, [field]: 'x'.repeat(limit) }])).toBe(true);
-      expect(valid([{ ...destination, [field]: 'x'.repeat(limit + 1) }])).toBe(false);
     }
-    for (const field of ['status', 'attempt_id', 'attempted_at', 'message_ts', 'error', 'sent_at'])
+    for (const field of ['automation_id', 'automation_name']) {
+      expect(valid([{ ...destination, [field]: '' }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(500) }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(501) }])).toBe(false);
+    }
+    for (const params of [undefined, null, [], 'channel'])
+      expect(valid([{ ...destination, params }])).toBe(false);
+    for (const field of [
+      'destination_index',
+      'status',
+      'attempt_id',
+      'attempted_at',
+      'message_ts',
+      'error',
+      'sent_at',
+      'channel',
+      'thread_ts',
+    ])
       expect(valid([{ ...destination, [field]: 'sent' }])).toBe(false);
     expect(valid(Array(20).fill(destination))).toBe(true);
     expect(valid(Array(21).fill(destination))).toBe(false);

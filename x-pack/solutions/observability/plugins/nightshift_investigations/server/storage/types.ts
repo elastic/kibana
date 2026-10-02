@@ -7,6 +7,7 @@
 
 import type {
   InvestigationNotification,
+  InvestigationNotificationDestination,
   InvestigationStatus,
   InvestigationStructuredOutput,
   InvestigationSubjectType,
@@ -29,6 +30,7 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string;
   conversation_id?: string;
+  readonly notificationDestinations?: readonly InvestigationNotificationDestination[];
   notifications?: InvestigationNotification[];
 }
 

@@ -62,10 +62,10 @@ const inputSchema = z.object({
     .describe(
       'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
     ),
-  notifications: investigationNotificationDestinationsSchema
+  notificationDestinations: investigationNotificationDestinationsSchema
     .optional()
     .describe(
-      'Slack destinations the concluded investigation is posted to. Delivery results are recorded on the investigation.'
+      'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
     ),
 });
 
@@ -103,7 +103,7 @@ export const triggerInvestigationStepDefinition = (
         stream_names: input.stream_names,
         concurrency_key: input.concurrency_key,
         context: input.context,
-        notifications: input.notifications,
+        notificationDestinations: input.notificationDestinations,
       });
       return { output: result };
     },

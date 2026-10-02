@@ -97,14 +97,14 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
-  it('forwards Slack destinations to the client', async () => {
+  it('forwards notification destinations to the client', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
-    const notifications = [
+    const notificationDestinations = [
       {
         type: 'slack',
         connector_id: 'elastic-apps-slack',
-        channel: '#alerts',
+        params: { channel: '#alerts' },
         automation_id: 'a1',
       },
     ];
@@ -114,11 +114,11 @@ describe('triggerInvestigationStepDefinition', () => {
         subject_type: 'significant_event',
         subject_id: 'event-1',
         title: 'Checkout latency breach',
-        notifications,
+        notificationDestinations,
       })
     );
 
-    expect(start).toHaveBeenCalledWith(expect.objectContaining({ notifications }));
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ notificationDestinations }));
   });
 
   it('rejects a destination without a connector or channel', async () => {
@@ -131,7 +131,7 @@ describe('triggerInvestigationStepDefinition', () => {
           subject_type: 'significant_event',
           subject_id: 'event-1',
           title: 'Checkout latency breach',
-          notifications: [{ type: 'slack', channel: '#alerts' }],
+          notificationDestinations: [{ type: 'slack', params: { channel: '#alerts' } }],
         })
       )
     ).rejects.toThrow();
