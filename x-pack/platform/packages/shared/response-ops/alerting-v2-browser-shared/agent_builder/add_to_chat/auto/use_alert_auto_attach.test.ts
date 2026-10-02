@@ -133,12 +133,9 @@ describe('useAlertAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
 
-    const { rerender } = renderHook(
-      ({ ep }) => useAlertAutoAttach(ep, undefined, services),
-      {
-        initialProps: { ep: episode },
-      }
-    );
+    const { rerender } = renderHook(({ ep }) => useAlertAutoAttach(ep, undefined, services), {
+      initialProps: { ep: episode },
+    });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);

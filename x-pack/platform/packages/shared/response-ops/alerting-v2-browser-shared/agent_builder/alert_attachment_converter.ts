@@ -11,9 +11,7 @@ import { alertEpisodeToAlertAttachment } from '@kbn/alerting-v2-utils';
 import type { AttachmentConverter, FocusedEpisode } from './types';
 
 export const alertAttachmentConverter: AttachmentConverter<FocusedEpisode> = {
-  toAttachment: (
-    focused
-  ): AttachmentInput<typeof ALERT_ATTACHMENT_TYPE, AlertAttachmentData> => ({
+  toAttachment: (focused): AttachmentInput<typeof ALERT_ATTACHMENT_TYPE, AlertAttachmentData> => ({
     id: `alert:${focused.episode['episode.id']}`,
     type: ALERT_ATTACHMENT_TYPE,
     origin: focused.episode['episode.id'],
