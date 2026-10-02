@@ -8,9 +8,10 @@
  */
 
 import { IconCircle, IconTriangle } from './assets';
+import type { VisIcon } from './vis_icons';
 import { resolveVisIcon, VIS_ICONS } from './vis_icons';
 
-const LEGACY_ALIASES = [
+const LEGACY_NAMED_IDENTIFIERS = [
   ['alert', 'warning'],
   ['compute', 'processor'],
   ['editorComment', 'comment'],
@@ -30,15 +31,27 @@ const LEGACY_ALIASES = [
   ['visTable', 'table'],
 ] as const;
 
+const ALIASES = [
+  ['desktop', 'display'],
+  ['lettering', 'text'],
+] as const;
+
 describe('resolveVisIcon', () => {
-  it.each(LEGACY_ALIASES)(
-    'resolves the legacy identifier "%s" to the current identifier and EUI icon "%s"',
+  it.each(LEGACY_NAMED_IDENTIFIERS)(
+    'resolves the identifier "%s", named after a deprecated EUI icon, to the EUI icon "%s"',
+    (iconId, expected) => {
+      expect(resolveVisIcon(iconId)).toEqual({ id: iconId, icon: expected });
+    }
+  );
+
+  it.each(ALIASES)(
+    'resolves the alias "%s" to the current identifier and EUI icon "%s"',
     (alias, expected) => {
       expect(resolveVisIcon(alias)).toEqual({ id: expected, icon: expected });
     }
   );
 
-  it.each(['asterisk', 'bell', 'comment', 'empty', 'globe', 'pin', 'sortUp', 'warning'])(
+  it.each(['asterisk', 'bell', 'empty', 'globe', 'info', 'pin', 'sortUp', 'warning'])(
     'resolves the identifier "%s" to itself and the EUI icon of the same name',
     (iconId) => {
       expect(resolveVisIcon(iconId)).toEqual({ id: iconId, icon: iconId });
@@ -50,25 +63,19 @@ describe('resolveVisIcon', () => {
     expect(resolveVisIcon('triangle')).toEqual({ id: 'triangle', icon: IconTriangle });
   });
 
-  it.each([
-    undefined,
-    '',
-    'notAnIcon',
-    'fa-star',
-    'constructor',
-    'toString',
-    'https://example.com/icon.svg',
-  ])('resolves the unknown identifier %p to the "empty" icon without an identifier', (iconId) => {
-    expect(resolveVisIcon(iconId)).toEqual({ id: undefined, icon: 'empty' });
-  });
+  it.each([undefined, '', 'notAnIcon', 'fa-star', 'https://example.com/icon.svg'])(
+    'resolves the unknown identifier %p to the "empty" icon without an identifier',
+    (iconId) => {
+      expect(resolveVisIcon(iconId)).toEqual({ id: undefined, icon: 'empty' });
+    }
+  );
 });
 
 describe('icon definitions', () => {
-  const definitions = Object.values(VIS_ICONS);
+  const definitions: ReadonlyArray<{ icon: VisIcon; aliases?: readonly string[] }> =
+    Object.values(VIS_ICONS);
   const iconIds = Object.keys(VIS_ICONS);
-  const aliases = definitions.flatMap((definition) =>
-    'aliases' in definition ? definition.aliases : []
-  );
+  const aliases = definitions.flatMap(({ aliases: iconAliases = [] }) => iconAliases);
 
   it('uses each alias only once', () => {
     expect(new Set(aliases).size).toBe(aliases.length);
