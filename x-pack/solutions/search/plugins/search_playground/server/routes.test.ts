@@ -13,7 +13,7 @@ import { ConversationalChain } from './lib/conversational_chain';
 import { getChatParams } from './lib/get_chat_params';
 import { parseElasticsearchQuery, defineRoutes } from './routes';
 import { ContextLimitError } from './lib/errors';
-import { ContextModelLimitError } from '../common';
+import { ContextModelLimitError, PLAYGROUND_ENABLED_SETTING_ID } from '../common';
 
 jest.mock('./lib/get_chat_params', () => ({
   getChatParams: jest.fn(),
@@ -54,8 +54,10 @@ describe('Search Playground routes', () => {
     asCurrentUser: {},
   };
 
+  const mockUiSettingsGet = jest.fn().mockResolvedValue(true);
   const mockCore = {
     elasticsearch: { client: mockClient },
+    uiSettings: { client: { get: mockUiSettingsGet } },
   };
   const mockLogger = loggingSystemMock.createLogger().get();
 
@@ -77,6 +79,7 @@ describe('Search Playground routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      mockUiSettingsGet.mockResolvedValue(true);
 
       const coreStart = coreMock.createStart();
 
@@ -95,6 +98,18 @@ describe('Search Playground routes', () => {
         router: mockRouter.router,
         getStartServices: jest.fn().mockResolvedValue([coreStart, {}, {}]),
       });
+    });
+
+    it('responds with 404 when the searchPlayground:enabled setting is off', async () => {
+      mockUiSettingsGet.mockResolvedValue(false);
+
+      await mockRouter.callRoute({
+        body: mockRequestBody,
+      });
+
+      expect(mockUiSettingsGet).toHaveBeenCalledWith(PLAYGROUND_ENABLED_SETTING_ID);
+      expect(mockRouter.response.notFound).toHaveBeenCalled();
+      expect(getChatParams).not.toHaveBeenCalled();
     });
 
     it('responds with error message if stream throws an error', async () => {

@@ -29,8 +29,10 @@ describe('Search Playground - Playgrounds API', () => {
     update: jest.fn(),
     get: jest.fn(),
   };
+  const mockUiSettingsGet = jest.fn();
   const mockCore = {
     savedObjects: { client: mockSOClient },
+    uiSettings: { client: { get: mockUiSettingsGet } },
   };
 
   let context: jest.Mocked<RequestHandlerContext>;
@@ -40,6 +42,7 @@ describe('Search Playground - Playgrounds API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUiSettingsGet.mockResolvedValue(true);
 
     const coreStart = coreMock.createStart();
     mockGetStartServices = jest.fn().mockResolvedValue([coreStart, {}, {}]);
@@ -63,6 +66,15 @@ describe('Search Playground - Playgrounds API', () => {
           router: mockRouter.router,
           getStartServices: mockGetStartServices,
         });
+      });
+
+      it('responds with 404 when the searchPlayground:enabled setting is off', async () => {
+        mockUiSettingsGet.mockResolvedValue(false);
+
+        await mockRouter.callRoute({ query: {} });
+
+        expect(mockRouter.response.notFound).toHaveBeenCalled();
+        expect(mockSOClient.find).not.toHaveBeenCalled();
       });
 
       it('should call the find method of the saved objects client', async () => {

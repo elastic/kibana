@@ -18,6 +18,9 @@ export const PLUGIN_PATH = '/app/search_playground';
 
 export const SEARCH_MODE_FEATURE_FLAG_ID = 'searchPlayground:searchModeEnabled';
 
+/** Advanced setting that, when `true`, shows the Playground app and enables its API. Off by default. */
+export const PLAYGROUND_ENABLED_SETTING_ID = 'searchPlayground:enabled';
+
 export const DEFAULT_PAGINATION: Pagination = {
   from: 0,
   size: 10,

@@ -16,11 +16,12 @@ import type {
   PlaygroundSavedObject,
 } from '../types';
 import { APIRoutes } from '../types';
-import { errorHandler } from '../utils/error_handler';
+import { createPlaygroundRouteHandler } from '../utils/with_playground_enabled';
 import { parsePlaygroundSO, parsePlaygroundSOList, validatePlayground } from '../utils/playgrounds';
 import { playgroundAttributesSchema } from '../playground_saved_object/schema/v1/v1';
 
 export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOptions) => {
+  const routeHandler = createPlaygroundRouteHandler(logger);
   router.versioned
     .get({
       access: 'internal',
@@ -54,7 +55,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
         },
         version: ROUTE_VERSIONS.v1,
       },
-      errorHandler(logger)(async (context, request, response) => {
+      routeHandler(async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         const soPlaygrounds = await soClient.find<PlaygroundSavedObject>({
           type: PLAYGROUND_SAVED_OBJECT_TYPE,
@@ -96,7 +97,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
         },
         version: ROUTE_VERSIONS.v1,
       },
-      errorHandler(logger)(async (context, request, response) => {
+      routeHandler(async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         const soPlayground = await soClient.get<PlaygroundSavedObject>(
           PLAYGROUND_SAVED_OBJECT_TYPE,
@@ -134,7 +135,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
           },
         },
       },
-      errorHandler(logger)(async (context, request, response) => {
+      routeHandler(async (context, request, response) => {
         // Validate playground request
         const playground = request.body;
         const validationErrors = validatePlayground(playground);
@@ -192,7 +193,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
           },
         },
       },
-      errorHandler(logger)(async (context, request, response) => {
+      routeHandler(async (context, request, response) => {
         const playground = request.body;
         const validationErrors = validatePlayground(playground);
         if (validationErrors && validationErrors.length > 0) {
@@ -244,7 +245,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
           },
         },
       },
-      errorHandler(logger)(async (context, request, response) => {
+      routeHandler(async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         await soClient.delete(PLAYGROUND_SAVED_OBJECT_TYPE, request.params.id);
         return response.ok();

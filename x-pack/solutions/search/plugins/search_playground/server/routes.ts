@@ -14,7 +14,7 @@ import { sendMessageEvent } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
-import { errorHandler } from './utils/error_handler';
+import { createPlaygroundRouteHandler } from './utils/with_playground_enabled';
 import { handleStreamResponse } from './utils/handle_stream_response';
 import type {
   DefineRoutesOptions,
@@ -61,6 +61,7 @@ export function parseElasticsearchQuery(esQuery: string) {
 
 export function defineRoutes(routeOptions: DefineRoutesOptions) {
   const { logger, router, getStartServices } = routeOptions;
+  const routeHandler = createPlaygroundRouteHandler(logger);
 
   router.post(
     {
@@ -79,7 +80,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    routeHandler(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indices } = request.body;
 
@@ -118,7 +119,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    routeHandler(async (context, request, response) => {
       const [{ analytics }, { actions, cloud, inference }] = await getStartServices();
 
       const { client } = (await context.core).elasticsearch;
@@ -232,7 +233,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    routeHandler(async (context, request, response) => {
       const { search_query: searchQuery, exact, size } = request.query;
       const {
         client: { asCurrentUser },
@@ -271,7 +272,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    routeHandler(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { elasticsearch_query: elasticsearchQuery, indices, size, from } = request.body;
 
@@ -352,7 +353,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    routeHandler(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indices } = request.body;
 
@@ -413,7 +414,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    routeHandler(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const {
         elasticsearch_query: elasticsearchQuery,

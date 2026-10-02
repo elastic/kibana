@@ -112,6 +112,9 @@ aiAssistantManagementSelection.preferredChatExperience: "agent"
 # Query Rules UI
 xpack.searchQueryRules.enabled: true
 
+# Playground is not available on Serverless Elasticsearch
+xpack.searchPlayground.enabled: false
+
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false
 

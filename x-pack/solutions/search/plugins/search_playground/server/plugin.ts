@@ -24,6 +24,7 @@ import type {
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_NAME, PLAYGROUND_SAVED_OBJECT_TYPE } from '../common';
 import { createPlaygroundSavedObjectType } from './playground_saved_object/playground_saved_object';
+import { uiSettings } from './ui_settings';
 
 export class SearchPlaygroundPlugin
   implements
@@ -47,6 +48,7 @@ export class SearchPlaygroundPlugin
     this.logger.debug('searchPlayground: Setup');
 
     core.savedObjects.registerType(createPlaygroundSavedObjectType());
+    core.uiSettings.register(uiSettings);
 
     const router = core.http.createRouter();
 
