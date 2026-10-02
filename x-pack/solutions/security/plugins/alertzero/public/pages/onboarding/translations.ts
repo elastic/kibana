@@ -15,6 +15,10 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 
+export const ONBOARDING_GREETING = i18n.translate('xpack.alertzero.onboarding.greeting', {
+  defaultMessage: 'Your data is coming in.',
+});
+
 export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
   defaultMessage: "Let's turn on the Watches?",
 });

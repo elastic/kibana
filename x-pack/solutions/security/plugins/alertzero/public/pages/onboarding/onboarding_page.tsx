@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  tint,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -33,6 +34,7 @@ import {
   SYSTEM_SECURITY_WORKER_CATALOG,
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
+import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -133,9 +135,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           width: 100%;
         `}
       >
-        <EuiTitle>
-          <h1>{i18n.ONBOARDING_TITLE}</h1>
-        </EuiTitle>
+        <AlertZeroPageHeader greeting={i18n.ONBOARDING_GREETING} title={i18n.ONBOARDING_TITLE} />
         <EuiSpacer size="l" />
         <EuiTitle size="xs">
           <h2>{i18n.ONBOARDING_INTRO_HEADING}</h2>
@@ -218,7 +218,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                           {watch ? (
                             <EuiFlexItem grow={false}>
                               <EuiBadge
-                                color={resolveWatchAccent(euiTheme.colors, watch.color)}
+                                color={tint(resolveWatchAccent(euiTheme.colors, watch.color), 0.8)}
                                 data-test-subj={`alertZeroOnboardingWorkerWatch-${id}`}
                               >
                                 {watch.name}
