@@ -108,7 +108,7 @@ describe('OsqueryPlugin setup', () => {
   it('should pass getSpaceId(request) as the fourth checkResponseActionAuthz argument', async () => {
     const { core, plugins } = createSetupDeps();
     const getSpaceId = jest.fn().mockReturnValue('space-a');
-    plugins.spaces = { spacesService: { getSpaceId } } as SetupPlugins['spaces'];
+    plugins.spaces = { spacesService: { getSpaceId } } as unknown as SetupPlugins['spaces'];
 
     const plugin = new OsqueryPlugin(coreMock.createPluginInitializerContext());
     const setup = plugin.setup(core, plugins);

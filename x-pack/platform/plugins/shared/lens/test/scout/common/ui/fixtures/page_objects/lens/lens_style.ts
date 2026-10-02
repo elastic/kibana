@@ -433,4 +433,22 @@ export class LensStyle {
   async editMissingValues(label: string) {
     await this.missingValuesSuperSelect.selectOptionByLabel(label);
   }
+
+  /**
+   * Sets value-label visibility in the open style flyout (`hide` or `inside`).
+   */
+  async setValueLabels(mode: 'hide' | 'inside') {
+    const button = this.page.testSubj.locator(`lns_valueLabels_${mode}`);
+    await button.click();
+    await button.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Sets XY point visibility in the open style flyout (`auto`, `show`, or `hide`).
+   */
+  async setPointVisibility(mode: 'auto' | 'show' | 'hide') {
+    const button = this.page.testSubj.locator(`xy_point_visibility_${mode}`);
+    await button.click();
+    await button.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
+  }
 }

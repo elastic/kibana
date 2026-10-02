@@ -23,6 +23,9 @@ export const MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH = 64;
 /** Change history `event.id` values are UUID v7 (canonical string form). */
 export const MAX_CHANGE_HISTORY_EVENT_ID_LENGTH = 36;
 
+/** Workflow, execution, and step-execution path IDs (matches HUMAN_READABLE_ID_MAX_LENGTH). */
+export const MAX_WORKFLOW_ENTITY_ID_LENGTH = 255;
+
 // Versioned API constants
 export const API_VERSION = '2023-10-31';
 export { INTERNAL_API_VERSION } from '../../../../common/lib/api_constants';

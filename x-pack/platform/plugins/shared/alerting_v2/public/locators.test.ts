@@ -303,8 +303,8 @@ describe('createAlertingV2HostApp', () => {
       executionHistory: '/eh',
     });
 
-    expect(host.rules).toEqual({ app: 'myApp', basePath: '/r' });
-    expect(host.episodes).toEqual({ app: 'myApp', basePath: '/e' });
+    expect(host.rules).toEqual({ app: 'myApp', pathPrefix: '/r' });
+    expect(host.episodes).toEqual({ app: 'myApp', pathPrefix: '/e' });
   });
 });
 

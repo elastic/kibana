@@ -8,6 +8,7 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import useLatest from 'react-use/lib/useLatest';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildJoinedFilter, buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
@@ -23,6 +24,7 @@ import {
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
+import { buildEsqlQueryFailureEvent } from '../telemetry/build_esql_query_failure_event';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -44,7 +46,7 @@ export function useFetchMetricsData({
   /** Forwarded as `profile_id` APM label on captured errors. */
   profileId: string;
 }): MetricsInfo {
-  const { trackMetricsInfo } = useTelemetry();
+  const { trackMetricsInfo, trackEsqlQueryFailure } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
@@ -55,13 +57,13 @@ export function useFetchMetricsData({
   // "Unable to load visualization". The post-fetch state wipe (against
   // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
   const appliedDimensions = useMemo(() => {
-    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+    if (!selectedDimensionNames?.length || !fetchParams.columnsMap) {
       return selectedDimensionNames;
     }
     return selectedDimensionNames.filter(
-      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
+      (dimension) => fetchParams.columnsMap![dimension.name] != null
     );
-  }, [selectedDimensionNames, fetchParams.dataView]);
+  }, [selectedDimensionNames, fetchParams.columnsMap]);
 
   const appliedDimensionNames = useMemo(
     () => appliedDimensions?.map((dimension) => dimension.name),
@@ -78,6 +80,10 @@ export function useFetchMetricsData({
     );
     return buildMetricsInfoQuery(esql, appliedDimensionNames, declaredDimensionFilter);
   }, [esql, appliedDimensionNames]);
+
+  // Read inside the error effect without keying it on the query, so only a
+  // freshly landed error triggers a report.
+  const metricsInfoQueryRef = useLatest(metricsInfoQuery);
 
   const shouldFetch = isComponentVisible && !!metricsInfoQuery;
 
@@ -97,7 +103,7 @@ export function useFetchMetricsData({
             esqlQuery: metricsInfoQuery,
             search: services.data.search.search,
             signal,
-            dataView: fetchParams.dataView,
+            timeFieldName: fetchParams.dataSource?.timeFieldName,
             timeRange: fetchParams.timeRange,
             filters: fetchParams.filters ?? [],
             variables: fetchParams.esqlVariables,
@@ -114,8 +120,8 @@ export function useFetchMetricsData({
       );
 
       const getFieldType = (name: string) => {
-        const field = fetchParams.dataView?.getFieldByName(name);
-        return field ? getFieldIconType(field) : undefined;
+        const column = fetchParams.columnsMap?.[name];
+        return column ? getFieldIconType({ name, type: column.meta.type }) : undefined;
       };
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
@@ -133,7 +139,8 @@ export function useFetchMetricsData({
     [
       metricsInfoQuery,
       trackRequest,
-      fetchParams.dataView,
+      fetchParams.dataSource,
+      fetchParams.columnsMap,
       fetchParams.timeRange,
       fetchParams.filters,
       fetchParams.esqlVariables,
@@ -146,7 +153,7 @@ export function useFetchMetricsData({
   );
 
   useEffect(() => {
-    if (!shouldFetch || !fetchParams.dataView) {
+    if (!shouldFetch) {
       return;
     }
     const abortController = new AbortController();
@@ -156,7 +163,7 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    fetchParams.dataView,
+    fetchParams.dataSource,
     fetchParams.timeRange,
     fetchParams.abortController,
     fetchParams.filters,
@@ -181,7 +188,19 @@ export function useFetchMetricsData({
         profile_id: profileId,
       },
     });
-  }, [error, profileId, reportError]);
+
+    // EBT counterpart of the APM report above: powers the failure-rate
+    // dashboards, which need the ES error type and category as queryable
+    // fields rather than APM labels. The query is read through a ref so a
+    // rebuilt query cannot re-report an error that already landed.
+    const failureEvent = buildEsqlQueryFailureEvent({
+      error,
+      esqlQuery: metricsInfoQueryRef.current,
+    });
+    if (failureEvent) {
+      trackEsqlQueryFailure(failureEvent);
+    }
+  }, [error, profileId, reportError, metricsInfoQueryRef, trackEsqlQueryFailure]);
 
   const isInitialState = !loading && !value && !error;
   const isPendingResponse = isComponentVisible && isInitialState;

@@ -61,9 +61,11 @@ import {
 import type {
   DiscoverAppState,
   DiscoverInternalState,
+  ExpandedDocCascadePath,
   TabState,
   UpdateESQLQueryActionPayload,
 } from '../types';
+import { appendAdHocDataViews } from './data_views';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
@@ -119,6 +121,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
 type ExpandedDocPayload = TabActionPayload<{
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner?: string;
+  expandedDocCascadePath?: ExpandedDocCascadePath;
   initialDocViewerTabId?: string;
   initialDocViewerTabState?: object;
   shouldUpdateUrl?: boolean;
@@ -439,9 +442,14 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
  * Clean ups the ES|QL query and moves to the dataview mode
  */
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
-  function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
+  [TabActionPayload<{ dataView: DataView }>],
+  Promise<void>
+> = ({ tabId, dataView: fallbackDataView }) =>
+  async function transitionFromESQLToDataViewThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
     // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
       internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
@@ -449,6 +457,32 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         fieldsToReset: 'all',
       })
     );
+
+    // If currently in ES|QL mode, find or create a proper (non-ESQL_TYPE) DataView for the
+    // FROM index pattern so Classic mode shows the right index — not the default DataView.
+    // The EsqlSource carries the index pattern as .title; no need to re-parse the query string.
+    let dataView = fallbackDataView;
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentSource = currentDataSource$.getValue();
+    if (currentSource?.kind === 'esql') {
+      try {
+        const savedDataViews = await services.dataViews.getIdsWithTitle();
+        const match = savedDataViews.find((dv) => dv.title === currentSource.title);
+        if (match?.id) {
+          dataView = await services.dataViews.get(match.id);
+        } else {
+          const adHocDataView = await services.dataViews.create({
+            title: currentSource.title,
+            timeFieldName: currentSource.timeFieldName,
+          });
+          await services.dataViews.refreshFields(adHocDataView);
+          dispatch(appendAdHocDataViews(adHocDataView));
+          dataView = adHocDataView;
+        }
+      } catch {
+        // fall through to fallbackDataView
+      }
+    }
 
     const sort = getDefaultSort(
       dataView,
@@ -505,7 +539,12 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
 
     const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
-    const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
+    const hasQuery = Boolean(filterQuery?.query && String(filterQuery.query).trim());
+    const hasFilters = allFilters.length > 0;
+    const queryString =
+      tabState.skipInitialFetch && !hasQuery && !hasFilters
+        ? ''
+        : getInitialESQLQuery(dataView, filterQuery, allFilters);
 
     dispatch(
       updateAppState({

@@ -24,6 +24,7 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -49,7 +50,14 @@ const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
 export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
-const MAX_HEALTHCHECK_RETRIES = 30;
+const DOCKER_HEALTHCHECK_RETRIES = 30;
+const CONTAINER_READY_CHECK_INTERVAL_MS = 2_000;
+// Keep the outer waiter longer than Docker's health window (about 153s)
+// so slow CI hosts don't fail while Docker still reports the container as starting.
+const CONTAINER_STARTUP_TIMEOUT_MS = 3 * 60 * 1000;
+const MAX_CONTAINER_READY_CHECK_RETRIES = Math.ceil(
+  CONTAINER_STARTUP_TIMEOUT_MS / CONTAINER_READY_CHECK_INTERVAL_MS
+);
 
 const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_PORT: '8081',
@@ -74,7 +82,7 @@ const SHARED_DOCKER_PARAMS = [
   '--health-timeout',
   '2s',
   '--health-retries',
-  `${MAX_HEALTHCHECK_RETRIES}`,
+  `${DOCKER_HEALTHCHECK_RETRIES}`,
   '--health-start-period',
   '3s',
 ];
@@ -227,7 +235,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--env',
       'uiam.cosmos.gateway_connection_mode=true',
       '--env',
-      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET},${MOCK_IDP_GATEWAY_SHARED_SECRET}`,
       '--env',
       `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
       '--env',
@@ -335,7 +343,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--env',
     'uiam.cosmos.gateway_connection_mode=true',
     '--env',
-    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET},${MOCK_IDP_GATEWAY_SHARED_SECRET}`,
     '--env',
     `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
     '--env',
@@ -397,7 +405,7 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
   const { stdout: containerId } = await execa('docker', dockerCommand);
 
   let isHealthy = false;
-  let healthcheckRetries = 0;
+  let readyCheckRetries = 0;
   while (!isHealthy) {
     let currentStatus;
     try {
@@ -418,15 +426,15 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
     }
 
     log.info(chalk.bold(`Waiting for "${container.name}" container (${currentStatus})…`));
-    await setTimeoutAsync(2000);
+    await setTimeoutAsync(CONTAINER_READY_CHECK_INTERVAL_MS);
 
-    healthcheckRetries++;
-    if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {
+    readyCheckRetries++;
+    if (readyCheckRetries >= MAX_CONTAINER_READY_CHECK_RETRIES) {
       await tryExportLogs(container.name, log);
       throw new Error(
-        `The "${
-          container.name
-        }" container failed to start within the expected time. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
+        `The "${container.name}" container failed to start within ${
+          CONTAINER_STARTUP_TIMEOUT_MS / 1000
+        } seconds. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
           `docker logs -f ${container.name}`
         )}`
       );

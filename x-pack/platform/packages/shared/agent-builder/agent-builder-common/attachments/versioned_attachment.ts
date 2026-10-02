@@ -307,9 +307,7 @@ export const parseVersionId = (
 /**
  * Checks if an attachment's current version is active (not deleted).
  */
-export const isAttachmentActive = <T = unknown>(
-  attachment: VersionedAttachment<string, T>
-): boolean => {
+export const isAttachmentActive = (attachment: Pick<VersionedAttachment, 'active'>): boolean => {
   return attachment.active !== false;
 };
 

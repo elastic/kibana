@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/data_views
 dependsOn:
   - '@kbn/core'
+  - '@kbn/data-views-types'
   - '@kbn/data-view-validation'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'
@@ -46,6 +47,7 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/as-code-data-views-schema'
 tags:
   - plugin
   - prod

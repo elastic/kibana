@@ -8,12 +8,20 @@
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { FleetStatusProvider, sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
+import {
+  FleetStatusProvider,
+  FlyoutContextProvider,
+  KibanaVersionContext,
+  sendGetCloudOnboardingDeployment,
+} from '@kbn/fleet-plugin/public';
+import { fromSOAuthMethod } from './step_components/authenticate_and_deploy_step/agent_based_section/credential_method_selector';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -80,17 +88,50 @@ export async function hydrateOnboardingSession(
         serviceVars: item.serviceVars ?? {},
       })
     );
+    const isAgentBased = item.mechanisms?.includes('agent_based') ?? false;
+    const policyIds = item.agentPolicyIds ?? [];
+    // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: only UI selector enums are
+    // stored ('static_keys', 'assume_role', 'identity_federation', etc.). Actual credentials
+    // (access keys, ARNs, tokens) are never written to sessionStorage.
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'authenticateAndDeployStep'),
-      item.connectorId
+      isAgentBased
+        ? JSON.stringify({
+            deploymentMethod: 'agent_based',
+            // Any persisted policy ids mean the policies already exist, so resume in
+            // 'existing' mode — otherwise the hook's new-policy route would create another.
+            agentHostsMode: policyIds.length ? 'existing' : 'new',
+            selectedAgentPolicyIds: policyIds,
+            // agentPolicyId is intentionally NOT seeded here: useAgentPolicySummary falls back to
+            // selectedAgentPolicyIds[0] for enrollment-token/count queries, and seeding it would
+            // cause useAgentBasedDeploy to narrow a multi-policy deployment to only the first id.
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined),
+          })
+        : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
         : JSON.stringify({ authMethod: 'static_keys' })
     );
+    // Seed policyIdsByInstance from packagePolicyIds so isAlreadyDeployed evaluates correctly
+    // on resume. Without this, Back→Next would re-run deployToExistingAgentPolicies and create
+    // duplicate package policies for every service instance.
+    // packagePolicyIds is a flat list — we don't know which id maps to which instance, but any
+    // truthy value per instance is enough to satisfy the isAlreadyDeployed check. Use the first
+    // id as a placeholder for all services in the SO's services list.
+    // Only seed for fully succeeded deploys — a failed status means some services need retry
+    // and fabricating completion for them would prevent that retry path from running.
+    // Fallback for V1 docs that lack policyIdsByInstance: use packagePolicyIds[0] for every
+    // service — we can't reconstruct the per-instance mapping from a flat list, but any truthy
+    // value satisfies the isAlreadyDeployed check on resume.
+    const policyIdsByInstance: Record<string, string> =
+      item.status === 'succeeded' && item.packagePolicyIds?.length && item.services?.length
+        ? Object.fromEntries(item.services.map((svc) => [svc, item.packagePolicyIds![0]]))
+        : {};
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
       JSON.stringify({
         serviceStatuses: {},
-        policyIdsByInstance: {},
+        policyIdsByInstance: item.policyIdsByInstance ?? policyIdsByInstance,
+        ...(item.ecfStacks ? { ecfStacks: item.ecfStacks } : {}),
         failedInstances: [],
         deployErrors: {},
         onboardingDeploymentId: item.id,
@@ -113,10 +154,23 @@ export async function hydrateOnboardingSession(
   }
 }
 
+export function getCloudService(
+  cloudSetup: CloudSetup | undefined,
+  cloudStart: CloudStart | undefined
+): (CloudStart & Partial<CloudSetup>) | undefined {
+  if (!cloudStart) return undefined;
+  return { ...cloudSetup, ...cloudStart };
+}
+
 export async function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
-  deps: IngestHubStartDependencies
+  deps: IngestHubStartDependencies,
+  // kibanaVersion is threaded here so Fleet components that call useKibanaVersion() (e.g.
+  // AgentEnrollmentFlyout → installation_message.tsx) don't throw. The context is provided
+  // at app root alongside FleetStatusProvider. See: fleet/public/hooks/use_kibana_version.ts
+  kibanaVersion?: string,
+  cloudSetup?: CloudSetup
 ) {
   // Write session storage before any hooks initialize.
   // useSessionStorage (react-use) writes its default on first mount and re-serializes
@@ -152,24 +206,51 @@ export async function renderOnboardingApp(
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider
-        services={{ ...coreStart, cloud: deps.cloud, fleet: deps.fleet, spaces: deps.spaces }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <FleetStatusProvider>
-            <OnboardingFlowProvider>
-              <Router history={params.history}>
-                <Route exact path="/">
-                  <RootRedirect />
-                </Route>
-                <Route path="/:integrationId">
-                  <OnboardingShell />
-                </Route>
-              </Router>
-            </OnboardingFlowProvider>
-          </FleetStatusProvider>
-        </QueryClientProvider>
-      </KibanaContextProvider>
+      // EuiThemeProvider (styled-components bridge) is required by any Fleet component that uses
+      // `props.theme.eui.*` in styled-components (e.g. AgentPolicyCreateInlineForm at line 36).
+      // Without it, styled-components receives undefined theme and throws at render time.
+      // Fleet's own app root adds this provider for the same reason; we mirror it here.
+      // See: fleet/public/applications/fleet/app.tsx lines 219-221.
+      <EuiThemeProvider darkMode={coreStart.theme.getTheme().darkMode}>
+        {/* authz must be part of the Kibana context so that Fleet's useAuthz() hook can read it
+            when AgentEnrollmentFlyout is rendered. Without it, authz.fleet.readAgentPolicies throws.
+            See: fleet/public/hooks/use_authz.ts */}
+        <KibanaContextProvider
+          services={{
+            ...coreStart,
+            cloud: getCloudService(cloudSetup, deps.cloud),
+            fleet: deps.fleet,
+            spaces: deps.spaces,
+            authz: deps.fleet.authz,
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <FleetStatusProvider>
+              {/* FlyoutContextProvider is required by AgentEnrollmentFlyout → EnrollmentRecommendation
+                  → useFlyoutContext(). The hook throws if the context is absent.
+                  See: fleet/public/hooks/use_flyout_context.tsx */}
+              <FlyoutContextProvider>
+                {/* KibanaVersionContext must wrap any Fleet component that calls useKibanaVersion().
+                  AgentEnrollmentFlyout reaches it via installation_message.tsx → useAgentVersion.
+                  Without this provider the hook throws by design (null context → Error).
+                  See: fleet/public/hooks/use_kibana_version.ts */}
+                <KibanaVersionContext.Provider value={kibanaVersion ?? ''}>
+                  <OnboardingFlowProvider>
+                    <Router history={params.history}>
+                      <Route exact path="/">
+                        <RootRedirect />
+                      </Route>
+                      <Route path="/:integrationId">
+                        <OnboardingShell />
+                      </Route>
+                    </Router>
+                  </OnboardingFlowProvider>
+                </KibanaVersionContext.Provider>
+              </FlyoutContextProvider>
+            </FleetStatusProvider>
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
     )
   );
   return () => root.unmount();

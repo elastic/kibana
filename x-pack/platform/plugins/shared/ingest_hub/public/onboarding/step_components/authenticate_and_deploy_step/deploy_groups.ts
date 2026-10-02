@@ -14,6 +14,12 @@ import type {
 } from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import {
+  reconcileInstances,
+  groupByPackage,
+  buildGroupPolicyNameStem,
+} from './deploy_group_helpers';
+export { collectDeployResults } from './deploy_group_helpers';
 
 /**
  * A deploy group is the unit of one `sendCreateAgentlessPolicy` call.
@@ -25,12 +31,19 @@ import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './pack
  *   collide inside `buildPackageInputs` (stream keys map on dataset name, which is shared).
  */
 export interface DeployGroup {
-  /** Package name — used for bundled originals. InstanceId — used for duplicates. */
+  /**
+   * Package name (suffixed with `__<namespace>` when one is set) — used for bundled originals.
+   * InstanceId — used for duplicates.
+   */
   groupId: string;
   /** All instanceIds whose status, policyId, and error this call resolves. */
   instanceIds: string[];
   members: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>;
   isDuplicateGroup: boolean;
+  /** Namespace shared by every member. Empty means the policy inherits the agent policy's. */
+  namespace: string;
+  /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
+  policyNameStem?: string;
 }
 
 export interface GroupDeployOutcome {
@@ -50,25 +63,18 @@ export interface GroupDeployOutcome {
 export function buildDeployGroups(
   instances: ServiceInstance[],
   selectedServiceIds: string[],
-  servicesMap: Map<string, AwsServiceMatrixEntry>
+  servicesMap: Map<string, AwsServiceMatrixEntry>,
+  storedServiceVars: Record<string, ServiceVars> = {}
 ): DeployGroup[] {
   // Reconcile persisted instances against the current selectedServiceIds — the same logic
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
   // changes their selection would deploy stale instances (deselected services deployed, newly
   // selected services skipped) because setGlobalRegion and Continue don't re-persist instances.
-  const selectedSet = new Set(selectedServiceIds);
-  const kept = instances.filter((inst) => selectedSet.has(inst.serviceId));
-  const coveredServiceIds = new Set(kept.map((i) => i.serviceId));
-  const added: ServiceInstance[] = [];
-  for (const id of selectedServiceIds) {
-    if (!coveredServiceIds.has(id)) {
-      const service = servicesMap.get(id);
-      if (service?.showInUI) {
-        added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
-      }
-    }
-  }
-  const resolved: ServiceInstance[] = [...kept, ...added];
+  const resolved: ServiceInstance[] = reconcileInstances(
+    instances,
+    selectedServiceIds,
+    servicesMap
+  );
 
   const originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
   const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
@@ -90,36 +96,7 @@ export function buildDeployGroups(
     }
   }
 
-  // Group originals by package name.
-  const bundledByPackage = new Map<
-    string,
-    Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>
-  >();
-  for (const member of originals) {
-    const pkg = member.service.packageName;
-    if (!bundledByPackage.has(pkg)) bundledByPackage.set(pkg, []);
-    bundledByPackage.get(pkg)!.push(member);
-  }
-
-  const groups: DeployGroup[] = [];
-  for (const [pkg, members] of bundledByPackage) {
-    groups.push({
-      groupId: pkg,
-      instanceIds: members.map(({ instance }) => instance.instanceId),
-      members,
-      isDuplicateGroup: false,
-    });
-  }
-  for (const member of duplicates) {
-    groups.push({
-      groupId: member.instance.instanceId,
-      instanceIds: [member.instance.instanceId],
-      members: [member],
-      isDuplicateGroup: true,
-    });
-  }
-
-  return groups;
+  return groupByPackage(originals, duplicates, storedServiceVars);
 }
 
 function buildAgentlessPolicyName(group: DeployGroup): string {
@@ -133,8 +110,7 @@ function buildAgentlessPolicyName(group: DeployGroup): string {
     return `${safe}-${name}-${Date.now()}`;
   }
   // Bundled originals — named after the package.
-  const pkg = group.groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return `${pkg}-${Date.now()}`;
+  return `${buildGroupPolicyNameStem(group)}-${Date.now()}`;
 }
 
 export async function deployGroup(
@@ -201,7 +177,7 @@ export async function deployGroup(
 
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group),
-    namespace,
+    namespace: group.namespace || namespace,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
@@ -217,49 +193,6 @@ export async function deployGroup(
   });
 
   return { policyId: response?.item?.id };
-}
-
-function extractErrorMessage(reason: unknown): string {
-  if (reason instanceof Error) return reason.message;
-  if (reason !== null && typeof reason === 'object' && 'message' in reason) {
-    return String((reason as { message: unknown }).message);
-  }
-  return String(reason);
-}
-
-export function collectDeployResults(
-  results: PromiseSettledResult<GroupDeployOutcome>[],
-  groups: DeployGroup[]
-): {
-  policyIdsByInstance: Record<string, string>;
-  failedInstances: string[];
-  errorsByInstance: Record<string, string>;
-} {
-  const policyIdsByInstance: Record<string, string> = {};
-  const failedInstances: string[] = [];
-  const errorsByInstance: Record<string, string> = {};
-
-  for (let i = 0; i < groups.length; i++) {
-    const group = groups[i];
-    const result = results[i];
-    if (result.status === 'fulfilled') {
-      // All instances in the group share the one policy — write policyId for each.
-      if (result.value.policyId) {
-        for (const instanceId of group.instanceIds) {
-          policyIdsByInstance[instanceId] = result.value.policyId;
-        }
-      }
-    } else {
-      // A bundled call failure surfaces as an error on every instance in the group.
-      const errorMsg = extractErrorMessage(result.reason);
-      for (const instanceId of group.instanceIds) {
-        failedInstances.push(instanceId);
-        errorsByInstance[instanceId] = errorMsg;
-      }
-    }
-  }
-
-  return { policyIdsByInstance, failedInstances, errorsByInstance };
 }
 
 export function buildInstanceStatuses(

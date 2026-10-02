@@ -10,7 +10,14 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  esHitsMockWithSort,
+  buildDataViewMock,
+} from '@kbn/discover-utils/src/__mocks__';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
@@ -20,6 +27,7 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
+import { fetchEsql } from '../data_fetching/fetch_esql';
 import {
   DEFAULT_TAB_STATE,
   createTabItem,
@@ -30,6 +38,7 @@ import {
 } from './redux';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import * as resolveEsqlSourceModule from '../data_fetching/resolve_esql_source';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -44,6 +53,7 @@ jest.mock('@kbn/ebt-tools', () => ({
 }));
 
 const mockFetchDocuments = jest.mocked(fetchDocuments);
+const mockFetchEsql = jest.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
@@ -59,6 +69,80 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
+  test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const tabId = stateContainer.getCurrentTab().id;
+
+    stateContainer.internalState.dispatch(
+      internalStateActions.setSkipInitialFetch({ tabId, skipInitialFetch: true })
+    );
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(true);
+
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    await dataState.fetch();
+
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(false);
+  });
+
+  test('fetch does not run or clear skipInitialFetch for an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setSkipInitialFetch)({
+        skipInitialFetch: true,
+      })
+    );
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    await dataStateContainer.fetch();
+
+    expect(toolkit.getCurrentTab().skipInitialFetch).toBe(true);
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+  });
+
+  test('timefilter-triggered refetch does not search an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+
+    jest.spyOn(toolkit.searchSessionManager, 'getNextSearchSessionId');
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    const unsubscribe = dataStateContainer.subscribe();
+    dataStateContainer.refetch$.next(undefined);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(toolkit.searchSessionManager.getNextSearchSessionId).not.toHaveBeenCalled();
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    unsubscribe();
   });
 
   test('refetch$ triggers a search', async () => {
@@ -113,6 +197,46 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('restores EsqlSource from the registry on fetch without resolveEsqlSource', async () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
+    const shim = buildDataViewMock({
+      id: 'esql-from-logs',
+      title: 'logs-*',
+      type: ESQL_TYPE,
+      timeFieldName: '@timestamp',
+      isPersisted: false,
+    });
+    const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    (esqlSource as { id: string }).id = 'esql-from-logs';
+    services.dataSourceService.registerEsqlSource(esqlSource);
+
+    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+    currentDataView$.next(shim);
+    currentDataSource$.next(new DataViewSource(shim));
+
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
+    services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer, services);
+    const unsubscribe = dataState.subscribe();
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
+    });
+
+    expect(currentDataSource$.getValue()).toBe(esqlSource);
+    expect(resolveSpy).not.toHaveBeenCalled();
+
+    unsubscribe();
+    resolveSpy.mockRestore();
   });
 
   test('does not reset warning callout dismiss on fetch more', async () => {

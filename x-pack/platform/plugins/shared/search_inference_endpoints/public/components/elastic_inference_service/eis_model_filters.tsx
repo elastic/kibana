@@ -7,17 +7,12 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { EuiFilterButton, type Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  filter,
-  SelectableFilterPopover,
-  StandardFilterOption,
-  useFieldQueryFilter,
-} from '@kbn/content-list-toolbar';
+import { filter, SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list-toolbar';
 import { EventType } from '../../analytics/constants';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { TASK_TYPE_FILTERS } from '../../utils/eis_utils';
+import { MODEL_TYPE_FILTERS } from '../../utils/eis_utils';
 import { EIS_CATEGORY_FILTER_ID, EIS_PROVIDER_FILTER_ID } from '../../utils/eis_content_list_utils';
 
 interface FilterControlProps {
@@ -59,33 +54,22 @@ const ModelFamilyFilterControl = ({ query, onChange }: FilterControlProps) => {
   );
 };
 
-const TaskTypeFilterControl = ({ query, onChange }: FilterControlProps) => {
-  const { getState, toggle } = useFieldQueryFilter({
-    fieldName: EIS_CATEGORY_FILTER_ID,
-    query,
-    onChange,
-  });
-
+const ModelTypeFilterControl = ({ query, onChange }: FilterControlProps) => {
   return (
-    <>
-      {TASK_TYPE_FILTERS.map(({ category, label }, index) => {
-        const isActive = getState(category) === 'include';
-        return (
-          <EuiFilterButton
-            key={category}
-            withNext={index < TASK_TYPE_FILTERS.length - 1}
-            grow={false}
-            hasActiveFilters={isActive}
-            isSelected={isActive}
-            isToggle
-            onClick={() => toggle(category, 'include')}
-            data-test-subj={`eisTaskTypeFilter-${category}`}
-          >
-            {label}
-          </EuiFilterButton>
-        );
+    <SelectableFilterPopover
+      fieldName={EIS_CATEGORY_FILTER_ID}
+      title={i18n.translate('xpack.searchInferenceEndpoints.modelTypeFilter.buttonLabel', {
+        defaultMessage: 'Model type',
       })}
-    </>
+      query={query}
+      onChange={onChange}
+      options={MODEL_TYPE_FILTERS}
+      renderOption={(option, { isActive }) => (
+        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
+      )}
+      hideSearch
+      data-test-subj="modelTypeFilterMultiselect"
+    />
   );
 };
 
@@ -93,6 +77,6 @@ export const ModelFamilyFilterPart = filter.createComponent({
   resolve: () => ({ type: 'custom_component' as const, component: ModelFamilyFilterControl }),
 });
 
-export const TaskTypeFilterPart = filter.createComponent({
-  resolve: () => ({ type: 'custom_component' as const, component: TaskTypeFilterControl }),
+export const ModelTypeFilterPart = filter.createComponent({
+  resolve: () => ({ type: 'custom_component' as const, component: ModelTypeFilterControl }),
 });

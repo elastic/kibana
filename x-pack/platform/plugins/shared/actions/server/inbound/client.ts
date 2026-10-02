@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-import type { InMemoryConnector } from '../types';
+import type { InMemoryConnector, RawAction } from '../types';
 import type { IngestInboundEventInput, IngestInboundEventResult } from './ingest';
 import { ingestInboundEvent } from './ingest';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
@@ -24,6 +29,9 @@ interface InboundEventsClientInternalDeps {
   maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
+  getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
+  getElasticsearchClient: () => Promise<IClusterClient>;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -48,6 +56,9 @@ export function buildInboundEventsClient(
         emitConnectorEvents: deps.emitConnectorEvents,
         logger: deps.logger,
         getUnsecuredSavedObjectsClient: deps.getUnsecuredSavedObjectsClient,
+        getDecryptedConnectorAttributes: deps.getDecryptedConnectorAttributes,
+        getElasticsearchClient: deps.getElasticsearchClient,
+        getKibanaRequestAccess: deps.getKibanaRequestAccess,
         inMemoryConnectors: deps.inMemoryConnectors,
       }),
   };

@@ -27,6 +27,7 @@ export class BulkDeleteActionPoliciesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Delete action policies in bulk by ID',
     oasOperationObject: bulkDeleteActionPoliciesOasExamples,
   } as const;

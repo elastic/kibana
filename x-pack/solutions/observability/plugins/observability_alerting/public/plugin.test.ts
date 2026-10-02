@@ -10,11 +10,13 @@ import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ObservabilityAlertingPlugin } from './plugin';
 import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_INBOX_PATH,
 } from './constants';
@@ -61,7 +63,7 @@ describe('ObservabilityAlertingPlugin', () => {
           CreateRuleOptionsFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
-              Object.entries(paths).map(([k, v]) => [k, { app: appId, basePath: v }])
+              Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])
             )
           ),
         },

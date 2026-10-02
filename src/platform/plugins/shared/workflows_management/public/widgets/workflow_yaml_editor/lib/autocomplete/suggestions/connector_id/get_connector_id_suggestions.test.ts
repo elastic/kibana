@@ -72,6 +72,7 @@ describe('getConnectorIdSuggestions', () => {
     expect(result[1].insertText).toBe('private-slack');
     expect(result[2].label).toBe('Create a new connector');
     expect(result[2].insertText).toBe('');
+    expect(result.map((item) => item.insertText)).not.toContain('"*"');
   });
 
   it('should suggest slack connectors for waitForApproval channel connector-id', () => {
@@ -90,6 +91,27 @@ describe('getConnectorIdSuggestions', () => {
 
     expect(result).toHaveLength(3);
     expect(result[0].insertText).toBe('public-slack');
+    expect(result.map((item) => item.insertText)).not.toContain('"*"');
+  });
+
+  it('should suggest slack connectors for waitForInput channel connector-id', () => {
+    const line = '        connector-id: ';
+    const result = getConnectorIdSuggestions({
+      line,
+      lineParseResult: parseLineForCompletion(line),
+      range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
+      focusedStepInfo: { stepType: 'waitForInput' },
+      focusedYamlPair: {
+        path: ['with', 'channels', 'slack', 'connector-id'],
+      },
+      path: ['steps', 0, 'with', 'channels', 'slack', 'connector-id'],
+      dynamicConnectorTypes: fakeConnectorTypes,
+    } as unknown as AutocompleteContext);
+
+    expect(result.some((item) => item.insertText === 'public-slack')).toBe(true);
+    expect(result.some((item) => item.command?.arguments?.[0].connectorType === '.slack')).toBe(
+      true
+    );
   });
 
   it('should suggest inbound webhook instances for a trigger connector-id', () => {
@@ -117,13 +139,25 @@ describe('getConnectorIdSuggestions', () => {
           minimumLicenseRequired: 'gold',
           subActions: [],
           instances: [
-            { id: 'testyng', name: 'testyng', isPreconfigured: false, isDeprecated: false },
+            {
+              id: 'inbound-webhook-1',
+              name: 'Sales inbound webhook',
+              isPreconfigured: false,
+              isDeprecated: false,
+            },
           ],
         },
       },
     } as unknown as AutocompleteContext);
 
-    expect(result.map((item) => item.insertText)).toContain('testyng');
-    expect(result[0].label).toContain('testyng');
+    expect(result.map((item) => item.insertText)).toEqual(
+      expect.arrayContaining(['"*"', 'inbound-webhook-1'])
+    );
+    expect(result.find((item) => item.insertText === '"*"')).toEqual(
+      expect.objectContaining({
+        label: 'All connectors of this type',
+        documentation: 'Starts the workflow for events from every connector instance of this type.',
+      })
+    );
   });
 });

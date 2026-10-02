@@ -53,6 +53,7 @@ test.describe('Rules page Logs visibility', { tag: '@local-stateful-classic' }, 
 
   test('omits the Logs menu item when the user lacks rule-type read access', async ({
     page,
+    pageObjects,
     browserAuth,
     kbnClient,
   }) => {
@@ -62,7 +63,7 @@ test.describe('Rules page Logs visibility', { tag: '@local-stateful-classic' }, 
       await page.gotoApp('rules');
       await page.waitForURL(RULES_URL_RE);
 
-      await page.testSubj.click('app-menu-overflow-button');
+      await pageObjects.appMenu.openOverflow();
       await expect(page.testSubj.locator('rulesLogsLink')).toBeHidden();
     } finally {
       await disableAlertingV2(kbnClient);
@@ -71,6 +72,7 @@ test.describe('Rules page Logs visibility', { tag: '@local-stateful-classic' }, 
 
   test('shows the Logs child page with its own heading, back button, no tabs, and no create button', async ({
     page,
+    pageObjects,
     browserAuth,
     kbnClient,
   }) => {
@@ -80,8 +82,7 @@ test.describe('Rules page Logs visibility', { tag: '@local-stateful-classic' }, 
       await page.gotoApp('rules');
       await page.waitForURL(RULES_URL_RE);
 
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('rulesLogsLink');
+      await pageObjects.appMenu.clickItem('rulesLogsLink');
       await page.waitForURL(LOGS_URL_RE);
 
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText('Logs');

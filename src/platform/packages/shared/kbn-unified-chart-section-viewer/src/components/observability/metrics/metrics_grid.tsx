@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import {
   DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
+  openAfterDismissingOtherFlyouts,
   type MetricsGridSettings,
 } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -44,6 +44,7 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -103,6 +104,11 @@ export type MetricsGridProps = Pick<
    *
    */
   isTabSelected: boolean;
+  /**
+   * `ChartsGrid` hides an inactive grid with CSS rather than unmounting it, so per-chart
+   * fetches that should pause while hidden (exemplars) need this flag explicitly.
+   */
+  isComponentVisible: boolean;
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -123,6 +129,7 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
+  isComponentVisible,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -173,7 +180,6 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       onFlyoutStateChange({
         gridPosition: index,
         metricUniqueKey: getMetricUniqueKey(metricItem),
@@ -183,6 +189,31 @@ export const MetricsGrid = ({
     },
     [onFlyoutStateChange]
   );
+
+  const hasFlyoutToOpen = Boolean(flyoutData) && isTabSelected;
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  // Push flyouts share one inline offset on the app scroll container, so this one only mounts once
+  // the others have unmounted. Keyed on whether a flyout is owed rather than on `flyoutData`, so
+  // switching metrics while the flyout is open does not dismiss and remount it. This covers both
+  // View details and a tab restoring its `flyoutState` when it becomes active.
+  useEffect(() => {
+    if (!hasFlyoutToOpen) {
+      setIsFlyoutOpen(false);
+      return;
+    }
+
+    let isCurrent = true;
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () => {
+      if (isCurrent) {
+        setIsFlyoutOpen(true);
+      }
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [hasFlyoutToOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -268,13 +299,14 @@ export const MetricsGrid = ({
                   profileId={profileId}
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
+                  isComponentVisible={isComponentVisible}
                 />
               </EuiFlexItem>
             );
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected && (
+      {flyoutData && isFlyoutOpen && (
         <MetricInsightsFlyout
           metricItem={flyoutData.metricItem}
           esqlQuery={flyoutData.esqlQuery}
@@ -310,6 +342,7 @@ interface ChartItemProps
   profileId: string;
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
+  isComponentVisible: boolean;
 }
 
 const ChartItem = React.memo(
@@ -339,6 +372,7 @@ const ChartItem = React.memo(
     profileId,
     gridSettings,
     onMetricExplored,
+    isComponentVisible,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -365,6 +399,18 @@ const ChartItem = React.memo(
       dimensions,
       metricItem.dimensionFields
     );
+
+    const exemplars = useFetchExemplars({
+      fetchParams,
+      services,
+      metricItem,
+      whereStatements,
+      originalSource: userSource,
+      profileId,
+      isComponentVisible,
+    });
+    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
+    void exemplars;
 
     const esqlQuery = useMemo(() => {
       const fieldType = firstNonNullable(metricItem.fieldTypes);

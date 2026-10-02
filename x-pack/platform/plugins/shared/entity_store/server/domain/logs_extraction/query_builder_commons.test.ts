@@ -50,7 +50,7 @@ describe('exported field name constants', () => {
 describe('buildExtractionSourceClause', () => {
   const baseParams = {
     indexPatterns: ['logs-*', 'metrics-*'],
-    type: 'host' as const,
+    entityDefinition: getEntityDefinition('host', 'default'),
     fromDateISO: '2024-01-01T00:00:00.000Z',
     toDateISO: '2024-01-02T00:00:00.000Z',
   };

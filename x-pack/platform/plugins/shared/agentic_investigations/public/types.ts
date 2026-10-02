@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
+
+export interface AgenticInvestigationsPublicStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;

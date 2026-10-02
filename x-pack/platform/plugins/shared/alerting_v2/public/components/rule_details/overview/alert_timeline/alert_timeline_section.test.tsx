@@ -33,7 +33,7 @@ jest.mock('../../rule_context', () => ({
   useRule: () => ({
     id: 'rule-1',
     grouping: { fields: [] },
-    query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+    query: { base: 'FROM logs-*' },
   }),
 }));
 
@@ -62,10 +62,6 @@ const mockServices: Record<string, unknown> = {
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
   useService: (token: string) => mockServices[token],
-}));
-
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
 }));
 
 const successResult = {

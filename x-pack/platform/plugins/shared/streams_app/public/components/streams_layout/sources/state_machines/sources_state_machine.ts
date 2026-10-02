@@ -8,7 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
 import type { ActionArgs, ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   createSourceApiKeyServices,
@@ -18,12 +18,20 @@ import {
 } from '../source_api_keys';
 import type { SourceEnvironmentLoader } from '../source_environment';
 import {
-  createConfiguredSource,
+  connectedDestinationLabels,
   createRuntimeMetadata,
   createSourceViewModel,
+  createUnitSource,
+  getConfiguredSources,
+  getUnitSources,
+  toConfiguredSource,
+  withUnitSources,
 } from '../source_models';
 import { createSourceId, getAvailableSourceTypes, type SourceEnvironment } from '../source_helpers';
+import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { getFormattedError } from '../../../../util/errors';
+import { removeComponentFromPipelines } from '../../../../services/unit_connections';
+import type { Unit } from '../../../../services/unit_repository';
 import type {
   ConfiguredSource,
   RevealedApiKey,
@@ -32,7 +40,6 @@ import type {
   SourceStatus,
   SourceType,
   SourceViewModel,
-  SourcesUnitDefinition,
 } from '../types';
 
 type ApiKeyOperation = 'load' | 'generate' | 'delete' | 'persist';
@@ -66,13 +73,13 @@ export interface DeleteApiKeyOutput {
 
 export interface SourcesParentEvent {
   type: 'unit.changed';
-  unitDefinition: SourcesUnitDefinition;
-  sourceId: string;
+  unitDefinition: Unit;
+  sourceIds: string[];
   intent: 'create' | 'delete';
 }
 
 export interface SourcesStateInput {
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
   metadataBySourceId: Record<string, SourceRuntimeMetadata>;
   apiKeysBySourceId?: Record<string, SourceApiKey[]>;
   statusBySourceId?: Record<string, SourceStatus>;
@@ -93,7 +100,7 @@ export interface SourceCreationContext {
 }
 
 export interface SourcesStateContext {
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
   metadataBySourceId: Record<string, SourceRuntimeMetadata>;
   apiKeysBySourceId: Record<string, SourceApiKey[]>;
   statusBySourceId: Record<string, SourceStatus>;
@@ -113,17 +120,22 @@ export interface SourcesStateContext {
 }
 
 export type SourcesStateEvent =
-  | { type: 'unit.loaded'; unitDefinition: SourcesUnitDefinition }
-  | { type: 'unit.persisted'; sourceId: string; unitDefinition: SourcesUnitDefinition }
+  | { type: 'unit.loaded'; unitDefinition: Unit }
+  | { type: 'unit.save.started' }
+  | { type: 'unit.save.finished' }
+  | { type: 'unit.persisted'; sourceIds: string[]; unitDefinition: Unit }
   | {
       type: 'unit.persistenceFailed';
-      sourceId: string;
-      unitDefinition: SourcesUnitDefinition;
+      sourceIds: string[];
+      unitDefinition: Unit;
       message: string;
       intent: 'create' | 'delete';
     }
   | { type: 'source.create' }
   | { type: 'source.delete'; sourceId: string }
+  | { type: 'source.deleteMany'; sourceIds: string[] }
+  | { type: 'unconfiguredNode.remove'; nodeId: string }
+  | { type: 'unconfiguredNodes.set'; nodeIds: string[] }
   | { type: 'source.view'; sourceId: string }
   | { type: 'apiKey.generate'; sourceId: string }
   | { type: 'apiKey.delete'; sourceId: string; apiKeyId: string }
@@ -163,14 +175,14 @@ export const getSourceNameValidationError = ({
   unitDefinition,
 }: {
   sourceName: string;
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
 }): SourceNameValidationError | undefined => {
   const normalizedSourceName = normalizeSourceName(sourceName);
   if (!normalizedSourceName) {
     return 'required';
   }
 
-  return unitDefinition.sources.some(
+  return getUnitSources(unitDefinition).some(
     ({ name }) => name && normalizeSourceName(name) === normalizedSourceName
   )
     ? 'duplicate'
@@ -182,13 +194,13 @@ const getCreationFormErrors = ({
   unitDefinition,
 }: {
   sourceName: string;
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
 }): SourceCreationFormErrors => ({
   sourceName: getSourceNameValidationError({ sourceName, unitDefinition }),
 });
 
-const hasSource = (unitDefinition: SourcesUnitDefinition, sourceId: string): boolean =>
-  unitDefinition.sources.some(({ id }) => id === sourceId);
+const hasSource = (unitDefinition: Unit, sourceId: string): boolean =>
+  getUnitSources(unitDefinition).some(({ id }) => id === sourceId);
 
 const createUnconfiguredNodeId = (): string =>
   `unconfigured-source-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
@@ -197,6 +209,40 @@ const withoutKey = <T>(record: Record<string, T>, key: string): Record<string, T
   const next = { ...record };
   delete next[key];
   return next;
+};
+
+const withoutKeys = <T>(record: Record<string, T>, keys: ReadonlySet<string>): Record<string, T> =>
+  Object.fromEntries(Object.entries(record).filter(([key]) => !keys.has(key)));
+
+const removeSourcesFromContext = (
+  context: Pick<
+    SourcesStateContext,
+    | 'unitDefinition'
+    | 'metadataBySourceId'
+    | 'apiKeysBySourceId'
+    | 'statusBySourceId'
+    | 'selectedSourceId'
+  >,
+  sourceIds: readonly string[]
+) => {
+  const removed = new Set(sourceIds);
+  const unitDefinition = [...removed].reduce(
+    (unit, sourceId) => removeComponentFromPipelines(unit, sourceId),
+    withUnitSources(
+      context.unitDefinition,
+      getUnitSources(context.unitDefinition).filter(({ id }) => !removed.has(id))
+    )
+  );
+  return {
+    unitDefinition,
+    metadataBySourceId: withoutKeys(context.metadataBySourceId, removed),
+    apiKeysBySourceId: withoutKeys(context.apiKeysBySourceId, removed),
+    statusBySourceId: withoutKeys(context.statusBySourceId, removed),
+    selectedSourceId:
+      context.selectedSourceId && removed.has(context.selectedSourceId)
+        ? undefined
+        : context.selectedSourceId,
+  };
 };
 
 const pruneBySourceIds = <T>(
@@ -214,16 +260,21 @@ const rebuildSourceSidecars = (
     | 'sourceEnvironment'
     | 'selectedSourceId'
   >,
-  unitDefinition: SourcesUnitDefinition
+  unitDefinition: Unit
 ) => {
-  const sourceIds = new Set(unitDefinition.sources.map(({ id }) => id));
+  const configuredSources = getConfiguredSources(unitDefinition);
+  const sourceIds = new Set(configuredSources.map(({ id }) => id));
+  const destinationLabels = connectedDestinationLabels(unitDefinition);
   return {
     unitDefinition,
     metadataBySourceId: Object.fromEntries(
-      unitDefinition.sources.map((source) => [
+      configuredSources.map((source) => [
         source.id,
-        context.metadataBySourceId[source.id] ??
-          createRuntimeMetadata(source, context.sourceEnvironment),
+        {
+          ...(context.metadataBySourceId[source.id] ??
+            createRuntimeMetadata(source, context.sourceEnvironment)),
+          destinations: destinationLabels[source.id] ?? [],
+        },
       ])
     ),
     apiKeysBySourceId: pruneBySourceIds(context.apiKeysBySourceId, sourceIds),
@@ -313,6 +364,7 @@ export const sourcesStateMachine = setup({
   },
   actions: {
     notifySourceCreated: getPlaceholderFor(createNotifySourceCreatedAction),
+    notifySourceDeleted: getPlaceholderFor(createNotifySourceDeletedAction),
     notifySourceEnvironmentError: getPlaceholderFor(createNotifySourceEnvironmentErrorAction),
     storeSourceEnvironment: assign(({ context, event }) => {
       if (event.type !== 'xstate.done.actor.loadSourceEnvironment') {
@@ -337,7 +389,7 @@ export const sourcesStateMachine = setup({
               }
             : context.creationContext,
         metadataBySourceId: Object.fromEntries(
-          context.unitDefinition.sources.map((source) => {
+          getConfiguredSources(context.unitDefinition).map((source) => {
             const resolvedMetadata = createRuntimeMetadata(source, sourceEnvironment);
             return [
               source.id,
@@ -364,7 +416,7 @@ export const sourcesStateMachine = setup({
         return {};
       }
       const sidecars = rebuildSourceSidecars(context, event.unitDefinition);
-      const sourceIds = new Set(event.unitDefinition.sources.map(({ id }) => id));
+      const sourceIds = new Set(getConfiguredSources(event.unitDefinition).map(({ id }) => id));
       return {
         ...sidecars,
         hasReceivedUnit: true,
@@ -422,6 +474,19 @@ export const sourcesStateMachine = setup({
       revealedApiKey: undefined,
       apiKeyError: undefined,
     }),
+    removeUnconfiguredNode: assign(({ context, event }) => {
+      if (event.type !== 'unconfiguredNode.remove') {
+        return {};
+      }
+      return {
+        unconfiguredNodeIds: context.unconfiguredNodeIds.filter(
+          (nodeId) => nodeId !== event.nodeId
+        ),
+      };
+    }),
+    setUnconfiguredNodes: assign(({ context, event }) =>
+      event.type === 'unconfiguredNodes.set' ? { unconfiguredNodeIds: event.nodeIds } : {}
+    ),
     clearFailedCreate: assign(({ context }) => {
       const sourceId = context.creationContext?.createdSource?.id;
       if (!sourceId || context.apiKeyError?.operation !== 'persist') {
@@ -432,10 +497,10 @@ export const sourcesStateMachine = setup({
         };
       }
       return {
-        unitDefinition: {
-          ...context.unitDefinition,
-          sources: context.unitDefinition.sources.filter(({ id }) => id !== sourceId),
-        },
+        unitDefinition: withUnitSources(
+          context.unitDefinition,
+          getUnitSources(context.unitDefinition).filter(({ id }) => id !== sourceId)
+        ),
         metadataBySourceId: withoutKey(context.metadataBySourceId, sourceId),
         apiKeysBySourceId: withoutKey(context.apiKeysBySourceId, sourceId),
         statusBySourceId: withoutKey(context.statusBySourceId, sourceId),
@@ -499,9 +564,13 @@ export const sourcesStateMachine = setup({
       const name = sourceName.trim();
       const id = createSourceId({
         name,
-        existingIds: context.unitDefinition.sources.map((source) => source.id),
+        existingIds: getUnitSources(context.unitDefinition).map((source) => source.id),
       });
-      const source = createConfiguredSource({ id, name, type });
+      const unitSource = createUnitSource({ id, name, type });
+      const source = toConfiguredSource(unitSource);
+      if (!source) {
+        return {};
+      }
       const metadata = createRuntimeMetadata(source, context.sourceEnvironment);
       return {
         creationContext: {
@@ -518,13 +587,12 @@ export const sourcesStateMachine = setup({
               (nodeId) => nodeId !== context.creationContext?.associatedUnconfiguredNodeId
             )
           : context.unconfiguredNodeIds,
-        unitDefinition: {
-          ...context.unitDefinition,
-          sources: [
-            ...context.unitDefinition.sources.filter(({ id: sourceId }) => sourceId !== source.id),
-            source,
-          ],
-        },
+        unitDefinition: withUnitSources(context.unitDefinition, [
+          ...getUnitSources(context.unitDefinition).filter(
+            ({ id: sourceId }) => sourceId !== unitSource.id
+          ),
+          unitSource,
+        ]),
         metadataBySourceId: {
           ...context.metadataBySourceId,
           [source.id]: metadata,
@@ -546,7 +614,7 @@ export const sourcesStateMachine = setup({
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
-          sourceId,
+          sourceIds: [sourceId],
           intent: 'create',
         };
       }
@@ -555,17 +623,13 @@ export const sourcesStateMachine = setup({
       if (event.type !== 'source.delete') {
         return {};
       }
-      return {
-        unitDefinition: {
-          ...context.unitDefinition,
-          sources: context.unitDefinition.sources.filter(({ id }) => id !== event.sourceId),
-        },
-        metadataBySourceId: withoutKey(context.metadataBySourceId, event.sourceId),
-        apiKeysBySourceId: withoutKey(context.apiKeysBySourceId, event.sourceId),
-        statusBySourceId: withoutKey(context.statusBySourceId, event.sourceId),
-        selectedSourceId:
-          context.selectedSourceId === event.sourceId ? undefined : context.selectedSourceId,
-      };
+      return removeSourcesFromContext(context, [event.sourceId]);
+    }),
+    deleteSources: assign(({ context, event }) => {
+      if (event.type !== 'source.deleteMany') {
+        return {};
+      }
+      return removeSourcesFromContext(context, event.sourceIds);
     }),
     notifyParentDelete: sendTo(
       ({ context }) => context.parentRef,
@@ -576,7 +640,21 @@ export const sourcesStateMachine = setup({
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
-          sourceId: event.sourceId,
+          sourceIds: [event.sourceId],
+          intent: 'delete',
+        };
+      }
+    ),
+    notifyParentDeleteMany: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context, event }): SourcesParentEvent => {
+        if (event.type !== 'source.deleteMany' || event.sourceIds.length === 0) {
+          throw new Error('Expected sources to delete');
+        }
+        return {
+          type: 'unit.changed',
+          unitDefinition: context.unitDefinition,
+          sourceIds: event.sourceIds,
           intent: 'delete',
         };
       }
@@ -730,6 +808,10 @@ export const sourcesStateMachine = setup({
       if (event.type !== 'unit.persistenceFailed') {
         return {};
       }
+      const sourceId = event.sourceIds[0];
+      if (!sourceId) {
+        return {};
+      }
       const associatedUnconfiguredNodeId =
         context.creationContext?.includeUnconfiguredNode === true
           ? context.creationContext.associatedUnconfiguredNodeId
@@ -743,12 +825,12 @@ export const sourcesStateMachine = setup({
             : context.unconfiguredNodeIds,
         apiKeyError: {
           operation: 'persist' as const,
-          sourceId: event.sourceId,
+          sourceId,
           message: event.message,
         },
         statusBySourceId: {
           ...context.statusBySourceId,
-          [event.sourceId]: 'failed' as const,
+          ...Object.fromEntries(event.sourceIds.map((_sourceId) => [_sourceId, 'failed' as const])),
         },
       };
     }),
@@ -768,27 +850,53 @@ export const sourcesStateMachine = setup({
           }) &&
           context.availableSourceTypes.includes(context.creationContext.formData.sourceType)
       ),
-    isCreatedSource: ({ context, event }) =>
-      (event.type === 'unit.persisted' ||
-        (event.type === 'unit.persistenceFailed' && event.intent === 'create')) &&
-      context.creationContext?.createdSource?.id === event.sourceId,
-    isCreatedSourceWithEndpoint: ({ context, event }) =>
-      event.type === 'unit.persisted' &&
-      context.creationContext?.createdSource?.id === event.sourceId &&
-      context.creationContext.createdSource.endpoint !== undefined,
+    isCreatedSource: ({ context, event }) => {
+      const createdSourceId = context.creationContext?.createdSource?.id;
+      return (
+        (event.type === 'unit.persisted' ||
+          (event.type === 'unit.persistenceFailed' && event.intent === 'create')) &&
+        createdSourceId !== undefined &&
+        event.sourceIds.includes(createdSourceId)
+      );
+    },
+    isCreatedSourceWithEndpoint: ({ context, event }) => {
+      const createdSourceId = context.creationContext?.createdSource?.id;
+      return (
+        event.type === 'unit.persisted' &&
+        createdSourceId !== undefined &&
+        event.sourceIds.includes(createdSourceId) &&
+        context.creationContext?.createdSource?.endpoint !== undefined
+      );
+    },
     loadedUnitRemovedViewedSource: ({ context, event }) =>
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedSourceId &&
-          !event.unitDefinition.sources.some(({ id }) => id === context.selectedSourceId)
+          !getConfiguredSources(event.unitDefinition).some(
+            ({ id }) => id === context.selectedSourceId
+          )
       ),
     targetsViewedSource: ({ context, event }) =>
       (event.type === 'apiKey.generate' || event.type === 'apiKey.delete') &&
       event.sourceId === context.selectedSourceId,
     deletesViewedSource: ({ context, event }) =>
       event.type === 'source.delete' && event.sourceId === context.selectedSourceId,
+    hasSourcesToDelete: ({ event }) =>
+      event.type === 'source.deleteMany' && event.sourceIds.length > 0,
+    removesOpenPlaceholder: ({ context, event }) =>
+      event.type === 'unconfiguredNode.remove' &&
+      event.nodeId === context.creationContext?.associatedUnconfiguredNodeId,
+    setDropsOpenPlaceholder: ({ context, event }) => {
+      const associatedNodeId = context.creationContext?.associatedUnconfiguredNodeId;
+      return (
+        event.type === 'unconfiguredNodes.set' &&
+        associatedNodeId !== undefined &&
+        !event.nodeIds.includes(associatedNodeId)
+      );
+    },
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
+    unitSaveIsIdle: stateIn('#sourcesUnitSaveIdle'),
   },
 }).createMachine({
   id: 'streamsSources',
@@ -807,14 +915,61 @@ export const sourcesStateMachine = setup({
   }),
   on: {
     'unit.loaded': { actions: 'syncLoadedUnit' },
-    'unit.persisted': { actions: 'syncLoadedUnit' },
+    'unit.persisted': { actions: ['syncLoadedUnit', 'notifySourceDeleted'] },
     'unit.persistenceFailed': {
       guard: 'isDeletePersistenceFailure',
       actions: 'restoreUnitAfterPersistenceFailure',
     },
-    'source.delete': { actions: ['deleteSource', 'notifyParentDelete'] },
+    'source.delete': {
+      guard: 'unitSaveIsIdle',
+      actions: ['deleteSource', 'notifyParentDelete'],
+    },
+    'source.deleteMany': {
+      guard: and(['unitSaveIsIdle', 'hasSourcesToDelete']),
+      actions: ['deleteSources', 'notifyParentDeleteMany'],
+    },
+    'unconfiguredNode.remove': [
+      {
+        guard: and([
+          'removesOpenPlaceholder',
+          not(stateIn({ configuring: 'persisting' })),
+          not(stateIn({ configuring: { apiKey: 'generating' } })),
+        ]),
+        target: '#configuringIdle',
+        actions: ['removeUnconfiguredNode', 'clearCreate'],
+      },
+      { actions: 'removeUnconfiguredNode' },
+    ],
+    'unconfiguredNodes.set': [
+      {
+        guard: and([
+          'setDropsOpenPlaceholder',
+          not(stateIn({ configuring: 'persisting' })),
+          not(stateIn({ configuring: { apiKey: 'generating' } })),
+        ]),
+        target: '#configuringIdle',
+        actions: ['setUnconfiguredNodes', 'clearCreate'],
+      },
+      { actions: 'setUnconfiguredNodes' },
+    ],
   },
   states: {
+    unitSave: {
+      initial: 'idle',
+      states: {
+        idle: {
+          id: 'sourcesUnitSaveIdle',
+          on: {
+            'unit.save.started': { target: 'saving' },
+          },
+        },
+        saving: {
+          on: {
+            'unit.save.finished': { target: 'idle' },
+          },
+        },
+      },
+    },
     environment: {
       initial: 'loading',
       states: {
@@ -847,6 +1002,7 @@ export const sourcesStateMachine = setup({
           id: 'configuringIdle',
           on: {
             'modal.openCreate': {
+              guard: 'unitSaveIsIdle',
               target: 'supplyingConfiguration',
               actions: 'startFreshCreate',
             },
@@ -860,7 +1016,7 @@ export const sourcesStateMachine = setup({
             'source.create': [
               {
                 target: 'persisting',
-                guard: 'canCreateSource',
+                guard: and(['canCreateSource', 'unitSaveIsIdle']),
                 actions: ['stageCreatedSource', 'notifyParentCreate'],
               },
               { actions: 'validateSourceName' },
@@ -927,15 +1083,11 @@ export const sourcesStateMachine = setup({
     flyout: {
       initial: 'closed',
       on: {
-        'source.view': {
-          target: '.loading',
-          reenter: true,
-          actions: 'selectViewedSource',
-        },
+        'source.view': { target: '.loading', actions: 'selectViewedSource' },
         'flyout.close': { target: '.closed', actions: 'closeFlyout' },
         'modal.openCreate': { target: '.closed', actions: 'closeFlyout' },
         'source.delete': {
-          guard: 'deletesViewedSource',
+          guard: and(['deletesViewedSource', 'unitSaveIsIdle']),
           target: '.closed',
           actions: ['deleteSource', 'notifyParentDelete', 'closeFlyout'],
         },
@@ -952,7 +1104,7 @@ export const sourcesStateMachine = setup({
             id: 'loadSourceApiKeys',
             src: 'loadApiKeys',
             input: ({ context }) => {
-              const source = context.unitDefinition.sources.find(
+              const source = getConfiguredSources(context.unitDefinition).find(
                 ({ id }) => id === context.selectedSourceId
               );
               if (!source) {
@@ -976,7 +1128,7 @@ export const sourcesStateMachine = setup({
                 id: 'generateViewedSourceApiKey',
                 src: 'generateApiKey',
                 input: ({ context }) => {
-                  const source = context.unitDefinition.sources.find(
+                  const source = getConfiguredSources(context.unitDefinition).find(
                     ({ id }) => id === context.selectedSourceId
                   );
                   if (!source) {
@@ -1033,7 +1185,7 @@ export const getSourceViewModels = (context: SourcesStateContext): SourceViewMod
     apiKeysBySourceId,
     sourceEnvironment,
   } = context;
-  const sourceViewModels = unitDefinition.sources.map((source) =>
+  const sourceViewModels = getConfiguredSources(unitDefinition).map((source) =>
     createSourceViewModel({
       source,
       metadata: metadataBySourceId[source.id] ?? createRuntimeMetadata(source, sourceEnvironment),
@@ -1054,6 +1206,21 @@ function createNotifySourceCreatedAction({ toasts }: { toasts: Toasts }) {
         defaultMessage: 'New source configured',
       }),
     });
+  };
+}
+
+function createNotifySourceDeletedAction({ toasts }: { toasts: Toasts }) {
+  return ({ event }: { event: SourcesStateEvent }) => {
+    if (event.type !== 'unit.persisted' || event.sourceIds.length === 0) {
+      return;
+    }
+    const remainingSourceIds = new Set(
+      getConfiguredSources(event.unitDefinition).map(({ id }) => id)
+    );
+    if (event.sourceIds.some((sourceId) => remainingSourceIds.has(sourceId))) {
+      return;
+    }
+    notifyUnitUpdated(toasts);
   };
 }
 
@@ -1092,6 +1259,7 @@ export const createSourcesMachineImplementations = ({
     },
     actions: {
       notifySourceCreated: createNotifySourceCreatedAction({ toasts }),
+      notifySourceDeleted: createNotifySourceDeletedAction({ toasts }),
       notifySourceEnvironmentError: createNotifySourceEnvironmentErrorAction({ toasts }),
     },
   };

@@ -1,12 +1,12 @@
 {
-  "sha1": "8c055343edfe0d4df29416569a7d0828e3b55813",
+  "sha1": "8aba026cde58f9cf935b13e0cc8e701fec82d076",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "c6fe95d49438245-b113663c1fae506",
-      "title": "Workflows Extensions - Event-Driven Trigger Definitions Approval should validate that all registered event-driven trigger definitions are approved by workflows-eng team",
+      "id": "c6fe95d49438245-2840d6686a1b3ec",
+      "title": "Workflows Extensions - Event-Driven Trigger Definitions Approval should validate that registered event-driven trigger definitions match the workflows-eng approved catalog",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

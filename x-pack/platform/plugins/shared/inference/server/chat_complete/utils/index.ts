@@ -13,6 +13,7 @@ export {
 } from './inference_executor';
 export {
   createInferenceEndpointExecutor,
+  pickConnectorTelemetryForConnector,
   type InferenceEndpointExecutor,
   type InferenceEndpointInvokeOptions,
 } from './inference_endpoint_executor';

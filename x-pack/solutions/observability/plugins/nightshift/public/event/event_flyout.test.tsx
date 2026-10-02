@@ -19,6 +19,7 @@ const queryClient = new QueryClient({
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -114,6 +115,11 @@ jest.mock('../hooks/use_kibana', () => ({
         },
       },
       application: {
+        capabilities: {
+          nightshift: {
+            show: true,
+          },
+        },
         getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
     },

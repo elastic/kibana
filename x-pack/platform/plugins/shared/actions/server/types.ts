@@ -113,6 +113,10 @@ export interface InMemoryConnector<
   config: Config;
   exposeConfig?: boolean;
   isDynamic?: boolean;
+  /**
+   * Events are on for this in-memory connector. GET reports it for a dual type.
+   */
+  isInboundEventsEnabled?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
@@ -316,6 +320,10 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
+  hasInboundEventIdentity?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

@@ -8,6 +8,11 @@
  */
 
 export { FlyoutTemplate } from './src/flyout_template';
+export { useFlyoutClose } from './src/context';
+
+/** @internal Openers only: hands `FlyoutTemplate` the root props it must render with. */
+export { FlyoutTemplateManagedProvider } from './src/context';
+export type { FlyoutTemplateManaged } from './src/context';
 
 export type {
   FlyoutTemplateProps,
@@ -16,7 +21,10 @@ export type {
   FlyoutHeaderInfoBlockProps,
   FlyoutHeaderMetaBlockProps,
   FlyoutTabProps,
+  FlyoutTabBarProps,
   FlyoutBodyProps,
+  FlyoutBodyCalloutLevel,
+  FlyoutBodyCalloutProps,
   FlyoutBodyTabPanelProps,
   FlyoutBodySectionProps,
   FlyoutBodySectionAction,
@@ -25,4 +33,7 @@ export type {
   FlyoutFooterProps,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
+  FlyoutFooterPrimaryActionMenuProps,
+  FlyoutFooterMenuPanel,
+  FlyoutFooterMenuItem,
 } from './src/types';

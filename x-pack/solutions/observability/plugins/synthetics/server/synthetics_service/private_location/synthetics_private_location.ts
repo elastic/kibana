@@ -13,7 +13,6 @@ import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
-import { getRebalancePrivateLocationShardsEnabled } from '../../tasks/rebalance_shards_enabled';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -23,7 +22,7 @@ import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
-import { scheduleCleanUpTask } from './clean_up_task';
+import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import type {
@@ -33,6 +32,7 @@ import type {
 } from '../../../common/runtime_types';
 import {
   ConfigKey,
+  MonitorTypeEnum,
   SourceType,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
@@ -46,12 +46,8 @@ import {
   toMonitorPlacements,
 } from './rebalance_writes';
 import { getPrivateLocations } from '../get_private_locations';
-import {
-  agentIdFromCondition,
-  assignAgentById,
-  isConditionShardedLocation,
-  isEqlSafeLiteral,
-} from './assign_by_condition';
+import { agentIdFromCondition, assignAgentById, isEqlSafeLiteral } from './assign_by_condition';
+import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -218,7 +214,7 @@ export class SyntheticsPrivateLocation {
     runOnce?: boolean,
     conditionHosts?: EnrolledAgents,
     existingCondition?: string | null,
-    assignAgentConditions: boolean = true
+    shardingMode: AgentShardingMode = 'inactive'
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -228,7 +224,7 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
-      if (isConditionShardedLocation(privateLocation) && assignAgentConditions) {
+      if (shardingMode === 'active') {
         const agentIds = conditionHosts?.agentIds ?? [];
         const existingAgentId = agentIdFromCondition(existingCondition);
 
@@ -243,13 +239,22 @@ export class SyntheticsPrivateLocation {
           }
         }
         // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+      } else if (shardingMode === 'unknown') {
+        // License unreadable: keep whatever pin exists until it can be read again.
+        if (existingCondition) {
+          newPolicy.condition = existingCondition;
+        }
       } else if (existingCondition) {
-        // Classic location, or shard rebalancing paused: drop any leftover pin.
+        // No Enterprise license, or shard rebalancing paused: drop any leftover pin.
         newPolicy.condition = null;
       }
       if (testRunId) {
+        // These names mark a policy as a Test Now run: the leftover scan skips
+        // them, and the daily clean up sweeps any whose own clean up never ran.
         newPolicy.name =
-          config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
+          config.type === MonitorTypeEnum.BROWSER || config.type === MonitorTypeEnum.API
+            ? BROWSER_TEST_NOW_RUN
+            : LIGHTWEIGHT_TEST_NOW_RUN;
       } else {
         newPolicy.name = this.getPolicyName(config, locName);
       }
@@ -287,6 +292,14 @@ export class SyntheticsPrivateLocation {
       return formattedPolicy;
     } catch (e) {
       this.server.logger.error(e);
+      // Preserve actionable package-upgrade guidance; other failures fall through
+      // to the caller's generic "unable to create package policy" path.
+      if (
+        e instanceof Error &&
+        e.message.includes('Synthetics integration version 1.12.0 or later')
+      ) {
+        throw e;
+      }
       return null;
     }
   }
@@ -326,32 +339,15 @@ export class SyntheticsPrivateLocation {
     return { agentIds: [...agentIds] };
   }
 
-  /**
-   * Cluster-wide kill-switch stored on the rebalance Task Manager task.
-   * Defaults to on so a task-read failure does not change CRUD behavior.
-   */
-  private async isShardRebalanceEnabled(): Promise<boolean> {
-    try {
-      return await getRebalancePrivateLocationShardsEnabled(this.server.pluginsStart.taskManager);
-    } catch (e) {
-      this.server.logger.error(e);
-      return true;
-    }
-  }
-
-  /** Resolves each touched scalable location at most once per monitor batch. */
-  private async getScalableAgentsByLocation(
-    locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+  /** Resolves each touched location at most once per monitor batch. */
+  private async getEnrolledAgentsByLocation(
+    locations: Array<{ id: string; agentPolicyId: string }>
   ): Promise<Map<string, EnrolledAgents>> {
-    const conditionLocations = [
-      ...new Map(
-        locations
-          .filter((location) => isConditionShardedLocation(location))
-          .map((location) => [location.id, location])
-      ).values(),
+    const uniqueLocations = [
+      ...new Map(locations.map((location) => [location.id, location])).values(),
     ];
     const entries = await Promise.all(
-      conditionLocations.map(
+      uniqueLocations.map(
         async (location) =>
           [location.id, await this.getEnrolledAgents(location.agentPolicyId)] as const
       )
@@ -390,10 +386,11 @@ export class SyntheticsPrivateLocation {
       configs,
       privateLocations
     );
-    const assignAgentConditions = await this.isShardRebalanceEnabled();
-    const scalableAgentsByLocation = assignAgentConditions
-      ? await this.getScalableAgentsByLocation(referencedPrivateLocations)
-      : new Map<string, EnrolledAgents>();
+    const shardingMode = await getAgentShardingMode(this.server);
+    const enrolledAgentsByLocation =
+      shardingMode === 'active'
+        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+        : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -417,9 +414,9 @@ export class SyntheticsPrivateLocation {
             maintenanceWindows,
             testRunId,
             runOnce,
-            scalableAgentsByLocation.get(location.id),
+            enrolledAgentsByLocation.get(location.id),
             undefined,
-            assignAgentConditions
+            shardingMode
           );
 
           if (!newPolicy) {
@@ -457,7 +454,7 @@ export class SyntheticsPrivateLocation {
       });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
-        void scheduleCleanUpTask(this.server);
+        void scheduleTestNowCleanUp(this.server, result.created);
       }
       return result;
     } catch (e) {
@@ -489,9 +486,9 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
-      const assignAgentConditions = await this.isShardRebalanceEnabled();
+      const shardingMode = await getAgentShardingMode(this.server);
       const conditionHosts =
-        assignAgentConditions && isConditionShardedLocation(location)
+        shardingMode === 'active'
           ? await this.getEnrolledAgents(location.agentPolicyId)
           : undefined;
 
@@ -506,7 +503,7 @@ export class SyntheticsPrivateLocation {
         undefined,
         conditionHosts,
         undefined,
-        assignAgentConditions
+        shardingMode
       );
 
       const pkgPolicy = {
@@ -552,10 +549,11 @@ export class SyntheticsPrivateLocation {
       configs,
       allPrivateLocations
     );
-    const assignAgentConditions = await this.isShardRebalanceEnabled();
-    const scalableAgentsByLocation = assignAgentConditions
-      ? await this.getScalableAgentsByLocation(referencedPrivateLocations)
-      : new Map<string, EnrolledAgents>();
+    const shardingMode = await getAgentShardingMode(this.server);
+    const enrolledAgentsByLocation =
+      shardingMode === 'active'
+        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+        : new Map<string, EnrolledAgents>();
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
@@ -593,9 +591,9 @@ export class SyntheticsPrivateLocation {
               maintenanceWindows,
               undefined,
               undefined,
-              scalableAgentsByLocation.get(privateLocation.id),
+              enrolledAgentsByLocation.get(privateLocation.id),
               existingCondition,
-              assignAgentConditions
+              shardingMode
             );
 
             if (!newPolicy) {
@@ -771,8 +769,8 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async getAgentPolicies() {
-    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  async getAgentPolicies(spaceId: string = ALL_SPACES_ID) {
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId });
   }
 
   /**
@@ -851,18 +849,14 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Drops every `${agent.id}` pin on *scalable* private-location package
-   * policies so monitors run unfiltered (classic). Used when shard
-   * rebalancing is turned off. Classic locations never stamp pins, and
-   * disable-sharding already rewrites them before the SO flips, so listing
-   * those agent policies would only add Fleet load. Dedupes by agent policy
-   * so a shared policy is listed once.
+   * Drops every `${agent.id}` pin on private-location package policies so
+   * monitors run unfiltered on every agent. Used when shard rebalancing is
+   * turned off or the license no longer covers sharding. Dedupes by agent
+   * policy so a shared policy is listed once.
    */
   async clearShardConditions(): Promise<{ cleared: number; failed: number }> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const locations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
-      isConditionShardedLocation
-    );
+    const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
     const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
 
     let cleared = 0;

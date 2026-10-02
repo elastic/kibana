@@ -1,5 +1,5 @@
 {
-  "sha1": "22d544cc064d8c4e85369f4af0d8e8103d8d5f24",
+  "sha1": "760a9639ecc6438009558192d5cfa7368642be19",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -50,7 +50,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 134,
+        "line": 132,
         "column": 31
       }
     },
@@ -63,7 +63,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 178,
+        "line": 176,
         "column": 57
       }
     },
@@ -76,7 +76,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 213,
+        "line": 211,
         "column": 31
       }
     },
@@ -89,7 +89,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 243,
+        "line": 241,
         "column": 18
       }
     },
@@ -102,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 294,
+        "line": 292,
         "column": 5
       }
     },
@@ -115,7 +115,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
-        "line": 347,
+        "line": 345,
         "column": 26
       }
     },
@@ -302,16 +302,55 @@
       }
     },
     {
-      "id": "10e89b7d2459195-cc2bbb39100dadc",
-      "title": "Lens annotation library saves an annotation group to the library, syncs edits across dashboard panels, and propagates deletion",
+      "id": "10e89b7d2459195-c91fcc2b3818f77",
+      "title": "Lens annotation library saves a new annotation layer to the library under a new tag",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
-        "line": 26,
-        "column": 13
+        "line": 36,
+        "column": 44
+      }
+    },
+    {
+      "id": "10e89b7d2459195-001725a7e5585f7",
+      "title": "Lens annotation library adds a saved annotation group from the library to a new chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 54,
+        "column": 25
+      }
+    },
+    {
+      "id": "10e89b7d2459195-3052a3d0585954d",
+      "title": "Lens annotation library syncs annotation-group edits across cloned dashboard panels via inline edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "10e89b7d2459195-ec02d75b8ea23d5",
+      "title": "Lens annotation library removes the annotation layer from the editor and dashboard panel once its library group is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
+        "line": 86,
+        "column": 41
       }
     },
     {
@@ -518,7 +557,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_layers.spec.ts",
-        "line": 55,
+        "line": 57,
         "column": 7
       }
     },
@@ -531,7 +570,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_layers.spec.ts",
-        "line": 67,
+        "line": 69,
         "column": 13
       }
     },
@@ -544,7 +583,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_layers.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 25
       }
     },
@@ -570,7 +609,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_metric.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 94
       }
     },
@@ -583,7 +622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_rbac.spec.ts",
-        "line": 73,
+        "line": 75,
         "column": 27
       }
     },
@@ -596,7 +635,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_rbac.spec.ts",
-        "line": 95,
+        "line": 97,
         "column": 11
       }
     },
@@ -622,7 +661,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_xy.spec.ts",
-        "line": 100,
+        "line": 102,
         "column": 64
       }
     },
@@ -635,7 +674,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard_inline_editing_xy.spec.ts",
-        "line": 132,
+        "line": 134,
         "column": 55
       }
     },
@@ -778,8 +817,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
-        "line": 88,
-        "column": 20
+        "line": 127,
+        "column": 15
+      }
+    },
+    {
+      "id": "a67f0ea6f9cf137-9a4508d4ebdd9a6",
+      "title": "Dashboard with ES|QL Lens panel cancels the search request when navigating away cancels both ES|QL and classic requests when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
+        "line": 158,
+        "column": 95
+      }
+    },
+    {
+      "id": "35588332e460d83-3479867a1ebcc21",
+      "title": "Lens ES|QL variable control panel highlighting keeps a secondary layer bound to an identifier variable after the control changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_control_highlight.spec.ts",
+        "line": 156,
+        "column": 7
+      }
+    },
+    {
+      "id": "35588332e460d83-16f15442d8e818d",
+      "title": "Lens ES|QL variable control panel highlighting highlights the panel that uses the variable in a non-first ES|QL layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_control_highlight.spec.ts",
+        "line": 172,
+        "column": 30
       }
     },
     {
@@ -817,8 +895,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 61,
-        "column": 30
+        "line": 86,
+        "column": 31
       }
     },
     {
@@ -858,6 +936,110 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_legacy_slot_self_heal.spec.ts",
         "line": 137,
         "column": 33
+      }
+    },
+    {
+      "id": "06b4ff532aa7561-cc7df877d3c3727",
+      "title": "Lens ES|QL annotation and reference-line layers combines ES|QL data with annotation and reference-line layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
+        "line": 35,
+        "column": 13
+      }
+    },
+    {
+      "id": "06b4ff532aa7561-d7a98ec35b513a6",
+      "title": "Lens ES|QL annotation and reference-line layers enables apply after editing a persisted reference line on an ES|QL panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
+        "line": 79,
+        "column": 9
+      }
+    },
+    {
+      "id": "06b4ff532aa7561-d23d2491357ca8f",
+      "title": "Lens ES|QL annotation and reference-line layers hides data-view-dependent controls on annotation and reference line layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
+        "line": 105,
+        "column": 40
+      }
+    },
+    {
+      "id": "06b4ff532aa7561-003f2a854e6f613",
+      "title": "Lens ES|QL annotation and reference-line layers edits, styles and duplicates annotations and reference lines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
+        "line": 146,
+        "column": 22
+      }
+    },
+    {
+      "id": "9c700cf8888f1b4-273cf1eabe86ce3",
+      "title": "Lens ES|QL data-layer lifecycle creates and edits independent ES|QL data layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_data_layers.spec.ts",
+        "line": 38,
+        "column": 17
+      }
+    },
+    {
+      "id": "9c700cf8888f1b4-f54e68c5a06f3c0",
+      "title": "Lens ES|QL data-layer lifecycle duplicates and deletes ES|QL layers via the tab actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_data_layers.spec.ts",
+        "line": 67,
+        "column": 52
+      }
+    },
+    {
+      "id": "9c700cf8888f1b4-2d05b50a79f994f",
+      "title": "Lens ES|QL data-layer lifecycle keeps the new source time field after changing a secondary layer query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_data_layers.spec.ts",
+        "line": 101,
+        "column": 20
+      }
+    },
+    {
+      "id": "a72159d97f059cb-6f1fe90d59d60b4",
+      "title": "Lens ES|QL layer query validation rejects invalid or incompatible queries on one layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_query_validation.spec.ts",
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -1259,8 +1441,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 141,
+        "column": 20
       }
     },
     {
@@ -1352,6 +1534,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
         "line": 55,
         "column": 15
+      }
+    },
+    {
+      "id": "79b736095ef203d-841136227d41f25",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a FORK query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 91,
+        "column": 49
       }
     },
     {
@@ -1454,7 +1649,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/runtime_fields.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 13
       }
     },
@@ -1507,7 +1702,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 59,
-        "column": 9
+        "column": 27
       }
     },
     {
@@ -1520,7 +1715,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 84,
-        "column": 18
+        "column": 22
       }
     },
     {
@@ -1533,7 +1728,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 110,
-        "column": 9
+        "column": 13
       }
     },
     {
@@ -1545,7 +1740,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 132,
+        "line": 135,
         "column": 4
       }
     },
@@ -1559,7 +1754,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 158,
-        "column": 25
+        "column": 20
       }
     },
     {
@@ -1572,7 +1767,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
         "line": 187,
-        "column": 25
+        "column": 9
       }
     },
     {
@@ -1584,8 +1779,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 231,
-        "column": 31
+        "line": 233,
+        "column": 24
       }
     },
     {
