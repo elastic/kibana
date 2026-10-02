@@ -22,6 +22,9 @@ const OPTIONS: TrimSpacesOption[] = [
   { value: 'true', label: createDatasetWizardStrings.trueLabel },
 ];
 
+export const getTrimSpacesDisplayLabel = (value: boolean): string =>
+  OPTIONS.find((option) => option.value === String(value))?.label ?? String(value);
+
 export function TrimSpaces({
   value,
   onChange,
