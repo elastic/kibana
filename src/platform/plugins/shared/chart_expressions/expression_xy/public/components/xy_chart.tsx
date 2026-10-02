@@ -908,7 +908,8 @@ export function XYChart({
                 formatFactory,
                 isEsqlMode,
                 canCreateAlerts,
-                interactive && !args.detailedTooltip
+                interactive && !args.detailedTooltip,
+                args.axisFormatPolicies
               )}
               customTooltip={
                 args.detailedTooltip

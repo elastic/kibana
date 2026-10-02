@@ -30,6 +30,7 @@ import {
   type AxisSeriesDescriptor,
 } from './axis_grouping';
 import type { AxisFormatPolicy, AxisPolicyMember } from './axis_format_policy_types';
+import { toCoordinateUnitValue } from './axis_unit_conversion';
 import { isDataLayer, isReferenceLine, isReferenceLineOrLayer } from './utils/layer_types_guards';
 
 const DEFAULT_FORMAT: SerializedFieldFormat = { id: 'number' };
@@ -310,7 +311,7 @@ const getAxisSourceFactor = (policy?: AxisFormatPolicy): number => {
 };
 
 const scaleExtentBound = (bound: number | undefined, factor: number): number | undefined =>
-  typeof bound === 'number' ? bound * factor : bound;
+  typeof bound === 'number' ? toCoordinateUnitValue(bound, factor) : bound;
 
 /**
  * Custom Y-axis extents are authored in the anchor series' source units. Scale them into the
@@ -371,7 +372,7 @@ const scaleTable = (table: Datatable, factors: Map<string, number>): Datatable =
     const scaledRow = { ...row };
     factors.forEach((factor, accessor) => {
       if (typeof row[accessor] === 'number') {
-        scaledRow[accessor] = row[accessor] * factor;
+        scaledRow[accessor] = toCoordinateUnitValue(row[accessor], factor);
       }
     });
     return scaledRow;
@@ -399,7 +400,7 @@ export const applyAxisFormatPolicies = <Layer extends CommonXYLayerConfig>(
           ...decoration,
           value:
             typeof decoration.value === 'number'
-              ? decoration.value * (factors.get(decoration.forAccessor) ?? 1)
+              ? toCoordinateUnitValue(decoration.value, factors.get(decoration.forAccessor) ?? 1)
               : decoration.value,
         })),
       } as Layer;
