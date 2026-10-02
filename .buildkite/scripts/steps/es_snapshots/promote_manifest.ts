@@ -52,7 +52,8 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
       cp manifest.json manifest-latest-verified.json
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
-      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_PERMANENT}
+      # Recursive archive copy can outlive the 60-minute shared token; impersonation refreshes it.
+      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_PERMANENT}
       cp manifest-permanent.json manifest.json
       gcloud storage cp --recursive gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
