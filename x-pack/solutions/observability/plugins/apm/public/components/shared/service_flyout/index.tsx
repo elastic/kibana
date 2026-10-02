@@ -47,14 +47,7 @@ const SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR =
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
-  alerts: 'alerts',
-  slos: 'slos',
 } as const;
-
-export type ServiceFlyoutTabId =
-  (typeof SERVICE_FLYOUT_TAB_IDS)[keyof typeof SERVICE_FLYOUT_TAB_IDS];
-
-export const SERVICE_FLYOUT_DEFAULT_TAB_ID = SERVICE_FLYOUT_TAB_IDS.overview;
 
 export const SERVICE_FLYOUT_TABS = [
   {
@@ -64,6 +57,18 @@ export const SERVICE_FLYOUT_TABS = [
     }),
   },
 ] as const;
+
+/**
+ * Derived from the declared tabs so the selected-tab state cannot hold an id that has no tab to
+ * render it, which is also what the flyout reports to telemetry.
+ */
+export type ServiceFlyoutTabId = (typeof SERVICE_FLYOUT_TABS)[number]['id'];
+
+export const SERVICE_FLYOUT_DEFAULT_TAB_ID = SERVICE_FLYOUT_TAB_IDS.overview;
+
+/** `FlyoutTemplate` hands back an unconstrained `string`, so narrow it to a declared tab. */
+const isServiceFlyoutTabId = (id: string): id is ServiceFlyoutTabId =>
+  SERVICE_FLYOUT_TABS.some((tab) => tab.id === id);
 
 const ACTIONS_BUTTON_LABEL = i18n.translate('xpack.apm.serviceFlyout.actionsButtonLabel', {
   defaultMessage: 'Actions',
@@ -121,6 +126,15 @@ function ServiceFlyoutContent({
   const badges = useServiceBadges();
   const { panels, isLoading, hasActions } = useServiceFlyoutFooterMenu();
 
+  const handleTabChange = useCallback(
+    (id: string) => {
+      if (isServiceFlyoutTabId(id)) {
+        onSelectedTabIdChange(id);
+      }
+    },
+    [onSelectedTabIdChange]
+  );
+
   const tabs = useMemo(
     () =>
       SERVICE_FLYOUT_TABS.map(({ id, label }) => ({
@@ -150,7 +164,7 @@ function ServiceFlyoutContent({
       tabs={tabs}
       tabBarProps={{ 'data-test-subj': 'serviceFlyoutTabs' }}
       selectedTabId={selectedTabId}
-      onTabChange={(id) => onSelectedTabIdChange(id as ServiceFlyoutTabId)}
+      onTabChange={handleTabChange}
     >
       <FlyoutTemplate.Header title={titleNode}>{badges}</FlyoutTemplate.Header>
       <FlyoutTemplate.Body>

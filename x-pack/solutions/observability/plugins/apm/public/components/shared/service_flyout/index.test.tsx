@@ -45,9 +45,6 @@ jest.mock('@kbn/flyout-template', () => {
       <button data-test-subj="flyoutCloseButton" onClick={onClose}>
         close
       </button>
-      <button data-test-subj="mockTabChange" onClick={() => onTabChange?.('alerts')}>
-        change tab
-      </button>
       {tabs.map(({ id, label, ...rest }) => (
         <button key={id} {...rest} onClick={() => onTabChange?.(id)}>
           {label}
@@ -165,24 +162,6 @@ describe('ServiceFlyout telemetry', () => {
     expect(mockReportServiceFlyoutViewed).toHaveBeenCalledTimes(1);
     expect(mockReportServiceFlyoutViewed).toHaveBeenCalledWith({
       tabId: 'overview',
-      source: 'test-source',
-    });
-  });
-
-  it('reports the new tab when the selected tab changes', () => {
-    render(
-      <ServiceFlyout
-        {...contextProps}
-        service={service}
-        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('mockTabChange'));
-
-    expect(mockReportServiceFlyoutViewed).toHaveBeenLastCalledWith({
-      tabId: 'alerts',
       source: 'test-source',
     });
   });
