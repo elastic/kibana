@@ -703,19 +703,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         justifyContent="flexEnd"
                         responsive={false}
                       >
-                        <EuiFlexItem grow={false}>
-                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                            {i18n.CANCEL}
-                          </EuiButton>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <SaveRuleButton
-                            onSubmit={onSubmit}
-                            isLoading={isLoading}
-                            isDisabled={loading}
-                          />
-                        </EuiFlexItem>
+                        <EditRuleFormButtons
+                          onCancel={goToDetailsRule}
+                          onSubmit={onSubmit}
+                          isLoading={isLoading}
+                          isDisabled={loading}
+                        />
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
@@ -756,30 +749,43 @@ const EditRulePageWrapper: FC = () => {
 
 export const EditRulePage = memo(EditRulePageWrapper);
 
-interface SaveRuleButtonProps {
+interface EditRuleFormButtonsProps {
+  onCancel: (ev: React.SyntheticEvent) => void;
   onSubmit: () => Promise<void>;
   isLoading: boolean;
   isDisabled: boolean;
 }
 
 /* Keeps the submitting state local, so toggling it doesn't re-render the whole page */
-const SaveRuleButton = memo(function SaveRuleButton({
+const EditRuleFormButtons = memo(function EditRuleFormButtons({
+  onCancel,
   onSubmit,
   isLoading,
   isDisabled,
-}: SaveRuleButtonProps): JSX.Element {
+}: EditRuleFormButtonsProps): JSX.Element {
   const [isSubmitting, submit] = useAsyncActionWithLoading(onSubmit);
+  const isSaving = isSubmitting || isLoading;
 
   return (
-    <EuiButton
-      data-test-subj="ruleEditSubmitButton"
-      fill
-      onClick={submit}
-      iconType="save"
-      isLoading={isSubmitting || isLoading}
-      isDisabled={isDisabled}
-    >
-      {i18n.SAVE_CHANGES}
-    </EuiButton>
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiButton iconType="cross" onClick={onCancel} isDisabled={isSaving}>
+          {i18n.CANCEL}
+        </EuiButton>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="ruleEditSubmitButton"
+          fill
+          onClick={submit}
+          iconType="save"
+          isLoading={isSaving}
+          isDisabled={isDisabled}
+        >
+          {i18n.SAVE_CHANGES}
+        </EuiButton>
+      </EuiFlexItem>
+    </>
   );
 });
