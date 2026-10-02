@@ -21,11 +21,11 @@ exports[`ElasticAgentCard props button 1`] = `
   }
   paddingSize="l"
   title={
-    <EuiTextColor
-      color="default"
-    >
-      Add Elastic Agent
-    </EuiTextColor>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -51,11 +51,11 @@ exports[`ElasticAgentCard props category 1`] = `
   }
   paddingSize="l"
   title={
-    <EuiTextColor
-      color="default"
-    >
-      Add Elastic Agent
-    </EuiTextColor>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -81,11 +81,11 @@ exports[`ElasticAgentCard props href 1`] = `
   }
   paddingSize="l"
   title={
-    <EuiTextColor
-      color="default"
-    >
-      Add Elastic Agent
-    </EuiTextColor>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -116,11 +116,11 @@ exports[`ElasticAgentCard props recommended 1`] = `
   }
   paddingSize="l"
   title={
-    <EuiTextColor
-      color="default"
-    >
-      Add Elastic Agent
-    </EuiTextColor>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;
@@ -146,11 +146,11 @@ exports[`ElasticAgentCard renders 1`] = `
   }
   paddingSize="l"
   title={
-    <EuiTextColor
-      color="default"
-    >
-      Add Elastic Agent
-    </EuiTextColor>
+    <EuiScreenReaderOnly>
+      <span>
+        Add Elastic Agent
+      </span>
+    </EuiScreenReaderOnly>
   }
 />
 `;

@@ -11,7 +11,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { EuiButton, EuiCard, EuiTextColor, EuiImage } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import type { NoDataPageActions } from '../no_data_page';
 import { NO_DATA_RECOMMENDED } from '../no_data_page';
@@ -86,8 +86,9 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
 
   const resolvedHref = href ?? addBasePath(`/app/integrations/browse${hasCategory}`);
 
-  // The card itself must not be clickable: nesting the button inside a card-level
-  // href/onClick produces invalid, doubly-interactive HTML. The button is the only action.
+  // The href/onClick live on the button only: a card-level href/onClick would make
+  // the whole card an interactive wrapper around this button, which is invalid,
+  // doubly-focusable nesting (@elastic/eui/no-nested-interactive-element).
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
@@ -101,7 +102,11 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     <EuiCard
       paddingSize="l"
       image={image}
-      title={<EuiTextColor color="default">{defaultCTAtitle}</EuiTextColor>}
+      title={
+        <EuiScreenReaderOnly>
+          <span>{defaultCTAtitle}</span>
+        </EuiScreenReaderOnly>
+      }
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
       })}
