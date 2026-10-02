@@ -240,10 +240,6 @@ export const useDiscoverHistogram = (
   );
 
   const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
-    if (!dataView) {
-      return undefined;
-    }
-
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,

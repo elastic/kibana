@@ -187,6 +187,8 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       await expect(discover.getUninitializedPrompt()).toBeVisible();
 
       await discover.codeEditor.setCodeEditorValue(QUERY_WITH_TIME_FIELD);
+      await discover.submitQueryAndWait();
+      await expect(datePicker.getTimePickerControl()).toBeEnabled();
       await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
       await discover.submitQueryAndWait();
       await expectCurrentEsqlTabState(pageObjects, {
