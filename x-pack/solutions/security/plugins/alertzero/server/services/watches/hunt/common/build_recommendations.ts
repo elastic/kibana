@@ -56,8 +56,40 @@ const buildAllowedEntitySet = (result: HuntCoordinatorCoreResult): Set<string> =
   return values;
 };
 
+/**
+ * A separator-joined identifier (`GHOST-HOST99`, `10.0.0.5`, `user.name`) that also carries a
+ * digit or is all-uppercase once the separators are stripped. Plain hyphenated prose
+ * (`real-time`, `well-known`) has neither, so it doesn't match; the asset/IOC naming
+ * conventions this run's own context uses do. Same spirit as `report_grounding.ts`'s
+ * `SINGLE_TOKEN` check: a narrow whitelist that only ever chooses which direction to be
+ * wrong in, not a full simulation of every way a model might phrase a name.
+ */
+const SEPARATOR_JOINED = /^[A-Za-z0-9]+([._-][A-Za-z0-9]+)+$/;
+
+const looksLikeEntity = (token: string): boolean => {
+  if (!SEPARATOR_JOINED.test(token)) return false;
+  const bare = token.replace(/[._-]/g, '');
+  return /\d/.test(bare) || bare === bare.toUpperCase();
+};
+
+/** Entity-shaped tokens in free text, stripped of surrounding sentence punctuation. */
+const extractEntityLikeTokens = (text: string): string[] =>
+  text
+    .split(/\s+/)
+    .map((token) => token.replace(/^[(["']+|[)\].,;:!?"']+$/g, ''))
+    .filter(looksLikeEntity);
+
+/**
+ * `entities_referenced` is the model's own self-report of what a line names, and an empty
+ * list satisfies `.every` on it unconditionally — so a hallucinated host the model simply
+ * forgot (or declined) to list passes for free. The line's own text is checked independently
+ * of that self-report so a line cannot clear grounding just by omitting a name from its own
+ * list; `entities_referenced` still has to agree with `allowed` too, so a line also can't pass
+ * by self-reporting an entity that isn't actually in the allowed set.
+ */
 const isLineGrounded = (line: RecommendationLine, allowed: Set<string>): boolean =>
-  line.entities_referenced.every((value) => allowed.has(value.toLowerCase()));
+  line.entities_referenced.every((value) => allowed.has(value.toLowerCase())) &&
+  extractEntityLikeTokens(line.text).every((token) => allowed.has(token.toLowerCase()));
 
 /** One line per confirmed technique, then a fallback so a confirmed hit never yields nothing. */
 export const templateRecommendations = (result: HuntCoordinatorCoreResult): string[] => {

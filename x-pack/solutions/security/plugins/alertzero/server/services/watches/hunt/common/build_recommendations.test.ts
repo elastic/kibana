@@ -171,6 +171,57 @@ describe('generateRecommendations', () => {
     expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
   });
 
+  it('drops a line naming a hallucinated entity in its text even with an empty entities_referenced', async () => {
+    // The actual bug: `.every()` on an empty `entities_referenced` passes unconditionally,
+    // so a model that names a host in prose but omits it from its own self-report used to
+    // get it through for free.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for WIN-ANALYST01.',
+          entities_referenced: ['WIN-ANALYST01'],
+        },
+        {
+          text: 'Isolate GHOST-HOST99 immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
+  });
+
+  it('keeps a line that legitimately names nothing specific', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Review recent privilege escalation activity for lateral movement in real-time.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual([
+      'Review recent privilege escalation activity for lateral movement in real-time.',
+    ]);
+  });
+
   it('falls back to the template floor when every generated line is ungrounded', async () => {
     const invoke = jest.fn().mockResolvedValue({
       recommendations: [
