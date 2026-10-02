@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { schema, type Type } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
 import {
   CATALOG_SEVERITIES,
-  CATALOG_SEVERITY_RANGES,
   CATALOG_SIGNAL_TYPES,
   MAX_CATALOG_REPOSITORY_FILTERS,
-  MAX_CATALOG_SUMMARY_REPOSITORIES,
-  type CatalogRepositorySummary,
   type CatalogSeverity,
   type CatalogSignalType,
   type CatalogSort,
@@ -27,23 +23,24 @@ import {
   MAX_REPOSITORY_IDENTITY_LENGTH,
   MAX_REVISION_LENGTH,
   isRepositoryIdentity,
-  isSafeRevision,
-  validateRepositorySettings,
-  type RepositorySettings,
 } from '../common/repository_settings';
 import {
   START_EXTRACTION_ERROR_CODES,
   type StartExtractionErrorAttributes,
 } from '../common/start_extraction_errors';
 import { ElasticsearchCatalogWriter } from './adapters/elasticsearch_catalog';
+import { ElasticsearchRepositorySettingsStore } from './adapters/elasticsearch_settings';
+import { getCatalogEntry, searchCatalog, summarizeCatalog } from './catalog_service';
+import type { ExtractionService } from './extraction_service';
 import {
-  ElasticsearchRepositorySettingsStore,
-  ensureSettingsIndex,
-} from './adapters/elasticsearch_settings';
-import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
-import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
-import type { BatchRepository, ExtractionService } from './extraction_service';
-import { SourceUnavailableError } from './source_session';
+  describeStartFailure,
+  listExtractableRepositories,
+  selectBatchRepositories,
+  upsertRepository,
+  type ExtractableRepository,
+} from './repository_service';
+
+export type { ExtractableRepository } from './repository_service';
 
 const errorAttributes = (
   attributes: StartExtractionErrorAttributes
@@ -78,27 +75,8 @@ const catalogSort: Type<CatalogSort> = schema.oneOf([
   schema.literal('severity_asc'),
 ]);
 
-const catalogSortClauses = (sort: CatalogSort, searching: boolean): estypes.SortCombinations[] => {
-  const relevance: estypes.SortCombinations[] = searching ? ['_score'] : [];
-  if (sort === 'default') return [...relevance, { updated_at: 'desc' }, '_doc'];
-  return [
-    {
-      severity_score: { order: sort === 'severity_desc' ? 'desc' : 'asc', missing: '_last' },
-    },
-    ...relevance,
-    { updated_at: 'desc' },
-    '_doc',
-  ];
-};
-
 const asArray = <T>(value: T | readonly T[] | undefined): readonly T[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value as T];
-
-/** A repository that an extraction batch may select. */
-export type ExtractableRepository = Pick<
-  RepositorySettings,
-  'repository' | 'remoteUrl' | 'defaultRef' | 'enabled' | 'githubConnectorId'
->;
 
 /** Services available once the plugin has started; extraction is absent when its source is unavailable. */
 export interface RouteServices {
@@ -167,21 +145,21 @@ export const registerRoutes = ({
           body: { message: 'The repository in the path must match the repository in the body.' },
         });
       }
-      const problems = validateRepositorySettings(request.body);
-      if (problems.length > 0) {
+      const { elasticsearch } = await context.core;
+      const result = await upsertRepository(
+        elasticsearch.client.asCurrentUser,
+        settingsIndex,
+        request.body
+      );
+      if (!result.ok) {
         return response.badRequest({
           body: {
-            message: problems.map(({ message }) => message).join(' '),
-            attributes: { problems },
+            message: result.problems.map(({ message }) => message).join(' '),
+            attributes: { problems: result.problems },
           },
         });
       }
-      const { elasticsearch } = await context.core;
-      const client = elasticsearch.client.asCurrentUser;
-      // Like the catalog, the settings index is created by the user who first writes to it.
-      await ensureSettingsIndex(client, settingsIndex);
-      const store = new ElasticsearchRepositorySettingsStore(client, settingsIndex);
-      return response.ok({ body: { repository: await store.upsert(request.body) } });
+      return response.ok({ body: { repository: result.repository } });
     }
   );
 
@@ -246,88 +224,60 @@ export const registerRoutes = ({
       if (extractionService === undefined) {
         return sourceUnavailable(extractionUnavailableReason ?? 'Extraction is unavailable.');
       }
-      const requested = request.body.repositories ?? [];
-      if (new Set(requested.map(({ repository }) => repository)).size !== requested.length) {
-        return response.badRequest({ body: { message: 'Each repository may appear only once.' } });
-      }
       const { elasticsearch } = await context.core;
-      const settings: readonly ExtractableRepository[] =
-        configuredRepositories ??
-        (await new ElasticsearchRepositorySettingsStore(
+      const selection = selectBatchRepositories(
+        request.body.repositories ?? [],
+        await listExtractableRepositories(
           elasticsearch.client.asCurrentUser,
-          settingsIndex
-        ).list());
-      const byIdentity = new Map(settings.map((entry) => [entry.repository, entry]));
-      const selected: BatchRepository[] = [];
-      for (const entry of requested.length === 0
-        ? settings.filter(({ enabled }) => enabled).map(({ repository }) => ({ repository }))
-        : requested) {
-        const configured = byIdentity.get(entry.repository);
-        if (configured === undefined) {
-          return response.badRequest({
-            body: {
-              message: 'Repository is not configured.',
-              attributes: errorAttributes({
-                code: START_EXTRACTION_ERROR_CODES.repositoryNotConfigured,
-                repository: entry.repository,
-              }),
-            },
-          });
-        }
-        const entryRevision =
-          ('revision' in entry ? entry.revision : undefined) ?? configured.defaultRef;
-        if (!isSafeRevision(entryRevision)) {
-          return response.badRequest({
-            body: { message: `Revision for ${entry.repository} is invalid.` },
-          });
-        }
-        selected.push({
-          repository: configured.repository,
-          revision: entryRevision,
-          remoteUrl: configured.remoteUrl,
-          ...(configured.githubConnectorId === undefined
-            ? {}
-            : { githubConnectorId: configured.githubConnectorId }),
-        });
-      }
-      if (selected.length === 0) {
+          settingsIndex,
+          configuredRepositories
+        )
+      );
+      if (!selection.ok) {
+        const { code, message, repository } = selection;
         return response.badRequest({
-          body: {
-            message: 'No enabled repositories to extract.',
-            attributes: errorAttributes({ code: START_EXTRACTION_ERROR_CODES.noRepositories }),
-          },
+          body:
+            code === undefined
+              ? { message }
+              : {
+                  message,
+                  attributes: errorAttributes({
+                    code,
+                    ...(repository === undefined ? {} : { repository }),
+                  }),
+                },
         });
       }
       try {
         const id = await extractionService.start(
-          selected,
+          selection.selected,
           request,
           getSpaceId(request),
           new ElasticsearchCatalogWriter(elasticsearch.client.asCurrentUser, catalogIndex)
         );
         return response.accepted({ body: { id } });
       } catch (error) {
-        if (error instanceof ExtractionAlreadyRunningError) {
+        const failure = describeStartFailure(error);
+        if (failure?.code === START_EXTRACTION_ERROR_CODES.alreadyRunning) {
           return response.conflict({
             body: {
-              message: error.message,
+              message: failure.message,
               attributes: errorAttributes({
-                code: START_EXTRACTION_ERROR_CODES.alreadyRunning,
-                ...(error.extractionId === undefined ? {} : { extractionId: error.extractionId }),
+                code: failure.code,
+                ...(failure.extractionId === undefined
+                  ? {}
+                  : { extractionId: failure.extractionId }),
               }),
             },
           });
         }
-        if (error instanceof ExtractionCapacityExhaustedError) {
+        if (failure?.code === START_EXTRACTION_ERROR_CODES.capacityExhausted) {
           return response.customError({
             statusCode: 429,
-            body: {
-              message: error.message,
-              attributes: errorAttributes({ code: START_EXTRACTION_ERROR_CODES.capacityExhausted }),
-            },
+            body: { message: failure.message, attributes: errorAttributes({ code: failure.code }) },
           });
         }
-        if (error instanceof SourceUnavailableError) return sourceUnavailable(error.message);
+        if (failure !== undefined) return sourceUnavailable(failure.message);
         // The router logs unexpected errors and answers 500 without leaking their details.
         throw error;
       }
@@ -370,53 +320,17 @@ export const registerRoutes = ({
     },
     async (context, request, response) => {
       const { elasticsearch } = await context.core;
-      const client = elasticsearch.client.asCurrentUser;
-      const repositories = asArray(request.query.repository);
-      const kinds = asArray(request.query.kind);
-      const severities = asArray(request.query.severity);
-      const filters: object[] = [];
-      if (repositories.length > 0) filters.push({ terms: { repository: repositories } });
-      if (kinds.length > 0) filters.push({ terms: { signal_type: kinds } });
-      if (severities.length > 0) {
-        filters.push({
-          bool: {
-            should: severities.map((level) => ({
-              range: { severity_score: CATALOG_SEVERITY_RANGES[level] },
-            })),
-            minimum_should_match: 1,
-          },
-        });
-      }
-      const { q } = request.query;
-      // `title` and `description` are `semantic_text`, which rejects `match`/`multi_match`.
-      const textQuery =
-        q === undefined
-          ? {}
-          : {
-              should: [
-                { semantic: { field: 'title', query: q } },
-                { semantic: { field: 'description', query: q } },
-                { match: { query: q } },
-              ],
-              minimum_should_match: 1,
-            };
-      const result = await client.search<Record<string, unknown>>({
-        index: catalogIndex,
-        from: (request.query.page - 1) * request.query.perPage,
-        size: request.query.perPage,
-        query: { bool: { filter: filters, ...textQuery } },
-        sort: catalogSortClauses(request.query.sort ?? 'default', q !== undefined),
-      });
+      const { query } = request;
       return response.ok({
-        body: {
-          page: request.query.page,
-          perPage: request.query.perPage,
-          total:
-            typeof result.hits.total === 'number'
-              ? result.hits.total
-              : result.hits.total?.value ?? 0,
-          items: result.hits.hits.map((hit) => ({ id: hit._id, ...hit._source })),
-        },
+        body: await searchCatalog(elasticsearch.client.asCurrentUser, catalogIndex, {
+          repositories: asArray(query.repository),
+          signalTypes: asArray(query.kind),
+          severities: asArray(query.severity),
+          ...(query.q === undefined ? {} : { q: query.q }),
+          ...(query.sort === undefined ? {} : { sort: query.sort }),
+          page: query.page,
+          perPage: query.perPage,
+        }),
       });
     }
   );
@@ -433,51 +347,7 @@ export const registerRoutes = ({
     },
     async (context, _request, response) => {
       const { elasticsearch } = await context.core;
-      const result = await elasticsearch.client.asCurrentUser.search({
-        index: catalogIndex,
-        // The catalog index does not exist until the first extraction writes to it.
-        ignore_unavailable: true,
-        size: 0,
-        aggs: {
-          repositories: {
-            terms: { field: 'repository', size: MAX_CATALOG_SUMMARY_REPOSITORIES },
-            aggs: {
-              severities: {
-                filters: {
-                  filters: Object.fromEntries(
-                    CATALOG_SEVERITIES.map((level) => [
-                      level,
-                      { range: { severity_score: CATALOG_SEVERITY_RANGES[level] } },
-                    ])
-                  ),
-                },
-              },
-            },
-          },
-        },
-      });
-      const buckets =
-        (
-          result.aggregations?.repositories as
-            | {
-                buckets?: Array<{
-                  key: string;
-                  doc_count: number;
-                  severities?: { buckets?: Partial<Record<string, { doc_count?: number }>> };
-                }>;
-              }
-            | undefined
-        )?.buckets ?? [];
-      const repositories: CatalogRepositorySummary[] = buckets.map((bucket) => ({
-        repository: bucket.key,
-        total: bucket.doc_count,
-        severities: {
-          low: bucket.severities?.buckets?.low?.doc_count ?? 0,
-          medium: bucket.severities?.buckets?.medium?.doc_count ?? 0,
-          high: bucket.severities?.buckets?.high?.doc_count ?? 0,
-          critical: bucket.severities?.buckets?.critical?.doc_count ?? 0,
-        },
-      }));
+      const repositories = await summarizeCatalog(elasticsearch.client.asCurrentUser, catalogIndex);
       return response.ok({ body: { repositories } });
     }
   );
@@ -493,14 +363,14 @@ export const registerRoutes = ({
     },
     async (context, request, response) => {
       const { elasticsearch } = await context.core;
-      const client = elasticsearch.client.asCurrentUser;
-      const result = await client.get<Record<string, unknown>>(
-        { index: catalogIndex, id: request.params.id },
-        { ignore: [404] }
+      const entry = await getCatalogEntry(
+        elasticsearch.client.asCurrentUser,
+        catalogIndex,
+        request.params.id
       );
-      return result.found
-        ? response.ok({ body: { id: result._id, ...result._source } })
-        : response.notFound({ body: { message: 'Catalog document was not found.' } });
+      return entry === undefined
+        ? response.notFound({ body: { message: 'Catalog document was not found.' } })
+        : response.ok({ body: entry });
     }
   );
 };
