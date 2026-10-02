@@ -17,8 +17,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * Threat-intel supply gates on `xpack.alertzero.enabled`. `agenticInvestigations`
  * and `proposals` are required by alertzero and default off; without them Kibana
  * cascade-disables alertzero and the TI routes never register. The AlertZero UI
- * suite relies on this set having no LLM connector and no EIS, so a fresh space
- * has no model.
+ * suite relies on this set having no LLM connector and no EIS.
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet threat_intel

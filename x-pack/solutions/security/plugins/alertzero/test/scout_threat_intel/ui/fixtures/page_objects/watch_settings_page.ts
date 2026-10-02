@@ -29,10 +29,6 @@ export class WatchSettingsPage {
     return this.page.testSubj.locator(`alertZeroWorkerWarningIcon-${workerId}`);
   }
 
-  noModelLink(workerId: string): Locator {
-    return this.warningTooltip.locator(`[data-test-subj="alertZeroWorkerNoModelLink-${workerId}"]`);
-  }
-
   modelsRow(workerId: string): Locator {
     return this.page.testSubj.locator(`alertZeroModelsRow-${workerId}`);
   }
