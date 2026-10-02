@@ -144130,7 +144130,7 @@ components:
         alert_count:
           type: number
         alerts:
-          description: Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.
+          description: Alert ids referenced by this event, bounded to MAX_EMBEDDED_ALERTS_PER_ITEM. Use `alert_count` for the true total.
           items:
             type: object
             properties:

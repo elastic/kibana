@@ -42,7 +42,7 @@ const getRuleEventsSchema = z
     status: alertEpisodeStatusSchema
       .optional()
       .describe(
-        'If set, only return events whose episode.status matches this lifecycle state (inactive, pending, active, recovering).'
+        'If set, only return events in this lifecycle state (inactive, pending, active, recovering).'
       ),
   })
   .refine((value) => (value.start === undefined) === (value.end === undefined), {
