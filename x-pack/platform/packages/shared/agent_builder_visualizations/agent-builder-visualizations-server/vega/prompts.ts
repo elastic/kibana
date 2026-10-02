@@ -15,7 +15,7 @@ export const vegaEsqlAdditionalInstructions = `
 
 This query feeds a Vega chart. Its ES|QL data source only applies the time picker when the query filters the RAW source time field, so every time-based chart needs \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`.
 
-\`@timestamp\`: \`TBUCKET(100)\`. Any other date field: \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\`.
+\`@timestamp\`: \`TBUCKET(100, ?_tstart, ?_tend)\`. A \`WHERE\` on \`@timestamp\` does not size a numeric \`TBUCKET\`, so pass the bounds as well. Any other date field: \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\`.
 
 ## Field names for Vega
 

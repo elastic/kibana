@@ -68,10 +68,13 @@ describe('columnsReferToSameExpression', () => {
   it('treats BUCKET and TBUCKET time buckets as the same axis', () => {
     const gold = `FROM kibana_sample_data_logs
 | STATS bytes = SUM(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 100, ?_tstart, ?_tend)`;
-    const actual = `FROM kibana_sample_data_logs
+    const bounded = `FROM kibana_sample_data_logs
+| STATS bytes = SUM(bytes) BY ts = TBUCKET(100, ?_tstart, ?_tend)`;
+    const unbounded = `FROM kibana_sample_data_logs
 | STATS bytes = SUM(bytes) BY ts = TBUCKET(100)`;
 
-    expect(columnsReferToSameExpression('Time Bucket', gold, 'ts', actual)).toBe(true);
+    expect(columnsReferToSameExpression('Time Bucket', gold, 'ts', bounded)).toBe(true);
+    expect(columnsReferToSameExpression('Time Bucket', gold, 'ts', unbounded)).toBe(true);
   });
 
   it('resolves gold columns against the actual query when the gold has no query', () => {
