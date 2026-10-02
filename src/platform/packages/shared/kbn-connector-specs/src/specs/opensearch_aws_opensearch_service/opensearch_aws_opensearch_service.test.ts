@@ -594,4 +594,36 @@ describe('OpenSearch (AWS OpenSearch Service) connector', () => {
       expect(result.message).toContain('green');
     });
   });
+
+  describe('input bounds', () => {
+    const { acknowledgeAlert, indexDocument, updateMonitor } =
+      OpensearchAwsOpensearchService.actions;
+    const ids = (count: number) => Array.from({ length: count }, (_, i) => `id-${i}`);
+
+    it.each([
+      [1000, true],
+      [1001, false],
+    ])('acknowledgeAlert accepts up to 1000 alert IDs: %d valid=%s', (count, expected) => {
+      expect(
+        acknowledgeAlert.input.safeParse({ monitorId: 'm1', alertIds: ids(count) }).success
+      ).toBe(expected);
+    });
+
+    it.each([
+      [1000, true],
+      [1001, false],
+    ])('updateMonitor accepts up to 1000 rbacRoles: %d valid=%s', (count, expected) => {
+      expect(
+        updateMonitor.input.safeParse({ monitorId: 'm1', name: 'n', rbacRoles: ids(count) }).success
+      ).toBe(expected);
+    });
+
+    it.each([
+      [10_000, true],
+      [10_001, false],
+    ])('indexDocument accepts up to 10000 top-level keys: %d valid=%s', (count, expected) => {
+      const document = Object.fromEntries(ids(count).map((key) => [key, 1]));
+      expect(indexDocument.input.safeParse({ index: 'logs', document }).success).toBe(expected);
+    });
+  });
 });

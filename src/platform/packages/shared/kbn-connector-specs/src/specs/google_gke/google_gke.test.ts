@@ -573,6 +573,14 @@ describe('GoogleGke', () => {
           totalMaxNodeCount: 15000,
         })
       ).not.toThrow();
+      expect(() =>
+        parse('setNodePoolAutoscaling', {
+          ...poolRef,
+          enabled: true,
+          totalMinNodeCount: 0,
+          totalMaxNodeCount: 15001,
+        })
+      ).toThrow();
     });
 
     it('setNodePoolAutoscaling sends per-zone bounds when enabling', async () => {

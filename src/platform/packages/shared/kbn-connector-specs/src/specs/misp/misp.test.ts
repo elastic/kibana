@@ -296,4 +296,17 @@ describe('Misp', () => {
       );
     });
   });
+
+  describe('checkWarninglist input bounds', () => {
+    it.each([
+      [1000, true],
+      [1001, false],
+    ])('%d values valid=%s', (count, expected) => {
+      const values = Array.from(
+        { length: count },
+        (_, i) => `10.0.${Math.floor(i / 256)}.${i % 256}`
+      );
+      expect(Misp.actions.checkWarninglist.input.safeParse({ values }).success).toBe(expected);
+    });
+  });
 });

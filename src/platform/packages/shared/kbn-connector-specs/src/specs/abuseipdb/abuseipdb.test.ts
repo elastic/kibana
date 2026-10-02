@@ -431,4 +431,15 @@ describe('AbuseIPDBConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow('Network error');
     });
   });
+
+  describe('getBlacklist input bounds', () => {
+    it.each([
+      [500_000, true],
+      [500_001, false],
+    ])('limit %d valid=%s', (limit, expected) => {
+      expect(AbuseIPDBConnector.actions.getBlacklist.input.safeParse({ limit }).success).toBe(
+        expected
+      );
+    });
+  });
 });

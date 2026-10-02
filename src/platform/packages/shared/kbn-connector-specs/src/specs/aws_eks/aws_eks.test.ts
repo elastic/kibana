@@ -961,4 +961,33 @@ describe('AwsEks', () => {
       await expect(runTest()).rejects.toThrow('Amazon EKS API error (403) [AccessDeniedException]');
     });
   });
+
+  describe('updateNodegroupConfig input bounds', () => {
+    const isValid = (input: Record<string, unknown>) =>
+      AwsEks.actions.updateNodegroupConfig.input.safeParse({
+        clusterName: 'prod',
+        nodegroupName: 'web',
+        ...input,
+      }).success;
+    const labels = (count: number) =>
+      Object.fromEntries(Array.from({ length: count }, (_, i) => [`label-${i}`, 'v']));
+    const keys = (count: number) => Array.from({ length: count }, (_, i) => `label-${i}`);
+    const taint = (key: string) => [{ key, value: 'v', effect: 'NO_SCHEDULE' }];
+    // A DNS-subdomain prefix plus '/' plus a 63-character name, `length` characters in total.
+    const taintKey = (length: number) => {
+      const prefix = `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(length - 1 - 63 - 128)}`;
+      return `${prefix}/${'n'.repeat(63)}`;
+    };
+
+    it.each([
+      ['labelsToAdd', { labelsToAdd: labels(1000) }, true],
+      ['labelsToAdd', { labelsToAdd: labels(1001) }, false],
+      ['labelsToRemove', { labelsToRemove: keys(1000) }, true],
+      ['labelsToRemove', { labelsToRemove: keys(1001) }, false],
+      ['taint key', { taintsToAdd: taint(taintKey(253)) }, true],
+      ['taint key', { taintsToAdd: taint(taintKey(254)) }, false],
+    ])('%s at the boundary', (_field, input, expected) => {
+      expect(isValid(input)).toBe(expected);
+    });
+  });
 });

@@ -307,4 +307,16 @@ describe('BigQuery', () => {
       expect(result).toEqual({});
     });
   });
+
+  describe('runQuery query size', () => {
+    const maxBytes = 1024 * 1024;
+    const isValid = (query: string) => BigQuery.actions.runQuery.input.safeParse({ query }).success;
+
+    it('is bounded at 1 MB of UTF-8', () => {
+      expect(isValid('x'.repeat(maxBytes))).toBe(true);
+      expect(isValid('x'.repeat(maxBytes + 1))).toBe(false);
+      expect(isValid('é'.repeat(maxBytes / 2))).toBe(true);
+      expect(isValid('é'.repeat(maxBytes / 2 + 1))).toBe(false);
+    });
+  });
 });

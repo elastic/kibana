@@ -844,4 +844,20 @@ describe('VirusTotalConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('URL length bounds', () => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      const { scanUrl, getAnalysisResults } = VirusTotalConnector.actions;
+      expect(scanUrl.input.safeParse({ url: url(length) }).success).toBe(expected);
+      expect(
+        getAnalysisResults.input.safeParse({ id: url(length), resourceType: 'url' }).success
+      ).toBe(expected);
+    });
+  });
 });

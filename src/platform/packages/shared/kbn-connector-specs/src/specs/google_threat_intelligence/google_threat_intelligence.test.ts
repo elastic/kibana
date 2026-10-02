@@ -972,4 +972,18 @@ describe('GoogleThreatIntelligenceConnector', () => {
       ).rejects.toThrow('GTI API error (400): Invalid URL');
     });
   });
+
+  describe.each(['getUrlReport', 'scanUrl'] as const)('%s url length', (action) => {
+    const prefix = 'https://example.com/';
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(
+        GoogleThreatIntelligenceConnector.actions[action].input.safeParse({
+          url: `${prefix}${'a'.repeat(length - prefix.length)}`,
+        }).success
+      ).toBe(expected);
+    });
+  });
 });

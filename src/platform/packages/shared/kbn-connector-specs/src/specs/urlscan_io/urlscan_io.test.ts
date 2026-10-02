@@ -1329,4 +1329,24 @@ describe('URLScan.io connector', () => {
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_001 }).success).toBe(false);
     });
   });
+
+  describe.each(['scanUrl', 'scanUrlAndWait'] as const)('%s url length', (actionName) => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [2083, true],
+      [2084, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(UrlscanIo.actions[actionName].input.safeParse({ url: url(length) }).success).toBe(
+        expected
+      );
+      expect(
+        UrlscanIo.actions[actionName].input.safeParse({
+          url: 'https://example.com',
+          referer: url(length),
+        }).success
+      ).toBe(expected);
+    });
+  });
 });

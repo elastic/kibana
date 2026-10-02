@@ -545,4 +545,41 @@ describe('Datadog', () => {
       expect(result).toEqual({});
     });
   });
+
+  describe('postEvent input bounds', () => {
+    const isValid = (input: Record<string, unknown>) =>
+      Datadog.actions.postEvent.input.safeParse({ title: 'Deploy', text: 'done', ...input })
+        .success;
+
+    it.each([
+      [{ text: 'x'.repeat(4000) }, true],
+      [{ text: 'x'.repeat(4001) }, false],
+      [{ aggregationKey: 'k'.repeat(100) }, true],
+      [{ aggregationKey: 'k'.repeat(101) }, false],
+    ])('%#: valid=%s', (input, expected) => {
+      expect(isValid(input)).toBe(expected);
+    });
+  });
+
+  describe('free-text field bounds', () => {
+    const { scheduleDowntime, createIncident } = Datadog.actions;
+
+    it.each([
+      [65_536, true],
+      [65_537, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      const text = 'x'.repeat(length);
+      expect(
+        scheduleDowntime.input.safeParse({
+          scope: 'env:prod',
+          start: '2024-01-15T00:00:00Z',
+          end: '2024-01-15T01:00:00Z',
+          message: text,
+        }).success
+      ).toBe(expected);
+      expect(createIncident.input.safeParse({ title: 'Outage', initialCell: text }).success).toBe(
+        expected
+      );
+    });
+  });
 });

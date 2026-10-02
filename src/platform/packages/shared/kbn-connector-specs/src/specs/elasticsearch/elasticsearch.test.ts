@@ -9,7 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { Elasticsearch } from './elasticsearch';
-import { RequestInputSchema, SearchInputSchema } from './types';
+import { EsqlInputSchema, RequestInputSchema, SearchInputSchema } from './types';
 
 const CLUSTER_URL = 'https://my-deployment.es.us-east-1.aws.elastic.cloud';
 
@@ -397,6 +397,36 @@ describe('Elasticsearch connector', () => {
       expect(result.success).toBe(true);
     });
 
+    it.each([
+      [{ size: 10_000, from: 0 }, true],
+      [{ size: 0, from: 10_000 }, true],
+      [{ size: 5_000, from: 5_000 }, true],
+      [{ size: 10_001, from: 0 }, false],
+      [{ size: 5_000, from: 5_001 }, false],
+    ])('bounds from + size by the 10000 result window: %j valid=%s', (window, expected) => {
+      expect(SearchInputSchema.safeParse({ index: 'logs-*', ...window }).success).toBe(expected);
+    });
+
+    it.each([
+      ['sort', (n: number) => Array.from({ length: n }, (_, i) => ({ [`f${i}`]: 'asc' }))],
+      ['_source', (n: number) => Array.from({ length: n }, (_, i) => `f${i}`)],
+      [
+        'aggs',
+        (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`a${i}`, {}])),
+      ],
+      [
+        'runtimeMappings',
+        (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`r${i}`, {}])),
+      ],
+    ])('accepts up to 1000 %s entries', (field, build) => {
+      expect(SearchInputSchema.safeParse({ index: 'logs-*', [field]: build(1000) }).success).toBe(
+        true
+      );
+      expect(SearchInputSchema.safeParse({ index: 'logs-*', [field]: build(1001) }).success).toBe(
+        false
+      );
+    });
+
     it('defaults query to match_all when omitted', () => {
       const result = SearchInputSchema.safeParse({ index: 'logs-*' });
       expect(result.success).toBe(true);
@@ -431,6 +461,36 @@ describe('Elasticsearch connector', () => {
           queryParams: { a: 'x'.repeat(2048) },
         }).success
       ).toBe(true);
+    });
+
+    it('measures the path after percent-encoding, including an embedded query', () => {
+      // Each 'é' is sent as %C3%A9, six bytes on the wire.
+      expect(RequestInputSchema.safeParse({ path: `/_search?q=${'é'.repeat(600)}` }).success).toBe(
+        true
+      );
+      expect(RequestInputSchema.safeParse({ path: `/_search?q=${'é'.repeat(700)}` }).success).toBe(
+        false
+      );
+      expect(RequestInputSchema.safeParse({ path: `/${'é'.repeat(700)}/_doc/1` }).success).toBe(
+        false
+      );
+    });
+  });
+
+  describe('EsqlInputSchema', () => {
+    it('accepts up to 1000 params', () => {
+      const params = (n: number) => Array.from({ length: n }, (_, i) => i);
+      expect(EsqlInputSchema.safeParse({ query: 'FROM a', params: params(1000) }).success).toBe(
+        true
+      );
+      expect(EsqlInputSchema.safeParse({ query: 'FROM a', params: params(1001) }).success).toBe(
+        false
+      );
+    });
+
+    it('accepts queries up to the 1,000,000-character ES|QL parser limit', () => {
+      expect(EsqlInputSchema.safeParse({ query: 'x'.repeat(1_000_000) }).success).toBe(true);
+      expect(EsqlInputSchema.safeParse({ query: 'x'.repeat(1_000_001) }).success).toBe(false);
     });
   });
 });

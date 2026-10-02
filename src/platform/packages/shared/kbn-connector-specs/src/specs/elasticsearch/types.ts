@@ -33,16 +33,20 @@ export const toSearchPath = (index: string | readonly string[]): string => {
   return `/${encodeURIComponent(target)}/_search`;
 };
 
-/** Approximates the request target the HTTP client sends for a path and its query params. */
+/**
+ * Approximates the percent-encoded request target the HTTP client sends for a path and its
+ * query params. The path is appended to the base URL, so it is parsed the same way.
+ */
 export const toRequestTarget = (
   path: string,
   queryParams?: Record<string, string | number | boolean>
 ): string => {
+  const { pathname, search } = new URL(`http://localhost${path}`);
   const query = new URLSearchParams(
     Object.entries(queryParams ?? {}).map(([key, value]) => [key, String(value)])
   ).toString();
-  if (!query) return path;
-  return `${path}${path.includes('?') ? '&' : '?'}${query}`;
+  if (!query) return `${pathname}${search}`;
+  return `${pathname}${search ? `${search}&` : '?'}${query}`;
 };
 
 // ============================================================================
@@ -50,69 +54,74 @@ export const toRequestTarget = (
 // ============================================================================
 
 export const SearchInputSchema = lazySchema(() =>
-  z.object({
-    index: z
-      .union([
-        z.string().min(1).max(HTTP_MAX_INITIAL_LINE_LENGTH),
-        z.array(z.string().min(1).max(512)).min(1).max(MAX_SEARCH_TARGETS),
-      ])
-      .refine((index) => fitsRequestLine(toSearchPath(index)), {
-        message: `The URL-encoded search targets must fit the ${HTTP_MAX_INITIAL_LINE_LENGTH}-byte HTTP request line.`,
-      })
-      .describe(
-        'Index name, comma-separated index names, or an array of index names. Wildcards and aliases are supported.'
-      ),
-    query: z
-      .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 30, { message: 'At most 30 top-level query keys.' })
-      .default({ match_all: {} })
-      .describe('Elasticsearch Query DSL object. Defaults to match_all.'),
-    size: z
-      .number()
-      .int()
-      .min(0)
-      .max(MAX_RESULT_WINDOW)
-      .default(10)
-      .describe(
-        `Maximum number of hits to return (0–${MAX_RESULT_WINDOW}; from + size must not exceed ${MAX_RESULT_WINDOW}). Keep this small (for example 10–50) to limit response size.`
-      ),
-    from: z
-      .number()
-      .int()
-      .min(0)
-      .max(MAX_RESULT_WINDOW)
-      .default(0)
-      .describe('Offset for pagination.'),
-    sort: z
-      .array(z.record(z.string().max(200), z.unknown()))
-      .max(MAX_REQUEST_ITEMS)
-      .optional()
-      .describe('Sort clauses, e.g. [{ "@timestamp": { "order": "desc" } }].'),
-    _source: z
-      .union([z.array(z.string().max(200)).max(MAX_REQUEST_ITEMS), z.boolean()])
-      .optional()
-      .describe('Fields to include in _source, or false to suppress _source entirely.'),
-    aggs: z
-      .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= MAX_REQUEST_ITEMS, {
-        message: `At most ${MAX_REQUEST_ITEMS} aggregations.`,
-      })
-      .optional()
-      .describe('Aggregations object. Results appear under "aggregations" in the response.'),
-    runtimeMappings: z
-      .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= MAX_REQUEST_ITEMS, {
-        message: `At most ${MAX_REQUEST_ITEMS} runtime mappings.`,
-      })
-      .optional()
-      .describe('Runtime field definitions to apply at query time.'),
-    timeout: z
-      .string()
-      .max(20)
-      .regex(/^\d+[smhd]$/)
-      .default('30s')
-      .describe('ES-side query timeout, e.g. "30s". Partial results are returned on timeout.'),
-  })
+  z
+    .object({
+      index: z
+        .union([
+          z.string().min(1).max(HTTP_MAX_INITIAL_LINE_LENGTH),
+          z.array(z.string().min(1).max(512)).min(1).max(MAX_SEARCH_TARGETS),
+        ])
+        .refine((index) => fitsRequestLine(toSearchPath(index)), {
+          message: `The URL-encoded search targets must fit the ${HTTP_MAX_INITIAL_LINE_LENGTH}-byte HTTP request line.`,
+        })
+        .describe(
+          'Index name, comma-separated index names, or an array of index names. Wildcards and aliases are supported.'
+        ),
+      query: z
+        .record(z.string().max(200), z.unknown())
+        .refine((v) => Object.keys(v).length <= 30, { message: 'At most 30 top-level query keys.' })
+        .default({ match_all: {} })
+        .describe('Elasticsearch Query DSL object. Defaults to match_all.'),
+      size: z
+        .number()
+        .int()
+        .min(0)
+        .max(MAX_RESULT_WINDOW)
+        .default(10)
+        .describe(
+          `Maximum number of hits to return (0–${MAX_RESULT_WINDOW}; from + size must not exceed ${MAX_RESULT_WINDOW}). Keep this small (for example 10–50) to limit response size.`
+        ),
+      from: z
+        .number()
+        .int()
+        .min(0)
+        .max(MAX_RESULT_WINDOW)
+        .default(0)
+        .describe('Offset for pagination.'),
+      sort: z
+        .array(z.record(z.string().max(200), z.unknown()))
+        .max(MAX_REQUEST_ITEMS)
+        .optional()
+        .describe('Sort clauses, e.g. [{ "@timestamp": { "order": "desc" } }].'),
+      _source: z
+        .union([z.array(z.string().max(200)).max(MAX_REQUEST_ITEMS), z.boolean()])
+        .optional()
+        .describe('Fields to include in _source, or false to suppress _source entirely.'),
+      aggs: z
+        .record(z.string().max(200), z.unknown())
+        .refine((v) => Object.keys(v).length <= MAX_REQUEST_ITEMS, {
+          message: `At most ${MAX_REQUEST_ITEMS} aggregations.`,
+        })
+        .optional()
+        .describe('Aggregations object. Results appear under "aggregations" in the response.'),
+      runtimeMappings: z
+        .record(z.string().max(200), z.unknown())
+        .refine((v) => Object.keys(v).length <= MAX_REQUEST_ITEMS, {
+          message: `At most ${MAX_REQUEST_ITEMS} runtime mappings.`,
+        })
+        .optional()
+        .describe('Runtime field definitions to apply at query time.'),
+      timeout: z
+        .string()
+        .max(20)
+        .regex(/^\d+[smhd]$/)
+        .default('30s')
+        .describe('ES-side query timeout, e.g. "30s". Partial results are returned on timeout.'),
+    })
+    .refine(({ from, size }) => from + size <= MAX_RESULT_WINDOW, {
+      message: `from + size must not exceed ${MAX_RESULT_WINDOW}.`,
+      path: ['size'],
+    })
 );
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
