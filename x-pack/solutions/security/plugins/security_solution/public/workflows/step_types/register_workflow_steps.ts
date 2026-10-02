@@ -90,4 +90,10 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./patch_rule_step/patch_rule_step').then((m) => m.patchRuleStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_alert_entities_step/get_alert_entities_step').then(
+      (m) => m.getAlertEntitiesStepDefinition
+    )
+  );
 };
