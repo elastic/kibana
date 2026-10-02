@@ -75,3 +75,5 @@ The start judges ownership by Agent Builder's owner check, and also by username.
 `POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by the conversation origin `team:<T>/channel:<C>/thread:<ts>`, which is the key Agent Builder uses for Slack. If that origin belongs to another conversation, it falls back to the thread's `slack_thread` subject.
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation gets that origin and has the thread as its subject. The thread's status message is recorded on that subject as `slack.status_message_ts`.
+
+The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id`, and the route records it on the thread's subject in `slack.seen_event_ids` (the latest 50). An event the thread already recorded is answered with `duplicate: true`, and the workflow skips it. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.

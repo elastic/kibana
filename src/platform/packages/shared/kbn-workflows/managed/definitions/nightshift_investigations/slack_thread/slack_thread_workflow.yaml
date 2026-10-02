@@ -10,10 +10,10 @@ enabled: true
 settings:
   # Longer than the investigation's own timeout, since this run waits for it.
   timeout: '65m'
-  # One run per thread at a time, in arrival order, so replies build on each other. The
-  # investigation rejects a second concurrent run (409), so this queue is what makes a reply wait
-  # rather than fail. It only orders runs of this workflow: a run of the investigation started
-  # elsewhere is not queued here, and a reply that collides with one leaves the thread as it was.
+  # One run per thread at a time, in arrival order, so replies build on each other and a
+  # redelivered event is recognised against the events the thread recorded. The investigation
+  # workflow also runs one execution per investigation at a time, so a run started some other way
+  # waits its turn there.
   concurrency:
     key: 'nightshift-slack-thread-{{ event.connectorId }}-{{ event.channel }}-{{ event.threadId | default: event.messageId }}'
     strategy: queue
