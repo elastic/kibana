@@ -101,6 +101,7 @@ const getPageRequest = ({ mock }: ReturnType<typeof createSearchClient>['query']
 const LATEST_VERSION_PER_EVENT = [
   'FROM .significant_events-events METADATA _id, _source',
   'WHERE `kibana.space_ids` == "default" OR `kibana.space_ids` IS NULL',
+  'EVAL event_id = COALESCE(event_id, event_uuid)',
   'INLINE STATS created_at = MIN(@timestamp) BY event_id',
   'INLINE STATS latest_ts = MAX(@timestamp) BY event_id',
   'WHERE @timestamp == latest_ts',
@@ -413,8 +414,8 @@ describe('EventClient', () => {
         ...LATEST_VERSION_PER_EVENT,
         // Created before the range ends, and still open or updated after it starts.
         'WHERE created_at <= TO_DATETIME(?overlapToIso)',
-        'WHERE (status IN ("open")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
-        'WHERE status IN ("closed")',
+        'WHERE (status IN ("active", "open")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
+        'WHERE status IN ("inactive", "closed", "dismissed")',
         ...FIRST_PAGE,
       ]);
       expect(params).toEqual([
