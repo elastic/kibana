@@ -109,7 +109,9 @@ export const DashboardListing = ({
         dashboardBreadcrumb,
         {
           text: activeTabTitle,
-          href: coreServices.application.getUrlForApp(appId, { path: window.location.hash }),
+          href: coreServices.application.getUrlForApp(appId, {
+            path: `#${LANDING_PAGE_PATH}/${activeTabId}`,
+          }),
         },
       ];
     },
@@ -137,7 +139,7 @@ export const DashboardListing = ({
         }),
         iconType: 'chartBarVertical',
         testId: 'createVisualizationButton',
-        run: createVisualizationAction,
+        run: () => createVisualizationAction(`#${LANDING_PAGE_PATH}/visualizations`),
       });
     }
 
@@ -150,7 +152,7 @@ export const DashboardListing = ({
         }),
         iconType: 'flag',
         testId: 'createAnnotationButton',
-        run: createAnnotationAction,
+        run: () => createAnnotationAction(`#${LANDING_PAGE_PATH}/annotations`),
       });
     }
 
@@ -166,7 +168,7 @@ export const DashboardListing = ({
         label: i18n.translate('dashboard.listing.createButtonLabel', {
           defaultMessage: 'Create dashboard',
         }),
-        run: createDashboardAction,
+        run: () => createDashboardAction(`#${LANDING_PAGE_PATH}`),
         popoverWidth: 200,
         splitButtonProps:
           createMenuItems.length > 0

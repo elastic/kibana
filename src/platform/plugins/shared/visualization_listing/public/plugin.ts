@@ -72,10 +72,10 @@ export class VisualizationListingPlugin
         }),
         visibleIn: ['globalSearch'],
       },
-      createAction: async () => {
+      createAction: async (path: string) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { showNewVisModalFromDashboard } = await import('./get_table_list');
-        showNewVisModalFromDashboard(coreStart, pluginsStart, tabTitle);
+        showNewVisModalFromDashboard(coreStart, pluginsStart, tabTitle, path);
       },
     };
 

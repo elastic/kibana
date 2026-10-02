@@ -55,9 +55,11 @@ export const getTableList = (
 export const showNewVisModalFromDashboard = async (
   coreStart: CoreStart,
   pluginsStart: { visualizations: VisualizationsStart; embeddable: EmbeddableStart },
-  tabTitle: string
+  tabTitle: string,
+  path: string
 ) => {
   try {
+    console.log('window.location.hash', window.location.hash);
     const currentApp = await firstValueFrom(coreStart.application.currentAppId$);
     const embeddableState = currentApp
       ? {
@@ -72,7 +74,7 @@ export const showNewVisModalFromDashboard = async (
             {
               text: tabTitle,
               href: coreStart.application.getUrlForApp(currentApp, {
-                path: window.location.hash,
+                path,
               }),
             },
           ],
