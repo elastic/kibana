@@ -10,6 +10,15 @@ import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
 
 /**
+ * Default window for ES|QL generation and schema probes when the caller does not
+ * pass a time range. Shared so those paths bind `?_tstart`/`?_tend` to the same range.
+ */
+export const DEFAULT_ESQL_TIME_RANGE = {
+  from: 'now-24h',
+  to: 'now',
+} as const satisfies TimeRange;
+
+/**
  * Resolves a datemath expression (e.g. "now-2w", "now", or an ISO string)
  * to an ISO 8601 timestamp string that ES|QL can parse.
  */

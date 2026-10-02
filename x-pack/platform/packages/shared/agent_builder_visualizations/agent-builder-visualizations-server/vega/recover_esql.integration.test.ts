@@ -8,7 +8,7 @@
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { generateEsql, executeEsql, validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { buildVegaConfig } from './build_config';
 
@@ -16,15 +16,7 @@ import { buildVegaConfig } from './build_config';
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
-  validateEsqlQuery: jest.fn(),
-}));
-
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
   buildTimeRangeParams: jest.fn(() => undefined),
-}));
-
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn(() => ({})),
 }));
 
 jest.mock('../utils/extract_text_from_message', () => ({
@@ -33,7 +25,6 @@ jest.mock('../utils/extract_text_from_message', () => ({
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
-const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
 
 // The real LangGraph compile+invoke can exceed the default 5s budget on first run under CI's parallel worker load.
 jest.setTimeout(30_000);
@@ -83,7 +74,6 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
       getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
       selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
-    mockedValidateEsqlQuery.mockResolvedValue(undefined);
     // A visual-only edit: the generator keeps the seeded query unchanged and
     // returns its result columns so the graph never re-executes it.
     mockedGenerateEsql.mockResolvedValue({

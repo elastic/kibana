@@ -6,21 +6,15 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
-import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
 import { buildLensConfig } from './build_lens_config';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  validateEsqlQuery: jest.fn(),
-}));
-
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn(() => ({})),
-}));
+// The graph is mocked below; keep the real graph module's ES|QL dependencies
+// out of this unit test.
+jest.mock('@kbn/agent-builder-genai-utils', () => ({}));
 
 jest.mock('./graph_lens', () => ({
   ...jest.requireActual('./graph_lens'),
@@ -31,8 +25,6 @@ jest.mock('./schemas', () => ({
   getSchemaForChartType: jest.fn(() => ({})),
 }));
 
-const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
-const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
 const mockedCreateGraph = jest.mocked(createVisualizationGraph);
 
 const createMockLogger = (): Logger =>
@@ -58,8 +50,6 @@ describe('buildLensConfig', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedValidateEsqlQuery.mockReset();
-    mockedValidateEsqlQuery.mockResolvedValue(undefined); // default: query is valid
     logger = createMockLogger();
     invoke = jest.fn().mockResolvedValue({
       validatedConfig: { type: 'metric' },
@@ -147,11 +137,9 @@ describe('buildLensConfig', () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
-  it('passes a valid provided ES|QL through to the graph verbatim', async () => {
+  it('passes a provided ES|QL through to the graph verbatim', async () => {
     const result = await run(PROVIDED_ESQL);
 
-    expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
-    expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke).toHaveBeenCalledTimes(1);
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
     expect(result.authoringNote).toBe(AUTHORING_NOTE);
@@ -173,30 +161,9 @@ describe('buildLensConfig', () => {
     });
   });
 
-  it('drops an invalid provided ES|QL and warns, so the graph regenerates', async () => {
-    mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
-
-    await run(PROVIDED_ESQL);
-
-    expect(invoke).toHaveBeenCalledTimes(1);
-    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
-  });
-
-  it('keeps the provided ES|QL when validation itself fails (inconclusive)', async () => {
-    mockedValidateEsqlQuery.mockRejectedValue(new Error('ES unreachable'));
-
-    await run(PROVIDED_ESQL);
-
-    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('does not validate when no ES|QL is provided', async () => {
+  it('passes an empty query to the graph when no ES|QL is provided', async () => {
     await run(undefined);
 
-    expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
   });
 

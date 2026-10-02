@@ -9,15 +9,13 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
+import { createEsqlResponseError } from '../shared/esql_response_error.mock';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { createVegaGraph } from './graph';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
-}));
-
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
   buildTimeRangeParams: jest.fn(() => undefined),
 }));
 
@@ -39,6 +37,10 @@ const asCodeBlock = (spec: object) => '```json\n' + JSON.stringify(spec) + '\n``
 
 const GENERATED_ESQL = 'FROM logs-* | STATS count = COUNT() BY status';
 const PROVIDED_ESQL = 'FROM metrics-* | STATS avg = AVG(value) BY host';
+const EXECUTED_COLUMNS = [
+  { name: 'count', type: 'long' as const },
+  { name: 'status', type: 'keyword' as const },
+];
 
 describe('createVegaGraph', () => {
   const events = {} as ToolEventEmitter;
@@ -69,16 +71,22 @@ describe('createVegaGraph', () => {
       getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
       selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
-    mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
-      ReturnType<typeof generateEsql>
-    >);
+    mockedGenerateEsql.mockResolvedValue({
+      query: GENERATED_ESQL,
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
   });
 
   const run = async (
-    input: { esqlQuery?: string; existingSpec?: string; existingEsql?: string } = {}
+    input: {
+      esqlQuery?: string;
+      existingSpec?: string;
+      existingEsql?: string;
+      preserveESQL?: boolean;
+    } = {}
   ) => {
     const graph = await createVegaGraph(modelProvider, logger, events, esClient);
     return graph.invoke({
@@ -86,6 +94,7 @@ describe('createVegaGraph', () => {
       index: undefined,
       existingSpec: input.existingSpec,
       existingEsql: input.existingEsql,
+      preserveESQL: input.preserveESQL,
       esqlQuery: input.esqlQuery ?? '',
       currentAttempt: 0,
       actions: [],
@@ -254,10 +263,42 @@ describe('createVegaGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: PROVIDED_ESQL })
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false, limit: 1 })
     );
     const spec = JSON.parse(state.spec!);
     expect(spec.data.url.query).toBe(PROVIDED_ESQL);
+  });
+
+  it('binds executed columns from a provided query into the authoring prompt', async () => {
+    mockedExecuteEsql.mockResolvedValue({
+      columns: EXECUTED_COLUMNS,
+      values: [],
+    } as Awaited<ReturnType<typeof executeEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run({ esqlQuery: PROVIDED_ESQL });
+
+    const prompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(prompt).toContain('Bind only these executed result columns, using their exact names');
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
+    expect(prompt).not.toContain('No column information is available');
+  });
+
+  it('binds generateEsql result columns into the authoring prompt', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      query: GENERATED_ESQL,
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run();
+
+    const prompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(prompt).toContain('Bind only these executed result columns, using their exact names');
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
   });
 
   it('escapes dotted field references produced by the model', async () => {
@@ -299,7 +340,10 @@ describe('createVegaGraph', () => {
     // The provided query throws (an invalid, agent-invented query); generation
     // then supplies a runnable query and its schema-probe columns.
     mockedExecuteEsql.mockRejectedValueOnce(
-      new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
+      createEsqlResponseError(
+        'verification_exception',
+        'second argument of [half_ms * 1ms] must be [numeric]'
+      )
     );
     mockedGenerateEsql.mockResolvedValue({
       query: GENERATED_ESQL,
@@ -318,7 +362,10 @@ describe('createVegaGraph', () => {
 
   it('aborts only after both the provided query and regeneration fail to execute', async () => {
     mockedExecuteEsql.mockRejectedValue(
-      new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
+      createEsqlResponseError(
+        'verification_exception',
+        'second argument of [half_ms * 1ms] must be [numeric]'
+      )
     );
     mockedGenerateEsql.mockResolvedValue({
       error: 'verification_exception: second argument of [half_ms * 1ms] must be [numeric]',
@@ -358,5 +405,32 @@ describe('createVegaGraph', () => {
     expect(state.spec).toBeNull();
     expect(state.error).toEqual(expect.any(String));
     expect(invoke).toHaveBeenCalledTimes(3);
+  });
+
+  it('authors an appearance-only edit without regenerating ES|QL when the probe fails', async () => {
+    mockedExecuteEsql.mockRejectedValue(new Error('verification_exception'));
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'verification_exception',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL, preserveESQL: true });
+
+    expect(mockedExecuteEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false, limit: 1 })
+    );
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('No column information is available');
+    expect(state.actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'resolve_esql',
+          success: true,
+          query: PROVIDED_ESQL,
+        }),
+      ])
+    );
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).data.url.query).toBe(PROVIDED_ESQL);
   });
 });

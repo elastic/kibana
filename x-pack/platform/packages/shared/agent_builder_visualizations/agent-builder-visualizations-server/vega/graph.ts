@@ -11,38 +11,28 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { runResolveEsqlNode } from '../shared/run_resolve_esql_node';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
 import {
-  GENERATE_ESQL_NODE,
+  RESOLVE_ESQL_NODE,
   SELECT_EXAMPLES_NODE,
   AUTHOR_SPEC_NODE,
   VALIDATE_SPEC_NODE,
   FINALIZE_NODE,
   MAX_RETRY_ATTEMPTS,
-  isGenerateEsqlAction,
+  isResolveEsqlAction,
   isAuthorSpecAction,
   isValidateSpecAction,
   type VegaAction,
-  type GenerateEsqlAction,
   type AuthorSpecAction,
   type ValidateSpecAction,
 } from './actions';
 
 // Regex to extract JSON from markdown code blocks.
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
-
-/**
- * Default range used only to bind `?_tstart`/`?_tend` when executing a query
- * server-side to collect its result columns. The live dashboard range is applied
- * by Kibana at render time, so this default never reaches the stored spec.
- */
-const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 /** Top-level keys that declare a renderable Vega-Lite view. */
 const RENDERABLE_VIEW_KEYS = [
@@ -105,6 +95,7 @@ const VegaStateAnnotation = Annotation.Root({
   existingSpec: Annotation<string | undefined>(),
   /** Query recovered from the spec being edited, used as context to (re)generate. */
   existingEsql: Annotation<string | undefined>(),
+  preserveESQL: Annotation<boolean>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
   esqlQuery: Annotation<string>(),
@@ -138,93 +129,22 @@ export const createVegaGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Resolve the ES|QL query and its result columns. A query may reference
-  // time-picker params (?_tstart/?_tend); bind a default range so it runs
-  // server-side. Kibana binds the live range at render time.
-  const generateESQLNode = async (state: VegaState) => {
-    const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
-
-    let action: GenerateEsqlAction;
-
-    try {
-      let query = state.esqlQuery;
-      let columns: EsqlEsqlColumnInfo[] | undefined;
-
-      // A provided query is only trustworthy if it actually runs: the caller may
-      // pass an LLM-invented query whose error (e.g. a type mismatch) AST
-      // validation never catches. Execute it; if it throws, discard it and fall
-      // through to self-correcting generation rather than author a spec around a
-      // query that can never render.
-      if (query) {
-        try {
-          logger.debug('Validating provided ES|QL query for Vega visualization');
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
-        } catch (providedError) {
-          const message =
-            providedError instanceof Error ? providedError.message : String(providedError);
-          logger.warn(
-            `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
-          );
-          query = '';
-        }
-      }
-
-      // Generate a query when none was provided, or the provided one failed.
-      // generateVisualizationEsql self-corrects in a bounded retry loop, so it
-      // yields only a query that actually runs (or an error once the budget is
-      // spent) — this keeps invalid ES|QL out of a stored spec.
-      if (!query) {
-        logger.debug('Generating ES|QL query for Vega visualization');
-        const generated = await generateVisualizationEsql({
-          nlQuery: state.nlQuery,
-          // On edit, seed generation with the query recovered from the existing
-          // spec so a data-shape edit (e.g. a new breakdown) can modify it
-          // instead of being stuck with the original columns.
-          existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
-          index: state.index,
-          modelProvider,
-          events,
-          logger,
-          esClient,
-          timeRange: DEFAULT_VALIDATION_TIME_RANGE,
-          // Vega must filter rows on the raw source time field itself (Kibana
-          // does not do it for us as with Lens); see vegaEsqlAdditionalInstructions.
-          extraInstructions: vegaEsqlAdditionalInstructions,
-        });
-        if (!generated.query) {
-          return {
-            esqlQuery: state.esqlQuery,
-            actions: [
-              {
-                type: 'generate_esql',
-                success: false,
-                error: generated.error ?? 'No queries generated',
-              },
-            ],
-          };
-        }
-        query = generated.query;
-        // Schema mode already returned columns, including the 0-row case.
-        columns = generated.columns;
-      }
-
-      action = { type: 'generate_esql', success: true, query, columns };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logger.error(`Failed to resolve ES|QL query for Vega: ${message}`);
-      action = { type: 'generate_esql', success: false, error: message };
-    }
-
-    return {
-      esqlQuery: action.query ?? state.esqlQuery,
-      columns: action.columns,
-      actions: [action],
-    };
-  };
+  const resolveEsqlNode = (state: VegaState) =>
+    runResolveEsqlNode({
+      preserveESQL: state.preserveESQL,
+      esqlQuery: state.esqlQuery,
+      nlQuery: state.nlQuery,
+      // On edit, seed generation with the query recovered from the existing
+      // spec so a data-shape edit (e.g. a new breakdown) can modify it
+      // instead of being stuck with the original columns.
+      existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
+      index: state.index,
+      modelProvider,
+      events,
+      logger,
+      esClient,
+      extraInstructions: vegaEsqlAdditionalInstructions,
+    });
 
   // Runs once before the authoring retry loop; the model picks which examples fit.
   const selectExamplesNode = async (state: VegaState) => {
@@ -359,14 +279,14 @@ export const createVegaGraph = async (
 
     // Surface an ES|QL resolution failure (an unexecutable query that was never
     // authored into a spec) so the caller gets the real root cause.
-    const lastGenerate = [...state.actions].reverse().find(isGenerateEsqlAction);
-    if (lastGenerate && !lastGenerate.success) {
+    const lastResolve = [...state.actions].reverse().find(isResolveEsqlAction);
+    if (lastResolve && !lastResolve.success) {
       return {
         spec: null,
         title: null,
         authoringNote: null,
         error: `Could not resolve a valid ES|QL query for the visualization: ${
-          lastGenerate.error ?? 'Unknown error'
+          lastResolve.error ?? 'Unknown error'
         }`,
       };
     }
@@ -382,9 +302,9 @@ export const createVegaGraph = async (
 
   // A query that could not be resolved/executed must not be authored into a
   // spec (the spec would only fail at render), so route straight to finalize.
-  const afterGenerateEsqlRouter = (state: VegaState): string => {
-    const lastGenerate = [...state.actions].reverse().find(isGenerateEsqlAction);
-    if (!lastGenerate?.success) {
+  const afterResolveEsqlRouter = (state: VegaState): string => {
+    const lastResolve = [...state.actions].reverse().find(isResolveEsqlAction);
+    if (!lastResolve?.success) {
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
       return FINALIZE_NODE;
     }
@@ -408,14 +328,14 @@ export const createVegaGraph = async (
   };
 
   return new StateGraph(VegaStateAnnotation)
-    .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(RESOLVE_ESQL_NODE, resolveEsqlNode)
     .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
     .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
     .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
     .addNode(FINALIZE_NODE, finalizeNode)
-    .addEdge('__start__', GENERATE_ESQL_NODE)
+    .addEdge('__start__', RESOLVE_ESQL_NODE)
     .addEdge('__start__', SELECT_EXAMPLES_NODE)
-    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+    .addConditionalEdges(RESOLVE_ESQL_NODE, afterResolveEsqlRouter, {
       [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
       [FINALIZE_NODE]: FINALIZE_NODE,
     })

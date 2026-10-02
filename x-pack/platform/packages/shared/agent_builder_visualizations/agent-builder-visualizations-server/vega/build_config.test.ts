@@ -8,25 +8,13 @@
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
-import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
 import { buildVegaConfig } from './build_config';
-
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  validateEsqlQuery: jest.fn(),
-}));
-
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn(() => ({})),
-}));
 
 jest.mock('./graph', () => ({
   createVegaGraph: jest.fn(),
 }));
 
-const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
-const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
 const mockedCreateGraph = jest.mocked(createVegaGraph);
 
 const createMockLogger = (): Logger =>
@@ -46,8 +34,6 @@ describe('buildVegaConfig', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedValidateEsqlQuery.mockReset();
-    mockedValidateEsqlQuery.mockResolvedValue(undefined); // default: query is valid
     logger = createMockLogger();
     invoke = jest.fn().mockResolvedValue({
       spec: SPEC,
@@ -70,11 +56,9 @@ describe('buildVegaConfig', () => {
       esClient,
     });
 
-  it('passes a valid provided ES|QL through to the graph verbatim', async () => {
+  it('passes a provided ES|QL through to the graph verbatim', async () => {
     const result = await run(PROVIDED_ESQL);
 
-    expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
-    expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
     expect(result).toEqual({
       spec: SPEC,
@@ -112,28 +96,9 @@ describe('buildVegaConfig', () => {
     });
   });
 
-  it('drops an invalid provided ES|QL and warns, so the graph regenerates', async () => {
-    mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
-
-    await run(PROVIDED_ESQL);
-
-    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
-  });
-
-  it('keeps the provided ES|QL when validation itself fails (inconclusive)', async () => {
-    mockedValidateEsqlQuery.mockRejectedValue(new Error('ES unreachable'));
-
-    await run(PROVIDED_ESQL);
-
-    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('does not validate when no ES|QL is provided', async () => {
+  it('passes an empty query to the graph when no ES|QL is provided', async () => {
     await run(undefined);
 
-    expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
   });
 
@@ -163,10 +128,9 @@ describe('buildVegaConfig', () => {
     it('passes the recovered ES|QL as edit context, not as the query to reuse', async () => {
       await edit(undefined);
 
-      // No caller query to pre-validate; the recovered query is threaded as
-      // context (existingEsql) so the graph can modify it when the edit needs
-      // different data, while esqlQuery stays empty so generation runs.
-      expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
+      // The recovered query is threaded as context (existingEsql) so the graph
+      // can modify it when the edit needs different data, while esqlQuery
+      // stays empty so generation runs.
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: '',
         existingEsql: PROVIDED_ESQL,
@@ -208,6 +172,7 @@ describe('buildVegaConfig', () => {
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: PROVIDED_ESQL,
         existingEsql: PROVIDED_ESQL,
+        preserveESQL: true,
       });
     });
 
@@ -226,29 +191,15 @@ describe('buildVegaConfig', () => {
       expect(invoke).not.toHaveBeenCalled();
     });
 
-    it('prefers a valid provided ES|QL over the query embedded in the spec', async () => {
+    it('prefers a provided ES|QL over the query embedded in the spec', async () => {
       const newEsql = 'FROM metrics-* | STATS avg = AVG(value)';
 
       await edit(newEsql);
 
-      // The trusted caller query wins, but the recovered query is still threaded
-      // as context so the graph has the prior shape available.
+      // The caller query wins, but the recovered query is still threaded as
+      // context so the graph can regenerate from the prior shape if it fails.
       expect(invoke.mock.calls[0][0]).toMatchObject({
         esqlQuery: newEsql,
-        existingEsql: PROVIDED_ESQL,
-      });
-    });
-
-    it('still provides the embedded ES|QL as context when a provided query fails validation', async () => {
-      mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
-
-      await edit('INVALID QUERY');
-
-      // The invalid caller query is dropped (esqlQuery empty, so generation runs)
-      // and the query embedded in the existing spec seeds regeneration.
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
-      expect(invoke.mock.calls[0][0]).toMatchObject({
-        esqlQuery: '',
         existingEsql: PROVIDED_ESQL,
       });
     });

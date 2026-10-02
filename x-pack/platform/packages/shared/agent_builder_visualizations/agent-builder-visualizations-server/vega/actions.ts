@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
-
-export interface GenerateEsqlAction {
-  type: 'generate_esql';
-  success: boolean;
-  query?: string;
-  /** Result columns of the executed query, used to inform spec authoring/validation. */
-  columns?: EsqlEsqlColumnInfo[];
-  error?: string;
-}
+import type { ResolveEsqlAction } from '../shared/run_resolve_esql_node';
 
 export interface AuthorSpecAction {
   type: 'author_spec';
@@ -43,10 +34,10 @@ export interface ValidateSpecAction {
   error?: string;
 }
 
-export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;
+export type VegaAction = ResolveEsqlAction | AuthorSpecAction | ValidateSpecAction;
 
-export const isGenerateEsqlAction = (action: VegaAction): action is GenerateEsqlAction =>
-  action.type === 'generate_esql';
+export const isResolveEsqlAction = (action: VegaAction): action is ResolveEsqlAction =>
+  action.type === 'resolve_esql';
 
 export const isAuthorSpecAction = (action: VegaAction): action is AuthorSpecAction =>
   action.type === 'author_spec';
@@ -55,7 +46,7 @@ export const isValidateSpecAction = (action: VegaAction): action is ValidateSpec
   action.type === 'validate_spec';
 
 // Node name constants
-export const GENERATE_ESQL_NODE = 'generate_esql_query';
+export const RESOLVE_ESQL_NODE = 'resolve_esql';
 export const SELECT_EXAMPLES_NODE = 'select_reference_examples';
 export const AUTHOR_SPEC_NODE = 'author_spec';
 export const VALIDATE_SPEC_NODE = 'validate_spec';

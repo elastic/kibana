@@ -9,7 +9,7 @@ import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-bu
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
+import { generateVisualizationEsql } from './generate_visualization_esql';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
@@ -80,8 +80,25 @@ describe('generateVisualizationEsql', () => {
         index: 'logs-*',
         esClient: asCurrentUser,
         additionalInstructions: 'esql-instructions',
-        timeRange: { from: 'now-7d', to: 'now' },
         execute: 'schema',
+        timeRange: { from: 'now-7d', to: 'now' },
+      })
+    );
+  });
+
+  it('forwards additional context to generateEsql', async () => {
+    mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+      ReturnType<typeof generateEsql>
+    >);
+
+    await generateVisualizationEsql({
+      ...params,
+      additionalContext: 'A provided ES|QL query failed to execute',
+    });
+
+    expect(mockedGenerateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        additionalContext: 'A provided ES|QL query failed to execute',
       })
     );
   });
@@ -139,6 +156,23 @@ describe('generateVisualizationEsql', () => {
     expect(nlQuery).toContain('User query: count logs by status');
   });
 
+  it('seeds the request with per-layer context for multiple existing queries', async () => {
+    mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+      ReturnType<typeof generateEsql>
+    >);
+
+    await generateVisualizationEsql({
+      ...params,
+      existingQueries: ['FROM a | STATS x', 'FROM b | STATS y'],
+    });
+
+    const { nlQuery } = mockedGenerateEsql.mock.calls[0][0];
+    expect(nlQuery).toContain('Existing esql queries from multiple layers:');
+    expect(nlQuery).toContain('Layer 1: "FROM a | STATS x"');
+    expect(nlQuery).toContain('Layer 2: "FROM b | STATS y"');
+    expect(nlQuery).toContain('User query: count logs by status');
+  });
+
   describe('default-model fallback', () => {
     it('runs on the low-effort model with two attempts and does not fall back on success', async () => {
       mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
@@ -179,6 +213,25 @@ describe('generateVisualizationEsql', () => {
       expect(fallbackCall.additionalContext).toContain('Unknown column [status.keyword]');
     });
 
+    it('keeps caller additional context on the default-model fallback', async () => {
+      mockedGenerateEsql
+        .mockResolvedValueOnce({
+          error: 'Unknown column [status.keyword]',
+        } as Awaited<ReturnType<typeof generateEsql>>)
+        .mockResolvedValueOnce({
+          query: 'FROM logs-* | STATS c = COUNT() BY status',
+        } as Awaited<ReturnType<typeof generateEsql>>);
+
+      await generateVisualizationEsql({
+        ...params,
+        additionalContext: 'A provided ES|QL query failed to execute',
+      });
+
+      const fallbackCall = mockedGenerateEsql.mock.calls[1][0];
+      expect(fallbackCall.additionalContext).toContain('A provided ES|QL query failed to execute');
+      expect(fallbackCall.additionalContext).toContain('Unknown column [status.keyword]');
+    });
+
     it('returns the fallback error when the fallback also fails', async () => {
       mockedGenerateEsql
         .mockResolvedValueOnce({ error: 'first error' } as Awaited<ReturnType<typeof generateEsql>>)
@@ -199,30 +252,5 @@ describe('generateVisualizationEsql', () => {
       expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
       expect(getDefaultModel).not.toHaveBeenCalled();
     });
-  });
-});
-
-describe('buildEsqlEditContext', () => {
-  it('returns the request unchanged when no existing queries are given', () => {
-    expect(buildEsqlEditContext('count logs')).toBe('count logs');
-    expect(buildEsqlEditContext('count logs', [])).toBe('count logs');
-  });
-
-  it('formats a single existing query as a modify instruction', () => {
-    expect(buildEsqlEditContext('exclude 503s', ['FROM logs-* | STATS c = COUNT()'])).toBe(
-      'Existing esql query to modify: "FROM logs-* | STATS c = COUNT()"\n\nUser query: exclude 503s'
-    );
-  });
-
-  it('formats multiple existing queries as per-layer context', () => {
-    const result = buildEsqlEditContext('add a trend line', [
-      'FROM a | STATS x',
-      'FROM b | STATS y',
-    ]);
-
-    expect(result).toContain('Existing esql queries from multiple layers:');
-    expect(result).toContain('Layer 1: "FROM a | STATS x"');
-    expect(result).toContain('Layer 2: "FROM b | STATS y"');
-    expect(result).toContain('User query: add a trend line');
   });
 });
