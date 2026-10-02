@@ -2248,19 +2248,31 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toEqual({ id: 'user:dup', name: 'dup', type: 'user' });
   });
 
-  it('keeps the prefixed entity id within the shared 256-character limit for long names', () => {
-    const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
-      with: { current_entity: Record<string, unknown> };
+  it('skips names too long for a prefixed id instead of truncating them into a shared id', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_names_for_entities: string; user_names_for_entities: string };
     };
-    const longName = 'h'.repeat(512);
+    const fits = 'h'.repeat(251);
+    // Same first 251 characters: truncation would have collapsed these into one entity id.
+    const tooLongA = `${fits}-a`;
+    const tooLongB = `${fits}-b`;
+    const verdicts = [
+      createMockOutputVerdict({ alert_id: 'a1', host_name: fits, user_name: fits }),
+      createMockOutputVerdict({ alert_id: 'a2', host_name: tooLongA, user_name: tooLongA }),
+      createMockOutputVerdict({ alert_id: 'a3', host_name: tooLongB, user_name: tooLongB }),
+    ];
 
-    const entity = renderValueRecursively(engine, hostStep.with.current_entity, {
-      foreach: { item: longName },
-    }) as { id: string; name: string };
+    const hosts = evaluateExpression(engine, collectStep.with.host_names_for_entities, {
+      variables: { output_verdicts: verdicts },
+    }) as string[];
+    const users = evaluateExpression(engine, collectStep.with.user_names_for_entities, {
+      variables: { output_verdicts: verdicts },
+    }) as string[];
 
-    expect(entity.id.length).toBeLessThanOrEqual(256);
-    expect(entity.id.startsWith('host:')).toBe(true);
-    expect(entity.name).toBe(longName);
+    // 'host:' + 251 characters is exactly the shared 256-character id limit.
+    expect(hosts).toEqual([fits]);
+    expect(users).toEqual([fits]);
+    expect(`host:${hosts[0]}`.length).toBe(256);
   });
 
   it('caps hosts and users at 50 each so impact stays within the shared 100-entity limit', () => {
