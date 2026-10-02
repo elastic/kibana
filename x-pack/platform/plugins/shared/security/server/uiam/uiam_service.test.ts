@@ -675,7 +675,9 @@ describe('UiamService', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        `https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=${encodeURIComponent(expectedAudience)}`,
+        `https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=${encodeURIComponent(
+          expectedAudience
+        )}`,
         {
           method: 'POST',
           headers: {
