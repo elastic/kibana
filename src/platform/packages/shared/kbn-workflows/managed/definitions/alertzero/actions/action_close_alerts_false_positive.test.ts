@@ -33,14 +33,14 @@ describe('Close alerts as false positive action', () => {
   // Mirrors WorkflowTemplatingEngine.evaluateExpression: strip the leading `$` and the
   // surrounding `{{ }}`, then evalValueSync the raw expression against a context — the
   // same call the execution engine makes for a step's `if` condition.
-  const evaluateIfCondition = (updated: number, alertIds: string[]): unknown => {
+  const evaluateIfCondition = (output: { updated: number; total: number }): unknown => {
     const expression = (failStep.if as string)
       .replace(/^\$\{\{/, '')
       .replace(/\}\}$/, '')
       .trim();
     return engine.evalValueSync(expression, {
-      steps: { close_alerts: { output: { updated } } },
-      inputs: { actionInput: { alertIds } },
+      steps: { close_alerts: { output } },
+      inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
     });
   };
 
@@ -57,24 +57,32 @@ describe('Close alerts as false positive action', () => {
     expect(typeof failStep.if).toBe('string');
   });
 
-  it('does not fail when every requested alert was updated', () => {
-    expect(evaluateIfCondition(2, ['alert-1', 'alert-2'])).toBe(false);
+  it('does not fail when every matched alert was updated', () => {
+    expect(evaluateIfCondition({ updated: 2, total: 2 })).toBe(false);
   });
 
-  it('fails when fewer alerts were updated than requested', () => {
-    expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
+  it('does not fail when a requested alert no longer exists', () => {
+    expect(evaluateIfCondition({ updated: 1, total: 1 })).toBe(false);
   });
 
-  it('fails when none of the requested alerts were updated (conflicts: proceed no-op)', () => {
-    expect(evaluateIfCondition(0, ['alert-1', 'alert-2'])).toBe(true);
+  it('fails when a matched alert was skipped by a version conflict', () => {
+    expect(evaluateIfCondition({ updated: 1, total: 2 })).toBe(true);
+  });
+
+  it('fails when none of the requested alerts exist', () => {
+    expect(evaluateIfCondition({ updated: 0, total: 0 })).toBe(true);
+  });
+
+  it('fails when every matched alert hit a version conflict', () => {
+    expect(evaluateIfCondition({ updated: 0, total: 2 })).toBe(true);
   });
 
   it('renders a message naming the shortfall', () => {
     const rendered = engine.parseAndRenderSync(failStep.with!.message as string, {
-      steps: { close_alerts: { output: { updated: 1 } } },
+      steps: { close_alerts: { output: { updated: 1, total: 2 } } },
       inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
     });
 
-    expect(rendered).toContain('Closed 1 of 2 requested alert(s) as false positive');
+    expect(rendered).toContain('Closed 1 of 2 matched alert(s) as false positive');
   });
 });

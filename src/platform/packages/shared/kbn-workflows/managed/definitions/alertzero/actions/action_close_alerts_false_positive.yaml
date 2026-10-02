@@ -84,20 +84,27 @@ steps:
               _id: "${{ inputs.actionInput.alertIds }}"
 
   # `conflicts: proceed` lets close_alerts finish without throwing even when it
-  # updates fewer alerts than requested (including zero) — e.g. version conflicts
-  # or ids no longer matching. The proposal gate that runs this action only checks
-  # steps.execute_action.error == blank, not closed_count, so an incomplete close
-  # would otherwise be reported as a full success and the Investigation closed
-  # while some alerts remain open. Fail loud instead so that check catches it.
+  # updates fewer alerts than it matched, so the gate (which only checks
+  # steps.execute_action.error == blank) would report a partial close as a full
+  # success and the Investigation would close with alerts still open. Fail loud
+  # instead. Compare `updated` against `total` (the alerts the query matched),
+  # not against the number of requested ids: an alert deleted since the proposal
+  # was created simply does not match, and a coalesced proposal can stay pending
+  # for days, so requiring every id to still exist would make approval fail
+  # permanently. A matched-but-not-updated alert (version conflict) still fails,
+  # and so does zero matches, which means the ids are wrong rather than gone.
+  # Alerts that are already closed still count as updated: the update script never
+  # sets `ctx.op = 'noop'`.
   - name: fail_incomplete_close
     type: workflow.fail
-    if: "${{ steps.close_alerts.output.updated != inputs.actionInput.alertIds.size }}"
+    if: "${{ steps.close_alerts.output.updated != steps.close_alerts.output.total or steps.close_alerts.output.total == 0 }}"
     with:
       message: >-
         Closed {{ steps.close_alerts.output.updated }} of
-        {{ inputs.actionInput.alertIds.size }} requested alert(s) as false
-        positive; the rest were not updated (conflicts: proceed skips
-        version conflicts and no-ops instead of aborting the batch).
+        {{ steps.close_alerts.output.total }} matched alert(s) as false
+        positive ({{ inputs.actionInput.alertIds.size }} requested); the rest
+        were not updated (conflicts: proceed skips version conflicts instead of
+        aborting the batch), or none of the requested alerts exist.
 
   # Emit a structured result so the caller (Worker or gate) can verify the
   # close landed. `workflow.execute` declares its output as unknown, so the
