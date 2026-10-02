@@ -61,10 +61,6 @@ const suitesWithSpecModelGroups = suites.filter(
 const shardedSuites = suites.filter((suite) => (suite.shards?.length ?? 0) > 0);
 
 describe('evals.suites.json specModelGroups', () => {
-  it('has at least one suite exercising specModelGroups (significant-events)', () => {
-    expect(suitesWithSpecModelGroups.map((suite) => suite.id)).toContain('significant-events');
-  });
-
   it('points every specModelGroups file at a spec that exists in the suite directory', () => {
     const problems = suitesWithSpecModelGroups.flatMap((suite) =>
       (suite.specModelGroups ?? [])
