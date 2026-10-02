@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
 import { getPackages } from '@kbn/repo-packages';
 import { snakeCase } from 'lodash';
 import ts from 'typescript';
+import { parse } from 'yaml';
 import type { ScoutServerConfig } from '../types';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
 
@@ -234,8 +236,44 @@ export function listConfigSetFiles(repoRoot: string): ConfigSetFile[] {
   return out;
 }
 
+/** Tracked Playwright config files, as repo relative paths. */
+const listPlaywrightConfigs = (repoRoot: string): string[] =>
+  execFileSync('git', ['ls-files', '-z', '--', '*playwright.config.ts'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
+    .split('\0')
+    .filter(Boolean);
+
+/**
+ * Names of the custom config sets with at least one test config that CI runs. The directory
+ * `test/scout_<set>` selects the set, and `excluded_configs` in `.buildkite/scout_ci_config.yml`
+ * lists the test configs CI skips. A set nobody runs in CI costs no lane, so the audit ignores it.
+ */
+export function findSetsRunInCi(
+  repoRoot: string,
+  listConfigs: (repoRoot: string) => string[] = listPlaywrightConfigs
+): Set<string> {
+  const ciConfigPath = Path.join(repoRoot, '.buildkite', 'scout_ci_config.yml');
+  const { excluded_configs: excludedConfigs = [] } = parse(
+    Fs.readFileSync(ciConfigPath, 'utf8')
+  ) as { excluded_configs?: string[] };
+  const excluded = new Set(excludedConfigs);
+
+  const sets = new Set<string>();
+  for (const config of listConfigs(repoRoot)) {
+    const set = /(?:^|\/)test\/scout_([^/]+)\//.exec(config)?.[1];
+    if (set && !excluded.has(config)) sets.add(set);
+  }
+  return sets;
+}
+
 /** Compares every config set against the default set of the same flavor and file. */
-export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsReport> {
+export async function auditConfigSets(
+  repoRoot: string,
+  listConfigs?: (repoRoot: string) => string[]
+): Promise<ConfigSetsReport> {
   const runtimeKeys = findRuntimeUpdatableKeys(repoRoot);
   const defaults = new Map<string, ScoutServerConfig>();
   const loadDefault = async (flavor: ConfigSetFlavor, file: string) => {
@@ -251,8 +289,9 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
 
   const sets: ConfigSetOverrides[] = [];
   const failed: ConfigSetsReport['failed'] = [];
+  const runInCi = findSetsRunInCi(repoRoot, listConfigs);
   for (const entry of listConfigSetFiles(repoRoot)) {
-    if (entry.name in KEEP_SEPARATE) continue;
+    if (entry.name in KEEP_SEPARATE || !runInCi.has(entry.name)) continue;
     let set: ScoutServerConfig;
     let base: ScoutServerConfig;
     try {
