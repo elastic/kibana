@@ -410,8 +410,9 @@ function transformInternal(
       branches.forEach((branch, idx) => {
         if (!Array.isArray(branch.steps) || branch.steps.length === 0) {
           // Empty branch — synthesize a bypass lane node so the labeled edge appears.
+          // Width 80 matches switch cases so dagre allocates enough room for the chip label.
           const bypassId = ids.allocate(`${step.name}-branch-${idx}-bypass`);
-          bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+          bypassLaneNodes.push({ id: bypassId, style: { width: 80, height: 1 } });
           edges.push({
             id: `${id}:${bypassId}-branch-${idx}`,
             source: id,
