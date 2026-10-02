@@ -41,11 +41,11 @@ const fakeResource: ResolvedResourceWithSampling = {
   isTsdb: false,
 };
 
-const createMockModel = () => {
+const createMockModel = (generateResponse = GENERATE_RESPONSE) => {
   const docModelInvoke = jest.fn().mockResolvedValue({ commands: ['LIMIT'], functions: [] });
   const docRunnable = { withConfig: jest.fn(() => ({ invoke: docModelInvoke })) };
 
-  const generateModelInvoke = jest.fn().mockResolvedValue({ content: GENERATE_RESPONSE });
+  const generateModelInvoke = jest.fn().mockResolvedValue({ content: generateResponse });
   const generateRunnable = { invoke: generateModelInvoke };
 
   const chatModel = {
@@ -166,9 +166,48 @@ describe('createNlToEsqlGraph — execute_query node', () => {
       expect.objectContaining({ limit: 1, dropNullColumns: false })
     );
     expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('FROM logs-test');
+    expect(mockedExecuteEsql.mock.calls[0][0].filter).toBeUndefined();
     expect(outState.results).toEqual({
       columns: [{ name: 'count', type: 'long' }],
       values: [[42]],
     });
+  });
+
+  const TS_QUERY = 'TS metrics-test | STATS SUM(RATE(requests))';
+  const TS_RESPONSE = `\`\`\`esql\n${TS_QUERY}\n\`\`\``;
+
+  it('schema execute bounds a TS query to the time range with a @timestamp filter', async () => {
+    const { chatModel } = createMockModel(TS_RESPONSE);
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke(
+      {
+        ...BASE_INPUT,
+        execute: 'schema',
+        maxRetries: 1,
+        timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      },
+      { recursionLimit: 25 }
+    );
+
+    expect(mockedExecuteEsql.mock.calls[0][0].filter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: '2026-01-01T00:00:00.000Z',
+          lte: '2026-01-02T00:00:00.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('data execute does not filter a TS query', async () => {
+    const { chatModel } = createMockModel(TS_RESPONSE);
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke({ ...BASE_INPUT, execute: 'data', maxRetries: 1 }, { recursionLimit: 25 });
+
+    expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('TS metrics-test');
+    expect(mockedExecuteEsql.mock.calls[0][0].filter).toBeUndefined();
   });
 });
