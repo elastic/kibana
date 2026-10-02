@@ -11,12 +11,16 @@ import {
   workflowsExtensionsMock,
 } from '@kbn/workflows-extensions/server/mocks';
 import { TimelineEventType, EventActorType } from '@kbn/agent-builder-common';
-import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  ConversationUpdatedTriggerEvent,
+} from '@kbn/agent-builder-common';
 import {
   ConversationMetadataUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
 import { createConversationEventBus } from './conversation_event_bus';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
@@ -259,6 +263,52 @@ describe('registerConversationWorkflowEventBridge', () => {
         expect.stringContaining(
           `Failed to emit workflow trigger "${ConversationAttachmentAddedTriggerId}"`
         )
+      );
+    });
+  });
+
+  describe('ai.conversation.updated', () => {
+    const payload: ConversationUpdatedTriggerEvent = {
+      conversationId: 'conv-1',
+      templateId: 'investigation',
+      source: 'execution',
+      changeKinds: ['events'],
+      eventTypes: ['user_message'],
+      actorTypes: ['user'],
+      attachmentTypes: [],
+      attachmentIds: [],
+      changedFields: [],
+    };
+
+    it('forwards conversation updated events to workflows extensions', async () => {
+      eventBus.emitConversationUpdated(request, payload);
+
+      await flushMicrotasks();
+
+      expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+    });
+
+    it('forwards even when experimental features are disabled', async () => {
+      isExperimentalEnabled.mockResolvedValue(false);
+
+      eventBus.emitConversationUpdated(request, payload);
+
+      await flushMicrotasks();
+
+      expect(isExperimentalEnabled).not.toHaveBeenCalled();
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+    });
+
+    it('logs a warning when the emit fails', async () => {
+      mockClient.emitEvent.mockRejectedValue(new Error('network error'));
+
+      eventBus.emitConversationUpdated(request, payload);
+
+      await flushMicrotasks();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to emit workflow trigger "${ConversationUpdatedTriggerId}"`)
       );
     });
   });

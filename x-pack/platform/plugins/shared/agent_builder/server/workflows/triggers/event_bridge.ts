@@ -7,7 +7,10 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  ConversationMetadataUpdatedTriggerId,
+  ConversationUpdatedTriggerId,
+} from '../../../common/workflows/triggers';
 import type { ConversationEventBus } from './conversation_event_bus';
 import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
@@ -24,9 +27,14 @@ export function registerConversationWorkflowEventBridge(
     return;
   }
 
-  const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
+  const forward = async (
+    eventType: string,
+    payload: unknown,
+    request: KibanaRequest,
+    { requireExperimental = true }: { requireExperimental?: boolean } = {}
+  ) => {
     try {
-      if (!(await isExperimentalEnabled(request))) {
+      if (requireExperimental && !(await isExperimentalEnabled(request))) {
         return;
       }
       const client = await workflowsExtensions.getClient(request);
@@ -70,5 +78,10 @@ export function registerConversationWorkflowEventBridge(
       request,
       events.map((event) => toAttachmentTriggerEvent(conversationId, event))
     );
+  });
+
+  // Not experimental, unlike the metadata and attachment triggers.
+  conversationEventBus.onConversationUpdated((request, payload) => {
+    void forward(ConversationUpdatedTriggerId, payload, request, { requireExperimental: false });
   });
 }

@@ -15,6 +15,7 @@ export {
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
 } from '@kbn/agent-builder-common';
 export type {
   AttachmentAddedTriggerEvent,
