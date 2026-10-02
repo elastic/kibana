@@ -366,9 +366,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
     let functionName = name ?? 'extract';
     let tools: ToolDefinition[];
-    let zodSchema: InteropZodType<RunOutput> | undefined;
     if (isInteropZodSchema(schema)) {
-      zodSchema = schema;
       tools = [
         {
           type: 'function',
@@ -376,9 +374,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
             name: functionName,
             description,
             parameters:
-              '_zod' in (zodSchema as object)
-                ? z4.toJSONSchema(zodSchema as unknown as z4.ZodType, { io: 'input' })
-                : zodToJsonSchema(zodSchema as unknown as Parameters<typeof zodToJsonSchema>[0]),
+              '_zod' in (schema as object)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
           },
         },
       ];
@@ -409,10 +407,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         if (!toolCall) {
           throw new Error(`No tool call found with name ${functionName}.`);
         }
-        if (!zodSchema) {
+        if (!isInteropZodSchema(schema)) {
           return toolCall.args as RunOutput;
         }
-        const parsed = await interopSafeParseAsync(zodSchema, toolCall.args);
+        const parsed = await interopSafeParseAsync(schema, toolCall.args);
         if (parsed.success) {
           return parsed.data;
         }
