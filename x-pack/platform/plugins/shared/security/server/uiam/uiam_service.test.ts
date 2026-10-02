@@ -1574,6 +1574,7 @@ describe('UiamService', () => {
       role_assignments: {},
       assumable_by: [],
       creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
+      revoked: false,
     };
 
     it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
@@ -1633,6 +1634,68 @@ describe('UiamService', () => {
       fetchSpy.mockRejectedValue(new Error('socket hang up'));
 
       await expect(uiamService.getServiceAccount('service-account-id')).rejects.toThrowError(
+        'socket hang up'
+      );
+    });
+  });
+
+  describe('#revokeServiceAccount', () => {
+    it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(uiamService.revokeServiceAccount('service-account-id')).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
+        {
+          method: 'DELETE',
+          headers: { 'User-Agent': 'Kibana/9.0.0' },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+    });
+
+    it('URL-encodes the service account id', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.revokeServiceAccount('id/with spaces');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/id%2Fwith%20spaces',
+        expect.anything()
+      );
+    });
+
+    it('reproduces the UIAM refusal with its error code', async () => {
+      const payload = {
+        error: {
+          code: '0xEDF789',
+          type: 'forbidden',
+          message: 'Service account with id [missing] is not found.',
+        },
+      };
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => payload,
+      });
+
+      await expect(uiamService.revokeServiceAccount('missing')).rejects.toMatchObject({
+        output: { statusCode: 403, payload },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.revokeServiceAccount('service-account-id')).rejects.toThrowError(
         'socket hang up'
       );
     });

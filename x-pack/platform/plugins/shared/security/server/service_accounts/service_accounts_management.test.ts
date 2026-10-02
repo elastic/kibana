@@ -1,0 +1,226 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+
+import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
+
+import type { WorkloadBindingStore } from './bindings';
+import { ServiceAccountsManagement } from './service_accounts_management';
+import { serviceAccountsServiceMock } from './service_accounts_service.mock';
+import type { ServiceAccountsBackend } from './types';
+import { licenseMock } from '../../common/licensing/index.mock';
+
+const SERVICE_ACCOUNT_ID = 'service-account-id';
+
+const binding = (
+  overrides: Partial<ServiceAccountWorkloadBinding> = {}
+): ServiceAccountWorkloadBinding => ({
+  pluginId: 'workflows',
+  workloadType: 'workflow',
+  workloadId: 'workflow-1',
+  serviceAccountId: SERVICE_ACCOUNT_ID,
+  spaceId: 'default',
+  boundBy: { type: 'user', username: 'elastic' },
+  boundAt: '2026-10-01T00:00:00.000Z',
+  ...overrides,
+});
+
+const workloadOf = ({
+  pluginId,
+  workloadType,
+  workloadId,
+  spaceId,
+}: ServiceAccountWorkloadBinding) => ({
+  pluginId,
+  workloadType,
+  workloadId,
+  spaceId,
+  displayName: workloadId,
+});
+
+const coordinatesOf = ({
+  pluginId,
+  workloadType,
+  workloadId,
+  spaceId,
+}: ServiceAccountWorkloadBinding) => ({ pluginId, workloadType, workloadId, spaceId });
+
+const clusterPrivilegesResponse = (authorized: boolean) =>
+  ({ hasAllRequested: authorized } as unknown as CheckPrivilegesResponse);
+
+describe('ServiceAccountsManagement', () => {
+  let management: ServiceAccountsManagement;
+  let backend: jest.Mocked<ServiceAccountsBackend>;
+  let store: jest.Mocked<WorkloadBindingStore>;
+  let license: ReturnType<typeof licenseMock.create>;
+  let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
+  let request: KibanaRequest;
+
+  beforeEach(() => {
+    license = licenseMock.create();
+    license.isEnabled.mockReturnValue(true);
+    backend = serviceAccountsServiceMock.createStart()
+      .backend as jest.Mocked<ServiceAccountsBackend>;
+    store = {
+      findByServiceAccountId: jest.fn().mockResolvedValue([]),
+      getVerified: jest.fn(),
+    } as unknown as jest.Mocked<WorkloadBindingStore>;
+    mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
+    mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(true));
+    request = httpServerMock.createKibanaRequest();
+
+    management = new ServiceAccountsManagement({
+      logger: loggingSystemMock.createLogger(),
+      license,
+      backend,
+      store,
+      checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+    });
+  });
+
+  describe('#listWorkloads', () => {
+    it('lists the bound workloads after checking `read_security`', async () => {
+      const bindings = [binding(), binding({ workloadId: 'workflow-2', spaceId: 'other' })];
+      store.findByServiceAccountId.mockResolvedValue(bindings);
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).resolves.toEqual(
+        bindings.map(workloadOf)
+      );
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['read_security'], index: {} },
+      });
+      expect(store.findByServiceAccountId).toHaveBeenCalledWith(SERVICE_ACCOUNT_ID);
+    });
+
+    it('rejects with a 403 before searching when the caller lacks `read_security`', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(store.findByServiceAccountId).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#delete', () => {
+    it('deletes an account with no bound workloads', async () => {
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).resolves.toEqual({ deleted: true, warnings: [] });
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(backend.delete).toHaveBeenCalledWith(request, SERVICE_ACCOUNT_ID);
+    });
+
+    it('refuses to delete an account that is still bound, and reports the workloads', async () => {
+      const bound = binding();
+      store.findByServiceAccountId.mockResolvedValue([bound]);
+      store.getVerified.mockResolvedValue(bound);
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).resolves.toEqual({ deleted: false, workloads: [workloadOf(bound)] });
+
+      expect(store.getVerified).toHaveBeenCalledWith(coordinatesOf(bound));
+      expect(backend.delete).not.toHaveBeenCalled();
+    });
+
+    it('still refuses when a binding fails integrity verification', async () => {
+      const bound = binding();
+      store.findByServiceAccountId.mockResolvedValue([bound]);
+      store.getVerified.mockRejectedValue(
+        Boom.forbidden(
+          'The service account binding for this workload failed integrity verification.'
+        )
+      );
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).resolves.toEqual({ deleted: false, workloads: [workloadOf(bound)] });
+      expect(backend.delete).not.toHaveBeenCalled();
+    });
+
+    it('ignores bindings that were removed or rebound after the search', async () => {
+      const removed = binding({ workloadId: 'removed' });
+      const rebound = binding({ workloadId: 'rebound' });
+      store.findByServiceAccountId.mockResolvedValue([removed, rebound]);
+      store.getVerified
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ ...rebound, serviceAccountId: 'another-account' });
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).resolves.toEqual({ deleted: true, warnings: [] });
+      expect(backend.delete).toHaveBeenCalledWith(request, SERVICE_ACCOUNT_ID);
+    });
+
+    it('propagates a failure to read a binding that is not a verification failure', async () => {
+      const error = new Error('saved objects unavailable');
+      store.findByServiceAccountId.mockResolvedValue([binding()]);
+      store.getVerified.mockRejectedValue(error);
+
+      await expect(management.delete(request, SERVICE_ACCOUNT_ID, { force: false })).rejects.toBe(
+        error
+      );
+      expect(backend.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes a bound account without looking at its bindings when forced', async () => {
+      store.findByServiceAccountId.mockResolvedValue([binding()]);
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: true })
+      ).resolves.toEqual({ deleted: true, warnings: [] });
+
+      expect(store.findByServiceAccountId).not.toHaveBeenCalled();
+      expect(backend.delete).toHaveBeenCalledWith(request, SERVICE_ACCOUNT_ID);
+    });
+
+    it('rejects with a 403 before reading bindings when the caller lacks `manage_security`', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(store.findByServiceAccountId).not.toHaveBeenCalled();
+      expect(backend.delete).not.toHaveBeenCalled();
+    });
+
+    it('passes the backend warnings through', async () => {
+      backend.delete.mockResolvedValue({ warnings: ['a token could not be deleted'] });
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).resolves.toEqual({ deleted: true, warnings: ['a token could not be deleted'] });
+    });
+
+    it('propagates a backend failure', async () => {
+      backend.delete.mockRejectedValue(Boom.notFound('Service account was not found'));
+
+      await expect(
+        management.delete(request, SERVICE_ACCOUNT_ID, { force: false })
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+  });
+});

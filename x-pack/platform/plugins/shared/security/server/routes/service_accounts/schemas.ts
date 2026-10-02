@@ -7,6 +7,7 @@
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
 import {
@@ -73,4 +74,8 @@ export const listServiceAccountsQuerySchema = z.object({
 
 export const getServiceAccountParamsSchema = z.object({
   id: serviceAccountIdSchema.min(1),
+});
+
+export const deleteServiceAccountQuerySchema = z.object({
+  force: BooleanFromString.default(false),
 });

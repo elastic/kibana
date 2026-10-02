@@ -28,6 +28,7 @@ import type {
 import { UIAM_SERVICE_ACCOUNT_ROLE_LIMITS } from './uiam_role_limits';
 import type { SecurityLicense } from '../../common';
 import type {
+  DeleteServiceAccountResponse,
   ListServiceAccountsResponse,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
@@ -336,12 +337,56 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     this.logger.debug(`Attempting to get service account ${id}`);
 
+    let account: UiamServiceAccountDetails;
     try {
-      return toDirectoryEntry(this.cloudProjectContext, await this.uiam.getServiceAccount(id));
+      account = await this.uiam.getServiceAccount(id);
     } catch (e) {
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      throw getNotFound(id, e) ?? e;
     }
+
+    // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
+    // concerned: it cannot be exchanged, restored or listed.
+    if (account.revoked) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    return toDirectoryEntry(this.cloudProjectContext, account);
+  }
+
+  /**
+   * Revokes the account in UIAM. Requires the same `manage_security` privilege as {@link create},
+   * which is the only user-level gate: UIAM authorizes the revoke against Kibana's certificate and
+   * the account's `assumable_by` policy, not against the end user.
+   *
+   * Repeating a revoke while UIAM still holds the record succeeds, so a retry is safe. Once UIAM
+   * drops the record, the same call answers 404.
+   */
+  async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot delete a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'delete a service account',
+    });
+
+    this.logger.debug(`Attempting to delete service account ${id}`);
+
+    try {
+      await this.uiam.revokeServiceAccount(id);
+    } catch (e) {
+      this.logger.error(`Failed to delete service account: ${getDetailedErrorMessage(e)}`);
+      throw getNotFound(id, e) ?? e;
+    }
+
+    return { warnings: [] };
   }
 
   /**
@@ -419,8 +464,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 }
 
+/** `ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND` */
+const SERVICE_ACCOUNT_NOT_FOUND_CODE = '0xEDF789';
+
 const TERMINAL_EXCHANGE_CODES = new Set([
-  '0xEDF789', // ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
+  SERVICE_ACCOUNT_NOT_FOUND_CODE,
   '0x3B8626', // ORGANIZATION_SERVICE_ACCOUNT_REVOKED
   '0x93B121', // AUTHZ_DENY
 ]);
@@ -451,6 +499,20 @@ const getCreateRefusal = (error: unknown): Boom.Boom | null => {
   const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
   const reason = parsed.success ? CREATE_REFUSALS[parsed.data.error.code] : undefined;
   return reason ? Boom.badRequest(`Cannot create a service account: ${reason}`) : null;
+};
+
+/**
+ * Turns UIAM's answer for an account it does not know into a 404, or returns `null` for anything
+ * else. UIAM answers that with a 403, and the error code is what separates it from a real refusal.
+ */
+const getNotFound = (id: string, error: unknown): Boom.Boom | null => {
+  if (!Boom.isBoom(error)) {
+    return null;
+  }
+  const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
+  return parsed.success && parsed.data.error.code === SERVICE_ACCOUNT_NOT_FOUND_CODE
+    ? Boom.notFound(`Service account [${id}] was not found`)
+    : null;
 };
 
 const getExchangeRetryDelay = (error: Error): number | null => {
