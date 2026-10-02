@@ -32,6 +32,7 @@ import {
   AgentService,
   AttachmentsService,
   RenderersService,
+  ConversationEventsService,
   ChatService,
   ConversationsService,
   ConversationTemplatesService,
@@ -50,6 +51,7 @@ import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
+import { createPublicConversationEventsContract } from './services/conversation_events';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
@@ -77,6 +79,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { appPaths } from './application/utils/app_paths';
+import { searchParamNames } from './application/search_param_names';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -104,7 +107,7 @@ export class AgentBuilderPlugin
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private isEarsEnabled = false;
+  private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
   private sidebarOpenSubscription?: Subscription;
@@ -178,6 +181,7 @@ export class AgentBuilderPlugin
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
     const renderersService = new RenderersService();
+    const conversationEventsService = new ConversationEventsService();
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
@@ -245,6 +249,7 @@ export class AgentBuilderPlugin
     const openConversationDetails = async ({
       conversationId,
       onClose,
+      trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
         './flyout/open_conversation_details_flyout'
@@ -255,6 +260,7 @@ export class AgentBuilderPlugin
         conversationTemplatesService,
         conversationId,
         onClose,
+        trailingActions,
       });
     };
 
@@ -263,6 +269,7 @@ export class AgentBuilderPlugin
       agentService,
       attachmentsService,
       renderersService,
+      conversationEventsService,
       chatService,
       conversationsService,
       conversationTemplatesService,
@@ -359,17 +366,20 @@ export class AgentBuilderPlugin
           openSidebarConversation: (conversationId) => {
             openSidebarInternal({ conversationId });
           },
-          openFullscreenConversation: ({ conversationId, agentId }) => {
+          openFullscreenConversation: ({ conversationId, agentId, openDetails }) => {
             agentBuilderSidebar.close();
-            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
-              path: appPaths.agent.conversations.byId({ agentId, conversationId }),
-            });
+            const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
+            const path = openDetails
+              ? `${basePath}?${searchParamNames.openConversationDetails}=true`
+              : basePath;
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, { path });
           },
         },
       }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      conversationEvents: createPublicConversationEventsContract({ conversationEventsService }),
       conversations: createPublicConversationsContract({ conversationsService }),
       getAgentBuilderAccess: createPublicEmbeddableChatAccess({
         accessChecker,

@@ -7,11 +7,11 @@
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardManagementSkill as skill } from './dashboard_management_skill';
+import { dashboardsSkill as skill } from './dashboards_skill';
 import { registerSkills } from './register_skills';
 
 describe('registerSkills', () => {
-  it('registers the dashboard management skill', async () => {
+  it('registers the dashboards skill', async () => {
     const register = jest.fn();
     const agentBuilder = {
       skills: { register },
@@ -20,7 +20,7 @@ describe('registerSkills', () => {
     registerSkills(agentBuilder);
 
     expect(register).toHaveBeenCalledTimes(1);
-    expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard-management' }));
+    expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
   });
 
   it('includes SML discovery instructions in the skill content', () => {
@@ -54,7 +54,8 @@ describe('registerSkills', () => {
     );
     expect(skill.content).toContain('Do not run queries by default');
     expect(skill.content).toContain(`call \`${internalTools.askUserQuestion}\` on its own`);
-    expect(skill.content).toContain('"Appearance only" and "Appearance and content"');
+    expect(skill.content).toContain('"How would you like to enhance this dashboard?"');
+    expect(skill.content).toContain('"Appearance and content" and "Appearance only"');
     expect(skill.content).toContain('Ask even when you found no gaps');
     expect(skill.content).toContain('Content mode is the default');
     expect(skill.content).toContain(

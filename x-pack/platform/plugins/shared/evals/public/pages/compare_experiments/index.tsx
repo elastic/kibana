@@ -261,7 +261,7 @@ const ExperimentHeader: React.FC<{
   );
 };
 
-const ExampleDrilldownFlyout: React.FC<{
+export const ExampleDrilldownFlyout: React.FC<{
   baselineExperimentId: string;
   targetExperimentId: string;
   datasetId: string;

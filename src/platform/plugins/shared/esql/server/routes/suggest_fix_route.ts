@@ -84,6 +84,7 @@ export const registerSuggestFixRoute = (
           additionalContext: buildSuggestFixContext(queryString, errorMessage),
           execute: 'none',
           includeDatasets,
+          includeViews: true,
         });
 
         return response.ok({

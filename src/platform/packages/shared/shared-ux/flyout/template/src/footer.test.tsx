@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -49,6 +50,107 @@ describe('FlyoutTemplate footer', () => {
     expect(screen.queryByTestId('noFooterFooter')).not.toBeInTheDocument();
     expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
   });
+
+  it('forwards a custom data attribute and an EuiButton prop through PrimaryAction', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryAction
+            label="Save"
+            onClick={noop}
+            data-foo="primaryFoo"
+            data-test-subj="primarySave"
+            contentProps={{ 'data-test-subj': 'primaryContent' }}
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('primarySave')).toHaveAttribute('data-foo', 'primaryFoo');
+    expect(screen.getByTestId('primaryContent')).toBeInTheDocument();
+  });
+
+  it('forwards a custom data attribute and an EuiButtonEmpty prop through SecondaryAction', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.SecondaryAction
+            label="Discard"
+            onClick={noop}
+            data-foo="secondaryFoo"
+            data-test-subj="secondaryDiscard"
+            textProps={{ 'data-test-subj': 'secondaryText' }}
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('secondaryDiscard')).toHaveAttribute('data-foo', 'secondaryFoo');
+    expect(screen.getByTestId('secondaryText')).toBeInTheDocument();
+  });
+
+  it('shows an action tooltip on hover', async () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.SecondaryAction
+            label="Discard"
+            onClick={noop}
+            tooltip="Discards unsaved edits"
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    const button = screen.getByRole('button', { name: 'Discard' });
+    expect(button).not.toHaveAttribute('aria-disabled');
+
+    await userEvent.hover(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Discards unsaved edits');
+  });
+
+  it.each([{ isDisabled: true }, { disabled: true }, { isLoading: true }])(
+    'keeps an action with a tooltip hoverable through aria-disabled when given %p',
+    async (disabledProps) => {
+      const onClick = jest.fn();
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.PrimaryAction
+              label="Save"
+              onClick={onClick}
+              {...disabledProps}
+              tooltip="Fix the errors to save"
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      const button = screen.getByRole('button', { name: 'Save' });
+      expect(button).toHaveAttribute('aria-disabled', 'true');
+      expect(button).not.toBeDisabled();
+
+      // EUI gives an aria-disabled button `pointer-events: none`, so the pointer lands on the
+      // tooltip anchor around it, as it does in a browser.
+      await userEvent.hover(button.parentElement!);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Fix the errors to save');
+
+      await userEvent.setup({ pointerEventsCheck: 0 }).click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    }
+  );
 
   it('renders the menu trigger to the right of the secondary action', () => {
     renderTemplate(
