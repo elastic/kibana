@@ -357,6 +357,8 @@ describe('client', () => {
       });
 
       it('throws when custom statuses are not enabled', async () => {
+        clientArgs.config = { ...ConfigSchema.validate({}), customStatuses: { enabled: false } };
+
         await expect(
           update(
             'test-id',
@@ -442,6 +444,7 @@ describe('client', () => {
             },
             observableTypes: [],
             statuses: [],
+            pauseReasons: [],
           },
         });
 
@@ -504,6 +507,7 @@ describe('client', () => {
             ],
             observableTypes: [],
             statuses: [],
+            pauseReasons: [],
             extractObservables: true,
           },
           version: 'test-version',
@@ -518,6 +522,7 @@ describe('client', () => {
           attributes: {
             observableTypes: [],
             statuses: [],
+            pauseReasons: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1115,6 +1120,7 @@ describe('client', () => {
               owner: 'cases',
               observableTypes: [],
               statuses: [],
+              pauseReasons: [],
               extractObservables: true,
             },
             id: 'test-id',
@@ -1186,6 +1192,7 @@ describe('client', () => {
                 ],
                 observableTypes: [],
                 statuses: [],
+                pauseReasons: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1339,6 +1346,7 @@ describe('client', () => {
             },
             observableTypes: [],
             statuses: [],
+            pauseReasons: [],
           },
         };
 
@@ -1555,6 +1563,8 @@ describe('client', () => {
     });
 
     it('throws when statuses are set while custom statuses are not enabled', async () => {
+      clientArgs.config = { ...ConfigSchema.validate({}), customStatuses: { enabled: false } };
+
       await expect(
         create({ ...baseRequest, statuses: getBuiltInStatuses() }, clientArgs, casesClientInternal)
       ).rejects.toThrow(
@@ -1695,6 +1705,7 @@ describe('client', () => {
                   updated_by: null,
                   observableTypes: [],
                   statuses: [],
+                  pauseReasons: [],
                   extractObservables: true,
                 },
                 score: 0,
@@ -1723,6 +1734,7 @@ describe('client', () => {
               updated_by: null,
               observableTypes: [],
               statuses: [],
+              pauseReasons: [],
               extractObservables: true,
             },
           });
@@ -1964,6 +1976,7 @@ describe('client', () => {
           templates: [],
           observableTypes: [],
           statuses: [],
+          pauseReasons: [],
           extractObservables: true,
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },

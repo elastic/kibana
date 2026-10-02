@@ -44,14 +44,33 @@ export function registerCasesWorkflowEventBridge(
     void forward(CaseUpdatedTriggerId, event.payload, event.request);
 
     const { updatedFields, ...reducedPayload } = event.payload;
-    if (updatedFields && previousCase && updatedCase && updatedFields.includes('status')) {
+    if (
+      updatedFields &&
+      previousCase &&
+      updatedCase &&
+      (updatedFields.includes('status') || updatedFields.includes('status_key'))
+    ) {
       const status = updatedCase.status;
       const previousStatus = previousCase.attributes.status;
+      const statusKey = updatedCase.status_key ?? undefined;
+      const previousStatusKey = previousCase.attributes.status_key ?? undefined;
 
-      if (status && previousStatus && status !== previousStatus) {
+      // A move between two statuses of the same category is still a status change to a workflow.
+      if (
+        status &&
+        previousStatus &&
+        (status !== previousStatus || statusKey !== previousStatusKey)
+      ) {
         void forward(
           CaseStatusUpdatedTriggerId,
-          { ...reducedPayload, status, previousStatus },
+          {
+            ...reducedPayload,
+            status,
+            previousStatus,
+            statusKey,
+            previousStatusKey,
+            paused: updatedCase.paused_at != null,
+          },
           event.request
         );
       }

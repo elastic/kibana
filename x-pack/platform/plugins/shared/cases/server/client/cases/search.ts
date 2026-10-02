@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { getEffectiveStatuses } from '../../../common/utils/statuses';
+import { getEffectiveStatuses, getPausingStatusKeys } from '../../../common/utils/statuses';
 import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
 import { CasesSearchRequestRt, CasesSearchResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
@@ -194,7 +194,10 @@ export const search = async (
       // extended field filters, attachment matches) so the metrics shown next to the list
       // always reflect it; only the status clause is stripped (statusStatsOptions) so all
       // three status counts stay populated.
-      statsOptions: { filter: statusStatsOptions.filter },
+      statsOptions: {
+        filter: statusStatsOptions.filter,
+        pausingStatusKeys: getPausingStatusKeys(statuses),
+      },
     });
 
     const statusStats = cases.searchStats?.statusStats ?? {
@@ -214,6 +217,7 @@ export const search = async (
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
       mttr: cases.searchStats?.mttr ?? null,
+      countPausedCases: cases.searchStats?.paused,
     });
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);

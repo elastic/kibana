@@ -55,6 +55,7 @@ import {
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
+  validatePauseReasons,
   validateStatusesConfiguration,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
@@ -338,6 +339,13 @@ export async function update(
       customStatusesEnabled: clientArgs.config.customStatuses.enabled,
     });
 
+    validatePauseReasons({
+      requestPauseReasons: request.pauseReasons,
+      pauseReasons: request.pauseReasons ?? configuration.attributes.pauseReasons,
+      statuses: request.statuses ?? configuration.attributes.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
     const updatedTemplates = transformTemplateCustomFields({
       templates,
       customFields: request.customFields,
@@ -492,6 +500,13 @@ export async function create(
       customStatusesEnabled: clientArgs.config.customStatuses.enabled,
     });
 
+    validatePauseReasons({
+      requestPauseReasons: validatedConfigurationRequest.pauseReasons,
+      pauseReasons: validatedConfigurationRequest.pauseReasons ?? [],
+      statuses: validatedConfigurationRequest.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
     let error = null;
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -581,6 +596,7 @@ export async function create(
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
         templates: validatedConfigurationRequest.templates ?? [],
+        pauseReasons: validatedConfigurationRequest.pauseReasons ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

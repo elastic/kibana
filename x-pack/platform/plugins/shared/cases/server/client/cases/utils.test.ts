@@ -34,6 +34,7 @@ import {
   fillMissingCustomFields,
   normalizeCreateCaseRequest,
   getConfiguredStatuses,
+  getPauseFieldsForUpdate,
   resolveStatusForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
@@ -1308,6 +1309,168 @@ describe('utils', () => {
     });
   });
 
+  describe('getPauseFieldsForUpdate', () => {
+    const onHold = {
+      key: 'on_hold',
+      label: 'On hold',
+      category: CaseStatuses['in-progress'],
+      order: 3,
+      isDefault: false,
+      disabled: false,
+      pausesTimeTracking: true,
+    };
+    const triage = { ...onHold, key: 'triage', label: 'Triage', pausesTimeTracking: false };
+    const statuses = [...getBuiltInStatuses(), onHold, triage];
+    const pauseReasons = ['Awaiting customer', 'Awaiting vendor'];
+    const now = '2024-01-01T00:10:00.000Z';
+    const activeCase = {
+      status: CaseStatuses['in-progress'],
+      status_key: 'triage' as string | undefined,
+      paused_at: null as string | null,
+      time_paused: 0,
+      pause_reason: null as string | null,
+    };
+    const pausedCase = {
+      status: CaseStatuses['in-progress'],
+      status_key: 'on_hold',
+      paused_at: '2024-01-01T00:00:00.000Z',
+      time_paused: 30,
+      pause_reason: 'Awaiting customer',
+    };
+    const getFields = (args: {
+      originalCase?: typeof activeCase;
+      targetStatusKey?: string;
+      targetCategory?: CaseStatuses;
+      pauseReason?: string;
+      enabled?: boolean;
+    }) =>
+      getPauseFieldsForUpdate({
+        originalCase: args.originalCase ?? activeCase,
+        targetStatusKey: args.targetStatusKey,
+        targetCategory: args.targetCategory,
+        pauseReason: args.pauseReason,
+        statuses,
+        pauseReasons,
+        customStatusesEnabled: args.enabled ?? true,
+        stateTransitionTimestamp: now,
+      });
+
+    it('starts a pause with the reason and remembers the status to resume to', () => {
+      expect(getFields({ targetStatusKey: 'on_hold', pauseReason: 'Awaiting customer' })).toEqual({
+        paused_at: now,
+        pause_reason: 'Awaiting customer',
+        resume_to_status_key: 'triage',
+      });
+    });
+
+    it('resumes to the category default when the case has no status key yet', () => {
+      expect(
+        getFields({
+          originalCase: { ...activeCase, status_key: undefined },
+          targetStatusKey: 'on_hold',
+          pauseReason: 'Awaiting customer',
+        })
+      ).toEqual(expect.objectContaining({ resume_to_status_key: 'in-progress' }));
+    });
+
+    it('requires a reason to start a pause', () => {
+      expect(() => getFields({ targetStatusKey: 'on_hold' })).toThrow(
+        'A pause reason is required when moving a case to "On hold"'
+      );
+    });
+
+    it('rejects a reason that is not configured', () => {
+      expect(() => getFields({ targetStatusKey: 'on_hold', pauseReason: 'Lunch' })).toThrow(
+        'Unknown pause reason: Lunch'
+      );
+    });
+
+    it('rejects a reason when the target status does not pause time tracking', () => {
+      expect(() =>
+        getFields({ targetStatusKey: 'triage', pauseReason: 'Awaiting customer' })
+      ).toThrow('The status "Triage" does not pause time tracking');
+    });
+
+    it('rejects a reason without a status change when the case is not paused', () => {
+      expect(() => getFields({ pauseReason: 'Awaiting customer' })).toThrow(
+        'A pause reason can only be set when moving a case to a status that pauses time tracking'
+      );
+    });
+
+    it('replaces the reason of a paused case without touching the pause', () => {
+      expect(getFields({ originalCase: pausedCase, pauseReason: 'Awaiting vendor' })).toEqual({
+        pause_reason: 'Awaiting vendor',
+      });
+      expect(
+        getFields({
+          originalCase: pausedCase,
+          targetStatusKey: 'on_hold',
+          pauseReason: 'Awaiting vendor',
+        })
+      ).toEqual({ pause_reason: 'Awaiting vendor' });
+    });
+
+    it('keeps the pause running when moving between pausing statuses without a reason', () => {
+      expect(getFields({ originalCase: pausedCase, targetStatusKey: 'on_hold' })).toBeUndefined();
+    });
+
+    it('adds the paused interval to time_paused and clears the pause on resume', () => {
+      expect(
+        getFields({
+          originalCase: pausedCase,
+          targetStatusKey: 'triage',
+          targetCategory: CaseStatuses['in-progress'],
+        })
+      ).toEqual({
+        paused_at: null,
+        pause_reason: null,
+        resume_to_status_key: null,
+        time_paused: 630,
+      });
+    });
+
+    it('adds the paused interval when closing from a pausing status', () => {
+      expect(
+        getFields({
+          originalCase: pausedCase,
+          targetStatusKey: 'closed',
+          targetCategory: CaseStatuses.closed,
+        })
+      ).toEqual(expect.objectContaining({ paused_at: null, time_paused: 630 }));
+    });
+
+    it('resets time_paused when a closed case is reopened', () => {
+      expect(
+        getFields({
+          originalCase: {
+            ...activeCase,
+            status: CaseStatuses.closed,
+            status_key: 'closed',
+            time_paused: 600,
+          },
+          targetStatusKey: 'open',
+          targetCategory: CaseStatuses.open,
+        })
+      ).toEqual(expect.objectContaining({ time_paused: 0 }));
+    });
+
+    it('returns undefined for a status change between two statuses that do not pause', () => {
+      expect(
+        getFields({ targetStatusKey: 'open', targetCategory: CaseStatuses.open })
+      ).toBeUndefined();
+    });
+
+    it('ignores the change when custom statuses are disabled', () => {
+      expect(getFields({ targetStatusKey: 'on_hold', enabled: false })).toBeUndefined();
+    });
+
+    it('rejects a reason when custom statuses are disabled', () => {
+      expect(() =>
+        getFields({ targetStatusKey: 'on_hold', pauseReason: 'Awaiting customer', enabled: false })
+      ).toThrow('Custom statuses are not enabled');
+    });
+  });
+
   describe('getClosedInfoForUpdate', () => {
     const date = '2021-02-03T17:41:26.108Z';
     const user = { full_name: 'Elastic', username: 'elastic', email: 'elastic@elastic.co' };
@@ -1608,6 +1771,56 @@ describe('utils', () => {
       });
     });
 
+    describe('paused time', () => {
+      const openedAt = '2021-11-23T19:00:00Z';
+      const startedAt = '2021-11-23T19:01:00Z';
+      const closedAt = '2021-11-23T19:05:00Z';
+
+      it('leaves paused time out of the time to investigate and resolve, not the time to acknowledge', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: openedAt,
+            inProgressAt: startedAt,
+            stateTransitionTimestamp: closedAt,
+            timePaused: 100,
+          })
+        ).toEqual({
+          time_to_acknowledge: 60,
+          time_to_investigate: 140,
+          time_to_resolve: 200,
+        });
+      });
+
+      it('never reports a negative metric when more time was paused than elapsed', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: openedAt,
+            inProgressAt: startedAt,
+            stateTransitionTimestamp: closedAt,
+            timePaused: 1000,
+          })
+        ).toEqual({
+          time_to_acknowledge: 60,
+          time_to_investigate: 0,
+          time_to_resolve: 0,
+        });
+      });
+
+      it.each([[null], [-5]])('treats a paused time of %s as zero', (timePaused) => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: openedAt,
+            inProgressAt: startedAt,
+            stateTransitionTimestamp: closedAt,
+            timePaused,
+          })
+        ).toEqual({ time_to_acknowledge: 60, time_to_investigate: 240, time_to_resolve: 300 });
+      });
+    });
+
     describe('changing status to open', () => {
       it('should return the correct metrics', () => {
         expect(
@@ -1687,6 +1900,15 @@ describe('utils', () => {
       expect(getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt })).toEqual({
         duration: 120,
       });
+    });
+
+    it('leaves paused time out of the duration, never going below zero', () => {
+      expect(
+        getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt, timePaused: 45 })
+      ).toEqual({ duration: 75 });
+      expect(
+        getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt, timePaused: 500 })
+      ).toEqual({ duration: 0 });
     });
 
     it.each([[CaseStatuses.open], [CaseStatuses['in-progress']]])(

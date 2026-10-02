@@ -10,6 +10,7 @@ import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { getBuiltInStatuses } from '../../../common/utils/statuses';
 import {
   validateCustomFieldTypesInRequest,
+  validatePauseReasons,
   validateStatusesConfiguration,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
@@ -555,6 +556,109 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"The category of the status \\"on_hold\\" cannot be changed"`
       );
+    });
+
+    describe('pausing statuses', () => {
+      it('allows a pausing status in the open and in-progress categories', () => {
+        expect(() =>
+          validate([
+            ...builtIn,
+            { ...onHold, pausesTimeTracking: true },
+            {
+              ...onHold,
+              key: 'awaiting_triage',
+              label: 'Awaiting triage',
+              category: CaseStatuses.open,
+              pausesTimeTracking: true,
+            },
+          ])
+        ).not.toThrow();
+      });
+
+      it('throws when a closed status pauses time tracking', () => {
+        expect(() =>
+          validate([
+            ...builtIn,
+            { ...onHold, key: 'parked', category: CaseStatuses.closed, pausesTimeTracking: true },
+          ])
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"The status \\"parked\\" cannot pause time tracking: only statuses in the \\"open\\" and \\"in-progress\\" categories can"`
+        );
+      });
+
+      it('throws when the default status pauses time tracking', () => {
+        expect(() =>
+          validate(
+            builtIn.map((status) =>
+              status.key === 'in-progress' ? { ...status, pausesTimeTracking: true } : status
+            )
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"The default status of the category \\"in-progress\\" cannot pause time tracking"`
+        );
+      });
+    });
+  });
+
+  describe('validatePauseReasons', () => {
+    const pausing = {
+      key: 'on_hold',
+      label: 'On hold',
+      category: CaseStatuses['in-progress'],
+      order: 3,
+      isDefault: false,
+      disabled: false,
+      pausesTimeTracking: true,
+    };
+    const statuses = [...getBuiltInStatuses(), pausing];
+
+    it('does not throw when the reasons are not part of the persisted values', () => {
+      expect(() => validatePauseReasons({ customStatusesEnabled: true })).not.toThrow();
+      expect(() => validatePauseReasons({ customStatusesEnabled: false })).not.toThrow();
+    });
+
+    it('throws when reasons are sent while custom statuses are disabled', () => {
+      expect(() =>
+        validatePauseReasons({ requestPauseReasons: ['Waiting'], customStatusesEnabled: false })
+      ).toThrowErrorMatchingInlineSnapshot(`"Custom statuses are not enabled"`);
+    });
+
+    it('throws on duplicated reasons regardless of case and spacing', () => {
+      expect(() =>
+        validatePauseReasons({
+          pauseReasons: ['Awaiting customer', ' awaiting CUSTOMER '],
+          statuses,
+          customStatusesEnabled: true,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid duplicated pause reasons: awaiting customer"`);
+    });
+
+    it('throws when the list is empty while an enabled status pauses time tracking', () => {
+      expect(() =>
+        validatePauseReasons({ pauseReasons: [], statuses, customStatusesEnabled: true })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Add at least one pause reason when a status pauses time tracking"`
+      );
+    });
+
+    it('allows an empty list when the only pausing status is disabled', () => {
+      expect(() =>
+        validatePauseReasons({
+          pauseReasons: [],
+          statuses: [...getBuiltInStatuses(), { ...pausing, disabled: true }],
+          customStatusesEnabled: true,
+        })
+      ).not.toThrow();
+    });
+
+    it('allows an empty list when no status pauses time tracking', () => {
+      expect(() =>
+        validatePauseReasons({
+          pauseReasons: [],
+          statuses: getBuiltInStatuses(),
+          customStatusesEnabled: true,
+        })
+      ).not.toThrow();
     });
   });
 });

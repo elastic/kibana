@@ -9,7 +9,7 @@ import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { getEffectiveStatuses } from '../../../common/utils/statuses';
+import { getEffectiveStatuses, getPausingStatusKeys } from '../../../common/utils/statuses';
 import type {
   CasesFindRequestWithCustomFields,
   CasesFindResponse,
@@ -126,8 +126,9 @@ export const find = async (
     });
 
     const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
+    const pausingStatusKeys = getPausingStatusKeys(statuses);
 
-    const [cases, statusStats] = await Promise.all([
+    const [cases, statusStats, countPausedCases] = await Promise.all([
       caseService.findCasesGroupedByID({
         caseOptions: {
           ...paramArgs,
@@ -139,6 +140,18 @@ export const find = async (
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,
       }),
+      pausingStatusKeys.length > 0
+        ? caseService.countCases({
+            searchOptions: constructQueryOptions({
+              ...options,
+              status: undefined,
+              status_key: pausingStatusKeys,
+              customFieldsConfiguration,
+              statuses,
+              authorizationFilter,
+            }),
+          })
+        : undefined,
     ]);
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
@@ -151,6 +164,7 @@ export const find = async (
       countOpenCases: statusStats.open,
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
+      countPausedCases,
     });
 
     return decodeOrThrow(CasesFindResponseRt)(res);
