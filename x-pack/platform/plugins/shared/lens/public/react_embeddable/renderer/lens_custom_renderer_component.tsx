@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useSearchApi } from '@kbn/presentation-publishing';
+import { apiHasDisableTriggers, useSearchApi } from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
 import {
   LENS_EMBEDDABLE_TYPE,
@@ -186,7 +186,9 @@ export function LensRenderer({
           disabledActionIds$,
           setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
           viewMode$,
-          disableTriggers$,
+          disableTriggers$: apiHasDisableTriggers(parentApi)
+            ? parentApi.disableTriggers$ // parent API takes precedence for this value
+            : disableTriggers$,
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)
@@ -196,8 +198,6 @@ export function LensRenderer({
           isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
-          // valeus provided by the parent take precedence, if provided
-          ...(typeof parentApi === 'object' ? parentApi : {}),
         } satisfies LensParentApi)
       }
       onApiAvailable={handleApiAvailable}
