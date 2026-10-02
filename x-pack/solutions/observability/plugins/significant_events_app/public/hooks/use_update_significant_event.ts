@@ -17,8 +17,6 @@ interface UpdateSignificantEventArgs {
 }
 
 interface UpdateSignificantEventResult {
-  // Absent when the event was not found for the given eventId.
-  event_uuid?: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
@@ -28,6 +26,14 @@ const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.updateEvent.successToastTitle',
   {
     defaultMessage: 'Significant event updated',
+  }
+);
+
+const UPDATE_NO_CHANGE_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.noChangeToastTitle',
+  {
+    defaultMessage:
+      'No change made: the significant event already has that status or no longer exists',
   }
 );
 
@@ -68,8 +74,12 @@ export const useUpdateSignificantEvent = ({
           signal: null,
         }
       ),
-    onSuccess: () => {
-      toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
+    onSuccess: ({ updated }) => {
+      if (updated === 0) {
+        toasts.addInfo({ title: UPDATE_NO_CHANGE_TOAST_TITLE });
+      } else {
+        toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
+      }
       onUpdateSuccess?.();
     },
     onError: (error) => {
