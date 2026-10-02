@@ -25,13 +25,14 @@ import { getEbtOwner } from './get_ebt_owner';
 export const CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN = 'cases.cases' as const;
 
 /**
- * Maps a Cases run origin to the `origin` and `itemCount` reported by `RunWorkflowPanel`.
- * Attachment origins report the attachment type (such as `security.alert`) as the origin.
+ * Maps a Cases run origin to the `origin`, `itemCount`, and `attachmentType` reported by
+ * `RunWorkflowPanel`. The origin is always a `cases.` surface; attachment origins also report the
+ * attachment type (such as `security.alert`) separately.
  */
 export const getCaseWorkflowRunTelemetry = (
   origin: CaseWorkflowRunOrigin | undefined,
   caseCount: number
-): Pick<RunWorkflowTelemetry, 'origin' | 'itemCount'> => {
+): Pick<RunWorkflowTelemetry, 'origin' | 'itemCount' | 'attachmentType'> => {
   if (origin === undefined) {
     return { origin: CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN, itemCount: caseCount };
   }
@@ -43,9 +44,13 @@ export const getCaseWorkflowRunTelemetry = (
     case OBSERVABLES_WORKFLOW_ORIGIN_TYPE:
       return { origin: origin.type, itemCount: origin.observableIds.length };
     case ATTACHMENT_WORKFLOW_ORIGIN_TYPE:
-      return { origin: origin.attachmentType, itemCount: 1 };
+      return { origin: origin.type, attachmentType: origin.attachmentType, itemCount: 1 };
     case ATTACHMENTS_WORKFLOW_ORIGIN_TYPE:
-      return { origin: origin.attachmentType, itemCount: origin.attachmentIds.length };
+      return {
+        origin: origin.type,
+        attachmentType: origin.attachmentType,
+        itemCount: origin.attachmentIds.length,
+      };
   }
 };
 

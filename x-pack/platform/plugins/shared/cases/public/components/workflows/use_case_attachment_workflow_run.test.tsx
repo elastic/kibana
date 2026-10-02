@@ -104,7 +104,12 @@ describe('useCaseAttachmentWorkflowRun', () => {
     expect(result.current).toEqual({
       runWorkflow: expect.any(Function),
       showSuccessToast: false,
-      telemetry: { origin: 'security.alert', itemCount: 1, owner: 'securitySolution' },
+      telemetry: {
+        origin: 'cases.attachment',
+        attachmentType: 'security.alert',
+        itemCount: 1,
+        owner: 'securitySolution',
+      },
     });
   });
 
@@ -119,7 +124,8 @@ describe('useCaseAttachmentWorkflowRun', () => {
     );
 
     expect(result.current.telemetry).toEqual({
-      origin: 'security.event',
+      origin: 'cases.attachments',
+      attachmentType: 'security.event',
       itemCount: 2,
       owner: 'securitySolution',
     });
