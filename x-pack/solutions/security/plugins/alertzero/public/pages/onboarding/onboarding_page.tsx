@@ -155,8 +155,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                 ),
               }}
             />
-          </p>
-          <p>
+            <br />
             <EuiLink
               href={ONBOARDING_READ_MORE_URL_PLACEHOLDER}
               target="_blank"
