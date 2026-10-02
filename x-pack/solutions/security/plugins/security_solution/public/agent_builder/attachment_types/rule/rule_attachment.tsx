@@ -14,6 +14,7 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
   UserPrivilegesContext,
   initialUserPrivilegesState,
@@ -36,15 +37,22 @@ export const registerRuleAttachment = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.rule,
-    createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings })
+    createRuleAttachmentDefinition({
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    })
   );
 };
 
@@ -52,11 +60,19 @@ export const createRuleAttachmentDefinition = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<RuleAttachment> => {
+  const LazyRulePill = React.lazy(() =>
+    import(
+      /* webpackChunkName: "security_conversation_details_rule_pill" */
+      '../conversation_details/rule_pill'
+    ).then((m) => ({ default: m.RulePill }))
+  );
   // `RuleInlineContent` only reads `rulesPrivileges.rules.read`, so derive privileges once from the
   // already-loaded capabilities instead of mounting the fetching `UserPrivilegesProvider` per card
   // (which fired duplicate privilege requests for every rendered attachment).
@@ -100,5 +116,14 @@ export const createRuleAttachmentDefinition = ({
         return [];
       }
     },
+    renderConversationDetailsContent: ({ attachment }) => (
+      <React.Suspense fallback={null}>
+        <LazyRulePill
+          attachment={attachment}
+          application={application}
+          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+        />
+      </React.Suspense>
+    ),
   };
 };

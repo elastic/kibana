@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Investigation } from '../../types';
 import { OverviewTab } from './details_flyout_tab_contents';
 
@@ -32,22 +33,33 @@ const attachment: VersionedAttachment = {
   type: 'security.alert',
   versions: [{ version: 1, data: {}, created_at: '2026-09-01T10:00:00.000Z', content_hash: 'a' }],
   current_version: 1,
+  active: true,
 };
+
+const makeService = (
+  renderContent?: (props: { attachment: unknown }) => React.ReactNode
+): AttachmentServiceStartContract =>
+  ({
+    getAttachmentUiDefinition: () =>
+      renderContent ? { renderConversationDetailsContent: renderContent } : undefined,
+    addAttachmentType: jest.fn(),
+    getClient: jest.fn(),
+  } as unknown as AttachmentServiceStartContract);
 
 const renderTab = ({
   attachments,
-  renderAttachmentsOverview,
+  attachmentsService,
   investigationOverrides,
 }: {
   attachments?: VersionedAttachment[];
-  renderAttachmentsOverview?: (a: VersionedAttachment[]) => React.ReactNode;
+  attachmentsService?: AttachmentServiceStartContract;
   investigationOverrides?: Partial<Investigation>;
 } = {}) =>
   render(
     <OverviewTab
       investigation={{ ...investigation, ...investigationOverrides }}
       attachments={attachments}
-      renderAttachmentsOverview={renderAttachmentsOverview}
+      attachmentsService={attachmentsService}
     />
   );
 
@@ -61,31 +73,37 @@ describe('OverviewTab', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('does not render attachment summary when no renderAttachmentsOverview is provided', () => {
+  it('does not render attachments section when no attachmentsService is provided', () => {
     renderTab({ attachments: [attachment] });
 
-    expect(screen.queryByText('Attachment summary')).not.toBeInTheDocument();
+    expect(screen.queryByText('Attachments')).not.toBeInTheDocument();
   });
 
-  it('calls renderAttachmentsOverview when attachments are present', () => {
-    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
-    renderTab({ attachments: [attachment], renderAttachmentsOverview });
+  it('calls renderConversationDetailsContent for each visible attachment', () => {
+    const renderContent = jest.fn().mockReturnValue(<span>12 alerts</span>);
+    renderTab({ attachments: [attachment], attachmentsService: makeService(renderContent) });
 
-    expect(renderAttachmentsOverview).toHaveBeenCalledWith([attachment]);
+    expect(renderContent).toHaveBeenCalledTimes(1);
     expect(screen.getByText('12 alerts')).toBeInTheDocument();
   });
 
-  it('does not call renderAttachmentsOverview when attachments is empty', () => {
-    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
-    renderTab({ attachments: [], renderAttachmentsOverview });
+  it('does not render attachment section when attachments is empty', () => {
+    const renderContent = jest.fn().mockReturnValue(<span>12 alerts</span>);
+    renderTab({ attachments: [], attachmentsService: makeService(renderContent) });
 
-    expect(renderAttachmentsOverview).not.toHaveBeenCalled();
+    expect(renderContent).not.toHaveBeenCalled();
   });
 
-  it('does not call renderAttachmentsOverview when attachments is undefined', () => {
-    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
-    renderTab({ attachments: undefined, renderAttachmentsOverview });
+  it('does not render attachment section when attachments is undefined', () => {
+    const renderContent = jest.fn().mockReturnValue(<span>12 alerts</span>);
+    renderTab({ attachments: undefined, attachmentsService: makeService(renderContent) });
 
-    expect(renderAttachmentsOverview).not.toHaveBeenCalled();
+    expect(renderContent).not.toHaveBeenCalled();
+  });
+
+  it('skips attachments whose type has no renderConversationDetailsContent', () => {
+    renderTab({ attachments: [attachment], attachmentsService: makeService(undefined) });
+
+    expect(screen.queryByText('Attachments')).not.toBeInTheDocument();
   });
 });

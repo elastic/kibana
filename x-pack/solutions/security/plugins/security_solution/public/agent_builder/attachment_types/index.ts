@@ -15,6 +15,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
 import type { StartServices } from '../../types';
@@ -25,6 +26,10 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { createImpactAttachmentDefinition } from './impact';
+import {
+  renderAlertConversationDetails,
+  renderAlertsConversationDetails,
+} from './conversation_details/alert_renderers';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -63,8 +68,8 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 /**
  * Registers the baseline attachment UI definitions:
- *   - `security.alert` — label and icon.
- *   - `security.alerts` — label and icon. A batch names a set of alerts.
+ *   - `security.alert` — label, icon, and conversation-details pill.
+ *   - `security.alerts` — label, icon, and conversation-details pill. A batch names a set of alerts.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
@@ -72,13 +77,21 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  */
 export const registerAttachmentUiDefinitions = ({
   attachments,
+  application,
+  getSpaceId,
+  search,
   resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  getSpaceId: () => Promise<string>;
+  search: ISearchGeneric;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
+    renderConversationDetailsContent: ({ attachment }) =>
+      renderAlertConversationDetails({ attachment, resolveSecurityCanvasContext }),
   });
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
@@ -94,6 +107,14 @@ export const registerAttachmentUiDefinitions = ({
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
+      renderConversationDetailsContent: ({ attachment }) =>
+        renderAlertsConversationDetails({
+          attachment,
+          application,
+          getSpaceId,
+          search,
+          resolveSecurityCanvasContext,
+        }),
     }
   );
 };
@@ -223,17 +244,25 @@ export const registerRuleAttachment = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   void import(
     /* webpackChunkName: "security_rule_attachment" */
     './rule'
   ).then(({ registerRuleAttachment: register }) => {
-    register({ attachments, application, aiRuleCreation, uiSettings });
+    register({
+      attachments,
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    });
   });
 };
 
@@ -457,14 +486,20 @@ export const registerRulePreviewAttachment = ({
  */
 export const registerAttackDiscoveryAttachment = ({
   attachments,
+  getSpaceId,
+  search,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  getSpaceId: () => Promise<string>;
+  search: ISearchGeneric;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   void import(
     /* webpackChunkName: "security_attack_discovery_attachment" */
     './attack_discovery'
   ).then(({ registerAttackDiscoveryAttachment: register }) => {
-    register({ attachments });
+    register({ attachments, getSpaceId, search, resolveSecurityCanvasContext });
   });
 };
 

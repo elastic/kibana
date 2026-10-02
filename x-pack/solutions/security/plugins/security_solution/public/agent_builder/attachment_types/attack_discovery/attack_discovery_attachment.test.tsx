@@ -8,6 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
+import type { ISearchGeneric } from '@kbn/search-types';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -44,9 +46,15 @@ const makeAttachment = (
 const renderInline = (data: AttackDiscoveryAttachment['data']) =>
   render(<AttackDiscoveryInlineContent attachment={makeAttachment(data)} isSidebar={false} />);
 
+const makeDefinitionProps = () => ({
+  getSpaceId: jest.fn().mockResolvedValue('default'),
+  search: jest.fn() as unknown as ISearchGeneric,
+  resolveSecurityCanvasContext: jest.fn() as unknown as () => Promise<SecurityCanvasEmbeddedBundle>,
+});
+
 describe('createAttackDiscoveryAttachmentDefinition', () => {
   it('labels the attachment with the discovery title', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition(makeDefinitionProps());
 
     expect(definition.getLabel(makeAttachment({ title: 'Lateral movement' }))).toBe(
       'Lateral movement'
@@ -54,7 +62,7 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
   });
 
   it('labels the attachment with the de-anonymized title', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition(makeDefinitionProps());
 
     expect(
       definition.getLabel(
@@ -67,25 +75,31 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
   });
 
   it('falls back to a default label when the title is missing', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition(makeDefinitionProps());
 
     expect(definition.getLabel(makeAttachment({}))).toBe('Attack Discovery');
   });
 
   it('uses the sparkles icon', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition(makeDefinitionProps());
 
     expect(definition.getIcon?.()).toBe('sparkles');
   });
 
   it('renders inline content through AttackDiscoveryInlineContent', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition(makeDefinitionProps());
     const element = definition.renderInlineContent?.({
       attachment: makeAttachment({ details_markdown: 'd', summary_markdown: 's' }),
       isSidebar: false,
     }) as React.ReactElement;
 
     expect(element.type).toBe(AttackDiscoveryInlineContent);
+  });
+
+  it('provides renderConversationDetailsContent', () => {
+    const definition = createAttackDiscoveryAttachmentDefinition(makeDefinitionProps());
+
+    expect(definition.renderConversationDetailsContent).toBeDefined();
   });
 });
 
@@ -94,7 +108,7 @@ describe('registerAttackDiscoveryAttachment', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
-    registerAttackDiscoveryAttachment({ attachments });
+    registerAttackDiscoveryAttachment({ attachments, ...makeDefinitionProps() });
 
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.attackDiscovery,
@@ -102,6 +116,7 @@ describe('registerAttackDiscoveryAttachment', () => {
         getIcon: expect.any(Function),
         getLabel: expect.any(Function),
         renderInlineContent: expect.any(Function),
+        renderConversationDetailsContent: expect.any(Function),
       })
     );
   });

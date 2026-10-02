@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  AttachmentsOverviewSection,
-  type AttachmentsOverviewSectionProps,
-} from './attachments_overview_section';
+export { AttachmentsSection, type AttachmentsSectionProps } from './attachments_section';

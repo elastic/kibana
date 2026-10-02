@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
 
@@ -16,10 +18,16 @@ describe('registerAttachmentUiDefinitions', () => {
   } as unknown as AttachmentServiceStartContract;
 
   const resolveSecurityCanvasContext = jest.fn();
+  const application = {} as unknown as ApplicationStart;
+  const getSpaceId = jest.fn().mockResolvedValue('default');
+  const search = jest.fn() as unknown as ISearchGeneric;
 
   const register = () =>
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
+      application,
+      getSpaceId,
+      search,
       resolveSecurityCanvasContext,
     });
 
@@ -68,25 +76,25 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(entityCall).toBeUndefined();
   });
 
-  it('registers security.alert with label and icon only (no drilldown)', () => {
+  it('registers security.alert with label, icon, and conversation-details pill', () => {
     register();
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    expect(alertCall![1].renderConversationDetailsContent).toBeUndefined();
+    expect(alertCall![1].renderConversationDetailsContent).toBeDefined();
     expect(alertCall![1].getLabel).toBeDefined();
     expect(alertCall![1].getIcon).toBeDefined();
   });
 
-  it('registers security.alerts with label and icon only (no drilldown)', () => {
+  it('registers security.alerts with label, icon, and conversation-details pill', () => {
     register();
 
     const alertsCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
     );
     expect(alertsCall).toBeDefined();
-    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
+    expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
     expect(alertsCall![1].getLabel).toBeDefined();
     expect(alertsCall![1].getIcon).toBeDefined();
   });

@@ -365,13 +365,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         throw new Error('Security Solution setup contract is required to register attachments');
       }
 
+      const resolveSecurityCanvasContext = () =>
+        this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies);
+      const getSpaceId = () => plugins.spaces.getActiveSpace().then((s) => s.id);
+
       registerAttachmentUiDefinitions({
         attachments: plugins.agentBuilder.attachments,
-        resolveSecurityCanvasContext: () =>
-          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+        application: core.application,
+        getSpaceId,
+        search: plugins.data.search.search,
+        resolveSecurityCanvasContext,
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
+        getSpaceId,
+        search: plugins.data.search.search,
+        resolveSecurityCanvasContext,
       });
       registerAttackDiscoveryVerdictAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -387,6 +396,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           application: core.application,
           aiRuleCreation: this.services.aiRuleCreation,
           uiSettings: core.uiSettings,
+          resolveSecurityCanvasContext,
         });
       }
       registerEntityAnalyticsDashboardAttachment({
@@ -426,8 +436,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         experimentalFeatures: this.experimentalFeatures,
-        resolveSecurityCanvasContext: () =>
-          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+        resolveSecurityCanvasContext,
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
       });

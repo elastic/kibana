@@ -23,6 +23,5 @@
     "@kbn/user-profile-components",
     "@kbn/proposals-ui",
     "@kbn/ui-ai-components",
-    "@kbn/rison",
   ]
 }

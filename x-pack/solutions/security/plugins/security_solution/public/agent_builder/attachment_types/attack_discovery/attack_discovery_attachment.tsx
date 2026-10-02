@@ -18,6 +18,8 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import type { ISearchGeneric } from '@kbn/search-types';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -135,8 +137,23 @@ export const AttackDiscoveryInlineContent = ({
   );
 };
 
-export const createAttackDiscoveryAttachmentDefinition =
-  (): AttachmentUIDefinition<AttackDiscoveryAttachment> => ({
+export const createAttackDiscoveryAttachmentDefinition = ({
+  getSpaceId,
+  search,
+  resolveSecurityCanvasContext,
+}: {
+  getSpaceId: () => Promise<string>;
+  search: ISearchGeneric;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}): AttachmentUIDefinition<AttackDiscoveryAttachment> => {
+  const LazyAttackPill = React.lazy(() =>
+    import(
+      /* webpackChunkName: "security_conversation_details_attack_pill" */
+      '../conversation_details/attack_pill'
+    ).then((m) => ({ default: m.AttackPill }))
+  );
+
+  return {
     getIcon: () => 'sparkles',
     getLabel: (attachment) =>
       attachment.data?.title != null
@@ -147,15 +164,32 @@ export const createAttackDiscoveryAttachmentDefinition =
           })
         : DEFAULT_LABEL,
     renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
-  });
+    renderConversationDetailsContent: ({ attachment }) => (
+      <React.Suspense fallback={null}>
+        <LazyAttackPill
+          attachment={attachment}
+          getSpaceId={getSpaceId}
+          search={search}
+          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+        />
+      </React.Suspense>
+    ),
+  };
+};
 
 export const registerAttackDiscoveryAttachment = ({
   attachments,
+  getSpaceId,
+  search,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  getSpaceId: () => Promise<string>;
+  search: ISearchGeneric;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.attackDiscovery,
-    createAttackDiscoveryAttachmentDefinition()
+    createAttackDiscoveryAttachmentDefinition({ getSpaceId, search, resolveSecurityCanvasContext })
   );
 };
