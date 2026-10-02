@@ -91,7 +91,7 @@ A profile backed by a local config file (for example `--profile local`, reading
 ```
 
 Kibana connects to `url` over TLS and authenticates with the API key; without a port, `https`
-defaults to 443. `host` / `port` work instead of `url`. A sandbox that requires mTLS also needs
+defaults to 443. A sandbox that requires mTLS also needs
 `"ssl": { "certificate", "key", "certificateAuthorities" }` as PEM **file paths** (`certificate` and
 `key` together; inline PEM contents are ignored).
 

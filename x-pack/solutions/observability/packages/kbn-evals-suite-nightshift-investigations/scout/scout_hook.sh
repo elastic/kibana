@@ -2,10 +2,10 @@
 
 # Scout hook for the nightshift-investigations eval suite (`scoutHook` in evals.suites.json).
 #
-# Reads the evals config JSON on stdin and prints `{"env": {...}}`. The sandbox API key, address
-# (`url`, or `host`/`port`) and optional mTLS file paths (`ssl`) come from the config's `sandbox`
-# block, falling back to SANDBOX_* already exported in the shell (e.g. a self-hosted sandbox). The
-# shared sandbox needs only `apiKey` and `url`: it authenticates by API key over plain TLS.
+# Reads the evals config JSON on stdin and prints `{"env": {...}}`. The sandbox API key, `url` and
+# optional mTLS file paths (`ssl`) come from the config's `sandbox` block, falling back to SANDBOX_*
+# already exported in the shell (e.g. a self-hosted sandbox). The shared sandbox needs only `apiKey`
+# and `url`: it authenticates by API key over plain TLS.
 # SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout config set at
 # kibana.sandbox.yml, which reads the credentials from the environment. Without an API key it prints
 # `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
@@ -60,30 +60,15 @@ parse_url() {
   fi
 }
 
-# The profile's address, as `url` or `host`/`port`, takes precedence over any shell address.
+# The profile's `url` takes precedence over any shell address.
 profile_url="$(config_value '.sandbox.url')"
 if [[ -n "$profile_url" ]]; then
   parse_url "$profile_url"
-elif [[ -n "$(config_value '.sandbox.host')$(config_value '.sandbox.port')" ]]; then
-  host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
-  port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
 elif [[ -n "${SANDBOX_API_URL:-}" ]]; then
   parse_url "$SANDBOX_API_URL"
 else
   host="${SANDBOX_API_HOST:-}"
   port="${SANDBOX_API_PORT:-}"
-fi
-
-# A `host` that already carries `:port` (e.g. `sandbox-api.example.com:9090`) would otherwise reach
-# Kibana as `host:port:port`. An explicit `port` wins over the embedded one.
-if [[ "$host" == *:* ]]; then
-  embedded_port="${host##*:}"
-  host="${host%:*}"
-  port="${port:-$embedded_port}"
-fi
-if [[ -n "$port" && ! "$port" =~ ^[0-9]+$ ]]; then
-  echo "nightshift-investigations scout hook: sandbox port must be a number, got '$port'" >&2
-  exit 1
 fi
 
 # Optional mTLS PEM file paths for a self-hosted sandbox. Older evals configs hold PEM contents

@@ -91,45 +91,16 @@ describe('nightshift-investigations scout hook', () => {
     }
   });
 
-  it('still accepts host and port when there is no url', () => {
+  it('ignores profile host and port', () => {
     const { output } = runHook({
       sandbox: { apiKey: 'key', host: 'legacy.example.com', port: 9090 },
     });
-    expect(output.env).toMatchObject({
-      SANDBOX_API_HOST: 'legacy.example.com',
-      SANDBOX_API_PORT: '9090',
-    });
+    expect(output.env).not.toHaveProperty('SANDBOX_API_HOST');
+    expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
   });
 
-  it('splits a port embedded in host, with an explicit port taking precedence', () => {
-    const embedded = { apiKey: 'key', host: 'sandbox.example.com:9090' };
-    expect(runHook({ sandbox: embedded }).output.env).toMatchObject({
-      SANDBOX_API_HOST: 'sandbox.example.com',
-      SANDBOX_API_PORT: '9090',
-    });
-    expect(runHook({ sandbox: { ...embedded, port: 443 } }).output.env).toMatchObject({
-      SANDBOX_API_HOST: 'sandbox.example.com',
-      SANDBOX_API_PORT: '443',
-    });
-    expect(
-      runHook({}, { SANDBOX_API_KEY: 'key', SANDBOX_API_HOST: 'h.example.com:7000' }).output.env
-    ).toMatchObject({ SANDBOX_API_HOST: 'h.example.com', SANDBOX_API_PORT: '7000' });
-  });
-
-  it('rejects a non-numeric port', () => {
-    const { status, stderr } = runHook({
-      sandbox: { apiKey: 'key', host: 'sandbox.example.com', port: 'abc' },
-    });
-    expect(status).toBe(1);
-    expect(stderr).toContain("sandbox port must be a number, got 'abc'");
-  });
-
-  it("prefers the profile's address, in either form, over a shell SANDBOX_API_URL", () => {
+  it("prefers the profile's url over a shell SANDBOX_API_URL", () => {
     const shell = { SANDBOX_API_URL: 'https://localhost:9090' };
-    expect(
-      runHook({ sandbox: { apiKey: 'key', host: 'remote.example.com', port: 9443 } }, shell).output
-        .env
-    ).toMatchObject({ SANDBOX_API_HOST: 'remote.example.com', SANDBOX_API_PORT: '9443' });
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
       SANDBOX_API_HOST: 'sandbox.example.com',
       SANDBOX_API_PORT: '9443',
