@@ -235,9 +235,26 @@ range, and payload size. Check the parameter table in the API reference, the Ope
 - **Check limits on the whole payload in a `.refine()` too.** GitHub limits all `workflow_dispatch`
   inputs together to 65,535 characters, so a cap on each value is not enough; check the serialized
   record as well.
-- **Derive an encoded length from the vendor's raw limit.** When the vendor limits a file in bytes and
-  the input is Base64, declare the byte limit and compute the string bound from it
-  (`Math.ceil(maxBytes / 3) * 4`) rather than writing a round number.
+- **Check a Base64 file against the vendor's limit after decoding.** When the vendor limits a file in
+  bytes and the input is Base64, declare the byte limit and derive the string cap from it
+  (`Math.ceil(maxBytes / 3) * 4`) rather than writing a round number. That cap rounds up to a whole
+  4-character group, so it still admits up to two bytes over the limit: for `maxBytes = 1` it is 4, and
+  `//8=` decodes to 2 bytes. Keep it as a cheap first bound, then check the decoded size in a
+  `.refine()`. Test with files of exactly `maxBytes` and `maxBytes + 1` bytes
+  (`Buffer.alloc(n).toString('base64')`). `Buffer.byteLength(value, 'utf8')` measures the encoded text,
+  not the file, so it does not replace this check.
+
+  ```typescript
+  // https://docs.virustotal.com/reference/files-scan
+  const VIRUSTOTAL_MAX_FILE_BYTES = 32 * 1024 * 1024;
+
+  file: z
+    .string()
+    .max(Math.ceil(VIRUSTOTAL_MAX_FILE_BYTES / 3) * 4)
+    .refine((value) => Buffer.from(value, 'base64').byteLength <= VIRUSTOTAL_MAX_FILE_BYTES, {
+      message: `File must not exceed ${VIRUSTOTAL_MAX_FILE_BYTES} bytes once decoded`,
+    }),
+  ```
 - **Check a byte limit in bytes.** `.max()` counts characters. When the vendor states the limit in bytes,
   check `Buffer.byteLength(value, 'utf8')` in a `.refine()` (see "Measure a byte bound in bytes" below).
 - **Do not lower a large vendor limit to fit Kibana.** The actions plugin already rejects any
