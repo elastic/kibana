@@ -6,7 +6,7 @@ pageLoadAssetSize:
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
-  agentBuilderWorkflows: 1029
+  agentBuilderWorkflows: 1152
   agenticInvestigations: 15406
   aiAssistantManagementSelection: 355
   aiops: 586
@@ -197,7 +197,7 @@ pageLoadAssetSize:
   significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
-  spaces: 22966
+  spaces: 25351
   stackAlerts: 1985
   stackConnectors: 63548
   streams: 4563

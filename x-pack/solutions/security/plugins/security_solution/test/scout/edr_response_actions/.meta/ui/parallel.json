@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 53,
+        "column": 35
       }
     },
     {
