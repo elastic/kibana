@@ -1139,12 +1139,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available; added in 9.4.0
                   required:
                     - access_mode
                 avatar_color:
@@ -1201,14 +1202,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available; added in 9.6.0
                     tools:
                       items:
                         additionalProperties: false
@@ -1673,12 +1674,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available; added in 9.4.0
                   required:
                     - access_mode
                 avatar_color:
@@ -1735,14 +1737,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available; added in 9.6.0
                     tools:
                       items:
                         additionalProperties: false
@@ -1933,7 +1935,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/agents/{id}/access_control
-      x-state: Technical Preview; added in 9.5.0
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1994,7 +1996,7 @@ paths:
                         maxLength: 1024
                         minLength: 1
                         type: string
-                        x-state: Technical Preview; added in 9.6.0
+                        x-state: Generally available; added in 9.6.0
                       name:
                         description: Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.
                         maxLength: 1024
@@ -2094,7 +2096,7 @@ paths:
                 { "type": "user", "id": "u_bob_profile_uid", "role": "user" }
               ]
             }
-      x-state: Technical Preview; added in 9.5.0
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2647,7 +2649,7 @@ paths:
                 { "type": "text_note", "data": { "text": "A note on this conversation" } }
               ]
             }
-      x-state: Experimental; added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2821,7 +2823,7 @@ paths:
                 { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
               ]
             }
-      x-state: Technical Preview; added in 9.6.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3566,7 +3568,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview; added in 9.5.0
+                  x-state: Generally available; added in 9.5.0
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -4048,7 +4050,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview; added in 9.5.0
+                  x-state: Generally available; added in 9.5.0
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -71461,7 +71463,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the default. Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -71482,6 +71484,13 @@ paths:
                   logExtraction:
                     delay: null
                     frequency: null
+              updateHistorySnapshotExample:
+                description: Update the history snapshot interval and retention. Omit a field to leave it unchanged.
+                summary: Update history snapshot settings
+                value:
+                  historySnapshot:
+                    frequency: 12h
+                    retentionDays: 90
               updateLogExtractionExample:
                 description: Update the log extraction configuration with a new lookback period and frequency.
                 summary: Update log extraction settings
@@ -71494,6 +71503,18 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                historySnapshot:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    frequency:
+                      maxLength: 32
+                      pattern: '[smdh]$'
+                      type: string
+                    retentionDays:
+                      maximum: 3650
+                      minimum: 1
+                      type: integer
                 logExtraction:
                   additionalProperties: false
                   type: object
@@ -71558,8 +71579,6 @@ paths:
                       nullable: true
                       pattern: '[smdh]$'
                       type: string
-              required:
-                - logExtraction
       responses:
         '200':
           content:
@@ -71581,6 +71600,13 @@ paths:
                   value:
                     error: Bad Request
                     message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+                invalidHistorySnapshotFrequencyExample:
+                  description: The history snapshot interval must be at least 1 hour.
+                  summary: Invalid history snapshot interval
+                  value:
+                    error: Bad Request
+                    message: '[request body]: historySnapshot.frequency: must be a valid duration of at least 1 hour (e.g. 1h, 24h)'
                     statusCode: 400
           description: Bad request.
         '404':
@@ -71613,6 +71639,21 @@ paths:
                 "lookbackPeriod": "6h",
                 "frequency": "10m",
                 "fieldHistoryLength": 15
+              }
+            }
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"historySnapshot":{"frequency":"12h","retentionDays":90}}' \
+              "${KIBANA_URL}/api/security/entity_store"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store
+            {
+              "historySnapshot": {
+                "frequency": "12h",
+                "retentionDays": 90
               }
             }
       x-metaTags:
@@ -80212,12 +80253,10 @@ paths:
                   type: object
                   properties:
                     frequency:
-                      default: 24h
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     retentionDays:
-                      default: 60
                       maximum: 3650
                       minimum: 1
                       type: integer

@@ -18,6 +18,7 @@ import type {
   EuiFlyoutProps,
   EuiIconProps,
   EuiTabProps,
+  EuiTabsProps,
 } from '@elastic/eui';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
@@ -45,6 +46,9 @@ export type FlyoutTabProps = Omit<EuiTabProps, TabBarOwnedProps> &
     /** Tab label rendered inside `EuiTab`. */
     label: ReactNode;
   };
+
+/** Props forwarded to the `EuiTabs` bar that wraps the root `tabs`. */
+export type FlyoutTabBarProps = Pick<EuiTabsProps, 'aria-label' | 'data-test-subj'>;
 
 /** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
 export interface FlyoutBodyTabPanelProps {
@@ -180,6 +184,12 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   /** Button label. */
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
+  /**
+   * Tooltip shown on hover and focus, e.g. to explain why the action is disabled. An action with a
+   * tooltip defaults `hasAriaDisabled` to true, so the tooltip still opens while the action is
+   * disabled or loading.
+   */
+  tooltip?: ReactNode;
 }
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
@@ -290,6 +300,8 @@ export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps>
     children?: ReactNode;
     /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
     tabs?: FlyoutTabProps[];
+    /** Accessible name and test subject for the tab bar. */
+    tabBarProps?: FlyoutTabBarProps;
     /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
     defaultSelectedTabId?: string;
     /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */

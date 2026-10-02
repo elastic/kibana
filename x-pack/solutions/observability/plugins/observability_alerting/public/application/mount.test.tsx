@@ -13,7 +13,7 @@ const mockCreateAlertingV2HostApp: jest.Mock = jest.fn(
   (appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
-    episodes: { app: appId, pathPrefix: paths.episodes },
+    alerts: { app: appId, pathPrefix: paths.alerts },
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })
