@@ -36,7 +36,7 @@ test.describe(
           '@timestamp': new Date().toISOString(),
           rule: { id: RULE_ID, version: 1 },
           group_hash: 'scout-alerts-privileges-group',
-          episode: { id: 'scout-alerts-privileges-episode', status: 'active' },
+          alert: { id: 'scout-alerts-privileges-episode', status: 'active' },
         }),
       ]);
     });

@@ -15,7 +15,7 @@ import { AlertingV2EpisodesLocatorDefinition, createAlertingV2HostApp } from '..
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
@@ -165,7 +165,7 @@ describe('AlertTimelineSection', () => {
     const [params] = jest.mocked(episodesLocators.useUrl).mock.calls[0];
     const location = await AlertingV2EpisodesLocatorDefinition.getLocation({
       ...params,
-      host: TEST_HOST.episodes,
+      host: TEST_HOST.alerts,
     });
     expect(location.app).toBe('test-app');
     expect(location.path).toMatch(/^\/alerting\/inbox\?_a=/);

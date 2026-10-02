@@ -23,7 +23,7 @@ import { createAlertingV2HostApp } from '../../locators';
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });

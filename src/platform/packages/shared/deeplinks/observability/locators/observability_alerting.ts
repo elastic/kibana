@@ -9,9 +9,9 @@
 
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
@@ -19,7 +19,7 @@ import {
 export interface ObservabilityAlertingV2PagePaths {
   rules: string;
   ruleLibrary: string;
-  episodes: string;
+  alerts: string;
   actionPolicies: string;
   executionHistory: string;
 }
@@ -31,7 +31,7 @@ export const createObservabilityAlertingV2Host = <THost>(
   createHost(OBSERVABILITY_ALERTING_APP_ID, {
     rules: OBSERVABILITY_ALERTING_RULES_V2_PATH,
     ruleLibrary: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-    episodes: OBSERVABILITY_ALERTING_INBOX_PATH,
+    alerts: OBSERVABILITY_ALERTING_ALERTS_PATH,
     actionPolicies: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
     executionHistory: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   });

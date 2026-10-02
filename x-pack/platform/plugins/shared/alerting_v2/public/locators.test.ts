@@ -139,7 +139,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     it('encodes episodeId', async () => {
       const loc = await locator.getLocation({
         episodeId: 'ep/special chars',
-        host: OBSERVABILITY_HOST.episodes,
+        host: OBSERVABILITY_HOST.alerts,
       });
       expect(loc.path).toBe('/inbox/ep%2Fspecial%20chars');
     });
@@ -147,7 +147,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     it('resolves list with filters', async () => {
       const loc = await locator.getLocation({
         filters: { ruleId: 'r-1', status: 'active' },
-        host: OBSERVABILITY_HOST.episodes,
+        host: OBSERVABILITY_HOST.alerts,
       });
       expect(loc.path).toContain('/inbox?');
       expect(loc.path).toContain('_a=');
@@ -156,7 +156,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     it('resolves list with timeRange', async () => {
       const loc = await locator.getLocation({
         timeRange: { from: 'now-15m', to: 'now' },
-        host: OBSERVABILITY_HOST.episodes,
+        host: OBSERVABILITY_HOST.alerts,
       });
       expect(loc.path).toContain('_a=');
     });
@@ -164,7 +164,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     it('ignores empty filters', async () => {
       const loc = await locator.getLocation({
         filters: {},
-        host: OBSERVABILITY_HOST.episodes,
+        host: OBSERVABILITY_HOST.alerts,
       });
       expect(loc.path).toBe('/inbox');
     });
@@ -172,7 +172,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     it('ignores empty groupingValues', async () => {
       const loc = await locator.getLocation({
         filters: { groupingValues: {} },
-        host: OBSERVABILITY_HOST.episodes,
+        host: OBSERVABILITY_HOST.alerts,
       });
       expect(loc.path).toBe('/inbox');
     });

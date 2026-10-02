@@ -19,7 +19,7 @@ import { AlertingV2RulesLocatorDefinition, createAlertingV2HostApp } from '../..
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
