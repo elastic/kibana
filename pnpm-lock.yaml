@@ -12677,6 +12677,7 @@ packages:
   '@mswjs/http-middleware@0.10.3':
     resolution: {integrity: sha512-6CoX9IivDF7hggORdA4vX6uz+pkY1urGQMhmviHmYya/0b4EXwmhaXlGLQG3G29heqb3qdjp61V0+E2xRtyR5A==}
     engines: {node: '>=18'}
+    deprecated: This package has been deprecated in favor of @msw/serve.
     peerDependencies:
       msw: '>=2.0.0'
 
