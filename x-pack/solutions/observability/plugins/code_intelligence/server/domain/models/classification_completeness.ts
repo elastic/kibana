@@ -9,11 +9,20 @@
 export interface ClassificationPartition<Result> {
   /** Holds exactly one result per resolved candidate, in candidate order. */
   readonly results: readonly Result[];
-  /** Lists candidates the workflow omitted or answered more than once, in candidate order. */
+  /** Lists candidates the workflow omitted or answered with conflicting results, in candidate order. */
   readonly unresolvedIds: readonly string[];
 }
 
-/** Matches workflow results to submitted candidates, ignoring unknown IDs and treating duplicates as unresolved. */
+/** Compares flat workflow results field by field, ignoring key order. */
+const sameResult = (left: object, right: object): boolean => {
+  const leftEntries = Object.entries(left);
+  return (
+    leftEntries.length === Object.keys(right).length &&
+    leftEntries.every(([key, value]) => (right as Record<string, unknown>)[key] === value)
+  );
+};
+
+/** Matches workflow results to submitted candidates, ignoring unknown IDs, keeping agreeing duplicates once, and treating conflicting duplicates as unresolved. */
 export const partitionClassificationResults = <
   Candidate extends { readonly id: string },
   Result extends { readonly id: string }
@@ -29,9 +38,9 @@ export const partitionClassificationResults = <
   const resolved: Result[] = [];
   const unresolvedIds: string[] = [];
   for (const { id } of candidates) {
-    const matches = byId.get(id) ?? [];
-    if (matches.length === 1 && matches[0] !== undefined) {
-      resolved.push(matches[0]);
+    const [first, ...others] = byId.get(id) ?? [];
+    if (first !== undefined && others.every((other) => sameResult(first, other))) {
+      resolved.push(first);
     } else {
       unresolvedIds.push(id);
     }

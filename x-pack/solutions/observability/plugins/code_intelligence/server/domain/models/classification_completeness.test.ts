@@ -27,7 +27,7 @@ describe('partitionClassificationResults', () => {
     });
   });
 
-  it('reports omitted and duplicated candidates and ignores unknown IDs', () => {
+  it('reports omitted and conflicting duplicate candidates and ignores unknown IDs', () => {
     expect(
       partitionClassificationResults(candidates, [
         { id: 'a', keep: true },
@@ -36,5 +36,23 @@ describe('partitionClassificationResults', () => {
         { id: 'unknown', keep: true },
       ])
     ).toEqual({ results: [{ id: 'a', keep: true }], unresolvedIds: ['b', 'c'] });
+  });
+
+  it('keeps 1 copy of duplicate results that agree', () => {
+    expect(
+      partitionClassificationResults(candidates, [
+        { id: 'a', keep: true, level: 'info' },
+        { level: 'info', keep: true, id: 'a' },
+        { id: 'b', keep: false },
+        { id: 'c', keep: true, level: 'info' },
+        { id: 'c', keep: true },
+      ])
+    ).toEqual({
+      results: [
+        { id: 'a', keep: true, level: 'info' },
+        { id: 'b', keep: false },
+      ],
+      unresolvedIds: ['c'],
+    });
   });
 });
