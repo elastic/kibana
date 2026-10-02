@@ -697,6 +697,33 @@ describe('RunWorkflowPanel', () => {
       );
     });
 
+    it('reports the attachment type for a case attachment run', () => {
+      renderComponent({
+        telemetry: {
+          origin: 'cases.attachments',
+          attachmentType: 'security.alert',
+          itemCount: 2,
+          owner: 'securitySolution',
+        },
+      });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      const { onSuccess } = mockMutate.mock.calls[0][1];
+      onSuccess({ workflowExecutionId: 'exec-123' });
+
+      expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
+        origin: 'cases.attachments',
+        attachment_type: 'security.alert',
+        workflow_id: 'test-workflow-id',
+        workflow_execution_id: 'exec-123',
+        item_count: 2,
+        succeeded: true,
+        owner: 'securitySolution',
+      });
+    });
+
     it('reports an unknown origin when no telemetry context is provided', () => {
       renderComponent();
 

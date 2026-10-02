@@ -17,8 +17,10 @@ export const UNKNOWN_RUN_WORKFLOW_ORIGIN = 'unknown' as const;
 
 /** Caller-supplied context that `RunWorkflowPanel` attaches to its run event. */
 export interface RunWorkflowTelemetry {
-  /** Surface the panel was mounted from, such as `alert`, `cases.case`, or an attachment type. */
+  /** Surface the panel was mounted from, such as `alert`, `cases.case`, or `cases.attachment`. */
   origin: string;
+  /** Attachment type the run targeted (such as `security.alert`), for case attachment origins. */
+  attachmentType?: string;
   /** Number of items (alerts, attacks, documents, cases, observables, attachments) sent with the run. */
   itemCount?: number;
   /** Solution that rendered the panel, such as `securitySolution`. */
@@ -27,6 +29,7 @@ export interface RunWorkflowTelemetry {
 
 export interface RunWorkflowExecutedEvent {
   origin: string;
+  attachment_type?: string;
   workflow_id: string;
   workflow_execution_id?: string;
   item_count?: number;
@@ -42,8 +45,16 @@ export const runWorkflowExecutedEventType: EventTypeOpts<RunWorkflowExecutedEven
       type: 'keyword',
       _meta: {
         description:
-          'Surface the run was dispatched from, supplied by the caller (for example `alert`, `alert_bulk`, `attack`, `document`, `cases.case`, `cases.cases`, `cases.observable`, or a case attachment type such as `security.alert`). `unknown` when the caller supplies none.',
+          'Surface the run was dispatched from, supplied by the caller (for example `alert`, `alert_bulk`, `attack`, `document`, `cases.case`, `cases.cases`, `cases.observable`, or `cases.attachment`). `unknown` when the caller supplies none.',
         optional: false,
+      },
+    },
+    attachment_type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Attachment type the run targeted (for example `security.alert` or `security.event`). Only set when `origin` is `cases.attachment` or `cases.attachments`.',
+        optional: true,
       },
     },
     workflow_id: {

@@ -173,6 +173,9 @@ export const RunWorkflowPanel = ({
       const reportRunExecuted = (succeeded: boolean, workflowExecutionId?: string) => {
         const event: RunWorkflowExecutedEvent = {
           origin: telemetry?.origin ?? UNKNOWN_RUN_WORKFLOW_ORIGIN,
+          ...(telemetry?.attachmentType !== undefined && {
+            attachment_type: telemetry.attachmentType,
+          }),
           workflow_id: selectedId,
           succeeded,
           ...(workflowExecutionId && { workflow_execution_id: workflowExecutionId }),
