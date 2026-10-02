@@ -471,7 +471,6 @@ export { convertToAbsoluteDateRange } from './esql/date_range';
 export type {
   EsqlConversionFailureReason,
   EsqlFailureTooltip,
-  GetFailureTooltipOptions,
 } from './esql/to_esql_failure_reasons';
 export {
   esqlConversionFailureReasonMessages,

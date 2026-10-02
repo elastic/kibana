@@ -25,7 +25,9 @@ export interface TermsConversionContext {
 /**
  * Returns every conversion failure reason for a terms dimension, in priority order
  * (first entry is what the Convert tooltip shows when only one reason is displayed):
- * 1. Other bucket (default-on; also covers missing values)
+ * 1. Other bucket (default-on; also covers missing values — the UI only enables
+ *    "Include documents without the selected field" when Other is on, and
+ *    toEsAggsFn forces missingBucket = otherBucket && missingBucket)
  * 2. Date histogram / time series
  * 3. More than two Top values dimensions
  * 4. Multiple fields on one Top values dimension
@@ -42,11 +44,7 @@ export const getTermsConversionFailures = (
 ): EsqlConversionFailureReason[] => {
   const reasons: EsqlConversionFailureReason[] = [];
 
-  // Match UI `Boolean(otherBucket)` and toEsAggsFn: unset/false = Other off.
-  // No dedicated missingBucket reason: the UI only enables "Include documents without
-  // the selected field" when Other is on, and toEsAggsFn forces
-  // missingBucket = otherBucket && missingBucket. So this Other failure also covers
-  // missing values for real configs; a separate reason would never surface alone.
+  // unset/false = Other off (UI / toEsAggsFn Boolean).
   if (params.otherBucket === true) {
     reasons.push('terms_other_bucket_not_supported');
   }

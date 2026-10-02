@@ -13,10 +13,10 @@ import { getFailureTooltip, getFailureTooltipPlainText } from '@kbn/lens-common'
 
 export const buildEsqlFailureTooltip = (
   reasons?: EsqlConversionFailureReason[]
-): EsqlFailureTooltip => getFailureTooltip(reasons, { showAllReasons: false });
+): EsqlFailureTooltip => getFailureTooltip(reasons);
 
 export const getEsqlFailureTooltipPlainText = (reasons?: EsqlConversionFailureReason[]): string =>
-  getFailureTooltipPlainText(reasons, { showAllReasons: false });
+  getFailureTooltipPlainText(reasons);
 
 /** Renders title + message(s) for Convert-to-ES|QL failure tooltips. */
 export const renderEsqlFailureTooltipContent = (tooltip: EsqlFailureTooltip): ReactNode => {

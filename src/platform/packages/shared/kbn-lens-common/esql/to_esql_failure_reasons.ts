@@ -209,10 +209,6 @@ export interface EsqlFailureTooltip {
   messages: string[];
 }
 
-export interface GetFailureTooltipOptions {
-  showAllReasons?: boolean;
-}
-
 const resolveMessage = (reason: EsqlConversionFailureReason): string =>
   esqlConversionFailureReasonMessages[reason] ??
   esqlConversionFailureReasonMessages.unsupported_settings;
@@ -220,11 +216,11 @@ const resolveMessage = (reason: EsqlConversionFailureReason): string =>
 /**
  * Builds tooltip content for a conversion failure. Top values reasons use a shared
  * title plus sentence-only bodies; other reasons keep a single full message.
- * Pass `showAllReasons` to list every blocker; otherwise only the first is shown.
+ * Pass `{ showAllReasons: true }` to list every blocker; otherwise only the first is shown.
  */
 export const getFailureTooltip = (
   reasons: EsqlConversionFailureReason[] | undefined,
-  { showAllReasons = false }: GetFailureTooltipOptions = {}
+  { showAllReasons = false }: { showAllReasons?: boolean } = {}
 ): EsqlFailureTooltip => {
   const allReasons =
     reasons && reasons.length > 0 ? reasons : (['unknown'] as EsqlConversionFailureReason[]);
@@ -245,9 +241,9 @@ export const getFailureTooltip = (
 /** Plain-text form of {@link getFailureTooltip} for aria-labels and string-only call sites. */
 export const getFailureTooltipPlainText = (
   reasons: EsqlConversionFailureReason[] | undefined,
-  options?: GetFailureTooltipOptions
+  { showAllReasons = false }: { showAllReasons?: boolean } = {}
 ): string => {
-  const { title, messages } = getFailureTooltip(reasons, options);
+  const { title, messages } = getFailureTooltip(reasons, { showAllReasons });
   if (!title) {
     return messages[0];
   }

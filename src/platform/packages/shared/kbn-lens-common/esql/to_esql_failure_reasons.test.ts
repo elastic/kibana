@@ -39,9 +39,10 @@ describe('getFailureTooltip', () => {
 
   it('returns every Top values reason when showAllReasons is true', () => {
     expect(
-      getFailureTooltip(['terms_other_bucket_not_supported', 'terms_accuracy_mode_not_supported'], {
-        showAllReasons: true,
-      })
+      getFailureTooltip(
+        ['terms_other_bucket_not_supported', 'terms_accuracy_mode_not_supported'],
+        { showAllReasons: true }
+      )
     ).toEqual({
       title: esqlConversionFailureTitle,
       messages: [
