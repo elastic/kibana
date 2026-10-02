@@ -6,7 +6,7 @@
  */
 
 export {
-  AlertStatusChangedV1TriggerId,
+  AlertStatusChangedTriggerId,
   alertStatusChangedV1EventSchema,
   alertStatusChangedV1TriggerDefinition,
 } from './alert_status_changed';
