@@ -131,7 +131,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 
   echo "Writing to vault..."
 
-  set_in_legacy_vault "$CLOUD_DEPLOYMENT_NAME" \
+  set_deployment_credentials "$CLOUD_DEPLOYMENT_NAME" \
     username="$CLOUD_DEPLOYMENT_USERNAME" \
     password="$CLOUD_DEPLOYMENT_PASSWORD"
 
@@ -172,7 +172,7 @@ else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
-VAULT_READ_COMMAND=$(print_legacy_vault_read "$CLOUD_DEPLOYMENT_NAME")
+VAULT_READ_COMMAND=$(print_deployment_credentials_read "$CLOUD_DEPLOYMENT_NAME")
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')

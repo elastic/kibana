@@ -1,17 +1,7 @@
 #!/bin/bash
 
-# TODO: rewrite after https://github.com/elastic/kibana-operations/issues/15 is done
-export LEGACY_VAULT_ADDR="https://secrets.elastic.co:8200"
-if [[ "${VAULT_ADDR:-}" == "$LEGACY_VAULT_ADDR" ]]; then
-  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
-  VAULT_KV_PREFIX="secret/kibana-issues/dev"
-  IS_LEGACY_VAULT_ADDR=true
-else
-  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
-  VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
-  IS_LEGACY_VAULT_ADDR=false
-fi
-export IS_LEGACY_VAULT_ADDR
+VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
+VAULT_DEPLOYMENTS_PATH="kv/ci-shared/kibana-deployments"
 
 retry() {
   local retries=$1; shift
@@ -70,59 +60,29 @@ vault_kv_get() {
   fi
 }
 
-vault_kv_set() {
-  kv_path=$1
-  shift
-  fields=("$@")
-
-  vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
-}
-
-function set_in_legacy_vault() {
+set_deployment_credentials() {
   key_path=$1
   shift
   fields=("$@")
 
-  VAULT_TOKEN_BAK="$VAULT_TOKEN"
-
-  # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,
-  # otherwise the VM's default token will be used, that's connected to the ci-prod vault instance
-  VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
-
-  set +e
-  # shellcheck disable=SC2068
-  vault write -address=$LEGACY_VAULT_ADDR "secret/kibana-issues/dev/cloud-deploy/$key_path" ${fields[@]}
-  EXIT_CODE=$?
-  set -e
-
-  VAULT_TOKEN="$VAULT_TOKEN_BAK"
-
-  return $EXIT_CODE
+  retry 5 5 vault kv put "$VAULT_DEPLOYMENTS_PATH/$key_path" "${fields[@]}"
 }
 
-function unset_in_legacy_vault() {
+get_deployment_credentials() {
   key_path=$1
+  field=$2
 
-  VAULT_TOKEN_BAK="$VAULT_TOKEN"
-
-  # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,
-  # otherwise the VM's default token will be used, that's connected to the ci-prod vault instance
-  VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-  VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
-
-  set +e
-  vault delete -address=$LEGACY_VAULT_ADDR "secret/kibana-issues/dev/cloud-deploy/$key_path"
-  EXIT_CODE=$?
-  set -e
-
-  VAULT_TOKEN="$VAULT_TOKEN_BAK"
-
-  return $EXIT_CODE
+  retry 5 5 vault kv get -field="$field" "$VAULT_DEPLOYMENTS_PATH/$key_path"
 }
 
-function print_legacy_vault_read() {
+unset_deployment_credentials() {
   key_path=$1
 
-  echo "vault read -address=$LEGACY_VAULT_ADDR secret/kibana-issues/dev/cloud-deploy/$key_path"
+  retry 5 5 vault kv delete "$VAULT_DEPLOYMENTS_PATH/$key_path"
+}
+
+print_deployment_credentials_read() {
+  key_path=$1
+
+  echo "vault kv get -address=https://vault-ci-prod.elastic.dev $VAULT_DEPLOYMENTS_PATH/$key_path"
 }
