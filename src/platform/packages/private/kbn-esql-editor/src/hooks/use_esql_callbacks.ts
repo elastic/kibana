@@ -17,13 +17,14 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
-  getESQLAdHocDataview,
   getEditorExtensions,
   getEsqlPolicies,
   getInferenceEndpoints,
   getViews,
   getDatasets,
+  getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { getEsqlColumns, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
@@ -324,10 +325,12 @@ export const useEsqlCallbacks = ({
       if (!hasQuerySuggestions) {
         return undefined;
       }
-      const dataView = await getESQLAdHocDataview({
-        dataViewsService: data.dataViews,
-        query: minimalQueryRef.current,
-      });
+      const sourceQuery = getSourceCommandQueryFromESQLQuery(minimalQueryRef.current);
+      if (!sourceQuery) {
+        return undefined;
+      }
+      const source = await EsqlSource.create({ query: sourceQuery, http: core.http });
+      const dataView = await registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http);
       const suggestions = await kql?.autocomplete.getQuerySuggestions({
         language: 'kuery',
         query: kqlQuery,
@@ -347,7 +350,7 @@ export const useEsqlCallbacks = ({
         }) ?? []
       );
     },
-    [data.dataViews, kql?.autocomplete, minimalQueryRef]
+    [core.http, data.dataViews, kql?.autocomplete, minimalQueryRef]
   );
 
   return useMemo<ESQLCallbacks>(

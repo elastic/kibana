@@ -50,6 +50,7 @@ jest.mock('../../data_fetching/create_esql_source', () => ({
     resultColumns: [],
     getColumns: () => [],
     getColumn: () => undefined,
+    getFilterableFields: async () => [],
     isTimeBased: () => false,
     isPersisted: () => false,
   }),

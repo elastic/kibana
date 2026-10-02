@@ -16,7 +16,8 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/ui-ai-components';
@@ -95,6 +96,7 @@ export function QuickSearchVisor({
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
   const sourcesKey = useMemo(() => getIndexPatternFromESQLQuery(query), [query]);
+  const sourceQuery = useMemo(() => getSourceCommandQueryFromESQLQuery(query), [query]);
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);
@@ -143,24 +145,21 @@ export function QuickSearchVisor({
   }, [isInline, isVisible]);
 
   useEffect(() => {
-    if (!isVisible || !sourcesKey) {
+    if (!isVisible || !sourceQuery) {
       setAdHocDataView(null);
       return;
     }
     let cancelled = false;
-    getESQLAdHocDataview({
-      dataViewsService: data.dataViews,
-      query: `FROM ${sourcesKey}`,
-      options: { idPrefix: 'esql-visor' },
-    }).then((dataView) => {
-      if (!cancelled) {
-        setAdHocDataView(dataView);
-      }
-    });
+    EsqlSource.create({ query: sourceQuery, http: core.http })
+      .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
+      .then(
+        (dataView) => !cancelled && setAdHocDataView(dataView),
+        () => !cancelled && setAdHocDataView(null)
+      );
     return () => {
       cancelled = true;
     };
-  }, [isVisible, sourcesKey, data.dataViews]);
+  }, [isVisible, sourceQuery, data.dataViews, core.http]);
 
   const isKqlMode = visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);

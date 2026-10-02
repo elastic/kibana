@@ -19,7 +19,7 @@ import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews } from './data_views';
-import { setDataView } from './tab_state_data_view';
+import { setDataSource, setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
@@ -265,7 +265,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       initialGlobalState.filters = urlGlobalState.filters;
     }
 
-    dispatch(setDataView({ tabId, dataView, dataSource: esqlSource }));
+    dispatch(
+      esqlSource
+        ? setDataSource({ tabId, dataSource: esqlSource })
+        : setDataView({ tabId, dataView })
+    );
 
     /**
      * Sync global services

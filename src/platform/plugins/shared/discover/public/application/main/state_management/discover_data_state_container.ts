@@ -245,7 +245,6 @@ export function getDataStateContainer({
     getCurrentTab,
     injectCurrentTab,
     dataSourceService: services.dataSourceService,
-    dataViews: services.dataViews,
   });
 
   // The main subscription to handle state changes
@@ -315,13 +314,7 @@ export function getDataStateContainer({
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
           const existingSource = currentDataSource$.getValue();
-          const dataView = currentDataView$.getValue();
-          const lookedUp = dataView ? services.dataSourceService.fromDataView(dataView) : undefined;
-          const source = lookedUp ?? existingSource;
-          if (source && source.kind !== existingSource?.kind) {
-            currentDataSource$.next(source);
-          }
-          const esqlSource = source?.kind === 'esql' ? source : undefined;
+          const esqlSource = existingSource?.kind === 'esql' ? existingSource : undefined;
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;

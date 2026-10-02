@@ -7,50 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { sha256 } from './sha256';
+import { getESQLAdHocDataviewId } from '@kbn/esql-utils';
 import type { Column } from './types';
 import type { EsqlSource } from './sources/esql_source';
 
 const esqlDataViewsById = new Map<string, DataView>();
 
-const dataViewsWithResultColumns = new WeakSet<DataView>();
+/** LIMIT 0 reports no aggregatability; these ES types have no doc values, so no value suggestions. */
+const NON_AGGREGATABLE_ES_TYPES: ReadonlySet<string> = new Set([
+  'text',
+  'match_only_text',
+  'semantic_text',
+  'unsupported',
+]);
 
-const getDatasetDataViewId = async (source: EsqlSource): Promise<string> =>
-  `esql-dataset-${await sha256(source.datasetKey)}`;
+/** Same id as the legacy ES|QL ad-hoc DataView, so persisted filters and Lens keep resolving it. */
+const getDatasetDataViewId = (source: EsqlSource): Promise<string> =>
+  getESQLAdHocDataviewId({
+    indexPattern: source.title,
+    timeFieldName: source.timeFieldName,
+    projectRouting: source.projectRouting,
+  });
 
 /**
  * Transitional shim: registers one DataView per dataset (FROM target, time field, project routing)
- * with the fields of the FROM target from field caps, falling back to the result columns for
- * sources without field caps (views, external datasets).
+ * whose fields are the source's filterable fields, never fetched from field caps.
  */
 export async function registerEsqlSourceInDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
-  source: EsqlSource
+  source: EsqlSource,
+  http?: HttpStart
 ): Promise<DataView> {
+  const id = await getDatasetDataViewId(source);
+  const filterableFields = await source.getFilterableFields(http);
   const spec = {
-    id: await getDatasetDataViewId(source),
+    id,
     title: source.title,
     type: ESQL_TYPE,
     timeFieldName: source.timeFieldName,
+    fields: withTimeField(makeFieldSpecs(filterableFields), source.timeFieldName),
   };
-  let dataView: DataView;
-  try {
-    dataView = await dataViews.create(spec, false, false);
-  } catch {
+  let dataView = await dataViews.create(spec, true);
+  // The id is shared with the legacy ad-hoc DataView, which `getESQLAdHocDataview` callers (e.g.
+  // Lens text_based) or a hydrated saved search source may have cached with field caps fields
+  // (none for views). Replace it when it lacks the dataset's fields.
+  // TODO: remove once Lens and the remaining callers produce an `EsqlSource` instead.
+  if (filterableFields.some(({ name }) => !dataView.fields.getByName(name))) {
+    dataViews.clearInstanceCache(id);
     dataView = await dataViews.create(spec, true);
   }
-
-  if (dataView.fields.length === 0 || dataViewsWithResultColumns.has(dataView)) {
-    dataViews.clearInstanceCache(spec.id);
-    dataView = await dataViews.create(
-      { ...spec, fields: withTimeField(makeResultColumnFieldSpecs(source), source.timeFieldName) },
-      true
-    );
-    dataViewsWithResultColumns.add(dataView);
+  // A failed schema lookup yields no fields; don't keep that DataView so the next query retries.
+  if (!filterableFields.length) {
+    dataViews.clearInstanceCache(id);
   }
 
   esqlDataViewsById.set(source.id, dataView);
@@ -65,23 +78,21 @@ export function getRegisteredEsqlDataView(source: EsqlSource): DataView | undefi
 /** DataView shim for Lens, reusing the one registered for this source. */
 export async function getOrRegisterEsqlDataView(
   dataViews: DataViewsPublicPluginStart,
-  source: EsqlSource
+  source: EsqlSource,
+  http?: HttpStart
 ): Promise<DataView> {
-  return getRegisteredEsqlDataView(source) ?? registerEsqlSourceInDataViewsCache(dataViews, source);
-}
-
-export function unregisterFromDataViewsCache(
-  dataViews: DataViewsPublicPluginStart,
-  id: string
-): void {
-  esqlDataViewsById.delete(id);
-  dataViews.clearInstanceCache(id);
-}
-
-function makeResultColumnFieldSpecs(source: EsqlSource): Record<string, FieldSpec> {
-  return Object.fromEntries(
-    source.getColumns().map((column) => [column.name, columnToFieldSpec(column)])
+  return (
+    getRegisteredEsqlDataView(source) ?? registerEsqlSourceInDataViewsCache(dataViews, source, http)
   );
+}
+
+/** The dataset DataView stays registered, as other queries on the same dataset share it. */
+export function unregisterFromDataViewsCache(id: string): void {
+  esqlDataViewsById.delete(id);
+}
+
+function makeFieldSpecs(columns: readonly Column[]): Record<string, FieldSpec> {
+  return Object.fromEntries(columns.map((column) => [column.name, columnToFieldSpec(column)]));
 }
 
 function withTimeField(
@@ -110,7 +121,7 @@ function columnToFieldSpec(column: Column): FieldSpec {
     type: column.type,
     esTypes: column.esType ? [column.esType] : undefined,
     searchable: true,
-    aggregatable: column.type === KBN_FIELD_TYPES.DATE,
+    aggregatable: !column.esType || !NON_AGGREGATABLE_ES_TYPES.has(column.esType),
     isComputedColumn: column.source === 'esql-result',
   };
 }

@@ -11,6 +11,7 @@ import {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './get_index_pattern_from_query';
 
@@ -149,6 +150,37 @@ describe('getIndexPatternsFromESQLQuery', () => {
       indexPattern: '',
       indexPatternWithoutRemoteClusterPrefix: '',
     });
+  });
+});
+
+describe('getSourceCommandQueryFromESQLQuery', () => {
+  it('drops the commands after FROM', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery('FROM logs-* | WHERE a > 1 | STATS count() BY host')
+    ).toBe('FROM logs-*');
+  });
+
+  it('keeps TS and METADATA', () => {
+    expect(getSourceCommandQueryFromESQLQuery('TS metrics-* | STATS avg(cpu)')).toBe(
+      'TS metrics-*'
+    );
+    expect(getSourceCommandQueryFromESQLQuery('FROM logs-* METADATA _index | KEEP _index')).toBe(
+      'FROM logs-* METADATA _index'
+    );
+  });
+
+  it('keeps SET headers', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'SET project_routing = "_alias:*"; FROM logs-* | STATS count()'
+      )
+    ).toBe('SET project_routing = "_alias:*"; FROM logs-*');
+  });
+
+  it('returns an empty string without a FROM or TS command', () => {
+    expect(getSourceCommandQueryFromESQLQuery('')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery(undefined)).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('ROW a = 1')).toBe('');
   });
 });
 

@@ -9,11 +9,13 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
   getESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
   hasTransformationalCommand,
   getLimitFromESQLQuery,

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, isSubQuery } from '@elastic/esql';
+import { BasicPrettyPrinter, Parser, isSubQuery } from '@elastic/esql';
 import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
@@ -130,6 +130,26 @@ export function getSourceCommandFromESQLQuery(
   );
 
   return sourceCommand?.name.toUpperCase() ?? '';
+}
+
+/**
+ * Returns the query reduced to its FROM or TS command (keeping SET headers and METADATA),
+ * whose columns are the schema of the queried dataset. Empty string if there is none.
+ */
+export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): string {
+  if (!esql?.trim()) {
+    return '';
+  }
+
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+  if (!sourceCommand) {
+    return '';
+  }
+
+  return BasicPrettyPrinter.print({ ...root, commands: [sourceCommand] });
 }
 
 /**
