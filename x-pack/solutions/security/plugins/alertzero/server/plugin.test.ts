@@ -350,9 +350,28 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
     });
 
+    it('does not install managed worker workflows when service accounts are disabled', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreStart = coreMock.createStart();
+      jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(false);
+
+      plugin.start(coreStart, {
+        spaces: undefined,
+        agentBuilder: { agents: { ensure: jest.fn() } },
+        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        agenticInvestigations: { getImpactClient: jest.fn() },
+        inference: {},
+      } as never);
+
+      expect(initializeManagedWorkflows).not.toHaveBeenCalled();
+      expect(ensureAgentSafe).not.toHaveBeenCalled();
+    });
+
     it('installs managed worker workflows during start', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
+      jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
       const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
 
       plugin.start(coreStart, {
@@ -376,6 +395,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('ensures the thin agent in the default space', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
+      jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
       const agentBuilder = { agents: { ensure: jest.fn() } };
 
       plugin.start(coreStart, {

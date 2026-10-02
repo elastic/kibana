@@ -23,7 +23,10 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowTemplateValues,
+} from '@kbn/workflows/managed';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import {
@@ -91,6 +94,24 @@ export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisRuntimeDisabled'
   | 'ruleAttachmentUnavailable';
 
+const readServiceAccountId = (
+  values: Record<string, unknown> | null | undefined
+): string | undefined => {
+  const id = values?.serviceAccountId;
+  return typeof id === 'string' && id.length > 0 ? id : undefined;
+};
+
+/** User saves install through the request-scoped workflows client so `run_as` can bind. */
+export type InstallWorkerForRequest = (
+  request: KibanaRequest,
+  registration: WorkerRegistration,
+  options: {
+    spaceId: string;
+    workflowIdSuffix?: string;
+    values?: ManagedWorkflowTemplateValues;
+  }
+) => Promise<void>;
+
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
@@ -117,7 +138,8 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: AlertTriageOpts = {}
+    private readonly alertTriageOpts: AlertTriageOpts = {},
+    private readonly installWorkerForRequest?: InstallWorkerForRequest
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -138,6 +160,23 @@ export class WorkersService {
       throw new Error('Managed Workflows API is not available');
     }
     return managedWorkflows;
+  }
+
+  private async persistWorker(
+    request: KibanaRequest,
+    managedWorkflows: PluginScopedManagedWorkflowsApi,
+    registration: WorkerRegistration,
+    options: {
+      spaceId: string;
+      workflowIdSuffix: string;
+      values: ManagedWorkflowTemplateValues;
+    }
+  ): Promise<void> {
+    if (this.installWorkerForRequest) {
+      await this.installWorkerForRequest(request, registration, options);
+      return;
+    }
+    await installRegisteredWorker(managedWorkflows, registration, options);
   }
 
   private async ensureAgent(spaceId: string): Promise<void> {
@@ -258,6 +297,20 @@ export class WorkersService {
       }
     }
 
+    const currentState = status.installed
+      ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
+      : null;
+    if (status.installed && !currentState) return { outcome: 'unavailable' };
+    const requestedAccount = patch.settings?.serviceAccountId;
+    const nextAccount =
+      requestedAccount === undefined
+        ? readServiceAccountId(currentState?.templateValues)
+        : requestedAccount ?? undefined;
+    const nextEnabled = patch.enabled ?? Boolean(status.enabled);
+    if (nextEnabled && !nextAccount) {
+      return { outcome: 'rejected', what: 'a worker that is enabled without a service account' };
+    }
+
     if (touchesSettings) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
@@ -276,7 +329,7 @@ export class WorkersService {
         return { outcome: 'invalid', message: applied.invalid };
       }
 
-      await installRegisteredWorker(managedWorkflows, registration, {
+      await this.persistWorker(request, managedWorkflows, registration, {
         spaceId,
         workflowIdSuffix: spaceId,
         values: applied.values,
@@ -311,7 +364,7 @@ export class WorkersService {
 
     if (patch.enabled != null) {
       if (!status.installed) {
-        await installRegisteredWorker(managedWorkflows, registration, {
+        await this.persistWorker(request, managedWorkflows, registration, {
           spaceId,
           workflowIdSuffix: spaceId,
           values: registration.settings.createDefaultValues(),

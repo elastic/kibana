@@ -56,7 +56,10 @@ export const renderApp = async ({
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>
-            <AccessBoundary availability$={availability$}>
+            <AccessBoundary
+              availability$={availability$}
+              serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
+            >
               <AppChromeLayout>
                 <AlertZeroRoutes />
               </AppChromeLayout>
