@@ -207,7 +207,6 @@ describe('layeredXyVis', () => {
         groupId: 'axis-shared',
         coordinateUnit: undefined,
         formatter: { id: 'number' },
-        anchor: { layerId: 'first', accessor: 'raw' },
       }),
     ]);
   });

@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License, v 1".
- */
-
 import { Position } from '@elastic/charts';
 import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
@@ -147,7 +138,7 @@ const getRequestedAxis = (
   };
 };
 
-export type DataSeriesDescriptor = AxisSeriesDescriptor & { sourceFormat: SerializedFieldFormat };
+type DataSeriesDescriptor = AxisSeriesDescriptor & { sourceFormat: SerializedFieldFormat };
 
 const getDataDescriptors = (
   layers: CommonXYDataLayerConfig[],
@@ -280,12 +271,10 @@ export const resolveAxisFormatPolicies = (
       const policy: AxisFormatPolicy = {
         groupId,
         position: getPolicyPosition(groupId, yAxisConfigs),
-        anchor: { layerId: anchor.layerId, accessor: anchor.accessor },
         formatter,
         coordinateUnit: anchorDuration?.outputUnit,
         members: [],
         mismatches: [],
-        source: 'inferred',
       };
       group.forEach((dataDescriptor) => {
         addMember(

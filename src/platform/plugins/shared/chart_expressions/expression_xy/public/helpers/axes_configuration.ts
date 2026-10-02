@@ -18,8 +18,8 @@ import type {
   ReferenceLineDecorationConfig,
   YAxisConfigResult,
   XAxisConfigResult,
-  AxisFormatPolicy,
 } from '../../common';
+import type { AxisFormatPolicy } from '../../common/axis_format_policy_types';
 import type { LayersFieldFormats } from './layers';
 import {
   groupAxisSeries,
@@ -51,13 +51,6 @@ export interface AxisConfiguration extends Omit<YAxisConfig, 'id'> {
 export type GroupsConfiguration = AxisConfiguration[];
 
 export type AxesMap = Record<'left' | 'right', AxisConfiguration | undefined>;
-
-export function isFormatterCompatible(
-  formatter1: SerializedFieldFormat,
-  formatter2: SerializedFieldFormat
-) {
-  return formatter1?.id === formatter2?.id;
-}
 
 export function groupAxesByType(
   layers: CommonXYDataLayerConfig[],

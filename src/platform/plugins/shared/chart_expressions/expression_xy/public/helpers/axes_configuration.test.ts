@@ -483,11 +483,9 @@ describe('axes_configuration', () => {
         {
           groupId: 'left',
           position: 'left',
-          anchor: { layerId: 'first', accessor: 'yAccessorId' },
           formatter,
           members: [],
           mismatches: [],
-          source: 'inferred',
         },
       ]
     );
