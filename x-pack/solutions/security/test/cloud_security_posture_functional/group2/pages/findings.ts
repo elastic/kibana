@@ -245,12 +245,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Ensure both columns are present before trying to remove them.
         // This test must be self-contained: it cannot rely on Test 13 having
         // run first and persisted agent.id/agent.name columns in localStorage.
-        const isAgentIdPresent = await testSubjects.exists('dataGridHeaderCell-agent.id', {
-          timeout: 0,
-        });
-        const isAgentNamePresent = await testSubjects.exists('dataGridHeaderCell-agent.name', {
-          timeout: 0,
-        });
+        const isAgentIdPresent = await testSubjects.exists('dataGridHeaderCell-agent.id');
+        const isAgentNamePresent = await testSubjects.exists('dataGridHeaderCell-agent.name');
         if (!isAgentIdPresent || !isAgentNamePresent) {
           const setupButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
           await setupButton.click();
