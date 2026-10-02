@@ -1,6 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. See the Elastic License 2.0.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
@@ -81,7 +83,8 @@ const enrichedAlerts: AlertDoc[] = [
     'host.name': 'srv-win-finance-02',
     'user.name': 'CORP\\j.ramirez',
     'process.name': 'rundll32.exe',
-    'process.command_line': 'rundll32.exe C:\\windows\\system32\\comsvcs.dll, MiniDump 672 lsass.dmp full',
+    'process.command_line':
+      'rundll32.exe C:\\windows\\system32\\comsvcs.dll, MiniDump 672 lsass.dmp full',
     'file.hash.sha256': '9b7d3a2c1e0f48619c2bd7e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5',
     'event.category': ['malware', 'process'],
     'event.type': ['start'],
