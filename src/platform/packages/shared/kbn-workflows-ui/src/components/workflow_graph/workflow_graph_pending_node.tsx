@@ -12,9 +12,15 @@ import { Position, useReactFlow, useStore, ViewportPortal } from '@xyflow/react'
 import type { Node } from '@xyflow/react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CONTAINER_STEP_TYPES, FOREACH_GROUP_EMPTY_HEIGHT, type LayoutDirection } from '@kbn/workflows';
-import type { InsertionPoints } from './compute_insertion_points';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
+import {
+  CONTAINER_STEP_TYPES,
+  FOREACH_GROUP_EMPTY_HEIGHT,
+  type LayoutDirection,
+} from '@kbn/workflows';
+import { aiIconTileCss } from './ai_icon_tile';
 import { computeEdgePath } from './compute_edge_path';
+import type { InsertionPoints } from './compute_insertion_points';
 import { deslugifyStepName } from './deslugify_step_name';
 import {
   computePendingInsertConnector,
@@ -23,14 +29,8 @@ import {
   PENDING_NODE_WIDTH,
   type PendingInsertVisual,
 } from './pending_insert';
+import { errorPortEdgeStyle, PORT_DOT_SIZE, STEP_PORT } from './port_geometry';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
-import {
-  PORT_DOT_SIZE,
-  STEP_PORT,
-  errorPortEdgeStyle,
-} from './port_geometry';
-import { AiIcon } from '@kbn/shared-ux-ai-components';
-import { aiIconTileCss } from './ai_icon_tile';
 import { resolveNodeColors } from './workflow_graph_node';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
@@ -80,24 +80,12 @@ export function WorkflowGraphPendingNode({
       x: (viewportWidth / 2 - x) / zoom - PENDING_NODE_WIDTH / 2,
       y: (viewportHeight / 2 - y) / zoom - PENDING_NODE_HEIGHT / 2,
     };
-  }, [
-    layoutOrigin,
-    pending.context.mode,
-    viewportWidth,
-    viewportHeight,
-    getViewport,
-  ]);
+  }, [layoutOrigin, pending.context.mode, viewportWidth, viewportHeight, getViewport]);
 
   const connector = useMemo(
     () =>
       origin && layoutOrigin
-        ? computePendingInsertConnector(
-            pending.context,
-            origin,
-            nodes,
-            insertionPoints,
-            direction
-          )
+        ? computePendingInsertConnector(pending.context, origin, nodes, insertionPoints, direction)
         : undefined,
     [pending.context, origin, layoutOrigin, nodes, insertionPoints, direction]
   );
@@ -105,12 +93,10 @@ export function WorkflowGraphPendingNode({
   if (!origin) return null;
 
   const isConfiguring = pending.phase === 'configuring';
-  const isContainer =
-    pending.phase === 'configuring' && CONTAINER_STEP_TYPES.has(pending.stepType);
+  const isContainer = pending.phase === 'configuring' && CONTAINER_STEP_TYPES.has(pending.stepType);
   const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
   const borderRadius = 8;
-  const chipBorderRadius = 4;
   const ariaLabel = isConfiguring
     ? isTriggerDraft
       ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {
@@ -155,8 +141,7 @@ export function WorkflowGraphPendingNode({
         targetY: connector.targetY,
         // Failure always leaves Bottom (orientation-invariant error port).
         // LR enters the left edge; TB enters the top.
-        sourcePosition:
-          connector.isFailure || !isHorizontal ? Position.Bottom : Position.Right,
+        sourcePosition: connector.isFailure || !isHorizontal ? Position.Bottom : Position.Right,
         targetPosition: connector.isFailure
           ? isHorizontal
             ? Position.Left

@@ -2,10 +2,19 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1".
  */
 
-import { EuiToolTip, euiCanAnimate, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { euiCanAnimate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { keyframes } from '@emotion/react';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer } from '@xyflow/react';
@@ -181,16 +190,15 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
                   ? euiTheme.colors.backgroundBaseDanger
                   : euiTheme.colors.backgroundBasePlain,
                 border: `1px ${isBranchEdge && !isFailure ? 'dashed' : 'solid'} ${
-                  isFailure
-                    ? euiTheme.colors.borderBaseDanger
-                    : euiTheme.colors.borderBaseProminent
+                  isFailure ? euiTheme.colors.borderBaseDanger : euiTheme.colors.borderBaseProminent
                 }`,
                 color: isFailure ? euiTheme.colors.textDanger : euiTheme.colors.textParagraph,
                 whiteSpace: 'nowrap',
               },
               pillShadow,
             ]}
-            data-test-subj={isFailure ? 'workflowGraphEdgeFailureLabel' : undefined}
+            data-test-subj={isFailure ? 'workflowGraphEdgeFailureLabel' : 'workflowGraphEdgeLabel'}
+            data-label={fullLabel}
           >
             <EuiToolTip content={fullLabel} position="top">
               {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}

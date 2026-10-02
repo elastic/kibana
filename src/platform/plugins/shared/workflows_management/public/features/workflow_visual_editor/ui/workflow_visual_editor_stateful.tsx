@@ -55,11 +55,11 @@ import {
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
-import { WorkflowCreationPanel } from './workflow_creation_panel';
 import {
   getShowCreationEmptyState,
   subscribeShowCreationEmptyState,
 } from './workflow_creation_empty_state_prototype';
+import { WorkflowCreationPanel } from './workflow_creation_panel';
 import {
   WorkflowSettingsBPanel,
   type WorkflowSettingsBPanelKind,
@@ -77,6 +77,7 @@ import {
 import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 import { PLUGIN_ID } from '../../../../common';
 import { getAllConnectorsWithDynamic } from '../../../../common/schema';
+import { flushWorkflowComputation } from '../../../entities/workflows/store/workflow_detail/middleware';
 import {
   selectConnectors,
   selectEditorWorkflowDefinition,
@@ -89,7 +90,6 @@ import {
   selectWorkflowName,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { flushWorkflowComputation } from '../../../entities/workflows/store/workflow_detail/middleware';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
@@ -290,10 +290,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   // Advanced editor needs room for the catalog + value pane; that width is
   // display-only so switching steps / closing the editor restores preferred.
   const panelWidth = fieldEditorExpanded
-    ? Math.min(
-        maxPanelWidth,
-        Math.max(preferredPanelWidth, FIELD_EDITOR_EXPANDED_PANEL_WIDTH)
-      )
+    ? Math.min(maxPanelWidth, Math.max(preferredPanelWidth, FIELD_EDITOR_EXPANDED_PANEL_WIDTH))
     : preferredPanelWidth;
 
   const definition = useSelector(selectEditorWorkflowDefinition);
@@ -517,7 +514,13 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           : ctx.mode === 'after'
           ? insertStepAfterName(yamlString, fragment, ctx.stepName)
           : ctx.mode === 'branch'
-          ? insertStepIntoBranch(yamlString, fragment, ctx.stepName, ctx.branch)
+          ? insertStepIntoBranch(
+              yamlString,
+              fragment,
+              ctx.stepName,
+              ctx.branch,
+              ctx.position ?? 'end'
+            )
           : ctx.mode === 'fallback'
           ? setStepFallback(yamlString, ctx.stepName, fragment)
           : null;
@@ -629,7 +632,13 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           result = insertStepAfterName(yamlString, fragment, context.stepName);
           break;
         case 'branch':
-          result = insertStepIntoBranch(yamlString, fragment, context.stepName, context.branch);
+          result = insertStepIntoBranch(
+            yamlString,
+            fragment,
+            context.stepName,
+            context.branch,
+            context.position ?? 'end'
+          );
           break;
         case 'fallback':
           result = setStepFallback(yamlString, context.stepName, fragment);
@@ -741,17 +750,30 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [panel, insertFragment, applyMutation, editorYaml, setSelectedStep]
   );
 
-  useWorkflowGraphPocToggles();
+  const pocToggles = useWorkflowGraphPocToggles();
 
   const handlePanelCancel = useCallback(() => {
-    clearPendingAfterDefinitionRef.current = false;
+    // Closing any insert flyout commits the partial fragment so the node
+    // stays on the canvas — the author can keep editing it later.
+    if (panel?.mode === 'insert') {
+      const fragmentToCommit = liveFragment ?? panel.fragment;
+      const nameVal = parseDocument(fragmentToCommit).get('name');
+      const parsedName = typeof nameVal === 'string' ? nameVal : undefined;
+      clearPendingAfterDefinitionRef.current = true;
+      insertFragment(panel.context, fragmentToCommit, parsedName);
+    } else if (panel?.mode === 'insert-trigger') {
+      clearPendingAfterDefinitionRef.current = true;
+      applyMutation(appendTrigger(editorYaml, panel.fragment));
+    } else {
+      clearPendingAfterDefinitionRef.current = false;
+    }
     setPanel(null);
     setSettingsBKind(null);
     setPendingInsert(null);
     setConfigPanelDirty(false);
     setPendingStepSelection(undefined);
     setSelectedStep(null);
-  }, [setSelectedStep]);
+  }, [panel, liveFragment, insertFragment, applyMutation, editorYaml, setSelectedStep]);
 
   const isConfigPanelOpen =
     panel?.mode === 'edit' ||
@@ -1208,7 +1230,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         flashNodeId={flashNodeId}
         emptyState={creationEmptyState}
         pendingInsert={previewData ? undefined : pendingInsert ?? undefined}
-        suppressInsertionControls={floatingPanelOpen}
+        suppressInsertionControls={insertion != null}
         settingsNodes={settingsNodesProp}
         onSettingsNodeSelect={
           canEdit && settingsSurfaceVariant === 'b' ? handleSettingsNodeSelect : undefined
@@ -1263,6 +1285,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             isFallbackStep={panelIsFallbackStep}
             onExpandedChange={setFieldEditorExpanded}
             onDraftDirtyChange={setConfigPanelDirty}
+            onFragmentChange={panel.mode === 'insert' ? setLiveFragment : undefined}
+            keepNodeOnCancel={panel.mode === 'insert'}
           />
         </CanvasConfigPanelShell>
       )}

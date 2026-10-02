@@ -17,7 +17,7 @@ import {
   PENDING_NODE_HEIGHT,
   PENDING_NODE_WIDTH,
 } from './pending_insert';
-import { WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
+import { WORKFLOW_NODE_SEP, WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
 
 const wf = (steps: unknown[]): WorkflowYaml =>
   ({
@@ -51,7 +51,12 @@ describe('computePendingInsertOrigin', () => {
       { id: 'b', x: 0, y: 200 },
     ]);
     // Insert after 'a': ghost hangs gap below a's exit.
-    const origin = computePendingInsertOrigin({ mode: 'step', sourceNodeId: 'a' }, nodes, points, 'TB');
+    const origin = computePendingInsertOrigin(
+      { mode: 'step', sourceNodeId: 'a' },
+      nodes,
+      points,
+      'TB'
+    );
     expect(origin).toEqual({
       x: (0 + PENDING_NODE_WIDTH) / 2 - PENDING_NODE_WIDTH / 2,
       y: 100 + PENDING_NODE_HEIGHT + WORKFLOW_RANK_SEP,
@@ -65,7 +70,12 @@ describe('computePendingInsertOrigin', () => {
       { id: 'manual', x: 0, y: 0, type: 'trigger' },
       { id: 'a', x: 10, y: 80 },
     ]);
-    const origin = computePendingInsertOrigin({ mode: 'step', sourceNodeId: 'a' }, nodes, points, 'TB');
+    const origin = computePendingInsertOrigin(
+      { mode: 'step', sourceNodeId: 'a' },
+      nodes,
+      points,
+      'TB'
+    );
     expect(origin).toEqual({
       x: (10 + 10 + PENDING_NODE_WIDTH) / 2 - PENDING_NODE_WIDTH / 2,
       y: 80 + PENDING_NODE_HEIGHT + WORKFLOW_RANK_SEP,
@@ -85,12 +95,7 @@ describe('computePendingInsertOrigin', () => {
   it('returns undefined on a truly empty canvas so the UI can center the draft', () => {
     const workflow = wf([]);
     const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
-    const origin = computePendingInsertOrigin(
-      { mode: 'step' },
-      [],
-      points,
-      'TB'
-    );
+    const origin = computePendingInsertOrigin({ mode: 'step' }, [], points, 'TB');
     expect(origin).toBeUndefined();
   });
 

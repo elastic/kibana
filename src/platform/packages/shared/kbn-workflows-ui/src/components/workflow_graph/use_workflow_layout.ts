@@ -366,6 +366,13 @@ export function useWorkflowLayout({
         extent: parentId ? ('parent' as const) : undefined,
         width: pos.width,
         height: pos.height,
+        // Preserve `handleBounds` across layout changes by forwarding the
+        // layout-computed dimensions as `measured`. React Flow's `parseHandles`
+        // uses `userNode.measured` to decide whether to keep the existing
+        // `handleBounds` or reset it to `undefined`, which forces a
+        // ResizeObserver round-trip before edges can render. Seeding `measured`
+        // from the dagre layout avoids that timing gap for every non-bypass node.
+        measured: { width: pos.width, height: pos.height },
         targetPosition,
         sourcePosition,
         // Without `nopan`, panOnDrag swallows clicks on the card so selection
@@ -399,22 +406,50 @@ export function useWorkflowLayout({
       } else {
         position = { x: 0, y: 0 };
       }
+      const w = pos?.width ?? 1;
+      const h = pos?.height ?? 1;
       return {
         id,
         type: 'bypassLane',
         position,
         parentId,
         extent: parentId ? ('parent' as const) : undefined,
-        width: pos?.width ?? 1,
-        height: pos?.height ?? 1,
+        width: w,
+        height: h,
         selectable: false,
         style: {
-          width: pos?.width ?? 1,
-          height: pos?.height ?? 1,
+          width: w,
+          height: h,
           pointerEvents: 'none' as const,
         },
         targetPosition,
         sourcePosition,
+        // Provide explicit handles so React Flow can resolve edge endpoints
+        // immediately, without waiting for the ResizeObserver to fire. This
+        // fixes a race where bypass lane nodes — invisible structural nodes
+        // that represent empty branches — never get `handleBounds` set before
+        // EdgeWrapper calls `getEdgePosition`, causing all branch edges to
+        // render as null even when the bypass nodes are already in the DOM.
+        handles: [
+          {
+            type: 'target' as const,
+            position: targetPosition,
+            id: null,
+            x: 0,
+            y: 0,
+            width: w,
+            height: h,
+          },
+          {
+            type: 'source' as const,
+            position: sourcePosition,
+            id: null,
+            x: 0,
+            y: 0,
+            width: w,
+            height: h,
+          },
+        ],
         data: { traversed: branchTraversal.traversedBypassIds.has(id) },
       };
     });

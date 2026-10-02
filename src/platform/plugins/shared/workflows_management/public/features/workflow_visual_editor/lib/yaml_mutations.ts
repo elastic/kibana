@@ -9,8 +9,8 @@
 
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument } from 'yaml';
 import type { Node, Scalar, YAMLMap, YAMLSeq } from 'yaml';
-import { isNestedStepKey } from '@kbn/workflows-yaml';
 import type { BranchSlot } from '@kbn/workflows';
+import { isNestedStepKey } from '@kbn/workflows-yaml';
 
 /**
  * Canvas edit-mode mutations. Every function takes the full workflow YAML,
@@ -280,10 +280,9 @@ const resolveBranchSeq = (
     case 'case': {
       const cases = ownerNode.get('cases');
       if (!isSeq(cases)) return { error: 'No cases array on step' };
-      const caseItem = cases.items.find(
-        (item) => isMap(item) && item.get('match') === slot.match
-      );
-      if (!isMap(caseItem)) return { error: `Case "${slot.match}" not found` };
+      // Look up by index (robust against duplicate or empty match values).
+      const caseItem = cases.items[slot.index];
+      if (!isMap(caseItem)) return { error: `Case index ${slot.index} not found` };
       const existing = caseItem.get('steps');
       if (isSeq(existing)) return { seq: existing };
       const created = doc.createNode([]) as YAMLSeq;
@@ -296,12 +295,16 @@ const resolveBranchSeq = (
 /**
  * Inserts a step fragment into the branch sequence identified by `slot` on the
  * step named `ownerStepName`. Creates the branch sequence if absent.
+ *
+ * `position === 'start'` prepends the step (chip "+" inserts at the branch head).
+ * `position === 'end'` (default) appends the step.
  */
 export const insertStepIntoBranch = (
   yaml: string,
   stepFragment: string,
   ownerStepName: string,
-  slot: BranchSlot
+  slot: BranchSlot,
+  position: 'start' | 'end' = 'end'
 ): MutationResult => {
   const { doc, error } = parse(yaml);
   if (error) return fail(yaml, error);
@@ -311,7 +314,11 @@ export const insertStepIntoBranch = (
   if (!location) return fail(yaml, `Step "${ownerStepName}" not found`);
   const { seq, error: branchError } = resolveBranchSeq(doc, location.node, slot);
   if (!seq) return fail(yaml, branchError ?? 'Branch not found');
-  seq.items.push(node);
+  if (position === 'start') {
+    seq.items.unshift(node);
+  } else {
+    seq.items.push(node);
+  }
   return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
 };
 

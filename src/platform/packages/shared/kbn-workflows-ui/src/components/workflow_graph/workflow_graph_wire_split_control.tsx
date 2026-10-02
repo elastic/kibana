@@ -11,11 +11,11 @@ import { euiCanAnimate, euiFocusRing, EuiIcon, EuiToolTip, useEuiTheme } from '@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WireInsertionControl } from './compute_wire_insertion_controls';
-import { PORT_SPRING_EASE, PORT_SPRING_MS } from './workflow_graph_connection_ports';
 import type {
   WorkflowGraphAnchorRect,
   WorkflowGraphEditActions,
 } from './workflow_graph_actions_context';
+import { PORT_SPRING_EASE, PORT_SPRING_MS } from './workflow_graph_connection_ports';
 import { toAnchorRect } from './workflow_graph_insert_control';
 
 const CONTROL_SIZE = 22;
@@ -76,6 +76,7 @@ export function WorkflowGraphWireSplitControl({
       data-test-subj={`workflowGraphWireControl-${control.kind}`}
       data-control-id={control.id}
       data-direction={control.direction}
+      data-insert-context={JSON.stringify(control.insertContext)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)}

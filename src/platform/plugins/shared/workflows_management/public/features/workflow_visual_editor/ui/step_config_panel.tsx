@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiComboBox,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -21,7 +22,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiComboBox,
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
@@ -34,15 +34,25 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { ESQL_LANG_ID, XJSON_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { getBuiltInStepDefinition } from '@kbn/workflows';
-import { ensureWorkflowGraphEuiIcons, resolveNodeChipStyle, stepSupportsErrorHandling, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import {
+  ensureWorkflowGraphEuiIcons,
+  resolveNodeChipStyle,
+  stepSupportsErrorHandling,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '@kbn/workflows-ui';
+import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
+import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
+import { ReferenceCapableField } from './reference_capable_field';
+import { StepErrorHandlingSection } from './step_error_handling_section';
+import { SwitchCasesField } from './switch_cases_field';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
@@ -51,17 +61,9 @@ import {
   getStepFormSchema,
   isEmptyFieldValue,
   isFieldValueRepresentable,
-  validateStepField,
   type StepFormField,
+  validateStepField,
 } from '../lib/step_form_schema';
-import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
-import { SwitchCasesField } from './switch_cases_field';
-import {
-  FlyoutMonacoFrame,
-  getFlyoutMonacoEditorOptions,
-} from './flyout_monaco_frame';
-import { ReferenceCapableField } from './reference_capable_field';
-import { StepErrorHandlingSection } from './step_error_handling_section';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -97,6 +99,16 @@ export interface StepConfigPanelProps {
    * snapshot — used to gate canvas navigation (selecting another step).
    */
   readonly onDraftDirtyChange?: (dirty: boolean) => void;
+  /**
+   * Fires on every draft change with the current fragment string — used for
+   * live graph preview while the flyout is open (insert mode only).
+   */
+  readonly onFragmentChange?: (fragment: string) => void;
+  /**
+   * When true and mode is 'insert', the ✕ button commits the draft fragment
+   * instead of discarding it — the node stays on the canvas for later editing.
+   */
+  readonly keepNodeOnCancel?: boolean;
 }
 
 const CODE_EDITOR_HEIGHT = 160;
@@ -219,6 +231,7 @@ export function resetStepConfigPanelSessionStateForTests(): void {
 }
 
 export function StepConfigPanel({
+  mode,
   stepType,
   actionLabel,
   initialFragment,
@@ -229,6 +242,8 @@ export function StepConfigPanel({
   isFallbackStep = false,
   onExpandedChange,
   onDraftDirtyChange,
+  onFragmentChange,
+  keepNodeOnCancel = false,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -270,6 +285,11 @@ export function StepConfigPanel({
     },
     [onDraftDirtyChange]
   );
+
+  // Notify the canvas shell of every draft change so it can power live graph preview.
+  useEffect(() => {
+    onFragmentChange?.(fragment);
+  }, [fragment, onFragmentChange]);
 
   const handleSettingsToggle = useCallback((isOpen: boolean) => {
     settingsAccordionOpenForPage = isOpen;
@@ -492,14 +512,21 @@ export function StepConfigPanel({
 
   // Cancel / X / Escape share one close-attempt path: dirty draft → confirm, else close.
   // Skip while the step-name editor is active (Escape there reverts the name instead).
+  // When keepNodeOnCancel is on and mode is 'insert', X commits the draft instead of
+  // prompting — the caller (stateful) persists it via its onCancel handler.
   const attemptClose = useCallback(() => {
     if (isEditingNameRef.current) return;
+    if (mode === 'insert' && keepNodeOnCancel) {
+      // Commit: onCancel signals the stateful shell to persist via insertFragment.
+      onCancel();
+      return;
+    }
     if (isDraftDirty(fragment, initialFragment)) {
       setShowDiscardConfirm(true);
       return;
     }
     onCancel();
-  }, [fragment, initialFragment, onCancel]);
+  }, [mode, keepNodeOnCancel, fragment, initialFragment, onCancel]);
 
   const handleKeepEditing = useCallback(() => {
     setShowDiscardConfirm(false);
@@ -615,9 +642,7 @@ export function StepConfigPanel({
               <span
                 css={[
                   { color: chip.iconColor, display: 'inline-flex', lineHeight: 0 },
-                  chip.iconColor
-                    ? { '& svg, & svg *': { fill: chip.iconColor } }
-                    : undefined,
+                  chip.iconColor ? { '& svg, & svg *': { fill: chip.iconColor } } : undefined,
                 ]}
               >
                 <StepIcon
@@ -942,26 +967,23 @@ export function StepConfigPanel({
           paddingInline: euiTheme.size.base,
         }}
       >
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={attemptClose}
-                data-test-subj="workflowStepConfigPanelCancel"
-              >
-                {i18n.translate('workflows.stepConfigPanel.cancel', { defaultMessage: 'Cancel' })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={handleSave}
-                isDisabled={!parsed.valid || hasBlockingDraftErrors}
-                data-test-subj="workflowStepConfigPanelSave"
-              >
-                {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Done' })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={attemptClose} data-test-subj="workflowStepConfigPanelCancel">
+              {i18n.translate('workflows.stepConfigPanel.cancel', { defaultMessage: 'Cancel' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={handleSave}
+              isDisabled={!parsed.valid || hasBlockingDraftErrors}
+              data-test-subj="workflowStepConfigPanelSave"
+            >
+              {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Done' })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
 
       {expandedField ? (
@@ -981,9 +1003,7 @@ export function StepConfigPanel({
             value={expandedFieldValue}
             onChange={handleExpandedFieldChange}
             catalog={referenceCatalog}
-            language={
-              expandedField.kind === 'code' ? expandedField.language : undefined
-            }
+            language={expandedField.kind === 'code' ? expandedField.language : undefined}
             onBack={handleFieldEditorBack}
             onCloseStack={attemptClose}
           />
@@ -1223,10 +1243,7 @@ function StepForm({
         },
       }}
     >
-      <div
-        data-test-subj="workflowStepConfigPanelForm"
-        css={{ paddingTop: 12 }}
-      >
+      <div data-test-subj="workflowStepConfigPanelForm" css={{ paddingTop: 12 }}>
         {fields.length === 0 ? (
           <EuiEmptyPrompt
             paddingSize="m"
@@ -1331,13 +1348,10 @@ function StepFieldRow({
   // parent re-creates the callback identity on every render.
   useEffect(() => () => onDraftErrorChangeRef.current(undefined), []);
 
-  const setDraftError = useCallback(
-    (error: string | undefined) => {
-      setJsonDraftError(error);
-      onDraftErrorChangeRef.current(error);
-    },
-    []
-  );
+  const setDraftError = useCallback((error: string | undefined) => {
+    setJsonDraftError(error);
+    onDraftErrorChangeRef.current(error);
+  }, []);
 
   const optionalLabel = i18n.translate('workflows.stepConfigPanel.optional', {
     defaultMessage: 'Optional',
@@ -1353,7 +1367,8 @@ function StepFieldRow({
   const showYamlKeyHint = fieldLabelDivergesFromKey(field.key, field.label);
 
   const accuseIfInvalid = useCallback(() => {
-    const nextError = jsonDraftError ?? (representable ? validateStepField(field, value) : undefined);
+    const nextError =
+      jsonDraftError ?? (representable ? validateStepField(field, value) : undefined);
     if (nextError) setAccused(true);
   }, [jsonDraftError, representable, field, value]);
 
@@ -1469,7 +1484,10 @@ function StepFieldRow({
     });
 
     const exprToggleButton = (
-      <EuiToolTip content={exprMode ? switchToTypedLabel : switchToExprLabel} disableScreenReaderOutput>
+      <EuiToolTip
+        content={exprMode ? switchToTypedLabel : switchToExprLabel}
+        disableScreenReaderOutput
+      >
         <EuiButtonIcon
           iconType={exprMode ? 'apps' : 'code'}
           size="xs"
@@ -1500,7 +1518,14 @@ function StepFieldRow({
               onChange={onChange}
               onExpand={onExpand}
             >
-              {({ value: textValue, teachingPlaceholder, appendControls, reportChange, attachInputRef, isOpen }) => (
+              {({
+                value: textValue,
+                teachingPlaceholder,
+                appendControls,
+                reportChange,
+                attachInputRef,
+                isOpen,
+              }) => (
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -1543,7 +1568,14 @@ function StepFieldRow({
             flexWrap: 'wrap',
           }}
         >
-          <div css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s, minWidth: 0 }}>
+          <div
+            css={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: euiTheme.size.s,
+              minWidth: 0,
+            }}
+          >
             <label htmlFor={switchId} css={{ cursor: 'pointer' }}>
               {labelContent}
             </label>
@@ -1597,7 +1629,10 @@ function StepFieldRow({
         defaultMessage: 'Switch to typed mode',
       });
       const numExprToggle = (
-        <EuiToolTip content={numExprMode ? numSwitchToTypedLabel : numSwitchToExprLabel} disableScreenReaderOutput>
+        <EuiToolTip
+          content={numExprMode ? numSwitchToTypedLabel : numSwitchToExprLabel}
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             iconType={numExprMode ? 'apps' : 'code'}
             size="xs"
@@ -1618,7 +1653,14 @@ function StepFieldRow({
               onChange={onChange}
               onExpand={onExpand}
             >
-              {({ value: textValue, teachingPlaceholder, appendControls, reportChange, attachInputRef, isOpen }) => (
+              {({
+                value: textValue,
+                teachingPlaceholder,
+                appendControls,
+                reportChange,
+                attachInputRef,
+                isOpen,
+              }) => (
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -1643,9 +1685,7 @@ function StepFieldRow({
               fullWidth
               isInvalid={isInvalid}
               value={typeof value === 'number' || typeof value === 'string' ? value : ''}
-              onChange={(e) =>
-                onChange(e.target.value === '' ? undefined : Number(e.target.value))
-              }
+              onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))}
               onBlur={accuseIfInvalid}
               append={numExprToggle}
               data-test-subj={testSubj}
@@ -1698,7 +1738,10 @@ function StepFieldRow({
         </StepValidatedFormRow>
       );
     case 'switch-cases': {
-      type CaseItem = { match: unknown; steps: unknown[] };
+      interface CaseItem {
+        match: unknown;
+        steps: unknown[];
+      }
       const casesArray = Array.isArray(value) ? (value as CaseItem[]) : [];
       const addCaseLabel = i18n.translate('workflows.stepConfigPanel.switchCases.addCase', {
         defaultMessage: 'Add case',
@@ -1718,10 +1761,7 @@ function StepFieldRow({
         >
           <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}>
             {casesArray.map((caseItem, idx) => (
-              <div
-                key={idx}
-                css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
-              >
+              <div key={idx} css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -1761,11 +1801,17 @@ function StepFieldRow({
       );
     }
     case 'parallel-branches': {
-      type BranchItem = { name?: unknown; steps: unknown[] };
+      interface BranchItem {
+        name?: unknown;
+        steps: unknown[];
+      }
       const branchesArray = Array.isArray(value) ? (value as BranchItem[]) : [];
-      const addBranchLabel = i18n.translate('workflows.stepConfigPanel.parallelBranches.addBranch', {
-        defaultMessage: 'Add branch',
-      });
+      const addBranchLabel = i18n.translate(
+        'workflows.stepConfigPanel.parallelBranches.addBranch',
+        {
+          defaultMessage: 'Add branch',
+        }
+      );
       const deleteBranchLabel = i18n.translate(
         'workflows.stepConfigPanel.parallelBranches.deleteBranch',
         { defaultMessage: 'Delete branch' }
@@ -1782,10 +1828,7 @@ function StepFieldRow({
         >
           <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}>
             {branchesArray.map((branch, idx) => (
-              <div
-                key={idx}
-                css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
-              >
+              <div key={idx} css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -2010,9 +2053,7 @@ function CodeField({
               value={draft}
               onChange={(text, event) => {
                 const last = event?.changes?.[event.changes.length - 1];
-                const caret = last
-                  ? last.rangeOffset + last.text.length
-                  : text.length;
+                const caret = last ? last.rangeOffset + last.text.length : text.length;
                 reportChange(text, caret);
               }}
               height={editorHeight}
@@ -2092,13 +2133,7 @@ function CodeField({
       onChange={applyDraft}
       onExpand={onExpand}
     >
-      {({
-        teachingPlaceholder,
-        appendControls,
-        reportChange,
-        attachInputRef,
-        isOpen,
-      }) => (
+      {({ teachingPlaceholder, appendControls, reportChange, attachInputRef, isOpen }) => (
         <EuiFieldText
           compressed
           fullWidth
@@ -2127,4 +2162,3 @@ function CodeField({
     </ReferenceCapableField>
   );
 }
-

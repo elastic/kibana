@@ -27,31 +27,25 @@ import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
-import { deslugifyStepName } from './deslugify_step_name';
-import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { aiIconTileCss } from './ai_icon_tile';
+import { deslugifyStepName } from './deslugify_step_name';
+import { handleAlongStyle, IF_PORT_FALSE, IF_PORT_TRUE, STEP_PORT } from './port_geometry';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
-
-/** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
-const FAILURE_PORT_RIGHT_INSET = 24;
+import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type {
   NodeConfigWarningReason,
   RenderStepIcon,
   WorkflowGraphEditActions,
 } from './workflow_graph_actions_context';
-import { FORK_BUS_TRUNK } from './compute_edge_path';
-import {
-  handleAlongStyle,
-  IF_PORT_FALSE,
-  IF_PORT_TRUE,
-  STEP_PORT,
-} from './port_geometry';
 import { WorkflowGraphConnectionPorts } from './workflow_graph_connection_ports';
-import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
+
+/** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
+const FAILURE_PORT_RIGHT_INSET = 24;
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -269,9 +263,7 @@ function NodeIconChip({
                 width: CHIP_SIZE,
                 height: CHIP_SIZE,
               }),
-          ...(useAiGradient
-            ? {}
-            : { background, border: `1px solid ${border}` }),
+          ...(useAiGradient ? {} : { background, border: `1px solid ${border}` }),
           borderRadius,
           display: 'flex',
           alignItems: 'center',
@@ -406,8 +398,7 @@ function NodeFailureBadge({
     });
   } else if (maxAttempts != null) {
     tooltip = i18n.translate('workflowsUi.graphNode.failureBadge.retryTooltip', {
-      defaultMessage:
-        'Retries {count}× ({delay} delay), then the workflow stops if it still fails',
+      defaultMessage: 'Retries {count}× ({delay} delay), then the workflow stops if it still fails',
       values: { count: maxAttempts, delay: delay ?? '5s' },
     });
   } else {
@@ -813,8 +804,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const borderRadius = NODE_BORDER_RADIUS;
   const chipBorderRadius = CHIP_BORDER_RADIUS;
 
-  const canShowRun =
-    Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;
+  const canShowRun = Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;
   const isFallback = Boolean(fallbackOf);
   const nodeKind: NodeKind = isTriggerNode ? 'trigger' : isFallback ? 'fallback' : 'step';
   const configWarningReason = nodeConfigWarnings?.get(node.id);
@@ -973,9 +963,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           </span>
         </div>
 
-        {configWarningReason ? (
-          <NodeConfigWarningIndicator reason={configWarningReason} />
-        ) : null}
+        {configWarningReason ? <NodeConfigWarningIndicator reason={configWarningReason} /> : null}
 
         {colors.hasStatusIcon && (
           <NodeStatusIcon
@@ -1054,7 +1042,12 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               type="source"
               id="fallback"
               position={Position.Bottom}
-              style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+              style={{
+                opacity: 0,
+                right: FAILURE_PORT_RIGHT_INSET,
+                left: 'auto',
+                transform: 'none',
+              }}
             />
           )}
         </>

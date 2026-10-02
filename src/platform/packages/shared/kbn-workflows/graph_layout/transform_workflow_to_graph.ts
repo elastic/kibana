@@ -471,13 +471,17 @@ function transformInternal(
         if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
           // Empty case — synthesize a bypass lane so the branch is visible
           // while the author is still filling in steps on the canvas.
+          // Width 80 (matching the if-bypass minimum) prevents offsetWidth=0
+          // in React Flow's updateNodeInternals, which gates handleBounds on
+          // dimensions.width && dimensions.height being truthy (non-zero).
           const bypassId = ids.allocate(`${step.name}-case-${idx}-bypass`);
-          bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+          bypassLaneNodes.push({ id: bypassId, style: { width: 80, height: 1 } });
           edges.push({
             id: `${id}:${bypassId}-case-${idx}`,
             source: id,
             target: bypassId,
             branchType: 'switch',
+            branchIndex: idx,
             label: matchLabel,
           });
           branchExits.push(bypassId);
@@ -499,6 +503,7 @@ function transformInternal(
             source: id,
             target: firstId,
             branchType: 'switch',
+            branchIndex: idx,
             label: matchLabel,
           });
         }
@@ -532,7 +537,7 @@ function transformInternal(
         // 'default' so the implicit fall-through renders as a balanced, labeled
         // lane aside instead of an unlabeled edge from the gate.
         const bypassId = ids.allocate(`${step.name}-default-bypass`);
-        bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+        bypassLaneNodes.push({ id: bypassId, style: { width: 80, height: 1 } });
         edges.push({
           id: `${id}:${bypassId}-default`,
           source: id,
@@ -546,7 +551,7 @@ function transformInternal(
       if (branchExits.length > 0) {
         const swExitIds = dedupeIds(branchExits);
         const joinId = ids.allocate(`${step.name}-join`);
-        bypassLaneNodes.push({ id: joinId, style: { width: 1, height: 1 } });
+        bypassLaneNodes.push({ id: joinId, style: { width: 80, height: 1 } });
         for (const exitId of swExitIds) {
           edges.push({ id: `${exitId}:${joinId}`, source: exitId, target: joinId });
         }

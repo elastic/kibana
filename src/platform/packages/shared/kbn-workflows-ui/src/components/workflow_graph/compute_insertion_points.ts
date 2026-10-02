@@ -69,7 +69,9 @@ const slotKey = (slot: BranchSlot): string => {
     case 'branch':
       return `branch:${slot.index}`;
     case 'case':
-      return `case:${slot.match}`;
+      // Key by index (not match) so freshly-added cases with match:'' don't collide.
+      // compute_wire_insertion_controls.ts uses branchIndex for switch edges to match.
+      return `case:${slot.index}`;
     case 'default':
       return 'default';
   }
@@ -103,7 +105,7 @@ export function computeInsertionPoints(
   const byNodeId = new Map<string, NodePortTargets>();
   const topLevelStepNodeIds: string[] = [];
 
-  const steps = Array.isArray(workflow?.steps) ? (workflow!.steps as Step[]) : [];
+  const steps = Array.isArray(workflow?.steps) ? (workflow?.steps as Step[]) : [];
 
   // Collect top-level node ids in declaration order.
   for (const step of steps) {
@@ -113,10 +115,11 @@ export function computeInsertionPoints(
 
   // Trigger ports: flow port inserts at the first position in top-level steps.
   for (const [id, ref] of Object.entries(nodeRefs)) {
-    if (ref.kind !== 'trigger') continue;
-    byNodeId.set(id, {
-      step: { sourceNodeId: id, isTerminal: steps.length === 0 },
-    });
+    if (ref.kind === 'trigger') {
+      byNodeId.set(id, {
+        step: { sourceNodeId: id, isTerminal: steps.length === 0 },
+      });
+    }
   }
 
   const walkStep = (step: Step, isLastInSeq: boolean): void => {
@@ -131,7 +134,10 @@ export function computeInsertionPoints(
         : undefined;
     const isContainerType = type === 'foreach' || type === 'while';
 
-    const branches = new Map<string, { slot: BranchSlot; ownerStepName: string; isTerminal: boolean }>();
+    const branches = new Map<
+      string,
+      { slot: BranchSlot; ownerStepName: string; isTerminal: boolean }
+    >();
     let hasBranches = false;
 
     visitStepChildSlots(step, (slot, childSteps) => {
@@ -139,7 +145,11 @@ export function computeInsertionPoints(
       if (slot.kind === 'fallback' || slot.kind === 'iteration-fallback') return;
 
       hasBranches = true;
-      branches.set(slotKey(slot), { slot, ownerStepName: step.name, isTerminal: childSteps.length === 0 });
+      branches.set(slotKey(slot), {
+        slot,
+        ownerStepName: step.name,
+        isTerminal: childSteps.length === 0,
+      });
 
       // Recurse into the slot's children.
       childSteps.forEach((child, idx) => {
@@ -152,7 +162,11 @@ export function computeInsertionPoints(
     // node gets a branch port (the body + button) even when the body is empty.
     if (isContainerType && !hasBranches) {
       hasBranches = true;
-      branches.set('steps', { slot: { kind: 'steps' }, ownerStepName: step.name, isTerminal: true });
+      branches.set('steps', {
+        slot: { kind: 'steps' },
+        ownerStepName: step.name,
+        isTerminal: true,
+      });
     }
 
     // if steps always present both 'then' (steps) and 'else' branch ports,
@@ -162,12 +176,30 @@ export function computeInsertionPoints(
     if (type === 'if') {
       if (!branches.has('steps')) {
         hasBranches = true;
-        branches.set('steps', { slot: { kind: 'steps' }, ownerStepName: step.name, isTerminal: true });
+        branches.set('steps', {
+          slot: { kind: 'steps' },
+          ownerStepName: step.name,
+          isTerminal: true,
+        });
       }
       if (!branches.has('else')) {
         hasBranches = true;
-        branches.set('else', { slot: { kind: 'else' }, ownerStepName: step.name, isTerminal: true });
+        branches.set('else', {
+          slot: { kind: 'else' },
+          ownerStepName: step.name,
+          isTerminal: true,
+        });
       }
+    }
+    // switch always gets a 'default' branch port so the implicit default lane
+    // produced by the transform is always selectable (even with 0 explicit cases).
+    if (type === 'switch' && !branches.has('default')) {
+      hasBranches = true;
+      branches.set('default', {
+        slot: { kind: 'default' },
+        ownerStepName: step.name,
+        isTerminal: true,
+      });
     }
 
     const supportsFallback = stepSupportsErrorHandling(type);
@@ -181,10 +213,11 @@ export function computeInsertionPoints(
         ? new Map([...branches].filter(([k]) => k !== 'steps'))
         : branches;
 
-      // Fork nodes (if/switch/parallel) get an "after block" step port when they are
-      // the last step in their sequence. This produces the single "+" below the merge
-      // point. Container types already have this port unconditionally (line below).
-      const isForkType = !isContainerType && (type === 'if' || type === 'switch' || type === 'parallel');
+      // Fork nodes (if/switch/parallel) always get an "after block" step port.
+      // This produces the single "+" below the merge point whether or not there
+      // is a step after the fork. Container types get this port unconditionally too.
+      const isForkType =
+        !isContainerType && (type === 'if' || type === 'switch' || type === 'parallel');
 
       byNodeId.set(id, {
         branches: effectiveBranches.size > 0 ? effectiveBranches : undefined,
@@ -193,8 +226,8 @@ export function computeInsertionPoints(
         // relaxed for containers — a step after a loop is a common pattern.
         ...(isContainerType
           ? { step: { sourceNodeId: id, stepName: step.name, isTerminal: isLastInSeq } }
-          : isForkType && isLastInSeq
-          ? { step: { sourceNodeId: id, stepName: step.name, isTerminal: true } }
+          : isForkType
+          ? { step: { sourceNodeId: id, stepName: step.name, isTerminal: isLastInSeq } }
           : {}),
         ...(supportsFallback
           ? hasFallbackSteps(step)

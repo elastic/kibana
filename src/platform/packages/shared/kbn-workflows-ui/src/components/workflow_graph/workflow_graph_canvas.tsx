@@ -209,10 +209,7 @@ const boundsFromNodes = (nodes: readonly Node[]): GraphBounds | undefined => {
  * shift triggers away from the center-top (TB) / center-left (LR) landing.
  * Falls back to the full graph when there are no triggers yet.
  */
-const getHomeFrameBounds = (
-  nodes: readonly Node[],
-  fallback: GraphBounds
-): GraphBounds => {
+const getHomeFrameBounds = (nodes: readonly Node[], fallback: GraphBounds): GraphBounds => {
   // Frame the leading rank: settings (when present) + triggers so the home
   // view keeps both rows in view under TOP_PADDING.
   // Prefer the settings group (absolute) over child cards (parent-relative).
@@ -640,11 +637,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   // error-path placeholder needs a lane inserted (same algorithm as committed layout).
   const pendingErrorPlacement = useMemo(() => {
     if (!edit || !pendingInsert || pendingInsert.context.mode !== 'error') return undefined;
-    return computePendingErrorBranchPlacement(
-      pendingInsert.context.stepId,
-      nodes,
-      direction
-    );
+    return computePendingErrorBranchPlacement(pendingInsert.context.stepId, nodes, direction);
   }, [edit, pendingInsert, nodes, direction]);
 
   const nodesWithPendingLane = useMemo(() => {
@@ -677,10 +670,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     });
   }, [nodesWithPendingLane, selectedStepId, settingsNodes?.selectedKind]);
 
-  const {
-    nodes: animatedNodes,
-    edges: animatedEdges,
-  } = useInsertLayoutAnimation({
+  const { nodes: animatedNodes, edges: animatedEdges } = useInsertLayoutAnimation({
     nodes: decoratedNodes,
     edges: layoutEdges,
     flashNodeId,
@@ -1195,7 +1185,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 </Panel>
               )}
               {edit && (
-                <Panel position="top-right" style={{ margin: CORNER_CONTROLS_INSET }}>
+                <Panel position="top-right" style={{ margin: WORKFLOWS_CANVAS_CHROME_INSET }}>
                   <WorkflowSettingsPanel />
                 </Panel>
               )}
@@ -1240,7 +1230,10 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               )}
             </ReactFlow>
           </GraphErrorBoundary>
-          {edit && isEmptyWorkflow && !pendingInsert && (emptyState ?? <WorkflowGraphEmptyAddTrigger edit={edit} />)}
+          {edit &&
+            isEmptyWorkflow &&
+            !pendingInsert &&
+            (emptyState ?? <WorkflowGraphEmptyAddTrigger edit={edit} />)}
         </div>
       </div>
     </WorkflowGraphActionsContext.Provider>

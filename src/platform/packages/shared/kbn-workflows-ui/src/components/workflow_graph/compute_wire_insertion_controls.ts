@@ -11,8 +11,8 @@ import type { Edge, Node } from '@xyflow/react';
 import type { EdgeBranchType, LayoutDirection } from '@kbn/workflows';
 import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, MERGE_BUS_TRUNK } from './compute_edge_path';
 import type { InsertionPoints, NodePortTargets } from './compute_insertion_points';
-import type { WorkflowGraphInsertionContext } from './workflow_graph_actions_context';
 import { stepSupportsErrorHandling } from './step_supports_error_handling';
+import type { WorkflowGraphInsertionContext } from './workflow_graph_actions_context';
 /**
  * Stub length from the last node's exit edge to the terminal + tip.
  * Longer than inter-rank spacing so the terminal insert control is visually
@@ -60,10 +60,7 @@ interface AbsBounds {
 }
 
 /** Absolute (flow-space) bounds; walks parentId chain for nested nodes. */
-export function absoluteNodeBounds(
-  node: Node,
-  byId: ReadonlyMap<string, Node>
-): AbsBounds {
+export function absoluteNodeBounds(node: Node, byId: ReadonlyMap<string, Node>): AbsBounds {
   let { x, y } = node.position;
   let parent = node.parentId ? byId.get(node.parentId) : undefined;
   while (parent) {
@@ -77,10 +74,7 @@ export function absoluteNodeBounds(
 }
 
 /** Midpoint of a segment — the rule every control position must use. */
-export function segmentMidpoint(
-  start: WireSegmentPoint,
-  end: WireSegmentPoint
-): WireSegmentPoint {
+export function segmentMidpoint(start: WireSegmentPoint, end: WireSegmentPoint): WireSegmentPoint {
   return {
     x: (start.x + end.x) / 2,
     y: (start.y + end.y) / 2,
@@ -207,8 +201,6 @@ export function computeWireInsertionControls(args: {
   const controls: WireInsertionControl[] = [];
   /** Keys `${sourceId}:${handle}` that already have a wire control. */
   const wiredExits = new Set<string>();
-  /** Merge targets that already have a shared-trunk control. */
-  const mergeTargetsSeen = new Set<string>();
 
   // Reverse of forkNodeToJoinId: join-node-id → fork-node-id.
   const joinToForkId: ReadonlyMap<string, string> = forkNodeToJoinId
@@ -218,14 +210,15 @@ export function computeWireInsertionControls(args: {
   for (const edge of edges) {
     if (isFailureEdge(edge)) continue;
 
-    // Join-node sources: the edge join → next-step uses the fork node's step port.
+    // Join-node sources: the edge join → next-step uses the fork node's "after" context.
     const joinedForkId = joinToForkId.get(edge.source);
     if (joinedForkId) {
       const forkPorts = insertionPoints.byNodeId.get(joinedForkId);
-      if (forkPorts?.step) {
-        const ctx: WorkflowGraphInsertionContext = forkPorts.step.stepName
-          ? { mode: 'after', stepName: forkPorts.step.stepName }
-          : { mode: 'prepend-step' };
+      // Fork nodes always have a step port now (compute_insertion_points.ts).
+      // Derive the context from either the step port or by node ref lookup.
+      const forkStepName = forkPorts?.step?.stepName;
+      if (forkStepName) {
+        const ctx: WorkflowGraphInsertionContext = { mode: 'after', stepName: forkStepName };
         wiredExits.add(`${edge.source}:step`);
         const srcNode = byId.get(edge.source);
         const tgtNode = byId.get(edge.target);
@@ -241,99 +234,109 @@ export function computeWireInsertionControls(args: {
             segmentStart: s,
             segmentEnd: e,
             insertContext: ctx,
-            fallbackStepName: fallbackStepNameFor(forkPorts, srcNode),
+            fallbackStepName: fallbackStepNameFor(forkPorts ?? {}, srcNode),
             direction,
           });
         }
       }
-      continue;
+    } else {
+      const ports = insertionPoints.byNodeId.get(edge.source);
+      if (!ports) continue;
+      // For switch/parallel branch edges the React Flow sourceHandle is not set
+      // to the case/branch key (nodes don't mount a named handle per case/branch).
+      // Derive the logical branch key from edge data so insertionPoints can be
+      // looked up correctly, independently of the rendered handle.
+      const edgeData = edge.data as
+        | { branchType?: EdgeBranchType; branchIndex?: number; label?: string }
+        | undefined;
+      const handleKey =
+        edgeData?.branchType === 'switch'
+          ? edgeData.label === 'default'
+            ? 'default'
+            : typeof edgeData?.branchIndex === 'number'
+            ? `case:${edgeData.branchIndex}`
+            : `case:${edgeData.label}`
+          : typeof edgeData?.branchIndex === 'number'
+          ? `branch:${edgeData.branchIndex}`
+          : edge.sourceHandle ?? 'step';
+
+      const insertContext = resolveInsertContext(ports, handleKey);
+      if (!insertContext) continue;
+
+      const sourceNode = byId.get(edge.source);
+      const targetNode = byId.get(edge.target);
+      if (!sourceNode || !targetNode) continue;
+
+      const sourceBounds = absoluteNodeBounds(sourceNode, byId);
+      const targetBounds = absoluteNodeBounds(targetNode, byId);
+      const start = exitPoint(sourceBounds, direction);
+      const end = entryPoint(targetBounds, direction);
+
+      wiredExits.add(`${edge.source}:${handleKey}`);
+
+      const merge = isMergeEdge(edge);
+      const fork = !merge && isForkEdge(edge);
+
+      if (fork) {
+        // Fork branch head "+" sits below the chip label (always visible, like a terminal).
+        // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET below the source exit.
+        const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
+        // "+" centre: 14px below chip centre (chip half-height≈10, 4px gap).
+        const CHIP_PLUS_GAP = 14;
+        const chipX = direction === 'LR' ? start.x + chipOffset : end.x;
+        const chipY = direction === 'LR' ? end.y : start.y + chipOffset;
+        const plusX = chipX;
+        const plusY = direction === 'LR' ? chipY : chipY + CHIP_PLUS_GAP;
+        const plusPos = { x: plusX, y: plusY };
+        // Use position:'start' so clicking this "+" prepends to the branch.
+        const headContext: WorkflowGraphInsertionContext =
+          insertContext.mode === 'branch' ? { ...insertContext, position: 'start' } : insertContext;
+        controls.push({
+          id: `terminal:fork:${edge.id}`,
+          kind: 'terminal',
+          centre: plusPos,
+          segmentStart: { x: chipX, y: chipY },
+          segmentEnd: plusPos,
+          insertContext: headContext,
+          fallbackStepName: fallbackStepNameFor(ports, sourceNode),
+          direction,
+        });
+      } else if (merge) {
+        // Merge (fan-in) edges: emit a branch-tail terminal just below the branch's
+        // last step (the source of this merge edge). One per non-bypass fan-in edge —
+        // bypass nodes have no insertion ports so they're filtered out naturally.
+        // Always visible (kind: 'terminal'). Context: `after <leaf step>`.
+        // Only emit if the source has an actual step port (non-bypass).
+        if (insertContext.mode === 'after' || insertContext.mode === 'prepend-step') {
+          // Place the terminal just below the leaf (source) node, not on the wire.
+          const tip = terminalTip(start, direction);
+          controls.push({
+            id: `terminal:branch-tail:${edge.id}`,
+            kind: 'terminal',
+            centre: tip,
+            segmentStart: start,
+            segmentEnd: tip,
+            insertContext,
+            fallbackStepName: fallbackStepNameFor(ports, sourceNode),
+            direction,
+          });
+        }
+      } else {
+        // Plain sequential edge: midpoint of the full source→target segment.
+        const centre = segmentMidpoint(start, end);
+        controls.push({
+          id: `wire:${edge.id}`,
+          kind: 'wire',
+          centre,
+          segmentStart: start,
+          segmentEnd: end,
+          insertContext,
+          // on-failure is a property of the upstream step, not the edge.
+          fallbackStepName: fallbackStepNameFor(ports, sourceNode),
+          direction,
+        });
+      }
     }
-
-    const ports = insertionPoints.byNodeId.get(edge.source);
-    if (!ports) continue;
-    // For switch/parallel branch edges the React Flow sourceHandle is not set
-    // to the case/branch key (nodes don't mount a named handle per case/branch).
-    // Derive the logical branch key from edge data so insertionPoints can be
-    // looked up correctly, independently of the rendered handle.
-    const edgeData = edge.data as
-      | { branchType?: EdgeBranchType; branchIndex?: number; label?: string }
-      | undefined;
-    const handleKey =
-      edgeData?.branchType === 'switch'
-        ? edgeData.label === 'default'
-          ? 'default'
-          : `case:${edgeData.label}`
-        : typeof edgeData?.branchIndex === 'number'
-        ? `branch:${edgeData.branchIndex}`
-        : edge.sourceHandle ?? 'step';
-
-    const insertContext = resolveInsertContext(ports, handleKey);
-    if (!insertContext) continue;
-
-    const sourceNode = byId.get(edge.source);
-    const targetNode = byId.get(edge.target);
-    if (!sourceNode || !targetNode) continue;
-
-    const sourceBounds = absoluteNodeBounds(sourceNode, byId);
-    const targetBounds = absoluteNodeBounds(targetNode, byId);
-    const start = exitPoint(sourceBounds, direction);
-    const end = entryPoint(targetBounds, direction);
-
-    wiredExits.add(`${edge.source}:${handleKey}`);
-
-    const merge = isMergeEdge(edge);
-    if (merge && mergeTargetsSeen.has(edge.target)) {
-      // Shared lower trunk already has a control from an earlier fan-in edge.
-      continue;
-    }
-    if (merge) mergeTargetsSeen.add(edge.target);
-
-    const fork = !merge && isForkEdge(edge);
-
-    if (fork) {
-      // Fork branch "+" sits below the chip label (always visible, like a terminal).
-      // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET below the source exit.
-      const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
-      // "+" centre: 14px below chip centre (chip half-height=10, 4px gap).
-      const CHIP_PLUS_GAP = 14;
-      const chipX = direction === 'LR' ? start.x + chipOffset : end.x;
-      const chipY = direction === 'LR' ? end.y : start.y + chipOffset;
-      const plusX = chipX;
-      const plusY = direction === 'LR' ? chipY : chipY + CHIP_PLUS_GAP;
-      const plusPos = { x: plusX, y: plusY };
-      controls.push({
-        id: `terminal:fork:${edge.id}`,
-        kind: 'terminal',
-        centre: plusPos,
-        segmentStart: { x: chipX, y: chipY },
-        segmentEnd: plusPos,
-        insertContext,
-        fallbackStepName: fallbackStepNameFor(ports, sourceNode),
-        direction,
-      });
-      continue;
-    }
-
-    // Merge trunks: sit on the post-curve approach stub.
-    // Plain sequential edges: midpoint of the full source→target segment.
-    const useApproachTrunk = merge;
-    const trunkLength = MERGE_BUS_TRUNK;
-    const segment = useApproachTrunk
-      ? approachTrunkSegment(end, direction, trunkLength)
-      : { start, end };
-    const centre = segmentMidpoint(segment.start, segment.end);
-
-    controls.push({
-      id: merge ? `wire:merge:${edge.target}` : `wire:${edge.id}`,
-      kind: 'wire',
-      centre,
-      segmentStart: segment.start,
-      segmentEnd: segment.end,
-      insertContext,
-      // on-failure is a property of the upstream step, not the edge.
-      fallbackStepName: fallbackStepNameFor(ports, sourceNode),
-      direction,
-    });
   }
 
   // Pre-compute the branch floor for each fork node (max exit of branch targets).

@@ -8,15 +8,14 @@
  */
 
 import type { Edge, Node } from '@xyflow/react';
+import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK } from './compute_edge_path';
 import type { InsertionPoints } from './compute_insertion_points';
-import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, MERGE_BUS_TRUNK } from './compute_edge_path';
 import {
   approachTrunkSegment,
   computeWireInsertionControls,
   segmentMidpoint,
   TERMINAL_STUB_PX,
 } from './compute_wire_insertion_controls';
-
 
 describe('segmentMidpoint', () => {
   it('returns the geometric midpoint on both axes', () => {
@@ -81,9 +80,7 @@ describe('computeWireInsertionControls', () => {
     },
   ];
 
-  const edges: Edge[] = [
-    { id: 'a-b', source: 'a', target: 'b', type: 'workflow' },
-  ];
+  const edges: Edge[] = [{ id: 'a-b', source: 'a', target: 'b', type: 'workflow' }];
 
   it('places each wire control at the segment midpoint (TB)', () => {
     const controls = computeWireInsertionControls({
@@ -95,9 +92,7 @@ describe('computeWireInsertionControls', () => {
     const wire = controls.find((c) => c.kind === 'wire');
     expect(wire).toBeDefined();
     // a exit: (100, 48) → b entry: (100, 100); mid y = 74
-    expect(wire!.centre).toEqual(
-      segmentMidpoint(wire!.segmentStart, wire!.segmentEnd)
-    );
+    expect(wire!.centre).toEqual(segmentMidpoint(wire!.segmentStart, wire!.segmentEnd));
     expect(wire!.centre).toEqual({ x: 100, y: 74 });
     // fallbackStepName is undefined when stepSupportsErrorHandling('slack') is false
     // (slack does not support error-handling in the current registry).
@@ -131,9 +126,7 @@ describe('computeWireInsertionControls', () => {
     });
     const wire = controls.find((c) => c.kind === 'wire');
     expect(wire).toBeDefined();
-    expect(wire!.centre).toEqual(
-      segmentMidpoint(wire!.segmentStart, wire!.segmentEnd)
-    );
+    expect(wire!.centre).toEqual(segmentMidpoint(wire!.segmentStart, wire!.segmentEnd));
     // a exit: (200, 24) → b entry: (300, 24); mid x = 250
     expect(wire!.centre).toEqual({ x: 250, y: 24 });
   });
@@ -171,8 +164,14 @@ describe('computeWireInsertionControls', () => {
           'gate',
           {
             branches: new Map([
-              ['steps', { slot: { kind: 'steps' as const }, ownerStepName: 'gate', isTerminal: false }],
-              ['else', { slot: { kind: 'else' as const }, ownerStepName: 'gate', isTerminal: false }],
+              [
+                'steps',
+                { slot: { kind: 'steps' as const }, ownerStepName: 'gate', isTerminal: false },
+              ],
+              [
+                'else',
+                { slot: { kind: 'else' as const }, ownerStepName: 'gate', isTerminal: false },
+              ],
             ]),
           },
         ],
@@ -221,7 +220,7 @@ describe('computeWireInsertionControls', () => {
     expect(elseCtrl!.centre).toEqual({ x: 300, y: expectedPlusY });
   });
 
-  it('places one merge control on the shared lower trunk', () => {
+  it('places one branch-tail terminal per fan-in source (no shared wire)', () => {
     const mergeNodes: Node[] = [
       {
         id: 'manual',
@@ -267,19 +266,32 @@ describe('computeWireInsertionControls', () => {
       insertionPoints: mergeInsertion,
       direction: 'TB',
     });
+    // No shared wire control: replaced by per-source branch-tail terminals.
     const mergeWires = controls.filter((c) => c.kind === 'wire');
-    expect(mergeWires).toHaveLength(1);
-    // join entry at (210, 200); shared trunk mid sits MERGE_BUS_TRUNK/2 above.
-    expect(mergeWires[0].centre).toEqual({
-      x: 210,
-      y: 200 - MERGE_BUS_TRUNK / 2,
+    expect(mergeWires).toHaveLength(0);
+    // Each fan-in source gets a branch-tail terminal below it.
+    const branchTails = controls.filter((c) => c.id.startsWith('terminal:branch-tail:'));
+    expect(branchTails).toHaveLength(2);
+    // manual exits at (100, 48); tip is TERMINAL_STUB_PX below.
+    expect(branchTails.find((c) => c.id.includes('manual-join'))?.centre).toEqual({
+      x: 100,
+      y: 48 + TERMINAL_STUB_PX,
     });
-    expect(mergeWires[0].segmentEnd.y - mergeWires[0].segmentStart.y).toBe(MERGE_BUS_TRUNK);
-    // Both sources still count as wired — no terminal stubs on the triggers.
-    expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':manual:'))).toBe(
-      false
-    );
-    expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':alert:'))).toBe(false);
+    // alert exits at (320, 48); tip is TERMINAL_STUB_PX below.
+    expect(branchTails.find((c) => c.id.includes('alert-join'))?.centre).toEqual({
+      x: 320,
+      y: 48 + TERMINAL_STUB_PX,
+    });
+    // Both sources are wired — no plain terminal stubs should duplicate them.
+    expect(
+      controls.filter(
+        (c) =>
+          c.kind === 'terminal' &&
+          c.id.startsWith('terminal:') &&
+          !c.id.startsWith('terminal:branch-tail:') &&
+          (c.insertContext as { stepName?: string }).stepName === undefined
+      )
+    ).toHaveLength(0);
   });
 
   it('adds a terminal stub for the last node with the dashed + at the tip', () => {
@@ -296,8 +308,6 @@ describe('computeWireInsertionControls', () => {
     // Independent of inter-rank spacing so terminal stubs stay visually distinct.
     expect(TERMINAL_STUB_PX).toBe(75);
     // No duplicate terminal for a (already has a wire).
-    expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':a:'))).toBe(
-      false
-    );
+    expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':a:'))).toBe(false);
   });
 });

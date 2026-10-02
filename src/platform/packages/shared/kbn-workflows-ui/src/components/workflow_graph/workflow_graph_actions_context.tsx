@@ -43,7 +43,17 @@ export type WorkflowGraphInsertionContext =
   | { readonly mode: 'trigger' }
   | { readonly mode: 'prepend-step' }
   | { readonly mode: 'after'; readonly stepName: string }
-  | { readonly mode: 'branch'; readonly stepName: string; readonly branch: BranchSlot }
+  | {
+      readonly mode: 'branch';
+      readonly stepName: string;
+      readonly branch: BranchSlot;
+      /**
+       * Where to insert within the branch sequence.
+       * - `'start'` (default when chips are the anchor) — unshifts to the top.
+       * - `'end'` — appends at the bottom (legacy; used for inner after-leaf controls).
+       */
+      readonly position?: 'start' | 'end';
+    }
   | { readonly mode: 'fallback'; readonly stepName: string };
 
 /** Screen-space rectangle of the control that opened an insertion, for anchoring the menu. */
