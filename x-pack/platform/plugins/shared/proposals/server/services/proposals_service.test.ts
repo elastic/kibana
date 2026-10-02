@@ -1839,7 +1839,7 @@ describe('ProposalsService', () => {
   });
 
   describe('countPendingByConversationIds', () => {
-    it('counts live pending proposals per conversation in one aggregation', async () => {
+    it('counts pending, unexpired proposals per conversation in one aggregation', async () => {
       const storage = createStorage();
       storage.search.mockResolvedValue({
         hits: { hits: [] },
@@ -1873,6 +1873,11 @@ describe('ProposalsService', () => {
           { term: { spaceId: SPACE_ID } },
           { term: { status: 'pending' } },
           { terms: { conversationId: ['conv-1', 'conv-2'] } },
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([{ range: { expiresAt: { gt: 'now' } } }]),
+            }),
+          }),
         ])
       );
     });

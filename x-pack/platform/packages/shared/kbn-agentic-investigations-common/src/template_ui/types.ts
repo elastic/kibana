@@ -116,13 +116,17 @@ export interface OverviewSlotRenderProps {
  */
 export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode;
 
-/** Props passed to the `renderRunningState` render prop. */
-export interface RunningStateSlotRenderProps {
+/** Props passed to the `renderLiveState` render prop. */
+export interface LiveStateSlotRenderProps {
   conversationId: string;
+  /** The severity the conversation carries, for use until fresher data has been read. */
+  severity?: string;
 }
 
 /**
- * A render prop that shows whether an agent is working on the investigation now. Supplied by the
- * consuming plugin, because the running state is not on the conversation.
+ * A render prop for the investigation's live state in the header, next to its age: its severity
+ * and whether an agent is working on it now. Supplied by the consuming plugin, because the
+ * running state is not on the conversation and the severity changes while an agent runs. When
+ * supplied, the header leaves the severity badge to it.
  */
-export type RenderRunningState = (props: RunningStateSlotRenderProps) => React.ReactNode;
+export type RenderLiveState = (props: LiveStateSlotRenderProps) => React.ReactNode;

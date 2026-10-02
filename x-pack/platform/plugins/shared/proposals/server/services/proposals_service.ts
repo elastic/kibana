@@ -806,8 +806,8 @@ export class ProposalsService {
   }
 
   /**
-   * Pending, non-superseded proposals per conversation, in one aggregation. Conversations without
-   * any are absent from the map.
+   * Proposals awaiting a decision per conversation (pending, not superseded, deadline not passed),
+   * in one aggregation. Conversations without any are absent from the map.
    */
   async countPendingByConversationIds(
     conversationIds: string[],
@@ -827,7 +827,8 @@ export class ProposalsService {
               {
                 status: 'pending',
                 excludeSuperseded: true,
-                excludeExpired: false,
+                // Past its deadline a proposal awaits no decision, even before the gate settles it.
+                excludeExpired: true,
               },
               spaceId
             ),

@@ -19,7 +19,7 @@ import type {
   RenderStatus,
   RenderLinkedInvestigations,
   RenderOverview,
-  RenderRunningState,
+  RenderLiveState,
 } from './types';
 
 /**
@@ -96,8 +96,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * fetches. See `RenderOverview`.
    */
   renderOverview?: RenderOverview;
-  /** When provided, the header shows the investigation's running state next to its age. */
-  renderRunningState?: RenderRunningState;
+  /**
+   * When provided, the header shows the investigation's live state (severity, running indicator)
+   * next to its age. See `RenderLiveState`.
+   */
+  renderLiveState?: RenderLiveState;
   /**
    * Card Agent Builder renders for conversations on this template. Must be self-contained; see
    * `ConversationTemplateUIDefinition.briefCard`.
@@ -124,7 +127,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderStatus,
   renderCloseInvestigationModal,
   renderOverview,
-  renderRunningState,
+  renderLiveState,
   briefCard,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
@@ -162,7 +165,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                 conversation={conversation}
                 renderAssignees={renderAssignees}
                 renderStatus={renderStatus}
-                renderRunningState={renderRunningState}
+                renderLiveState={renderLiveState}
                 refetchConversation={refetchConversation}
               />
             </Suspense>
