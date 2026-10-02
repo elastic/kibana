@@ -295,9 +295,20 @@ async function seedEnrichedSources(esClient: EsClient, log: ToolingLog): Promise
   ];
   for (const { index, docs } of groups) {
     try {
-      const exists = await esClient.indices.exists({ index });
-      if (!exists) {
-        await esClient.indices.create({ index });
+      // logs-* names match the logs index template, which creates data streams only
+      const isDataStream = index.startsWith('logs-');
+      if (isDataStream) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (esClient as any).indices.createDataStream({ name: index });
+        } catch (err) {
+          // already exists — nothing to do
+        }
+      } else {
+        const exists = await esClient.indices.exists({ index });
+        if (!exists) {
+          await esClient.indices.create({ index });
+        }
       }
       await esClient.bulk({
         index,
@@ -327,7 +338,9 @@ export async function cleanupChrysalisAlerts({
     });
     log.info(`Cleaned up alerts from ${ALERT_INDEX}`);
     if (seedProfile === 'enriched') {
-      for (const index of [TELEMETRY_INDEX, ENTITY_RISK_INDEX, SECURITY_LABS_INDEX]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (esClient as any).indices.deleteDataStream({ name: TELEMETRY_INDEX }).catch(() => {});
+      for (const index of [ENTITY_RISK_INDEX, SECURITY_LABS_INDEX]) {
         try {
           await esClient.indices.delete({ index });
           log.info(`Deleted enriched index ${index}`);
