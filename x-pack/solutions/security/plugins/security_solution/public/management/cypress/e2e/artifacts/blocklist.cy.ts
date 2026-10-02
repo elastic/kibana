@@ -27,6 +27,7 @@ const {
   setMultiValue,
   openBlocklist,
   selectSignatureField,
+  selectField,
 } = blocklistFormSelectors;
 
 describe(
@@ -167,6 +168,37 @@ describe(
         after(() => {
           removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
         });
+      });
+    });
+
+    describe('Handles CRUD with the Match (wildcard) operator', () => {
+      const MATCH_PATH_CONDITION = /AND\s*file\.path\.caseless\s*MATCHES\s*C:\\foo\\\*\.exe/i;
+      const MATCH_FILE_NAME_CONDITION = /AND\s*file\.name\s*MATCHES\s*\*\.exe/i;
+
+      afterEach(() => {
+        removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
+      });
+
+      it('Create a blocklist item with the Match operator for the Path field', () => {
+        openBlocklist({ create: true });
+        fillOutBlocklistFlyout();
+        selectField('file.path.caseless');
+        selectOperator('Match');
+        setSingleValue('C:\\foo\\*.exe');
+        submitBlocklist();
+        validateSuccessPopup('create');
+        validateRenderedCondition(MATCH_PATH_CONDITION);
+      });
+
+      it('Create a blocklist item with the Match operator for the File Name field', () => {
+        openBlocklist({ create: true });
+        fillOutBlocklistFlyout();
+        selectField('file.name');
+        selectOperator('Match');
+        setSingleValue('*.exe');
+        submitBlocklist();
+        validateSuccessPopup('create');
+        validateRenderedCondition(MATCH_FILE_NAME_CONDITION);
       });
     });
   }
