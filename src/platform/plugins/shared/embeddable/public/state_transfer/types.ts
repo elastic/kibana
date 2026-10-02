@@ -27,22 +27,22 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   /**
    * The path within the originating app to navigate back to when the user saves or cancels.
-   * Set to the originating app's current path at the time the editor was launched
-   * (e.g. via getCurrentPath() or window.location.hash).
-   *
-   * When provided, editors must show a "Save and return" button. On save, the editor
+   * 
+   * When provided, editors must show a "Save and return" button.
+   * 
+   * On save, the editor
    * navigates back using stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
    *   path: originatingPath,
    *   state: [{ embeddableId, type, serializedState }],
    * }), carrying the updated embeddable state so the originating app can update the panel.
+   * 
    * On cancel, the editor navigates back with no embeddable state via
    * application.navigateToApp(originatingApp, { path: originatingPath }).
    */
   originatingPath?: string;
   /**
    * Breadcrumbs from the originating app context (e.g. [Dashboards, Visualizations]).
-   * Consumers prepend these to their own breadcrumbs. Computed by the originating app
-   * using getUrlForApp.
+   * Consumers prepend these to their own breadcrumbs.
    */
   breadcrumbs?: EmbeddableEditorBreadcrumb[];
   embeddableId?: string;
