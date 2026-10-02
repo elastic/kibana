@@ -139,6 +139,24 @@ describe('evals.suites.json specModelGroups', () => {
     expect(problems).toEqual([]);
   });
 
+  it('lists every weekly model in at least one spec once every spec has an override', () => {
+    // When each spec pins its own models, a weekly model that no spec lists is provisioned and
+    // requested every week but never gets a step. Keep the weekly list honest.
+    const problems = suitesWithSpecModelGroups.flatMap((suite) => {
+      const listedFiles = new Set(suite.specModelGroups.flatMap((spec) => spec.files ?? []));
+      const runnableFiles = (suite.shards ?? []).flatMap((shard) => shard.specFiles ?? []);
+      const everySpecHasOverride =
+        runnableFiles.length > 0 && runnableFiles.every((file) => listedFiles.has(file));
+      if (!everySpecHasOverride) return [];
+
+      const usedModels = new Set(suite.specModelGroups.flatMap((spec) => spec.models ?? []));
+      return (suite.weeklyEisModelGroups ?? [])
+        .filter((model) => !usedModels.has(model))
+        .map((model) => `${suite.id}: weekly model "${model}" is not listed by any spec`);
+    });
+    expect(problems).toEqual([]);
+  });
+
   it('puts every specModelGroups file of a sharded suite in some shard, or it never runs', () => {
     const problems = suitesWithSpecModelGroups
       .filter((suite) => (suite.shards?.length ?? 0) > 0)
