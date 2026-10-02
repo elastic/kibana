@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -18,7 +19,7 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverUninitialized } from './uninitialized';
 
-const setup = async ({ isEsqlMode }: { isEsqlMode: boolean }) => {
+const setup = async ({ isEsqlMode, draftQuery }: { isEsqlMode: boolean; draftQuery?: string }) => {
   const services = createDiscoverServicesMock();
   const getUiSettingsMock = jest.mocked(services.uiSettings.get);
   const originalGetImplementation = getUiSettingsMock.getMockImplementation();
@@ -54,11 +55,22 @@ const setup = async ({ isEsqlMode }: { isEsqlMode: boolean }) => {
     })
   );
 
+  if (draftQuery) {
+    toolkit.internalState.dispatch(
+      internalStateActions.setSearchDraftUiState({
+        tabId: toolkit.getCurrentTab().id,
+        searchDraftUiState: { query: { esql: draftQuery } },
+      })
+    );
+  }
+
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverUninitialized onRefresh={jest.fn()} />
     </DiscoverToolkitTestProvider>
   );
+
+  return { toolkit };
 };
 
 describe('DiscoverUninitialized', () => {
@@ -68,17 +80,32 @@ describe('DiscoverUninitialized', () => {
     expect(screen.getByTestId('discoverUninitialized')).toBeVisible();
     expect(screen.getByTestId('refreshDataButton')).toBeVisible();
     expect(screen.getByTestId('queryInEsqlButton')).toBeVisible();
-    expect(screen.queryByTestId('discoverUninitializedKeyboardShortcuts')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverRecommendedQueries')).not.toBeInTheDocument();
   });
 
-  it('shows Discover-owned ES|QL keyboard shortcuts in ES|QL mode', async () => {
+  it('shows recommended queries built from the inherited source in ES|QL mode', async () => {
     await setup({ isEsqlMode: true });
 
-    expect(screen.getByTestId('discoverUninitialized')).toBeVisible();
-    expect(screen.getByTestId('discoverUninitializedKeyboardShortcuts')).toBeVisible();
-    expect(screen.getByText('Editor keyboard shortcuts')).toBeVisible();
-    expect(screen.getByText('Run query')).toBeVisible();
-    expect(screen.getByText('Prettify query')).toBeVisible();
+    expect(screen.getByTestId('discoverRecommendedQueries')).toBeVisible();
+    expect(screen.getByText('Recommended queries')).toBeVisible();
+    expect(screen.getAllByTestId('discoverRecommendedQueryRun')).toHaveLength(6);
+    expect(screen.getAllByText(/FROM/).length).toBeGreaterThan(0);
     expect(screen.queryByTestId('refreshDataButton')).not.toBeInTheDocument();
+  });
+
+  it('keeps the recommended queries while the user is typing a query', async () => {
+    await setup({ isEsqlMode: true, draftQuery: 'FROM logs' });
+
+    expect(screen.getByTestId('discoverRecommendedQueries')).toBeVisible();
+  });
+
+  it('runs a recommended query when its run button is clicked', async () => {
+    const { toolkit } = await setup({ isEsqlMode: true });
+
+    await userEvent.click(screen.getAllByTestId('discoverRecommendedQueryRun')[0]);
+
+    expect(toolkit.getCurrentTab().appState.query).toEqual({
+      esql: expect.stringContaining('FROM'),
+    });
   });
 });

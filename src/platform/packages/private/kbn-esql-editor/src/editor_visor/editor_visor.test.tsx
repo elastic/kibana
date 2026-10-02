@@ -96,9 +96,47 @@ describe('Quick search visor', () => {
     );
   });
 
+  it('should notify the parent after a KQL filter is submitted so it can focus the editor', async () => {
+    const onKqlSubmitted = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, onKqlSubmitted }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onKqlSubmitted).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not notify the parent when the KQL submit is ignored', async () => {
+    const onKqlSubmitted = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, isDisabled: true, onKqlSubmitted }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onKqlSubmitted).not.toHaveBeenCalled();
+  });
+
   it('should not submit a KQL filter when the editor query has no source', async () => {
     const onUpdateAndSubmitQuery = jest.fn();
     renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x = 1', onUpdateAndSubmitQuery }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+  });
+
+  it('should not submit a KQL filter when the submit action is disabled', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(
+      renderESQLVisor({ ...props, disableSubmitAction: true, onUpdateAndSubmitQuery })
+    );
 
     await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
 
@@ -138,6 +176,14 @@ describe('Quick search visor', () => {
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     await act(async () => {});
     expect(queryByTestId('esqlVisorKQLSubmit')).not.toBeInTheDocument();
+  });
+
+  it('should stay in KQL mode when the editor has no source and AI is unavailable', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: '' }));
+    await waitFor(() => {
+      expect(kqlMock.QueryStringInput).toHaveBeenCalled();
+    });
+    expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
   });
 
   it('should not show a mode selector', async () => {
@@ -198,6 +244,56 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
     });
 
+    it('submits natural language when the editor query is empty and submit action is disabled', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, query: '', disableSubmitAction: true, onNlResult })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      await waitFor(() => {
+        expect(corePluginMock.http.post).toHaveBeenCalledWith(
+          '/internal/esql/nl_to_esql',
+          expect.objectContaining({
+            body: JSON.stringify({ nlInstruction: 'show me logs', currentQuery: '' }),
+          })
+        );
+      });
+      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+    });
+
+    it.each([
+      ['the submit action is disabled and the editor has a query', { disableSubmitAction: true }],
+      ['the visor is disabled and the editor has a query', { isDisabled: true }],
+      ['the visor is disabled even if the editor query is empty', { isDisabled: true, query: '' }],
+    ])('does not submit natural language when %s', async (_, overrides) => {
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, ...overrides, onNlResult })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      expect(corePluginMock.http.post).not.toHaveBeenCalled();
+      expect(onNlResult).not.toHaveBeenCalled();
+    });
+
     it('should show the Stop button while NL generation is in progress', async () => {
       (corePluginMock.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
@@ -215,6 +311,45 @@ describe('Quick search visor', () => {
 
       await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toBeInTheDocument());
       expect(getByRole('button', { name: 'Stop' })).toBe(getByTestId('esqlVisorStopGeneration'));
+    });
+
+    it('should default to AI mode with a dedicated placeholder when the editor has no source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+      });
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveAttribute(
+        'placeholder',
+        "Describe what you're looking for"
+      );
+    });
+
+    it('should switch back to KQL mode once the editor has a source', async () => {
+      const { getByTestId, rerender } = renderWithI18n(
+        renderWithEnterprise({ ...props, query: '' })
+      );
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+      });
+      rerender(renderWithEnterprise({ ...props, query: 'FROM test_index' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
+      });
+    });
+
+    it('should disable the KQL mode button when the editor has no source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeDisabled();
+      });
+    });
+
+    it('should enable the KQL mode button once the editor has a source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeEnabled();
+      });
     });
 
     it('should return to KQL mode when the KQL mode button is clicked', async () => {

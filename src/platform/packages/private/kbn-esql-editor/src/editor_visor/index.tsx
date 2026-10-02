@@ -26,11 +26,13 @@ import { useNlGeneration } from './use_nl_generation';
 import {
   searchPlaceholder,
   nlPlaceholder,
+  nlEmptyEditorPlaceholder,
   generatingLabel,
   stopLabel,
   aiModeLabel,
   aiModeTooltip,
   kqlModeLabel,
+  kqlModeNoSourceTooltip,
   visorModeLegend,
   enterHintFilterLabel,
   enterHintGenerateLabel,
@@ -53,8 +55,12 @@ export interface QuickSearchVisorProps {
   onNlResult?: (generatedQuery: string) => void;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
-  // When true, visor submit is a no-op (matches the query bar Search button)
+  // When true, every visor submit is a no-op (e.g. invalid date range or a disabled caller)
   isDisabled?: boolean;
+  // When true, KQL submit is a no-op. Natural language is still allowed while the editor query is empty
+  disableSubmitAction?: boolean;
+  // Called after a KQL filter is submitted so the parent can move focus back to the editor
+  onKqlSubmitted?: () => void;
 }
 
 export function QuickSearchVisor({
@@ -64,13 +70,16 @@ export function QuickSearchVisor({
   onNlResult,
   onUpdateAndSubmitQuery,
   isDisabled = false,
+  disableSubmitAction = false,
+  onKqlSubmitted,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
+  // Set only when the user picks a mode explicitly; otherwise the mode is derived from the editor.
+  const [userVisorMode, setUserVisorMode] = useState<VisorMode | null>(null);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const wasVisibleRef = useRef(isVisible);
   const telemetryService = useMemo(
@@ -96,25 +105,28 @@ export function QuickSearchVisor({
 
   const onKqlSubmit = useCallback(
     (kqlQuery: string) => {
-      if (isDisabled) return;
+      if (isDisabled || disableSubmitAction) return;
       if (sourcesKey && kqlQuery.trim()) {
         const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
         const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
         onUpdateAndSubmitQuery(newQuery);
         setSearchValue('');
+        onKqlSubmitted?.();
       }
     },
-    [isDisabled, sourcesKey, query, onUpdateAndSubmitQuery]
+    [isDisabled, disableSubmitAction, sourcesKey, query, onUpdateAndSubmitQuery, onKqlSubmitted]
   );
 
   const onNlSubmit = useCallback(() => {
     if (isDisabled) return;
+    // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
+    if (disableSubmitAction && query.trim()) return;
     submitNl();
-  }, [isDisabled, submitNl]);
+  }, [isDisabled, disableSubmitAction, query, submitNl]);
 
   const onVisorModeChange = useCallback(
     (id: string) => {
-      setVisorMode(id as VisorMode);
+      setUserVisorMode(id as VisorMode);
       if (id === VisorMode.KQL) {
         onStopGeneration();
       }
@@ -153,14 +165,16 @@ export function QuickSearchVisor({
     };
   }, [isVisible, sourcesKey, data.dataViews]);
 
-  const isKqlMode = visorMode === VisorMode.KQL;
+  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
+  // KQL needs a source from the editor, so AI is the only usable mode while the editor has none.
+  const hasNoSource = !sourcesKey;
+  const isKqlDisabled = hasNoSource && showAskAiButton;
+  const isKqlMode = !isKqlDisabled && (userVisorMode ?? VisorMode.KQL) === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
   if (!KQLComponent) {
     return null;
   }
-
-  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
 
   return (
     <EuiFlexGroup
@@ -190,7 +204,10 @@ export function QuickSearchVisor({
                 <EuiFlexItem grow={false} css={styles.modeToggleWrapper}>
                   <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
                     <span css={[styles.kqlModeButton, isKqlMode && styles.kqlModeButtonActive]}>
-                      <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
+                      <EuiToolTip
+                        content={isKqlDisabled ? kqlModeNoSourceTooltip : kqlModeLabel}
+                        disableScreenReaderOutput
+                      >
                         <EuiButtonIcon
                           iconType="query"
                           size="xs"
@@ -200,6 +217,7 @@ export function QuickSearchVisor({
                           aria-label={kqlModeLabel}
                           aria-pressed={isKqlMode}
                           isSelected={isKqlMode}
+                          isDisabled={isKqlDisabled}
                           onClick={() => onVisorModeChange(VisorMode.KQL)}
                           data-test-subj="esqlVisorModeKql"
                         />
@@ -255,7 +273,7 @@ export function QuickSearchVisor({
                   <EuiFlexItem>
                     <NLInput
                       value={nlValue}
-                      placeholder={nlPlaceholder}
+                      placeholder={hasNoSource ? nlEmptyEditorPlaceholder : nlPlaceholder}
                       disabled={isNlLoading}
                       onChange={setNlValue}
                       onSubmit={onNlSubmit}
