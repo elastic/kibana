@@ -8,6 +8,8 @@ The suite runs the managed analysis workflow (`system-security-attack-discovery-
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
+Caveat: the claim-grounding evaluator is still a follow-up, and parts of the managed analysis body are placeholders while security-team#19282 iterates — until both land, scores measure the shipped prompt, not the finished product.
+
 ## Dataset
 
 The dataset is every example of every scenario registered in `src/scenarios/index.ts`. Today that is one scenario, `encoded-powershell` (encoded PowerShell on a workstation vs. an Intune/SCCM box; see [its README](src/scenarios/encoded_powershell/README.md)):
