@@ -175,7 +175,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           {onboardingWorkers.length === 0 ? (
             <div
               css={css`
-                padding: 16px;
+                padding: ${euiTheme.size.l};
               `}
               data-test-subj="alertZeroOnboardingNoWorkersAvailable"
             >
@@ -194,6 +194,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                   : i18n.onboardingWorkerEventTrigger(id);
                 const checked = workerEnabled[id] ?? false;
                 const isLastEnabled = checked && enabledCount <= 1;
+                const hasWorkflowsNote = id === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 
                 return (
                   <React.Fragment key={id}>
@@ -203,7 +204,8 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                       gutterSize="m"
                       responsive={false}
                       css={css`
-                        padding: 12px 16px;
+                        padding: ${euiTheme.size.l} ${euiTheme.size.l}
+                          ${hasWorkflowsNote ? euiTheme.size.m : euiTheme.size.l};
                       `}
                     >
                       <EuiFlexItem>
@@ -239,19 +241,6 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                             <p id={`alertZeroOnboardingWorkerDescription-${id}`}>{description}</p>
                           </EuiText>
                         ) : null}
-                        {id === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID ? (
-                          <>
-                            <EuiSpacer size="s" />
-                            <EuiCallOut
-                              announceOnMount
-                              size="s"
-                              iconType="info"
-                              data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
-                            >
-                              <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
-                            </EuiCallOut>
-                          </>
-                        ) : null}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
@@ -267,13 +256,29 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
+                    {hasWorkflowsNote ? (
+                      <div
+                        css={css`
+                          padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
+                        `}
+                      >
+                        <EuiCallOut
+                          announceOnMount
+                          size="s"
+                          iconType="info"
+                          data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
+                        >
+                          <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
+                        </EuiCallOut>
+                      </div>
+                    ) : null}
                   </React.Fragment>
                 );
               })}
               <EuiHorizontalRule margin="none" />
               <div
                 css={css`
-                  padding: 8px 16px;
+                  padding: ${euiTheme.size.s} ${euiTheme.size.l};
                 `}
               >
                 <EuiText size="xs" color="subdued">
