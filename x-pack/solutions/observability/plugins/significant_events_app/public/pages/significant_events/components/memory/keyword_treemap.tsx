@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ElementClickListener, LayerValue, TooltipInfo } from '@elastic/charts';
+import type {
+  ElementClickListener,
+  LayerValue,
+  PartitionFillLabel,
+  PartitionLayer,
+  TooltipInfo,
+} from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings, Tooltip } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import {
@@ -56,6 +62,31 @@ const clickedKeyword = (elements: Parameters<ElementClickListener>[0]): string |
   const [layer] = elements.flat(2).filter(isLayerValue);
   return layer === undefined ? undefined : `${layer.groupByRollup}`;
 };
+
+/**
+ * Where a cell's label sits inside it, from elastic/elastic-charts#2912.
+ *
+ * The pinned 73.2.2 chart has no such control and drops the keys it does not
+ * know, so this is inert today — the label stays top-left — and centers the
+ * label the moment Kibana's `@elastic/charts` carries #2912.
+ */
+interface FillLabelAlignment {
+  verticalAlignment?: 'top' | 'middle' | 'bottom';
+  horizontalAlignment?: 'left' | 'center' | 'right';
+}
+
+/** The layer's own fill label type, widened with the alignment keys above. */
+type LayerFillLabel = NonNullable<PartitionLayer['fillLabel']> & FillLabelAlignment;
+
+/**
+ * Delete `FillLabelAlignment` once this stops compiling: it resolves to `never`
+ * as soon as `@elastic/charts` declares the alignment keys on the fill label
+ * itself (elastic/elastic-charts#2912), and a label type that has them needs no
+ * shim.
+ */
+type AlignmentShimNeeded = 'verticalAlignment' extends keyof PartitionFillLabel ? never : true;
+const ALIGNMENT_SHIM_NEEDED: AlignmentShimNeeded = true;
+void ALIGNMENT_SHIM_NEEDED;
 
 /**
  * The tooltip reports the numbers the cell label leaves out: the keyword's share
@@ -114,6 +145,15 @@ export function MemoryKeywordTreemap({
   // repeats, which is fine: a cell's identity is its label.
   const palette = useEuiPaletteColorBlindBehindText();
   const chartBaseTheme = useElasticChartsTheme();
+
+  const fillLabel: LayerFillLabel = {
+    verticalAlignment: 'middle',
+    horizontalAlignment: 'center',
+    clipText: cells.length > 1,
+    fontWeight: 500,
+    minFontSize: 10,
+    maxFontSize: 14,
+  };
 
   const onElementClick = useCallback<ElementClickListener>(
     (elements) => {
@@ -228,8 +268,9 @@ export function MemoryKeywordTreemap({
                     palette[(orderByKeyword.get(`${key}`) ?? 0) % palette.length],
                 },
                 // `clipText` keeps a long keyword inside its own cell. The label is
-                // vertically top-aligned because the chart has no centering control
-                // for a treemap's fill labels; a separate upstream change adds one.
+                // asked to sit in the middle of its cell, which the pinned chart
+                // ignores for want of the control; the keys light up on their own
+                // once Kibana's `@elastic/charts` carries elastic-charts#2912.
                 //
                 // A one-cell chart cannot ask for it. The chart builds the label's
                 // clip out of whatever canvas path its previous draw left behind,
@@ -238,12 +279,7 @@ export function MemoryKeywordTreemap({
                 // is laid out and then painted nowhere (elastic-charts 73.2.2).
                 // One cell is the whole panel and the chart only places words that
                 // fit inside it, so there is nothing to clip against anyway.
-                fillLabel: {
-                  clipText: cells.length > 1,
-                  fontWeight: 500,
-                  minFontSize: 10,
-                  maxFontSize: 14,
-                },
+                fillLabel,
                 nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.display ?? '',
               },
             ]}

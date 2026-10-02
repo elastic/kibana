@@ -81,7 +81,11 @@ interface PartitionSpec {
     groupByRollup: (cell: KeywordCell) => string;
     nodeLabel: (key: string) => string;
     shape: { fillColor: unknown };
-    fillLabel?: { clipText?: boolean };
+    fillLabel?: {
+      clipText?: boolean;
+      verticalAlignment?: string;
+      horizontalAlignment?: string;
+    };
   }>;
 }
 
@@ -261,6 +265,22 @@ describe('MemoryKeywordTreemap', () => {
 
     expect(partition().data.length).toBeGreaterThan(1);
     expect(layer().fillLabel!.clipText).toBe(true);
+  });
+
+  /**
+   * The label asks for the middle of its cell, and the pinned `@elastic/charts`
+   * ignores the request: 73.2.2 has no alignment control for a treemap's fill
+   * labels and drops the keys it does not know (elastic/elastic-charts#2912 adds
+   * them). Asserting them here pins the intent — the screenshot shows them doing
+   * nothing until the charts bump, and this shows the day they start.
+   */
+  it('asks the chart for a centered fill label, which the pinned charts version ignores', () => {
+    renderTreemap();
+
+    expect(layer().fillLabel).toMatchObject({
+      verticalAlignment: 'middle',
+      horizontalAlignment: 'center',
+    });
   });
 
   /**
