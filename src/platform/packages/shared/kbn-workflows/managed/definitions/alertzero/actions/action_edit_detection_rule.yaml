@@ -40,6 +40,13 @@ triggers:
               description: >-
                 Saved-object id of the rule, so the edit lands on the exact rule
                 incarnation the proposal was built against.
+            expected_revision:
+              type: integer
+              minimum: 0
+              description: >-
+                The rule's `revision` when the proposal was built. When set, the
+                edit fails instead of overwriting a rule that changed since. Not
+                a rule field, so it is never sent to the patch API.
             query:
               type: string
               maxLength: 65536
@@ -119,12 +126,48 @@ outputs:
   - name: from
     type: string
 steps:
-  # The whole object is the patch body: the API changes only the keys it
-  # receives, and a YAML object cannot omit a key conditionally.
+  # `revision` is the rule's change counter: it moves on every content edit and
+  # ignores enable/disable and run status. `version` does not move on custom
+  # rule edits, so it cannot detect one.
+  - name: fetch_rule
+    type: kibana.request
+    if: "${{ inputs.actionInput.expected_revision != nil }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+
+  # Fails the action so the gate records the proposal `failed` and re-offers it
+  # with this message, instead of silently overwriting someone else's edit.
+  # Analysts read it on the proposal card, so it states the next step; the
+  # trailing code keeps the failure countable.
+  - name: fail_rule_changed
+    type: workflow.fail
+    if: >-
+      ${{ inputs.actionInput.expected_revision != nil
+        and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
+    with:
+      message: >-
+        The rule was changed by {{ steps.fetch_rule.output.updated_by }} at
+        {{ steps.fetch_rule.output.updated_at }}, after this proposal was created,
+        so nothing was applied. Dismiss this proposal, and edit the rule yourself
+        if the change is still needed.
+        [RULE_CHANGED_SINCE_PROPOSAL: expected revision
+        {{ inputs.actionInput.expected_revision }}, current revision
+        {{ steps.fetch_rule.output.revision }}]
+
+  # The API changes only the keys it receives. `pick` drops absent keys, so only
+  # supplied fields are patched, and `expected_revision` never reaches the
+  # strict patch schema. Keep this list in sync with the editable fields above.
   - name: patch_rule
     type: security.patchRule
     with:
-      patch: "${{ inputs.actionInput }}"
+      patch: >-
+        ${{ inputs.actionInput | pick: 'id', 'query', 'risk_score', 'severity',
+          'threshold', 'interval', 'from' }}
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.

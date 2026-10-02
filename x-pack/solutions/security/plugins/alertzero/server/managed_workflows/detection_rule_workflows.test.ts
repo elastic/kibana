@@ -400,8 +400,11 @@ describe('detection rule workflows', () => {
       expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
+      // `expected_revision` is the revision the diagnosis read, so approving fails
+      // instead of overwriting a rule that was edited while the proposal waited.
       expect(actionInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
+        expected_revision: '${{ steps.fetch_rule.output.revision }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
       // Same edit-rule action as the query path; it patches only the fields it is given.
@@ -409,6 +412,7 @@ describe('detection rule workflows', () => {
       expect(settingsInputs.actionWorkflowId).toBe(actionInputs.actionWorkflowId);
       expect(settingsInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
+        expected_revision: '${{ steps.fetch_rule.output.revision }}',
         // `${{ }}` keeps the score a number.
         risk_score: '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}',
         severity: '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}',
@@ -823,13 +827,26 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The whole object is the patch body, so one action covers any field.
-      it('passes the whole edit through as one patch, so one action covers any field', () => {
+      // One patch carries every supplied field, so one action covers any field. The
+      // patch schema is strict, so `expected_revision` must not reach it, and every
+      // other editable field must, or adding one to the schema would silently drop it.
+      it('patches every editable field it is given, and nothing else', () => {
         const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
         const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
         const patchStep = actionSteps.find(({ type }) => type === 'security.patchRule')!;
+        const [trigger] = yaml.triggers as unknown as Array<{
+          inputs: { properties: { actionInput: { properties: Record<string, unknown> } } };
+        }>;
+        const editable = Object.keys(trigger.inputs.properties.actionInput.properties).filter(
+          (key) => key !== 'expected_revision'
+        );
+        const patch = String(patchStep.with?.patch);
 
-        expect(patchStep.with?.patch).toBe('${{ inputs.actionInput }}');
+        expect(patch).toMatch(/^\$\{\{ inputs\.actionInput \| pick: /);
+        expect(patch).not.toContain('expected_revision');
+        for (const key of editable) {
+          expect(patch).toContain(`'${key}'`);
+        }
 
         // No impact on the action: the caller's value wins.
         const metadata = (yaml.consts as Record<string, Record<string, unknown>>).actionMetadata;
