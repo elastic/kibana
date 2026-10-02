@@ -85,8 +85,8 @@ test.describe(
         agentId: SEEDED_AGENT_ID,
       });
 
-      // One surfaced once and marked useful: rate 1.0, confidence near zero. The
-      // "large cell, pale colour" quadrant the treemap exists to show.
+      // One surfaced once and marked useful: rate 1.0, confidence near zero. It
+      // still contributes to the keyword graph, at the floor weight.
       await seedMemory(esClient, {
         slug: slug('single-impression-fluke'),
         title: 'Single-impression signal',
@@ -240,8 +240,9 @@ test.describe(
 
       await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`)).toBeVisible();
       await expect(page.testSubj.locator('nightshiftMemoryHome')).toBeVisible();
-      // The treemap is drawn from the store's own ranking, not from the seeded
-      // list, so its presence proves a second, larger query answered too.
+      // The keyword treemap is drawn from the store's own ranking, over one wide
+      // query rather than the seeded list, so its presence proves a second,
+      // larger query answered too.
       await expect(page.testSubj.locator('nightshiftMemoryTreemap')).toBeVisible();
       await attachScreenshot(page, testInfo, 'memory-e1-list');
     });
@@ -305,7 +306,8 @@ test.describe(
       expect(await telemetryPercent(page, 'nightshiftMemoryUsefulnessValue')).toBe(90);
       const provenConfidence = await telemetryPercent(page, 'nightshiftMemoryConfidenceValue');
 
-      // The two quadrants the treemap draws, in numbers.
+      // The two evidence stories the store distinguishes, in numbers. They also
+      // weight the keyword graph: usefulness × confidence per memory.
       expect(provenConfidence).toBeGreaterThan(70);
       expect(provenConfidence).toBeGreaterThan(flukeConfidence);
       await attachScreenshot(page, testInfo, 'memory-e3-telemetry');

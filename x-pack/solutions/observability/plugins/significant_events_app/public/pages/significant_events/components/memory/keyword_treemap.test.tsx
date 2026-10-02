@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { PartitionProps, SettingsProps } from '@elastic/charts';
+import type { SettingsProps } from '@elastic/charts';
 import { calculateContrast, EuiProvider, hexToRgb } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryKeywordTreemap } from './keyword_treemap';
+import type { KeywordCell } from './keyword_page_rank';
 import type { MemorySummary } from './types';
 
 // `@elastic/charts` draws to a canvas jsdom has no layout for, so the specs are
@@ -67,14 +68,30 @@ const PAGES = [
   summary({ id: 'memory_c', tags: ['memory', 'agent builder', 'redis'] }),
 ];
 
-type PartitionProps_ = PartitionProps<{ keyword: string; display: string; area: number }>;
-type SettingsProps_ = SettingsProps;
+/**
+ * The spec the component last handed the chart, narrowed to what this reads. The
+ * chart types its accessors over its own datum types, which the component only
+ * ever passes a `KeywordCell` to.
+ */
+interface PartitionSpec {
+  data: KeywordCell[];
+  valueAccessor: (cell: KeywordCell) => number;
+  valueFormatter: (value: number) => string;
+  layers: Array<{
+    groupByRollup: (cell: KeywordCell) => string;
+    nodeLabel: (key: string) => string;
+    shape: { fillColor: unknown };
+  }>;
+}
 
-/** The spec the component last handed the chart. */
-const partition = () => partitionProps.mock.calls[0][0] as PartitionProps_;
-const layer = () => partition().layers![0];
-const settings = () => settingsProps.mock.calls[0][0] as SettingsProps_;
-const tooltip = () => tooltipProps.mock.calls[0][0] as { customTooltip: (info: unknown) => React.ReactNode };
+const partition = () => partitionProps.mock.calls[0][0] as unknown as PartitionSpec;
+const layer = () => partition().layers[0];
+const settings = () => settingsProps.mock.calls[0][0] as SettingsProps;
+const tooltip = () =>
+  tooltipProps.mock.calls[0][0] as { customTooltip: (info: unknown) => React.ReactNode };
+/** The colour the layer would fill the cell named `keyword` with. */
+const fillColor = (keyword: string) =>
+  (layer().shape.fillColor as (key: string) => string)(keyword);
 
 const renderTreemap = (
   props: Partial<React.ComponentProps<typeof MemoryKeywordTreemap>> = {},
@@ -102,7 +119,7 @@ const renderTreemap = (
 const clickCell = (keyword: string) =>
   settings().onElementClick!([
     [{ type: 'layerValue', groupByRollup: keyword }],
-  ] as unknown as Parameters<NonNullable<SettingsProps_['onElementClick']>>[0]);
+  ] as unknown as Parameters<NonNullable<SettingsProps['onElementClick']>>[0]);
 
 describe('MemoryKeywordTreemap', () => {
   beforeEach(() => {
@@ -139,9 +156,7 @@ describe('MemoryKeywordTreemap', () => {
   it('fills the cells from the colour-blind palette in rank order', () => {
     renderTreemap();
 
-    const colors = layer().shape!.fillColor as (key: string) => string;
-    const keywords = (partition().data as Array<{ keyword: string }>).map((cell) => cell.keyword);
-    const fills = keywords.map((keyword) => colors(keyword));
+    const fills = partition().data.map((cell) => fillColor(cell.keyword));
     expect(new Set(fills).size).toBe(fills.length);
     expect(fills.every((fill) => /^#|rgb/.test(fill))).toBe(true);
   });
@@ -179,7 +194,7 @@ describe('MemoryKeywordTreemap', () => {
 
     settings().onElementClick!([
       [{ type: 'primitive' }],
-    ] as unknown as Parameters<NonNullable<SettingsProps_['onElementClick']>>[0]);
+    ] as unknown as Parameters<NonNullable<SettingsProps['onElementClick']>>[0]);
 
     expect(onToggleKeyword).not.toHaveBeenCalled();
   });
@@ -199,7 +214,7 @@ describe('MemoryKeywordTreemap', () => {
   it('drops selected keywords from the cells rather than restyling them', () => {
     renderTreemap({ selectedKeywords: ['agent-builder'] });
 
-    const keywords = (partition().data as Array<{ keyword: string }>).map((cell) => cell.keyword);
+    const keywords = partition().data.map((cell) => cell.keyword);
     expect(keywords).not.toContain('agent-builder');
   });
 
@@ -241,11 +256,7 @@ describe('MemoryKeywordTreemap', () => {
     'has a readable label colour on every palette colour in %s mode',
     (colorMode) => {
       renderTreemap({}, colorMode);
-      const fills = new Set(
-        (partition().data as Array<{ keyword: string }>).map((cell) =>
-          (layer().shape!.fillColor as (key: string) => string)(cell.keyword)
-        )
-      );
+      const fills = new Set(partition().data.map((cell) => fillColor(cell.keyword)));
 
       fills.forEach((fill) => {
         const onBlack = calculateContrast(hexToRgb(fill) as never, [0, 0, 0]);
@@ -261,9 +272,7 @@ describe('MemoryKeywordTreemap', () => {
       summary({ id: `memory_${index}`, tags: ['memory', `topic-${index}`, `agent-${index}`] })
     );
     renderTreemap({ pages: wide });
-    const fills = (partition().data as Array<{ keyword: string }>).map((cell) =>
-      (layer().shape!.fillColor as (key: string) => string)(cell.keyword)
-    );
+    const fills = partition().data.map((cell) => fillColor(cell.keyword));
 
     expect(new Set(fills).size).toBeLessThanOrEqual(10);
   });

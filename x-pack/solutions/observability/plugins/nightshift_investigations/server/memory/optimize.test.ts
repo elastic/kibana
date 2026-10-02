@@ -1533,7 +1533,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    const write = store.update.mock.calls[0][1] as { tags: string[] };
+    const write = (store.update as jest.Mock).mock.calls[0][1] as { tags: string[] };
     expect(write.tags).toHaveLength(MAX_MEMORY_TAGS_PER_PAGE);
     // The union is ordered sources-first, so the cap drops the proposed tail
     // rather than the tags the merged pages already carried.

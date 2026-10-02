@@ -215,7 +215,7 @@ export function MemoryKeywordTreemap({
                 // vertically top-aligned because the chart has no centering control
                 // for a treemap's fill labels; a separate upstream change adds one.
                 fillLabel: { clipText: true, fontWeight: 500, minFontSize: 10, maxFontSize: 14 },
-                nodeLabel: (key: string) => cellsByKeyword.get(`${key}`)?.display ?? '',
+                nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.display ?? '',
               },
             ]}
           />
