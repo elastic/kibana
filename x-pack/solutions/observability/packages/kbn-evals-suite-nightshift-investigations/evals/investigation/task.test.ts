@@ -21,6 +21,7 @@ const connector = { id: 'investigation-model' };
 const investigation = (overrides: Partial<Investigation> = {}): Investigation => ({
   id: 'investigation',
   title: 'Investigate synthetic timeouts.',
+  title_pending: false,
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:05:00.000Z',
   agent_id: 'nightshift.investigation',

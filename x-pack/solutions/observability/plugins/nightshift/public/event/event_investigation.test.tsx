@@ -22,6 +22,7 @@ jest.mock('../hooks/use_kibana', () => ({
 const details: Investigation = {
   id: 'conv-1',
   title: 'Latency spike on web-frontend',
+  title_pending: false,
   created_at: '2026-07-10T12:00:00Z',
   updated_at: '2026-07-10T12:05:00Z',
   agent_id: 'nightshift.investigation',
