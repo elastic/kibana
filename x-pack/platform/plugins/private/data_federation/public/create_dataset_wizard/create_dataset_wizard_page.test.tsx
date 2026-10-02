@@ -1480,7 +1480,32 @@ describe('CreateDatasetWizardPage', () => {
       });
     };
 
-    it('does not allow skipping a step that has not passed validation', async () => {
+    it('allows jumping to any step when the saved settings are valid', async () => {
+      const { getByTestId, add } = renderEditWizard({
+        name: 'logs-dataset',
+        data_source: 'source-1',
+        resource: 's3://bucket/*',
+        settings: { format: 'csv', delimiter: ';' },
+      });
+
+      expect(getByTestId('createDatasetWizardStep-settings')).toBeEnabled();
+      expect(getByTestId('createDatasetWizardStep-mapping')).toBeEnabled();
+      expect(getByTestId('createDatasetWizardStep-review')).toBeEnabled();
+
+      await clickStep(getByTestId, 'review');
+      expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+      await clickStep(getByTestId, 'mapping');
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
+      ).toBeInTheDocument();
+      await clickStep(getByTestId, 'review');
+      expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+
+      await clickNext(getByTestId);
+      await waitFor(() => expect(add).toHaveBeenCalledTimes(1));
+    });
+
+    it('does not allow skipping a step whose saved settings are invalid', async () => {
       const { getByTestId, queryByTestId, add } = renderEditWizard({
         name: 'logs-dataset',
         data_source: 'source-1',
@@ -1488,6 +1513,7 @@ describe('CreateDatasetWizardPage', () => {
         settings: { format: 'csv', delimiter: 'ab' },
       });
 
+      expect(getByTestId('createDatasetWizardStep-settings')).toBeEnabled();
       expect(getByTestId('createDatasetWizardStep-review')).toBeDisabled();
       await clickStep(getByTestId, 'review');
       expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
@@ -1503,19 +1529,6 @@ describe('CreateDatasetWizardPage', () => {
         settings: { format: 'csv' },
       });
 
-      // Validate every step once so jumping ahead is allowed.
-      await clickNext(getByTestId);
-      expect(
-        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-      ).toBeInTheDocument();
-      await clickNext(getByTestId);
-      expect(
-        await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
-      ).toBeInTheDocument();
-      await clickNext(getByTestId);
-      expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-      await clickStep(getByTestId, 'dataset');
-      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
       expect(getByTestId('createDatasetWizardStep-review')).toBeEnabled();
 
       // Make Additional settings invalid, then leave it via Back without fixing it.

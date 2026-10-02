@@ -21,10 +21,7 @@ import { MappingEditor, type MappingEditorValue } from './mapping_editor';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 import { useWizardStep } from '../wizard_step_context';
-
-const isTimestampField = (f: MappingEditorValue['fields'][number]): boolean => {
-  return f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME;
-};
+import { isDefineSchemaValid, isTimestampField, isTimestampFieldValid } from '../step_validity';
 
 export function StepMapping() {
   const {
@@ -63,23 +60,18 @@ export function StepMapping() {
 
   const isTimeseriesEnabled = Boolean(splitFields.timestampField);
   const dynamicMode = field.value.dynamic;
-  const isTimeseriesFieldValid =
-    !splitFields.timestampField || splitFields.timestampField.path.trim() !== '';
-  const declaredFieldCount = useMemo(() => {
-    return splitFields.otherFields.filter((f) => f.name.trim() && f.type).length;
-  }, [splitFields.otherFields]);
-  const isDefineSchemaValid = dynamicMode || declaredFieldCount > 0;
-  const isMappingStepValid = isTimeseriesFieldValid && isDefineSchemaValid;
+  const isSchemaDefined = isDefineSchemaValid(field.value);
+  const isMappingStepValid = isTimestampFieldValid(field.value) && isSchemaDefined;
   const mappingStepErrors = useMemo(() => {
     const errors: Array<{ testSubj: string; message: string }> = [];
-    if (shouldShowDefineSchemaValidation && !isDefineSchemaValid) {
+    if (shouldShowDefineSchemaValidation && !isSchemaDefined) {
       errors.push({
         testSubj: 'createDatasetWizardDefineSchemaRequiresField',
         message: createDatasetWizardStrings.defineSchemaRequiresFieldError,
       });
     }
     return errors;
-  }, [isDefineSchemaValid, shouldShowDefineSchemaValidation]);
+  }, [isSchemaDefined, shouldShowDefineSchemaValidation]);
 
   const onTimeseriesToggle = useCallback(
     (checked: boolean) => {

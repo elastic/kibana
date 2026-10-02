@@ -34,6 +34,7 @@ import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
 import { StepMapping } from './mapping_step/step_mapping';
 import { StepReview } from './review_step/step_review';
+import { getValidStepIds } from './step_validity';
 import type { DatasetWizardStepContent, DatasetWizardStepId } from './types';
 import { WizardStepProvider } from './wizard_step_context';
 
@@ -85,9 +86,10 @@ export function CreateDatasetWizardPage({
   const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
   // Field rules only run while their step is mounted, so a step can only be skipped over once it
   // has passed validation, and its result is re-recorded whenever it is left in either direction.
-  // A new dataset's optional steps hold defaults that always pass; saved values may not.
+  // A saved dataset's steps start out validated when its values pass them; a new dataset's
+  // optional steps hold defaults that always pass, while its required steps must be visited.
   const [validatedStepIds, setValidatedStepIds] = useState<ReadonlySet<DatasetWizardStepId>>(
-    () => new Set(isEditMode ? [] : OPTIONAL_STEP_IDS)
+    () => new Set(isEditMode ? getValidStepIds(formDefaultValues) : OPTIONAL_STEP_IDS)
   );
 
   const skipsUnvalidatedStep = (index: number) =>
