@@ -160,13 +160,14 @@ function ServiceFlyoutContent({
       minWidth={660}
       session="start"
       historyKey={flyoutHistoryKey}
-      flyoutMenuProps={{ title }}
       tabs={tabs}
       tabBarProps={{ 'data-test-subj': 'serviceFlyoutTabs' }}
       selectedTabId={selectedTabId}
       onTabChange={handleTabChange}
     >
-      <FlyoutTemplate.Header title={titleNode}>{badges}</FlyoutTemplate.Header>
+      <FlyoutTemplate.Header title={titleNode} titleText={title}>
+        {badges}
+      </FlyoutTemplate.Header>
       <FlyoutTemplate.Body>
         <FlyoutTemplate.Body.TabPanel tabId={SERVICE_FLYOUT_TAB_IDS.overview}>
           <ServiceFlyoutOverview />

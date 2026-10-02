@@ -65,6 +65,13 @@ export interface FlyoutBodyTabPanelProps {
 export interface FlyoutHeaderProps {
   /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
+  /**
+   * Plain-text form of `title`, used to reveal the truncated collapsed title on hover and to name
+   * the flyout in EUI's flyout menu. A string `title` supplies this on its own. Set it when `title`
+   * is a `ReactNode`, or the collapsed title cannot be read in full and the menu shows a
+   * placeholder name. `flyoutMenuProps.title` still wins for the menu when both are set.
+   */
+  titleText?: string;
   'data-test-subj'?: string;
   /**
    * `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts.

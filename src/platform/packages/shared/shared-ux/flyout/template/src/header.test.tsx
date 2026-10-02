@@ -86,6 +86,69 @@ describe('FlyoutTemplate header title icon and description', () => {
     expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
   });
 
+  it('reveals a string title from the truncated collapsed heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" collapsed={true} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('title', 'Alert details');
+  });
+
+  it('reveals a node title from the collapsed heading using titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title={<a href="#details">Alert details</a>}
+          titleText="Alert details"
+          collapsed={true}
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('title', 'Alert details');
+  });
+
+  it('leaves the collapsed heading untitled when a node title has no titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} collapsed={true} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).not.toHaveAttribute('title');
+  });
+
+  it('prefers titleText over a string title for the collapsed reveal', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title="Alert details"
+          titleText="Full alert details"
+          collapsed={true}
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute(
+      'title',
+      'Full alert details'
+    );
+  });
+
   const body = (
     <FlyoutTemplate.Body>
       <span>content</span>

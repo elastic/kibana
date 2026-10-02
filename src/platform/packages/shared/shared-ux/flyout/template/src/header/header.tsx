@@ -220,6 +220,7 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 /** Internal renderer for the header zone; dividers are template-owned for full bleed. */
 export const HeaderZone = ({
   title,
+  titleText,
   titleIcon,
   titleTooltip,
   description,
@@ -243,6 +244,9 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  // The collapsed title truncates, so it needs plain text for the native hover reveal. A string
+  // title is its own text; anything richer only has text if the caller passed `titleText`.
+  const collapsedTitleText = titleText ?? (typeof title === 'string' ? title : undefined);
   const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
@@ -308,7 +312,7 @@ export const HeaderZone = ({
                       <h3
                         id={flyoutTitleId}
                         css={[titleCss, collapseStyles.collapsedTitle]}
-                        title={typeof title === 'string' ? title : undefined}
+                        title={collapsedTitleText}
                       >
                         {title}
                       </h3>
