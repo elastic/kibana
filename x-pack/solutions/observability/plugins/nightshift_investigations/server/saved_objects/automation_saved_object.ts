@@ -29,6 +29,7 @@ const automationAttributesSchemaV1 = schema.object({
 
 const automationAttributesSchemaV2 = automationAttributesSchemaV1.extends({
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 32 }), { maxSize: 50 })),
+  author: schema.maybe(schema.string({ maxLength: 1024 })),
 });
 
 export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAutomationAttributes> =

@@ -10,6 +10,9 @@ export const createRouteContext = () => ({
     savedObjects: {
       client: { getCurrentNamespace: jest.fn().mockReturnValue('default') },
     },
+    security: {
+      authc: { getCurrentUser: jest.fn().mockReturnValue({ username: 'alice' }) },
+    },
   }),
   resolve: jest.fn(),
 });

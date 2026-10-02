@@ -22,7 +22,7 @@ export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
   params: z.object({}),
-  handler: async ({ request, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({ request, getAutomationsSoClient, context }) => {
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
@@ -34,25 +34,13 @@ export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
       sortField: 'createdAt',
       sortOrder: 'desc',
     });
-    const workflowsManagement = getWorkflowsManagement();
-    const automations = await Promise.all(
-      result.saved_objects.map(async (so) => {
-        const workflow = so.attributes.workflowId
-          ? await workflowsManagement?.management.getWorkflow(
-              so.attributes.workflowId,
-              spaceId,
-              request
-            )
-          : null;
-        return {
-          id: so.id,
-          ...so.attributes,
-          author: { username: workflow?.createdBy ?? so.created_by ?? 'System' },
-        };
-      })
-    );
+
     return {
-      automations,
+      automations: result.saved_objects.map((so) => ({
+        id: so.id,
+        ...so.attributes,
+        author: { username: so.attributes.author ?? 'System' },
+      })),
       total: result.total,
     };
   },

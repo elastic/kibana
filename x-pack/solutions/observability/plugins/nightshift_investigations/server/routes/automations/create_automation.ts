@@ -90,8 +90,8 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       throw serverUnavailable('Workflows management is not available');
     }
 
-    const spaceId =
-      (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+    const coreContext = await context.core;
+    const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
 
     const now = new Date().toISOString();
@@ -99,8 +99,9 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       name: params.body.name,
       description: params.body.description,
       tags: params.body.tags,
+      author: coreContext.security.authc.getCurrentUser()?.username,
       automationType: params.body.automationType ?? 'custom',
-      isEnabled: params.body.isEnabled ?? true,
+      isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
       execution: params.body.execution,
       completion: params.body.completion,

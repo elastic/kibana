@@ -41,27 +41,36 @@ beforeEach(() => {
   createWorkflow.mockResolvedValue({ id: 'workflow-1' });
 });
 
-it('creates an enabled automation by default', async () => {
+it('creates a disabled automation by default', async () => {
   const result = await call();
 
   expect(soClient.create).toHaveBeenCalledWith(
     'nightshift-automation',
-    expect.objectContaining({ name: 'Triage', isEnabled: true, automationType: 'custom' })
+    expect.objectContaining({ name: 'Triage', isEnabled: false, automationType: 'custom' })
   );
   expect(soClient.update).toHaveBeenCalledWith('nightshift-automation', 'automation-1', {
     workflowId: 'workflow-1',
   });
-  expect(result).toMatchObject({ id: 'automation-1', workflowId: 'workflow-1', isEnabled: true });
+  expect(result).toMatchObject({ id: 'automation-1', workflowId: 'workflow-1', isEnabled: false });
 });
 
-it('stores tags and the requested enabled state', async () => {
-  const result = await call({ tags: ['oncall'], isEnabled: false });
+it('stores the current user as the author', async () => {
+  await call();
 
   expect(soClient.create).toHaveBeenCalledWith(
     'nightshift-automation',
-    expect.objectContaining({ tags: ['oncall'], isEnabled: false })
+    expect.objectContaining({ author: 'alice' })
   );
-  expect(result).toMatchObject({ tags: ['oncall'], isEnabled: false });
+});
+
+it('stores tags and the requested enabled state', async () => {
+  const result = await call({ tags: ['oncall'], isEnabled: true });
+
+  expect(soClient.create).toHaveBeenCalledWith(
+    'nightshift-automation',
+    expect.objectContaining({ tags: ['oncall'], isEnabled: true })
+  );
+  expect(result).toMatchObject({ tags: ['oncall'], isEnabled: true });
 });
 
 it('removes the automation when the workflow cannot be created', async () => {

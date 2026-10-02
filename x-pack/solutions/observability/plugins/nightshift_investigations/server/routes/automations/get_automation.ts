@@ -24,7 +24,7 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
   params: z.object({
     path: z.object({ id: z.string().min(1).max(512) }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({ request, params, getAutomationsSoClient, context }) => {
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
@@ -34,18 +34,10 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
       params.path.id
     );
 
-    const workflow = so.attributes.workflowId
-      ? await getWorkflowsManagement()?.management.getWorkflow(
-          so.attributes.workflowId,
-          spaceId,
-          request
-        )
-      : null;
-
     return {
       id: so.id,
       ...so.attributes,
-      author: { username: workflow?.createdBy ?? so.created_by ?? 'System' },
+      author: { username: so.attributes.author ?? 'System' },
     };
   },
 });

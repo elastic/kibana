@@ -10,39 +10,31 @@ import { listAutomationsRoute } from './list_automations';
 import { getAutomationRoute } from './get_automation';
 import { createRouteContext } from './test_helpers';
 
-const getWorkflow = jest.fn();
-const getWorkflowsManagement = jest.fn().mockReturnValue({ management: { getWorkflow } });
-const savedObject = (id: string, workflowId?: string) => ({
+const savedObject = (id: string, author?: string) => ({
   id,
-  created_by: 'so-author',
-  attributes: { name: id, ...(workflowId ? { workflowId } : {}) },
+  attributes: { name: id, ...(author ? { author } : {}) },
 });
-
-beforeEach(() => jest.clearAllMocks());
 
 describe('list automations', () => {
   const { handler } = listAutomationsRoute['GET /internal/nightshift/automations'];
 
-  it('reads the author from the backing workflow, then the saved object', async () => {
+  it('returns the stored author, or System when missing', async () => {
     const find = jest.fn().mockResolvedValue({
-      saved_objects: [savedObject('with-workflow', 'workflow-1'), savedObject('without-workflow')],
+      saved_objects: [savedObject('with-author', 'alice'), savedObject('without-author')],
       total: 2,
     });
-    getWorkflow.mockResolvedValue({ createdBy: 'workflow-author' });
 
     const result = await handler({
       request: httpServerMock.createKibanaRequest(),
       params: {},
       getAutomationsSoClient: jest.fn().mockReturnValue({ find }),
-      getWorkflowsManagement,
       context: createRouteContext(),
     } as never);
 
-    expect(getWorkflow).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       automations: [
-        expect.objectContaining({ id: 'with-workflow', author: { username: 'workflow-author' } }),
-        expect.objectContaining({ id: 'without-workflow', author: { username: 'so-author' } }),
+        expect.objectContaining({ id: 'with-author', author: { username: 'alice' } }),
+        expect.objectContaining({ id: 'without-author', author: { username: 'System' } }),
       ],
       total: 2,
     });
@@ -52,19 +44,16 @@ describe('list automations', () => {
 describe('get automation', () => {
   const { handler } = getAutomationRoute['GET /internal/nightshift/automations/{id}'];
 
-  it('returns the automation with its author', async () => {
-    getWorkflow.mockResolvedValue(null);
-
+  it('returns the automation with its stored author', async () => {
     const result = await handler({
       request: httpServerMock.createKibanaRequest(),
       params: { path: { id: 'automation-1' } },
       getAutomationsSoClient: jest
         .fn()
-        .mockReturnValue({ get: jest.fn().mockResolvedValue(savedObject('automation-1', 'wf')) }),
-      getWorkflowsManagement,
+        .mockReturnValue({ get: jest.fn().mockResolvedValue(savedObject('automation-1', 'bob')) }),
       context: createRouteContext(),
     } as never);
 
-    expect(result).toMatchObject({ id: 'automation-1', author: { username: 'so-author' } });
+    expect(result).toMatchObject({ id: 'automation-1', author: { username: 'bob' } });
   });
 });

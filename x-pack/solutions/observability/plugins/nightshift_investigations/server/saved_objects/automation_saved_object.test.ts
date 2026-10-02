@@ -40,4 +40,11 @@ describe('nightshift automation saved object', () => {
       getSchemas('2')?.create?.validate({ ...attributes, tags: ['x'.repeat(33)] })
     ).toThrow();
   });
+
+  it('accepts the author from model version 2', () => {
+    expect(getSchemas('2')?.create?.validate({ ...attributes, author: 'alice' })).toEqual({
+      ...attributes,
+      author: 'alice',
+    });
+  });
 });
