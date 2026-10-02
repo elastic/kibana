@@ -722,6 +722,7 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
       const bloatedRequiredFields = Array.from({ length: 50 }, (_, i) => ({
         name: `field${i}`,
         type: 'keyword',
+        ecs: false,
       }));
       const targetRequiredFields = bloatedRequiredFields.slice(0, 5);
 
