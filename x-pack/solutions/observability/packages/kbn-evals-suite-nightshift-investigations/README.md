@@ -59,9 +59,11 @@ The suite owns its sandbox wiring through the `scoutHook` in its
 [`scout/scout_hook.sh`](scout/scout_hook.sh). The evals CLI (and `run_suite.sh` in CI) pipes the
 profile's evals config to it; the hook reads the `sandbox` block and exports the `SANDBOX_*`
 variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations` Scout
-config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
-`${SANDBOX_*}` references in that file from its environment, so API keys never reach disk or
-process arguments. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
+config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml), or
+[`scout/kibana.sandbox_telemetry.yml`](scout/kibana.sandbox_telemetry.yml) when remote telemetry is
+configured. Kibana resolves the `${SANDBOX_*}` references in that file from its environment, so API
+keys never reach disk or process arguments. Each file also sets the tracing exporters and must be the
+only `--config` the config set passes, because the Kibana test server keeps just the last one. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
 
 #### Other profiles or a different sandbox
 
@@ -265,7 +267,7 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
   --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
+The committed [`scout/kibana.sandbox_telemetry.yml`](scout/kibana.sandbox_telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
 Remote telemetry and sandbox mTLS credentials are supplied through the hook environment.

@@ -17,18 +17,21 @@ const parentArgs = tracing.kbnTestServer.serverArgs;
 const exporters = parentArgs
   .find((arg) => arg.startsWith(exporterPrefix))
   ?.slice(exporterPrefix.length);
+// Exporter headers carry credentials, so they reach Kibana through the environment and a YAML file
+// rather than process arguments.
+const argsWithoutExporters = parentArgs.filter((arg) => !arg.startsWith(exporterPrefix));
+const tracingEnv = {
+  ...tracing.kbnTestServer.env,
+  NIGHTSHIFT_TRACING_EXPORTERS: exporters ?? '[]',
+};
+
+// The Kibana test server keeps only the last --config flag, so each variant passes exactly one file.
 const safeTracing: ScoutServerConfig = {
   ...tracing,
   kbnTestServer: {
     ...tracing.kbnTestServer,
-    env: {
-      ...tracing.kbnTestServer.env,
-      NIGHTSHIFT_TRACING_EXPORTERS: exporters ?? '[]',
-    },
-    serverArgs: [
-      ...parentArgs.filter((arg) => !arg.startsWith(exporterPrefix)),
-      `--config=${join(__dirname, 'kibana.tracing.yml')}`,
-    ],
+    env: tracingEnv,
+    serverArgs: [...argsWithoutExporters, `--config=${join(__dirname, 'kibana.tracing.yml')}`],
   },
 };
 
@@ -37,26 +40,20 @@ const createInvestigationConfig = (sandboxKibanaConfig: string): ScoutServerConf
     throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
 
-  const telemetryConfig = process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
-  if (telemetryConfig && !existsSync(telemetryConfig)) {
-    throw new Error(
-      `NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file: ${telemetryConfig}`
-    );
-  }
-
+  // The sandbox YAML also sets the tracing exporters, replacing kibana.tracing.yml.
   return {
-    ...safeTracing,
+    ...tracing,
     kbnTestServer: {
-      ...safeTracing.kbnTestServer,
+      ...tracing.kbnTestServer,
+      env: tracingEnv,
       serverArgs: [
-        ...safeTracing.kbnTestServer.serverArgs,
+        ...argsWithoutExporters,
         // Allow sixteen investigation workflows plus five background tasks.
         '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxKibanaConfig}`,
-        ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
         '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
