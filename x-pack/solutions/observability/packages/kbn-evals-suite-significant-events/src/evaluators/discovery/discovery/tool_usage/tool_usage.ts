@@ -101,29 +101,50 @@ const findDuplicateEventWriteRule = (
   }
 };
 
-const hasGroundedNoEventDecision = (steps: ConverseStep[]): boolean => {
-  const calledTools = new Set(extractToolCallIds(steps));
-  const hasQueryKiSearch = extractOrderedToolCalls(steps).some(
+/**
+ * A missing `events_write` is acceptable only when every detection was grounded: discovery skips
+ * the write when no detection is event-eligible (no event is created for non-confirming candidates),
+ * so the run must show a query KI search, an event search, and at least one `execute_esql` per detection.
+ */
+const hasGroundedNoEventDecision = ({
+  steps,
+  calledTools,
+  detectionCount,
+}: {
+  steps: ConverseStep[];
+  calledTools: Set<string>;
+  detectionCount: number;
+}): boolean => {
+  const orderedCalls = extractOrderedToolCalls(steps);
+  const hasQueryKiSearch = orderedCalls.some(
     ({ toolId, params }) =>
       isTool(toolId, TOOL_ID_KI_SEARCH) &&
       Array.isArray(params.kind) &&
       params.kind.includes('query')
   );
+  const esqlCallCount = orderedCalls.filter(({ toolId }) =>
+    isTool(toolId, TOOL_ID_EXECUTE_ESQL)
+  ).length;
 
   return (
     hasQueryKiSearch &&
-    calledCanonical(calledTools, TOOL_ID_EXECUTE_ESQL) &&
+    esqlCallCount >= detectionCount &&
     calledCanonical(calledTools, TOOL_ID_EVENT_SEARCH)
   );
 };
 
 /** Require a completed event write or a grounded no-event decision. */
-const scoreOutputTool = (
-  calledTools: Set<string>,
-  steps: ConverseStep[]
-): ToolUsageScore | null => {
+const scoreOutputTool = ({
+  calledTools,
+  steps,
+  detectionCount,
+}: {
+  calledTools: Set<string>;
+  steps: ConverseStep[];
+  detectionCount: number;
+}): ToolUsageScore | null => {
   if (!calledCanonical(calledTools, TOOL_ID_EVENTS_WRITE)) {
-    if (hasGroundedNoEventDecision(steps)) {
+    if (hasGroundedNoEventDecision({ steps, calledTools, detectionCount })) {
       return null;
     }
 
@@ -237,7 +258,7 @@ export const scoreToolUsage = ({
 
   const orderedCalls = extractOrderedToolCalls(steps);
 
-  const outputCheck = scoreOutputTool(calledTools, steps);
+  const outputCheck = scoreOutputTool({ calledTools, steps, detectionCount });
   if (outputCheck) {
     return outputCheck;
   }

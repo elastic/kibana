@@ -97,6 +97,23 @@ describe('scoreToolUsage', () => {
     });
   });
 
+  it('rejects a no-event run that grounded fewer detections than the batch size', () => {
+    const steps = allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE);
+
+    const result = scoreToolUsage({ steps, detectionCount: 5 });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+  });
+
+  it('accepts a no-event run with one execute_esql call per detection', () => {
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 2 }).score).toBe(1);
+  });
+
   it.each([undefined, {}, { items: [] }] as const)(
     'rejects events_write with payload %p',
     (params) => {
