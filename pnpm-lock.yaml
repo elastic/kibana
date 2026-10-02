@@ -316,6 +316,8 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
+pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
+
 importers:
 
   .:
