@@ -496,6 +496,7 @@ export const createDiscoverSessionTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createDiscoverSession,
     type: ToolType.builtin,
+    excludeFromMcp: true,
     description: `Create or update a Discover session attachment that shows a live document table in chat. Use this when the user should see raw documents or rows, not a chart.
 
 Pass an ES|QL query that returns documents (FROM or TS with WHERE/LIMIT as needed). Copy the "esql" string from generateEsql into the "esql" parameter — do not wrap it in an object and do not invent ES|QL. Do not use this for aggregations (STATS) or charts; use ${platformCoreTools.createVisualization} instead.
