@@ -705,6 +705,19 @@ describe('JinaReaderConnector', () => {
     });
   });
 
+  describe.each(['fileToMarkdown', 'fileToRenderedImage'] as const)('%s file size', (action) => {
+    const maxBytes = 10 * 1024 * 1024;
+    const isValid = (bytes: number) =>
+      JinaReaderConnector.actions[action].input.safeParse({
+        file: Buffer.alloc(bytes).toString('base64'),
+      }).success;
+
+    it('is bounded at 10 MiB once decoded', () => {
+      expect(isValid(maxBytes)).toBe(true);
+      expect(isValid(maxBytes + 1)).toBe(false);
+    });
+  });
+
   describe('test handler', () => {
     const testSpec = JinaReaderConnector.test;
 

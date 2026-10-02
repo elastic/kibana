@@ -35,7 +35,16 @@ const JINA_READER_SEARCH_URL = 'https://s.jina.ai' as const;
 const MAX_URL_LENGTH = 2048;
 const MAX_OPTION_KEY_LENGTH = 200;
 const MAX_FILENAME_LENGTH = 255;
-const MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((10 * 1024 * 1024) / 3);
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
+const base64FileField = () =>
+  z
+    .string()
+    .max(Math.ceil(MAX_FILE_BYTES / 3) * 4)
+    .refine((value) => Buffer.from(value, 'base64').byteLength <= MAX_FILE_BYTES, {
+      message: `File must not exceed ${MAX_FILE_BYTES} bytes once decoded`,
+    })
+    .describe('Base64-encoded file content');
 
 function mapPluginReturnFormatToReaderReturnFormat(returnFormat?: RETURN_FORMAT): string {
   switch (returnFormat) {
@@ -217,7 +226,7 @@ export const JinaReaderConnector: ConnectorSpec = {
       description: 'Convert a file to markdown for LLM consumption',
       input: lazySchema(() =>
         z.object({
-          file: z.string().max(MAX_FILE_BASE64_LENGTH).describe('Base64-encoded file content'),
+          file: base64FileField(),
           filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
           options: z
             .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
@@ -257,7 +266,7 @@ export const JinaReaderConnector: ConnectorSpec = {
       description: 'Render a document file to image. Office and PDF files supported.',
       input: lazySchema(() =>
         z.object({
-          file: z.string().max(MAX_FILE_BASE64_LENGTH).describe('Base64-encoded file content'),
+          file: base64FileField(),
           filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
           pageNumber: z
             .number()
