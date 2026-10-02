@@ -44,6 +44,7 @@ import type { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred
 import { DiscardStarredQueryModal } from './discard_starred_query';
 import { useRestorableState } from '../restorable_state';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
+import { useCanCreateView } from '../save_as_view/use_can_create_view';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 
 export function QueryHistoryAction({
@@ -240,6 +241,7 @@ export function QueryList({
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
   const [queryToSave, setQueryToSave] = useState<string>();
   const applySavedView = useApplySavedView();
+  const canCreateView = useCanCreateView(enableCreateView);
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const starredQueriesCount = starredQueries.length;
 
@@ -319,7 +321,7 @@ export function QueryList({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {enableCreateView && (
+              {canCreateView && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip position="top" content={createViewLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
@@ -365,7 +367,7 @@ export function QueryList({
       },
     ];
   }, [
-    enableCreateView,
+    canCreateView,
     onUpdateAndSubmit,
     setQueryToSave,
     starredQueriesCount,

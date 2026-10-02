@@ -19,6 +19,7 @@ import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
 import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
+import { useCanCreateView } from '../save_as_view/use_can_create_view';
 import {
   addStarredQueryLabel,
   helpLabel,
@@ -76,6 +77,7 @@ export function ESQLMenu({
   const [showStardust, setShowStardust] = useState(false);
   const [queryToSave, setQueryToSave] = useState<string>();
   const applySavedView = useApplySavedView();
+  const canCreateView = useCanCreateView(enableCreateView);
   const currentQuery = editorActions?.currentQuery ?? '';
   const wasStarredRef = useRef(isStarred);
   if (isStarred && !wasStarredRef.current) {
@@ -89,7 +91,7 @@ export function ESQLMenu({
     <>
       {onPrettifyQuery && <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />}
       <KeyboardShortcuts />
-      {enableCreateView && (
+      {canCreateView && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={createViewLabel} disableScreenReaderOutput>
             <EuiButtonIcon

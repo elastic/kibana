@@ -69,8 +69,13 @@ const createMockStarredQueriesService = (items: StarredQueryItem[] = []) =>
   } as unknown as EsqlStarredQueriesService);
 
 describe('Starred and History queries components', () => {
+  const defaultCore = coreMock.createStart();
+  defaultCore.application.capabilities = {
+    ...defaultCore.application.capabilities,
+    esqlViews: { create: true },
+  };
   const services = {
-    core: coreMock.createStart(),
+    core: defaultCore,
     usageCollection: {},
     storage: {},
   };

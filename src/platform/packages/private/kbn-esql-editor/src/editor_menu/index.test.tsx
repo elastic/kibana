@@ -33,6 +33,13 @@ startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('ob
 startMock.http.get = jest.fn().mockResolvedValue({ recommendedQueries: [] });
 startMock.notifications = notificationServiceMock.createStartContract();
 
+const setCanCreateView = (canCreate: boolean) => {
+  startMock.application.capabilities = {
+    ...startMock.application.capabilities,
+    esqlViews: { create: canCreate },
+  };
+};
+
 const services = { core: startMock, data: { dataViews: {} } };
 
 const renderMenu = async (
@@ -54,6 +61,10 @@ const renderMenu = async (
   });
 
 describe('ESQLMenu', () => {
+  beforeEach(() => {
+    setCanCreateView(true);
+  });
+
   it('does not render the visor (search) button by default when the editor is not inline', async () => {
     await renderMenu();
     expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
@@ -88,6 +99,12 @@ describe('ESQLMenu', () => {
 
   it('hides create view unless the host opts in', async () => {
     await renderMenu({}, { currentQuery: 'FROM logs-*' });
+    expect(screen.queryByRole('button', { name: 'Create view' })).not.toBeInTheDocument();
+  });
+
+  it('hides create view when the user lacks the create privilege, even if the host opts in', async () => {
+    setCanCreateView(false);
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
     expect(screen.queryByRole('button', { name: 'Create view' })).not.toBeInTheDocument();
   });
 

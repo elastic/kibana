@@ -30,12 +30,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { validateQuery } from '@kbn/esql-language';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
   validateEsqlViewName,
   type EsqlViewNameValidationError,
 } from '@kbn/esql-utils';
@@ -124,6 +126,20 @@ const createErrorTitle = i18n.translate('esqlEditor.createView.createErrorTitle'
   defaultMessage: 'Unable to create ES|QL view',
 });
 
+const queryTooLongErrorMessage = i18n.translate('esqlEditor.saveAsView.queryTooLongErrorMessage', {
+  defaultMessage: 'Query cannot be longer than 100,000 characters.',
+});
+
+const querySyntaxErrorMessage = (details: string) =>
+  i18n.translate('esqlEditor.saveAsView.querySyntaxErrorMessage', {
+    defaultMessage: 'Fix the ES|QL syntax: {details}',
+    values: { details },
+  });
+
+const applyViewErrorTitle = i18n.translate('esqlEditor.createView.applyViewErrorTitle', {
+  defaultMessage: 'The view was created, but the query could not be updated to use it',
+});
+
 const createSuccessTitle = (name: string) =>
   i18n.translate('esqlEditor.createView.createSuccessTitle', {
     defaultMessage: 'View "{name}" was created.',
@@ -170,6 +186,7 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [nameConflict, setNameConflict] = useState<NameConflict>();
   const [saveError, setSaveError] = useState<string>();
+  const [queryError, setQueryError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = () => {
@@ -209,8 +226,23 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
     setIsNameTouched(true);
     setNameConflict(undefined);
     setSaveError(undefined);
+    setQueryError(undefined);
 
     if (validateEsqlViewName(name) || description.length > MAX_ESQL_VIEW_DESCRIPTION_LENGTH) {
+      return;
+    }
+
+    if (query.length > MAX_ESQL_VIEW_QUERY_LENGTH) {
+      setQueryError(queryTooLongErrorMessage);
+      return;
+    }
+
+    const { errors } = await validateQuery(query);
+    if (errors.length > 0) {
+      const [firstError] = errors;
+      setQueryError(
+        querySyntaxErrorMessage('text' in firstError ? firstError.text : firstError.message)
+      );
       return;
     }
 
@@ -221,9 +253,6 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
         query,
         description: description.trim().length > 0 ? description : undefined,
       });
-      core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
-      await onSaved?.(name);
-      onClose();
     } catch (error) {
       if (error instanceof EsqlViewsClientError) {
         if (error.errorType === ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE) {
@@ -236,9 +265,23 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
       } else {
         setSaveError(error instanceof Error ? error.message : String(error));
       }
-    } finally {
       setIsSaving(false);
+      return;
     }
+
+    core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
+    try {
+      await onSaved?.(name);
+    } catch (error) {
+      core.notifications.toasts.addError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          title: applyViewErrorTitle,
+        }
+      );
+    }
+    setIsSaving(false);
+    onClose();
   };
 
   return (
@@ -306,7 +349,12 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow fullWidth label={queryLabel}>
+          <EuiFormRow
+            fullWidth
+            label={queryLabel}
+            isInvalid={Boolean(queryError)}
+            error={queryError}
+          >
             <EuiCodeBlock
               data-test-subj="saveAsViewQueryPreview"
               fontSize="s"

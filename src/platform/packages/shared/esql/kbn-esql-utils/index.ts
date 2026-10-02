@@ -111,6 +111,7 @@ export {
   type EsqlViewsClient,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_NAME_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
   validateEsqlViewName,
   type EsqlViewNameValidationError,
   getViewEsqlQuery,
