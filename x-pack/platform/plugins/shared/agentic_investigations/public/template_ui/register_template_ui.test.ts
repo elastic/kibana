@@ -57,7 +57,7 @@ describe('registerInvestigationTemplateUI', () => {
       expect.objectContaining({
         templateId: 'investigation',
         name: 'Investigation',
-        icon: 'securitySignalDetected',
+        icon: 'magnifyExclamation',
       })
     );
     expect(escalation).toEqual(

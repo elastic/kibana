@@ -48,7 +48,7 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
       )
     );
     expect(definitions.investigation).toEqual(
-      expect.objectContaining({ name: 'Investigation', icon: 'securitySignalDetected' })
+      expect.objectContaining({ name: 'Investigation', icon: 'magnifyExclamation' })
     );
     expect(definitions.escalation).toEqual(
       expect.objectContaining({ name: 'Escalation', icon: 'warning' })

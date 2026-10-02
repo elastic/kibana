@@ -205,7 +205,7 @@ export const registerInvestigationTemplateUI = ({
     conversationTemplates: agentBuilder.conversationTemplates,
     templateId: INVESTIGATION_TEMPLATE_ID,
     name: INVESTIGATION_TEMPLATE_NAME,
-    icon: 'securitySignalDetected',
+    icon: 'magnifyExclamation',
     renderAssignees,
     renderStatus: canManageInvestigations ? renderStatus : undefined,
     renderCloseInvestigationModal,
