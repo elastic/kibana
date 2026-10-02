@@ -180,6 +180,55 @@ export class SyntheticsMonitorClient {
     return pubicResponse;
   }
 
+  /**
+   * Deletes and recreates one private location's package policies for the given monitors.
+   */
+  async redeployPrivateLocation({
+    monitors,
+    locationId,
+    allPrivateLocations,
+    spaceId,
+  }: {
+    monitors: Array<{ monitor: MonitorFields; id: string }>;
+    locationId: string;
+    allPrivateLocations: SyntheticsPrivateLocations;
+    spaceId: string;
+  }) {
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+
+    const privateConfigs: PrivateConfig[] = [];
+    for (const monitorObj of monitors) {
+      const { formattedConfig, params } = await this.formatConfigWithParams(
+        monitorObj,
+        spaceId,
+        paramsBySpace
+      );
+      privateConfigs.push({
+        // Scoped to this location so the monitor's other locations are left untouched.
+        config: {
+          ...formattedConfig,
+          locations: formattedConfig.locations.filter(
+            ({ id, isServiceManaged }) => !isServiceManaged && id === locationId
+          ),
+        },
+        globalParams: params,
+      });
+    }
+
+    await this.privateLocationAPI.deleteMonitors(
+      privateConfigs.map(({ config }) => config),
+      spaceId
+    );
+
+    return this.privateLocationAPI.createPackagePolicies(
+      privateConfigs,
+      allPrivateLocations,
+      spaceId,
+      maintenanceWindows
+    );
+  }
+
   async testNowConfigs(
     monitor: { monitor: MonitorFields; id: string; testRunId: string },
     allPrivateLocations: PrivateLocationAttributes[],
