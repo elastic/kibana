@@ -6,12 +6,19 @@
  */
 import React, { useMemo } from 'react';
 import { useController } from 'react-hook-form';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 interface DescriptionFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
+
+const DESCRIPTION_LABEL_APPEND = (
+  <EuiText size="xs" color="subdued">
+    <FormattedMessage id="xpack.osquery.queryFlyoutForm.optionalLabel" defaultMessage="optional" />
+  </EuiText>
+);
 
 const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldProps }) => {
   const {
@@ -26,9 +33,12 @@ const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldPr
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
-        defaultMessage: 'Description (optional)',
+      // Own id: `xpack.osquery.pack.form.descriptionFieldLabel` is shared with the
+      // saved-query form, which still embeds "(optional)" in its label.
+      label={i18n.translate('xpack.osquery.pack.form.packDescriptionFieldLabel', {
+        defaultMessage: 'Description',
       })}
+      labelAppend={DESCRIPTION_LABEL_APPEND}
       error={error?.message}
       isInvalid={hasError}
       fullWidth

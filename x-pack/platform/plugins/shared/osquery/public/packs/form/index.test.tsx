@@ -1340,4 +1340,151 @@ describe('PackForm', () => {
       }
     });
   });
+
+  describe('stepped layout', () => {
+    const stepTitles = (container: HTMLElement) =>
+      Array.from(container.querySelectorAll('.euiStep__title')).map((el) => el.textContent);
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    it('should render four steps in order when rruleScheduling is enabled', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { container } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(stepTitles(container)).toEqual([
+        'Definition',
+        'Schedule',
+        'Queries',
+        'Policy assignment',
+      ]);
+    });
+
+    it('should omit the Schedule step and render three steps when rruleScheduling is disabled', () => {
+      const { container, queryByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(stepTitles(container)).toEqual(['Definition', 'Queries', 'Policy assignment']);
+      expect(queryByTestId('osqueryPackFormStep-schedule')).toBeNull();
+    });
+
+    it('should render exactly one Schedule heading inside the Schedule step', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { getAllByRole, getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      const scheduleHeadings = getAllByRole('heading', { name: 'Schedule' });
+      expect(scheduleHeadings).toHaveLength(1);
+      // The heading comes from the step chrome, not from ScheduleSection.
+      expect(scheduleHeadings[0]).toHaveClass('euiStep__title');
+      expect(
+        within(getByTestId('osquery-schedule-section')).queryByRole('heading', {
+          name: 'Schedule',
+        })
+      ).toBeNull();
+    });
+
+    it('should not render any step in a disabled state', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+
+      const { container, queryByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(container.querySelectorAll('.euiStep')).toHaveLength(4);
+      expect(queryByText(/is disabled/)).toBeNull();
+    });
+
+    it('should place pack Type and policy controls inside the Policy assignment step, after Queries', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      const policyStep = getByTestId('osqueryPackFormStep-policyAssignment');
+      const queriesStep = getByTestId('osqueryPackFormStep-queries');
+
+      expect(within(policyStep).getByTestId('osqueryPackTypePolicy')).toBeInTheDocument();
+      expect(within(policyStep).getByTestId('osqueryPackTypeGlobal')).toBeInTheDocument();
+      expect(within(policyStep).getByText('Partial deployments (shards)')).toBeInTheDocument();
+      // Sibling steps, so the position is exactly FOLLOWING (no containment bits).
+      expect(queriesStep.compareDocumentPosition(policyStep)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+
+    it('should show the inheritance copy in the Queries step', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(
+        within(getByTestId('osqueryPackFormStep-queries')).getByText(
+          "These queries inherit the pack's settings, but you can customize the defaults by editing them individually."
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should render the same steps with disabled controls for a read-only user', () => {
+      const { container, getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          isReadOnly={true}
+          defaultValue={{
+            id: 'ro-pack',
+            saved_object_id: 'ro-pack',
+            name: 'Read-only Pack',
+            description: '',
+            enabled: true,
+            queries: {},
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            policy_ids: [],
+            references: [],
+          }}
+        />
+      );
+
+      expect(stepTitles(container)).toEqual(['Definition', 'Queries', 'Policy assignment']);
+      expect(getByTestId('update-pack-button')).toBeDisabled();
+    });
+
+    it('should label the create button "Create pack" and the edit button "Update pack"', () => {
+      const { getByTestId, unmount } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('save-pack-button')).toHaveTextContent('Create pack');
+      unmount();
+
+      const { getByTestId: getByTestIdEdit } = renderWithContext(
+        <PackForm
+          editMode={true}
+          defaultValue={{
+            id: 'p',
+            saved_object_id: 'p',
+            name: 'Pack',
+            description: '',
+            enabled: true,
+            queries: {},
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            policy_ids: [],
+            references: [],
+          }}
+        />
+      );
+      expect(getByTestIdEdit('update-pack-button')).toHaveTextContent('Update pack');
+    });
+
+    it('should render the Description label without an embedded "(optional)"', () => {
+      const { getByText, queryByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(getByText('Description', { selector: 'label' })).toBeInTheDocument();
+      expect(queryByText('Description (optional)')).toBeNull();
+    });
+  });
 });
