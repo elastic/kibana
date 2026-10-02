@@ -130,8 +130,8 @@ export class AttachmentGetter {
     return result;
   }
 
-  // Migrated cases-comments documents fold to unified via toUnifiedAttributes;
-  // unrecognized types are surfaced as per-item errors (see toUnrecognizedTypeError).
+  // cases-comments documents with a unified mapping fold to unified via toUnifiedAttributes;
+  // the rest are surfaced as per-item errors (see toUnrecognizedTypeError).
   private transformAndDecodeBulkGetResponse(
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentAttributesV2> {
@@ -165,13 +165,13 @@ export class AttachmentGetter {
   }
 
   // Only `bulkGet` has an errors channel; get/getFileAttachments/flatten fall back to legacy instead.
-  // A unified cross-path policy (+ registry-derived gating) is tracked follow-up, not this narrowing.
+  // A unified cross-path policy for unmapped types is a tracked follow-up.
   private toUnrecognizedTypeError(
     injectedSo: SavedObject<AttachmentAttributesV2>
   ): OptionalAttributes<AttachmentAttributesV2> {
     const attachmentType = getAttachmentTypeFromAttributes(injectedSo.attributes);
     this.context.log.warn(
-      `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which is not in MIGRATED_ATTACHMENT_TYPES. Returning it as an error instead of a legacy fallback.`
+      `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which has no unified mapping. Returning it as an error instead of a legacy fallback.`
     );
 
     return {
