@@ -20,6 +20,9 @@ export class CustomContentPanelPage {
   readonly cancelButton: Locator;
   readonly runPreviewButton: Locator;
   readonly panel: Locator;
+  readonly refineWithChatButton: Locator;
+  readonly chatInput: Locator;
+  readonly chatSubmitButton: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -35,6 +38,9 @@ export class CustomContentPanelPage {
     this.cancelButton = page.testSubj.locator('customContentCancelButton');
     this.runPreviewButton = page.testSubj.locator('customContentRunPreviewButton');
     this.panel = page.testSubj.locator('customContentPanel');
+    this.refineWithChatButton = page.getByRole('button', { name: 'Refine with chat' });
+    this.chatInput = page.testSubj.locator('agentBuilderConversationInputEditor');
+    this.chatSubmitButton = page.testSubj.locator('agentBuilderConversationInputSubmitButton');
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
@@ -63,6 +69,12 @@ export class CustomContentPanelPage {
 
   async cancel() {
     await this.cancelButton.click();
+  }
+
+  async sendChatMessage(message: string) {
+    await this.chatInput.click();
+    await this.chatInput.fill(message);
+    await this.chatSubmitButton.click();
   }
 
   getPanelIframe() {
