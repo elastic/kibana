@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
@@ -80,7 +73,6 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
-  private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -175,14 +167,6 @@ export class AgentBuilderPlugin
       agents: serviceSetups.agents,
       register: this.config.deductive?.register ?? false,
     });
-
-    this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
-      const [coreStart] = await coreSetup.getStartServices();
-      const soClient = coreStart.savedObjects.getScopedClient(request);
-      return coreStart.uiSettings
-        .asScopedToClient(soClient)
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    };
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
@@ -384,8 +368,7 @@ export class AgentBuilderPlugin
     registerConversationWorkflowEventBridge(
       this.conversationEventBus,
       startDeps.workflowsExtensions,
-      this.logger,
-      this.isExperimentalEnabled!
+      this.logger
     );
 
     const {
