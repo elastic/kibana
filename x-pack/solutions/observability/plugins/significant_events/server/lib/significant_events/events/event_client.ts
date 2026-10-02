@@ -28,6 +28,7 @@ import {
 } from '../query_utils';
 import {
   andWhere,
+  applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
   fromIndexForSpace,
@@ -171,6 +172,11 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
+const activeStatusWhere = (): ESQLAstExpression =>
+  esql.exp`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
+    esql.str(status)
+  )})`;
+
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
@@ -241,20 +247,22 @@ export class EventClient implements SignificantEventsReadClient {
       columns: ['_id', '_source'],
     }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
 
-    query = applyTimeRange({
-      query,
-      from: options.from,
-      to: options.to,
-    });
+    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    // Free-text search runs pre-latest; current state and continuation-candidate filters run
-    // post-latest so stale versions cannot make a closed episode appear open.
+    // Free-text search, current state and continuation-candidate filters all run post-latest, so
+    // they match the current version and stale versions cannot make a closed episode appear open.
     const searchWhere = this.buildWhere({ search: options.search });
     if (searchWhere) {
       query = query.where`${searchWhere}`;
     }
 
-    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
+    // The time range selects events active during it, always shown in their current state.
+    query = applyLifetimeOverlap({
+      query,
+      from: options.from,
+      to: options.to,
+      activeWhere: activeStatusWhere(),
+    });
 
     if (options.status?.length) {
       query = query.where`${esql.col('status')} IN (${options.status.map((status) =>
@@ -398,9 +406,7 @@ export class EventClient implements SignificantEventsReadClient {
 
     query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    query = query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
-      (s) => esql.str(s)
-    )})`;
+    query = query.where`${activeStatusWhere()}`;
 
     const candidateWhere = continuationCandidateFilter({
       streamNames: options.streamNames,
