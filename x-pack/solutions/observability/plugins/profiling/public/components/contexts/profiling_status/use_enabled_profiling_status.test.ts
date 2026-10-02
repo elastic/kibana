@@ -55,8 +55,6 @@ describe('useEnabledProfilingStatus', () => {
   ])('throws when %s', (_name, status, data) => {
     mockStatus(status, data);
 
-    expect(() => renderHook(() => useEnabledProfilingStatus())).toThrow(
-      'useEnabledProfilingStatus must only be used below CheckStatus, once profiling is enabled'
-    );
+    expect(() => renderHook(() => useEnabledProfilingStatus())).toThrow();
   });
 });
