@@ -28,7 +28,13 @@ import { EsqlSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  dataViewMockWithTimeField,
+  esHitsMock,
+} from '@kbn/discover-utils/src/__mocks__';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
@@ -1201,6 +1207,58 @@ describe('tab_state actions', () => {
     expect(selectTab(toolkit.internalState.getState(), persistedTab.id).esqlVariables).toEqual([
       { key: 'foo', type: 'values', value: 'bar' },
     ]);
+    resolveSpy.mockRestore();
+  });
+
+  it('resolves the opening ES|QL query before the first fetch', async () => {
+    const services = createDiscoverServicesMock();
+    const uiSettingsGet = services.uiSettings.get as jest.Mock;
+    const originalGet = uiSettingsGet.getMockImplementation();
+    uiSettingsGet.mockImplementation((key: string) => {
+      if (key === ENABLE_ESQL) {
+        return true;
+      }
+      return originalGet?.(key);
+    });
+    services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+    const logsDataView = new DataView({
+      spec: {
+        id: 'logs-data-view',
+        title: 'logs*,-logstash*,filebeat-*',
+        timeFieldName: '@timestamp',
+      },
+      fieldFormats: {} as DataView['fieldFormats'],
+    });
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [logsDataView],
+    });
+    jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
+
+    const openingQuery = 'FROM logs*,-logstash*,filebeat-*';
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
+      esqlSource: createMockEsqlSource(),
+      dataView: dataViewMock,
+    });
+
+    await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.setDefaultProfileEsqlQuery({ query: openingQuery })
+    );
+    const tabId = toolkit.getCurrentTab().id;
+    await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+
+    expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
+      esql: openingQuery,
+    });
+    expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
+    expect(
+      selectTabRuntimeState(toolkit.runtimeStateManager, tabId).currentDataView$.getValue()
+    ).toBe(dataViewMock);
     resolveSpy.mockRestore();
   });
 });
