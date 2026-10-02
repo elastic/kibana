@@ -681,6 +681,28 @@ describe('create-investigation-proposal workflow', () => {
       expect(findStep(workflow.steps, 'break_succeeded')?.type).toBe('loop.break');
     });
 
+    // Retrying an action that reported it can never apply cannot succeed, so the gate
+    // closes the proposal with the action's reason instead of re-offering it.
+    it('closes an action reported as not applicable instead of re-offering it', () => {
+      const branch = findStep(workflow.steps, 'handle_action_not_applicable');
+      expect(String(branch?.condition)).toContain(
+        "steps.execute_action.output.outcome == 'not_applicable'"
+      );
+      expect(findStep(workflow.steps, 'record_not_applicable')?.with).toMatchObject({
+        status: 'failed',
+        executionError: '{{ steps.execute_action.output.message }}',
+      });
+      expect(findStep(workflow.steps, 'complete_not_applied')?.with).toMatchObject({
+        completed: true,
+        final_status: 'not_applied',
+        final_decision: 'approved',
+      });
+      expect(findStep(workflow.steps, 'break_not_applied')?.type).toBe('loop.break');
+      expect(String(findStep(workflow.steps, 'handle_action_success')?.condition)).toContain(
+        "steps.execute_action.output.outcome != 'not_applicable'"
+      );
+    });
+
     it('keeps an action failure inside the loop so it can be re-offered', () => {
       // Without the step-level continue the workflow-level handler would settle
       // the proposal and stop, making the clone branch unreachable.

@@ -44,9 +44,10 @@ triggers:
               type: integer
               minimum: 0
               description: >-
-                The rule's `revision` when the proposal was built. When set, the
-                edit fails instead of overwriting a rule that changed since. Not
-                a rule field, so it is never sent to the patch API.
+                The rule's `revision` when the proposal was built. When set, an
+                edit to a rule that changed since is reported as not applicable
+                instead of overwriting it. Not a rule field, so it is never sent
+                to the patch API.
             query:
               type: string
               maxLength: 65536
@@ -111,6 +112,18 @@ triggers:
         - actionInput
       additionalProperties: false
 outputs:
+  # `not_applicable` when the edit can never land (the rule changed or was
+  # deleted since the proposal was built), with `message` saying why for the
+  # analyst. The proposal gate closes such a proposal instead of re-offering it.
+  - name: outcome
+    type: string
+  - name: message
+    type: string
+  # `rule_changed` or `rule_deleted` with a `not_applicable` outcome. Kept out of
+  # `message` so the analyst reads plain text, while the run output can still be
+  # counted by cause.
+  - name: reason
+    type: string
   - name: id
     type: string
   - name: name
@@ -128,10 +141,10 @@ outputs:
 steps:
   # `revision` is the rule's change counter: it moves on every content edit and
   # ignores enable/disable and run status. `version` does not move on custom
-  # rule edits, so it cannot detect one.
+  # rule edits, so it cannot detect one. Read even without `expected_revision`,
+  # so a deleted rule is reported as such rather than as a failed patch.
   - name: fetch_rule
     type: kibana.request
-    if: "${{ inputs.actionInput.expected_revision != nil }}"
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.id | url_encode }}"
@@ -139,25 +152,49 @@ steps:
         kbn-xsrf: string
         elastic-api-version: "2023-10-31"
         Content-Type: application/json
+    on-failure:
+      continue: true
 
-  # Fails the action so the gate records the proposal `failed` and re-offers it
-  # with this message, instead of silently overwriting someone else's edit.
-  # Analysts read it on the proposal card, so it states the next step; the
-  # trailing code keeps the failure countable.
-  - name: fail_rule_changed
+  # Looked up by saved-object id, so a rule deleted and recreated under the same
+  # rule_id lands here too: the edit was built for a rule that no longer exists.
+  # The step error carries only a message, which the engine formats as
+  # `HTTP <status>: <body>` for every failed Kibana request.
+  - name: report_rule_deleted
+    type: workflow.output
+    status: completed
+    if: >-
+      ${{ steps.fetch_rule.error != nil
+        and steps.fetch_rule.error.message contains 'HTTP 404' }}
+    with:
+      outcome: not_applicable
+      reason: rule_deleted
+      message: >-
+        The rule was deleted after this proposal was created, so nothing was
+        applied.
+
+  # Any other read failure (permissions, a timeout) may pass on a retry, so it
+  # fails the action and the gate re-offers the proposal.
+  - name: fail_rule_read
     type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil }}"
+    with:
+      message: "{{ steps.fetch_rule.error.message }}"
+
+  # Not a failure: retrying can never succeed, so the gate closes the proposal
+  # with this message instead of re-offering it, and nothing overwrites the
+  # newer edit.
+  - name: report_rule_changed
+    type: workflow.output
+    status: completed
     if: >-
       ${{ inputs.actionInput.expected_revision != nil
         and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
     with:
+      outcome: not_applicable
+      reason: rule_changed
       message: >-
-        The rule was changed by {{ steps.fetch_rule.output.updated_by }} at
-        {{ steps.fetch_rule.output.updated_at }}, after this proposal was created,
-        so nothing was applied. Dismiss this proposal, and edit the rule yourself
-        if the change is still needed.
-        [RULE_CHANGED_SINCE_PROPOSAL: expected revision
-        {{ inputs.actionInput.expected_revision }}, current revision
-        {{ steps.fetch_rule.output.revision }}]
+        The rule was changed by {{ steps.fetch_rule.output.updated_by }} after
+        this proposal was created, so nothing was applied.
 
   # The API changes only the keys it receives. `pick` drops absent keys, so only
   # supplied fields are patched, and `expected_revision` never reaches the
@@ -175,6 +212,7 @@ steps:
     type: workflow.output
     status: completed
     with:
+      outcome: applied
       id: "{{ steps.patch_rule.output.id }}"
       name: "{{ steps.patch_rule.output.name }}"
       query: "{{ steps.patch_rule.output.query }}"

@@ -400,8 +400,8 @@ describe('detection rule workflows', () => {
       expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
-      // `expected_revision` is the revision the diagnosis read, so approving fails
-      // instead of overwriting a rule that was edited while the proposal waited.
+      // `expected_revision` is the revision the diagnosis read, so an approval cannot
+      // overwrite a rule that was edited while the proposal waited.
       expect(actionInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
         expected_revision: '${{ steps.fetch_rule.output.revision }}',
@@ -852,6 +852,103 @@ describe('detection rule workflows', () => {
         const metadata = (yaml.consts as Record<string, Record<string, unknown>>).actionMetadata;
         expect(metadata).not.toHaveProperty('impact');
         expect(metadata.approvalPolicy).toBe('always-gate');
+      });
+
+      // An edit that can never land is reported, not failed: the gate closes the
+      // proposal with the reason instead of re-offering it.
+      describe('an edit that can never land', () => {
+        const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
+        const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+        const step = (stepName: string) => actionSteps.find(({ name }) => name === stepName)!;
+        const indexOf = (stepName: string) =>
+          actionSteps.findIndex(({ name }) => name === stepName);
+
+        it('reads the rule even without an expected revision, and keeps going on an error', () => {
+          const read = step('fetch_rule');
+          expect(read.if).toBeUndefined();
+          expect(read['on-failure']).toEqual({ continue: true });
+        });
+
+        it('reports a deleted rule as not applicable', () => {
+          const deleted = step('report_rule_deleted');
+          expect(deleted.type).toBe('workflow.output');
+          expect(String(deleted.if)).toContain(
+            "steps.fetch_rule.error.message contains 'HTTP 404'"
+          );
+          expect(deleted.with?.outcome).toBe('not_applicable');
+          expect(deleted.with?.reason).toBe('rule_deleted');
+          expect(String(deleted.with?.message)).not.toMatch(/[[\]]/);
+        });
+
+        it('reports a rule changed since the proposal as not applicable', () => {
+          const changed = step('report_rule_changed');
+          expect(changed.type).toBe('workflow.output');
+          expect(String(changed.if)).toContain(
+            'steps.fetch_rule.output.revision != inputs.actionInput.expected_revision'
+          );
+          expect(changed.with?.outcome).toBe('not_applicable');
+          expect(changed.with?.reason).toBe('rule_changed');
+          // Read by the analyst on the proposal, so no codes, revision numbers or raw
+          // timestamps, which the workflow cannot render in the viewer's timezone.
+          expect(String(changed.with?.message)).not.toMatch(/[[\]]|revision|updated_at/);
+        });
+
+        // A permissions error or a timeout may pass on a retry, so the gate re-offers it.
+        it('still fails on any other read error', () => {
+          const readFailure = step('fail_rule_read');
+          expect(readFailure.type).toBe('workflow.fail');
+          expect(String(readFailure.if)).toContain('steps.fetch_rule.error != nil');
+          expect(indexOf('report_rule_deleted')).toBeLessThan(indexOf('fail_rule_read'));
+        });
+
+        it('decides before patching, and reports a landed edit as applied', () => {
+          for (const name of ['report_rule_deleted', 'fail_rule_read', 'report_rule_changed']) {
+            expect(indexOf(name)).toBeLessThan(indexOf('patch_rule'));
+          }
+          expect(step('emit_result').with?.outcome).toBe('applied');
+        });
+      });
+
+      // Nothing was applied and nobody rejected the diagnosis, so the alerts stay
+      // untagged and the next sweep re-diagnoses them against the current rule.
+      describe('a proposal the gate reports as not applied', () => {
+        const decision = reviewSteps.find(
+          ({ name }) => name === 'record_proposal_action_decision'
+        )!;
+        const reviewStep = (stepName: string) => reviewSteps.find(({ name }) => name === stepName)!;
+
+        it('is recognised on every arm that edits the rule', () => {
+          const notApplied = String(decision.with?.not_applied);
+          for (const arm of [
+            'propose_query',
+            'propose_risk_score',
+            'propose_threshold',
+            'propose_schedule',
+          ]) {
+            expect(notApplied).toContain(`steps.${arm}.output.status == 'not_applied'`);
+          }
+        });
+
+        it('leaves the alerts untagged', () => {
+          for (const tagStep of tagSteps) {
+            expect(String(tagStep.if)).not.toContain('not_applied');
+          }
+          expect(String(decision.with?.applied)).not.toContain('not_applied');
+          expect(String(decision.with?.dismissed)).not.toContain('not_applied');
+        });
+
+        it('closes the investigation with its own verdict, not as an applied tuning', () => {
+          const closed = reviewStep('close_investigation_not_applied');
+          expect(String(closed.if)).toContain(
+            'steps.record_proposal_action_decision.output.not_applied == true'
+          );
+          const updates = closed.with?.updates as Record<string, string>;
+          expect(updates.status).toBe('closed');
+          expect(updates.verdict).toContain('a new review will follow');
+          expect(String(reviewStep('close_investigation_applied').if)).toContain(
+            'steps.record_proposal_action_decision.output.not_applied != true'
+          );
+        });
       });
 
       // The gate validates actionInput against this schema at proposal creation.

@@ -128,6 +128,9 @@ triggers:
 outputs:
   - name: proposalId
     type: string
+  # `succeeded`, `no_action` or `expired`, or `not_applied` when an approved
+  # action reported it could never apply and the proposal was closed with its
+  # reason instead of being re-offered.
   - name: status
     type: string
   - name: decision
@@ -450,9 +453,36 @@ steps:
                 # would execute parameters the analyst never approved.
                 actionInput: '${{ variables.action_input }}'
 
+          # An action that completes with `outcome: not_applicable` found the edit
+          # can never land (its target changed or is gone), so re-offering it is
+          # pointless. Close the proposal with the action's reason instead, and
+          # report `not_applied` so the caller can tell it from a success.
+          - name: handle_action_not_applicable
+            type: if
+            condition: >-
+              ${{ steps.execute_action.error == blank
+                and steps.execute_action.output.outcome == 'not_applicable' }}
+            steps:
+              - name: record_not_applicable
+                type: proposals.updateProposal
+                with:
+                  proposalId: '{{ variables.current_proposal_id }}'
+                  status: failed
+                  executionError: '{{ steps.execute_action.output.message }}'
+              - name: complete_not_applied
+                type: data.set
+                with:
+                  completed: true
+                  final_status: not_applied
+                  final_decision: approved
+              - name: break_not_applied
+                type: loop.break
+
           - name: handle_action_success
             type: if
-            condition: '${{ steps.execute_action.error == blank }}'
+            condition: >-
+              ${{ steps.execute_action.error == blank
+                and steps.execute_action.output.outcome != 'not_applicable' }}
             steps:
               - name: record_success
                 type: proposals.updateProposal

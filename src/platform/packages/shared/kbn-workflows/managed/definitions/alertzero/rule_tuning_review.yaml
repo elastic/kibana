@@ -766,8 +766,8 @@ steps:
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
                   id: "{{ inputs.rule_uuid }}"
-                  # The revision the diagnosis read, so approving fails instead of
-                  # overwriting a rule that was edited while this waited.
+                  # The revision the diagnosis read, so an approval cannot overwrite
+                  # a rule that was edited while this waited.
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
                 impact: medium
@@ -905,9 +905,19 @@ steps:
   # An approval whose action failed through every retry settles as expired and
   # reports no decision, so it counts as neither approved nor dismissed and the
   # alerts stay untagged for the next sweep.
+  #
+  # `not_applied` is an approval whose edit could never land: the rule changed
+  # or was deleted while the proposal waited. Nothing was applied and nobody
+  # rejected the diagnosis, so the alerts stay untagged too, and the next sweep
+  # re-diagnoses them against the rule as it is now (a deleted rule drops out).
   - name: record_proposal_action_decision
     type: data.set
     with:
+      not_applied: >-
+        ${{ steps.propose_query.output.status == 'not_applied'
+          or steps.propose_risk_score.output.status == 'not_applied'
+          or steps.propose_threshold.output.status == 'not_applied'
+          or steps.propose_schedule.output.status == 'not_applied' }}
       applied: >-
         ${{ steps.propose_query.output.status == 'succeeded'
           or steps.propose_risk_score.output.status == 'succeeded'
@@ -1010,7 +1020,8 @@ steps:
     type: ai.conversation.metadata.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_proposal_action_decision.output.approved == true }}
+        and steps.record_proposal_action_decision.output.approved == true
+        and steps.record_proposal_action_decision.output.not_applied != true }}
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
@@ -1019,6 +1030,22 @@ steps:
         # No raw change type: the default arm accepts values the arms do not
         # name, and an unrecognised one would leave a gap in the sentence.
         verdict: "Analyst approved the tuning proposal."
+    on-failure:
+      continue: true
+
+  # Closed rather than left open: the proposal itself is settled, and a later
+  # sweep that still finds these false positives opens a fresh review.
+  - name: close_investigation_not_applied
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_proposal_action_decision.output.not_applied == true }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: other
+        verdict: "The rule changed or was deleted before the tuning could be applied, so nothing was applied. If the false positives continue, a new review will follow."
     on-failure:
       continue: true
 
