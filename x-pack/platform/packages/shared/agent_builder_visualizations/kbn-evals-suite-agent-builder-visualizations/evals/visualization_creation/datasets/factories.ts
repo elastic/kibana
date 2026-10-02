@@ -107,7 +107,7 @@ export const timeSeriesQuery = ({
   splitBy,
 }: QuerySource & { splitBy?: string }): string =>
   `FROM ${index}
-| STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 75, ?_tstart, ?_tend)${
+| STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 100, ?_tstart, ?_tend)${
     splitBy === undefined ? '' : `, ${splitBy}`
   }`;
 

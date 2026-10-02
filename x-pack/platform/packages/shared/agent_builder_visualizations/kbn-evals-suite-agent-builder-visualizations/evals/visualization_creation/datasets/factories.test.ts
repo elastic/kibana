@@ -40,7 +40,7 @@ describe('gold query factories', () => {
         timeField: 'order_date',
       })
     ).toBe(`FROM kibana_sample_data_ecommerce
-| STATS \`Total Revenue\` = SUM(taxful_total_price) BY \`Time Bucket\` = BUCKET(order_date, 75, ?_tstart, ?_tend)`);
+| STATS \`Total Revenue\` = SUM(taxful_total_price) BY \`Time Bucket\` = BUCKET(order_date, 100, ?_tstart, ?_tend)`);
   });
 
   it('appends a split column to the time series BY clause', () => {
@@ -51,7 +51,7 @@ describe('gold query factories', () => {
         splitBy: 'response.keyword',
       })
     ).toBe(`FROM kibana_sample_data_logs
-| STATS \`Request Count\` = COUNT(*) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), response.keyword`);
+| STATS \`Request Count\` = COUNT(*) BY \`Time Bucket\` = BUCKET(@timestamp, 100, ?_tstart, ?_tend), response.keyword`);
   });
 
   it('builds a single-row totals query', () => {

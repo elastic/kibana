@@ -53,13 +53,13 @@ Do not hardcode absolute times or now()-based ranges.
 
 ### FROM
 
-For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
+For time series charts, use auto buckets: \`BUCKET(<time field>, 100, ?_tstart, ?_tend)\` or \`TBUCKET(100, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
 Omit \`LIMIT\` and \`SORT\`; the bucket range already bounds the results.
 
 e.g. for a normal index with FROM and BUCKET:
 
 \`\`\`esql
-FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 75, ?_tstart, ?_tend)
+FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 100, ?_tstart, ?_tend)
 \`\`\`
 
 ### TS
@@ -72,7 +72,7 @@ The only exception when you should use the variables to manually filter the time
 e.g.
 
 \`\`\`esql
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
 \`\`\`
 
 Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
@@ -83,7 +83,7 @@ ${seriesStatisticsEsqlGuidance}
 
 Only \`BY\` dimensions the user asked for:
 
-- **Time series** default: group by the time bucket alone (e.g. \`BY bucket = TBUCKET(75, ?_tstart, ?_tend)\`). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
+- **Time series** default: group by the time bucket alone (e.g. \`BY bucket = TBUCKET(100, ?_tstart, ?_tend)\`). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
 - **Categorical charts**: \`BY\` only the category field(s) named in the request (plus no invented splits).
 - Index dimensions may be used in \`WHERE\` filters when the user scopes to a specific series; that is not a reason to put them in \`BY\`.
 
