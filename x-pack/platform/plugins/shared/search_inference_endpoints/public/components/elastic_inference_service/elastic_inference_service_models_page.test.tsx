@@ -170,13 +170,11 @@ describe('ElasticInferenceServiceModelsPage', () => {
   });
 
   it('filters models by provider via model family filter', async () => {
-    const { container, getByText } = await renderPopulatedPage();
+    const { container, getByTestId, getByText } = await renderPopulatedPage();
     const allCards = countCards(container);
 
-    fireEvent.click(getByText('Model provider'));
-    await waitFor(() => expect(getByText('Anthropic')).toBeInTheDocument());
-
-    fireEvent.click(getByText('Anthropic'));
+    fireEvent.click(getByTestId('modelFamilyFilterMultiselect'));
+    fireEvent.click(await waitFor(() => getByTestId('modelFamilyFilterOption-Anthropic')));
 
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
     expect(countCards(container)).toBeGreaterThan(0);

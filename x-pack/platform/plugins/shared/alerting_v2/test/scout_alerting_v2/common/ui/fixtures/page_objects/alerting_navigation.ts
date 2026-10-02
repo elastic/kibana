@@ -35,7 +35,7 @@ export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
     heading: /rule library/i,
   },
   alerts: {
-    path: 'management/alertingV2/episodes',
+    path: 'management/alertingV2/alerts',
     featureId: 'alerting_v2_alerts',
     heading: /alert episodes/i,
   },

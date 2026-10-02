@@ -67,7 +67,6 @@ export interface CompactEventSearchItem
     | 'causal_features'
     | 'confidence'
     | 'event_id'
-    | 'event_uuid'
     | 'severity'
     | 'status'
     | 'stream_names'
@@ -86,7 +85,6 @@ interface DetailedEventSearchItem
     | '@timestamp'
     | 'confidence'
     | 'event_id'
-    | 'event_uuid'
     | 'severity'
     | 'status'
     | 'stream_names'
@@ -172,7 +170,6 @@ const toEventSearchItemBase = (
   | '@timestamp'
   | 'confidence'
   | 'event_id'
-  | 'event_uuid'
   | 'severity'
   | 'status'
   | 'stream_names'
@@ -180,7 +177,6 @@ const toEventSearchItemBase = (
   | 'title'
 > => ({
   event_id: event.event_id,
-  event_uuid: event.event_uuid,
   '@timestamp': event['@timestamp'],
   title: event.title,
   symptom_hypothesis: event.symptom_hypothesis,
