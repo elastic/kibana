@@ -54,7 +54,7 @@ export const alertSubjectSnapshotSchema = z
     /** `kibana.alert.start` */
     start: z.string().max(100).optional(),
     timestamp: z.string().max(100).optional(),
-    /** `kibana.alert.url`: the alert details page, when the rule type writes it. */
+    /** `kibana.alert.url`: the link the rule type writes, if any (for example a Discover link). */
     url: z.string().max(2000).optional(),
     rule_tags: z.array(z.string().max(500)).max(50).optional(),
   })

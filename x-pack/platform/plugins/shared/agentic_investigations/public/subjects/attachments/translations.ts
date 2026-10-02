@@ -19,7 +19,7 @@ export const SUBJECT_TYPE_LABELS: Record<InvestigationSubjectType, string> = {
     defaultMessage: 'Question',
   }),
   slack_thread: i18n.translate('xpack.agenticInvestigations.subjects.type.slackThread', {
-    defaultMessage: 'Slack thread',
+    defaultMessage: 'Slack',
   }),
 };
 
@@ -43,3 +43,15 @@ export const subjectAttachmentLabel = (type: InvestigationSubjectType, detail?: 
         values: { type: SUBJECT_TYPE_LABELS[type], detail },
       })
     : SUBJECT_TYPE_LABELS[type];
+
+/** The line under a subject row's title: the subject started (or continued) the investigation. */
+export const subjectTriggerLabel = (type: InvestigationSubjectType): string =>
+  i18n.translate('xpack.agenticInvestigations.subjects.triggerLabel', {
+    defaultMessage: 'Trigger · {type}',
+    values: { type: SUBJECT_TYPE_LABELS[type] },
+  });
+
+export const OPENS_IN_NEW_TAB = i18n.translate(
+  'xpack.agenticInvestigations.subjects.opensInNewTab',
+  { defaultMessage: 'Opens in a new tab' }
+);
