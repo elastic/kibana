@@ -22,7 +22,7 @@ import type {
   Theme,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { EuiDescriptionList, EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiDescriptionList, EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -98,14 +98,17 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
   listItems,
 }) => {
   return (
-    <EuiPanel paddingSize="none" hasShadow={false} color="plain" style={{ maxWidth: 280 }}>
+    <div
+      css={css`
+        max-width: 280px;
+      `}
+    >
       <EuiText size="xs">
         <div
           css={css`
             display: flex;
             align-items: center;
             padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-            border-bottom: 1px solid ${euiTheme.colors.lightShade};
           `}
         >
           <EuiHealth color={alertTimelineStatusColor(euiTheme, status)} textSize="xs">
@@ -138,7 +141,7 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
           />
         </div>
       </EuiText>
-    </EuiPanel>
+    </div>
   );
 };
 

@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import type { ElementClickListener, Theme, XYChartElementEvent } from '@elastic/charts';
-import { EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { EpisodeSeverityTimelineSegment } from './derive_episode_severity_timeline_data';
@@ -149,7 +149,11 @@ export const EpisodeSeverityTimelineRow = ({
               }
 
               return (
-                <EuiPanel paddingSize="s" hasShadow={false} color="plain">
+                <div
+                  css={css`
+                    padding: ${euiTheme.size.s};
+                  `}
+                >
                   <EuiText size="xs">
                     <EuiHealth
                       color={getEpisodeSeverityColor(euiTheme, severitySegment.severity)}
@@ -159,7 +163,7 @@ export const EpisodeSeverityTimelineRow = ({
                     </EuiHealth>
                     <div>{formatTimestamp(severitySegment.x0Ms, timeZone)}</div>
                   </EuiText>
-                </EuiPanel>
+                </div>
               );
             }}
           />
