@@ -56,10 +56,26 @@ const KNOWN_FIELDS = new Set([
   'namespace',
   'deployment',
   'node',
+  'os',
+  'cloudprovider',
+  'servicename',
 ]);
 
+const ATTR_FIELD_KEYS: Record<string, string> = {
+  os: 'os',
+  cloudprovider: 'cloudProvider',
+  servicename: 'serviceName',
+};
+
+const K8S_SELF_SUBTYPE: Record<string, string> = {
+  cluster: 'Clusters',
+  namespace: 'Namespaces',
+  deployment: 'Deployments',
+  node: 'Nodes',
+};
+
 const fieldValues = (entity: Entity, rawField: string): string[] => {
-  const field = FIELD_ALIASES[rawField] ?? rawField;
+  const field = (FIELD_ALIASES[rawField] ?? rawField).toLowerCase();
   switch (field) {
     case 'name':
       return [entity.name];
@@ -81,8 +97,21 @@ const fieldValues = (entity: Entity, rawField: string): string[] => {
     case 'cluster':
     case 'namespace':
     case 'deployment':
-    case 'node':
-      return entity.attributes?.[field] ? [entity.attributes[field]] : [];
+    case 'node': {
+      // Attribute on child resources, or the entity's own name when it *is*
+      // that hierarchy level (e.g. a Clusters row matches `cluster:<name>`).
+      const fromAttr = entity.attributes?.[field];
+      if (fromAttr) return [fromAttr];
+      const selfSubtype = K8S_SELF_SUBTYPE[field];
+      return selfSubtype && entity.subType === selfSubtype ? [entity.name] : [];
+    }
+    case 'os':
+    case 'cloudprovider':
+    case 'servicename': {
+      const attrKey = ATTR_FIELD_KEYS[field];
+      const value = attrKey ? entity.attributes?.[attrKey] : undefined;
+      return value ? [value] : [];
+    }
     default:
       return [];
   }

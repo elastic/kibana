@@ -46,13 +46,13 @@ interface Props {
    */
   readonly hideClear?: boolean;
   /**
-   * ElasticOn hides Application (infra-first). Other modes keep the full
-   * Team / Application / Environment / Region set.
+   * ElasticOn hides Application (infra-first). Other modes keep Team /
+   * Application. Environment and Region are always hidden from this row.
    */
   readonly isElasticOn?: boolean;
   /**
-   * Phase 1 keeps only Environment + Region (no Team, no Application).
-   * Takes priority over `isElasticOn` when both are true.
+   * Phase 1 hides all tag-filter dropdowns (category-specific filters still
+   * appear via their own controls). Takes priority over `isElasticOn`.
    */
   readonly isPhase1?: boolean;
 }
@@ -170,6 +170,10 @@ export const EntitiesTagFilters = ({
     onChange({ application: [], environment: [], team: [], region: [] });
   };
 
+  if (visibleKeys.length === 0) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -187,46 +191,16 @@ export const EntitiesTagFilters = ({
             { defaultMessage: '{thing} tag filters', values: { thing: labThingLabel(isElasticOn) } }
           )}
         >
-          {/*
-            Ordering: Team → Application → Environment → Region.
-            Team leads because org-based triage ("what does my squad
-            own?") is the most common entry point on this page; keeping
-            it consistent everywhere avoids muscle-memory misclicks.
-            ElasticOn drops Application (infra-first).
-            Phase 1 keeps only Environment + Region.
-          */}
-          {visibleKeys.includes('team') ? (
+          {visibleKeys.map((tagKey) => (
             <TagFilterPopover
-              tagKey="team"
-              options={facets.team}
-              selected={activeFilters.team}
-              onChange={handleKeyChange('team')}
+              key={tagKey}
+              tagKey={tagKey}
+              options={facets[tagKey]}
+              selected={activeFilters[tagKey]}
+              onChange={handleKeyChange(tagKey)}
               isElasticOn={isElasticOn}
             />
-          ) : null}
-          {visibleKeys.includes('application') ? (
-            <TagFilterPopover
-              tagKey="application"
-              options={facets.application}
-              selected={activeFilters.application}
-              onChange={handleKeyChange('application')}
-              isElasticOn={isElasticOn}
-            />
-          ) : null}
-          <TagFilterPopover
-            tagKey="environment"
-            options={facets.environment}
-            selected={activeFilters.environment}
-            onChange={handleKeyChange('environment')}
-            isElasticOn={isElasticOn}
-          />
-          <TagFilterPopover
-            tagKey="region"
-            options={facets.region}
-            selected={activeFilters.region}
-            onChange={handleKeyChange('region')}
-            isElasticOn={isElasticOn}
-          />
+          ))}
         </EuiFilterGroup>
       </EuiFlexItem>
       {!hideClear && totalActive > 0 ? (

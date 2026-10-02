@@ -102,6 +102,35 @@ export interface SavedViewState {
    * from the table's group bucket (e.g. `hosts`, `kubernetes:Pod`).
    */
   readonly pageSizes?: Record<string, number>;
+  /**
+   * Kubernetes cascading filters (resource type / cluster / namespace /
+   * deployment / node). ElasticOn K8s-scoped pages only. Absent or `__all__`
+   * values mean "no filter". Optional for backward compatibility.
+   */
+  readonly k8sFilters?: {
+    readonly resourceType?: string;
+    readonly cluster?: string;
+    readonly namespace?: string;
+    readonly deployment?: string;
+    readonly node?: string;
+  };
+  /**
+   * Top-level category chip on the cross-category "All resources" page
+   * (`__all__` / absent = every category). Optional for backward
+   * compatibility.
+   */
+  readonly categoryFilter?: string;
+  /**
+   * Cloud provider chip on the Cloud category page (`aws` / `gcp` / `azure`).
+   * `__all__` / absent = every provider. Optional for backward compatibility.
+   */
+  readonly cloudProviderFilter?: string;
+  /**
+   * Generic resource-type chip on non-K8s category pages with 2+ entity types
+   * (e.g. Hosts Bare-metal / VM). `__all__` / absent = every type. Optional
+   * for backward compatibility.
+   */
+  readonly categoryTypeFilter?: string;
 }
 
 export interface SavedView {
@@ -216,6 +245,22 @@ const parseTimeRange = (value: unknown): { from: string; to: string } | undefine
     : undefined;
 };
 
+const parseK8sFilters = (
+  value: unknown
+): SavedViewState['k8sFilters'] | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const pick = (key: string): string | undefined =>
+    typeof source[key] === 'string' ? (source[key] as string) : undefined;
+  const resourceType = pick('resourceType');
+  const cluster = pick('cluster');
+  const namespace = pick('namespace');
+  const deployment = pick('deployment');
+  const node = pick('node');
+  if (!resourceType && !cluster && !namespace && !deployment && !node) return undefined;
+  return { resourceType, cluster, namespace, deployment, node };
+};
+
 const parseState = (value: unknown): SavedViewState | undefined => {
   if (!value || typeof value !== 'object') return undefined;
   const source = value as Record<string, unknown>;
@@ -250,6 +295,12 @@ const parseState = (value: unknown): SavedViewState | undefined => {
         ? source.pageSize
         : undefined,
     pageSizes: parsePageSizes(source.pageSizes),
+    k8sFilters: parseK8sFilters(source.k8sFilters),
+    categoryFilter: typeof source.categoryFilter === 'string' ? source.categoryFilter : undefined,
+    cloudProviderFilter:
+      typeof source.cloudProviderFilter === 'string' ? source.cloudProviderFilter : undefined,
+    categoryTypeFilter:
+      typeof source.categoryTypeFilter === 'string' ? source.categoryTypeFilter : undefined,
   };
 };
 
@@ -596,13 +647,76 @@ const canonicalExtraFilters = (
 // Reduce each "+ Add filter" chip to the fields that actually affect the
 // in-memory filtering (see `entityMatchesFilters`), ignoring volatile bits
 // like `$state` and index refs so re-loading a view doesn't read as modified.
+const extractFilterQueryValue = (filter: Filter): unknown => {
+  const params = filter.meta?.params;
+  // Phrase / match chips often stash the value on `meta.params.query`.
+  if (params && typeof params === 'object' && !Array.isArray(params)) {
+    const asRecord = params as { query?: unknown };
+    if (typeof asRecord.query !== 'undefined') return asRecord.query;
+  }
+  // "is one of" chips use `meta.params` as a string[] of values.
+  if (Array.isArray(params)) return [...params].map(String).sort();
+  const query = filter.query as Record<string, unknown> | undefined;
+  if (!query) return null;
+  // Common shapes from the unified search filter builder.
+  if (query.match_phrase && typeof query.match_phrase === 'object') {
+    const phrase = Object.values(query.match_phrase as Record<string, unknown>)[0];
+    if (phrase && typeof phrase === 'object' && 'query' in (phrase as object)) {
+      return (phrase as { query: unknown }).query;
+    }
+    return phrase ?? null;
+  }
+  if (query.match && typeof query.match === 'object') {
+    const match = Object.values(query.match as Record<string, unknown>)[0];
+    if (match && typeof match === 'object' && 'query' in (match as object)) {
+      return (match as { query: unknown }).query;
+    }
+    return match ?? null;
+  }
+  if (query.bool && typeof query.bool === 'object') {
+    // Fallback: stringify the bool clause so distinct combined filters compare.
+    return JSON.stringify(query.bool);
+  }
+  if (query.exists && typeof query.exists === 'object') {
+    return (query.exists as { field?: unknown }).field ?? true;
+  }
+  if (query.range && typeof query.range === 'object') {
+    return JSON.stringify(query.range);
+  }
+  return null;
+};
+
 const canonicalQueryFilters = (filters: readonly Filter[] = []) =>
-  filters.map((filter) => ({
-    key: filter.meta?.key ?? null,
-    negate: Boolean(filter.meta?.negate),
-    disabled: Boolean(filter.meta?.disabled),
-    query: (filter.meta?.params as { query?: unknown } | undefined)?.query ?? null,
-  }));
+  filters
+    .map((filter) => ({
+      key: filter.meta?.key ?? null,
+      type: filter.meta?.type ?? null,
+      negate: Boolean(filter.meta?.negate),
+      disabled: Boolean(filter.meta?.disabled),
+      query: extractFilterQueryValue(filter),
+    }))
+    // Stable order so adding filters in different sequences still compares.
+    .sort((a, b) => {
+      const keyCmp = String(a.key ?? '').localeCompare(String(b.key ?? ''));
+      if (keyCmp !== 0) return keyCmp;
+      const typeCmp = String(a.type ?? '').localeCompare(String(b.type ?? ''));
+      if (typeCmp !== 0) return typeCmp;
+      return JSON.stringify(a.query ?? null).localeCompare(JSON.stringify(b.query ?? null));
+    });
+
+/** Collapse `__all__` / empty K8s filter values so absent == default. */
+const canonicalK8sFilters = (
+  filters: SavedViewState['k8sFilters'] | undefined
+): Record<string, string> | null => {
+  if (!filters) return null;
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(filters)) {
+    if (typeof value === 'string' && value.length > 0 && value !== '__all__') {
+      out[key] = value;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : null;
+};
 
 const canonicalState = (state: SavedViewState) => ({
   category: state.category,
@@ -632,6 +746,23 @@ const canonicalState = (state: SavedViewState) => ({
   pageSizes: Object.fromEntries(
     Object.entries(state.pageSizes ?? {}).sort(([a], [b]) => a.localeCompare(b))
   ),
+  k8sFilters: canonicalK8sFilters(state.k8sFilters),
+  // Absent / all-categories sentinel == every category on All resources.
+  categoryFilter:
+    state.categoryFilter &&
+    state.categoryFilter !== '__all__' &&
+    state.categoryFilter !== '__all_categories__'
+      ? state.categoryFilter
+      : null,
+  // Absent / `__all__` == every cloud provider / every resource type.
+  cloudProviderFilter:
+    state.cloudProviderFilter && state.cloudProviderFilter !== '__all__'
+      ? state.cloudProviderFilter
+      : null,
+  categoryTypeFilter:
+    state.categoryTypeFilter && state.categoryTypeFilter !== '__all__'
+      ? state.categoryTypeFilter
+      : null,
 });
 
 export const areStatesEqual = (a: SavedViewState, b: SavedViewState): boolean => {

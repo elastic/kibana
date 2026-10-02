@@ -80,8 +80,6 @@ interface Props {
   readonly compact?: boolean;
   /** Use the neutral (grey) button style instead of the default primary blue. */
   readonly neutral?: boolean;
-  /** Hide the inline "Unsaved changes" badge (shown externally instead). */
-  readonly hideBadge?: boolean;
   readonly disabled?: boolean;
 }
 
@@ -95,7 +93,6 @@ export const SaveViewButton = ({
   isLoadedViewDefault = false,
   compact = false,
   neutral = false,
-  hideBadge = false,
   disabled = false,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -162,8 +159,8 @@ export const SaveViewButton = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        {!hideBadge && loadedView && isModified ? (
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        {loadedView && isModified ? (
           <EuiFlexItem grow={false}>
             <EuiBadge color="warning" data-test-subj="entityCentricLabSaveViewUnsavedBadge">
               {i18n.translate('xpack.streams.entityCentricLab.savedViews.saveViewButton.unsaved', {

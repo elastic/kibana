@@ -11,7 +11,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, Query } from '@kbn/es-query';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -875,10 +874,13 @@ const AllEntitiesViewInner = ({
     categoryScope ??
     (categoryFilter !== CATEGORY_FILTER_ALL ? (categoryFilter as EntityCategoryId) : undefined);
 
+  const phaseVariation = useVariation('phase');
+  const isPhase1 = phaseVariation === 'phase1';
+
   // ElasticOn Inventory unified search bar: an ad-hoc data view (fields only,
   // no backing index) powers autocomplete + "+ Add filter"; the KQL / filters
   // are evaluated against the seeded entities in-memory (see `entity_kql.ts`).
-  const labDataView = useEntityLabDataView(isElasticOn, effectiveCategoryScope);
+  const labDataView = useEntityLabDataView(isElasticOn, effectiveCategoryScope, isPhase1);
   // "+ Add filter" chips (transient; not persisted with saved views yet).
   const [labFilters, setLabFilters] = useState<Filter[]>([]);
   // Bumped on every (auto-)refresh to re-roll the fake metric readings so
@@ -900,8 +902,6 @@ const AllEntitiesViewInner = ({
 
   const dataVariation = useVariation('data') as DataVariation;
   const detailVariation = useVariation('detail') as DetailVariation;
-  const phaseVariation = useVariation('phase');
-  const isPhase1 = phaseVariation === 'phase1';
   const isDemoEmptyCategoryPage =
     isElasticOn &&
     dataVariation === 'default' &&
@@ -1476,6 +1476,17 @@ const AllEntitiesViewInner = ({
     setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
     setLabFilters(view.state.queryFilters ?? []);
     setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
+    setK8sResourceType(
+      (view.state.k8sFilters?.resourceType as KubernetesResourceType | undefined) ??
+        KUBERNETES_RESOURCE_TYPE_ALL
+    );
+    setK8sClusterFilter(view.state.k8sFilters?.cluster ?? KUBERNETES_FILTER_ALL);
+    setK8sNamespaceFilter(view.state.k8sFilters?.namespace ?? KUBERNETES_FILTER_ALL);
+    setK8sDeploymentFilter(view.state.k8sFilters?.deployment ?? KUBERNETES_FILTER_ALL);
+    setK8sNodeFilter(view.state.k8sFilters?.node ?? KUBERNETES_FILTER_ALL);
+    setCategoryFilter(view.state.categoryFilter ?? CATEGORY_FILTER_ALL);
+    setCloudProviderFilter(view.state.cloudProviderFilter ?? CLOUD_PROVIDER_FILTER_ALL);
+    setCategoryTypeFilter(view.state.categoryTypeFilter ?? CATEGORY_RESOURCE_TYPE_ALL);
     // "Store time with view": reset the shared time filter to the captured range.
     if (view.state.storeTime && view.state.timeRange) {
       updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
@@ -2082,6 +2093,20 @@ const AllEntitiesViewInner = ({
       // change and Save/Update persists the grouping.
       groupBy,
       pageSizes,
+      // K8s cascading filters — only meaningful on K8s-scoped pages; still
+      // snapshotted so changing them lights the badge and Save persists them.
+      k8sFilters: {
+        resourceType: k8sResourceType,
+        cluster: k8sClusterFilter,
+        namespace: k8sNamespaceFilter,
+        deployment: k8sDeploymentFilter,
+        node: k8sNodeFilter,
+      },
+      // Cross-category "All resources" category chip.
+      categoryFilter,
+      // Cloud provider + generic resource-type chips (non-K8s categories).
+      cloudProviderFilter,
+      categoryTypeFilter,
     }),
     [
       categoryScope,
@@ -2098,6 +2123,14 @@ const AllEntitiesViewInner = ({
       rangeTo,
       groupBy,
       pageSizes,
+      k8sResourceType,
+      k8sClusterFilter,
+      k8sNamespaceFilter,
+      k8sDeploymentFilter,
+      k8sNodeFilter,
+      categoryFilter,
+      cloudProviderFilter,
+      categoryTypeFilter,
     ]
   );
 
@@ -2185,6 +2218,17 @@ const AllEntitiesViewInner = ({
         setLabFilters(view.state.queryFilters ?? []);
         setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
         setPageSizes(view.state.pageSizes ?? {});
+        setK8sResourceType(
+          (view.state.k8sFilters?.resourceType as KubernetesResourceType | undefined) ??
+            KUBERNETES_RESOURCE_TYPE_ALL
+        );
+        setK8sClusterFilter(view.state.k8sFilters?.cluster ?? KUBERNETES_FILTER_ALL);
+        setK8sNamespaceFilter(view.state.k8sFilters?.namespace ?? KUBERNETES_FILTER_ALL);
+        setK8sDeploymentFilter(view.state.k8sFilters?.deployment ?? KUBERNETES_FILTER_ALL);
+        setK8sNodeFilter(view.state.k8sFilters?.node ?? KUBERNETES_FILTER_ALL);
+        setCategoryFilter(view.state.categoryFilter ?? CATEGORY_FILTER_ALL);
+        setCloudProviderFilter(view.state.cloudProviderFilter ?? CLOUD_PROVIDER_FILTER_ALL);
+        setCategoryTypeFilter(view.state.categoryTypeFilter ?? CATEGORY_RESOURCE_TYPE_ALL);
         if (view.state.storeTime && view.state.timeRange) {
           updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
         }
@@ -2268,16 +2312,6 @@ const AllEntitiesViewInner = ({
                     defaultMessage: 'All entities',
                   })}
             </EuiFlexItem>
-            {loadedView && isLoadedViewModified ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning" data-test-subj="entityCentricLabUnsavedBadgeHeader">
-                  {i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.unsavedChanges',
-                    { defaultMessage: 'Unsaved changes' }
-                  )}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
           </EuiFlexGroup>
         }
         tabs={
@@ -2383,7 +2417,6 @@ const AllEntitiesViewInner = ({
                           }
                           compact
                           neutral
-                          hideBadge
                           disabled={isCategoryEmptyState}
                         />
                       </EuiTourStep>,
@@ -2487,8 +2520,9 @@ const AllEntitiesViewInner = ({
                   title="Search and filter"
                   content={
                     <p>
-                      Filter resources by name, health, environment, or any attribute using KQL.
-                      Add structured filters with the + button.
+                      {isPhase1
+                        ? 'Filter resources by name, team, or category-specific attributes using KQL. Add structured filters with the + button.'
+                        : 'Filter resources by name, health, team, or category-specific attributes using KQL. Add structured filters with the + button.'}
                     </p>
                   }
                   onFinish={closeTour}
@@ -2541,8 +2575,24 @@ const AllEntitiesViewInner = ({
                             'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
                             {
                               defaultMessage:
-                                'Search {things} — e.g. health:unhealthy AND environment:production',
-                              values: { things: labThings(isElasticOn) },
+                                'Search {things} — e.g. {example}',
+                              values: {
+                                things: labThings(isElasticOn),
+                                example:
+                                  effectiveCategoryScope === 'kubernetes'
+                                    ? 'cluster:prod* AND namespace:payments'
+                                    : effectiveCategoryScope === 'hosts'
+                                    ? isPhase1
+                                      ? 'os:linux AND type:host'
+                                      : 'os:linux AND health:unhealthy'
+                                    : effectiveCategoryScope === 'cloud'
+                                    ? isPhase1
+                                      ? 'cloud.provider:aws'
+                                      : 'cloud.provider:aws AND health:unhealthy'
+                                    : isPhase1
+                                    ? 'team:platform'
+                                    : 'health:unhealthy AND team:platform',
+                              },
                             }
                           )}
                         />
@@ -2560,17 +2610,19 @@ const AllEntitiesViewInner = ({
                 </EuiTourStep>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap css={NO_GROW}>
-                  <EuiFlexItem grow={false}>
-                    <EntitiesTagFilters
-                      facets={tagFacets}
-                      activeFilters={activeTagFilters}
-                      onChange={setActiveTagFilters}
-                      compressed
-                      hideClear
-                      isElasticOn
-                      isPhase1={isPhase1}
-                    />
-                  </EuiFlexItem>
+                  {getVisibleTagKeys(isElasticOn, isPhase1).length > 0 ? (
+                    <EuiFlexItem grow={false}>
+                      <EntitiesTagFilters
+                        facets={tagFacets}
+                        activeFilters={activeTagFilters}
+                        onChange={setActiveTagFilters}
+                        compressed
+                        hideClear
+                        isElasticOn
+                        isPhase1={isPhase1}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   {isCrossCategoryPage && categoriesWithEntities.length >= 2 ? (
                     <EuiFlexItem grow={false}>
                       <EuiComboBox

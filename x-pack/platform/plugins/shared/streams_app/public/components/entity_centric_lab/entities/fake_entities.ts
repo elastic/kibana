@@ -181,18 +181,43 @@ export const TAG_KEY_LABEL: Record<TagKey, string> = {
 };
 
 /** ElasticOn inventory drops Application (infra-first; tags stay on the data). */
-export const ELASTICON_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['application']);
+export const ELASTICON_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set([
+  'application',
+  'environment',
+  'region',
+]);
 
-/** Phase 1 keeps only Environment + Region (no Team, no Application). */
-export const PHASE1_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['team', 'application']);
+/**
+ * Phase 1 drops the tag-filter dropdowns entirely (Team / Application /
+ * Environment / Region). Category-specific filters (K8s cluster, Hosts OS,
+ * …) still surface via their own controls.
+ */
+export const PHASE1_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set([
+  'team',
+  'application',
+  'environment',
+  'region',
+]);
+
+/**
+ * Always-hidden from the top tag-filter row (Environment / Region). Kept on
+ * entity data for geomap / saved views / free-text KQL, but no longer offered
+ * as dedicated dropdowns.
+ */
+export const ALWAYS_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['environment', 'region']);
 
 export const getVisibleTagKeys = (
   isElasticOn: boolean,
   isPhase1 = false
 ): readonly TagKey[] => {
-  if (isPhase1) return TAG_KEYS.filter((key) => !PHASE1_HIDDEN_TAG_KEYS.has(key));
-  if (isElasticOn) return TAG_KEYS.filter((key) => !ELASTICON_HIDDEN_TAG_KEYS.has(key));
-  return TAG_KEYS;
+  // Preferred row order: Team first (org triage), then Application.
+  const preferredOrder: readonly TagKey[] = ['team', 'application', 'environment', 'region'];
+  const hidden = isPhase1
+    ? PHASE1_HIDDEN_TAG_KEYS
+    : isElasticOn
+    ? new Set([...ELASTICON_HIDDEN_TAG_KEYS, ...ALWAYS_HIDDEN_TAG_KEYS])
+    : ALWAYS_HIDDEN_TAG_KEYS;
+  return preferredOrder.filter((key) => !hidden.has(key));
 };
 
 export type EntityTags = Record<TagKey, string>;

@@ -9,21 +9,37 @@ import { useEffect, useState } from 'react';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { EntityCategoryId } from './fake_entities';
-import { getEntitySearchFieldNames } from './entity_search_fields';
+import { getCategoryExtraFilters } from './fake_entities';
+import {
+  ENTITY_SEARCH_FIELD_LABELS,
+  getEntitySearchFieldNames,
+} from './entity_search_fields';
 
-const KEYWORD = (name: string): FieldSpec => ({
+const KEYWORD = (name: string, customLabel?: string): FieldSpec => ({
   name,
   type: 'string',
   esTypes: ['keyword'],
   aggregatable: true,
   searchable: true,
+  ...(customLabel ? { customLabel } : {}),
 });
 
+const labelForField = (name: string, categoryScope?: EntityCategoryId): string | undefined => {
+  const fromMap = ENTITY_SEARCH_FIELD_LABELS[name];
+  if (fromMap) return fromMap;
+  if (!categoryScope) return undefined;
+  return getCategoryExtraFilters(categoryScope).find((def) => def.key === name)?.label;
+};
+
 const buildEntitySearchFields = (
-  categoryScope?: EntityCategoryId
+  categoryScope?: EntityCategoryId,
+  isPhase1 = false
 ): Record<string, FieldSpec> =>
   Object.fromEntries(
-    getEntitySearchFieldNames(categoryScope).map((name) => [name, KEYWORD(name)])
+    getEntitySearchFieldNames(categoryScope, isPhase1).map((name) => [
+      name,
+      KEYWORD(name, labelForField(name, categoryScope)),
+    ])
   );
 
 /**
@@ -32,10 +48,15 @@ const buildEntitySearchFields = (
  * the "+ Add filter" builder. There's no backing index — filtering is done
  * in-memory by `compileEntityKql` — so we create it with `skipFetchFields`
  * and swallow any failure (the bar still works for typed KQL without it).
+ *
+ * The id is scoped per category + phase because `dataViews.create` returns a
+ * cached instance for a given id and ignores a new `fields` payload — without
+ * this, navigating Kubernetes → Storage (or Phase 1 ↔ 3) keeps stale fields.
  */
 export const useEntityLabDataView = (
   enabled: boolean,
-  categoryScope?: EntityCategoryId
+  categoryScope?: EntityCategoryId,
+  isPhase1 = false
 ): DataView | undefined => {
   const {
     dependencies: {
@@ -43,6 +64,9 @@ export const useEntityLabDataView = (
     },
   } = useKibana();
   const [dataView, setDataView] = useState<DataView | undefined>();
+  const dataViewId = `entity-centric-lab-adhoc-${categoryScope ?? 'all'}-${
+    isPhase1 ? 'phase1' : 'phase3'
+  }`;
 
   useEffect(() => {
     if (!enabled) {
@@ -54,10 +78,10 @@ export const useEntityLabDataView = (
     dataViews
       .create(
         {
-          id: 'entity-centric-lab-adhoc',
+          id: dataViewId,
           title: 'entity-centric-lab*',
           name: 'Entities (lab)',
-          fields: buildEntitySearchFields(categoryScope),
+          fields: buildEntitySearchFields(categoryScope, isPhase1),
         },
         true
       )
@@ -70,7 +94,7 @@ export const useEntityLabDataView = (
     return () => {
       cancelled = true;
     };
-  }, [enabled, categoryScope, dataViews]);
+  }, [enabled, categoryScope, isPhase1, dataViewId, dataViews]);
 
   return dataView;
 };
