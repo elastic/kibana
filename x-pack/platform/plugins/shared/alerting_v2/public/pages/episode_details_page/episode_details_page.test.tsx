@@ -295,7 +295,7 @@ describe('EpisodeDetailsPage', () => {
   it('renders the page structure once the episode loads', () => {
     renderPage();
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2AlertDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
     expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });
@@ -514,7 +514,7 @@ describe('EpisodeDetailsPage', () => {
       id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
       order: 50,
       displayName: 'Open in Discover',
-      iconType: 'discoverApp',
+      iconType: 'productDiscover',
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     };

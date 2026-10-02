@@ -166,14 +166,10 @@ export interface ExperimentalFeatures {
   aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the sub-agent execution feature is enabled */
-  subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
   /** Whether external ES|QL datasets are surfaced to data-source tools */
   datasets: boolean;
-  /** Whether the ask_user_question HITL tool is enabled */
-  askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
