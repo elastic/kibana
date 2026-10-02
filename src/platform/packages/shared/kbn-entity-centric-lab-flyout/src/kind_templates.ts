@@ -5419,6 +5419,7 @@ const emptyAlertsTabData = (): AlertsTabData => ({
   totalCount: 0,
   overTime: INCIDENT_X_DOMAIN.map((x) => ({ x, y: 0 })),
   details: [],
+  rulesConfigured: false,
 });
 
 export const buildKindTemplate = (

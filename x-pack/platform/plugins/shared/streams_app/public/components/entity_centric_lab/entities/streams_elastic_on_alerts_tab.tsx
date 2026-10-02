@@ -1,22 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -29,122 +25,47 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { useEntityFlyoutServices } from './services_context';
-import type { AlertRow, AlertsTabData } from './fake_entity_tabs';
-import { alertRowToStableRuleUuid } from './alert_row_ids';
-import { formatIncidentTick } from './time_domain';
+import {
+  AlertsNotConfiguredPrompt,
+  formatIncidentTick,
+  useEntityFlyoutServices,
+} from '@kbn/entity-centric-lab-flyout';
+import type { AlertRow, AlertsTabData } from '@kbn/entity-centric-lab-flyout';
 
-interface AlertsTabProps {
+export interface StreamsElasticOnAlertsTabProps {
   readonly alerts: AlertsTabData;
   readonly entityName: string;
+  readonly onOpenAlertRow: (row: AlertRow) => void;
+  readonly onOpenRuleRow: (row: AlertRow) => void;
 }
 
-const CREATE_ALERT_RULE_TYPE_ID = 'observability.rules.custom_threshold';
-
-/** App path under the current Kibana base path, opened from a flyout link. */
-const kibanaAppHref = (appPath: string): string => {
-  const appIndex = window.location.pathname.indexOf('/app/');
-  const basePath = appIndex > 0 ? window.location.pathname.slice(0, appIndex) : '';
-  return `${basePath}${appPath}`;
-};
-
-export const AlertsNotConfiguredPrompt = () => (
-  <EuiEmptyPrompt
-    iconType="bell"
-    title={
-      <h2>
-        {i18n.translate('entityCentricLabFlyout.flyout.alerts.empty.title', {
-          defaultMessage: 'No alerts set up',
-        })}
-      </h2>
-    }
-    body={
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('entityCentricLabFlyout.flyout.alerts.empty.body', {
-            defaultMessage:
-              'Alert rules notify you when this resource crosses a threshold. Create an alert to start monitoring it.',
-          })}
-        </p>
-      </EuiText>
-    }
-    actions={
-      <EuiButton
-        color="primary"
-        href={kibanaAppHref(`/app/rules/create/${encodeURIComponent(CREATE_ALERT_RULE_TYPE_ID)}`)}
-        target="_blank"
-        iconType="popout"
-        iconSide="right"
-        data-test-subj="entityCentricLabAlertsCreateButton"
-      >
-        {i18n.translate('entityCentricLabFlyout.flyout.alerts.empty.createButton', {
-          defaultMessage: 'Create alert',
-        })}
-      </EuiButton>
-    }
-  />
-);
-
-export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
+/**
+ * ElasticOn / Phase 1 alerts tab — lives in Streams so rule-name clicks and
+ * child flyouts stay in the same bundle as {@link AllEntitiesViewInner}.
+ */
+export const StreamsElasticOnAlertsTab = ({
+  alerts,
+  entityName,
+  onOpenAlertRow,
+  onOpenRuleRow,
+}: StreamsElasticOnAlertsTabProps) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    charts,
-    notifications,
-    renderAlertDetailFlyout,
-    onOpenAlertDetail,
-    renderRuleDetailFlyout,
-    onOpenRuleDetail,
-  } = useEntityFlyoutServices();
+  const { charts } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-  const [selectedAlertRow, setSelectedAlertRow] = useState<AlertRow | null>(null);
-  const [selectedRuleRow, setSelectedRuleRow] = useState<AlertRow | null>(null);
 
   const openAlertRow = useCallback(
     (row: AlertRow) => {
-      if (onOpenAlertDetail) {
-        onOpenAlertDetail({ alertRow: row, entityName });
-        return;
-      }
-      if (renderAlertDetailFlyout) {
-        setSelectedAlertRow(row);
-        return;
-      }
-      notifications.toasts.addWarning({
-        title: i18n.translate('entityCentricLabFlyout.flyout.alerts.openUnavailableTitle', {
-          defaultMessage: 'Alert details unavailable',
-        }),
-        text: i18n.translate('entityCentricLabFlyout.flyout.alerts.openUnavailableBody', {
-          defaultMessage:
-            'Restart Kibana after pulling the latest entity-centric changes. The Observability alert flyout could not be loaded.',
-        }),
-      });
+      onOpenAlertRow(row);
     },
-    [entityName, notifications.toasts, onOpenAlertDetail, renderAlertDetailFlyout]
+    [onOpenAlertRow]
   );
 
   const openRuleRow = useCallback(
     (row: AlertRow) => {
-      const ruleId = alertRowToStableRuleUuid(row);
-      if (onOpenRuleDetail) {
-        onOpenRuleDetail({ ruleId, ruleName: row.ruleName, entityName, alertRow: row });
-        return;
-      }
-      if (renderRuleDetailFlyout) {
-        setSelectedRuleRow(row);
-        return;
-      }
-      notifications.toasts.addWarning({
-        title: i18n.translate('entityCentricLabFlyout.flyout.alerts.openRuleUnavailableTitle', {
-          defaultMessage: 'Rule details unavailable',
-        }),
-        text: i18n.translate('entityCentricLabFlyout.flyout.alerts.openRuleUnavailableBody', {
-          defaultMessage:
-            'Restart Kibana after pulling the latest entity-centric changes. The Observability rule flyout could not be loaded.',
-        }),
-      });
+      onOpenRuleRow(row);
     },
-    [entityName, notifications.toasts, onOpenRuleDetail, renderRuleDetailFlyout]
+    [onOpenRuleRow]
   );
 
   const pageOfItems = useMemo(
@@ -176,7 +97,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                 }
               )}
               onClick={() => openAlertRow(row)}
-              data-test-subj="entityCentricLabAlertsExpandButton"
+              data-test-subj="streamsElasticOnAlertsExpandButton"
             />
           </EuiToolTip>
         ),
@@ -203,16 +124,15 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           defaultMessage: 'Rule name',
         }),
         render: (ruleName: string, row: AlertRow) => (
-          <EuiLink
+          <EuiButtonEmpty
+            flush="left"
+            size="s"
             color="primary"
-            data-test-subj="entityCentricLabAlertsRuleLink"
-            onClick={(event) => {
-              event.preventDefault();
-              openRuleRow(row);
-            }}
+            data-test-subj="streamsElasticOnAlertsRuleLink"
+            onClick={() => openRuleRow(row)}
           >
             {ruleName}
-          </EuiLink>
+          </EuiButtonEmpty>
         ),
       },
       {
@@ -221,13 +141,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           defaultMessage: 'Reason',
         }),
         render: (reason: string, row: AlertRow) => (
-          <EuiLink
-            color="primary"
-            onClick={(event) => {
-              event.preventDefault();
-              openAlertRow(row);
-            }}
-          >
+          <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => openAlertRow(row)}>
             <EuiText
               size="s"
               css={css`
@@ -238,7 +152,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
             >
               {reason}
             </EuiText>
-          </EuiLink>
+          </EuiButtonEmpty>
         ),
       },
     ],
@@ -351,33 +265,10 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                   yAccessors={['y']}
                   data={alerts.overTime as Array<{ x: number; y: number }>}
                   color={euiTheme.colors.vis.euiColorVis0}
-                  // Pin time axis to UTC so the alert-count climb at 02:47:31
-                  // UTC lines up with the AI summary copy and log timestamps.
                   timeZone="utc"
                 />
               </Chart>
             </div>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <span
-                  aria-hidden
-                  css={css`
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background-color: ${euiTheme.colors.vis.euiColorVis0};
-                    display: inline-block;
-                  `}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsLegend', {
-                    defaultMessage: 'Active alerts',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -405,7 +296,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable<AlertRow>
-          items={pageOfItems as AlertRow[]}
+          items={pageOfItems}
           columns={columns}
           tableCaption={i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTableCaption', {
             defaultMessage: 'Active alerts details',
@@ -421,27 +312,9 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
               setPagination({ pageIndex: page.index, pageSize: page.size });
             }
           }}
-          data-test-subj="entityCentricLabAlertsDetailsTable"
+          data-test-subj="streamsElasticOnAlertsDetailsTable"
         />
       </EuiPanel>
-
-      {!onOpenAlertDetail && selectedAlertRow && renderAlertDetailFlyout
-        ? renderAlertDetailFlyout({
-            alertRow: selectedAlertRow,
-            entityName,
-            onClose: () => setSelectedAlertRow(null),
-          })
-        : null}
-
-      {!onOpenRuleDetail && selectedRuleRow && renderRuleDetailFlyout
-        ? renderRuleDetailFlyout({
-            ruleId: alertRowToStableRuleUuid(selectedRuleRow),
-            ruleName: selectedRuleRow.ruleName,
-            entityName,
-            alertRow: selectedRuleRow,
-            onClose: () => setSelectedRuleRow(null),
-          })
-        : null}
     </>
   );
 };

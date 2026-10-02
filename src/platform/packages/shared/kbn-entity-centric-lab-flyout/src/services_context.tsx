@@ -12,6 +12,7 @@ import type { PropsWithChildren, ReactNode } from 'react';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AlertRow, AlertsTabData } from './fake_entity_tabs';
 
 /**
  * Context handed to {@link EntityFlyoutServices.renderEntityDashboard} so the
@@ -63,6 +64,50 @@ export interface EntityFlyoutServices {
    * Latest / entity-centric leave this unset (or false).
    */
   readonly resourceCopy?: boolean;
+  /**
+   * Host-provided renderer for Observability's alert detail flyout (Alerts page
+   * UI). When omitted, alert rule links in the Alerts tab stay inert.
+   */
+  readonly renderAlertDetailFlyout?: (props: {
+    readonly alertRow: AlertRow;
+    readonly entityName: string;
+    readonly onClose: () => void;
+  }) => ReactNode;
+  /**
+   * Preferred host hook: Streams renders the Observability alert flyout as a
+   * sibling of the entity flyout (reliable EUI session stacking). When set,
+   * {@link AlertsTab} delegates opening to the host instead of in-tab state.
+   */
+  readonly onOpenAlertDetail?: (props: {
+    readonly alertRow: AlertRow;
+    readonly entityName: string;
+  }) => void;
+  /**
+   * Host override for the Alerts tab (Streams ElasticOn / Phase 1). When set,
+   * replaces the shared {@link AlertsTab} so click + child-flyout wiring lives
+   * in the Streams bundle.
+   */
+  readonly renderAlertsTab?: (props: {
+    readonly alerts: AlertsTabData;
+    readonly entityName: string;
+  }) => ReactNode;
+  /**
+   * Host-provided renderer for the Observability rule form flyout (rule details).
+   * Rule name links in the Alerts tab open this when set.
+   */
+  readonly renderRuleDetailFlyout?: (props: {
+    readonly ruleId: string;
+    readonly ruleName: string;
+    readonly entityName: string;
+    readonly alertRow?: AlertRow;
+    readonly onClose: () => void;
+  }) => ReactNode;
+  readonly onOpenRuleDetail?: (props: {
+    readonly ruleId: string;
+    readonly ruleName: string;
+    readonly entityName: string;
+    readonly alertRow?: AlertRow;
+  }) => void;
 }
 
 const EntityFlyoutServicesContext = createContext<EntityFlyoutServices | null>(null);

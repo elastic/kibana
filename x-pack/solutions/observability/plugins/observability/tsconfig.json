@@ -109,6 +109,7 @@
     "@kbn/alerting-types",
     "@kbn/response-ops-alerts-table",
     "@kbn/streams-plugin",
+    "@kbn/entity-centric-lab-flyout",
     "@kbn/response-ops-rule-form",
     "@kbn/data-service",
     "@kbn/ebt-tools",

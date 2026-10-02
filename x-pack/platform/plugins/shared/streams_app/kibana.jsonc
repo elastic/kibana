@@ -29,7 +29,16 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces", "indexLifecycleManagement", "evals", "kql"],
+    "optionalPlugins": [
+      "agentBuilder",
+      "cloud",
+      "cps",
+      "spaces",
+      "indexLifecycleManagement",
+      "evals",
+      "kql",
+      "observability"
+    ],
     "requiredBundles": [
       "discover",
       "esql",

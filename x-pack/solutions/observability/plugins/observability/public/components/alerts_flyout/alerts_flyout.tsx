@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,11 +17,12 @@ import {
   type EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  type EuiTitleProps,
   EuiToolTip,
   EuiButton,
   EuiFlyoutFooter,
 } from '@elastic/eui';
-import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, type EuiFlyoutProps } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +48,13 @@ export interface AlertsFlyoutProps {
   onClose: () => void;
   headerAppend?: React.ReactNode;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  /** When set (e.g. `'inherit'`), docks beside a parent flyout in EUI's session manager. */
+  flyoutSession?: EuiFlyoutProps['session'];
+  ownFocus?: boolean;
+  /** EUI flyout width. Defaults to `'m'`. Use `'s'` when stacking as a child flyout. */
+  flyoutSize?: EuiFlyoutProps['size'];
+  /** Title typography; defaults to `'m'`. Use `'s'` to match entity-centric lab parent flyout. */
+  flyoutTitleSize?: EuiTitleProps['size'];
 }
 
 export function AlertsFlyout({
@@ -55,6 +64,10 @@ export function AlertsFlyout({
   onClose,
   observabilityRuleTypeRegistry,
   headerAppend,
+  flyoutSession,
+  ownFocus = true,
+  flyoutSize = 'm',
+  flyoutTitleSize = 'm',
 }: AlertsFlyoutProps) {
   const {
     http: {
@@ -126,13 +139,21 @@ export function AlertsFlyout({
     <EuiFlyout
       className="oblt__flyout"
       onClose={onClose}
-      size="m"
+      size={flyoutSize}
       data-test-subj="alertsFlyout"
       aria-label={ariaLabel}
+      session={flyoutSession}
+      ownFocus={ownFocus}
+      // Child flyouts dock beside the entity flyout; the handle lets the
+      // user widen the alert panel the same way the parent flyout can.
+      resizable={flyoutSession === 'inherit'}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiSpacer size="s" />
-        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
+      <EuiFlyoutHeader
+        hasBorder
+        css={flyoutTitleSize === 's' ? css`padding-bottom: 0;` : undefined}
+      >
+        {flyoutTitleSize === 'm' ? <EuiSpacer size="s" /> : null}
+        <EuiTitle size={flyoutTitleSize} data-test-subj="alertsFlyoutTitle">
           <h2>
             {alert?.[ALERT_RULE_NAME] ? (
               <EuiToolTip content={alert[ALERT_RULE_NAME]?.[0] as string}>

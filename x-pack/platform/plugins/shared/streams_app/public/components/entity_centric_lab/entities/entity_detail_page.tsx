@@ -62,6 +62,7 @@ import {
   ServicesTab,
   ProcessesTab,
   labThing,
+  alertRowToStableRuleUuid,
   entityTypeToKind,
   inferEntityKind,
   type EntitySelectionContext,
@@ -75,6 +76,16 @@ import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
+import {
+  EntityLabAlertDetailFlyoutHost,
+  type EntityLabAlertDetailFlyoutRequest,
+} from './entity_lab_alert_detail_flyout_host';
+import { EntityLabAlertDetailMockFlyout } from './entity_lab_alert_detail_mock_flyout';
+import {
+  EntityLabRuleSummaryFlyout,
+  type EntityLabRuleDetailFlyoutRequest,
+} from './entity_lab_rule_summary_flyout';
+import { StreamsElasticOnAlertsTab } from './streams_elastic_on_alerts_tab';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
@@ -177,7 +188,8 @@ const PageTabContent = ({
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }) => {
-  const { resourceCopy = false, renderTabDashboard: renderDash } = useEntityFlyoutServices();
+  const { resourceCopy = false, renderTabDashboard: renderDash, renderAlertsTab } =
+    useEntityFlyoutServices();
 
   const placeholder = (
     <EuiEmptyPrompt
@@ -210,7 +222,11 @@ const PageTabContent = ({
     case 'traces':
       return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
-      return <AlertsTab alerts={tabsData.alerts} />;
+      return renderAlertsTab ? (
+        renderAlertsTab({ alerts: tabsData.alerts, entityName })
+      ) : (
+        <AlertsTab alerts={tabsData.alerts} entityName={entityName} />
+      );
     case 'slos':
       return <SlosTab slos={tabsData.slos} />;
     case 'services':
@@ -280,7 +296,7 @@ const EntityDetailPageInner = () => {
   const {
     core: { notifications },
     dependencies: {
-      start: { agentBuilder, charts },
+      start: { agentBuilder, charts, observability },
     },
   } = useKibana();
 
@@ -291,6 +307,10 @@ const EntityDetailPageInner = () => {
   const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list' | 'listWithPreview';
   const isPhase1 = phaseVariation === 'phase1';
   const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
+  const [alertDetailRequest, setAlertDetailRequest] =
+    useState<EntityLabAlertDetailFlyoutRequest | null>(null);
+  const [ruleDetailRequest, setRuleDetailRequest] =
+    useState<EntityLabRuleDetailFlyoutRequest | null>(null);
   // Track whether we arrived via in-app navigation (expandable flyout) so
   // we can use history.goBack() to restore the flyout on "Back".
   // history.action === 'PUSH' means the user navigated here from another
@@ -561,6 +581,29 @@ const EntityDetailPageInner = () => {
   );
 
   // Flyout services for child flyout + tab components
+  const renderAlertDetailFlyout = useMemo(
+    () => observability?.renderEntityCentricLabAlertDetailFlyout,
+    [observability]
+  );
+
+  const onOpenAlertDetail = useCallback((request: EntityLabAlertDetailFlyoutRequest) => {
+    setRuleDetailRequest(null);
+    setAlertDetailRequest(request);
+  }, []);
+
+  const closeAlertDetail = useCallback(() => {
+    setAlertDetailRequest(null);
+  }, []);
+
+  const onOpenRuleDetail = useCallback((request: EntityLabRuleDetailFlyoutRequest) => {
+    setAlertDetailRequest(null);
+    setRuleDetailRequest(request);
+  }, []);
+
+  const closeRuleDetail = useCallback(() => {
+    setRuleDetailRequest(null);
+  }, []);
+
   const flyoutServices = useMemo(
     () => ({
       agentBuilder,
@@ -568,8 +611,42 @@ const EntityDetailPageInner = () => {
       charts,
       renderTabDashboard,
       resourceCopy: true,
+      renderAlertDetailFlyout,
+      onOpenAlertDetail,
+      onOpenRuleDetail,
+      renderAlertsTab: ({
+        alerts,
+        entityName: alertEntityName,
+      }: {
+        alerts: import('@kbn/entity-centric-lab-flyout').AlertsTabData;
+        entityName: string;
+      }) => (
+        <StreamsElasticOnAlertsTab
+          alerts={alerts}
+          entityName={alertEntityName}
+          onOpenAlertRow={(row) =>
+            onOpenAlertDetail({ alertRow: row, entityName: alertEntityName })
+          }
+          onOpenRuleRow={(row) =>
+            onOpenRuleDetail({
+              ruleId: alertRowToStableRuleUuid(row),
+              ruleName: row.ruleName,
+              entityName: alertEntityName,
+              alertRow: row,
+            })
+          }
+        />
+      ),
     }),
-    [agentBuilder, notifications, charts, renderTabDashboard]
+    [
+      agentBuilder,
+      notifications,
+      charts,
+      renderTabDashboard,
+      renderAlertDetailFlyout,
+      onOpenAlertDetail,
+      onOpenRuleDetail,
+    ]
   );
 
   // Navigate back to inventory, restoring the flyout for the current entity.
@@ -1064,6 +1141,27 @@ const EntityDetailPageInner = () => {
             )}
           </EuiFlyoutBody>
         </EuiFlyoutResizable>
+      ) : null}
+      {alertDetailRequest && renderAlertDetailFlyout ? (
+        <EntityLabAlertDetailFlyoutHost
+          request={alertDetailRequest}
+          onClose={closeAlertDetail}
+          renderAlertDetailFlyout={renderAlertDetailFlyout}
+        />
+      ) : null}
+      {alertDetailRequest && !renderAlertDetailFlyout ? (
+        <EntityLabAlertDetailMockFlyout
+          alertRow={alertDetailRequest.alertRow}
+          entityName={alertDetailRequest.entityName}
+          onClose={closeAlertDetail}
+        />
+      ) : null}
+      {ruleDetailRequest ? (
+        <EntityLabRuleSummaryFlyout
+          key={ruleDetailRequest.ruleId}
+          request={ruleDetailRequest}
+          onClose={closeRuleDetail}
+        />
       ) : null}
     </EntityFlyoutServicesProvider>
   );

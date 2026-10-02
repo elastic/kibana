@@ -101,7 +101,7 @@ import {
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
 import { TelemetryService } from './services/telemetry/telemetry_service';
-
+import { createEntityCentricLabAlertDetailFlyoutRenderer } from './entity_centric_lab/create_entity_centric_lab_alert_detail_flyout_renderer';
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
@@ -551,6 +551,11 @@ export class Plugin
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      renderEntityCentricLabAlertDetailFlyout: createEntityCentricLabAlertDetailFlyoutRenderer({
+        coreStart,
+        pluginsStart,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+      }),
     };
   }
 }

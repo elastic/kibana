@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,6 +38,13 @@ const SLO_STATUS_COLOR: Record<SloStatus, string> = {
   'No data': 'hollow',
 };
 
+/** App path under the current Kibana base path, opened from a flyout link. */
+const kibanaAppHref = (appPath: string): string => {
+  const appIndex = window.location.pathname.indexOf('/app/');
+  const basePath = appIndex > 0 ? window.location.pathname.slice(0, appIndex) : '';
+  return `${basePath}${appPath}`;
+};
+
 const BUDGET_BAR_COLOR: Record<SloStatus, 'success' | 'warning' | 'danger' | 'subdued'> = {
   Met: 'success',
   Breaching: 'danger',
@@ -52,9 +60,10 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.slos.columns.name', {
           defaultMessage: 'SLO',
         }),
-        truncateText: true,
         render: (name: string) => (
-          <EuiLink data-test-subj="entityCentricLabSloLink">{name}</EuiLink>
+          <EuiLink data-test-subj="entityCentricLabSloLink" onClick={() => {}}>
+            {name} <EuiIcon type="popout" size="s" aria-hidden={true} />
+          </EuiLink>
         ),
       },
       {
@@ -106,10 +115,14 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
           const clamped = Math.max(0, Math.min(100, budgetRemaining));
           return (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false} css={css`min-width: 42px; text-align: right;`}>
-                <EuiText size="xs">
-                  {budgetRemaining > 0 ? `${budgetRemaining}%` : '0%'}
-                </EuiText>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  min-width: 42px;
+                  text-align: right;
+                `}
+              >
+                <EuiText size="xs">{budgetRemaining > 0 ? `${budgetRemaining}%` : '0%'}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiProgress
@@ -147,6 +160,20 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
               })}
             </p>
           </EuiText>
+        }
+        actions={
+          <EuiButton
+            color="primary"
+            href={kibanaAppHref('/app/slos/create')}
+            target="_blank"
+            iconType="popout"
+            iconSide="right"
+            data-test-subj="entityCentricLabSlosCreateButton"
+          >
+            {i18n.translate('entityCentricLabFlyout.flyout.slos.empty.createButton', {
+              defaultMessage: 'Create SLO',
+            })}
+          </EuiButton>
         }
       />
     );
@@ -200,7 +227,11 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
           <EuiPanel hasBorder hasShadow={false} paddingSize="m">
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warning" size="l" color={degradingCount > 0 ? 'warning' : 'subdued'} />
+                <EuiIcon
+                  type="warning"
+                  size="l"
+                  color={degradingCount > 0 ? 'warning' : 'subdued'}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">

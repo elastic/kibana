@@ -63,6 +63,7 @@ const CATEGORY_FILTER_ALL = '__all_categories__';
 import {
   EntityFlyout,
   EntityFlyoutServicesProvider,
+  alertRowToStableRuleUuid,
   entityTypeToKind,
   inferEntityKind,
   isEntityTypeEnabled,
@@ -194,6 +195,16 @@ import { compileEntityKql, entityMatchesFilters } from './entity_kql';
 import { useEntityLabDataView } from './use_entity_lab_data_view';
 import { useEntityValueSuggestions } from './use_entity_value_suggestions';
 import { EntityErrorBoundary } from './entity_error_boundary';
+import {
+  EntityLabAlertDetailFlyoutHost,
+  type EntityLabAlertDetailFlyoutRequest,
+} from './entity_lab_alert_detail_flyout_host';
+import { EntityLabAlertDetailMockFlyout } from './entity_lab_alert_detail_mock_flyout';
+import {
+  EntityLabRuleSummaryFlyout,
+  type EntityLabRuleDetailFlyoutRequest,
+} from './entity_lab_rule_summary_flyout';
+import { StreamsElasticOnAlertsTab } from './streams_elastic_on_alerts_tab';
 import {
   CATEGORY_TAB_STORAGE_KEY,
   GROUP_BY_STORAGE_KEY,
@@ -763,7 +774,7 @@ const AllEntitiesViewInner = ({
   const {
     core: { notifications, uiSettings },
     dependencies: {
-      start: { agentBuilder, charts, unifiedSearch },
+      start: { agentBuilder, charts, unifiedSearch, observability },
     },
   } = useKibana();
   // Lab experience mode (Stack Management → Advanced Settings → Discover). The
@@ -1384,6 +1395,10 @@ const AllEntitiesViewInner = ({
     return restored;
   });
   const [childEntityName, setChildEntityName] = useState<string | null>(null);
+  const [alertDetailRequest, setAlertDetailRequest] =
+    useState<EntityLabAlertDetailFlyoutRequest | null>(null);
+  const [ruleDetailRequest, setRuleDetailRequest] =
+    useState<EntityLabRuleDetailFlyoutRequest | null>(null);
   // The health/type the child was opened with when it comes from an in-flyout
   // click (a Dependencies row / topology-map node). Those entities are
   // fabricated by the shared package and rarely live in `dataset`, so the
@@ -1762,6 +1777,8 @@ const AllEntitiesViewInner = ({
       setSelectedEntityName(entityName);
       setChildEntityName(null);
       setChildEntityContext(null);
+      setAlertDetailRequest(null);
+      setRuleDetailRequest(null);
       // Sync to URL so the deep-link is shareable.
       const params = new URLSearchParams(location.search);
       params.set('entity', entityName);
@@ -1826,6 +1843,8 @@ const AllEntitiesViewInner = ({
     setSelectedEntityName(null);
     setChildEntityName(null);
     setChildEntityContext(null);
+    setAlertDetailRequest(null);
+    setRuleDetailRequest(null);
     // Remove the deep-link param so the flyout doesn't re-open on refresh.
     const params = new URLSearchParams(location.search);
     if (params.has('entity')) {
@@ -1954,6 +1973,29 @@ const AllEntitiesViewInner = ({
   // footer button lights up and the entity context is forwarded to the
   // AI chat with the same payload Discover uses. When it's missing the
   // button is hidden and the rest of the flyout keeps working.
+  const renderAlertDetailFlyout = useMemo(
+    () => observability?.renderEntityCentricLabAlertDetailFlyout,
+    [observability]
+  );
+
+  const onOpenAlertDetail = useCallback((request: EntityLabAlertDetailFlyoutRequest) => {
+    setRuleDetailRequest(null);
+    setAlertDetailRequest(request);
+  }, []);
+
+  const closeAlertDetail = useCallback(() => {
+    setAlertDetailRequest(null);
+  }, []);
+
+  const onOpenRuleDetail = useCallback((request: EntityLabRuleDetailFlyoutRequest) => {
+    setAlertDetailRequest(null);
+    setRuleDetailRequest(request);
+  }, []);
+
+  const closeRuleDetail = useCallback(() => {
+    setRuleDetailRequest(null);
+  }, []);
+
   const flyoutServices = useMemo(
     () => ({
       agentBuilder,
@@ -1961,8 +2003,43 @@ const AllEntitiesViewInner = ({
       charts,
       renderTabDashboard,
       resourceCopy: isElasticOn,
+      renderAlertDetailFlyout,
+      onOpenAlertDetail,
+      onOpenRuleDetail,
+      renderAlertsTab: ({
+        alerts,
+        entityName: alertEntityName,
+      }: {
+        alerts: import('@kbn/entity-centric-lab-flyout').AlertsTabData;
+        entityName: string;
+      }) => (
+        <StreamsElasticOnAlertsTab
+          alerts={alerts}
+          entityName={alertEntityName}
+          onOpenAlertRow={(row) =>
+            onOpenAlertDetail({ alertRow: row, entityName: alertEntityName })
+          }
+          onOpenRuleRow={(row) =>
+            onOpenRuleDetail({
+              ruleId: alertRowToStableRuleUuid(row),
+              ruleName: row.ruleName,
+              entityName: alertEntityName,
+              alertRow: row,
+            })
+          }
+        />
+      ),
     }),
-    [agentBuilder, notifications, charts, renderTabDashboard, isElasticOn]
+    [
+      agentBuilder,
+      notifications,
+      charts,
+      renderTabDashboard,
+      isElasticOn,
+      renderAlertDetailFlyout,
+      onOpenAlertDetail,
+      onOpenRuleDetail,
+    ]
   );
 
   // Latest: the view currently loaded from the nav (`?loadView=<id>`), if it
@@ -3034,6 +3111,27 @@ const AllEntitiesViewInner = ({
               hideEvents={isPhase1}
               hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
               dashboardStyle={dashboardStyleVariation}
+            />
+          ) : null}
+          {alertDetailRequest && renderAlertDetailFlyout ? (
+            <EntityLabAlertDetailFlyoutHost
+              request={alertDetailRequest}
+              onClose={closeAlertDetail}
+              renderAlertDetailFlyout={renderAlertDetailFlyout}
+            />
+          ) : null}
+          {alertDetailRequest && !renderAlertDetailFlyout ? (
+            <EntityLabAlertDetailMockFlyout
+              alertRow={alertDetailRequest.alertRow}
+              entityName={alertDetailRequest.entityName}
+              onClose={closeAlertDetail}
+            />
+          ) : null}
+          {ruleDetailRequest ? (
+            <EntityLabRuleSummaryFlyout
+              key={ruleDetailRequest.ruleId}
+              request={ruleDetailRequest}
+              onClose={closeRuleDetail}
             />
           ) : null}
         </EntityFlyoutServicesProvider>

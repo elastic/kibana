@@ -14,7 +14,7 @@ export { EntityFlyout } from './src/entity_flyout';
 export { OverviewTab } from './src/overview_tab';
 export { MetricsTab } from './src/metrics_tab';
 export { LogsTab } from './src/logs_tab';
-export { AlertsTab } from './src/alerts_tab';
+export { AlertsTab, AlertsNotConfiguredPrompt } from './src/alerts_tab';
 export { RelationshipsTab } from './src/relationships_tab';
 export { TracesTab } from './src/traces_tab';
 export { ProfilingTab } from './src/profiling_tab';
@@ -26,6 +26,14 @@ export { SlosTab } from './src/slos_tab';
 export { ServicesTab } from './src/services_tab';
 export { ProcessesTab } from './src/processes_tab';
 export { labThing } from './src/lab_terminology';
+export { formatIncidentTick } from './src/time_domain';
+export {
+  alertRowToStableAlertUuid,
+  alertRowToStableRuleUuid,
+  ENTITY_CENTRIC_LAB_SYNTHETIC_ID_PREFIX,
+  isEntityCentricLabSyntheticRuleId,
+  stableUuidFromSeed,
+} from './src/alert_row_ids';
 export { EntityFlyoutServicesProvider, useEntityFlyoutServices } from './src/services_context';
 export type { EntityFlyoutServices, EntityDashboardRenderContext } from './src/services_context';
 

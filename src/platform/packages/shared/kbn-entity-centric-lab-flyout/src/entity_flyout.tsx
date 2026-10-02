@@ -1253,7 +1253,7 @@ const TabContent = ({
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }) => {
-  const { resourceCopy = false, renderTabDashboard } = useEntityFlyoutServices();
+  const { resourceCopy = false, renderTabDashboard, renderAlertsTab } = useEntityFlyoutServices();
 
   // Shared fallback: rendered for the `default` branch (unknown tab id from
   // an override) and for the `traces` branch when the active entity has no
@@ -1289,7 +1289,11 @@ const TabContent = ({
       // than crashing on a missing payload.
       return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
-      return <AlertsTab alerts={tabsData.alerts} />;
+      return renderAlertsTab ? (
+        renderAlertsTab({ alerts: tabsData.alerts, entityName })
+      ) : (
+        <AlertsTab alerts={tabsData.alerts} entityName={entityName} />
+      );
     case 'slos':
       return <SlosTab slos={tabsData.slos} />;
     case 'services':

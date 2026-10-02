@@ -97,6 +97,8 @@ export type {
 } from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 
+export type { EntityCentricLabAlertDetailFlyoutRenderer } from './entity_centric_lab/create_entity_centric_lab_alert_detail_flyout_renderer';
+export { createEntityCentricLabAlertDetailFlyoutRenderer } from './entity_centric_lab/create_entity_centric_lab_alert_detail_flyout_renderer';
 export { DatePickerContextProvider } from './context/date_picker_context/date_picker_context';
 
 export { fromQuery, toQuery } from './utils/url';

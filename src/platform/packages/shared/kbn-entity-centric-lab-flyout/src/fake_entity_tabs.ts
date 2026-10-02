@@ -96,6 +96,11 @@ export interface AlertsTabData {
   readonly totalCount: number;
   readonly overTime: readonly MetricSeriesPoint[];
   readonly details: readonly AlertRow[];
+  /**
+   * `false` when the inventory has no alert rules configured.
+   * Omitted for demo data and for entities that have rules but no active alerts.
+   */
+  readonly rulesConfigured?: boolean;
 }
 
 export type RelatedEntityHealth = 'Unhealthy' | 'At risk' | 'Healthy';
@@ -310,7 +315,13 @@ export const buildFakeEntityTabsData = (
     normalizeEntityHealth(entityHealth),
     getChaosModeEnabled()
   );
-  const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType, alertsActiveOverride);
+  const kindTemplate = buildKindTemplate(
+    entityName,
+    kind,
+    effectiveHealth,
+    entityType,
+    alertsActiveOverride
+  );
   if (kindTemplate) {
     return kindTemplate.tabs;
   }

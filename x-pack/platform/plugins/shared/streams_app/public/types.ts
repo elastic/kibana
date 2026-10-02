@@ -36,6 +36,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { EntityFlyoutServices } from '@kbn/entity-centric-lab-flyout';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -85,6 +86,9 @@ export interface StreamsAppStartDependencies {
   spaces?: SpacesPluginStart;
   console: ConsolePluginStart;
   evals?: EvalsPublicStart;
+  /** Observability — entity lab alert detail child flyout renderer (optional plugin). */
+  observability?: {
+    readonly renderEntityCentricLabAlertDetailFlyout?: EntityFlyoutServices['renderAlertDetailFlyout'];  };
 }
 
 export interface StreamsAppPublicSetup {}

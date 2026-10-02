@@ -423,6 +423,18 @@ const buildTags = (scope: string, index: number): EntityTags => ({
 });
 
 /**
+ * PayFlow click-path counts, matching the curated flyout tabs in
+ * `payflow_story.ts`. The hash below would otherwise mark some of these
+ * "no alert set up" or "0 active" while the flyout still shows the incident.
+ */
+const STORY_ENTITY_ALERTS: Record<string, { readonly total: number; readonly active: number }> = {
+  'payments-service': { total: 4, active: 4 },
+  'checkout-service': { total: 2, active: 2 },
+  'payments-pod-7f9b2': { total: 3, active: 3 },
+  'node-prod-eu-04': { total: 2, active: 2 },
+};
+
+/**
  * Seed fake alert data correlated with entity health:
  * - unhealthy → 70 % active alerts, 20 % clear, 10 % none
  * - atRisk   → 30 % active, 50 % clear, 20 % none
@@ -432,6 +444,8 @@ const buildAlerts = (
   name: string,
   health: EntityHealth
 ): { total: number; active: number } | undefined => {
+  const pinned = STORY_ENTITY_ALERTS[name];
+  if (pinned) return pinned;
   const h = stableHash(`alerts-${name}`) % 100;
   const thresholds: Record<EntityHealth, { readonly activeMax: number; readonly clearMax: number }> =
     {
