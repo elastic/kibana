@@ -219,6 +219,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
                     }
               )}
               isDisabled={!isFormValid}
+              iconType={isNewPanel ? undefined : 'check'}
               data-test-subj="aiopsPatternAnalysisConfirmButton"
             >
               {isNewPanel ? (
