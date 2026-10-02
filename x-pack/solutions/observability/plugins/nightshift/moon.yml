@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
+  - '@kbn/storage-adapter'
   - '@kbn/tooling-log'
   - '@kbn/ui-callout'
   - '@kbn/unified-search-plugin'

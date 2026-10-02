@@ -31,6 +31,8 @@ import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { types } from '@kbn/storage-adapter';
+import type { StorageSchema } from '@kbn/storage-adapter';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   HYPOTHESES_ATTACHMENT_TYPE,
@@ -1072,70 +1074,69 @@ const hypothesesDocumentId = (conversationId: string): string =>
 const impactDocumentId = (conversationId: string): string =>
   hashDocumentId(SPACE_ID, conversationId);
 
-const userMapping = {
-  type: 'object',
+const userMapping = types.object({
   properties: {
-    username: { type: 'keyword' },
-    fullName: { type: 'keyword' },
-    email: { type: 'keyword' },
-    profileUid: { type: 'keyword' },
+    username: types.keyword({}),
+    fullName: types.keyword({}),
+    email: types.keyword({}),
+    profileUid: types.keyword({}),
   },
-};
+});
 
 /**
- * Mappings of the side indexes, mirroring each entity's `server/<entity>/storage/*_storage.ts`.
- * Only installed when the plugin's storage adapter has not created the index yet; the adapter
- * updates them to its own versioned copy on its next write.
+ * Mappings of the side indexes, mirroring each entity's `server/<entity>/storage/*_storage.ts`
+ * with the storage adapter's own `types` factories, so every field carries the adapter's defaults
+ * (`ignore_above` on keywords, `format` on dates). Only installed when the plugin's storage adapter
+ * has not created the index yet; the adapter then puts its versioned mappings on its next read or
+ * write, which Elasticsearch only accepts while the field parameters are identical.
  */
-const SIDE_INDEX_MAPPINGS: Record<string, Record<string, object>> = {
+const SIDE_INDEX_MAPPINGS: Record<string, StorageSchema['properties']> = {
   [SUBJECT_INDEX_NAME]: {
-    spaceId: { type: 'keyword' },
-    conversationId: { type: 'keyword' },
-    subjectType: { type: 'keyword' },
-    subjectId: { type: 'keyword' },
-    summary: { type: 'text' },
-    triggerType: { type: 'keyword' },
-    snapshot: { type: 'object', enabled: false },
-    slack: {
-      type: 'object',
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    subjectType: types.keyword({}),
+    subjectId: types.keyword({}),
+    summary: types.text({}),
+    triggerType: types.keyword({}),
+    snapshot: types.object({ enabled: false }),
+    slack: types.object({
       properties: {
-        channel: { type: 'keyword' },
-        thread_ts: { type: 'keyword' },
-        status_message_ts: { type: 'keyword' },
-        permalink: { type: 'keyword', index: false },
-        seen_event_ids: { type: 'keyword', index: false },
+        channel: types.keyword({}),
+        thread_ts: types.keyword({}),
+        status_message_ts: types.keyword({}),
+        permalink: types.keyword({ index: false }),
+        seen_event_ids: types.keyword({ index: false }),
       },
-    },
-    createdAt: { type: 'date' },
-    updatedAt: { type: 'date' },
+    }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
     createdBy: userMapping,
   },
   [IMPACT_INDEX_NAME]: {
-    spaceId: { type: 'keyword' },
-    conversationId: { type: 'keyword' },
-    summary: { type: 'text' },
-    evidence: { type: 'object', enabled: false },
-    entities: {
-      type: 'nested',
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    summary: types.text({}),
+    evidence: types.object({ enabled: false }),
+    entities: types.nested({
       properties: {
-        id: { type: 'keyword' },
-        name: { type: 'keyword' },
-        type: { type: 'keyword' },
-        featureId: { type: 'keyword' },
-        streamName: { type: 'keyword' },
-        evidence: { type: 'object', enabled: false },
+        id: types.keyword({}),
+        name: types.keyword({}),
+        type: types.keyword({}),
+        featureId: types.keyword({}),
+        streamName: types.keyword({}),
+        evidence: types.object({ enabled: false }),
       },
-    },
-    createdAt: { type: 'date' },
-    updatedAt: { type: 'date' },
+    }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
     createdBy: userMapping,
   },
   [HYPOTHESES_INDEX_NAME]: {
-    spaceId: { type: 'keyword' },
-    conversationId: { type: 'keyword' },
-    hypotheses: { type: 'object', enabled: false },
-    createdAt: { type: 'date' },
-    updatedAt: { type: 'date' },
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    hypotheses: types.object({ enabled: false }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
     createdBy: userMapping,
   },
 };
@@ -1372,7 +1373,21 @@ const ensureSideIndexes = async (client: SeedClient): Promise<void> => {
         },
       });
     }
-    await client.es('PUT', `/${name}-000001`, undefined, [400]);
+    // Only a concurrent create by the adapter is benign; any other 400 (e.g. a plain index that
+    // already holds the alias name) must stop the seeding before it writes into the wrong index.
+    const { status, body } = await client.es<{ error?: { type?: string; reason?: string } }>(
+      'PUT',
+      `/${name}-000001`,
+      undefined,
+      [400]
+    );
+    if (status === 400 && body.error?.type !== 'resource_already_exists_exception') {
+      throw new Error(
+        `Creating ${name}-000001 failed: ${body.error?.type ?? 'unknown'} ${
+          body.error?.reason ?? ''
+        }`
+      );
+    }
   }
 };
 
