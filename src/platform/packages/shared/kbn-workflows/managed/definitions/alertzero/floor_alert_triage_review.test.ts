@@ -193,7 +193,7 @@ describe('floor_alert_triage_review — coalescing', () => {
 
     const coalesce = stepByName('coalesce_fp_close');
     expect(coalesce?.type).toBe('alertzero.coalesceFpCloseProposal');
-    expect(coalesce?.['on-failure']?.continue).toBe(true);
+    expect(coalesce?.['on-failure']).toEqual({ continue: true });
     expect(coalesce?.with).toEqual(
       expect.objectContaining({
         rule_id: '{{ inputs.rule_id }}',
@@ -214,6 +214,37 @@ describe('floor_alert_triage_review — coalescing', () => {
     [{}, 'mint'],
   ])('resolves the coalesce step %j to "%s"', (coalesce, expected) => {
     expect(resolveMode(coalesce)).toBe(expected);
+  });
+
+  it('releases the rule pointer once the proposal is settled, never failing the run on it', () => {
+    const release = stepByName('release_fp_open_pointer');
+    const branch = flatten(stepByName('handle_new_proposal')?.steps ?? []).map((step) => step.name);
+
+    expect(release?.type).toBe('alertzero.releaseFpOpenPointer');
+    expect(release?.['on-failure']).toEqual({ continue: true });
+    expect(release?.with).toEqual({
+      rule_id: '{{ inputs.rule_id }}',
+      conversation_id: '{{ inputs.conversation_id }}',
+    });
+    expect(branch.indexOf('resolve_proposal_outcome')).toBeLessThan(
+      branch.indexOf('release_fp_open_pointer')
+    );
+    expect(branch.indexOf('release_fp_open_pointer')).toBeLessThan(
+      branch.indexOf('handle_approved')
+    );
+  });
+
+  it.each([
+    ['approved', true],
+    ['dismissed', true],
+    ['expired', true],
+    ['unknown', false],
+  ])('releases the pointer for outcome "%s": %s', (outcome, expected) => {
+    expect(
+      evalExpr(stepByName('release_fp_open_pointer')?.if as string, {
+        variables: { proposal_outcome: outcome },
+      })
+    ).toBe(expected);
   });
 
   it('raises and waits on a proposal only when the batch did not join one', () => {
@@ -273,6 +304,10 @@ describe('floor_alert_triage_review — coalescing', () => {
 // ---------------------------------------------------------------------------
 
 describe('floor_alert_triage_review — alerts of the live revision', () => {
+  const closureIdsFromHead = stepByName('set_closure_alert_ids_from_head')?.with as Record<
+    string,
+    string
+  >;
   const closureAlerts = stepByName('resolve_closure_alerts')?.with as Record<string, string>;
   const inputs = { fp_candidate_ids: ['a', 'b'] };
 
@@ -289,14 +324,19 @@ describe('floor_alert_triage_review — alerts of the live revision', () => {
       inputs,
       steps: { resolve_head: { output: { actionInput: { alertIds: ['a', 'b', 'c', 'd'] } } } },
     };
-    expect(evalExpr(closureAlerts.closure_alert_ids, context)).toEqual(['a', 'b', 'c', 'd']);
-    expect(evalExpr(closureAlerts.closure_alert_count, context)).toBe(4);
+    expect(evalExpr(closureIdsFromHead.closure_alert_ids, context)).toEqual(['a', 'b', 'c', 'd']);
+    expect(Number(renderString(closureAlerts.closure_alert_count, context).trim())).toBe(4);
   });
 
-  it("falls back to this batch's candidates when the live revision could not be read", () => {
+  it('clears closure_alert_ids when the live revision could not be read', () => {
+    expect(stepByName('clear_closure_alert_ids_when_head_unreadable')?.if).toBe(
+      '${{ steps.resolve_head.error != blank }}'
+    );
+    expect(
+      stepByName('clear_closure_alert_ids_when_head_unreadable')?.with?.closure_alert_ids
+    ).toEqual([]);
     const context = { inputs, steps: { resolve_head: { error: { message: 'timeout' } } } };
-    expect(evalExpr(closureAlerts.closure_alert_ids, context)).toEqual(['a', 'b']);
-    expect(evalExpr(closureAlerts.closure_alert_count, context)).toBe(2);
+    expect(Number(renderString(closureAlerts.closure_alert_count, context).trim())).toBe(2);
   });
 
   it('re-tags the alerts of the live revision on a dismissal', () => {
@@ -376,14 +416,21 @@ describe('floor_alert_triage_review — guard_get_proposal_readable', () => {
     expect(getProposal?.['on-failure']?.continue).toBe(true);
   });
 
-  it('gates the retag/close on the read having succeeded, with a preserve-and-warn else', () => {
+  it('gates the retag/close on get_proposal and resolve_head, with preserve-and-warn else branches', () => {
     const guard = stepByName('guard_get_proposal_readable');
     expect(guard?.condition).toBe('${{ steps.get_proposal.error == blank }}');
     expect(guard?.condition).not.toContain('|');
 
-    expect(guard?.steps?.some((s) => s.name === 'map_dismiss_reason_to_tag')).toBe(true);
-    expect(guard?.steps?.some((s) => s.name === 'retag_dismissed_alerts')).toBe(true);
-    expect(guard?.steps?.some((s) => s.name === 'close_investigation_after_dismissal')).toBe(true);
+    const headGuard = stepByName('guard_resolve_head_readable');
+    expect(headGuard?.condition).toBe('${{ steps.resolve_head.error == blank }}');
+    expect(headGuard?.steps?.some((s) => s.name === 'map_dismiss_reason_to_tag')).toBe(true);
+    expect(headGuard?.steps?.some((s) => s.name === 'retag_dismissed_alerts')).toBe(true);
+    expect(headGuard?.steps?.some((s) => s.name === 'close_investigation_after_dismissal')).toBe(
+      true
+    );
+    expect(headGuard?.else?.some((s) => s.name === 'post_comment_dismissed_head_read_failed')).toBe(
+      true
+    );
     expect(guard?.else?.some((s) => s.name === 'post_comment_dismissed_read_failed')).toBe(true);
   });
 

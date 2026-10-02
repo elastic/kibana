@@ -128,4 +128,42 @@ describe('createFpOpenPointerStore', () => {
       await expect(store.write({ ruleId: 'rule-1', conversationId: 'conv-1' })).rejects.toThrow();
     });
   });
+
+  describe('release', () => {
+    it('deletes exactly the version it read', async () => {
+      const { esClient, store } = setup();
+
+      await expect(store.release('rule-1', { seqNo: 4, primaryTerm: 2 })).resolves.toBe('released');
+      expect(esClient.delete).toHaveBeenCalledWith(
+        {
+          index: RULE_DISPOSITIONS_AI_INDEX_DEST,
+          id: 'space-a:alert-triage-fp-open:rule-1',
+          if_seq_no: 4,
+          if_primary_term: 2,
+        },
+        expect.anything()
+      );
+    });
+
+    it('leaves a pointer another writer replaced in the meantime', async () => {
+      const { esClient, store } = setup();
+      esClient.delete.mockRejectedValue(responseError(409));
+
+      await expect(store.release('rule-1', { seqNo: 4, primaryTerm: 2 })).resolves.toBe('conflict');
+    });
+
+    it('treats a pointer that is already gone as released', async () => {
+      const { esClient, store } = setup();
+      esClient.delete.mockRejectedValue(responseError(404));
+
+      await expect(store.release('rule-1', { seqNo: 4, primaryTerm: 2 })).resolves.toBe('released');
+    });
+
+    it('does not swallow other errors', async () => {
+      const { esClient, store } = setup();
+      esClient.delete.mockRejectedValue(responseError(403));
+
+      await expect(store.release('rule-1', { seqNo: 4, primaryTerm: 2 })).rejects.toThrow();
+    });
+  });
 });

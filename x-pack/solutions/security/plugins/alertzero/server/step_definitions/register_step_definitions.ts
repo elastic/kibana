@@ -9,6 +9,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import { coalesceFpCloseProposalStepDefinition } from './coalesce_fp_close_proposal';
 import { findOpenFpCloseProposalStepDefinition } from './find_open_fp_close_proposal';
 import type { FpCloseStepDependencies } from './fp_close_proposal';
+import { releaseFpOpenPointerStepDefinition } from './release_fp_open_pointer';
 
 /** Registers the AlertZero workflow steps the managed Alert Triage workflows call. */
 export const registerStepDefinitions = (
@@ -17,4 +18,5 @@ export const registerStepDefinitions = (
 ): void => {
   workflowsExtensions.registerStepDefinition(findOpenFpCloseProposalStepDefinition(dependencies));
   workflowsExtensions.registerStepDefinition(coalesceFpCloseProposalStepDefinition(dependencies));
+  workflowsExtensions.registerStepDefinition(releaseFpOpenPointerStepDefinition(dependencies));
 };

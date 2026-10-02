@@ -37,10 +37,17 @@ const MINT_IN_FLIGHT_POLL_ATTEMPTS = 3;
 const MINT_IN_FLIGHT_POLL_DELAY_MS = 5_000;
 
 /** Revisions of one proposal from concurrent batches race on its sequence number. */
-const REVISE_ATTEMPTS = 3;
+const REVISE_ATTEMPTS = 8;
+
+const REVISE_CONFLICT_DELAY_MS = 250;
 
 /** One re-read after a lost pointer write; a second loss raises a proposal of its own. */
 const POINTER_WRITE_PASSES = 2;
+
+/** When append races, retry before claiming the rule for a new proposal. */
+const APPEND_RETRY_PASSES = 3;
+
+const APPEND_RETRY_DELAY_MS = 500;
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
@@ -55,6 +62,16 @@ interface CoalesceOutput {
 const hasErrorName = (error: unknown, name: string): boolean =>
   error instanceof Error && error.name === name;
 
+class PendingAppendExhaustedError extends Error {
+  readonly name = 'PendingAppendExhaustedError';
+
+  constructor(ruleId: string) {
+    super(
+      `Pending closure proposal exists for rule ${ruleId} but this batch could not be appended after retries`
+    );
+  }
+}
+
 /**
  * Adds a batch's false positives to the rule's pending closure proposal, or claims the rule's
  * pointer for this batch so the closure review raises the proposal later batches are added to.
@@ -63,7 +80,13 @@ export const coalesceFpCloseProposalStepDefinition = ({
   getProposals,
   isPointerStoreAvailable,
   pollDelayMs = MINT_IN_FLIGHT_POLL_DELAY_MS,
-}: FpCloseStepDependencies & { pollDelayMs?: number }) =>
+  reviseConflictDelayMs = REVISE_CONFLICT_DELAY_MS,
+  appendRetryDelayMs = APPEND_RETRY_DELAY_MS,
+}: FpCloseStepDependencies & {
+  pollDelayMs?: number;
+  reviseConflictDelayMs?: number;
+  appendRetryDelayMs?: number;
+}) =>
   createServerStepDefinition({
     id: COALESCE_FP_CLOSE_PROPOSAL_STEP_ID,
     label: i18n.translate('xpack.alertzero.steps.coalesceFpCloseProposal.label', {
@@ -164,7 +187,7 @@ export const coalesceFpCloseProposalStepDefinition = ({
           return undefined;
         }
         await proposals.getProposalPrivileges().assertCanManage(request);
-        return reviseWithBatch({
+        const revised = await reviseWithBatch({
           service,
           proposalId: pending.proposalId,
           batchAlertIds,
@@ -172,16 +195,66 @@ export const coalesceFpCloseProposalStepDefinition = ({
           request,
           comment: (alertCount) => buildFpCloseComment({ alertCount, ruleName, confidenceFloor }),
           standingConversationId: stored.pointer.conversationId,
+          reviseConflictDelayMs,
+          signal,
         });
+        if (revised) {
+          return revised;
+        }
+
+        const head = await service.getLatestRevision(pending.proposalId, spaceId);
+        if (head.status !== 'pending' || head.decision != null) {
+          return undefined;
+        }
+        const existing = alertIdsOf(head.actionInput);
+        const batchAlreadyOnProposal = batchAlertIds.every((id) => existing.includes(id));
+        if (batchAlreadyOnProposal) {
+          return {
+            mode: 'appended',
+            standing_conversation_id: stored.pointer.conversationId,
+            added_count: 0,
+            total_count: existing.length,
+            proposal_id: head.proposalId,
+          };
+        }
+        return undefined;
+      };
+
+      const pendingStillOpenForPointer = async (stored: StoredFpOpenPointer): Promise<boolean> => {
+        const pending = await findPendingFpCloseProposal({
+          service,
+          conversationId: stored.pointer.conversationId,
+          spaceId,
+          request,
+        });
+        if (!pending) {
+          return false;
+        }
+        const head = await service.getLatestRevision(pending.proposalId, spaceId);
+        if (head.status !== 'pending' || head.decision != null) {
+          return false;
+        }
+        return unionAlertIds(pending.alertIds, batchAlertIds).length <= MAX_FP_CLOSE_ALERT_IDS;
       };
 
       try {
         for (let pass = 0; pass < POINTER_WRITE_PASSES; pass++) {
           const stored = await store.get(ruleId);
           if (stored) {
-            const appended = await appendToPendingProposal(stored);
-            if (appended) {
-              return { output: appended };
+            for (let appendPass = 0; appendPass < APPEND_RETRY_PASSES; appendPass++) {
+              const appended = await appendToPendingProposal(stored);
+              if (appended) {
+                return { output: appended };
+              }
+              if (!(await pendingStillOpenForPointer(stored))) {
+                break;
+              }
+              if (appendPass + 1 < APPEND_RETRY_PASSES) {
+                await delay(appendRetryDelayMs, undefined, { signal });
+              }
+            }
+            if (await pendingStillOpenForPointer(stored)) {
+              throw new PendingAppendExhaustedError(ruleId);
             }
           }
 
@@ -198,6 +271,10 @@ export const coalesceFpCloseProposalStepDefinition = ({
         );
         return mint;
       } catch (error) {
+        // Rethrown rather than answered with `mint`: a `mint` answer claims the rule's pointer, and
+        // a failure says nothing about whether a pending proposal still exists. The review
+        // continues past the failed step and raises a proposal for this batch without the pointer,
+        // so later batches keep joining the proposal the pointer already leads to.
         context.logger.warn(
           `Could not coalesce the closure proposal of rule ${ruleId}; the review raises a new one: ${
             error instanceof Error ? error.message : String(error)
@@ -221,6 +298,8 @@ const reviseWithBatch = async ({
   request,
   comment,
   standingConversationId,
+  reviseConflictDelayMs,
+  signal,
 }: {
   service: ProposalsService;
   proposalId: string;
@@ -229,10 +308,12 @@ const reviseWithBatch = async ({
   request: KibanaRequest;
   comment: (alertCount: number) => string;
   standingConversationId: string;
+  reviseConflictDelayMs: number;
+  signal: AbortSignal;
 }): Promise<CoalesceOutput | undefined> => {
   for (let attempt = 0; attempt < REVISE_ATTEMPTS; attempt++) {
     const head = await service.getLatestRevision(proposalId, spaceId);
-    if (head.status !== 'pending' || head.decision !== undefined) {
+    if (head.status !== 'pending' || head.decision != null) {
       return undefined;
     }
 
@@ -269,6 +350,9 @@ const reviseWithBatch = async ({
       }
       if (!hasErrorName(error, 'ProposalConflictError')) {
         throw error;
+      }
+      if (attempt + 1 < REVISE_ATTEMPTS) {
+        await delay(reviseConflictDelayMs, undefined, { signal });
       }
     }
   }

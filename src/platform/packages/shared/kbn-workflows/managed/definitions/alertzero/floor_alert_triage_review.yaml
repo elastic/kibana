@@ -141,7 +141,10 @@ steps:
   #    batches are added to.
   #
   #    A failed step falls back to raising a proposal, which is how every batch was handled before
-  #    coalescing: a noisier queue, never a lost closure.
+  #    coalescing: a noisier queue, never a lost closure. That includes a batch that could not be
+  #    appended to a proposal that is still pending (concurrent revisions kept winning, or the
+  #    proposals service failed): it raises a proposal of its own without claiming the rule's
+  #    pointer, so later batches keep joining the proposal the pointer already leads to.
   # ---------------------------------------------------------------------------
   - name: coalesce_fp_close
     type: alertzero.coalesceFpCloseProposal
@@ -277,9 +280,10 @@ steps:
             # Autonomy → autoApprove mapping. One site: update here if semantics change.
             autoApprove: "${{ inputs.autonomy == 'supervised' }}"
 
-      # Later batches revise the proposal while it waits, so the alerts it closed (or that a
-      # dismissal re-tags) are the live revision's, not this batch's input. A failed read falls
-      # back to this batch's candidates.
+      # Later batches revise the proposal while it waits, so dismissal re-tags and approval
+      # comments should use the live revision's alert ids when the read succeeds. Only the
+      # approval comment may fall back to this batch's candidates; dismiss re-tags are gated
+      # on a successful read (see guard_resolve_head_readable).
       - name: resolve_head
         type: proposals.getLatestRevision
         on-failure:
@@ -293,8 +297,20 @@ steps:
       - name: resolve_closure_alerts
         type: data.set
         with:
-          closure_alert_ids: "${{ steps.resolve_head.output.actionInput.alertIds | default: inputs.fp_candidate_ids }}"
-          closure_alert_count: "${{ steps.resolve_head.output.actionInput.alertIds | default: inputs.fp_candidate_ids | size }}"
+          closure_alert_count: >-
+            {% if steps.resolve_head.error == blank %}{{ steps.resolve_head.output.actionInput.alertIds | size }}{% else %}{{ inputs.fp_candidate_ids | size }}{% endif %}
+
+      - name: set_closure_alert_ids_from_head
+        type: data.set
+        if: "${{ steps.resolve_head.error == blank }}"
+        with:
+          closure_alert_ids: "${{ steps.resolve_head.output.actionInput.alertIds }}"
+
+      - name: clear_closure_alert_ids_when_head_unreadable
+        type: data.set
+        if: "${{ steps.resolve_head.error != blank }}"
+        with:
+          closure_alert_ids: []
 
       # Fetch proposal details for outcome comment attribution (decision, decidedBy,
       # dismissReason, rationale). handle_dismissed below must not derive the retag from a
@@ -318,6 +334,20 @@ steps:
         with:
           proposal_outcome: >-
             {% if steps.create_fp_proposal.output.status == 'succeeded' %}approved{% elsif steps.create_fp_proposal.output.decision == 'dismissed' %}dismissed{% elsif steps.create_fp_proposal.output.status == 'expired' %}expired{% else %}unknown{% endif %}
+
+      # The proposal is settled, so nothing can be added to it any more. Release the rule's
+      # pointer so the next batch raises its own proposal at once instead of polling for a
+      # proposal that is gone. Only a pointer that still leads to this Investigation is removed.
+      # Best effort: a pointer left behind is replaced by the next batch, as before. `unknown`
+      # is left alone because it does not say the proposal was settled.
+      - name: release_fp_open_pointer
+        type: alertzero.releaseFpOpenPointer
+        if: "${{ variables.proposal_outcome != 'unknown' }}"
+        on-failure:
+          continue: true
+        with:
+          rule_id: "{{ inputs.rule_id }}"
+          conversation_id: "{{ inputs.conversation_id }}"
 
       - name: handle_approved
         type: if
@@ -366,97 +396,117 @@ steps:
           # without a successful read there is no decider or reason to report, and closing the
           # Investigation would hide that. Gate the whole re-tag/close on the read having
           # actually succeeded; a failed read leaves tags and the Investigation untouched.
+          #
+          # resolve_head must succeed too: coalesced batches are not listed in
+          # inputs.fp_candidate_ids, so falling back would leave appended alerts tagged
+          # az:false_positive.
           - name: guard_get_proposal_readable
             type: if
             condition: "${{ steps.get_proposal.error == blank }}"
             steps:
-              # Every dismissal re-tags as az:inconclusive: the decline reasons the proposal API
-              # offers (no_reason, duplicate, false_positive, handled_elsewhere, risk_accepted,
-              # other) reject the *action*, and none says the classification itself was wrong,
-              # so none can justify az:true_positive. The reason is reported in the comment below.
-              - name: map_dismiss_reason_to_tag
-                type: data.set
-                with:
-                  dismissed_tag: az:inconclusive
-                  failed_retag_count: 0
-
-              # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the
-              # same tag (e.g. az:false_positive removed and re-added), so keep them separate.
-              # `continue: true` sits on each SetAlertTags step, next to its retry, like
-              # attach_alert_chunk does in the Worker: on the foreach it would leave the whole loop at
-              # the first failure and skip the remaining candidates and record_retag_failure.
-              - name: retag_dismissed_alerts
-                type: foreach
-                foreach: "${{ variables.closure_alert_ids }}"
+              - name: guard_resolve_head_readable
+                type: if
+                condition: "${{ steps.resolve_head.error == blank }}"
                 steps:
-                  - name: remove_fp_tag
-                    type: kibana.SetAlertTags
-                    on-failure:
-                      retry:
-                        max-attempts: 3
-                        delay: 5s
-                      continue: true
-                    with:
-                      ids:
-                        - "{{ foreach.item }}"
-                      tags:
-                        tags_to_remove:
-                          - "az:false_positive"
-                        tags_to_add: []
-                  - name: add_dismissed_tag
-                    type: kibana.SetAlertTags
-                    on-failure:
-                      retry:
-                        max-attempts: 3
-                        delay: 5s
-                      continue: true
-                    with:
-                      ids:
-                        - "{{ foreach.item }}"
-                      tags:
-                        tags_to_remove: []
-                        tags_to_add:
-                          - "{{ variables.dismissed_tag }}"
-
-                  # Both calls above retry, then continue past a persistent failure, so this
-                  # alert's tags may be left partway through the swap and the loop moves on to
-                  # the next candidate. Counted (not failed
-                  # loudly) so post_comment_outcome_dismissed can report the shortfall instead
-                  # of unconditionally claiming every FP candidate was re-tagged.
-                  - name: record_retag_failure
+                  # Every dismissal re-tags as az:inconclusive: the decline reasons the proposal API
+                  # offers (no_reason, duplicate, false_positive, handled_elsewhere, risk_accepted,
+                  # other) reject the *action*, and none says the classification itself was wrong,
+                  # so none can justify az:true_positive. The reason is reported in the comment below.
+                  - name: map_dismiss_reason_to_tag
                     type: data.set
-                    if: "${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}"
                     with:
-                      failed_retag_count: "${{ variables.failed_retag_count | plus: 1 }}"
+                      dismissed_tag: az:inconclusive
+                      failed_retag_count: 0
 
-              # Same failure tolerance as close_investigation_after_approval: the decision has
-              # landed, so a failed bookkeeping patch must not fail the run.
-              - name: close_investigation_after_dismissal
-                type: ai.conversation.metadata.patch
-                on-failure:
-                  continue: true
-                  fallback:
-                    - name: log_dismissed_close_failed
-                      type: console
-                      with:
-                        message: >-
-                          The proposal was dismissed, but the Investigation could not be marked
-                          closed: {{ error.message }}. Investigation
-                          {{ inputs.conversation_id }} stays open.
-                with:
-                  conversation_id: "{{ inputs.conversation_id }}"
-                  updates:
-                    status: closed
-                    close_reason: other
+                  # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the
+                  # same tag (e.g. az:false_positive removed and re-added), so keep them separate.
+                  # `continue: true` sits on each SetAlertTags step, next to its retry, like
+                  # attach_alert_chunk does in the Worker: on the foreach it would leave the whole loop at
+                  # the first failure and skip the remaining candidates and record_retag_failure.
+                  - name: retag_dismissed_alerts
+                    type: foreach
+                    foreach: "${{ variables.closure_alert_ids }}"
+                    steps:
+                      - name: remove_fp_tag
+                        type: kibana.SetAlertTags
+                        on-failure:
+                          retry:
+                            max-attempts: 3
+                            delay: 5s
+                          continue: true
+                        with:
+                          ids:
+                            - "{{ foreach.item }}"
+                          tags:
+                            tags_to_remove:
+                              - "az:false_positive"
+                            tags_to_add: []
+                      - name: add_dismissed_tag
+                        type: kibana.SetAlertTags
+                        on-failure:
+                          retry:
+                            max-attempts: 3
+                            delay: 5s
+                          continue: true
+                        with:
+                          ids:
+                            - "{{ foreach.item }}"
+                          tags:
+                            tags_to_remove: []
+                            tags_to_add:
+                              - "{{ variables.dismissed_tag }}"
 
-              - name: post_comment_outcome_dismissed
-                type: ai.conversation.add_user_message
-                on-failure:
-                  continue: true
-                with:
-                  conversation_id: "{{ inputs.conversation_id }}"
-                  message: >-
-                    Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.closure_alert_count | minus: variables.failed_retag_count }} of {{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+                      # Both calls above retry, then continue past a persistent failure, so this
+                      # alert's tags may be left partway through the swap and the loop moves on to
+                      # the next candidate. Counted (not failed
+                      # loudly) so post_comment_outcome_dismissed can report the shortfall instead
+                      # of unconditionally claiming every FP candidate was re-tagged.
+                      - name: record_retag_failure
+                        type: data.set
+                        if: "${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}"
+                        with:
+                          failed_retag_count: "${{ variables.failed_retag_count | plus: 1 }}"
+
+                  # Same failure tolerance as close_investigation_after_approval: the decision has
+                  # landed, so a failed bookkeeping patch must not fail the run.
+                  - name: close_investigation_after_dismissal
+                    type: ai.conversation.metadata.patch
+                    on-failure:
+                      continue: true
+                      fallback:
+                        - name: log_dismissed_close_failed
+                          type: console
+                          with:
+                            message: >-
+                              The proposal was dismissed, but the Investigation could not be marked
+                              closed: {{ error.message }}. Investigation
+                              {{ inputs.conversation_id }} stays open.
+                    with:
+                      conversation_id: "{{ inputs.conversation_id }}"
+                      updates:
+                        status: closed
+                        close_reason: other
+
+                  - name: post_comment_outcome_dismissed
+                    type: ai.conversation.add_user_message
+                    on-failure:
+                      continue: true
+                    with:
+                      conversation_id: "{{ inputs.conversation_id }}"
+                      message: >-
+                        Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.closure_alert_count | minus: variables.failed_retag_count }} of {{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+                else:
+                  - name: post_comment_dismissed_head_read_failed
+                    type: ai.conversation.add_user_message
+                    on-failure:
+                      continue: true
+                    with:
+                      conversation_id: "{{ inputs.conversation_id }}"
+                      message: >-
+                        ⚠️ The proposal was dismissed, but the live alert list could not be read after
+                        retries ({{ steps.resolve_head.error.message }}). Alerts on the proposal — including
+                        any added by later batches — were not re-tagged and stay az:false_positive; this
+                        Investigation stays open for manual follow-up.
             else:
               - name: post_comment_dismissed_read_failed
                 type: ai.conversation.add_user_message

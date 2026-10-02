@@ -53,6 +53,8 @@ export interface StoredFpOpenPointer {
 
 export type FpOpenPointerWriteResult = 'written' | 'conflict';
 
+export type FpOpenPointerReleaseResult = 'released' | 'conflict';
+
 export interface FpOpenPointerStore {
   get: (ruleId: string) => Promise<StoredFpOpenPointer | undefined>;
   /**
@@ -63,6 +65,14 @@ export interface FpOpenPointerStore {
     pointer: Omit<FpOpenPointer, 'updatedAt'>,
     replaces?: Pick<StoredFpOpenPointer, 'seqNo' | 'primaryTerm'>
   ) => Promise<FpOpenPointerWriteResult>;
+  /**
+   * Deletes exactly the version that was read. Returns `conflict` when another writer replaced it
+   * since, so a pointer that already leads to a newer proposal is never removed.
+   */
+  release: (
+    ruleId: string,
+    replaces: Pick<StoredFpOpenPointer, 'seqNo' | 'primaryTerm'>
+  ) => Promise<FpOpenPointerReleaseResult>;
 }
 
 const isStatusError = (error: unknown, statusCode: number): boolean =>
@@ -147,6 +157,30 @@ export const createFpOpenPointerStore = ({
     } catch (error) {
       if (isStatusError(error, 409)) {
         return 'conflict';
+      }
+      throw error;
+    }
+  },
+
+  release: async (ruleId, replaces) => {
+    try {
+      await esClient.delete(
+        {
+          index: RULE_DISPOSITIONS_AI_INDEX_DEST,
+          id: fpOpenPointerId(spaceId, ruleId),
+          if_seq_no: replaces.seqNo,
+          if_primary_term: replaces.primaryTerm,
+        },
+        { signal }
+      );
+      return 'released';
+    } catch (error) {
+      if (isStatusError(error, 409)) {
+        return 'conflict';
+      }
+      // Already gone: the pointer is released either way.
+      if (isStatusError(error, 404)) {
+        return 'released';
       }
       throw error;
     }

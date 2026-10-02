@@ -75,7 +75,7 @@ export const findPendingFpCloseProposal = async ({
 
   const proposal = proposals.find(
     ({ actionWorkflowId, decision }) =>
-      actionWorkflowId === ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID && decision === undefined
+      actionWorkflowId === ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID && decision == null
   );
   return proposal
     ? { proposalId: proposal.id, alertIds: alertIdsOf(proposal.actionInput) }

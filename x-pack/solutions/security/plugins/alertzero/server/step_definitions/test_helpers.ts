@@ -55,6 +55,7 @@ export const pendingFpCloseProposal = (id: string, alertIds: string[]) => ({
   actionWorkflowId: ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
   actionInput: { alertIds, reason: 'false_positive' },
   status: 'pending',
+  decision: undefined,
 });
 
 export const storedPointer = ({

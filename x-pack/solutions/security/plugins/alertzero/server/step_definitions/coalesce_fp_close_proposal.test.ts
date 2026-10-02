@@ -40,6 +40,8 @@ const setup = ({ isPointerStoreAvailable = true } = {}) => {
       getProposals: proposals.getProposals,
       isPointerStoreAvailable,
       pollDelayMs: 0,
+      reviseConflictDelayMs: 0,
+      appendRetryDelayMs: 0,
     }).handler(context);
   return { ...proposals, logger, run };
 };
@@ -151,7 +153,7 @@ describe('coalesceFpCloseProposalStepDefinition', () => {
     const { run, service } = setup();
 
     await expect(run()).resolves.toEqual(MINT);
-    expect(service.list).toHaveBeenCalledTimes(1);
+    expect(service.list).toHaveBeenCalled();
     expect(mockStore.write).toHaveBeenCalledWith(
       expect.objectContaining({ conversationId: 'conv-batch' }),
       stored
@@ -176,10 +178,70 @@ describe('coalesceFpCloseProposalStepDefinition', () => {
     const { run, service } = setup();
 
     await expect(run()).resolves.toEqual(MINT);
-    expect(service.list).toHaveBeenCalledTimes(4);
+    expect(service.list.mock.calls.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('re-reads the head and retries when a concurrent batch revised it first', async () => {
+  it('raises a new proposal when the pending one expires under it', async () => {
+    mockStore.get.mockResolvedValue(storedPointer());
+    const { run, service } = setup();
+    withPendingHead(service, ['a']);
+    service.revise.mockRejectedValue(namedError('ProposalExpiredError'));
+    service.getLatestRevision.mockResolvedValue({
+      proposalId: 'fp-1',
+      revision: 1,
+      status: 'expired',
+      actionInput: { alertIds: ['a'] },
+    });
+
+    await expect(run()).resolves.toEqual(MINT);
+    expect(mockStore.write).toHaveBeenCalled();
+  });
+
+  it('re-reads after losing the pointer write and joins the winner', async () => {
+    mockStore.get
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(storedPointer({ conversationId: 'conv-winner' }));
+    mockStore.write.mockResolvedValueOnce('conflict');
+    const { run, service } = setup();
+    withPendingHead(service, ['a']);
+    service.revise.mockResolvedValue({ proposalId: 'fp-2', revision: 2 });
+
+    await expect(run()).resolves.toEqual({
+      output: expect.objectContaining({
+        mode: 'appended',
+        standing_conversation_id: 'conv-winner',
+      }),
+    });
+  });
+
+  it('raises a proposal of its own after losing the pointer write twice', async () => {
+    mockStore.write.mockResolvedValue('conflict');
+    const { run, logger } = setup();
+
+    await expect(run()).resolves.toEqual(MINT);
+    expect(mockStore.write).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('reports appended when revise conflicts but the batch is already on the proposal', async () => {
+    mockStore.get.mockResolvedValue(storedPointer());
+    const { run, service } = setup();
+    withPendingHead(service, ['c', 'd']);
+    service.revise.mockRejectedValue(namedError('ProposalConflictError'));
+
+    await expect(run()).resolves.toEqual({
+      output: {
+        mode: 'appended',
+        proposal_id: 'fp-1',
+        standing_conversation_id: 'conv-standing',
+        added_count: 0,
+        total_count: 2,
+      },
+    });
+    expect(service.revise).not.toHaveBeenCalled();
+  });
+
+  it('re-reads the head and revises again when a concurrent batch revised it first', async () => {
     mockStore.get.mockResolvedValue(storedPointer());
     const { run, service } = setup();
     withPendingHead(service, ['a']);
@@ -211,42 +273,28 @@ describe('coalesceFpCloseProposalStepDefinition', () => {
       'space-a',
       FAKE_REQUEST
     );
+    expect(mockStore.write).not.toHaveBeenCalled();
   });
 
-  it('raises a new proposal when the pending one expires under it', async () => {
+  it('fails the step instead of claiming the pointer when appending keeps losing the race', async () => {
+    mockStore.get.mockResolvedValue(storedPointer());
+    const { run, service, logger } = setup();
+    withPendingHead(service, ['a']);
+    service.revise.mockRejectedValue(namedError('ProposalConflictError'));
+
+    await expect(run()).rejects.toThrow('could not be appended after retries');
+    expect(mockStore.write).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('fails the step instead of claiming the pointer when the proposals service errors', async () => {
     mockStore.get.mockResolvedValue(storedPointer());
     const { run, service } = setup();
     withPendingHead(service, ['a']);
-    service.revise.mockRejectedValue(namedError('ProposalExpiredError'));
+    service.revise.mockRejectedValue(new Error('es unavailable'));
 
-    await expect(run()).resolves.toEqual(MINT);
-    expect(mockStore.write).toHaveBeenCalled();
-  });
-
-  it('re-reads after losing the pointer write and joins the winner', async () => {
-    mockStore.get
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce(storedPointer({ conversationId: 'conv-winner' }));
-    mockStore.write.mockResolvedValueOnce('conflict');
-    const { run, service } = setup();
-    withPendingHead(service, ['a']);
-    service.revise.mockResolvedValue({ proposalId: 'fp-2', revision: 2 });
-
-    await expect(run()).resolves.toEqual({
-      output: expect.objectContaining({
-        mode: 'appended',
-        standing_conversation_id: 'conv-winner',
-      }),
-    });
-  });
-
-  it('raises a proposal of its own after losing the pointer write twice', async () => {
-    mockStore.write.mockResolvedValue('conflict');
-    const { run, logger } = setup();
-
-    await expect(run()).resolves.toEqual(MINT);
-    expect(mockStore.write).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalled();
+    await expect(run()).rejects.toThrow('es unavailable');
+    expect(mockStore.write).not.toHaveBeenCalled();
   });
 
   it('fails the step with a warning when the Worker identity may not revise proposals', async () => {
