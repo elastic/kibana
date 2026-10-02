@@ -91,7 +91,7 @@ export const useFetchHistogramBounds = ({
     [metricItems, whereStatements, originalSource]
   );
   const {
-    dataView,
+    dataSource,
     relativeTimeRange,
     filters,
     esqlVariables,
@@ -115,15 +115,16 @@ export const useFetchHistogramBounds = ({
         timeTo: relativeTimeRange?.to ?? null,
         filters: filters ?? [],
         variables: esqlVariables ?? [],
-        indexPattern: dataView?.getIndexPattern() ?? null,
+        indexPattern: dataSource?.title ?? null,
+        timeFieldName: dataSource?.timeFieldName ?? null,
         searchSessionId: searchSessionId ?? null,
       }),
-    [fetchEnabled, queries, relativeTimeRange, filters, esqlVariables, dataView, searchSessionId]
+    [fetchEnabled, queries, relativeTimeRange, filters, esqlVariables, dataSource, searchSessionId]
   );
 
   const queriesRef = useLatest(queries);
   const enabledRef = useLatest(fetchEnabled);
-  const dataViewRef = useLatest(dataView);
+  const dataSourceRef = useLatest(dataSource);
   const relativeTimeRangeRef = useLatest(relativeTimeRange);
   const filtersRef = useLatest(filters);
   const esqlVariablesRef = useLatest(esqlVariables);
@@ -136,8 +137,8 @@ export const useFetchHistogramBounds = ({
   const { loading, value } = useAbortableAsync(
     ({ signal }) => {
       const currentQueries = queriesRef.current;
-      const currentDataView = dataViewRef.current;
-      if (!enabledRef.current || currentQueries.length === 0 || !currentDataView) {
+      const currentDataSource = dataSourceRef.current;
+      if (!enabledRef.current || currentQueries.length === 0 || !currentDataSource) {
         return EMPTY_BOUNDS;
       }
 
@@ -186,7 +187,7 @@ export const useFetchHistogramBounds = ({
             esqlQuery: boundsQuery.esqlQuery,
             search: searchRef.current,
             signal,
-            dataView: currentDataView,
+            timeFieldName: currentDataSource.timeFieldName,
             timeRange: relativeTimeRangeRef.current,
             filters: filtersRef.current ?? [],
             variables: esqlVariablesRef.current,
@@ -222,7 +223,7 @@ export const useFetchHistogramBounds = ({
       requestKey,
       queriesRef,
       enabledRef,
-      dataViewRef,
+      dataSourceRef,
       relativeTimeRangeRef,
       filtersRef,
       esqlVariablesRef,

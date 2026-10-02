@@ -26,7 +26,6 @@ jest.mock('../../../../context/ebt_telemetry_context', () => ({
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { ParsedMetricItem } from '../../../../types';
@@ -93,12 +92,6 @@ const services = {
   uiSettings: {},
 } as unknown as ChartSectionProps['services'];
 
-const dataView = {
-  getIndexPattern: () => 'metrics-*',
-  isTimeBased: () => true,
-  timeFieldName: '@timestamp',
-} as unknown as DataView;
-
 type HookParams = Parameters<typeof useFetchHistogramBounds>[0];
 // Tests build on a populated `fetchParams`; the undefined case is covered explicitly below.
 type HookProps = Omit<HookParams, 'fetchParams'> & {
@@ -109,7 +102,6 @@ const createProps = (overrides: Partial<HookProps> = {}): HookProps => ({
   enabled: true,
   metricItems: [histogramA, histogramB],
   fetchParams: getFetchParamsMock({
-    dataView,
     query: { esql: 'TS metrics-*' },
     filters: [],
     esqlVariables: [],
@@ -207,6 +199,7 @@ describe('useFetchHistogramBounds', () => {
     const [[params]] = mockExecuteEsqlQuery.mock.calls;
     expect(params).toEqual(
       expect.objectContaining({
+        timeFieldName: 'timestamp',
         timeRange: { from: 'now-15m', to: 'now' },
         filters: [],
         variables: [],

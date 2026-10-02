@@ -302,7 +302,14 @@ describe('useFetchMetricsData', () => {
         .mockResolvedValueOnce(response)
         .mockImplementationOnce(() => secondFetch as Promise<typeof response>);
 
-      const params = createDefaultParams({ searchSessionId: 'session-1' });
+      const defaults = createDefaultParams();
+      const params = {
+        ...defaults,
+        fetchParams: {
+          ...defaults.fetchParams,
+          searchSessionId: 'session-1',
+        },
+      };
       const { result, rerender } = renderHook(
         (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
         { initialProps: params }
