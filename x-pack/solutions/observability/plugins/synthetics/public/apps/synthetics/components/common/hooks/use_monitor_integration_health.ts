@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { chunk } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import {
   fetchMonitorListAction,
@@ -20,6 +19,7 @@ import {
 } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
+import { resetSyntheticsPrivateLocation } from '../../../state/private_locations/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { isFixableByResetStatus } from './status_labels';
 
@@ -38,10 +38,6 @@ interface UseMonitorIntegrationHealthOptions {
   /** Checks every monitor on these private locations, not just the current monitor list page. */
   locationIds?: string[];
 }
-
-// Matches the server-side cap on bulk reset ids.
-const RESET_BATCH_SIZE = 500;
-
 const getPrivateLocationMonitorIds = (monitors: EncryptedSyntheticsSavedMonitor[]): string[] =>
   monitors
     .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
@@ -76,6 +72,8 @@ interface UseMonitorIntegrationHealthReturn {
   isResetting: boolean;
   resetMonitor: (configId: string) => Promise<{ error?: Error }>;
   resetMonitors: (configIds: string[]) => Promise<{ error?: Error }>;
+  /** Recreates only the given location's missing package policies, across all its monitors. */
+  resetPrivateLocation: (locationId: string) => Promise<{ error?: Error }>;
   isUnhealthy: (configId: string) => boolean;
   isFixableByReset: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
@@ -251,15 +249,31 @@ export const useMonitorIntegrationHealth = (
     async (ids: string[]): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
-        let hasFailures = false;
-        for (const batch of chunk(ids, RESET_BATCH_SIZE)) {
-          const response = await resetMonitorBulkAPI({ ids: batch });
-          hasFailures = hasFailures || response.result.some((r) => !r.reset);
-        }
+        const response = await resetMonitorBulkAPI({ ids });
+        const hasFailures = response.result.some((r) => !r.reset);
         if (hasFailures) {
           return { error: new Error('Failed to reset one or more monitors') };
         }
         refetchHealth();
+        return {};
+      } catch (err) {
+        return { error: err instanceof Error ? err : new Error(String(err)) };
+      } finally {
+        setIsResetting(false);
+      }
+    },
+    [refetchHealth]
+  );
+
+  const resetPrivateLocation = useCallback(
+    async (locationId: string): Promise<{ error?: Error }> => {
+      setIsResetting(true);
+      try {
+        const { failed } = await resetSyntheticsPrivateLocation(locationId);
+        refetchHealth();
+        if (failed.length > 0) {
+          return { error: new Error('Failed to reset one or more monitors') };
+        }
         return {};
       } catch (err) {
         return { error: err instanceof Error ? err : new Error(String(err)) };
@@ -278,6 +292,7 @@ export const useMonitorIntegrationHealth = (
     isResetting,
     resetMonitor,
     resetMonitors,
+    resetPrivateLocation,
     isUnhealthy,
     isFixableByReset,
     getUnhealthyLocationStatuses,

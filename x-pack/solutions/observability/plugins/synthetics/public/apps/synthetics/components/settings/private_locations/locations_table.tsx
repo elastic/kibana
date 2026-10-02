@@ -63,6 +63,7 @@ export const PrivateLocationsTable = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    locationId: string;
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
@@ -71,7 +72,7 @@ export const PrivateLocationsTable = ({
     [privateLocations]
   );
   const {
-    resetMonitors,
+    resetPrivateLocation,
     getUnhealthyLocationStatuses,
     getUnhealthyMonitorsForLocation,
     getUnhealthyConfigIdsForLocation,
@@ -262,7 +263,7 @@ export const PrivateLocationsTable = ({
             }
 
             if (resetIds.length > 0) {
-              setMonitorPendingReset({ resetIds, skippedMonitors });
+              setMonitorPendingReset({ locationId: item.id, resetIds, skippedMonitors });
             }
           },
         },
@@ -387,7 +388,7 @@ export const PrivateLocationsTable = ({
         <ResetMonitorModal
           configIds={monitorPendingReset.resetIds}
           onClose={() => setMonitorPendingReset(null)}
-          resetMonitors={resetMonitors}
+          resetMonitors={() => resetPrivateLocation(monitorPendingReset.locationId)}
           skippedMonitors={monitorPendingReset.skippedMonitors}
         />
       )}
