@@ -23,7 +23,7 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
-import { useTabs } from './hooks/use_tabs';
+import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
@@ -49,14 +49,18 @@ export const DashboardListing = ({
 
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
 
-  const tabs = useTabs({
-    goToDashboard,
-    getDashboardUrl,
-    useSessionStorageIntegration,
-    initialFilter,
-    getTabs,
-    refreshListBouncer,
-  });
+  const tabs = useMemo(
+    () =>
+      getDashboardListingTabs({
+        goToDashboard,
+        getDashboardUrl,
+        useSessionStorageIntegration,
+        initialFilter,
+        getTabs,
+        refreshListBouncer,
+      }),
+    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs, refreshListBouncer]
+  );
 
   const activeTabId = useMemo(() => {
     return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
