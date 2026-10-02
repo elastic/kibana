@@ -241,6 +241,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           organization_id: this.cloudProjectContext.organizationId,
           name,
           ...toDescriptionField(description),
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },

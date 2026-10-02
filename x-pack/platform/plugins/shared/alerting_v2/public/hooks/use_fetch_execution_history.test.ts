@@ -27,7 +27,7 @@ const item: PolicyExecutionHistoryItem = {
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   total_rule_count: 1,
   outcome: 'success',
-  episode_count: 1,
+  alert_count: 1,
   action_group_count: 1,
   workflows: [],
   error: null,
@@ -179,7 +179,7 @@ describe('toListExecutionHistoryRequest', () => {
       search: 'foo',
       rule_ids: ['rule-1', 'rule-2'],
       outcomes: ['success'],
-      episode_ids: ['ep-1'],
+      alert_ids: ['ep-1'],
       sort_field: 'dispatched_at',
       sort_order: 'asc',
     });

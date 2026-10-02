@@ -6,7 +6,14 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from '@testing-library/react';
 import user from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -36,7 +43,7 @@ const availableRoles: Role[] = [
 ];
 const account = { id: 'account-id', name: 'workflow-runner', roles: ['workflow_reader'] };
 
-const renderApp = ({
+const renderApp = async ({
   canCreate = true,
   pathname = '/create',
   canCreateRole = true,
@@ -64,22 +71,24 @@ const renderApp = ({
       </MockAppHeaderProvider>
     </EuiProvider>
   );
+  await waitForElementToBeRemoved(() => screen.queryByTestId('serviceAccountsLoading'));
   return { history, list, create, getRoles, onCreated, unmount: view.unmount };
 };
 
 const fillForm = async () => {
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled());
+  await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
   fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
     target: { value: account.name },
   });
-  await user.click(screen.getByRole('button', { name: 'Set privileges' }));
-  await user.click(await screen.findByTestId('roleOption-workflow_reader'));
-  await user.click(screen.getByTestId('serviceAccountNameInput'));
+  fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+  fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
+  fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+  await waitForElementToBeRemoved(() => screen.queryByTestId('roleOption-workflow_reader'));
 };
 
 describe('ServiceAccountsApp', () => {
   it('keeps Create account disabled until name and roles are valid', async () => {
-    renderApp();
+    await renderApp();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
     await fillForm();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
@@ -88,13 +97,14 @@ describe('ServiceAccountsApp', () => {
   it.each([false, true])(
     'creates an account with an optional description (serverless: %s)',
     async (isServerless) => {
-      const { create } = renderApp({ isServerless });
+      const { create } = await renderApp({ isServerless });
       await fillForm();
-      await user.type(
-        screen.getByTestId('createServiceAccountDescription'),
-        'Reads investigation events.'
-      );
-      await user.click(screen.getByTestId('createServiceAccountSubmit'));
+      fireEvent.change(screen.getByTestId('createServiceAccountDescription'), {
+        target: { value: 'Reads investigation events.' },
+      });
+      fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
       expect(create).toHaveBeenCalledWith({
         name: account.name,
         roles: ['workflow_reader'],
@@ -104,24 +114,24 @@ describe('ServiceAccountsApp', () => {
   );
 
   it('opens the create flyout from the directory action', async () => {
-    const { history } = renderApp({ pathname: '/' });
+    const { history } = await renderApp({ pathname: '/' });
     expect(screen.queryByTestId('createServiceAccountFlyout')).not.toBeInTheDocument();
 
-    await user.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
+    fireEvent.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
 
     expect(history.location.pathname).toBe('/create');
     expect(await screen.findByTestId('serviceAccountNameInput')).toBeVisible();
   });
 
   it('creates with explicit roles, closes the flyout, and refreshes the directory', async () => {
-    const { create, list, history, onCreated } = renderApp();
+    const { create, list, history, onCreated } = await renderApp();
     await fillForm();
     list.mockResolvedValue({ serviceAccounts: [{ ...account, enabled: true, assumable: true }] });
 
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
 
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
     expect(create).toHaveBeenCalledWith({ name: account.name, roles: ['workflow_reader'] });
-    expect(onCreated).toHaveBeenCalledWith(account);
     expect(history.location.pathname).toBe('/');
     expect(await screen.findByText(account.name)).toBeVisible();
     expect(list).toHaveBeenCalledTimes(2);
@@ -129,42 +139,54 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('requires a valid name and at least one selected role', async () => {
-    const { create } = renderApp();
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled()
-    );
-    await user.type(screen.getByTestId('serviceAccountNameInput'), '../invalid');
+    const { create } = await renderApp();
+    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+    fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+      target: { value: '../invalid' },
+    });
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
     fireEvent.submit(screen.getByRole('form', { name: 'Create account' }));
 
     expect(screen.getByText(/Enter a name of up to/)).toBeVisible();
     expect(screen.getByText('Select at least one role.')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Set privileges' })).toHaveAttribute(
+    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveAccessibleName(
+      'Set privileges'
+    );
+    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveAttribute(
       'aria-invalid',
       'true'
     );
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('shows custom and built-in roles without preselecting any role', async () => {
-    const { getRoles } = renderApp();
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled()
-    );
-    expect(getRoles).toHaveBeenCalledWith({ includeReservedRoles: true });
-    await user.click(screen.getByRole('button', { name: 'Set privileges' }));
+  it('flags an invalid name once the field is touched, before submitting', async () => {
+    await renderApp();
+    const nameInput = await screen.findByTestId('serviceAccountNameInput');
+    fireEvent.change(nameInput, { target: { value: '../invalid' } });
+    expect(screen.queryByText(/Enter a name of up to/)).not.toBeInTheDocument();
 
-    expect(screen.getByText('Custom roles')).toBeVisible();
+    fireEvent.blur(nameInput);
+
+    expect(screen.getByText(/Enter a name of up to/)).toBeVisible();
+  });
+
+  it('shows custom and built-in roles without preselecting any role', async () => {
+    const { getRoles } = await renderApp();
+    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+    expect(getRoles).toHaveBeenCalledWith({ includeReservedRoles: true });
+    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+
+    await waitFor(() => expect(screen.getByText('Custom roles')).toBeVisible());
     expect(screen.getByTestId('roleOption-workflow_reader')).toBeVisible();
     expect(within(screen.getByTestId('roleOption-viewer')).getByText('built-in')).toBeVisible();
-    expect(screen.getByRole('link', { name: /Create new role/ })).toHaveAttribute(
+    expect(screen.getByTestId('createServiceAccountRoleLink')).toHaveAttribute(
       'href',
       '/app/management/security/roles/edit'
     );
   });
 
   it('selects roles with the keyboard and returns focus when the menu closes', async () => {
-    renderApp();
+    await renderApp();
     const selector = screen.getByRole('button', { name: 'Set privileges' });
     await waitFor(() => expect(selector).toBeEnabled());
     act(() => selector.focus());
@@ -182,7 +204,7 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('retains form values after a server error and allows retrying', async () => {
-    const { create } = renderApp();
+    const { create } = await renderApp();
     create.mockRejectedValueOnce(
       Object.assign(new Error('Conflict'), {
         request: {},
@@ -190,17 +212,17 @@ describe('ServiceAccountsApp', () => {
       })
     );
     await fillForm();
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
 
     expect(await screen.findByText('An account with this name already exists.')).toBeVisible();
     expect(screen.getByTestId('serviceAccountNameInput')).toHaveValue(account.name);
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
     expect(create).toHaveBeenCalledTimes(2);
-    expect(screen.queryByTestId('createServiceAccountFlyout')).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
   });
 
   it('blocks duplicate submissions and closing while creation is pending', async () => {
-    const { create } = renderApp();
+    const { create } = await renderApp();
     let resolveCreation: (value: ServiceAccount) => void = () => {};
     create.mockReturnValue(
       new Promise<ServiceAccount>((resolve) => {
@@ -208,16 +230,16 @@ describe('ServiceAccountsApp', () => {
       })
     );
     await fillForm();
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
 
     expect(create).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    expect(screen.getByTestId('createServiceAccountCancel')).toBeDisabled();
     await act(async () => resolveCreation(account));
   });
 
   it('does not redirect after leaving while creation is pending', async () => {
-    const { create, history, onCreated } = renderApp();
+    const { create, history, onCreated } = await renderApp();
     let resolveCreation: (value: ServiceAccount) => void = () => {};
     create.mockReturnValue(
       new Promise<ServiceAccount>((resolve) => {
@@ -225,7 +247,7 @@ describe('ServiceAccountsApp', () => {
       })
     );
     await fillForm();
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
     act(() => history.push('/another-page'));
 
     await act(async () => resolveCreation(account));
@@ -235,8 +257,8 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('refreshes the directory and notifies after navigating Back during creation', async () => {
-    const { create, history, list, onCreated } = renderApp({ pathname: '/' });
-    await user.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
+    const { create, history, list, onCreated } = await renderApp({ pathname: '/' });
+    fireEvent.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
     let resolveCreation: (value: ServiceAccount) => void = () => {};
     create.mockReturnValue(
       new Promise<ServiceAccount>((resolve) => {
@@ -244,7 +266,7 @@ describe('ServiceAccountsApp', () => {
       })
     );
     await fillForm();
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
     act(() => history.goBack());
     expect(screen.queryByTestId('createServiceAccountFlyout')).not.toBeInTheDocument();
     list.mockResolvedValue({ serviceAccounts: [{ ...account, enabled: true, assumable: true }] });
@@ -258,7 +280,7 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('does not update an unmounted app after creation completes', async () => {
-    const { create, onCreated, unmount, list } = renderApp();
+    const { create, onCreated, unmount, list } = await renderApp();
     let resolveCreation: (value: ServiceAccount) => void = () => {};
     create.mockReturnValue(
       new Promise<ServiceAccount>((resolve) => {
@@ -266,7 +288,7 @@ describe('ServiceAccountsApp', () => {
       })
     );
     await fillForm();
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
     unmount();
     await act(async () => resolveCreation(account));
     expect(onCreated).not.toHaveBeenCalled();
@@ -294,18 +316,20 @@ describe('ServiceAccountsApp', () => {
         </>
       ));
     try {
-      const { create } = renderApp({ isServerless, roleOptions });
+      const { create } = await renderApp({ isServerless, roleOptions });
       fireEvent.change(await screen.findByTestId('serviceAccountNameInput'), {
         target: { value: account.name },
       });
-      await user.click(screen.getByRole('button', { name: 'Exceed limit' }));
+      fireEvent.click(screen.getByText('Exceed limit'));
       expect(screen.getByText(`Select no more than ${maxRoles} roles.`)).toBeVisible();
       expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
       fireEvent.submit(screen.getByRole('form', { name: 'Create account' }));
       expect(create).not.toHaveBeenCalled();
-      await user.click(screen.getByRole('button', { name: 'Select limit' }));
+      fireEvent.click(screen.getByText('Select limit'));
       expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
-      await user.click(screen.getByTestId('createServiceAccountSubmit'));
+      fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
       expect(create).toHaveBeenCalledWith({
         name: account.name,
         roles: roleOptions.slice(0, maxRoles).map(({ name }) => name),
@@ -316,56 +340,57 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('bounds rendered options for a large role catalog', async () => {
-    renderApp({
+    await renderApp({
       roleOptions: Array.from({ length: 2000 }, (_, index) => ({
         ...availableRoles[0],
         name: `role_${index}`,
       })),
     });
-    const selector = screen.getByRole('button', { name: 'Set privileges' });
+    const selector = screen.getByTestId('serviceAccountRolesSelector');
     await waitFor(() => expect(selector).toBeEnabled());
-    await user.click(selector);
-    const options = within(await screen.findByRole('listbox')).getAllByRole('option');
+    fireEvent.click(selector);
+    await waitFor(() => expect(screen.getByTestId('createServiceAccountRoleLink')).toBeVisible());
+    const options = within(screen.getByRole('listbox')).getAllByRole('option');
     expect(options.length).toBeGreaterThan(0);
     expect(options.length).toBeLessThan(30);
-    expect(screen.getByRole('link', { name: /Create new role/ })).toBeVisible();
   });
 
   it('requires removing roles that disappeared when refreshing the role list', async () => {
-    const { create, getRoles } = renderApp();
+    const { create, getRoles } = await renderApp();
     await fillForm();
     getRoles.mockResolvedValue([availableRoles[1]]);
     fireEvent.focus(window);
     expect(await screen.findByText(/Remove roles that are no longer available/)).toBeVisible();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
     expect(create).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', { name: 'Set privileges' }));
-    await user.click(screen.getByTestId('roleOption-workflow_reader'));
-    await user.click(screen.getByTestId('roleOption-viewer'));
-    await user.click(screen.getByTestId('serviceAccountNameInput'));
+    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+    fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
+    fireEvent.click(screen.getByTestId('roleOption-viewer'));
+    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('roleOption-viewer'));
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
   });
 
   it('allows retrying role loading without losing the name', async () => {
-    const { getRoles, create } = renderApp({ pathname: '/' });
+    const { getRoles, create } = await renderApp({ pathname: '/' });
     getRoles.mockRejectedValueOnce(new Error('Unavailable'));
-    await user.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
+    fireEvent.click(await screen.findByTestId('serviceAccountsPageCreateButton'));
     expect(await screen.findByText('Unable to load roles.')).toBeVisible();
-    await user.type(screen.getByTestId('serviceAccountNameInput'), account.name);
+    fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+      target: { value: account.name },
+    });
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
 
-    await user.click(screen.getByRole('button', { name: 'Refresh roles' }));
+    fireEvent.click(screen.getByTestId('refreshServiceAccountRolesButton'));
 
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled()
-    );
+    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
     expect(screen.getByTestId('serviceAccountNameInput')).toHaveValue(account.name);
     expect(create).not.toHaveBeenCalled();
   });
 
   it('cancels without creating or refetching the directory', async () => {
-    const { history, create, list } = renderApp();
-    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    const { history, create, list } = await renderApp();
+    fireEvent.click(screen.getByTestId('createServiceAccountCancel'));
 
     expect(history.location.pathname).toBe('/');
     expect(create).not.toHaveBeenCalled();
@@ -373,7 +398,7 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('does not open the flyout or load roles without the create capability', async () => {
-    const { getRoles } = renderApp({ canCreate: false });
+    const { getRoles } = await renderApp({ canCreate: false });
     await screen.findByTestId('serviceAccountsEmptyPrompt');
 
     expect(screen.queryByTestId('createServiceAccountFlyout')).not.toBeInTheDocument();
@@ -384,10 +409,8 @@ describe('ServiceAccountsApp', () => {
   it.each([true, false])(
     'explains privileges for the deployment (serverless: %s)',
     async (isServerless) => {
-      renderApp({ isServerless });
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled()
-      );
+      await renderApp({ isServerless });
+      await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
 
       await user.hover(screen.getByText('About role privileges'));
       if (isServerless) {
@@ -403,12 +426,11 @@ describe('ServiceAccountsApp', () => {
   );
 
   it('hides create-role navigation without permission', async () => {
-    renderApp({ canCreateRole: false });
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled()
-    );
-    await user.click(screen.getByRole('button', { name: 'Set privileges' }));
+    await renderApp({ canCreateRole: false });
+    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
 
-    expect(screen.queryByRole('link', { name: /Create new role/ })).not.toBeInTheDocument();
+    await screen.findByText('Custom roles');
+    expect(screen.queryByTestId('createServiceAccountRoleLink')).not.toBeInTheDocument();
   });
 });

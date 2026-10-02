@@ -13,19 +13,26 @@ import { CreateEscalationForm, type CreateEscalationFormProps } from './create_e
 
 jest.mock('@kbn/user-profile-components', () => ({
   UserProfilesSelectable: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={testSubj ?? 'escalationModalCollaboratorPicker'} />
+    <div data-test-subj={testSubj ?? 'escalationModalAssigneePicker'} />
   ),
 }));
 
+const currentUser = {
+  uid: 'user-1',
+  user: { username: 'alice', avatar: undefined },
+  enabled: true,
+  data: {},
+};
+
 const defaultProps: CreateEscalationFormProps = {
   investigationTitle: 'Suspicious login activity',
-  suggestedCollaborators: [],
-  onSearchCollaborators: jest.fn(),
-  isSearchingCollaborators: false,
+  suggestedAssignees: [],
+  onSearchAssignees: jest.fn(),
+  isSearchingAssignees: false,
   onSubmit: jest.fn(),
   isSubmitting: false,
   onCancel: jest.fn(),
-  currentUserUid: 'user-123',
+  currentUser,
   currentUserName: 'Alice',
 };
 
@@ -63,29 +70,21 @@ describe('CreateEscalationForm', () => {
     expect(screen.getByTestId('escalationModalCreateEscalation')).toBeDisabled();
   });
 
-  it('disables submit when private mode is on but currentUserUid is empty', () => {
-    renderForm({ currentUserUid: '' });
-
-    fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));
-
-    expect(screen.getByTestId('escalationModalCreateEscalation')).toBeDisabled();
-  });
-
-  it('does not show the collaborator section in public mode', () => {
+  it('does not show the assignee picker in public mode', () => {
     renderForm();
 
-    expect(screen.queryByTestId('escalationModalCollaboratorPicker')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationModalAssigneePicker')).not.toBeInTheDocument();
   });
 
-  it('shows the collaborator section when private mode is toggled on', () => {
+  it('shows the assignee picker when private mode is toggled on', () => {
     renderForm();
 
     fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));
 
-    expect(screen.getByTestId('escalationModalCollaboratorPicker')).toBeInTheDocument();
+    expect(screen.getByTestId('escalationModalAssigneePicker')).toBeInTheDocument();
   });
 
-  it('calls onSubmit with title, public visibility, and empty collaborators by default', () => {
+  it('calls onSubmit with title, public visibility, and empty assignees by default', () => {
     const onSubmit = jest.fn();
     renderForm({ onSubmit });
 
@@ -94,13 +93,14 @@ describe('CreateEscalationForm', () => {
     expect(onSubmit).toHaveBeenCalledWith({
       title: 'Suspicious login activity',
       visibility: 'public',
-      collaboratorUids: [],
+      assigneeUids: [],
     });
   });
 
-  it('calls onSubmit with private visibility and currentUserUid prepended when private', () => {
+  it('calls onSubmit with private visibility and selected assignees when private', () => {
     const onSubmit = jest.fn();
-    renderForm({ onSubmit, currentUserUid: 'user-abc' });
+    // currentUser is pre-selected by default, so submit should include their uid.
+    renderForm({ onSubmit, currentUser });
 
     fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
@@ -108,7 +108,7 @@ describe('CreateEscalationForm', () => {
     expect(onSubmit).toHaveBeenCalledWith({
       title: 'Suspicious login activity',
       visibility: 'private',
-      collaboratorUids: ['user-abc'],
+      assigneeUids: ['user-1'],
     });
   });
 

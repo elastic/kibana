@@ -79,9 +79,12 @@ describe('UiamServiceAccounts', () => {
 
   const validResponse: UiamServiceAccount = {
     id: 'service-account-id',
-    type: 'project' as const,
+    type: 'organization' as const,
+    scope: 'project' as const,
     name: 'nightshift-relay',
     organization_id: 'organization-id',
+    project_type: 'security',
+    project_id: 'project-id',
     role_assignments: expectedRoleAssignments,
     assumable_by: [
       {
@@ -122,7 +125,7 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#create', () => {
-    it('forwards the caller access token, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
+    it('forwards the caller access token, the project, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
       await expect(
@@ -135,6 +138,8 @@ describe('UiamServiceAccounts', () => {
         {
           organization_id: 'organization-id',
           name: 'nightshift-relay',
+          project_type: 'security',
+          project_id: 'project-id',
           role_assignments: expectedRoleAssignments,
           assumable_by: [
             {

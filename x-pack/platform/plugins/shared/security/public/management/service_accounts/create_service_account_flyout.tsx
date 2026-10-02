@@ -349,6 +349,7 @@ export const CreateServiceAccountFlyout = ({
               isDisabled={isSaving || availableRoles.loading}
               iconType="refresh"
               size="s"
+              data-test-subj="refreshServiceAccountRolesButton"
             >
               <FormattedMessage
                 id="xpack.security.management.serviceAccounts.create.refreshRolesButtonLabel"
@@ -371,7 +372,13 @@ export const CreateServiceAccountFlyout = ({
         >
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" color="text" onClick={onClose} isDisabled={isSaving}>
+              <EuiButtonEmpty
+                size="s"
+                color="text"
+                onClick={onClose}
+                isDisabled={isSaving}
+                data-test-subj="createServiceAccountCancel"
+              >
                 <FormattedMessage
                   id="xpack.security.management.serviceAccounts.create.cancelButtonLabel"
                   defaultMessage="Cancel"

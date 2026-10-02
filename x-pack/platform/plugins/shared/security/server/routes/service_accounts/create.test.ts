@@ -249,8 +249,11 @@ describe('Create service account route', () => {
       const uiam = uiamServiceMock.create();
       uiam.createServiceAccount.mockResolvedValue({
         ...serviceAccount,
-        type: 'project',
+        type: 'organization',
+        scope: 'project',
         organization_id: 'organization-id',
+        project_type: 'security',
+        project_id: 'project-id',
         role_assignments: {},
         assumable_by: [],
       });
