@@ -18,6 +18,7 @@ import {
   DEFAULT_PARALLEL_MAX_FAN_OUT,
 } from '../../../spec/schema';
 import { ExecutionStatus } from '../../../types/latest';
+import ALERT_ANALYSIS_WORKFLOW_YAML from '../alert_analysis/alert_analysis_workflow.yaml';
 
 interface YamlStep {
   name: string;
@@ -470,19 +471,18 @@ describe('floor_alert_triage — if-conditions', () => {
 // az: tags — written in bulk and in chunks, never one call per alert
 // ---------------------------------------------------------------------------
 const AZ_TAG_WRITES = [
-  { step: 'remove_stale_az_tags', idsVariable: 'az_all_ids', tagToAdd: undefined },
   {
-    step: 'add_az_true_positive_tags',
+    step: 'set_az_true_positive_tags',
     idsVariable: 'az_true_positive_ids',
     tagToAdd: 'az:true_positive',
   },
   {
-    step: 'add_az_false_positive_tags',
+    step: 'set_az_false_positive_tags',
     idsVariable: 'az_false_positive_ids',
     tagToAdd: 'az:false_positive',
   },
   {
-    step: 'add_az_inconclusive_tags',
+    step: 'set_az_inconclusive_tags',
     idsVariable: 'az_inconclusive_ids',
     tagToAdd: 'az:inconclusive',
   },
@@ -539,7 +539,6 @@ describe('floor_alert_triage — az: tags', () => {
 
   it('partitions the alert ids by classification, every id landing in exactly one class', () => {
     expect(computeIds(verdicts)).toEqual({
-      az_all_ids: ['tp-1', 'fp-1', 'fp-2', 'inc-1'],
       az_true_positive_ids: ['tp-1'],
       az_false_positive_ids: ['fp-1', 'fp-2'],
       az_inconclusive_ids: ['inc-1'],
@@ -572,12 +571,12 @@ describe('floor_alert_triage — az: tags', () => {
   it('makes a bounded number of calls for a large batch, not one per alert', () => {
     const alertCount = 1200;
     const ids = makeIds(alertCount);
-    // Every alert is a false positive: the remove and the false-positive add each see them all.
+    // Every alert is a false positive: only the false-positive write has any chunks.
     const calls = AZ_TAG_WRITES.map(({ step, idsVariable }) => {
-      const list = step === 'add_az_false_positive_tags' || idsVariable === 'az_all_ids' ? ids : [];
+      const list = step === 'set_az_false_positive_tags' ? ids : [];
       return renderChunks(step, idsVariable, list).length;
     });
-    expect(calls).toEqual([3, 0, 3, 0]);
+    expect(calls).toEqual([0, 3, 0]);
     expect(calls.reduce((sum, count) => sum + count, 0)).toBeLessThan(alertCount);
   });
 
@@ -586,16 +585,24 @@ describe('floor_alert_triage — az: tags', () => {
       expect(renderChunks(step, idsVariable, [])).toEqual([]);
     });
     const ids = computeIds([]);
-    expect(Object.values(ids)).toEqual([[], [], [], []]);
+    expect(Object.values(ids)).toEqual([[], [], []]);
   });
 
   it('only writes a class tag for the alerts of that class', () => {
     const ids = computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }]);
     const chunksFor = (variable: string, step: string) =>
       renderChunks(step, variable, ids[variable] as string[]);
-    expect(chunksFor('az_false_positive_ids', 'add_az_false_positive_tags')).toEqual([['fp-1']]);
-    expect(chunksFor('az_true_positive_ids', 'add_az_true_positive_tags')).toEqual([]);
-    expect(chunksFor('az_inconclusive_ids', 'add_az_inconclusive_tags')).toEqual([]);
+    expect(chunksFor('az_false_positive_ids', 'set_az_false_positive_tags')).toEqual([['fp-1']]);
+    expect(chunksFor('az_true_positive_ids', 'set_az_true_positive_tags')).toEqual([]);
+    expect(chunksFor('az_inconclusive_ids', 'set_az_inconclusive_tags')).toEqual([]);
+  });
+
+  // The three writes run in order and the last one wins, so an alert id in two classes would end
+  // with the last class's tag. The sub-workflow rules that out by failing on duplicate ids.
+  it('relies on the analysis sub-workflow failing the run on duplicate alert ids', () => {
+    const { steps } = parse(ALERT_ANALYSIS_WORKFLOW_YAML) as { steps: YamlStep[] };
+    const reject = flatten(steps).find(({ name }) => name === 'fail_duplicate_caller_alert_ids');
+    expect(reject?.type).toBe('workflow.fail');
   });
 
   it('reads each loop from the list its tag belongs to', () => {
@@ -604,27 +611,14 @@ describe('floor_alert_triage — az: tags', () => {
     });
   });
 
-  it('clears the three classification tags before any tag is added, and never in the same call', () => {
-    const order = parsed.steps.map((step) => step.name);
-    const [removeStep, ...addSteps] = AZ_TAG_STEPS;
-    addSteps.forEach((add) => expect(order.indexOf(removeStep)).toBeLessThan(order.indexOf(add)));
-
-    const remove = callOf(removeStep)?.with as {
-      tags: { tags_to_remove: string[]; tags_to_add: string[] };
-    };
-    expect(remove.tags.tags_to_remove).toEqual([
-      'az:true_positive',
-      'az:false_positive',
-      'az:inconclusive',
-    ]);
-    expect(remove.tags.tags_to_add).toEqual([]);
-
-    AZ_TAG_WRITES.filter(({ tagToAdd }) => tagToAdd !== undefined).forEach(({ step, tagToAdd }) => {
-      const add = callOf(step)?.with as {
+  it('adds its own class tag and removes the other two in the same call, never the one it adds', () => {
+    const all = ['az:true_positive', 'az:false_positive', 'az:inconclusive'];
+    AZ_TAG_WRITES.forEach(({ step, tagToAdd }) => {
+      const { tags } = callOf(step)?.with as {
         tags: { tags_to_remove: string[]; tags_to_add: string[] };
       };
-      expect(add.tags.tags_to_add).toEqual([tagToAdd]);
-      expect(add.tags.tags_to_remove).toEqual([]);
+      expect(tags.tags_to_add).toEqual([tagToAdd]);
+      expect([...tags.tags_to_remove, ...tags.tags_to_add].sort()).toEqual([...all].sort());
     });
   });
 

@@ -211,24 +211,15 @@ describe('floor_alert_triage_review — dismiss mapping', () => {
     expect(evaluateDismissedTag(undefined)).toBe('az:inconclusive');
   });
 
-  it('remove_fp_tag and add_dismissed_tag never share a tag', () => {
-    const removeFp = stepByName('remove_fp_tag')?.with?.tags as {
-      tags_to_remove?: string[];
-      tags_to_add?: string[];
-    };
-    const addDismissed = stepByName('add_dismissed_tag')?.with?.tags as {
+  it('retag_dismissed_chunk never removes the tag it adds', () => {
+    const tags = stepByName('retag_dismissed_chunk')?.with?.tags as {
       tags_to_remove?: string[];
       tags_to_add?: string[];
     };
 
-    expect(removeFp?.tags_to_add).toEqual([]);
-    expect(addDismissed?.tags_to_remove).toEqual([]);
-    const removed = new Set(removeFp?.tags_to_remove ?? []);
-    const added = new Set(addDismissed?.tags_to_add ?? []);
-    // No static overlap (dynamic dismissed_tag is a variable, not a literal here)
-    for (const tag of added) {
-      expect(removed.has(tag)).toBe(false);
-    }
+    expect(tags?.tags_to_remove).toEqual(['az:false_positive']);
+    // dismissed_tag is a variable, so check the value it resolves to.
+    expect(tags?.tags_to_remove).not.toContain(evaluateDismissedTag(undefined));
   });
 });
 
@@ -374,14 +365,11 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
     expect(mapStep?.with?.failed_retag_count).toBe(0);
   });
 
-  it('retries remove_fp_tag and add_dismissed_tag, then continues past a persistent failure', () => {
-    const removeFpTag = stepByName('remove_fp_tag');
-    const addDismissedTag = stepByName('add_dismissed_tag');
+  it('retries retag_dismissed_chunk, then continues past a persistent failure', () => {
+    const retag = stepByName('retag_dismissed_chunk');
 
-    expect(removeFpTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(removeFpTag?.['on-failure']?.continue).toBe(true);
-    expect(addDismissedTag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(addDismissedTag?.['on-failure']?.continue).toBe(true);
+    expect(retag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(retag?.['on-failure']?.continue).toBe(true);
   });
 
   // `continue: true` on a foreach exits the whole loop at the first inner failure, so the
@@ -392,24 +380,16 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
     expect(loop?.['on-failure']).toBeUndefined();
   });
 
-  it('increments the counter when either tag call recorded an error', () => {
+  it('increments the counter when the tag call recorded an error', () => {
     const recordFailure = stepByName('record_retag_failure');
     expect(recordFailure?.type).toBe('data.set');
-    expect(recordFailure?.if).toBe(
-      '${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}'
-    );
+    expect(recordFailure?.if).toBe('${{ steps.retag_dismissed_chunk.error != blank }}');
 
-    const noError = { steps: { remove_fp_tag: {}, add_dismissed_tag: {} } };
-    const removeFailed = {
-      steps: { remove_fp_tag: { error: { message: 'x' } }, add_dismissed_tag: {} },
-    };
-    const addFailed = {
-      steps: { remove_fp_tag: {}, add_dismissed_tag: { error: { message: 'x' } } },
-    };
+    const noError = { steps: { retag_dismissed_chunk: {} } };
+    const failed = { steps: { retag_dismissed_chunk: { error: { message: 'x' } } } };
 
     expect(evalExpr(recordFailure!.if!, noError)).toBe(false);
-    expect(evalExpr(recordFailure!.if!, removeFailed)).toBe(true);
-    expect(evalExpr(recordFailure!.if!, addFailed)).toBe(true);
+    expect(evalExpr(recordFailure!.if!, failed)).toBe(true);
 
     expect(
       evalExpr(recordFailure!.with!.failed_retag_count as string, {
@@ -452,12 +432,11 @@ describe('floor_alert_triage_review — retag_dismissed_alerts chunking', () => 
     expect(loop?.foreach).toContain('chunk: 500');
   });
 
-  it('passes the whole chunk as the ids of both tag calls', () => {
-    expect(stepByName('remove_fp_tag')?.with?.ids).toBe('${{ foreach.item }}');
-    expect(stepByName('add_dismissed_tag')?.with?.ids).toBe('${{ foreach.item }}');
+  it('passes the whole chunk as the ids of the tag call', () => {
+    expect(stepByName('retag_dismissed_chunk')?.with?.ids).toBe('${{ foreach.item }}');
   });
 
-  it('makes two calls for a typical batch instead of two per alert', () => {
+  it('makes one call for a typical batch instead of one per alert', () => {
     expect(renderChunks(candidateIds(50))).toHaveLength(1);
     expect(renderChunks(candidateIds(500))).toHaveLength(1);
   });
