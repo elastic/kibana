@@ -33,7 +33,7 @@
  * },
  *
  * To get the schemaHash for a trigger: run this suite (or start the server with
- * `--serverConfigSet workflows_extensions`), then GET
+ * `--serverConfigSet nightshift_investigations`), then GET
  * internal/workflows_extensions/trigger_definitions and copy the schemaHash
  * from the response for the trigger id.
  */

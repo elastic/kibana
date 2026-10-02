@@ -193,7 +193,7 @@ All event-driven trigger definitions must be approved by the workflows-eng team 
    Or start the stack separately:
 
    ```bash
-   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet workflows_extensions
+   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet nightshift_investigations
    ```
 
 3. **Add an entry** to `test/scout_nightshift_investigations/api/fixtures/approved_trigger_definitions.ts` (alphabetically by id):
