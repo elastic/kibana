@@ -28,6 +28,13 @@ const triggerRowSchema = z.discriminatedUnion('kind', [
     timezone: z.string().max(100).optional(),
     scopeQuery: z.string().max(10000).optional(),
   }),
+  z.object({
+    kind: z.literal('slack'),
+    event: z.enum(['message', 'mention', 'invite']),
+    channels: z.array(z.string().max(500)).max(100).optional(),
+    users: z.array(z.string().max(500)).max(100).optional(),
+    messageFilter: z.string().max(1000).optional(),
+  }),
 ]);
 
 const triggerSchema = z.object({

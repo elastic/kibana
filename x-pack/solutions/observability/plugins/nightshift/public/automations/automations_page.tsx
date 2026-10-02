@@ -51,12 +51,16 @@ import {
   AUTOMATIONS_LOAD_ERROR_TITLE,
   useAutomationRunsInRange,
   useAutomationsRunsInRange,
+  useCreateAutomation,
+  useCurrentUsername,
   useDeleteAutomation,
   useFetchAutomations,
   useToggleAutomation,
   type Automation,
 } from '../hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
+import { toCloneAutomationBody } from './automation_draft';
+import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './automation_trigger_section';
 import { CreateAutomationFlyout } from './create_automation_flyout';
 
 const labels = {
@@ -78,8 +82,24 @@ const labels = {
   automationColumn: i18n.translate('xpack.nightshift.automations.automationColumn', {
     defaultMessage: 'Automations',
   }),
-  active: i18n.translate('xpack.nightshift.automations.activeColumn', {
-    defaultMessage: 'Active',
+  enabled: i18n.translate('xpack.nightshift.automations.enabledColumn', {
+    defaultMessage: 'Enabled',
+  }),
+  enabledStatus: i18n.translate('xpack.nightshift.automations.enabledStatus', {
+    defaultMessage: 'Enabled',
+  }),
+  disabledStatus: i18n.translate('xpack.nightshift.automations.disabledStatus', {
+    defaultMessage: 'Disabled',
+  }),
+  rateLimitedStatus: i18n.translate('xpack.nightshift.automations.rateLimitedStatus', {
+    defaultMessage: 'Rate limited',
+  }),
+  you: i18n.translate('xpack.nightshift.automations.youAuthor', { defaultMessage: 'You' }),
+  rateLimitBody: i18n.translate('xpack.nightshift.automations.rateLimitBannerBody', {
+    defaultMessage: 'Further triggers are skipped until the limit resets at midnight (UTC).',
+  }),
+  showThem: i18n.translate('xpack.nightshift.automations.rateLimitBannerShow', {
+    defaultMessage: 'Show them',
   }),
   viewRuns: i18n.translate('xpack.nightshift.automations.viewRuns', {
     defaultMessage: 'View runs',
@@ -102,10 +122,6 @@ const labels = {
   any: i18n.translate('xpack.nightshift.automations.anyFilter', { defaultMessage: 'Any' }),
   last48Hours: i18n.translate('xpack.nightshift.automations.last48Hours', {
     defaultMessage: 'Last 48 hours',
-  }),
-  alert: i18n.translate('xpack.nightshift.automations.alertLabel', { defaultMessage: 'Alert' }),
-  schedule: i18n.translate('xpack.nightshift.automations.scheduleLabel', {
-    defaultMessage: 'Schedule',
   }),
   clone: i18n.translate('xpack.nightshift.automations.cloneAction', { defaultMessage: 'Clone' }),
   delete: i18n.translate('xpack.nightshift.automations.deleteAction', { defaultMessage: 'Delete' }),
@@ -179,6 +195,13 @@ const getDeleteConfirmTitle = (name: string) =>
   i18n.translate('xpack.nightshift.automations.deleteConfirmTitle', {
     defaultMessage: 'Delete "{name}"?',
     values: { name },
+  });
+
+const getRateLimitTitle = (count: number) =>
+  i18n.translate('xpack.nightshift.automations.rateLimitBannerTitle', {
+    defaultMessage:
+      '{count, plural, one {# automation} other {# automations}} reached their daily trigger limit',
+    values: { count },
   });
 
 const SPARKLINE_WIDTH = 72;
@@ -320,14 +343,16 @@ interface FilterOption {
   prepend?: React.ReactNode;
 }
 
-const countFilterValues = (valuesPerAutomation: string[][]): FilterOption[] => {
+const countFilterValues = (valuesPerAutomation: string[][], order?: string[]): FilterOption[] => {
   const counts = new Map<string, number>();
   valuesPerAutomation.forEach((values) =>
     new Set(values).forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1))
   );
   return [...counts]
     .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+    .sort((a, b) =>
+      order ? order.indexOf(a.label) - order.indexOf(b.label) : a.label.localeCompare(b.label)
+    );
 };
 
 const AutomationFilter = ({
@@ -365,7 +390,7 @@ const AutomationFilter = ({
       nextOptions.filter(({ checked }) => checked === 'on').map(({ label: value }) => value)
     );
   const renderContent = (list: React.ReactNode, search?: React.ReactNode) => (
-    <div css={{ width: 240 }}>
+    <div css={{ width: 300 }}>
       {search && <div css={{ padding: euiTheme.size.s }}>{search}</div>}
       {list}
       {selected.length > 0 && (
@@ -391,6 +416,8 @@ const AutomationFilter = ({
       panelPaddingSize="none"
       button={
         <EuiFilterButton
+          iconType="chevronSingleDown"
+          iconSide="right"
           onClick={() => setIsOpen((open) => !open)}
           isSelected={isOpen}
           hasActiveFilters={selected.length > 0}
@@ -435,8 +462,9 @@ export const AutomationsPage = (): React.ReactElement => {
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const toggleAutomation = useToggleAutomation();
   const deleteAutomation = useDeleteAutomation();
+  const createAutomation = useCreateAutomation();
+  const currentUsername = useCurrentUsername();
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
-  const [automationToClone, setAutomationToClone] = useState<Automation | undefined>();
   const [automationToDelete, setAutomationToDelete] = useState<Automation | undefined>();
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
@@ -475,36 +503,39 @@ export const AutomationsPage = (): React.ReactElement => {
   const usedToday = new Map(
     automations.map(({ id }, index) => [id, todayQueries[index]?.data?.total ?? 0])
   );
-  const statuses = useMemo(
-    () => countFilterValues(automations.map(({ isEnabled }) => [isEnabled ? 'Active' : 'Paused'])),
-    [automations]
-  );
+  const isRateLimited = ({ id, runtime }: Automation) =>
+    runtime.dailyDispatchLimit !== undefined &&
+    (usedToday.get(id) ?? 0) >= runtime.dailyDispatchLimit;
+  const getStatuses = (automation: Automation) => [
+    automation.isEnabled ? labels.enabledStatus : labels.disabledStatus,
+    ...(isRateLimited(automation) ? [labels.rateLimitedStatus] : []),
+  ];
+  const getAuthorName = ({ author }: Automation) =>
+    author.username === currentUsername ? labels.you : author.username;
+  const rateLimitedCount = automations.filter(isRateLimited).length;
+  const statuses = countFilterValues(automations.map(getStatuses), [
+    labels.enabledStatus,
+    labels.disabledStatus,
+    labels.rateLimitedStatus,
+  ]);
   const tags = useMemo(() => countFilterValues(automations.map(getAutomationTags)), [automations]);
-  const authors = useMemo(
-    () =>
-      countFilterValues(automations.map(({ author }) => [author.username])).map((option) => ({
-        ...option,
-        prepend: <EuiAvatar size="s" name={option.label} />,
-      })),
-    [automations]
-  );
-  const triggers = useMemo(
-    () =>
-      countFilterValues(
-        automations.map(({ trigger }) =>
-          trigger.rows.map(({ kind }) => (kind === 'schedule' ? labels.schedule : labels.alert))
-        )
-      ).map((option) => ({
-        ...option,
-        prepend: (
-          <EuiIcon
-            type={option.label === labels.schedule ? 'calendar' : 'logoSlack'}
-            aria-hidden={true}
-          />
-        ),
-      })),
-    [automations]
-  );
+  const authors = countFilterValues(
+    automations.map((automation) => [getAuthorName(automation)])
+  ).map((option) => ({
+    ...option,
+    prepend: <EuiAvatar size="s" name={option.label} />,
+  }));
+  const triggers = useMemo(() => {
+    const rows = automations.flatMap(({ trigger }) => trigger.rows.map(getTriggerDisplay));
+    const icons = new Map(rows.map(({ label, icon }) => [label, icon]));
+    return countFilterValues(
+      automations.map(({ trigger }) => trigger.rows.map((row) => getTriggerDisplay(row).label)),
+      TRIGGER_LABEL_ORDER
+    ).map((option) => ({
+      ...option,
+      prepend: <EuiIcon type={icons.get(option.label) ?? 'empty'} aria-hidden={true} />,
+    }));
+  }, [automations]);
   const hasFilters = Boolean(
     search ||
       selectedStatus.length ||
@@ -512,32 +543,28 @@ export const AutomationsPage = (): React.ReactElement => {
       selectedAuthors.length ||
       selectedTriggers.length
   );
-  const visibleAutomations = useMemo(
-    () =>
-      automations.filter((automation) => {
-        const query = search.trim().toLowerCase();
-        const matchesSearch =
-          !query ||
-          [automation.name, automation.description ?? '', ...getAutomationTags(automation)].some(
-            (value) => value.toLowerCase().includes(query)
-          );
-        const matchesStatus =
-          selectedStatus.length === 0 ||
-          selectedStatus.includes(automation.isEnabled ? 'Active' : 'Paused');
-        const matchesTags =
-          selectedTags.length === 0 ||
-          getAutomationTags(automation).some((tag) => selectedTags.includes(tag));
-        const matchesAuthors =
-          selectedAuthors.length === 0 || selectedAuthors.includes(automation.author.username);
-        const matchesTriggers =
-          selectedTriggers.length === 0 ||
-          automation.trigger.rows.some((row) =>
-            selectedTriggers.includes(row.kind === 'schedule' ? labels.schedule : labels.alert)
-          );
-        return matchesSearch && matchesStatus && matchesTags && matchesAuthors && matchesTriggers;
-      }),
-    [automations, search, selectedAuthors, selectedStatus, selectedTags, selectedTriggers]
-  );
+  const visibleAutomations = automations.filter((automation) => {
+    const query = search.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      [automation.name, automation.description ?? '', ...getAutomationTags(automation)].some(
+        (value) => value.toLowerCase().includes(query)
+      );
+    const matchesStatus =
+      selectedStatus.length === 0 ||
+      getStatuses(automation).some((status) => selectedStatus.includes(status));
+    const matchesTags =
+      selectedTags.length === 0 ||
+      getAutomationTags(automation).some((tag) => selectedTags.includes(tag));
+    const matchesAuthors =
+      selectedAuthors.length === 0 || selectedAuthors.includes(getAuthorName(automation));
+    const matchesTriggers =
+      selectedTriggers.length === 0 ||
+      automation.trigger.rows.some((row) =>
+        selectedTriggers.includes(getTriggerDisplay(row).label)
+      );
+    return matchesSearch && matchesStatus && matchesTags && matchesAuthors && matchesTriggers;
+  });
 
   const columns: Array<EuiBasicTableColumn<Automation>> = [
     {
@@ -548,7 +575,7 @@ export const AutomationsPage = (): React.ReactElement => {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon
-              type={automation.trigger.rows[0]?.kind === 'schedule' ? 'calendar' : 'logoSlack'}
+              type={getTriggerDisplay(automation.trigger.rows[0]).icon}
               size="m"
               aria-hidden={true}
             />
@@ -567,31 +594,30 @@ export const AutomationsPage = (): React.ReactElement => {
               <AutomationTags tags={getAutomationTags(automation)} />
             </EuiFlexItem>
           )}
-          {automation.runtime.dailyDispatchLimit !== undefined &&
-            (usedToday.get(automation.id) ?? 0) >= automation.runtime.dailyDispatchLimit && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="hourglass"
-                  color="danger"
-                  content={labels.limitReached}
-                  aria-label={labels.limitReached}
-                  iconProps={{ 'data-test-subj': 'automationLimitReached' }}
-                />
-              </EuiFlexItem>
-            )}
+          {isRateLimited(automation) && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="hourglass"
+                color="danger"
+                content={labels.limitReached}
+                aria-label={labels.limitReached}
+                iconProps={{ 'data-test-subj': 'automationLimitReached' }}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ),
     },
     {
       field: 'isEnabled',
-      name: labels.active,
+      name: labels.enabled,
       width: '96px',
       sortable: true,
       render: (isEnabled: boolean, automation: Automation) => (
         <EuiSwitch
           label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
             defaultMessage: '{action} {name}',
-            values: { action: isEnabled ? 'Pause' : 'Activate', name: automation.name },
+            values: { action: isEnabled ? 'Disable' : 'Enable', name: automation.name },
           })}
           showLabel={false}
           compressed
@@ -607,8 +633,8 @@ export const AutomationsPage = (): React.ReactElement => {
     {
       name: labels.author,
       width: '160px',
-      sortable: (automation) => automation.author.username,
-      render: (automation: Automation) => <AutomationAuthorCell automation={automation} />,
+      sortable: getAuthorName,
+      render: (automation: Automation) => <AutomationAuthorCell name={getAuthorName(automation)} />,
     },
     {
       name: labels.runs,
@@ -638,7 +664,7 @@ export const AutomationsPage = (): React.ReactElement => {
             render: (automation: Automation) => (
               <AutomationActions
                 automation={automation}
-                onClone={() => setAutomationToClone(automation)}
+                onClone={() => createAutomation.mutate(toCloneAutomationBody(automation))}
                 onDelete={() => setAutomationToDelete(automation)}
               />
             ),
@@ -653,6 +679,29 @@ export const AutomationsPage = (): React.ReactElement => {
     <>
       {!isEmpty && (
         <>
+          {rateLimitedCount > 0 && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="warning"
+                iconType="hourglass"
+                title={getRateLimitTitle(rateLimitedCount)}
+                data-test-subj="automationsRateLimitBanner"
+              >
+                <p>{labels.rateLimitBody}</p>
+                <EuiButton
+                  data-test-subj="automationsShowRateLimited"
+                  color="warning"
+                  size="s"
+                  onClick={() => setSelectedStatus([labels.rateLimitedStatus])}
+                >
+                  {labels.showThem}
+                </EuiButton>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={true} css={css({ minWidth: 240 })}>
               <EuiFieldSearch
@@ -731,10 +780,15 @@ export const AutomationsPage = (): React.ReactElement => {
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.nightshift.automations.showingCount', {
-                  defaultMessage: 'Showing {count} automations',
-                  values: { count: visibleAutomations.length },
-                })}
+                {hasFilters
+                  ? i18n.translate('xpack.nightshift.automations.showingFilteredCount', {
+                      defaultMessage: 'Showing {count} of {total} automations',
+                      values: { count: visibleAutomations.length, total: automations.length },
+                    })
+                  : i18n.translate('xpack.nightshift.automations.showingCount', {
+                      defaultMessage: 'Showing {count} automations',
+                      values: { count: visibleAutomations.length },
+                    })}
               </EuiText>
             </EuiFlexItem>
             {hasFilters && (
@@ -818,6 +872,7 @@ export const AutomationsPage = (): React.ReactElement => {
           items={visibleAutomations}
           columns={columns}
           sorting={{ sort: { field: 'name', direction: 'asc' } }}
+          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
           rowHeader="name"
           tableCaption={labels.title}
           tableLayout="auto"
@@ -829,13 +884,6 @@ export const AutomationsPage = (): React.ReactElement => {
         <CreateAutomationFlyout
           tagSuggestions={tags.map(({ label }) => label)}
           onClose={() => setIsCreateFlyoutOpen(false)}
-        />
-      )}
-      {automationToClone && (
-        <CreateAutomationFlyout
-          automation={automationToClone}
-          tagSuggestions={tags.map(({ label }) => label)}
-          onClose={() => setAutomationToClone(undefined)}
         />
       )}
       {automationToDelete && (
@@ -902,18 +950,14 @@ const AutomationUsageCell = ({ used, limit }: { used: number; limit?: number }) 
   );
 };
 
-const AutomationAuthorCell = ({ automation }: { automation: Automation }) => {
-  const { username } = automation.author;
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiAvatar size="s" name={username} />
-      </EuiFlexItem>
-      <EuiFlexItem className="eui-textTruncate">{username}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const AutomationAuthorCell = ({ name }: { name: string }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiAvatar size="s" name={name} />
+    </EuiFlexItem>
+    <EuiFlexItem className="eui-textTruncate">{name}</EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const AutomationActions = ({
   automation,

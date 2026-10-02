@@ -13,6 +13,7 @@ import {
   isTriggerValid,
   isValidCron,
   isValidDailyLimit,
+  toCloneAutomationBody,
   toCreateAutomationBody,
   toEveryCron,
   type TriggerDraft,
@@ -40,7 +41,7 @@ const everyTrigger = (overrides: Partial<Extract<TriggerDraft, { kind: 'every' }
 
 describe('automation draft', () => {
   describe('createAutomationDraft', () => {
-    it('starts an empty paused draft', () => {
+    it('starts an empty disabled draft', () => {
       expect(createAutomationDraft()).toEqual({
         name: '',
         tags: [],
@@ -53,47 +54,30 @@ describe('automation draft', () => {
         isEnabled: false,
       });
     });
+  });
 
-    it('copies an existing automation', () => {
+  describe('toCloneAutomationBody', () => {
+    it('copies an existing automation with a copy suffix', () => {
       const automation = buildAutomation({
         name: 'Triage',
         tags: ['oncall'],
         description: 'Triage alerts',
-        trigger: {
-          rows: [{ kind: 'alert', ruleNamePattern: 'cpu', alertStatus: 'active', tags: ['infra'] }],
-        },
+        trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
         execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
         completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
         runtime: { dailyDispatchLimit: 5 },
       });
 
-      expect(createAutomationDraft(automation)).toEqual({
-        name: 'Triage',
+      expect(toCloneAutomationBody(automation)).toEqual({
+        name: 'Triage (copy)',
         tags: ['oncall'],
         description: 'Triage alerts',
-        trigger: {
-          kind: 'alert',
-          ruleNamePattern: 'cpu',
-          ruleTags: ['infra'],
-          alertStatus: 'active',
-        },
-        dailyDispatchLimit: '5',
-        instructions: 'Find the cause',
-        mode: 'investigate',
-        slackAction: { target: 'self', destination: '@me' },
         isEnabled: false,
-      });
-    });
-
-    it('maps schedule rows to a custom cron trigger', () => {
-      const automation = buildAutomation({
+        automationType: 'custom',
         trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
-      });
-
-      expect(createAutomationDraft(automation).trigger).toEqual({
-        kind: 'cron',
-        cronExpression: '0 7 * * 1',
-        timezone: 'CET',
+        execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
+        completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+        runtime: { dailyDispatchLimit: 5 },
       });
     });
   });
@@ -233,6 +217,38 @@ describe('automation draft', () => {
         completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' },
         runtime: {},
       });
+    });
+
+    it('sends a Slack trigger with its event, channels, people, and message filter', () => {
+      expect(
+        toCreateAutomationBody({
+          ...draft,
+          name: 'Slack',
+          trigger: {
+            kind: 'slack_message',
+            channels: ['#oncall'],
+            users: ['emily'],
+            messageFilter: ' outage ',
+          },
+        }).trigger
+      ).toEqual({
+        rows: [
+          {
+            kind: 'slack',
+            event: 'message',
+            channels: ['#oncall'],
+            users: ['emily'],
+            messageFilter: 'outage',
+          },
+        ],
+      });
+      expect(
+        toCreateAutomationBody({
+          ...draft,
+          name: 'Slack',
+          trigger: { kind: 'slack_invite', channels: [], users: [], messageFilter: 'ignored' },
+        }).trigger
+      ).toEqual({ rows: [{ kind: 'slack', event: 'invite' }] });
     });
   });
 });

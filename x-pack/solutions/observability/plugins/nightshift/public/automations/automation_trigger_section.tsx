@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiCheckbox,
   EuiFieldNumber,
   EuiFieldText,
@@ -27,18 +28,25 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type EuiSelectableOption,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import cronstrue from 'cronstrue';
+import type { Automation } from '../hooks/use_automations';
+import { actionLabels } from './automation_actions_section';
 import {
   createTriggerDraft,
   hasDailyLimit,
+  isSlackTrigger,
   isValidCron,
   isValidDailyLimit,
   type AlertStatus,
   type ScheduleUnit,
+  type SlackTriggerDraft,
+  type SlackTriggerKind,
   type TriggerDraft,
 } from './automation_draft';
 
@@ -46,8 +54,30 @@ const labels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
     defaultMessage: 'Triggers',
   }),
-  change: i18n.translate('xpack.nightshift.automations.flyout.changeTrigger', {
-    defaultMessage: 'Change',
+  changeTrigger: i18n.translate('xpack.nightshift.automations.flyout.changeTriggerTooltip', {
+    defaultMessage: 'Change trigger',
+  }),
+  removeTrigger: i18n.translate('xpack.nightshift.automations.flyout.removeTrigger', {
+    defaultMessage: 'Remove trigger',
+  }),
+  slackIn: i18n.translate('xpack.nightshift.automations.flyout.slackIn', { defaultMessage: 'in' }),
+  slackTo: i18n.translate('xpack.nightshift.automations.flyout.slackTo', { defaultMessage: 'to' }),
+  slackBy: i18n.translate('xpack.nightshift.automations.flyout.slackBy', { defaultMessage: 'by' }),
+  selectChannels: i18n.translate('xpack.nightshift.automations.flyout.selectChannels', {
+    defaultMessage: 'Select channels',
+  }),
+  anyMessage: i18n.translate('xpack.nightshift.automations.flyout.anyMessage', {
+    defaultMessage: 'Any message',
+  }),
+  messageContains: i18n.translate('xpack.nightshift.automations.flyout.messageContains', {
+    defaultMessage: 'Message contains…',
+  }),
+  anyone: i18n.translate('xpack.nightshift.automations.flyout.anyone', {
+    defaultMessage: 'Anyone',
+  }),
+  slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
+    defaultMessage:
+      'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.',
   }),
   empty: i18n.translate('xpack.nightshift.automations.flyout.triggersEmpty', {
     defaultMessage: 'Choose what starts this automation.',
@@ -66,6 +96,9 @@ const labels = {
   }),
   scheduled: i18n.translate('xpack.nightshift.automations.flyout.scheduledGroup', {
     defaultMessage: 'Scheduled',
+  }),
+  slack: i18n.translate('xpack.nightshift.automations.flyout.slackGroup', {
+    defaultMessage: 'Slack',
   }),
   alertTriggered: i18n.translate('xpack.nightshift.automations.flyout.alertTriggered', {
     defaultMessage: 'Alert triggered',
@@ -157,6 +190,54 @@ const labels = {
   }),
 };
 
+export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
+  slack_message: i18n.translate('xpack.nightshift.automations.flyout.slackMessageTrigger', {
+    defaultMessage: 'New message in channel',
+  }),
+  slack_mention: i18n.translate('xpack.nightshift.automations.flyout.slackMentionTrigger', {
+    defaultMessage: 'Agent mentioned in channel',
+  }),
+  slack_invite: i18n.translate('xpack.nightshift.automations.flyout.slackInviteTrigger', {
+    defaultMessage: 'Agent invited to channel',
+  }),
+};
+
+const slackTriggerLeads: Record<SlackTriggerKind, string> = {
+  slack_message: i18n.translate('xpack.nightshift.automations.flyout.slackMessageLead', {
+    defaultMessage: 'New message',
+  }),
+  slack_mention: i18n.translate('xpack.nightshift.automations.flyout.slackMentionLead', {
+    defaultMessage: 'Agent mentioned',
+  }),
+  slack_invite: i18n.translate('xpack.nightshift.automations.flyout.slackInviteLead', {
+    defaultMessage: 'Agent invited',
+  }),
+};
+
+export const TRIGGER_LABEL_ORDER = [
+  labels.alertTriggered,
+  ...Object.values(slackTriggerLabels),
+  labels.scheduled,
+];
+
+const SLACK_EVENT_KINDS = {
+  message: 'slack_message',
+  mention: 'slack_mention',
+  invite: 'slack_invite',
+} as const;
+
+export const getTriggerDisplay = (
+  row: Automation['trigger']['rows'][number]
+): { label: string; icon: string } => {
+  if (row.kind === 'slack') {
+    return { label: slackTriggerLabels[SLACK_EVENT_KINDS[row.event]], icon: 'logoSlack' };
+  }
+  if (row.kind === 'schedule') {
+    return { label: labels.scheduled, icon: 'calendar' };
+  }
+  return { label: labels.alertTriggered, icon: 'logoElastic' };
+};
+
 const DAYS = [
   { id: '1', label: 'Mon' },
   { id: '2', label: 'Tue' },
@@ -226,6 +307,12 @@ const TriggerPicker = ({
       kind: 'alert',
       prepend: <EuiIcon type="logoElastic" aria-hidden={true} />,
     },
+    { label: labels.slack, isGroupLabel: true, css: groupLabelCss },
+    ...(Object.keys(slackTriggerLabels) as SlackTriggerKind[]).map((kind) => ({
+      label: slackTriggerLabels[kind],
+      kind,
+      prepend: <EuiIcon type="logoSlack" aria-hidden={true} />,
+    })),
     { label: labels.scheduled, isGroupLabel: true, css: groupLabelCss },
     { label: labels.every, kind: 'every', prepend: <EuiIcon type="calendar" aria-hidden={true} /> },
     {
@@ -257,7 +344,7 @@ const TriggerPicker = ({
           if (changed.kind) onSelect(changed.kind);
           setIsOpen(false);
         }}
-        listProps={{ bordered: false, showIcons: false, paddingSize: 's' }}
+        listProps={{ bordered: false, showIcons: false, paddingSize: 's', isVirtualized: false }}
       >
         {(list, search) => (
           <div css={{ width: 280 }}>
@@ -608,6 +695,98 @@ const EveryTriggerEditor = ({
   </Sentence>
 );
 
+const ListPill = ({
+  ariaLabel,
+  emptyLabel,
+  placeholder,
+  values,
+  onChange,
+  testSubject,
+}: {
+  ariaLabel: string;
+  emptyLabel: string;
+  placeholder: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  testSubject: string;
+}) => (
+  <PillPopover
+    ariaLabel={ariaLabel}
+    label={values.join(', ') || emptyLabel}
+    testSubject={testSubject}
+  >
+    {() => (
+      <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+        <EuiComboBox
+          compressed
+          noSuggestions
+          autoFocus
+          aria-label={ariaLabel}
+          placeholder={placeholder}
+          selectedOptions={values.map((value) => ({ label: value }))}
+          onCreateOption={(value) => onChange([...new Set([...values, value.trim()])])}
+          onChange={(options) => onChange(options.map(({ label }) => label))}
+          data-test-subj={`${testSubject}Input`}
+        />
+      </EuiPanel>
+    )}
+  </PillPopover>
+);
+
+const SlackTriggerEditor = ({
+  trigger,
+  onChange,
+}: {
+  trigger: SlackTriggerDraft;
+  onChange: (trigger: TriggerDraft) => void;
+}) => (
+  <Sentence>
+    <EuiIcon type="logoSlack" aria-hidden={true} />
+    <EuiText size="s">
+      <strong>{slackTriggerLeads[trigger.kind]}</strong>
+    </EuiText>
+    <EuiText size="s">{trigger.kind === 'slack_invite' ? labels.slackTo : labels.slackIn}</EuiText>
+    <ListPill
+      ariaLabel={labels.selectChannels}
+      emptyLabel={labels.selectChannels}
+      placeholder={actionLabels.searchChannels}
+      values={trigger.channels}
+      onChange={(channels) => onChange({ ...trigger, channels })}
+      testSubject="automationSlackTriggerChannels"
+    />
+    {trigger.kind === 'slack_message' && (
+      <PillPopover
+        ariaLabel={labels.anyMessage}
+        label={trigger.messageFilter.trim() || labels.anyMessage}
+        testSubject="automationSlackTriggerMessage"
+      >
+        {() => (
+          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+            <EuiFieldText
+              compressed
+              autoFocus
+              aria-label={labels.anyMessage}
+              placeholder={labels.messageContains}
+              value={trigger.messageFilter}
+              onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
+              data-test-subj="automationSlackTriggerMessageInput"
+            />
+          </EuiPanel>
+        )}
+      </PillPopover>
+    )}
+    <EuiText size="s">{trigger.kind === 'slack_message' ? labels.from : labels.slackBy}</EuiText>
+    <ListPill
+      ariaLabel={labels.anyone}
+      emptyLabel={labels.anyone}
+      placeholder={actionLabels.searchPeople}
+      values={trigger.users}
+      onChange={(users) => onChange({ ...trigger, users })}
+      testSubject="automationSlackTriggerUsers"
+    />
+  </Sentence>
+);
+
 const describeCron = (expression: string): string =>
   cronstrue.toString(expression, { use24HourTimeFormat: false, verbose: false });
 
@@ -653,6 +832,69 @@ const CronTriggerEditor = ({
   );
 };
 
+const TriggerRow = ({
+  trigger,
+  onSelect,
+  onRemove,
+  children,
+}: {
+  trigger: TriggerDraft;
+  onSelect: (kind: TriggerDraft['kind']) => void;
+  onRemove: () => void;
+  children: React.ReactNode;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const rowCss = css`
+    padding: ${euiTheme.size.s};
+    border-radius: ${euiTheme.border.radius.medium};
+    &:hover,
+    &:focus-within {
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    }
+    [data-remove-trigger] {
+      display: none;
+    }
+    &:hover [data-remove-trigger],
+    &:focus-within [data-remove-trigger] {
+      display: block;
+    }
+  `;
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={rowCss}>
+      <EuiFlexItem>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TriggerPicker
+          current={trigger.kind}
+          onSelect={onSelect}
+          button={(toggle) => (
+            <EuiToolTip content={labels.changeTrigger} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="chevronSingleDown"
+                color="text"
+                aria-label={labels.changeTrigger}
+                onClick={toggle}
+                data-test-subj="automationChangeTrigger"
+              />
+            </EuiToolTip>
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} data-remove-trigger>
+        <EuiToolTip content={labels.removeTrigger} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={labels.removeTrigger}
+            onClick={onRemove}
+            data-test-subj="automationRemoveTrigger"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const AutomationTriggerSection = ({
   trigger,
   dailyDispatchLimit,
@@ -661,9 +903,10 @@ export const AutomationTriggerSection = ({
 }: {
   trigger?: TriggerDraft;
   dailyDispatchLimit: string;
-  onTriggerChange: (trigger: TriggerDraft) => void;
+  onTriggerChange: (trigger?: TriggerDraft) => void;
   onDailyDispatchLimitChange: (value: string) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [stashedTriggers, setStashedTriggers] = useState<
     Partial<Record<TriggerDraft['kind'], TriggerDraft>>
   >({});
@@ -674,33 +917,11 @@ export const AutomationTriggerSection = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{labels.triggers}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {trigger && (
-          <EuiFlexItem grow={false}>
-            <TriggerPicker
-              current={trigger.kind}
-              onSelect={selectTrigger}
-              button={(toggle) => (
-                <EuiButtonEmpty
-                  size="xs"
-                  color="text"
-                  onClick={toggle}
-                  data-test-subj="automationChangeTrigger"
-                >
-                  {labels.change}
-                </EuiButtonEmpty>
-              )}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>{labels.triggers}</h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+      <EuiPanel hasBorder hasShadow={false} paddingSize={trigger ? 's' : 'm'}>
         {!trigger && (
           <>
             <EuiText size="s" color="subdued">
@@ -723,18 +944,29 @@ export const AutomationTriggerSection = ({
             />
           </>
         )}
-        {trigger?.kind === 'alert' && (
-          <AlertTriggerEditor trigger={trigger} onChange={onTriggerChange} />
-        )}
-        {trigger?.kind === 'every' && (
-          <EveryTriggerEditor trigger={trigger} onChange={onTriggerChange} />
-        )}
-        {trigger?.kind === 'cron' && (
-          <CronTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+        {trigger && (
+          <TriggerRow
+            trigger={trigger}
+            onSelect={selectTrigger}
+            onRemove={() => onTriggerChange(undefined)}
+          >
+            {trigger.kind === 'alert' && (
+              <AlertTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+            )}
+            {trigger.kind === 'every' && (
+              <EveryTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+            )}
+            {trigger.kind === 'cron' && (
+              <CronTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+            )}
+            {isSlackTrigger(trigger) && (
+              <SlackTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+            )}
+          </TriggerRow>
         )}
         {hasDailyLimit(trigger) && (
-          <>
-            <EuiHorizontalRule margin="m" />
+          <div css={{ paddingInline: euiTheme.size.s, paddingBlockEnd: euiTheme.size.s }}>
+            <EuiHorizontalRule margin="s" />
             <Sentence>
               <EuiText size="s">
                 <strong>{labels.dailyLimit}</strong>
@@ -758,9 +990,11 @@ export const AutomationTriggerSection = ({
             </Sentence>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
-              {labels.dailyLimitHelp}
+              {trigger && isSlackTrigger(trigger)
+                ? labels.slackDailyLimitHelp
+                : labels.dailyLimitHelp}
             </EuiText>
-          </>
+          </div>
         )}
       </EuiPanel>
     </>

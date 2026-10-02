@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationTriggerSection } from './automation_trigger_section';
 import type { TriggerDraft } from './automation_draft';
@@ -51,6 +51,68 @@ describe('AutomationTriggerSection', () => {
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Every…')).toBeInTheDocument();
     expect(screen.getByText('Custom cron…')).toBeInTheDocument();
+    expect(screen.getByText('Slack')).toBeInTheDocument();
+    expect(screen.getByText('New message in channel')).toBeInTheDocument();
+  });
+
+  it('lists Slack triggers before scheduled ones', async () => {
+    render(<TriggerSection />);
+    fireEvent.click(screen.getByTestId('automationAddTrigger'));
+
+    const groups = (await screen.findAllByText(/^(Elastic|Slack|Scheduled)$/)).map(
+      (group) => group.textContent
+    );
+    expect(groups).toEqual(['Elastic', 'Slack', 'Scheduled']);
+  });
+
+  it('configures a new message Slack trigger', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'New message in channel');
+
+    expect(screen.getByText('New message')).toBeInTheDocument();
+    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent(
+      'Select channels'
+    );
+    expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('Any message');
+    expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
+    expect(
+      screen.getByText(
+        'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('automationSlackTriggerChannels'));
+    const channelInput = within(
+      await screen.findByTestId('automationSlackTriggerChannelsInput')
+    ).getByRole('combobox');
+    fireEvent.change(channelInput, { target: { value: '#oncall' } });
+    fireEvent.keyDown(channelInput, { key: 'Enter' });
+    expect(lastTrigger()).toMatchObject({ kind: 'slack_message', channels: ['#oncall'] });
+    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent('#oncall');
+  });
+
+  it('configures mention and invite Slack triggers', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Agent mentioned in channel');
+
+    expect(screen.getByText('Agent mentioned')).toBeInTheDocument();
+    expect(screen.getByText('in')).toBeInTheDocument();
+    expect(screen.getByText('by')).toBeInTheDocument();
+    expect(screen.queryByTestId('automationSlackTriggerMessage')).not.toBeInTheDocument();
+
+    await selectTrigger('automationChangeTrigger', 'Agent invited to channel');
+    expect(screen.getByText('Agent invited')).toBeInTheDocument();
+    expect(screen.getByText('to')).toBeInTheDocument();
+  });
+
+  it('removes the trigger', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Alert triggered');
+
+    fireEvent.click(screen.getByTestId('automationRemoveTrigger'));
+
+    expect(lastTrigger()).toBeUndefined();
+    expect(screen.getByTestId('automationAddTrigger')).toBeInTheDocument();
   });
 
   it('configures an alert trigger', async () => {

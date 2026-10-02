@@ -9,6 +9,7 @@ export type AutomationType = 'custom' | 'managed';
 
 export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
+export type SlackTriggerEvent = 'message' | 'mention' | 'invite';
 export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
@@ -29,6 +30,13 @@ export type NightshiftTriggerRow =
       cronExpression?: string;
       timezone?: string;
       scopeQuery?: string;
+    }
+  | {
+      kind: 'slack';
+      event: SlackTriggerEvent;
+      channels?: string[];
+      users?: string[];
+      messageFilter?: string;
     };
 
 export interface NightshiftAutomationTrigger {

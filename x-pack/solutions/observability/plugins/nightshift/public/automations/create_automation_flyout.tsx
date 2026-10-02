@@ -7,33 +7,27 @@
 
 import React, { useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiConfirmModal,
-  EuiContextMenuItem,
   EuiComboBox,
-  EuiContextMenuPanel,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiFormRow,
-  EuiPopover,
   EuiSpacer,
   EuiSwitch,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useCreateAutomation, type Automation } from '../hooks/use_automations';
+import { useCreateAutomation } from '../hooks/use_automations';
 import {
   createAutomationDraft,
   hasDailyLimit,
@@ -53,33 +47,24 @@ const labels = {
   untitled: i18n.translate('xpack.nightshift.automations.flyout.untitled', {
     defaultMessage: 'Untitled automation',
   }),
-  automationName: i18n.translate('xpack.nightshift.automations.flyout.automationName', {
-    defaultMessage: 'Automation name',
+  createTitle: i18n.translate('xpack.nightshift.automations.flyout.createTitle', {
+    defaultMessage: 'Create automation',
+  }),
+  name: i18n.translate('xpack.nightshift.automations.flyout.nameLabel', {
+    defaultMessage: 'Name',
+  }),
+  namePlaceholder: i18n.translate('xpack.nightshift.automations.flyout.namePlaceholder', {
+    defaultMessage: 'Name this automation',
+  }),
+  tags: i18n.translate('xpack.nightshift.automations.flyout.tagsLabel', {
+    defaultMessage: 'Tags',
   }),
   addTags: i18n.translate('xpack.nightshift.automations.flyout.addTags', {
     defaultMessage: 'Add tags',
   }),
-  addTag: i18n.translate('xpack.nightshift.automations.flyout.addTag', {
-    defaultMessage: 'Add tag',
-  }),
   addTagOption: i18n.translate('xpack.nightshift.automations.flyout.addTagOption', {
     defaultMessage: 'Add {searchValue} as a tag',
     values: { searchValue: '{searchValue}' },
-  }),
-  clickToRename: i18n.translate('xpack.nightshift.automations.flyout.clickToRename', {
-    defaultMessage: 'Click to rename',
-  }),
-  tagPlaceholder: i18n.translate('xpack.nightshift.automations.flyout.tagPlaceholder', {
-    defaultMessage: 'Type a tag and press Enter',
-  }),
-  settings: i18n.translate('xpack.nightshift.automations.flyout.settingsTab', {
-    defaultMessage: 'Settings',
-  }),
-  runHistory: i18n.translate('xpack.nightshift.automations.flyout.runHistoryTab', {
-    defaultMessage: 'Run history',
-  }),
-  runHistoryDisabled: i18n.translate('xpack.nightshift.automations.flyout.runHistoryDisabled', {
-    defaultMessage: 'Save the automation to see run history',
   }),
   description: i18n.translate('xpack.nightshift.automations.descriptionLabel', {
     defaultMessage: 'Description',
@@ -90,23 +75,17 @@ const labels = {
   descriptionPlaceholder: i18n.translate('xpack.nightshift.automations.descriptionPlaceholder', {
     defaultMessage: 'What does this automation do?',
   }),
-  rename: i18n.translate('xpack.nightshift.automations.flyout.rename', {
-    defaultMessage: 'Rename',
+  enabled: i18n.translate('xpack.nightshift.automations.flyout.enabled', {
+    defaultMessage: 'Enabled',
   }),
-  discardDraft: i18n.translate('xpack.nightshift.automations.flyout.discardDraft', {
-    defaultMessage: 'Discard draft',
+  disabled: i18n.translate('xpack.nightshift.automations.flyout.disabled', {
+    defaultMessage: 'Disabled',
   }),
-  active: i18n.translate('xpack.nightshift.automations.flyout.active', {
-    defaultMessage: 'Active',
+  savesAsDisabled: i18n.translate('xpack.nightshift.automations.flyout.savesAsDisabled', {
+    defaultMessage: 'Saves as disabled',
   }),
-  paused: i18n.translate('xpack.nightshift.automations.flyout.paused', {
-    defaultMessage: 'Paused',
-  }),
-  savesAsPaused: i18n.translate('xpack.nightshift.automations.flyout.savesAsPaused', {
-    defaultMessage: 'Saves as paused',
-  }),
-  activatesWhenSaved: i18n.translate('xpack.nightshift.automations.flyout.activatesWhenSaved', {
-    defaultMessage: 'Activates when saved',
+  enablesWhenSaved: i18n.translate('xpack.nightshift.automations.flyout.enablesWhenSaved', {
+    defaultMessage: 'Enables when saved',
   }),
   save: i18n.translate('xpack.nightshift.automations.flyout.save', { defaultMessage: 'Save' }),
   cronError: i18n.translate('xpack.nightshift.automations.flyout.cronError', {
@@ -129,7 +108,7 @@ const getDiscardBody = (name: string) =>
     values: { name },
   });
 
-const AutomationTagsEditor = ({
+const AutomationTagsField = ({
   tags,
   suggestions,
   onChange,
@@ -138,182 +117,27 @@ const AutomationTagsEditor = ({
   suggestions: string[];
   onChange: (tags: string[]) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const addTag = (tag: string) => {
     const trimmed = tag.trim().slice(0, MAX_TAG_LENGTH);
     if (trimmed && !tags.some((existing) => existing.toLowerCase() === trimmed.toLowerCase())) {
       onChange([...tags, trimmed]);
     }
   };
-  const options = suggestions
-    .filter((suggestion) => !tags.some((tag) => tag.toLowerCase() === suggestion.toLowerCase()))
-    .map((label) => ({ label }));
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" wrap responsive={false}>
-      {tags.map((tag) => (
-        <EuiFlexItem grow={false} key={tag}>
-          <EuiBadge
-            color="hollow"
-            iconType="cross"
-            iconSide="right"
-            iconOnClick={() => onChange(tags.filter((existing) => existing !== tag))}
-            iconOnClickAriaLabel={i18n.translate('xpack.nightshift.automations.flyout.removeTag', {
-              defaultMessage: 'Remove tag {tag}',
-              values: { tag },
-            })}
-          >
-            {tag}
-          </EuiBadge>
-        </EuiFlexItem>
-      ))}
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          aria-label={labels.addTags}
-          isOpen={isOpen}
-          closePopover={() => setIsOpen(false)}
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-          button={
-            <EuiButtonEmpty
-              size="xs"
-              color="text"
-              iconType="tag"
-              flush={tags.length ? undefined : 'left'}
-              onClick={() => setIsOpen((open) => !open)}
-              data-test-subj="automationAddTags"
-            >
-              {tags.length ? labels.addTag : labels.addTags}
-            </EuiButtonEmpty>
-          }
-        >
-          <div css={{ width: 260 }}>
-            <EuiComboBox
-              compressed
-              fullWidth
-              autoFocus
-              aria-label={labels.addTag}
-              placeholder={labels.tagPlaceholder}
-              customOptionText={labels.addTagOption}
-              options={options}
-              selectedOptions={[]}
-              onCreateOption={addTag}
-              onChange={([selected]) => selected && addTag(selected.label)}
-              inputRef={(input) => input?.setAttribute('maxLength', String(MAX_TAG_LENGTH))}
-              data-test-subj="automationTagInput"
-            />
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const AutomationNameTitle = ({
-  name,
-  isEditing,
-  isInvalid,
-  onEdit,
-  onCommit,
-}: {
-  name: string;
-  isEditing: boolean;
-  isInvalid: boolean;
-  onEdit: () => void;
-  onCommit: (name: string) => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const [value, setValue] = useState(name);
-  const startEditing = () => {
-    setValue(name);
-    onEdit();
-  };
-  const box = css`
-    margin: -${euiTheme.size.xs} 0 -${euiTheme.size.xs} -${euiTheme.size.s};
-    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-    border-radius: ${euiTheme.border.radius.small};
-  `;
-
-  if (isEditing) {
-    return (
-      <EuiTitle size="s">
-        <h2>
-          <input
-            autoFocus
-            aria-label={labels.automationName}
-            aria-invalid={isInvalid}
-            placeholder={labels.untitled}
-            value={value}
-            onFocus={(event) => event.target.select()}
-            onChange={(event) => setValue(event.target.value)}
-            onBlur={() => onCommit(value.trim() || name)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') onCommit(value.trim() || name);
-              if (event.key === 'Escape') {
-                event.stopPropagation();
-                setValue(name);
-                onCommit(name);
-              }
-            }}
-            css={[
-              box,
-              css`
-                display: block;
-                font: inherit;
-                letter-spacing: inherit;
-                color: inherit;
-                border: none;
-                outline: ${euiTheme.border.width.thick} solid
-                  ${isInvalid ? euiTheme.colors.danger : euiTheme.colors.primary};
-                background: ${euiTheme.colors.backgroundBasePlain};
-                inline-size: calc(
-                  ${Math.max(value.length, labels.untitled.length)}ch + ${euiTheme.size.l}
-                );
-                max-inline-size: 100%;
-                &::placeholder {
-                  color: ${euiTheme.colors.textSubdued};
-                }
-              `,
-            ]}
-            data-test-subj="automationName"
-          />
-        </h2>
-      </EuiTitle>
-    );
-  }
-
-  return (
-    <EuiToolTip content={labels.clickToRename} position="bottom">
-      <EuiTitle size="s">
-        <h2>
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={startEditing}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                startEditing();
-              }
-            }}
-            css={[
-              box,
-              css`
-                display: inline-block;
-                cursor: text;
-                color: ${name ? 'inherit' : euiTheme.colors.textSubdued};
-                &:hover {
-                  background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-                }
-              `,
-            ]}
-            data-test-subj="automationNameReadMode"
-          >
-            {name || labels.untitled}
-          </span>
-        </h2>
-      </EuiTitle>
-    </EuiToolTip>
+    <EuiComboBox
+      fullWidth
+      compressed
+      aria-label={labels.tags}
+      placeholder={labels.addTags}
+      customOptionText={labels.addTagOption}
+      options={suggestions.map((label) => ({ label }))}
+      selectedOptions={tags.map((label) => ({ label }))}
+      onCreateOption={addTag}
+      onChange={(selected) => onChange(selected.map(({ label }) => label))}
+      inputRef={(input) => input?.setAttribute('maxLength', String(MAX_TAG_LENGTH))}
+      data-test-subj="automationTagInput"
+    />
   );
 };
 
@@ -331,19 +155,16 @@ const getSaveBlocker = (draft: AutomationDraft): string | undefined => {
 
 export const CreateAutomationFlyout = ({
   onClose,
-  automation,
   tagSuggestions = [],
 }: {
   onClose: () => void;
-  automation?: Automation;
   tagSuggestions?: string[];
 }): React.ReactElement => {
-  const [initialDraft] = useState(() => createAutomationDraft(automation));
+  const [initialDraft] = useState(createAutomationDraft);
   const [draft, setDraft] = useState(initialDraft);
-  const [isEditingName, setIsEditingName] = useState(false);
   const [isNameInvalid, setIsNameInvalid] = useState(false);
-  const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
+  const titleId = useGeneratedHtmlId();
   const createAutomation = useCreateAutomation();
   const { euiTheme } = useEuiTheme();
   const update = (changes: Partial<AutomationDraft>) =>
@@ -356,14 +177,12 @@ export const CreateAutomationFlyout = ({
     !saveBlocker;
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
-  const openTitleEdit = () => setIsEditingName(true);
 
   const save = () => {
     const { trigger } = draft;
     if (!isTriggerValid(trigger)) return;
     if (!draft.name.trim()) {
       setIsNameInvalid(true);
-      openTitleEdit();
       return;
     }
     createAutomation.mutate(toCreateAutomationBody({ ...draft, trigger }), { onSuccess: onClose });
@@ -388,35 +207,43 @@ export const CreateAutomationFlyout = ({
       size={780}
       minWidth={420}
       maxWidth={960}
-      aria-label={draft.name || labels.untitled}
+      aria-labelledby={titleId}
     >
-      <EuiFlyoutHeader css={{ borderBlockEnd: euiTheme.border.thin }}>
-        <AutomationNameTitle
-          name={draft.name}
-          isEditing={isEditingName}
-          isInvalid={isNameInvalid}
-          onEdit={openTitleEdit}
-          onCommit={(name) => {
-            update({ name });
-            setIsEditingName(false);
-            setIsNameInvalid(false);
-          }}
-        />
-        <EuiSpacer size="xs" />
-        <AutomationTagsEditor
-          tags={draft.tags}
-          suggestions={tagSuggestions}
-          onChange={(tags) => update({ tags })}
-        />
-        <EuiSpacer size="m" />
-        <EuiTabs bottomBorder={false}>
-          <EuiTab isSelected>{labels.settings}</EuiTab>
-          <EuiToolTip content={labels.runHistoryDisabled}>
-            <EuiTab disabled>{labels.runHistory}</EuiTab>
-          </EuiToolTip>
-        </EuiTabs>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={titleId}>{labels.createTitle}</h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiFormRow fullWidth label={labels.name} isInvalid={isNameInvalid}>
+          <EuiFieldText
+            fullWidth
+            compressed
+            placeholder={labels.namePlaceholder}
+            value={draft.name}
+            isInvalid={isNameInvalid}
+            onChange={(event) => {
+              update({ name: event.target.value });
+              setIsNameInvalid(false);
+            }}
+            data-test-subj="automationName"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={labels.tags}
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              {labels.optional}
+            </EuiText>
+          }
+        >
+          <AutomationTagsField
+            tags={draft.tags}
+            suggestions={tagSuggestions}
+            onChange={(tags) => update({ tags })}
+          />
+        </EuiFormRow>
         <EuiFormRow
           fullWidth
           label={labels.description}
@@ -428,6 +255,7 @@ export const CreateAutomationFlyout = ({
         >
           <EuiTextArea
             fullWidth
+            compressed
             rows={1}
             resize="none"
             css={{ fieldSizing: 'content', minBlockSize: 0, maxBlockSize: 160 }}
@@ -466,59 +294,13 @@ export const CreateAutomationFlyout = ({
           borderBlockStart: euiTheme.border.thin,
         }}
       >
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              aria-label={actionLabels.actions}
-              isOpen={isActionsOpen}
-              closePopover={() => setIsActionsOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="upLeft"
-              button={
-                <EuiButtonEmpty
-                  color="text"
-                  iconType="chevronSingleDown"
-                  iconSide="right"
-                  onClick={() => setIsActionsOpen((open) => !open)}
-                  data-test-subj="automationFlyoutActions"
-                >
-                  {actionLabels.actions}
-                </EuiButtonEmpty>
-              }
-            >
-              <EuiContextMenuPanel
-                items={[
-                  <EuiContextMenuItem
-                    key="rename"
-                    icon="pencil"
-                    onClick={() => {
-                      setIsActionsOpen(false);
-                      openTitleEdit();
-                    }}
-                  >
-                    {labels.rename}
-                  </EuiContextMenuItem>,
-                  <EuiContextMenuItem
-                    key="discard"
-                    icon="trash"
-                    color="danger"
-                    onClick={() => {
-                      setIsActionsOpen(false);
-                      requestClose();
-                    }}
-                  >
-                    {labels.discardDraft}
-                  </EuiContextMenuItem>,
-                ]}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   compressed
-                  label={draft.isEnabled ? labels.active : labels.paused}
+                  label={draft.isEnabled ? labels.enabled : labels.disabled}
                   checked={draft.isEnabled}
                   onChange={(event) => update({ isEnabled: event.target.checked })}
                   data-test-subj="automationEnabledSwitch"
@@ -532,7 +314,7 @@ export const CreateAutomationFlyout = ({
                 }}
               >
                 <EuiText size="xs" color="subdued">
-                  {draft.isEnabled ? labels.activatesWhenSaved : labels.savesAsPaused}
+                  {draft.isEnabled ? labels.enablesWhenSaved : labels.savesAsDisabled}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

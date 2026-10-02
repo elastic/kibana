@@ -24,7 +24,7 @@ type RunStatus = 'completed' | 'failed' | 'running';
 
 interface SeedAutomation {
   name: string;
-  kind: 'alert' | 'schedule';
+  trigger: Record<string, string | string[]>;
   tags: string[];
   author: string;
   enabled: boolean;
@@ -38,7 +38,7 @@ interface SeedAutomation {
 const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Triage incoming alerts',
-    kind: 'alert',
+    trigger: { kind: 'alert' },
     tags: ['triage', 'alerts'],
     author: 'Emily Clarke',
     enabled: true,
@@ -50,7 +50,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Escalate on-call alerts',
-    kind: 'alert',
+    trigger: { kind: 'slack', event: 'message', channels: ['#oncall'] },
     tags: ['oncall', 'escalation', 'p1'],
     author: 'James Turner',
     enabled: true,
@@ -62,7 +62,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Triage P0 Issues',
-    kind: 'alert',
+    trigger: { kind: 'slack', event: 'message', channels: ['#incidents'] },
     tags: ['p0', 'triage'],
     author: 'Sarah Mitchell',
     enabled: true,
@@ -74,7 +74,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Managed Slack bot mention',
-    kind: 'alert',
+    trigger: { kind: 'slack', event: 'mention' },
     tags: [],
     author: 'Nightshift',
     enabled: true,
@@ -86,7 +86,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Daily Report - Active Usage',
-    kind: 'schedule',
+    trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
     tags: ['reporting', 'leadership'],
     author: 'Emily Clarke',
     enabled: true,
@@ -98,7 +98,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Product usage by channel and customers',
-    kind: 'schedule',
+    trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
     tags: ['reporting', 'product'],
     author: 'Daniel Hughes',
     enabled: false,
@@ -110,7 +110,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Investigate incoming alerts',
-    kind: 'alert',
+    trigger: { kind: 'slack', event: 'message', channels: ['#alerts'] },
     tags: [],
     author: 'Daniel Hughes',
     enabled: false,
@@ -170,9 +170,6 @@ const resolveKibanaUrl = async (url: string, auth: string): Promise<string> => {
     ? `${base}${location.replace(/\/$/, '')}`
     : base;
 };
-
-const triggerRows = ({ kind }: SeedAutomation) =>
-  kind === 'schedule' ? [{ kind: 'schedule', schedulePreset: 'daily' }] : [{ kind: 'alert' }];
 
 const randomTimes = (start: number, end: number, count: number): number[] =>
   Array.from({ length: count }, () => start + Math.random() * (end - start)).sort((a, b) => a - b);
@@ -250,7 +247,7 @@ run(
             name,
             tags: automation.tags,
             isEnabled: enabled,
-            trigger: { rows: triggerRows(automation) },
+            trigger: { rows: [automation.trigger] },
             execution: {},
             completion: {},
             runtime: { dailyDispatchLimit: limit },
@@ -283,7 +280,7 @@ run(
       }
       log.success(
         `${name}: ${runs48h} runs in 48h, ${runsToday}/${limit} today, by ${author}, ${
-          enabled ? 'active' : 'paused'
+          enabled ? 'enabled' : 'disabled'
         }`
       );
     }

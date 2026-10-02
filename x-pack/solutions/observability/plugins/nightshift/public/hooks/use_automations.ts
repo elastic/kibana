@@ -70,6 +70,15 @@ type InvestigationsClient = NonNullable<
   ReturnType<typeof useKibana>['services']['nightshiftInvestigations']
 >['investigationsClient'];
 
+export const useCurrentUsername = (): string | undefined => {
+  const { security } = useKibana().services;
+  const { data } = useQuery({
+    queryKey: ['nightshift.currentUser'],
+    queryFn: () => security.authc.getCurrentUser(),
+  });
+  return data?.username;
+};
+
 const getAutomationRunsQuery = (
   investigationsClient: InvestigationsClient | undefined,
   id: string,

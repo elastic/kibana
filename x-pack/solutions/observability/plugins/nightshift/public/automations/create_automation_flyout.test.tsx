@@ -24,9 +24,8 @@ const renderFlyout = (props: Partial<React.ComponentProps<typeof CreateAutomatio
     </I18nProvider>
   );
 
-const addTag = async (tag: string) => {
-  fireEvent.click(screen.getByTestId('automationAddTags'));
-  const tagInput = within(await screen.findByTestId('automationTagInput')).getByRole('combobox');
+const addTag = (tag: string) => {
+  const tagInput = within(screen.getByTestId('automationTagInput')).getByRole('combobox');
   fireEvent.change(tagInput, { target: { value: tag } });
   fireEvent.keyDown(tagInput, { key: 'Enter' });
 };
@@ -37,9 +36,7 @@ const addTrigger = async (label: string) => {
 };
 
 const rename = (name: string) => {
-  fireEvent.click(screen.getByTestId('automationNameReadMode'));
   fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
-  fireEvent.keyDown(screen.getByTestId('automationName'), { key: 'Enter' });
 };
 
 describe('CreateAutomationFlyout', () => {
@@ -66,13 +63,13 @@ describe('CreateAutomationFlyout', () => {
     fireEvent.click(screen.getByTestId('submitAutomation'));
 
     expect(mutate).not.toHaveBeenCalled();
-    expect(screen.getByTestId('automationName')).toBeInTheDocument();
+    expect(screen.getByTestId('automationName')).toBeInvalid();
   });
 
-  it('creates a paused alert automation with tags, instructions, and daily limit', async () => {
+  it('creates a disabled alert automation with tags, instructions, and daily limit', async () => {
     renderFlyout();
     rename('  Alert triage  ');
-    await addTag('oncall');
+    addTag('oncall');
     await addTrigger('Alert triggered');
     fireEvent.change(screen.getByTestId('automationInstructions'), {
       target: { value: 'Find the root cause' },
@@ -135,38 +132,24 @@ describe('CreateAutomationFlyout', () => {
     expect(screen.getByTestId('submitAutomation')).toBeEnabled();
   });
 
-  it('ignores duplicate tags and removes tags', async () => {
+  it('shows the create title and name and tags fields', () => {
     renderFlyout();
-    await addTag('oncall');
-    await addTag('OnCall');
 
-    expect(screen.getAllByText('oncall')).toHaveLength(1);
-    expect(screen.getByTestId('automationAddTags')).toHaveTextContent('Add tag');
-    fireEvent.click(screen.getByLabelText('Remove tag oncall'));
-    expect(screen.queryByText('oncall')).not.toBeInTheDocument();
-    expect(screen.getByTestId('automationAddTags')).toHaveTextContent('Add tags');
+    expect(screen.getByRole('heading', { name: 'Create automation' })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Name this automation')).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
-  it('renames the automation in place and reverts on Escape', () => {
+  it('ignores duplicate tags and removes tags', () => {
     renderFlyout();
+    addTag('oncall');
+    addTag('OnCall');
 
-    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Untitled automation');
-    rename('Alert triage');
-    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Alert triage');
-
-    fireEvent.click(screen.getByTestId('automationNameReadMode'));
-    fireEvent.change(screen.getByTestId('automationName'), { target: { value: 'Other' } });
-    fireEvent.keyDown(screen.getByTestId('automationName'), { key: 'Escape' });
-    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Alert triage');
-  });
-
-  it('opens the title editor from the footer Rename action', async () => {
-    renderFlyout();
-
-    fireEvent.click(screen.getByTestId('automationFlyoutActions'));
-    fireEvent.click(await screen.findByText('Rename'));
-
-    expect(screen.getByTestId('automationName')).toBeInTheDocument();
+    expect(screen.getAllByTestId('euiComboBoxPill').map((pill) => pill.textContent)).toEqual([
+      'oncall',
+    ]);
+    fireEvent.click(screen.getByLabelText(/Remove oncall/));
+    expect(screen.queryByTestId('euiComboBoxPill')).not.toBeInTheDocument();
   });
 
   it('closes a pristine draft without confirmation', () => {
@@ -177,12 +160,11 @@ describe('CreateAutomationFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('confirms before discarding unsaved changes', async () => {
+  it('confirms before discarding unsaved changes', () => {
     renderFlyout();
     rename('Alert triage');
 
-    fireEvent.click(screen.getByTestId('automationFlyoutActions'));
-    fireEvent.click(await screen.findByText('Discard draft'));
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     expect(onClose).not.toHaveBeenCalled();
     expect(
@@ -198,47 +180,19 @@ describe('CreateAutomationFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('activates the automation on save when the switch is on', async () => {
+  it('enables the automation on save when the switch is on', async () => {
     renderFlyout();
     rename('Alert triage');
     await addTrigger('Alert triggered');
 
-    expect(screen.getByText('Saves as paused')).toBeInTheDocument();
+    expect(screen.getByText('Saves as disabled')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('automationEnabledSwitch'));
-    expect(screen.getByText('Activates when saved')).toBeInTheDocument();
+    expect(screen.getByText('Enables when saved')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('submitAutomation'));
 
     expect(mutate).toHaveBeenCalledWith(
       expect.objectContaining({ isEnabled: true }),
       expect.anything()
     );
-  });
-
-  it('prefills the form from a cloned automation', () => {
-    renderFlyout({
-      automation: {
-        id: 'automation-1',
-        name: 'Triage',
-        tags: ['oncall'],
-        description: 'Triage alerts',
-        automationType: 'custom',
-        isEnabled: true,
-        trigger: { rows: [{ kind: 'alert', alertStatus: 'active' }] },
-        execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-        completion: {},
-        runtime: { dailyDispatchLimit: 5 },
-        createdAt: '2026-10-01T00:00:00.000Z',
-        updatedAt: '2026-10-01T00:00:00.000Z',
-        author: { username: 'elastic' },
-      },
-    });
-
-    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Triage');
-    expect(screen.getByText('oncall')).toBeInTheDocument();
-    expect(screen.getByTestId('automationDescription')).toHaveValue('Triage alerts');
-    expect(screen.getByTestId('automationStatusPicker')).toHaveTextContent('Active');
-    expect(screen.getByTestId('automationDailyLimit')).toHaveValue(5);
-    expect(screen.getByTestId('automationInstructions')).toHaveValue('Find the cause');
-    expect(screen.getByTestId('automationInstructionMode')).toHaveTextContent('Investigate');
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { NightshiftInvestigationsAPIClientRequestParamsOf } from '@kbn/nightshift-investigations-plugin/public';
 import type { Automation } from '../hooks/use_automations';
 
@@ -15,6 +16,16 @@ export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
 export type SlackTarget = 'channel' | 'self';
+
+export const SLACK_TRIGGER_EVENTS = {
+  slack_message: 'message',
+  slack_mention: 'mention',
+  slack_invite: 'invite',
+} as const;
+export type SlackTriggerKind = keyof typeof SLACK_TRIGGER_EVENTS;
+
+export const isSlackTriggerKind = (kind: string): kind is SlackTriggerKind =>
+  kind in SLACK_TRIGGER_EVENTS;
 
 export type TriggerDraft =
   | {
@@ -33,7 +44,13 @@ export type TriggerDraft =
       endTime: string;
       timezone: string;
     }
-  | { kind: 'cron'; cronExpression: string; timezone: string };
+  | { kind: 'cron'; cronExpression: string; timezone: string }
+  | { kind: SlackTriggerKind; channels: string[]; users: string[]; messageFilter: string };
+
+export type SlackTriggerDraft = Extract<TriggerDraft, { kind: SlackTriggerKind }>;
+
+export const isSlackTrigger = (trigger: TriggerDraft): trigger is SlackTriggerDraft =>
+  isSlackTriggerKind(trigger.kind);
 
 export interface SlackActionDraft {
   target: SlackTarget;
@@ -57,6 +74,9 @@ export const DEFAULT_CRON = '0 9 * * *';
 const WEEKDAYS = [1, 2, 3, 4, 5];
 
 export const createTriggerDraft = (kind: TriggerDraft['kind']): TriggerDraft => {
+  if (isSlackTriggerKind(kind)) {
+    return { kind, channels: [], users: [], messageFilter: '' };
+  }
   if (kind === 'alert') {
     return { kind, ruleNamePattern: '', ruleTags: [], alertStatus: 'any' };
   }
@@ -75,41 +95,41 @@ export const createTriggerDraft = (kind: TriggerDraft['kind']): TriggerDraft => 
   };
 };
 
-const toTriggerDraft = (row: Automation['trigger']['rows'][number]): TriggerDraft =>
-  row.kind === 'alert'
-    ? {
-        kind: 'alert',
-        ruleNamePattern: row.ruleNamePattern ?? '',
-        ruleTags: row.tags ?? [],
-        alertStatus: row.alertStatus ?? 'any',
-      }
-    : {
-        kind: 'cron',
-        cronExpression: row.cronExpression ?? DEFAULT_CRON,
-        timezone: row.timezone ?? DEFAULT_TIMEZONE,
-      };
+export const createAutomationDraft = (): AutomationDraft => ({
+  name: '',
+  tags: [],
+  description: '',
+  trigger: undefined,
+  dailyDispatchLimit: '20',
+  instructions: '',
+  mode: 'ask',
+  slackAction: undefined,
+  isEnabled: false,
+});
 
-export const createAutomationDraft = (automation?: Automation): AutomationDraft => {
-  const { completion, execution } = automation ?? {};
-  const firstRow = automation?.trigger.rows[0];
-  return {
-    name: automation?.name ?? '',
-    tags: automation?.tags ?? [],
-    description: automation?.description ?? '',
-    trigger: firstRow ? toTriggerDraft(firstRow) : undefined,
-    dailyDispatchLimit: String(automation?.runtime.dailyDispatchLimit ?? 20),
-    instructions: execution?.promptTemplate ?? '',
-    mode: execution?.reasoningMode === 'investigate' ? 'investigate' : 'ask',
-    slackAction:
-      completion?.action === 'post_to_slack'
-        ? {
-            target: completion.targetMode === 'self' ? 'self' : 'channel',
-            destination: completion.destination ?? '',
-          }
-        : undefined,
-    isEnabled: false,
-  };
-};
+export const toCloneAutomationBody = ({
+  name,
+  description,
+  tags,
+  automationType,
+  trigger,
+  execution,
+  completion,
+  runtime,
+}: Automation): CreateAutomationBody => ({
+  name: i18n.translate('xpack.nightshift.automations.cloneName', {
+    defaultMessage: '{name} (copy)',
+    values: { name },
+  }),
+  description,
+  tags,
+  isEnabled: false,
+  automationType,
+  trigger,
+  execution,
+  completion,
+  runtime,
+});
 
 const toCronTime = (time: string): { minute: number; hour: number } => {
   const [hour, minute] = time.split(':').map(Number);
@@ -158,6 +178,16 @@ const toTriggerRow = (trigger: TriggerDraft): CreateAutomationBody['trigger']['r
       ...(ruleNamePattern ? { ruleNamePattern } : {}),
       ...(trigger.alertStatus !== 'any' ? { alertStatus: trigger.alertStatus } : {}),
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
+    };
+  }
+  if (isSlackTrigger(trigger)) {
+    const messageFilter = trigger.kind === 'slack_message' ? trigger.messageFilter.trim() : '';
+    return {
+      kind: 'slack',
+      event: SLACK_TRIGGER_EVENTS[trigger.kind],
+      ...(trigger.channels.length ? { channels: trigger.channels } : {}),
+      ...(trigger.users.length ? { users: trigger.users } : {}),
+      ...(messageFilter ? { messageFilter } : {}),
     };
   }
   if (trigger.kind === 'cron') {

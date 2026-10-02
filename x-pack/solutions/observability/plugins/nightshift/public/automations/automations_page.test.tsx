@@ -12,6 +12,8 @@ import { AutomationsPage } from './automations_page';
 import {
   useAutomationRunsInRange,
   useAutomationsRunsInRange,
+  useCreateAutomation,
+  useCurrentUsername,
   useDeleteAutomation,
   useFetchAutomations,
   useToggleAutomation,
@@ -23,19 +25,21 @@ jest.mock('../hooks/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
+  useCreateAutomation: jest.fn(),
+  useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
   useToggleAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./create_automation_flyout', () => ({
-  CreateAutomationFlyout: ({ automation }: { automation?: { name: string } }) => (
-    <div data-test-subj="createAutomationFlyoutStub">{automation?.name ?? 'new'}</div>
-  ),
+  CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
 
 const mockUseAutomationRunsInRange = useAutomationRunsInRange as jest.Mock;
 const mockUseAutomationsRunsInRange = useAutomationsRunsInRange as jest.Mock;
+const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
+const mockUseCurrentUsername = useCurrentUsername as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
@@ -52,6 +56,8 @@ describe('AutomationsPage', () => {
       data: { runs: [], total: 0 },
       isInitialLoading: false,
     });
+    mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
+    mockUseCurrentUsername.mockReturnValue('Daniel Hughes');
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseToggleAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
   });
@@ -166,6 +172,7 @@ describe('AutomationsPage', () => {
       triage: { range: 28, today: 27 },
       report: { range: 2, today: 1 },
     };
+    const createMutate = jest.fn();
     const deleteMutate = jest.fn();
     const toggleMutate = jest.fn();
 
@@ -178,6 +185,7 @@ describe('AutomationsPage', () => {
     const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
 
     beforeEach(() => {
+      createMutate.mockClear();
       deleteMutate.mockClear();
       toggleMutate.mockClear();
       mockUseFetchAutomations.mockReturnValue({ data: { automations }, isInitialLoading: false });
@@ -195,6 +203,7 @@ describe('AutomationsPage', () => {
         },
         isInitialLoading: false,
       }));
+      mockUseCreateAutomation.mockReturnValue({ mutate: createMutate, isLoading: false });
       mockUseDeleteAutomation.mockReturnValue({ mutate: deleteMutate, isLoading: false });
       mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
     });
@@ -216,6 +225,7 @@ describe('AutomationsPage', () => {
       expect(within(triageRow).getByTestId('automationUsage')).toHaveTextContent('27 / 20');
       expect(within(triageRow).getByTestId('automationLimitReached')).toBeInTheDocument();
       expect(within(triageRow).getByText('Emily Clarke')).toBeInTheDocument();
+      expect(within(rowOf('Daily report')).getByText('You')).toBeInTheDocument();
 
       const reportRow = rowOf('Daily report');
       expect(within(reportRow).queryByTestId('automationTags')).not.toBeInTheDocument();
@@ -237,8 +247,8 @@ describe('AutomationsPage', () => {
       fireEvent.click(screen.getByTestId('automationActions-triage'));
       fireEvent.click(await screen.findByTestId('cloneAutomation'));
 
-      expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent(
-        'Triage incoming alerts'
+      expect(createMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Triage incoming alerts (copy)' })
       );
     });
 
@@ -264,7 +274,12 @@ describe('AutomationsPage', () => {
       renderPage();
 
       fireEvent.click(screen.getByTestId('automationStatusFilter'));
-      const activeOption = await screen.findByRole('option', { name: /Active/ });
+      const activeOption = await screen.findByRole('option', { name: /Enabled/ });
+      expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+        'Enabled1',
+        'Disabled1',
+        'Rate limited1',
+      ]);
       expect(activeOption).toHaveTextContent('1');
       expect(
         screen.queryByTestId('nightshiftAutomationFilterClearSelection')
@@ -272,9 +287,36 @@ describe('AutomationsPage', () => {
 
       fireEvent.click(activeOption);
       expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
-      expect(screen.getByText('Showing 1 automations')).toBeInTheDocument();
+      expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftAutomationFilterClearSelection'));
+      expect(screen.getByText('Daily report')).toBeInTheDocument();
+    });
+
+    it('filters rate limited automations from the banner', () => {
+      renderPage();
+
+      expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
+        '1 automation reached their daily trigger limit'
+      );
+      fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
+
+      expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
+      expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
+    it('filters by the configured triggers', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationTriggerFilter'));
+      expect(await screen.findByRole('option', { name: /Alert triggered/ })).toBeInTheDocument();
+      expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+        'Alert triggered1',
+        'Scheduled1',
+      ]);
+      fireEvent.click(screen.getByRole('option', { name: /Scheduled/ }));
+
+      expect(screen.queryByText('Triage incoming alerts')).not.toBeInTheDocument();
       expect(screen.getByText('Daily report')).toBeInTheDocument();
     });
 
