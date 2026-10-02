@@ -54,7 +54,8 @@ export const useFetchExemplars = ({
   );
   const reportError = useReportChartSectionError();
   const probeExemplarsAvailability = useExemplarsAvailabilityProbe();
-  const { dataView } = fetchParams;
+  const { dataSource } = fetchParams;
+  const timeFieldName = dataSource?.timeFieldName;
   const {
     data: {
       search: { search },
@@ -64,7 +65,7 @@ export const useFetchExemplars = ({
 
   const { value } = useAbortableAsync<ExemplarsResponse | undefined>(
     async ({ signal }) => {
-      if (!isExemplarsEnabled || !isComponentVisible || !dataView) {
+      if (!isExemplarsEnabled || !isComponentVisible || !dataSource) {
         return undefined;
       }
 
@@ -85,7 +86,7 @@ export const useFetchExemplars = ({
       const metricsByStream = await probeExemplarsAvailability({
         fetchId: fetchParams.lastReloadRequestTime,
         search,
-        dataView,
+        timeFieldName,
         timeRange: fetchParams.timeRange,
         uiSettings,
         profileId,
@@ -100,7 +101,7 @@ export const useFetchExemplars = ({
           esqlQuery,
           search,
           signal,
-          dataView,
+          timeFieldName,
           timeRange: fetchParams.timeRange,
           // Filters on the chart's own metric field move onto `value`; other metric fields cannot
           // apply to these exemplars and are dropped.
@@ -126,7 +127,8 @@ export const useFetchExemplars = ({
     [
       isExemplarsEnabled,
       isComponentVisible,
-      dataView,
+      dataSource,
+      timeFieldName,
       metricItem,
       whereStatements,
       originalSource,
