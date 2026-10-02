@@ -2,6 +2,9 @@
 # Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['manage_own_api_key', 'read_pipeline']
   indices:
     - names:
@@ -16,6 +19,9 @@ viewer:
       resources:
         - '*'
 developer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names:
@@ -31,6 +37,9 @@ developer:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']
