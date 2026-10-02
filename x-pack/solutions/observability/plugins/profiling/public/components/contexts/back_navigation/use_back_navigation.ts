@@ -14,15 +14,19 @@ import { hasProfilingData } from '../../../utils/has_profiling_data';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 
+const SETTINGS_PATHNAME = '/settings';
+const STORAGE_EXPLORER_PATHNAME = '/storage-explorer';
+const ADD_DATA_INSTRUCTIONS_PATHNAME = '/add-data-instructions';
+
 // Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
 // this provider renders above RedirectWithDefaultDateRange. Calling matchRoutes() at this level
 // throws a plain Error when rangeFrom/rangeTo are absent from the URL (they have no defaults in
 // the route codec).
 export const ROUTES_WITH_BACK_NAVIGATION = [
-  '/settings',
-  '/storage-explorer',
-  '/add-data-instructions',
+  SETTINGS_PATHNAME,
+  STORAGE_EXPLORER_PATHNAME,
+  ADD_DATA_INSTRUCTIONS_PATHNAME,
 ] as const satisfies ReadonlyArray<PathsOf<ProfilingRoutes>>;
 
 export const hasBackNavigation = (pathname: string): boolean =>
@@ -47,7 +51,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   // status is unresolved the button would otherwise render and then vanish once it reports no data.
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
-    pathname === '/add-data-instructions' &&
+    pathname === ADD_DATA_INSTRUCTIONS_PATHNAME &&
     (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
   ) {
     return undefined;
