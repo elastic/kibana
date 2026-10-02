@@ -40,6 +40,7 @@ import type {
   ListInvestigationsQuery,
   ListInvestigationsResponse,
 } from '../../../common/investigations/investigation';
+import { isInvestigationTitlePending } from '../../../common/investigations/title';
 import type {
   InvestigationSubject,
   InvestigationSubjectKey,
@@ -596,7 +597,10 @@ const matchesFilters = (
     }
   }
   if (filters.query !== undefined) {
-    const text = [conversation.title, metadata.summary, metadata.verdict]
+    // A title Agent Builder has not generated yet is its placeholder, which says nothing about
+    // the investigation.
+    const title = isInvestigationTitlePending(conversation.title) ? undefined : conversation.title;
+    const text = [title, metadata.summary, metadata.verdict]
       .filter((part): part is string => part !== undefined)
       .join('\n')
       .toLowerCase();
@@ -664,6 +668,7 @@ const toSummary = ({
 }): InvestigationSummary => ({
   id: conversation.id,
   title: conversation.title,
+  title_pending: isInvestigationTitlePending(conversation.title),
   created_at: conversation.created_at,
   updated_at: conversation.updated_at,
   agent_id: conversation.agent_id,

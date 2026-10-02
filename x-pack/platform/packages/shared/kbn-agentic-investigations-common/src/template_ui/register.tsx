@@ -20,6 +20,7 @@ import type {
   RenderLinkedInvestigations,
   RenderOverview,
   RenderLiveState,
+  RenderTitle,
 } from './types';
 
 /**
@@ -102,6 +103,10 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderLiveState?: RenderLiveState;
   /**
+   * When provided, renders the header's title, also while the header loads. See `RenderTitle`.
+   */
+  renderTitle?: RenderTitle;
+  /**
    * Card Agent Builder renders for conversations on this template. Must be self-contained; see
    * `ConversationTemplateUIDefinition.briefCard`.
    */
@@ -128,6 +133,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderCloseInvestigationModal,
   renderOverview,
   renderLiveState,
+  renderTitle,
   briefCard,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
@@ -160,12 +166,22 @@ export const registerAgenticInvestigationTemplateUI = ({
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
             // collapse to nothing while the slot's chunk loads.
-            <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+            <Suspense
+              fallback={
+                <ConversationTitle
+                  title={
+                    renderTitle?.({ conversationId: conversation.id, title: conversation.title }) ??
+                    conversation.title
+                  }
+                />
+              }
+            >
               <LazyHeaderSlot
                 conversation={conversation}
                 renderAssignees={renderAssignees}
                 renderStatus={renderStatus}
                 renderLiveState={renderLiveState}
+                renderTitle={renderTitle}
                 refetchConversation={refetchConversation}
               />
             </Suspense>

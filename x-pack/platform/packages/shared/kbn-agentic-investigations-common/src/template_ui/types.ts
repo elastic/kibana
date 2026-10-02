@@ -130,3 +130,17 @@ export interface LiveStateSlotRenderProps {
  * supplied, the header leaves the severity badge to it.
  */
 export type RenderLiveState = (props: LiveStateSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderTitle` render prop. */
+export interface TitleSlotRenderProps {
+  conversationId: string;
+  /** The conversation's title, which Agent Builder generates from the first round. */
+  title: string;
+}
+
+/**
+ * A render prop for the investigation's title in the header. Supplied by the consuming plugin so it
+ * can name an investigation Agent Builder has not titled yet, for example after its first
+ * subject. Renders inside the header's heading, so it should render text.
+ */
+export type RenderTitle = (props: TitleSlotRenderProps) => React.ReactNode;

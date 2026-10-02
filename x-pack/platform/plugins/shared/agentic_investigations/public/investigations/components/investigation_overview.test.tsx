@@ -40,6 +40,7 @@ const attachmentsService = {
 const investigation: Investigation = {
   id: 'conv-1',
   title: 'Checkout latency spike',
+  title_pending: false,
   created_at: '2026-07-28T14:00:00.000Z',
   updated_at: '2026-07-28T14:00:00.000Z',
   agent_id: 'nightshift.investigation',

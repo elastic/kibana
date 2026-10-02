@@ -29,6 +29,7 @@ const chart = {
 const investigation: Investigation = {
   id: 'conv-1',
   title: 'Checkout down',
+  title_pending: false,
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:00:00.000Z',
   agent_id: 'agent-1',

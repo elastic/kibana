@@ -14,11 +14,13 @@ import {
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
   type LiveStateSlotRenderProps,
+  type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
-import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
+import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
+import { NEW_INVESTIGATION_TITLE } from '../../../investigations/components/translations';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -33,7 +35,7 @@ const OVERVIEW_LOADING_LABEL = i18n.translate(
 
 /**
  * The `investigation` template: status, close, escalation, proposed actions, and the overview,
- * running state, and brief card from the query API.
+ * live state, title, and brief card from the query API.
  */
 export const investigationTemplate: TemplateDefinition = {
   templateId: INVESTIGATION_TEMPLATE_ID,
@@ -128,6 +130,13 @@ export const investigationTemplate: TemplateDefinition = {
       }
     );
 
+    const LazyInvestigationTitle = makeLazyWithSharedClient<TitleSlotRenderProps>(async () => {
+      const { InvestigationTitle } = await import(
+        '../../../investigations/components/investigation_title'
+      );
+      return InvestigationTitle;
+    });
+
     const LazyInvestigationBriefCard =
       makeLazyWithSharedClient<ConversationTemplateBriefCardRenderProps>(async () => {
         const [{ InvestigationBriefCard }, { createInvestigationCardsLoader }] = await Promise.all([
@@ -194,6 +203,18 @@ export const investigationTemplate: TemplateDefinition = {
           React.Suspense,
           { fallback: null },
           React.createElement(LazyInvestigationLiveState, props)
+        ),
+      // Agent Builder titles an investigation on its first round. While the title chunk loads, an
+      // untitled one shows the generic title rather than Agent Builder's placeholder.
+      renderTitle: (props) =>
+        React.createElement(
+          React.Suspense,
+          {
+            fallback: isInvestigationTitlePending(props.title)
+              ? NEW_INVESTIGATION_TITLE
+              : props.title,
+          },
+          React.createElement(LazyInvestigationTitle, props)
         ),
       briefCard: InvestigationBriefCardWithFallback,
       // Without escalations the footer has no "Open escalation" button.

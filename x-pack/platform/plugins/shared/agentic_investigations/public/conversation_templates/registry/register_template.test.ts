@@ -98,11 +98,12 @@ describe('registerTemplate', () => {
     expect(escalation).toBeUndefined();
   });
 
-  it('registers the overview, the running state, and the brief card from the query API', () => {
+  it('registers the overview, the running state, the title, and the brief card from the query API', () => {
     const { investigation } = register();
 
     expect(investigation.renderOverview).toEqual(expect.any(Function));
     expect(investigation.renderLiveState).toEqual(expect.any(Function));
+    expect(investigation.renderTitle).toEqual(expect.any(Function));
     expect(investigation.briefCard).toEqual(expect.any(Function));
   });
 

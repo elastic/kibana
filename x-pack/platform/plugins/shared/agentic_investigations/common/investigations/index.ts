@@ -9,3 +9,4 @@ export * from './constants';
 export * from './status';
 export * from './step_types';
 export * from './investigation';
+export * from './title';

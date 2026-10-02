@@ -11,6 +11,7 @@ import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builde
 import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
 import {
   INVESTIGATION_SEVERITIES,
+  isInvestigationTitlePending,
   type InvestigationSeverity,
   type InvestigationSummary,
 } from '../../../common';
@@ -34,6 +35,7 @@ export const conversationToInvestigationSummary = (
   return {
     id: conversation.id,
     title: conversation.title,
+    title_pending: isInvestigationTitlePending(conversation.title),
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
     agent_id: conversation.agent_id,

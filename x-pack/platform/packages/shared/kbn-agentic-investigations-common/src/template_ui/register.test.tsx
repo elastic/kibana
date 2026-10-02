@@ -220,6 +220,26 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
   });
 
+  it('renders the header title with renderTitle, passing it the conversation id and title', async () => {
+    const { contract } = createFakeService();
+    register(contract, {
+      renderTitle: ({ conversationId, title }) => (
+        <span>
+          title {conversationId} {title}
+        </span>
+      ),
+    });
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'title conversation-1 Impossible travel — exec account',
+      })
+    ).toBeInTheDocument();
+  });
+
   it('registers the brief card when supplied', () => {
     const { contract } = createFakeService();
     const BriefCard = () => <span>card</span>;

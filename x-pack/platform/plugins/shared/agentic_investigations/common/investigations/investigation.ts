@@ -162,7 +162,13 @@ export interface InvestigationProposalSummary {
 export interface InvestigationSummary {
   /** The conversation id. */
   id: string;
+  /** The conversation title, which Agent Builder generates from the investigation's first round. */
   title: string;
+  /**
+   * Agent Builder has not generated the title yet, so `title` is empty or its placeholder. UIs show
+   * a fallback then, such as the first subject.
+   */
+  title_pending: boolean;
   created_at: string;
   updated_at: string;
   agent_id: string;
