@@ -2,7 +2,7 @@
 
 Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can schedule them as independent Playwright configs. They run against the default Scout servers; there is no custom server config set, so the same suites can run on serverless.
 
-Each namespaced config has a global setup hook that turns on the `alerting:v2:enabled` advanced setting (every alerting_v2 route returns 503 without it) and a global teardown hook that unsets it. The root `api/` config has no such hook: it hosts the Agent Builder skill-gating suite, which needs the setting unset to cover the disabled cases.
+Each config has a global setup hook that turns on the `alerting:v2:enabled` advanced setting (every alerting_v2 route returns 503 without it) and a global teardown hook that unsets it. The exception is `agent_builder_skills`, which needs the setting unset to cover the disabled cases.
 
 ## Namespaces
 
@@ -16,6 +16,7 @@ Each namespaced config has a global setup hook that turns on the `alerting:v2:en
 | `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `API_ENGINE_TAG`. API-only. |
 | `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `API_ENGINE_TAG`. API-only. |
 | `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
+| `agent_builder_skills` | Agent Builder alerting v2 skill gating | — | No global setup, so `alerting:v2:enabled` starts unset. API-only. |
 
 `API_ENGINE_TAG` (`common/constants.ts`) is the shared tag for API and engine suites, currently `tags.deploymentAgnostic`.
 
@@ -28,7 +29,7 @@ Each namespaced config has a global setup hook that turns on the `alerting:v2:en
 - UI for a management page → the matching namespace's `ui/tests/`.
 - Cross-page privilege interstitial → `management`.
 
-Every spec must live under some namespace's `testDir` (`<namespace>/{api,ui}/tests/`). There
+Scout rejects a root-level `test/scout/{api,ui}/` next to namespaces, so every spec must live under some namespace's `testDir` (`<namespace>/{api,ui}/tests/`). There
 is no catch-all config, so a spec outside those directories is silently never run. After
 adding or moving a spec, run `update-test-config-manifests` and confirm the `.meta/`
 manifest lists it.
@@ -47,7 +48,7 @@ Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatc
 
 ```text
 test/scout/
-├── api/                          # Agent Builder skill gating (no global setup)
+├── agent_builder_skills/api/     # no global setup
 ├── common/{alerting_v2_setting,builders,constants,roles,urls}.ts
 ├── common/services/
 ├── common/api/fixtures/          # apiTest + alertingV2 apiServices

@@ -29,7 +29,7 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
  * asserting either skill is listed.
  *
  * This config has no global setup, so `alerting:v2:enabled` starts unset and
- * the disabled cases can be covered. The namespaced configs enable it globally.
+ * the disabled cases can be covered. The other alerting_v2 configs enable it globally.
  */
 apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   // Reset both gates after every test. `.unset()` / DELETE are safe no-ops when
