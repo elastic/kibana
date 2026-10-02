@@ -43,6 +43,18 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(/Do not narrate your reasoning or announce each step/);
     });
 
+    it('names the catalog strategy to the user, followed by what it produces', () => {
+      expect(instructions).toMatch(
+        /Strategy names from the catalog — Index\/Table Metadata, Bottom-Up, Cumulative and the rest — are the user's terms too/
+      );
+      expect(instructions).toMatch(/name the strategy, then say in plain words what it produces/);
+    });
+
+    it('keeps its examples generic, outside any one domain', () => {
+      expect(instructions).not.toMatch(/tickets/);
+      expect(instructions).toMatch(/I'll check how your records spread across categories/);
+    });
+
     it('keeps the facts the user needs to decide', () => {
       expect(instructions).toMatch(
         /how many one run writes and the model calls that costs, how long a run takes once a pilot has measured it/
