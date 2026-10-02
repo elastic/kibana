@@ -32,6 +32,12 @@ const createCore = (getComponentTemplate: jest.Mock): CoreSetup =>
   } as unknown as CoreSetup);
 
 describe('preCreateDefaultAdhocAttackDiscoveryIndex', () => {
+  const contextNotRegistered = async () => ({
+    result: false,
+    error:
+      'Error getting initialized status for context security.attack.discovery - context has not been registered.',
+  });
+
   it('calls getWriter for the default space when framework alerts are disabled', () => {
     const dataClient = createDataClient();
 
@@ -44,6 +50,111 @@ describe('preCreateDefaultAdhocAttackDiscoveryIndex', () => {
     expect(dataClient.getWriter).toHaveBeenCalledWith({ namespace: 'default' });
   });
 
+  it('does not call getWriter before attack discovery resources are initialized', async () => {
+    const dataClient = createDataClient();
+    let resolveInitialization: (value: { result: boolean }) => void = () => undefined;
+    const initialization = new Promise<{ result: boolean }>((resolve) => {
+      resolveInitialization = resolve;
+    });
+
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core: createCore(jest.fn()),
+      dataClient,
+      frameworkAlerts: {
+        enabled: () => true,
+        getContextInitializationPromise: () => initialization,
+      },
+      logger: createLogger(),
+    });
+
+    await flushPromises();
+
+    expect(dataClient.getWriter).not.toHaveBeenCalled();
+    resolveInitialization({ result: true });
+    await flushPromises();
+  });
+
+  it('calls getWriter for the default space after attack discovery resources are initialized', async () => {
+    const dataClient = createDataClient();
+    const getComponentTemplate = jest.fn();
+
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core: createCore(getComponentTemplate),
+      dataClient,
+      frameworkAlerts: {
+        enabled: () => true,
+        getContextInitializationPromise: async () => ({ result: true }),
+      },
+      logger: createLogger(),
+    });
+
+    await flushPromises();
+
+    expect(dataClient.getWriter).toHaveBeenCalledWith({ namespace: 'default' });
+  });
+
+  it('does not poll for the component template after attack discovery resources are initialized', async () => {
+    const getComponentTemplate = jest.fn();
+
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core: createCore(getComponentTemplate),
+      dataClient: createDataClient(),
+      frameworkAlerts: {
+        enabled: () => true,
+        getContextInitializationPromise: async () => ({ result: true }),
+      },
+      logger: createLogger(),
+    });
+
+    await flushPromises();
+
+    expect(getComponentTemplate).not.toHaveBeenCalled();
+  });
+
+  it('does not install the index when alerting resources fail', async () => {
+    const dataClient = createDataClient();
+
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core: createCore(jest.fn()),
+      dataClient,
+      frameworkAlerts: {
+        enabled: () => true,
+        getContextInitializationPromise: async () => ({
+          result: false,
+          error: 'Common resources were not initialized',
+        }),
+      },
+      logger: createLogger(),
+    });
+
+    await flushPromises();
+
+    expect(dataClient.getWriter).not.toHaveBeenCalled();
+  });
+
+  it('logs when alerting resources fail', async () => {
+    const logger = createLogger();
+
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core: createCore(jest.fn()),
+      dataClient: createDataClient(),
+      frameworkAlerts: {
+        enabled: () => true,
+        getContextInitializationPromise: async () => ({
+          result: false,
+          error: 'Common resources were not initialized',
+        }),
+      },
+      logger,
+    });
+
+    await flushPromises();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Unable to pre-create ad-hoc Attack Discovery index for the default space: alerting resources were not initialized: Common resources were not initialized'
+    );
+  });
+
   it('does not call getWriter before the ECS component template exists', async () => {
     const dataClient = createDataClient();
     const getComponentTemplate = jest.fn(() => new Promise(() => undefined));
@@ -51,7 +162,10 @@ describe('preCreateDefaultAdhocAttackDiscoveryIndex', () => {
     preCreateDefaultAdhocAttackDiscoveryIndex({
       core: createCore(getComponentTemplate),
       dataClient,
-      frameworkAlerts: { enabled: () => true },
+      frameworkAlerts: {
+        enabled: () => true,
+        getContextInitializationPromise: contextNotRegistered,
+      },
       logger: createLogger(),
     });
 

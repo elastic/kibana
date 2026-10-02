@@ -6,6 +6,7 @@
  */
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from '@kbn/attack-discovery-schedules-common';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
@@ -15,9 +16,20 @@ const ECS_COMPONENT_TEMPLATE_POLL_INTERVAL_MS = 500;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+interface ContextInitializationResult {
+  result: boolean;
+  error?: string;
+}
+
 interface FrameworkAlerts {
   enabled: () => boolean;
+  getContextInitializationPromise?: (
+    context: string,
+    namespace: string
+  ) => Promise<ContextInitializationResult>;
 }
+
+const CONTEXT_NOT_REGISTERED = 'has not been registered';
 
 export interface PreCreateDefaultAdhocAttackDiscoveryIndexParams {
   core: CoreSetup;
@@ -27,10 +39,10 @@ export interface PreCreateDefaultAdhocAttackDiscoveryIndexParams {
 }
 
 /**
- * The ad-hoc index template references `.alerts-ecs-mappings`. That component
- * template is installed asynchronously by the alerting framework, and there is
- * no setup contract for that step. Poll until it exists so getWriter() does
- * not create a concrete index with empty mappings.
+ * Polls until `.alerts-ecs-mappings` exists. Used only when the Attack Discovery
+ * alerts context was not registered, so there is no initialization promise to wait on.
+ * Existence is not enough on upgrade: a previous Kibana version's template is
+ * already present, and getWriter() would apply those mappings.
  */
 const waitForEcsComponentTemplate = async (core: CoreSetup, logger: Logger): Promise<boolean> => {
   const [coreStart] = await core.getStartServices();
@@ -59,6 +71,39 @@ const waitForEcsComponentTemplate = async (core: CoreSetup, logger: Logger): Pro
 };
 
 /**
+ * Waits until the alerting framework has installed the current `.alerts-ecs-mappings`.
+ * Returns false when that install failed and the concrete index must not be created.
+ */
+const waitForCurrentEcsMappings = async (
+  core: CoreSetup,
+  frameworkAlerts: FrameworkAlerts,
+  logger: Logger
+): Promise<boolean> => {
+  if (frameworkAlerts.getContextInitializationPromise) {
+    const initialization = await frameworkAlerts.getContextInitializationPromise(
+      ATTACK_DISCOVERY_ALERTS_CONTEXT,
+      'default'
+    );
+    if (initialization.result) {
+      return true;
+    }
+    // The schedule rule type is registered by elastic_assistant. When that plugin
+    // is absent the context was never registered, and the existence poll is the
+    // remaining signal that the component template is installed.
+    if (!initialization.error?.includes(CONTEXT_NOT_REGISTERED)) {
+      logger.warn(
+        `Unable to pre-create ad-hoc Attack Discovery index for the default space: alerting resources were not initialized${
+          initialization.error ? `: ${initialization.error}` : ''
+        }`
+      );
+      return false;
+    }
+  }
+
+  return waitForEcsComponentTemplate(core, logger);
+};
+
+/**
  * Creates `.adhoc.alerts-security.attack.discovery.alerts-default` without writing documents.
  * Does not block plugin setup.
  */
@@ -69,12 +114,13 @@ export const preCreateDefaultAdhocAttackDiscoveryIndex = ({
   logger,
 }: PreCreateDefaultAdhocAttackDiscoveryIndexParams): void => {
   // initializeIndex installs shared templates only. The concrete alias is created
-  // by getWriter(). When framework alerts are on, wait until `.alerts-ecs-mappings`
-  // exists: calling getWriter() earlier creates the concrete index with empty mappings.
+  // by getWriter(). When framework alerts are on, wait until the current
+  // `.alerts-ecs-mappings` is installed: calling getWriter() earlier creates the
+  // concrete index with empty or stale mappings.
   void (async () => {
     try {
       if (frameworkAlerts?.enabled()) {
-        const ecsMappingsReady = await waitForEcsComponentTemplate(core, logger);
+        const ecsMappingsReady = await waitForCurrentEcsMappings(core, frameworkAlerts, logger);
         if (!ecsMappingsReady) {
           return;
         }

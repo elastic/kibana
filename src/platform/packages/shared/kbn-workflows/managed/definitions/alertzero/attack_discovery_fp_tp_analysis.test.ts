@@ -381,10 +381,10 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
-    // The alias is created on the first ad-hoc write. A missing index is an
-    // empty hit set, which `require_attack_discovery` already fails.
-    it('ignores a missing ad-hoc index', () => {
-      expect(loadAttack?.with?.ignore_unavailable).toBe(true);
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_attack_discovery` would report not-found.
+    it('fails the run when the discovery search is not authorized', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBeUndefined();
     });
 
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
@@ -519,10 +519,10 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
     });
 
-    // The alerts alias is created on first write. A missing index is zero hits,
-    // which `require_cited_alerts` already rejects.
-    it('ignores a missing alerts index', () => {
-      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBe(true);
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_cited_alerts` would report missing alerts.
+    it('fails the run when the alerts search is not authorized', () => {
+      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
     });
 
     it.each(['load_entities', 'load_events'] as const)(
