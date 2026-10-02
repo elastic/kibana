@@ -29,7 +29,7 @@ import { agentPolicyService, appContextService, packagePolicyService } from '../
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import {
-  buildVariantAgentsKuery,
+  getVariantAgentsKuery,
   deleteVersionSpecificFleetServerPolicies,
   deleteVersionSpecificFleetServerPoliciesForVersions,
   getAgentCountsForVariantPolicyIds,
@@ -800,7 +800,9 @@ export class VersionSpecificPolicyAssignmentTask {
     signal: AbortSignal
   ) {
     try {
-      const variantAgentsKuery = buildVariantAgentsKuery(parentPolicyId);
+      // Include agents on a versioned `policy_id` that lack `policy_base_id` (enrolled by a downlevel
+      // fleet-server after the last backfill) so they are reassigned before the variant docs are deleted.
+      const variantAgentsKuery = await getVariantAgentsKuery(esClient, parentPolicyId);
 
       const agentIds: string[] = [];
       // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid

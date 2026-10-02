@@ -51,6 +51,7 @@ import * as AgentService from '../agents';
 
 import {
   buildVariantAgentsKuery,
+  getVariantPolicyIdsForParent,
   deleteVersionSpecificFleetServerPolicies,
   deleteVersionSpecificFleetServerPoliciesForVersions,
   getAgentAssignedVersionsForPolicies,
@@ -283,13 +284,14 @@ describe('getVersionSpecificPolicies', () => {
 
 describe('reassignAgentsFromVersionSpecificPolicies', () => {
   const soClient = {} as any;
-  const esClient = { deleteByQuery: jest.fn() } as any;
+  const esClient = { deleteByQuery: jest.fn(), search: jest.fn() } as any;
   const getAgentsByKueryMock = AgentService.getAgentsByKuery as jest.Mock;
   const reassignAgentsMock = AgentService.reassignAgents as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     esClient.deleteByQuery.mockResolvedValue({});
+    esClient.search.mockResolvedValue({ aggregations: { variant_policy_ids: { buckets: [] } } });
   });
 
   const variantKuery = 'policy_base_id:"policy1" and not policy_id:"policy1"';
@@ -308,6 +310,28 @@ describe('reassignAgentsFromVersionSpecificPolicies', () => {
       soClient,
       esClient,
       { kuery: variantKuery, showInactive: false },
+      'policy1'
+    );
+  });
+
+  it('also matches agents on a known variant policy_id that have no policy_base_id', async () => {
+    esClient.search.mockResolvedValue({
+      aggregations: { variant_policy_ids: { buckets: [{ key: 'policy1#9.4' }] } },
+    });
+    getAgentsByKueryMock.mockResolvedValue({ total: 1 });
+
+    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
+
+    const expectedKuery = `(${variantKuery}) or (policy_id:("policy1#9.4") and not policy_base_id:*)`;
+    expect(getAgentsByKueryMock).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ kuery: expectedKuery })
+    );
+    expect(reassignAgentsMock).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      { kuery: expectedKuery, showInactive: false },
       'policy1'
     );
   });
@@ -360,6 +384,37 @@ describe('buildVariantAgentsKuery', () => {
     const kuery = buildVariantAgentsKuery('policy1');
     expect(kuery).toBe('policy_base_id:"policy1" and not policy_id:"policy1"');
     expect(kuery).not.toContain('*');
+  });
+
+  it('adds an exact policy_id clause for known variants lacking policy_base_id', () => {
+    expect(buildVariantAgentsKuery('policy1', ['policy1#9.4', 'policy1#9.3'])).toBe(
+      '(policy_base_id:"policy1" and not policy_id:"policy1") or (policy_id:("policy1#9.4" or "policy1#9.3") and not policy_base_id:*)'
+    );
+  });
+});
+
+describe('getVariantPolicyIdsForParent', () => {
+  it('returns variant policy ids from .fleet-policies excluding the base document', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { variant_policy_ids: { buckets: [{ key: 'policy1#9.4' }] } },
+      }),
+    } as any;
+
+    await expect(getVariantPolicyIdsForParent(esClient, 'policy1')).resolves.toEqual([
+      'policy1#9.4',
+    ]);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.fleet-policies',
+        query: {
+          bool: {
+            filter: [{ term: { policy_base_id: 'policy1' } }],
+            must_not: [{ term: { policy_id: 'policy1' } }],
+          },
+        },
+      })
+    );
   });
 });
 
