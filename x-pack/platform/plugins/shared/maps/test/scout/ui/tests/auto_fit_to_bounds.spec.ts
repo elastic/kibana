@@ -34,6 +34,10 @@ test.describe(
       await uiSettings.set({ defaultIndex: DEFAULT_INDEX_ID });
     });
 
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+    });
+
     test.afterAll(async ({ kbnClient, uiSettings }) => {
       await kbnClient.savedObjects.cleanStandardList();
       if (prevDefaultIndex !== undefined) {
@@ -44,10 +48,8 @@ test.describe(
     });
 
     test('initial location - should automatically fit to bounds on initial map load', async ({
-      browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.maps.openMapWithId(AUTO_FIT_INITIAL_LOCATION_MAP_ID);
 
       await expect.poll(() => pageObjects.maps.getHits(), { timeout: 20_000 }).toBe('6');
@@ -59,10 +61,8 @@ test.describe(
     });
 
     test('with joins - should automatically fit to bounds when query is applied', async ({
-      browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.maps.openMapWithId(JOIN_EXAMPLE_MAP_ID);
       await pageObjects.maps.enableAutoFitToBounds();
 
@@ -80,10 +80,8 @@ test.describe(
     });
 
     test('without joins - should automatically fit to bounds when query is applied', async ({
-      browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.maps.openMapWithId(DOCUMENT_EXAMPLE_MAP_ID);
       await pageObjects.maps.enableAutoFitToBounds();
 
@@ -104,10 +102,8 @@ test.describe(
     });
 
     test('without joins - should sync layers even when there is no data', async ({
-      browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.maps.openMapWithId(DOCUMENT_EXAMPLE_MAP_ID);
       await pageObjects.maps.enableAutoFitToBounds();
 

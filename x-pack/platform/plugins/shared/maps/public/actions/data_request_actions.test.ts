@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-/* eslint @typescript-eslint/no-var-requires: 0 */
-
-jest.mock('../selectors/map_selectors', () => ({}));
-jest.mock('../reducers/non_serializable_instances', () => ({}));
+jest.mock('../selectors/map_selectors', () => ({
+  getDataFilters: () => ({ zoom: 5 }),
+  getEditState: () => undefined,
+  getDataRequestDescriptor: () => undefined,
+}));
+jest.mock('../reducers/non_serializable_instances', () => ({
+  getInspectorAdapters: () => ({}),
+}));
 jest.mock('../classes/layers/layer_group', () => ({
   isLayerGroup: () => false,
 }));
@@ -24,13 +28,6 @@ const getState = () =>
   } as any);
 
 describe('data_request_actions', () => {
-  beforeEach(() => {
-    require('../selectors/map_selectors').getDataFilters = () => ({ zoom: 5 });
-    require('../selectors/map_selectors').getEditState = () => undefined;
-    require('../selectors/map_selectors').getDataRequestDescriptor = () => undefined;
-    require('../reducers/non_serializable_instances').getInspectorAdapters = () => ({});
-  });
-
   afterEach(() => {
     jest.resetAllMocks();
   });

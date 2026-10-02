@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-/* eslint @typescript-eslint/no-var-requires: 0 */
-
-jest.mock('../../../kibana_services', () => ({}));
+jest.mock('../../../kibana_services', () => ({
+  getUiSettings: () => ({
+    get: (key: string) => {
+      if (key === UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS) {
+        return DEFAULT_REFRESH_CONFIG;
+      }
+    },
+  }),
+}));
 
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -16,16 +22,6 @@ import type { MapAttributes } from '../../../../server';
 const DEFAULT_REFRESH_CONFIG = { pause: true, value: 0 };
 
 describe('getInitialRefreshConfig', () => {
-  beforeEach(() => {
-    require('../../../kibana_services').getUiSettings = jest.fn().mockReturnValue({
-      get: (key: string) => {
-        if (key === UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS) {
-          return DEFAULT_REFRESH_CONFIG;
-        }
-      },
-    });
-  });
-
   afterEach(() => {
     jest.resetAllMocks();
   });
