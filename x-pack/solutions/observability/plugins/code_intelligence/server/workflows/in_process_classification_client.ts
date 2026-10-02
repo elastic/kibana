@@ -6,7 +6,7 @@
  */
 
 import { isLeft } from 'fp-ts/Either';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
@@ -51,6 +51,39 @@ const workflowResults = (execution: unknown): unknown => {
   const content = record(record(classify)?.output)?.content;
   return record(content)?.results ?? content;
 };
+
+/**
+ * Trims optional free-text fields and removes blank or null ones, because a fully dynamic
+ * message honestly has no static text and must not invalidate the rest of the result.
+ */
+const withoutBlankText = (value: unknown, textFields: readonly string[]): unknown => {
+  const result = record(value);
+  if (result === undefined) return value;
+  const cleaned: Record<string, unknown> = { ...result };
+  for (const field of textFields) {
+    const text = cleaned[field];
+    if (text === null || (typeof text === 'string' && text.trim().length === 0)) {
+      delete cleaned[field];
+    } else if (typeof text === 'string') {
+      cleaned[field] = text.trim();
+    }
+  }
+  return cleaned;
+};
+
+/**
+ * Keeps each result that satisfies its contract on its own; an invalid result is dropped so its
+ * candidate counts as omitted and joins the caller's retry instead of failing every other result.
+ */
+const validResults = <Value>(
+  results: readonly unknown[],
+  codec: t.Type<Value>,
+  textFields: readonly string[]
+): readonly Value[] =>
+  results.flatMap((result) => {
+    const decoded = codec.decode(withoutBlankText(result, textFields));
+    return isLeft(decoded) ? [] : [decoded.right];
+  });
 
 const validateRequest = <Value>(codec: t.Type<Value>, value: Value): OperationResult<Value> => {
   const decoded = codec.decode(value);
@@ -114,7 +147,8 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
       | typeof CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID
       | typeof CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
     input: Record<string, unknown>,
-    codec: t.Type<readonly Value[]>
+    codec: t.Type<Value>,
+    textFields: readonly string[]
   ): Promise<OperationResult<readonly Value[]>> {
     try {
       const executionId = await this.managedWorkflows.execute(this.request, workflowId, {
@@ -144,14 +178,14 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
           true
         );
       }
-      const decoded = codec.decode(workflowResults(execution));
-      return isLeft(decoded)
-        ? failure(
+      const results = workflowResults(execution);
+      return Array.isArray(results)
+        ? { status: 'success', value: validResults(results, codec, textFields) }
+        : failure(
             'malformed_workflow_response',
-            'Classification workflow response did not match its contract.',
-            false
-          )
-        : { status: 'success', value: decoded.right };
+            'Classification workflow response did not contain a result list.',
+            true
+          );
     } catch (_error: unknown) {
       return failure('workflow_transport_failure', 'Classification workflow failed.', true);
     }
@@ -165,7 +199,8 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
     const result = await this.run(
       CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
       validated.value,
-      t.readonlyArray(loggingClassificationRt)
+      loggingClassificationRt,
+      ['staticMessage']
     );
     return result.status === 'failure'
       ? result
@@ -180,7 +215,8 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
     const result = await this.run(
       CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
       validated.value,
-      t.readonlyArray(otelClassificationRt)
+      otelClassificationRt,
+      ['description', 'title']
     );
     return result.status === 'failure'
       ? result

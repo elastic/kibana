@@ -76,8 +76,8 @@ export interface ExtractRepositoryDependencies {
 
 /** Encodes source text for byte limits enforced by workflow DTO contracts. */
 const utf8Encoder = new TextEncoder();
-/** Allows one bounded retry for transient workflow failures. */
-const workflowBatchAttempts = 2;
+/** Allows 1 request plus 3 retries of whatever a batch still leaves unresolved. */
+const workflowBatchAttempts = 4;
 
 /** Converts an operational source or workflow failure into the orchestrator result shape. */
 const failure = <Value>(code: string, message: string): OperationResult<Value> => ({
@@ -180,8 +180,12 @@ const firstWorkflowExcerpt = (source: string): string => workflowExcerptChunks(s
 const workflowEvidence = (evidence: readonly SourceLocation[]): readonly SourceLocation[] =>
   evidence.map((location) => ({ ...location, excerpt: firstWorkflowExcerpt(location.excerpt) }));
 
-/** Caps the share of one batch that may stay unclassified before the repository fails. */
+/** Caps the share of a repository's candidates that may stay unclassified before the run fails. */
 const maxUnclassifiedShare = 0.05;
+
+/** Returns how many candidates may stay unclassified while the run still counts as complete. */
+const allowedUnclassified = (candidates: number): number =>
+  Math.min(candidates - 1, Math.max(1, Math.floor(candidates * maxUnclassifiedShare)));
 
 /** Holds one decision per classified candidate and the candidates the workflow never decided. */
 interface ClassifiedBatch<Decision> {
@@ -221,7 +225,36 @@ const describeSkippedCandidate = (
   ].join(', ');
 };
 
-/** Runs a classification batch, retrying transient failures and then only the candidates the model skipped. */
+/**
+ * Sends batch-local IDs such as `c1` so the model cannot rewrite path-like IDs, then maps answers
+ * back to the original candidate IDs. Answers with an ID outside the batch are dropped.
+ */
+const runWithShortIds = async <
+  Candidate extends { readonly id: string },
+  Decision extends { readonly id: string }
+>(
+  candidates: readonly Candidate[],
+  run: (candidates: readonly Candidate[]) => Promise<OperationResult<readonly Decision[]>>
+): Promise<OperationResult<readonly Decision[]>> => {
+  const originalIds = new Map(candidates.map(({ id }, index) => [`c${index + 1}`, id]));
+  const result = await run(
+    candidates.map((candidate, index) => ({ ...candidate, id: `c${index + 1}` } as Candidate))
+  );
+  if (result.status === 'failure') return result;
+  return {
+    status: 'success',
+    value: result.value.flatMap((decision) => {
+      const id = originalIds.get(decision.id);
+      return id === undefined ? [] : [{ ...decision, id } as Decision];
+    }),
+  };
+};
+
+/**
+ * Runs a classification batch and retries only the candidates still unresolved, whether the
+ * model skipped them or the whole request failed transiently. Only a non-retryable failure stops
+ * the repository; anything left after the last attempt is reported as unclassified.
+ */
 const classifyWorkflowBatch = async <
   Candidate extends DescribableCandidate,
   Decision extends { readonly id: string }
@@ -238,58 +271,54 @@ const classifyWorkflowBatch = async <
   readonly run: (candidates: readonly Candidate[]) => Promise<OperationResult<readonly Decision[]>>;
   readonly workflow: string;
 }): Promise<OperationResult<ClassifiedBatch<Decision>>> => {
-  let classification: OperationResult<readonly Decision[]> | undefined;
-  for (let attempt = 1; attempt <= workflowBatchAttempts; attempt += 1) {
-    classification = await run(candidates);
-    if (classification.status === 'success' || !classification.error.retryable) break;
-  }
-  if (classification === undefined) {
-    return failure('workflow_retry_exhausted', 'Workflow classification retry was exhausted.');
-  }
-  if (classification.status === 'failure') return classification;
-  /** Unknown IDs are ignored; omitted and duplicated IDs get one more request of their own. */
-  const first = partitionClassificationResults(candidates, classification.value);
-  let decisions = first.results;
-  let unclassifiedIds = first.unresolvedIds;
-  if (unclassifiedIds.length > 0) {
-    const pending = new Set(unclassifiedIds);
-    const retryCandidates = candidates.filter(({ id }) => pending.has(id));
-    const retry = await run(retryCandidates);
-    let retryOutcome: string;
-    if (retry.status === 'success') {
-      const second = partitionClassificationResults(retryCandidates, retry.value);
-      decisions = [...decisions, ...second.results];
-      unclassifiedIds = second.unresolvedIds;
-      retryOutcome = `The retry recovered ${pending.size - unclassifiedIds.length}; ${
-        unclassifiedIds.length
-      } still unclassified.`;
-    } else {
-      retryOutcome = `The retry failed: ${retry.error.message}`;
+  const decisions: Decision[] = [];
+  let pending: readonly Candidate[] = candidates;
+  /** Describes what the first request left unresolved, so the warning shows why retries ran. */
+  let firstTry: { readonly pending: number; readonly summary: string } | undefined;
+  for (let attempt = 1; attempt <= workflowBatchAttempts && pending.length > 0; attempt += 1) {
+    const classification = await runWithShortIds(pending, run);
+    if (classification.status === 'failure') {
+      if (!classification.error.retryable) return classification;
+      if (attempt === 1) {
+        firstTry = {
+          pending: pending.length,
+          summary: `failed for ${pending.length} candidates on the first try. ${classification.error.message}`,
+        };
+      }
+      continue;
     }
-    const answerCounts = new Map<string, number>();
-    for (const { id } of classification.value) {
-      answerCounts.set(id, (answerCounts.get(id) ?? 0) + 1);
+    const partition = partitionClassificationResults(pending, classification.value);
+    decisions.push(...partition.results);
+    if (attempt === 1 && partition.unresolvedIds.length > 0) {
+      const answerCounts = new Map<string, number>();
+      for (const { id } of classification.value) {
+        answerCounts.set(id, (answerCounts.get(id) ?? 0) + 1);
+      }
+      firstTry = {
+        pending: partition.unresolvedIds.length,
+        summary: `skipped ${partition.unresolvedIds.length} of ${
+          candidates.length
+        } candidates on the first try. ${partition.unresolvedIds
+          .map((id) => describeSkippedCandidate(candidates, answerCounts, id))
+          .join('; ')}.`,
+      };
     }
+    const unresolved = new Set(partition.unresolvedIds);
+    pending = pending.filter(({ id }) => unresolved.has(id));
+  }
+  if (firstTry !== undefined) {
     logger.warn(
-      `The ${workflow} classification workflow for ${repository} skipped ${pending.size} of ${
-        candidates.length
-      } candidates on the first try. ${retryOutcome} ${[...pending]
-        .map((id) => describeSkippedCandidate(candidates, answerCounts, id))
-        .join('; ')}`
+      `The ${workflow} classification workflow for ${repository} ${
+        firstTry.summary
+      } Retries recovered ${firstTry.pending - pending.length}; ${
+        pending.length
+      } still unclassified.`
     );
   }
-  /** A large gap signals a broken workflow rather than an occasional skipped ID. */
-  const allowed = Math.min(
-    candidates.length - 1,
-    Math.max(1, Math.floor(candidates.length * maxUnclassifiedShare))
-  );
-  if (unclassifiedIds.length > allowed) {
-    return failure(
-      'incomplete_classification',
-      `Workflow left ${unclassifiedIds.length} of ${candidates.length} candidates unclassified after a retry.`
-    );
-  }
-  return { status: 'success', value: { decisions, unclassifiedIds } };
+  return {
+    status: 'success',
+    value: { decisions, unclassifiedIds: pending.map(({ id }) => id) },
+  };
 };
 
 /** Converts deduplicated validated templates into codec-valid catalog write requests. */
@@ -397,7 +426,7 @@ export const extractRepository = async (
   if (loggingBatches.status === 'failure') return loggingBatches;
   /** Counts candidates the workflow never decided; they produce no templates and block the prune. */
   let unclassifiedLogging = 0;
-  /** Retains source-backed templates only after every required logging batch succeeds. */
+  /** Retains source-backed templates from every batch; only a non-retryable workflow failure stops the run. */
   const loggingTemplates: GeneratedTemplate[] = [];
   for (const candidates of loggingBatches.value) {
     const classified = await classifyWorkflowBatch({
@@ -464,7 +493,7 @@ export const extractRepository = async (
   });
   if (otelBatches.status === 'failure') return otelBatches;
   let unclassifiedOtel = 0;
-  /** Retains source-backed templates only after every required OTel batch succeeds. */
+  /** Retains source-backed templates from every batch; only a non-retryable workflow failure stops the run. */
   const otelTemplates: GeneratedTemplate[] = [];
   for (const candidates of otelBatches.value) {
     const classified = await classifyWorkflowBatch({
@@ -506,10 +535,27 @@ export const extractRepository = async (
   const validation = new Map<string, QueryValidationResult>();
   /** Explains invalid template exclusion without converting it into a required workflow failure. */
   const diagnostics: ExtractionDiagnostic[] = [];
-  if (unclassifiedLogging + unclassifiedOtel > 0) {
+  const unclassified = unclassifiedLogging + unclassifiedOtel;
+  const classifiable = loggingCandidates.length + otelSignals.length;
+  /** A large repository-wide gap signals a broken workflow rather than an occasional skipped ID. */
+  const incompleteClassification = (written: boolean): OperationResult<never> => ({
+    error: {
+      code: 'incomplete_classification',
+      message: `The classification workflow left ${unclassified} of ${classifiable} candidates unclassified after retries. ${
+        written
+          ? 'The classified entries were written, but documents from earlier extractions of this repository were kept and may be stale.'
+          : 'No catalog documents were produced, so documents from earlier extractions of this repository were kept.'
+      }`,
+      retryable: true,
+    },
+    status: 'failure',
+  });
+  const classificationIncomplete =
+    unclassified > 0 && unclassified > allowedUnclassified(classifiable);
+  if (unclassified > 0) {
     diagnostics.push({
       code: 'unclassified_candidates',
-      message: `The classification workflow skipped ${unclassifiedLogging} logging and ${unclassifiedOtel} OTel candidates even after a retry, so they were left out of the catalog.`,
+      message: `The classification workflow skipped ${unclassifiedLogging} logging and ${unclassifiedOtel} OTel candidates even after retries, so they were left out of the catalog.`,
     });
   }
   for (const template of templates) {
@@ -535,6 +581,7 @@ export const extractRepository = async (
   /** Empty valid output intentionally performs no catalog call, preserving the previous catalog unchanged. */
   const requests = catalogRequestsFor({ now: dependencies.now, templates, validation });
   if (requests.length === 0) {
+    if (classificationIncomplete) return incompleteClassification(false);
     diagnostics.push({
       code: 'prune_skipped_no_documents',
       message:
@@ -550,11 +597,12 @@ export const extractRepository = async (
       },
     };
   }
-  /** Catalog writes happen only after all required source and workflow stages have completed successfully. */
+  /** Classified entries are written even when too many candidates stayed unclassified, so 1 bad batch cannot empty a repository. */
   const write = await dependencies.catalogWriter.write(requests);
   if (write.status === 'failure') return write;
+  if (classificationIncomplete) return incompleteClassification(true);
   /** Skipped candidates may match documents from earlier extractions, so those must not be pruned. */
-  if (write.value.failures.length === 0 && unclassifiedLogging + unclassifiedOtel > 0) {
+  if (write.value.failures.length === 0 && unclassified > 0) {
     diagnostics.push({
       code: 'prune_skipped_unclassified_candidates',
       message:
@@ -562,7 +610,7 @@ export const extractRepository = async (
     });
   }
   /** Prunes only after a fully successful write, so a partial write never removes the previous catalog. */
-  if (write.value.failures.length === 0 && unclassifiedLogging + unclassifiedOtel === 0) {
+  if (write.value.failures.length === 0 && unclassified === 0) {
     const prune = await dependencies.catalogWriter.prune({
       keepIds: write.value.writtenIds,
       repository: repository.repository,
