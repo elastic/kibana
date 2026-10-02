@@ -28,7 +28,7 @@ export class EpisodeDetailsPage {
     private readonly kbnUrl: KibanaUrl,
     private readonly mountConfig: AlertingMountConfig
   ) {
-    this.pageContainer = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
+    this.pageContainer = this.page.testSubj.locator('alertingV2AlertDetailsPage');
     this.actionPolicyHistoryTab = this.page.testSubj.locator(
       'alertingV2EpisodeDetailsMainTabActionPolicyHistory'
     );

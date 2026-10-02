@@ -24,14 +24,14 @@ export const OBSERVABILITY_MOUNT_CONFIG: AlertingMountConfig = {
   paths: {
     rules: '/rules/v2',
     ruleLibrary: '/rule-library',
-    alerts: '/inbox',
+    alerts: '/alerts',
     actionPolicies: '/action-policies',
     executionHistory: '/execution-history',
   },
   subPaths: {
     rulesCreate: '/rules/v2/create',
     rulesDetail: (ruleId: string) => `/rules/v2/${ruleId}`,
-    episodeDetail: (episodeId: string) => `/inbox/${encodeURIComponent(episodeId)}`,
+    episodeDetail: (episodeId: string) => `/alerts/${encodeURIComponent(episodeId)}`,
     actionPoliciesCreate: '/action-policies/create',
     actionPoliciesEdit: (policyId: string) => `/action-policies/edit/${policyId}`,
   },
