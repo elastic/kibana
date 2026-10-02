@@ -250,6 +250,27 @@ describe('CheckStatus', () => {
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });
 
+  it.each([
+    ['OTel data', makeStatus({ otel: { hasData: true }, universalProfiling: { hasSetup: false } })],
+    [
+      'Universal Profiling data',
+      makeStatus({ universalProfiling: { hasSetup: false, hasData: true } }),
+    ],
+  ])(
+    'redirects to the add data page when Universal Profiling is not set up, even with %s',
+    (_name, data) => {
+      mockStatus({ data });
+
+      renderCheckStatus();
+
+      expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
+        path: {},
+        query: { selectedTab: AddDataTabs.Kubernetes },
+      });
+      expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
+    }
+  );
+
   it.each(['/add-data-instructions', '/profiling-not-enabled'])(
     'displays %s without redirecting when there is no data',
     (pathname) => {
