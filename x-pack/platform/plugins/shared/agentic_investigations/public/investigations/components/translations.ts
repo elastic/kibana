@@ -59,3 +59,9 @@ export const moreSubjectsLabel = (count: number): string =>
     defaultMessage: '+{count}',
     values: { count },
   });
+
+/** Shown for an investigation Agent Builder has not titled yet and that has no subject to name. */
+export const NEW_INVESTIGATION_TITLE = i18n.translate(
+  'xpack.agenticInvestigations.investigations.newInvestigationTitle',
+  { defaultMessage: 'New investigation' }
+);

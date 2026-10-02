@@ -7,7 +7,10 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
+import {
+  DEFAULT_CONVERSATION_TITLE,
+  type ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { toKqlExpression, type KueryNode } from '@kbn/es-query';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
@@ -193,6 +196,7 @@ describe('InvestigationsQueryService', () => {
       expect(investigation).toEqual({
         id: 'conv-1',
         title: 'Investigation conv-1',
+        title_pending: false,
         created_at: '2026-01-01T00:00:00.000Z',
         updated_at: '2026-01-01T00:00:00.000Z',
         agent_id: 'agent-1',
@@ -559,6 +563,28 @@ describe('InvestigationsQueryService', () => {
       const { results } = await service.list(request, parseQuery({ query: 'checkout' }));
 
       expect(results.map(({ id }) => id).sort()).toEqual(['summary', 'title', 'verdict']);
+    });
+
+    it('reports a title Agent Builder has not generated yet and never matches text against it', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('pending', { title: DEFAULT_CONVERSATION_TITLE }),
+          conversation('titled', { title: 'Conversation pool exhausted' }),
+        ],
+      });
+
+      const { results } = await service.list(request, parseQuery());
+      expect(
+        results
+          .map(({ id, title_pending: titlePending }) => ({ id, titlePending }))
+          .sort((a, b) => a.id.localeCompare(b.id))
+      ).toEqual([
+        { id: 'pending', titlePending: true },
+        { id: 'titled', titlePending: false },
+      ]);
+
+      const matched = await service.list(request, parseQuery({ query: 'conversation' }));
+      expect(matched.results.map(({ id }) => id)).toEqual(['titled']);
     });
 
     it('hides a removed document with one attachment lookup instead of reading the conversation', async () => {
