@@ -74,6 +74,7 @@ export function useOnboardingDriftDetection({
       : '';
 
   useEffect(() => {
+    let cancelled = false;
     const thisId = ++driftCheckIdRef.current;
     // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
     // false for edit mode while awsServicesMap is still loading, allowing it to settle once the
@@ -83,7 +84,9 @@ export function useOnboardingDriftDetection({
     setDriftCheckError(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
-        if (thisId !== driftCheckIdRef.current) return; // stale response — discard
+        // cancelled guards against unmount (step navigated away); thisId guards against a
+        // newer effect run superseding this one within the same hook instance.
+        if (cancelled || thisId !== driftCheckIdRef.current) return;
         if (!item) {
           // SO does not exist or was cleared — nothing to compare against; treat as clean.
           // Also clear persisted drift flags so stale session state doesn't re-trigger callout.
@@ -141,9 +144,12 @@ export function useOnboardingDriftDetection({
         setDriftSettled(true);
       })
       .catch(() => {
-        if (thisId !== driftCheckIdRef.current) return;
+        if (cancelled || thisId !== driftCheckIdRef.current) return;
         setDriftCheckError(true);
       });
+    return () => {
+      cancelled = true;
+    };
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based

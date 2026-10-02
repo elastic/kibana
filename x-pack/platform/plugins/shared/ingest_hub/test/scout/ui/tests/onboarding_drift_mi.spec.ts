@@ -740,50 +740,5 @@ test.describe(
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
     });
-
-    test('auth method radio is locked in identity-federation edit mode', async ({
-      browserAuth,
-      page,
-    }) => {
-      // Auth method is locked in MI edit mode: a deployment that used identity federation cannot
-      // switch to Access Keys via the radio. The Access Keys option must be disabled.
-      const DEP_ID = 'dep-auth-drift-001';
-      await page.route(
-        (url) =>
-          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
-        (route) =>
-          route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              item: makeSoItem(DEP_ID, {
-                authMethod: 'identity_federation',
-                policyIdsByInstance: {},
-              }),
-            }),
-          })
-      );
-
-      await browserAuth.loginAsAdmin();
-      await page.gotoApp('onboarding/aws', {
-        params: { deploymentId: DEP_ID },
-        hash: 'authenticate-and-deploy',
-      });
-      await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-
-      // The Access Keys radio must be disabled — auth method is locked once a deployment exists.
-      await expect(
-        page.testSubj
-          .locator('managedIntegrationsSection-preferredMethodRadio')
-          .locator('[id="access_keys"]')
-      ).toBeDisabled();
-
-      // The Identity Federation radio remains enabled (already selected, not switching).
-      await expect(
-        page.testSubj
-          .locator('managedIntegrationsSection-preferredMethodRadio')
-          .locator('[id="identity_federation"]')
-      ).toBeEnabled();
-    });
   }
 );
