@@ -26,7 +26,8 @@ const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1, tags: ['tag1'] },
+  version: 1,
+  metadata: { name: 'Test Rule', tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
@@ -469,8 +470,10 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toEqual({
       pendingCount: 3,
       pendingTimeframe: '10m',
+      pendingOperator: null,
       recoveringCount: null,
       recoveringTimeframe: null,
+      recoveringOperator: null,
     });
     expect(result.stateTransitionAlertDelayMode).toBe('duration');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');

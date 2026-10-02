@@ -12,6 +12,7 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
   toUnifiedAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
+  getAttachmentTypeFromAttributes,
 } from '../../../../common/utils/attachments';
 import { getAttachmentSavedObjectType } from '../../../common/attachments';
 import { isSOError } from '../../../common/error';
@@ -47,6 +48,7 @@ import type {
   GetAttachmentArgs,
   GetUnifiedAttachmentsByTypesArgs,
   MixSavedObjectResponse,
+  OptionalAttributes,
   ServiceContext,
 } from '../types';
 import type {
@@ -128,12 +130,12 @@ export class AttachmentGetter {
     return result;
   }
 
-  // Leftover cases-comments documents fold via toUnifiedAttributes. Unknown
-  // persistable-state subtype ids stay legacy-shaped.
+  // Migrated cases-comments documents fold to unified via toUnifiedAttributes;
+  // unrecognized types are surfaced as per-item errors (see toUnrecognizedTypeError).
   private transformAndDecodeBulkGetResponse(
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentAttributesV2> {
-    const validatedAttachments: Array<AttachmentSavedObjectTransformedV2> = [];
+    const validatedAttachments: Array<OptionalAttributes<AttachmentAttributesV2>> = [];
 
     for (const so of merged) {
       if (isSOError(so)) {
@@ -152,21 +154,35 @@ export class AttachmentGetter {
             }) as AttachmentSavedObjectTransformedV2
           );
         } else {
-          const legacySo = {
-            ...injectedSo,
-            attributes: transformed.attributes,
-          } as SavedObject<AttachmentPersistedAttributes>;
-          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-            legacySo.attributes
-          );
-
-          validatedAttachments.push(Object.assign(legacySo, { attributes: validatedAttributes }));
+          validatedAttachments.push(this.toUnrecognizedTypeError(injectedSo));
         }
       }
     }
 
     return {
       saved_objects: validatedAttachments,
+    };
+  }
+
+  // Only `bulkGet` has an errors channel; get/getFileAttachments/flatten fall back to legacy instead.
+  // A unified cross-path policy (+ registry-derived gating) is tracked follow-up, not this narrowing.
+  private toUnrecognizedTypeError(
+    injectedSo: SavedObject<AttachmentAttributesV2>
+  ): OptionalAttributes<AttachmentAttributesV2> {
+    const attachmentType = getAttachmentTypeFromAttributes(injectedSo.attributes);
+    this.context.log.warn(
+      `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which is not in MIGRATED_ATTACHMENT_TYPES. Returning it as an error instead of a legacy fallback.`
+    );
+
+    return {
+      id: injectedSo.id,
+      type: injectedSo.type,
+      references: injectedSo.references,
+      error: {
+        error: 'Bad Request',
+        message: `Attachment type "${attachmentType}" is not recognized.`,
+        statusCode: 400,
+      },
     };
   }
 
