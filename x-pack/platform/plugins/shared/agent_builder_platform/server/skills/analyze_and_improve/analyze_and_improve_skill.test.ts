@@ -197,6 +197,15 @@ describe('analyzeAndImproveSkill', () => {
       expect(prose).toMatch(/Choose the strategy from the signals in `strategy_catalog`/);
     });
 
+    it('says a Bottom-Up re-run replaces each document KI, not that it reaches new documents', () => {
+      const catalog = strategyCatalogReference.content;
+
+      expect(catalog).not.toMatch(/new documents added/);
+      expect(catalog).toMatch(
+        /\| \*\*Bottom-Up\*\* \|[^\n]*\| Every run over the filtered slice, replacing each document's KI \|/
+      );
+    });
+
     it('lists the fit signals for each strategy in the catalog', () => {
       const catalog = strategyCatalogReference.content.replace(/\s+/g, ' ');
 
