@@ -119,10 +119,13 @@ const triageInputTemplate = (triageStartedComment?.with as Record<string, unknow
 const makeAlerts = (count: number) =>
   Array.from({ length: count }, (_, i) => ({ _id: `alert-id-${i + 1}` }));
 
-const renderTriageStarted = (alertCount: number): string =>
+const renderTriageStarted = (alertCount: number, reusedInvestigation = false): string =>
   renderString(triageInputTemplate, {
     event: { rule: { name: 'My Rule' }, alerts: makeAlerts(alertCount) },
-    steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+    variables: {
+      investigation_conversation_id: 'conv-1',
+      reused_investigation: reusedInvestigation,
+    },
     execution: { url: 'https://kibana.example.com/app/exec/1' },
   });
 
@@ -150,9 +153,12 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
   it('claims every alert is attached when no chunk failed', () => {
     const comment = renderString(triageInputTemplate, {
       event: { rule: { name: 'My Rule' }, alerts: makeAlerts(3) },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
-      variables: { failed_attach_chunk_count: 0, total_attach_chunk_count: 1 },
+      variables: {
+        investigation_conversation_id: 'conv-1',
+        failed_attach_chunk_count: 0,
+        total_attach_chunk_count: 1,
+      },
     });
     expect(comment).toContain('Alerts attached above.');
     expect(comment).not.toContain('failed to attach');
@@ -161,9 +167,12 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
   it('warns with the failure count instead of claiming full attachment when a chunk failed', () => {
     const comment = renderString(triageInputTemplate, {
       event: { rule: { name: 'My Rule' }, alerts: makeAlerts(45) },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
-      variables: { failed_attach_chunk_count: 1, total_attach_chunk_count: 3 },
+      variables: {
+        investigation_conversation_id: 'conv-1',
+        failed_attach_chunk_count: 1,
+        total_attach_chunk_count: 3,
+      },
     });
     expect(comment).toContain('1 of 3 alert chunk(s) failed to attach');
     expect(comment).not.toContain('Alerts attached above.');
@@ -471,7 +480,7 @@ describe('floor_alert_triage — add_verdict_notes', () => {
     renderString(noteTemplate, {
       workflow: { spaceId: 'default' },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      variables: { investigation_conversation_id: 'conv-1' },
       foreach: {
         item: {
           classification: 'false_positive',
@@ -585,8 +594,7 @@ describe('floor_alert_triage — closure review hand-off', () => {
 
     const context = {
       event: { rule: { id: 'rule-1', name: 'Noisy rule' } },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
-      variables: { fp_candidate_ids: ['a', 'b'] },
+      variables: { investigation_conversation_id: 'conv-1', fp_candidate_ids: ['a', 'b'] },
       consts: {
         worker_settings: { autonomy: 'supervised', autoCloseConfidenceScoreMinThreshold: 0.9 },
       },
@@ -792,6 +800,100 @@ describe('floor_alert_triage — closure review hand-off', () => {
 
     expect(rendered).toContain('handed to the closure review');
     expect(rendered).toContain('A human decision is required.');
-    expect(rendered).toContain('The outcome is posted here');
+    expect(rendered).toContain('the review adds these alerts to it instead of raising another');
+    expect(rendered).toContain(
+      'The outcome is posted in the Investigation that holds the proposal'
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Joining the Investigation that holds the rule's pending closure proposal
+//
+// A noisy rule's batches share one Investigation while its closure proposal is pending. That
+// Investigation belongs to the proposal, so a batch that joined it must never close it.
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage — standing Investigation', () => {
+  const topLevelNames = parsed.steps.map((step) => step.name);
+  const reusedExpr = stepByName('resolve_standing_investigation')?.with
+    ?.reused_investigation as string;
+  const investigationIdTemplate = stepByName('resolve_investigation')?.with
+    ?.investigation_conversation_id as string;
+
+  it('looks the rule up after the preflight and before an Investigation is opened', () => {
+    const find = stepByName('find_standing_investigation');
+    expect(find?.type).toBe('alertzero.findOpenFpCloseProposal');
+    expect(find?.with?.rule_id).toBe('{{ event.rule.id }}');
+    expect(find?.['on-failure']?.continue).toBe(true);
+    expect(topLevelNames.indexOf('require_analysis_enabled')).toBeLessThan(
+      topLevelNames.indexOf('find_standing_investigation')
+    );
+    expect(topLevelNames.indexOf('find_standing_investigation')).toBeLessThan(
+      topLevelNames.indexOf('create_investigation')
+    );
+  });
+
+  it.each([
+    [{ output: { found: true, conversation_id: 'conv-standing' } }, true],
+    [{ output: { found: false } }, false],
+    [{ error: { message: 'forbidden' } }, false],
+  ])('reads the lookup %j as reused=%s', (lookup, expected) => {
+    expect(evalExpr(reusedExpr, { steps: { find_standing_investigation: lookup } })).toBe(expected);
+  });
+
+  it('opens an Investigation only when the batch did not join one', () => {
+    const condition = stepByName('create_investigation')?.if as string;
+    expect(evalExpr(condition, { variables: { reused_investigation: true } })).toBe(false);
+    expect(evalExpr(condition, { variables: { reused_investigation: false } })).toBe(true);
+  });
+
+  it('writes to the standing Investigation when reused and to the new one otherwise', () => {
+    const steps = {
+      find_standing_investigation: { output: { conversation_id: 'conv-standing' } },
+      create_investigation: { output: { conversation_id: 'conv-new' } },
+    };
+    expect(
+      renderString(investigationIdTemplate, { steps, variables: { reused_investigation: true } })
+    ).toBe('conv-standing');
+    expect(
+      renderString(investigationIdTemplate, { steps, variables: { reused_investigation: false } })
+    ).toBe('conv-new');
+  });
+
+  it("reads create_investigation's output nowhere else, since it is empty for a reused batch", () => {
+    const readers = allSteps.filter(
+      (step) =>
+        step.name !== 'resolve_investigation' &&
+        JSON.stringify(step.with ?? {}).includes('steps.create_investigation.output')
+    );
+    expect(readers.map((step) => step.name)).toEqual([]);
+  });
+
+  it.each(['close_no_fp', 'close_investigation_review_limit'])(
+    '"%s" never closes a standing Investigation',
+    (name) => {
+      const condition = stepByName(name)?.if as string;
+      expect(evalExpr(condition, { variables: { reused_investigation: true } })).toBe(false);
+      expect(evalExpr(condition, { variables: { reused_investigation: false } })).toBe(true);
+    }
+  );
+
+  it('says the new run joined the Investigation of the pending proposal', () => {
+    const comment = renderTriageStarted(2, true);
+    expect(comment).toContain('New run of rule **My Rule**: 2 alerts added to this Investigation');
+    expect(comment).not.toContain('Triage started');
+  });
+
+  it('says the pending proposal is untouched when a joined batch has no false positives', () => {
+    const template = (stepByName('post_comment_outcome_no_fp')?.with as { message: string })
+      .message;
+    const render = (reused: boolean) =>
+      renderString(template, {
+        steps: { classify_alerts: { output: {} } },
+        variables: { reused_investigation: reused },
+        consts: { worker_settings: { autoCloseConfidenceScoreMinThreshold: 0.85 } },
+      });
+    expect(render(true)).toContain('already pending in this Investigation is unchanged');
+    expect(render(false)).not.toContain('already pending');
   });
 });

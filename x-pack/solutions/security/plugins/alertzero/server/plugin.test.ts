@@ -17,9 +17,14 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
 import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
+import { registerStepDefinitions } from './step_definitions/register_step_definitions';
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
+}));
+
+jest.mock('./step_definitions/register_step_definitions', () => ({
+  registerStepDefinitions: jest.fn(),
 }));
 
 jest.mock('./inference_features', () => ({
@@ -83,6 +88,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         setServerlessTierAvailable: expect.any(Function),
       });
       expect(registerOwner).not.toHaveBeenCalled();
+      expect(registerStepDefinitions).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
@@ -194,6 +200,35 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(features.registerKibanaFeature.mock.calls[0][0].subFeatures).toBeUndefined();
       expect(registerRoutes).toHaveBeenCalled();
       expect(registerAgentType).toHaveBeenCalled();
+    });
+
+    it.each([
+      ['registers the rule dispositions AI index', true],
+      ['leaves closure proposals uncoalesced without the Context Engine', false],
+    ])('%s and the Alert Triage steps', (_, hasContextEngine) => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+      const contextEngine = { registerAiIndex: jest.fn() };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions,
+          workflowsManagement: { management: {} },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
+          ...(hasContextEngine ? { contextEngine } : {}),
+        } as never
+      );
+
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(hasContextEngine ? 1 : 0);
+      expect(registerStepDefinitions).toHaveBeenCalledWith(
+        workflowsExtensions,
+        expect.objectContaining({ isPointerStoreAvailable: hasContextEngine })
+      );
     });
 
     it('registers the per-space enablement advanced setting', () => {
