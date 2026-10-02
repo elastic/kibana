@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
@@ -13,6 +13,7 @@ import { registerTemplate } from './conversation_templates/registry/register_tem
 import { escalationTemplate } from './conversation_templates/templates/escalation/register';
 import { investigationTemplate } from './conversation_templates/templates/investigation/register';
 import type {
+  AgenticInvestigationsPublicConfig,
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
@@ -33,6 +34,12 @@ export class AgenticInvestigationsPublicPlugin
       AgenticInvestigationsPublicStartDependencies
     >
 {
+  private readonly escalationsEnabled: boolean;
+
+  constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
+    this.escalationsEnabled = context.config.get().escalations.enabled;
+  }
+
   setup(
     _core: CoreSetup,
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
@@ -52,7 +59,12 @@ export class AgenticInvestigationsPublicPlugin
       registerTemplate({
         core,
         startDeps: { ...startDeps, agentBuilder },
-        templates: [investigationTemplate, escalationTemplate],
+        // Escalations are AlertZero-only for now: without them there is no escalation template,
+        // and the investigation template has no escalate action.
+        escalationsEnabled: this.escalationsEnabled,
+        templates: this.escalationsEnabled
+          ? [investigationTemplate, escalationTemplate]
+          : [investigationTemplate],
       });
     }
     return {};

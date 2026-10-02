@@ -40,13 +40,16 @@ jest.mock('./investigations/routes/register_routes', () => ({
   registerInvestigationRoutes: jest.fn(),
 }));
 
-const createContext = () =>
+const createContext = ({ escalationsEnabled = true }: { escalationsEnabled?: boolean } = {}) =>
   ({
     logger: { get: () => loggerMock.create() },
+    config: {
+      get: () => ({ enabled: true, escalations: { enabled: escalationsEnabled } }),
+    },
   } as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0]);
 
-const setupPlugin = () => {
-  const plugin = new AgenticInvestigationsPlugin(createContext());
+const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = {}) => {
+  const plugin = new AgenticInvestigationsPlugin(createContext({ escalationsEnabled }));
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
 
@@ -170,6 +173,23 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
+    it('registers no escalations sub-feature when escalations are disabled', () => {
+      const { features } = setupPlugin({ escalationsEnabled: false });
+      const feature = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+
+      expect(feature.subFeatures).toHaveLength(1);
+      expect(feature.subFeatures[0].privilegeGroups[0].privileges[0].id).toBe('investigations_all');
+      expect(JSON.stringify(feature)).not.toMatch(/escalations/i);
+    });
+
+    it('tells the escalation routes whether escalations are enabled', () => {
+      setupPlugin({ escalationsEnabled: false });
+
+      expect(registerEscalationRoutes).toHaveBeenCalledWith(
+        expect.objectContaining({ escalationsEnabled: false })
+      );
+    });
+
     it('registers the impact attachment type and workflow steps during setup', () => {
       const { workflowsExtensions, agentBuilder } = setupPlugin();
 
@@ -217,6 +237,14 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
+    });
+
+    it('refuses the escalations service when escalations are disabled', () => {
+      const { plugin } = setupPlugin({ escalationsEnabled: false });
+
+      const { contract } = startPlugin(plugin);
+
+      expect(() => contract.getEscalationsService()).toThrow(/escalations are disabled/i);
     });
 
     it('exposes no proposals getter, which the proposals plugin owns instead', () => {

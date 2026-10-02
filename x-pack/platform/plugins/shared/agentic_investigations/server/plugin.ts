@@ -14,6 +14,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { AgenticInvestigationsConfig } from './config';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -48,6 +49,7 @@ export class AgenticInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly escalationsEnabled: boolean;
   private impactService?: ImpactService;
   private escalationsService?: EscalationsService;
   private assignmentsService?: AssignmentsService;
@@ -56,15 +58,16 @@ export class AgenticInvestigationsPlugin
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext<AgenticInvestigationsConfig>) {
     this.logger = context.logger.get();
+    this.escalationsEnabled = context.config.get().escalations.enabled;
   }
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
     { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
-    registerFeatures({ features });
+    registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
     registerImpactAttachment(agentBuilder, {
       getImpactService: () => this.requireImpactService(),
@@ -105,6 +108,7 @@ export class AgenticInvestigationsPlugin
       getAssignmentsService: () => this.requireAssignmentsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+      escalationsEnabled: this.escalationsEnabled,
     });
 
     registerInvestigationRoutes({
@@ -114,6 +118,7 @@ export class AgenticInvestigationsPlugin
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
       privileges: createInvestigationsPrivilegesReader({
         getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        escalationsEnabled: this.escalationsEnabled,
       }),
     });
 
@@ -155,13 +160,15 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
-    this.escalationsService = new EscalationsService({
-      logger: this.logger,
-      getConversationClient: (request) =>
-        plugins.agentBuilder.conversations.getScopedClient({ request }),
-      conversationTemplates: plugins.agentBuilder.conversationTemplates,
-      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
-    });
+    if (this.escalationsEnabled) {
+      this.escalationsService = new EscalationsService({
+        logger: this.logger,
+        getConversationClient: (request) =>
+          plugins.agentBuilder.conversations.getScopedClient({ request }),
+        conversationTemplates: plugins.agentBuilder.conversationTemplates,
+        getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      });
+    }
 
     this.assignmentsService = new AssignmentsService({
       getConversationClient: (request) =>
@@ -193,6 +200,11 @@ export class AgenticInvestigationsPlugin
   }
 
   private requireEscalationsService(): EscalationsService {
+    if (!this.escalationsEnabled) {
+      throw new Error(
+        'Escalations are disabled by xpack.agenticInvestigations.escalations.enabled: false'
+      );
+    }
     if (!this.escalationsService) {
       throw new Error(
         'Escalations service is not available until the agenticInvestigations plugin has started'

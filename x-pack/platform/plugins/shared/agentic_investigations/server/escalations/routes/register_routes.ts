@@ -16,11 +16,15 @@ import { registerSetEscalationStatusRoute } from './set_escalation_status';
 import { registerGetEscalationClosePreviewRoute } from './get_escalation_close_preview';
 
 export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
+  // Shared with the investigation assignee picker, so it stays when escalations are disabled.
+  registerSuggestUsersRoute(deps);
+  if (!deps.escalationsEnabled) {
+    return;
+  }
   registerCreateEscalationRoute(deps);
   registerListEscalationsRoute(deps);
   registerListLinkedInvestigationsRoute(deps);
   registerUpdateEscalationRoute(deps);
-  registerSuggestUsersRoute(deps);
   registerAssignEscalationRoute(deps);
   registerSetEscalationStatusRoute(deps);
   registerGetEscalationClosePreviewRoute(deps);

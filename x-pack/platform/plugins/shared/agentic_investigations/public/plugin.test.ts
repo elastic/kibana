@@ -10,11 +10,16 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { getEscalationTabIds, getInvestigationTabIds } from '@kbn/agentic-investigations-common';
 import { AgenticInvestigationsPublicPlugin } from './plugin';
 
+const createPlugin = ({ escalationsEnabled = true }: { escalationsEnabled?: boolean } = {}) =>
+  new AgenticInvestigationsPublicPlugin(
+    coreMock.createPluginInitializerContext({ escalations: { enabled: escalationsEnabled } })
+  );
+
 describe('AgenticInvestigationsPublicPlugin conversation template UI registration', () => {
   it('registers the investigation and escalation template UI and their tabs', () => {
     const agentBuilder = agentBuilderMocks.createStart();
 
-    new AgenticInvestigationsPublicPlugin().start(coreMock.createStart(), { agentBuilder });
+    createPlugin().start(coreMock.createStart(), { agentBuilder });
 
     const { conversationTemplates } = agentBuilder;
     expect(conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledTimes(2);
@@ -37,7 +42,7 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
   it('registers the shared template names and icons', () => {
     const agentBuilder = agentBuilderMocks.createStart();
 
-    new AgenticInvestigationsPublicPlugin().start(coreMock.createStart(), { agentBuilder });
+    createPlugin().start(coreMock.createStart(), { agentBuilder });
 
     const definitions = Object.fromEntries(
       agentBuilder.conversationTemplates.registerTemplateUIDefinition.mock.calls.map(
@@ -56,8 +61,27 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
   });
 
   it('registers nothing without Agent Builder', () => {
-    const plugin = new AgenticInvestigationsPublicPlugin();
+    const plugin = createPlugin();
 
     expect(() => plugin.start(coreMock.createStart(), {})).not.toThrow();
+  });
+
+  it('registers only the investigation template, without an escalate action, when escalations are disabled', () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    createPlugin({ escalationsEnabled: false }).start(coreMock.createStart(), { agentBuilder });
+
+    const { conversationTemplates } = agentBuilder;
+    expect(conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledTimes(1);
+    expect(conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledWith(
+      'investigation',
+      expect.any(Function)
+    );
+    for (const tabId of getEscalationTabIds('escalation')) {
+      expect(conversationTemplates.registerTab).not.toHaveBeenCalledWith(
+        tabId,
+        expect.any(Function)
+      );
+    }
   });
 });

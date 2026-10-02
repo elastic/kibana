@@ -31,18 +31,23 @@ const mockRegisterEscalation = registerEscalationTemplateUI as jest.Mock;
 const register = ({
   proposals,
   core = coreMock.createStart(),
+  escalationsEnabled = true,
 }: {
   proposals?: ProposalsPublicPluginStart;
   core?: ReturnType<typeof coreMock.createStart>;
+  escalationsEnabled?: boolean;
 } = {}) => {
   registerTemplate({
     core,
     startDeps: { agentBuilder: agentBuilderMocks.createStart(), proposals },
-    templates: [investigationTemplate, escalationTemplate],
+    escalationsEnabled,
+    templates: escalationsEnabled
+      ? [investigationTemplate, escalationTemplate]
+      : [investigationTemplate],
   });
   return {
     investigation: mockRegisterInvestigation.mock.calls[0][0],
-    escalation: mockRegisterEscalation.mock.calls[0][0],
+    escalation: mockRegisterEscalation.mock.calls[0]?.[0],
   };
 };
 
@@ -80,6 +85,17 @@ describe('registerTemplate', () => {
     expect(escalation.renderAssignees).toEqual(expect.any(Function));
     expect(escalation.renderStatus).toEqual(expect.any(Function));
     expect(escalation.renderLinkedInvestigations).toEqual(expect.any(Function));
+  });
+
+  it('offers no escalate action when escalations are disabled', () => {
+    const { investigation, escalation } = register({ escalationsEnabled: false });
+
+    expect(investigation.renderEscalationModal).toBeUndefined();
+    expect(investigation.wrapEscalationButton).toBeUndefined();
+    // The investigation's own write actions are unaffected.
+    expect(investigation.renderStatus).toEqual(expect.any(Function));
+    expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
+    expect(escalation).toBeUndefined();
   });
 
   it('renders proposed actions only when the proposals plugin is enabled', () => {
