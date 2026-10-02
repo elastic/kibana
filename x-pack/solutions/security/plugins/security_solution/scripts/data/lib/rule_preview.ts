@@ -158,7 +158,7 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
       );
     }
 
-    const reindexDest = destIsDataStream ? destIndex : destWriteIndex ?? destIndex;
+    const reindexDest = destIsDataStream ? destIndex : (destWriteIndex ?? destIndex);
 
     const script = {
       lang: 'painless',

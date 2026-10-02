@@ -22,7 +22,7 @@ const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefini
     basePath: 'skills/platform/core',
     referencedContent: [],
     ...overrides,
-  } as unknown as InternalSkillDefinition);
+  }) as unknown as InternalSkillDefinition;
 
 // Above SMALL_SKILL_THRESHOLD (3) so a model call is triggered.
 const manySkills = () => [

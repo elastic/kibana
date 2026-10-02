@@ -90,7 +90,7 @@ export async function createAgentAction(
     expiration:
       newAgentAction.expiration === NO_EXPIRATION
         ? undefined
-        : newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString(),
+        : (newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString()),
     agents: newAgentAction.agents,
     namespaces: newAgentAction.namespaces,
     action_id: actionId,

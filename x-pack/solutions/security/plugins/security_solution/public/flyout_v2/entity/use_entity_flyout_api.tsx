@@ -546,10 +546,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         (engineType === 'host'
           ? formatFlyoutTitle(HOST_TITLE, entityName)
           : engineType === 'user'
-          ? formatFlyoutTitle(USER_TITLE, entityName)
-          : engineType === 'service'
-          ? formatFlyoutTitle(SERVICE_TITLE, entityName)
-          : GENERIC_ENTITY_TITLE);
+            ? formatFlyoutTitle(USER_TITLE, entityName)
+            : engineType === 'service'
+              ? formatFlyoutTitle(SERVICE_TITLE, entityName)
+              : GENERIC_ENTITY_TITLE);
       writeOnOpen(descriptor);
       const onClose = buildOnClose(null);
       open(
@@ -643,10 +643,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         (engineType === 'host'
           ? formatFlyoutTitle(HOST_TITLE, titleValue)
           : engineType === 'user'
-          ? formatFlyoutTitle(USER_TITLE, titleValue)
-          : engineType === 'service'
-          ? formatFlyoutTitle(SERVICE_TITLE, titleValue)
-          : GENERIC_ENTITY_TITLE);
+            ? formatFlyoutTitle(USER_TITLE, titleValue)
+            : engineType === 'service'
+              ? formatFlyoutTitle(SERVICE_TITLE, titleValue)
+              : GENERIC_ENTITY_TITLE);
       open(
         children,
         {

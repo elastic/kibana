@@ -207,8 +207,8 @@ const RuleActionsOverflowComponent = ({
                 !canManualRunRules
                   ? i18nActions.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
                   : !rule.enabled
-                  ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
-                  : ''
+                    ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
+                    : ''
               }
               data-test-subj="rules-details-manual-rule-run"
               onClick={async () => {

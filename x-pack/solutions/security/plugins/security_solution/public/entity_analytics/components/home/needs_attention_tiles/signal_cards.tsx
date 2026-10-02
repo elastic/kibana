@@ -312,7 +312,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         position: relative;
         /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local card stacking, no semantic token applies */
         z-index: ${selected || emphasized ? 2 : 1};
-        transition: border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+        transition:
+          border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
           background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
           opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 

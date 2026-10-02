@@ -133,7 +133,7 @@ const normalizeTypeName = (typeName?: string): string | undefined => {
     ZodBoolean: ZodSchemaType.boolean,
   };
 
-  return typeName ? typeMap[typeName] ?? typeName : undefined;
+  return typeName ? (typeMap[typeName] ?? typeName) : undefined;
 };
 
 const unwrapAndGetTypeName = (schema: any): string | undefined => {

@@ -37,7 +37,7 @@ const toInferenceConnector = (connector: AIConnector): CommonInferenceConnector 
   connectorId: connector.id,
   name: connector.name,
   type: connector.actionTypeId as InferenceConnectorType,
-  config: 'config' in connector ? connector.config ?? {} : {},
+  config: 'config' in connector ? (connector.config ?? {}) : {},
   capabilities: {},
   isInferenceEndpoint: connector.actionTypeId === InferenceConnectorType.Inference,
   isPreconfigured: connector.isPreconfigured,

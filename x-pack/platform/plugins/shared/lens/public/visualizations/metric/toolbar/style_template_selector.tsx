@@ -122,13 +122,15 @@ function StyleTemplateCard({
         &:focus {
           transform: none;
         }
-        ${isSelected
-          ? `
+        ${
+          isSelected
+            ? `
           border: 1px solid ${euiTheme.colors.borderStrongPrimary};
           `
-          : `
+            : `
           border: 1px solid ${euiTheme.border.color};
-          `}
+          `
+        }
       `}
     >
       {isCustomTemplate ? (

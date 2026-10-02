@@ -118,8 +118,8 @@ export const resolveTargetSpaces = async ({
       refusedAdditions.length === unauthorizedSpaceIds.length
         ? 'assign a dataset to'
         : refusedAdditions.length === 0
-        ? 'remove a dataset from'
-        : "change a dataset's spaces:";
+          ? 'remove a dataset from'
+          : "change a dataset's spaces:";
 
     return {
       authorized: false,

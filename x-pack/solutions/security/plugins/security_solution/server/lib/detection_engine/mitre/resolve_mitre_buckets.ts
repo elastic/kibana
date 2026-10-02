@@ -60,12 +60,10 @@ export const resolveMitreBuckets = async (
   // Remove once the managed source is the default and the blob is deleted.
   if (!legacyCachePromise) {
     legacyCachePromise = (async () => {
-      const { tactics, techniques, subtechniques } = await import(
-        '../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-      );
-      const { transformLegacyMitreData } = await import(
-        '../../../../common/detection_engine/mitre/mitre_data_adapter'
-      );
+      const { tactics, techniques, subtechniques } =
+        await import('../../../../common/detection_engine/mitre/mitre_tactics_techniques');
+      const { transformLegacyMitreData } =
+        await import('../../../../common/detection_engine/mitre/mitre_data_adapter');
       return transformLegacyMitreData({ tactics, techniques, subtechniques });
     })().then(undefined, (err) => {
       legacyCachePromise = null;

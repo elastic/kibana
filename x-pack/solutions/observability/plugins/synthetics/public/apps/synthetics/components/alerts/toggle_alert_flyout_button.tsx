@@ -86,8 +86,8 @@ export const ToggleAlertFlyoutButton = () => {
           toolTipContent: !canManageRules
             ? noWritePermissionsTooltipContent
             : !statusRuleExists
-            ? statusRuleNotAvailableTooltipContent
-            : null,
+              ? statusRuleNotAvailableTooltipContent
+              : null,
           disabled: !canManageRules || loading || !statusRuleExists,
           icon: 'bell',
         },
@@ -119,8 +119,8 @@ export const ToggleAlertFlyoutButton = () => {
           toolTipContent: !canManageRules
             ? noWritePermissionsTooltipContent
             : !tlsRuleExists
-            ? tlsRuleNotAvailableTooltipContent
-            : null,
+              ? tlsRuleNotAvailableTooltipContent
+              : null,
           disabled: !canManageRules || loading || !tlsRuleExists,
           icon: 'bell',
         },

@@ -601,7 +601,7 @@ describe('autocomplete_utils', () => {
           ),
           getWordUntilPosition: () => wordUntilPosition,
           getLineMaxColumn: (lineNumber: number) => editorLines[lineNumber - 1].length + 1,
-        } as unknown as monaco.editor.ITextModel);
+        }) as unknown as monaco.editor.ITextModel;
 
       // Simulates Monaco applying a completion item over its single-range form.
       const acceptSuggestion = (editorLines: string[], item: monaco.languages.CompletionItem) => {

@@ -30,19 +30,18 @@ export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData
 /**
  * Props of {@link UserAvatar} component
  */
-export interface UserAvatarProps
-  extends Omit<
-    EuiAvatarProps,
-    | 'initials'
-    | 'initialsLength'
-    | 'imageUrl'
-    | 'iconType'
-    | 'iconSize'
-    | 'iconColor'
-    | 'name'
-    | 'color'
-    | 'type'
-  > {
+export interface UserAvatarProps extends Omit<
+  EuiAvatarProps,
+  | 'initials'
+  | 'initialsLength'
+  | 'imageUrl'
+  | 'iconType'
+  | 'iconSize'
+  | 'iconColor'
+  | 'name'
+  | 'color'
+  | 'type'
+> {
   /**
    * User to be rendered
    */

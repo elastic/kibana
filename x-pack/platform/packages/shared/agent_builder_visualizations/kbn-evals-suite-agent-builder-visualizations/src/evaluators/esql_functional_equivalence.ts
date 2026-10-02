@@ -152,7 +152,7 @@ function isEquivalenceJudgement(value: unknown): value is EquivalenceJudgement {
  */
 export function createCalibratedEsqlEquivalenceEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >({
   inferenceClient,
   log,

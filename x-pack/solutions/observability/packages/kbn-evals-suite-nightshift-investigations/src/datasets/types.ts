@@ -22,8 +22,10 @@ import type { SeedSource } from '../seed_data/types';
  * `id` and `examples` are overridden because the framework's `EvaluationDataset` reserves `id`
  * for datasets already stored server-side, and takes its examples as a plain array.
  */
-export interface Dataset<TExample extends Example = Example>
-  extends Omit<EvaluationDataset<TExample>, 'examples' | 'id'> {
+export interface Dataset<TExample extends Example = Example> extends Omit<
+  EvaluationDataset<TExample>,
+  'examples' | 'id'
+> {
   /** Selector accepted by `NIGHTSHIFT_DATASETS`, also used as the Playwright describe title. */
   id: string;
   seedSource: SeedSource;

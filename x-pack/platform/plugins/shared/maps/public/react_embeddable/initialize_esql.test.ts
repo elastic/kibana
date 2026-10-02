@@ -22,7 +22,7 @@ function createTestStore(initialLayerList: LayerDescriptor[] = []): TestStore {
 
   return {
     store: {
-      getState: () => ({ map: { layerList } } as MapStoreState),
+      getState: () => ({ map: { layerList } }) as MapStoreState,
       subscribe: (listener) => {
         listeners.add(listener);
         return () => {

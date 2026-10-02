@@ -69,7 +69,7 @@ const createConstructorOptionsMock = (): ResponseActionsClientOptions => {
 };
 
 const createRunScriptOptionsMock = <
-  TParams extends EndpointRunScriptActionRequestParams = EndpointRunScriptActionRequestParams
+  TParams extends EndpointRunScriptActionRequestParams = EndpointRunScriptActionRequestParams,
 >(
   overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
 ): RunScriptActionRequestBody<TParams> => {

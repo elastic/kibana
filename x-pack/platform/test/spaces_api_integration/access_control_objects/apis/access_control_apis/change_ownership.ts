@@ -83,9 +83,8 @@ export default function ({ getService }: FtrProviderContext) {
     describe('should reject', function () {
       it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile(es);
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')

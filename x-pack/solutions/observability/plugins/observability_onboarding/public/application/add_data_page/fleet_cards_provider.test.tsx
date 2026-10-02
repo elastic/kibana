@@ -55,9 +55,9 @@ interface WrapOptions {
 }
 
 const fleetService = (canReadSettings: boolean) =>
-  ({ authz: { fleet: { readSettings: canReadSettings } } } as unknown as NonNullable<
+  ({ authz: { fleet: { readSettings: canReadSettings } } }) as unknown as NonNullable<
     ObservabilityOnboardingAppServices['fleet']
-  >);
+  >;
 
 const wrap = (ui: React.ReactNode, { path = '/', canReadSettings = true }: WrapOptions = {}) => (
   <KibanaContextProvider services={{ fleet: fleetService(canReadSettings) }}>

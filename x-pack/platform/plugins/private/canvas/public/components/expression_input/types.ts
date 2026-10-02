@@ -15,8 +15,10 @@ import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 /**
  * React Props for the ExpressionInput component.
  */
-export interface ExpressionInputProps
-  extends Pick<HTMLAttributes<HTMLDivElement>, 'style' | 'className'> {
+export interface ExpressionInputProps extends Pick<
+  HTMLAttributes<HTMLDivElement>,
+  'style' | 'className'
+> {
   /** A collection of ExpressionFunctions to use in the autocomplete */
   expressionFunctions: ExpressionFunction[];
 

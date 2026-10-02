@@ -46,7 +46,7 @@ const createMockEsClient = (presentPatterns: Set<string>): ElasticsearchClient =
           Promise.resolve(presentPatterns.has(name) ? present : absent)
         ),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('resolveIndexScope', () => {
   const SPACE_ID = 'default';
@@ -144,8 +144,8 @@ describe('resolveIndexScope', () => {
               data_streams: [],
             }
           : name === 'logs-aws.*' || name === 'logs-endpoint.events.*'
-          ? present
-          : absent
+            ? present
+            : absent
       )
     );
     const result = await resolveIndexScope({ esClient, technology: 'aws_iam', spaceId: SPACE_ID });

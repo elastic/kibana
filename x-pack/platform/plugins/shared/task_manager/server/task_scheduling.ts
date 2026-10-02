@@ -173,7 +173,7 @@ export class TaskScheduling {
           scheduling =
             arr.length === 1
               ? { runAt: new Date(), scheduledAt: new Date() }
-              : addJitter(modifiedTask.schedule?.interval) ?? {};
+              : (addJitter(modifiedTask.schedule?.interval) ?? {});
         }
         return {
           ...modifiedTask,

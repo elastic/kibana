@@ -38,18 +38,17 @@ import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hoo
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from './telemetry';
 
-export interface ESQLDataCascadeProps
-  extends Pick<
-    UnifiedDataTableProps,
-    | 'rows'
-    | 'columns'
-    | 'dataGridDensityState'
-    | 'showTimeCol'
-    | 'dataView'
-    | 'showKeyboardShortcuts'
-    | 'externalCustomRenderers'
-    | 'onUpdateDataGridDensity'
-  > {
+export interface ESQLDataCascadeProps extends Pick<
+  UnifiedDataTableProps,
+  | 'rows'
+  | 'columns'
+  | 'dataGridDensityState'
+  | 'showTimeCol'
+  | 'dataView'
+  | 'showKeyboardShortcuts'
+  | 'externalCustomRenderers'
+  | 'onUpdateDataGridDensity'
+> {
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
 }

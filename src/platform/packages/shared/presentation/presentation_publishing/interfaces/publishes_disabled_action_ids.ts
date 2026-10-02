@@ -24,7 +24,7 @@ export const apiPublishesDisabledActionIds = (
 ): unknownApi is PublishesDisabledActionIds => {
   return Boolean(
     unknownApi &&
-      (unknownApi as PublishesDisabledActionIds)?.disabledActionIds$ !== undefined &&
-      typeof (unknownApi as PublishesDisabledActionIds)?.setDisabledActionIds === 'function'
+    (unknownApi as PublishesDisabledActionIds)?.disabledActionIds$ !== undefined &&
+    typeof (unknownApi as PublishesDisabledActionIds)?.setDisabledActionIds === 'function'
   );
 };

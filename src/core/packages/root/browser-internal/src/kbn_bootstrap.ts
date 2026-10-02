@@ -39,10 +39,10 @@ export async function __kbnBootstrap__() {
     i18n.getIsInitialized()
       ? Promise.resolve()
       : injectedMetadata.i18n.translationsUrl === null
-      ? Promise.resolve(i18n.initDefault())
-      : i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
-          i18nError = error;
-        }),
+        ? Promise.resolve(i18n.initDefault())
+        : i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
+            i18nError = error;
+          }),
   ]);
 
   const isDomStorageDisabled = () => {

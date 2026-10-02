@@ -293,7 +293,7 @@ describe('bulkChangeAgentsPrivilegeLevel kuery path — cheap count and sync/asy
         () =>
           ({
             runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
-          } as any)
+          }) as any
       );
   });
 

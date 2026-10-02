@@ -56,7 +56,7 @@ const getContext = (
       enableMappingsSourceFieldSection: sourceFieldEnabled,
     },
     hasAtLeastEnterpriseLicense,
-  } as unknown as AppDependencies);
+  }) as unknown as AppDependencies;
 
 describe('Mappings editor: configuration form', () => {
   beforeEach(() => {

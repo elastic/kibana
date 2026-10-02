@@ -95,8 +95,8 @@ export function SelectedFilterPills({
             remaining.length > 0 ? remaining : undefined,
             Boolean(
               remaining.length &&
-                isLogicalAndField(field) &&
-                urlParams.useLogicalAndFor?.includes(field)
+              isLogicalAndField(field) &&
+              urlParams.useLogicalAndFor?.includes(field)
             )
           );
         },

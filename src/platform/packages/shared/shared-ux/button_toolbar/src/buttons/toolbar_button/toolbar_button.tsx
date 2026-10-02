@@ -21,18 +21,10 @@ type ButtonPositions = 'left' | 'right' | 'center' | 'none';
 
 type ButtonRenderStyle = 'standard' | 'iconButton';
 
-interface ToolbarButtonCommonProps
-  extends Pick<
-    EuiButtonPropsForButton,
-    | 'onClick'
-    | 'onBlur'
-    | 'iconType'
-    | 'size'
-    | 'data-test-subj'
-    | 'isDisabled'
-    | 'aria-label'
-    | 'id'
-  > {
+interface ToolbarButtonCommonProps extends Pick<
+  EuiButtonPropsForButton,
+  'onClick' | 'onBlur' | 'iconType' | 'size' | 'data-test-subj' | 'isDisabled' | 'aria-label' | 'id'
+> {
   /**
    * Render style of the toolbar button
    */
@@ -70,9 +62,8 @@ type ToolbarIconButton = ToolbarButtonCommonProps & {
 /**
  * Props for `PrimaryButton`.
  */
-export type Props<T extends ButtonRenderStyle> = T extends Extract<ButtonRenderStyle, 'iconButton'>
-  ? ToolbarIconButton
-  : ToolbarStandardButton;
+export type Props<T extends ButtonRenderStyle> =
+  T extends Extract<ButtonRenderStyle, 'iconButton'> ? ToolbarIconButton : ToolbarStandardButton;
 
 const isIconButton = (
   props: ToolbarStandardButton | ToolbarIconButton
@@ -129,8 +120,8 @@ const ToolbarStandardButton = ({
   const toolbarButtonStyleProps: EuiButtonPropsForButton = isDisabled
     ? {}
     : type === 'primary'
-    ? { color: 'primary', fill: true }
-    : { color: 'text' };
+      ? { color: 'primary', fill: true }
+      : { color: 'text' };
 
   const icon = iconType ?? (hasArrow ? 'chevronSingleDown' : '');
 

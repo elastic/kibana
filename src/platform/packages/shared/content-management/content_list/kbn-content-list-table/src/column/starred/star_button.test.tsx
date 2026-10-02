@@ -31,12 +31,10 @@ jest.mock('@kbn/content-management-favorites-public', () => {
   };
 });
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockFavoritesService: FavoritesClientPublic = {
   getFavorites: async () => ({ favoriteIds: [], favoriteMetadata: {} as Record<string, never> }),
@@ -50,17 +48,16 @@ const mockFavoritesService: FavoritesClientPublic = {
 
 const createWrapper =
   (favorites?: FavoritesClientPublic) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-        dataSource={{ findItems: mockFindItems }}
-        services={favorites ? { favorites } : undefined}
-      >
-        {children}
-      </ContentListProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+      dataSource={{ findItems: mockFindItems }}
+      services={favorites ? { favorites } : undefined}
+    >
+      {children}
+    </ContentListProvider>
+  );
 
 describe('StarButton', () => {
   it('renders nothing when starred support is unavailable', () => {

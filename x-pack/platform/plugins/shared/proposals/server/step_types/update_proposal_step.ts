@@ -39,10 +39,10 @@ export const getUpdateProposalStepDefinition = ({
         // fallback rather than the other way round.
         const decidedBy =
           input.decision !== undefined
-            ? (await resolveUser(request)) ??
+            ? ((await resolveUser(request)) ??
               (input.decidedBy
                 ? { username: input.decidedBy, fullName: null, email: null }
-                : undefined)
+                : undefined))
             : undefined;
 
         const proposal = await getProposalsService().update(

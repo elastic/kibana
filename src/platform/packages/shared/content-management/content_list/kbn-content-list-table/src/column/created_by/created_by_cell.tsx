@@ -59,7 +59,7 @@ export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) =
   const user = useProfile(!managed ? createdBy : undefined);
   const toggleFilter = useCreatedByFilterToggle();
 
-  const filterKey = managed ? MANAGED_USER_FILTER : createdBy ?? NO_CREATOR_USER_FILTER;
+  const filterKey = managed ? MANAGED_USER_FILTER : (createdBy ?? NO_CREATOR_USER_FILTER);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {

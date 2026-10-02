@@ -91,8 +91,8 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
               status: (activeStepIndex === index
                 ? 'selected'
                 : activeStepIndex > index
-                ? 'complete'
-                : 'incomplete') as EuiStepStatus,
+                  ? 'complete'
+                  : 'incomplete') as EuiStepStatus,
               disabled: getIsStepDisabled(index),
               'data-test-subj': `formWizardStep-${index}`,
               onClick: () => navigateToStep(index),

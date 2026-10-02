@@ -58,7 +58,7 @@ const carriedTodos: ConversationRoundStep = {
 };
 
 const modelProvider = (calls: unknown[] = []) =>
-  ({ getUsageStats: () => ({ calls }) } as unknown as ModelProvider);
+  ({ getUsageStats: () => ({ calls }) }) as unknown as ModelProvider;
 
 /** A tracker seeded as `run_chat_agent` does; `ran` feeds it the state the graph would have streamed. */
 const trackerFor = (seed: RunSeed) => {

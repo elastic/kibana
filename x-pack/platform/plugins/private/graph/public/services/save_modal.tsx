@@ -14,8 +14,10 @@ import type { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import type { OnSaveGraphProps } from '../components/save_modal';
 import { SaveModal } from '../components/save_modal';
 
-export interface SaveWorkspaceServices
-  extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'> {
+export interface SaveWorkspaceServices extends Pick<
+  CoreStart,
+  'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+> {
   contentClient: ContentClient;
 }
 

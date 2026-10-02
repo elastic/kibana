@@ -26,12 +26,10 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   const batchSetGlobal = jest.fn(() => ({
     settings: {},
   }));
-  const validate = jest.fn(
-    (): ValidationApiResponse => ({
-      valid: false,
-      errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
-    })
-  );
+  const validate = jest.fn((): ValidationApiResponse => ({
+    valid: false,
+    errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
+  }));
   done$ = new Subject();
   const client = new UiSettingsClient({
     defaults,

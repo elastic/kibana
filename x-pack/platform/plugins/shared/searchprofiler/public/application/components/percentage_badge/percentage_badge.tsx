@@ -34,9 +34,11 @@ const useStyles = (valueType: 'percent' | 'time') => {
         ${euiTheme.colors.backgroundBaseSubdued} var(--prfDevToolProgressPercentage, auto),
         ${euiTheme.colors.backgroundBaseSubdued} 100%
       );
-      width: ${valueType === 'percent'
-        ? 'var(--prfDevToolBadgeSize)'
-        : 'var(--prfDevToolBadgeSizeExtended)'};
+      width: ${
+        valueType === 'percent'
+          ? 'var(--prfDevToolBadgeSize)'
+          : 'var(--prfDevToolBadgeSizeExtended)'
+      };
     `,
 
     progressTextIE: css`

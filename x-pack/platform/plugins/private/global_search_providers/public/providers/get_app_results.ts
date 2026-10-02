@@ -31,16 +31,16 @@ export const getAppResults = (
         term.length > 0
           ? flattenDeepLinks(app)
           : app.visibleIn.includes('globalSearch')
-          ? [
-              {
-                id: app.id,
-                app,
-                path: app.appRoute,
-                subLinkTitles: [],
-                keywords: app.keywords ?? [],
-              },
-            ]
-          : []
+            ? [
+                {
+                  id: app.id,
+                  app,
+                  path: app.appRoute,
+                  subLinkTitles: [],
+                  keywords: app.keywords ?? [],
+                },
+              ]
+            : []
       )
       .map((appLink) => ({
         appLink,

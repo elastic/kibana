@@ -15,8 +15,7 @@ import type { CardActionsFlexItemProps } from './card_actions_flex_item';
 import { CardActionsFlexItem } from './card_actions_flex_item';
 
 export interface CardHeaderProps
-  extends CardActionsFlexItemProps,
-    Pick<CommonProps, 'data-test-subj'> {
+  extends CardActionsFlexItemProps, Pick<CommonProps, 'data-test-subj'> {
   name: string;
   createdDate: string;
   updatedDate: string;

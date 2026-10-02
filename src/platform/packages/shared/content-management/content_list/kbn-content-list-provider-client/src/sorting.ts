@@ -15,7 +15,7 @@ import { DEFAULT_SORT_FIELDS, type SortField } from '@kbn/content-list-provider'
  * Pass to {@link defineContentListSortField} or include in {@link ContentListSortFieldConfig}.
  */
 export interface ContentListSortField<
-  TItem extends UserContentCommonSchema = UserContentCommonSchema
+  TItem extends UserContentCommonSchema = UserContentCommonSchema,
 > {
   /** Unique sort field id; maps to the KQL/query field name. */
   id: string;

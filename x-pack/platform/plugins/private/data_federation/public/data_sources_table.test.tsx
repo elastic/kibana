@@ -20,7 +20,7 @@ const createDataSource = (name: string, type: DataSource['type'] | string): Data
     type,
     description: '',
     settings: {},
-  } as unknown as DataSource);
+  }) as unknown as DataSource;
 
 const docLinksMock = {
   links: {

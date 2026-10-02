@@ -141,7 +141,7 @@ export function getProgressBarLabelWidthCh(
   max: number
 ): number {
   const format = (n: number): string =>
-    Number.isFinite(n) ? formatter?.convertToText?.(n) ?? String(n) : '';
+    Number.isFinite(n) ? (formatter?.convertToText?.(n) ?? String(n)) : '';
   const widest = Math.max(format(min).length, format(max).length);
   return Math.max(widest, MIN_LABEL_WIDTH_CH);
 }

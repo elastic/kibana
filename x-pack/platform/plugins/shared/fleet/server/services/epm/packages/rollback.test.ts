@@ -959,7 +959,7 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
           },
         ],
       }),
-    } as any);
+    }) as any;
 
   it('triggers variant cleanup when no remaining version conditions after rollback', async () => {
     const soClient = buildSoClient();

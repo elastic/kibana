@@ -143,7 +143,7 @@ const processRow = async ({
 
   const queryFilters: QueryDslQueryContainer[] = Object.entries(row)
     .filter(([field, value]) => !REQUIRED_CSV_HEADERS.includes(field) && !isEmpty(value))
-    .map(([field, value]) => ({ term: { [field]: value } } as QueryDslQueryContainer));
+    .map(([field, value]) => ({ term: { [field]: value } }) as QueryDslQueryContainer);
 
   if (!queryFilters.length) {
     throw new Error('Row has no identifying fields');

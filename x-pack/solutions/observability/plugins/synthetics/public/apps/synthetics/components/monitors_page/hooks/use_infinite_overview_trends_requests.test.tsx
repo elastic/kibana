@@ -37,7 +37,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       locations: [{ id: locationId, label: locationId, status: 'up' }],
       name: `Monitor ${configId}`,
       schedule: '5',
-    } as OverviewStatusMetaData);
+    }) as OverviewStatusMetaData;
 
   const createMockMonitors = (count: number): OverviewStatusMetaData[] => {
     const monitors: OverviewStatusMetaData[] = [];

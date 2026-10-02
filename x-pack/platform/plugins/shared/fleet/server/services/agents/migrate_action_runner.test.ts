@@ -29,7 +29,7 @@ const makeAgent = (overrides: Partial<Agent>): Agent =>
       elastic: { agent: { version: '9.2.0', upgradeable: true } },
     },
     ...overrides,
-  } as Agent);
+  }) as Agent;
 
 describe('partitionAgentsForMigration', () => {
   const soClient = savedObjectsClientMock.create();

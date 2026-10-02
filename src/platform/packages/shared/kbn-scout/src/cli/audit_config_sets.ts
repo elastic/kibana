@@ -163,7 +163,7 @@ export function findRuntimeUpdatableKeys(repoRoot: string): string[] {
 
     const configPath = Array.isArray(plugin.configPath)
       ? plugin.configPath.join('.')
-      : plugin.configPath ?? snakeCase(plugin.id); // Kibana's own default for a missing configPath
+      : (plugin.configPath ?? snakeCase(plugin.id)); // Kibana's own default for a missing configPath
 
     for (const file of listConfigSourceFiles(serverDir)) {
       const text = Fs.readFileSync(file, 'utf8');

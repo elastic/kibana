@@ -29,7 +29,9 @@ const GITHUB_REPO = 'kibana';
 const token = process.env.GITHUB_TOKEN;
 if (!token) {
   console.error('Error: GITHUB_TOKEN environment variable is required.');
-  console.error('Create a token with `security_events` scope at https://github.com/settings/tokens');
+  console.error(
+    'Create a token with `security_events` scope at https://github.com/settings/tokens'
+  );
   process.exit(1);
 }
 
@@ -82,9 +84,10 @@ const main = async () => {
     headers: { Accept: 'application/sarif+json' },
   });
 
-  const sarifData = typeof rawSarif === 'string'
-    ? JSON.parse(rawSarif)
-    : JSON.parse(new TextDecoder('utf-8').decode(rawSarif));
+  const sarifData =
+    typeof rawSarif === 'string'
+      ? JSON.parse(rawSarif)
+      : JSON.parse(new TextDecoder('utf-8').decode(rawSarif));
 
   if (!sarifData.runs?.length) {
     console.log('No runs found in SARIF data.');
@@ -94,9 +97,7 @@ const main = async () => {
   // Step 3: Print SARIF results
   for (const run of sarifData.runs) {
     const results = run.results ?? [];
-    const rulesById = Object.fromEntries(
-      (run.tool?.driver?.rules ?? []).map((r) => [r.id, r])
-    );
+    const rulesById = Object.fromEntries((run.tool?.driver?.rules ?? []).map((r) => [r.id, r]));
 
     console.log(`Results: ${results.length}`);
     if (results.length === 0) continue;

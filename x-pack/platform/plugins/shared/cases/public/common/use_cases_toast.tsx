@@ -189,7 +189,7 @@ export const useCasesToast = () => {
         const mountedText =
           text != null && typeof text !== 'string'
             ? toMountPoint(text, services.rendering)
-            : text ?? undefined;
+            : (text ?? undefined);
         toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
       showInfoToast: (

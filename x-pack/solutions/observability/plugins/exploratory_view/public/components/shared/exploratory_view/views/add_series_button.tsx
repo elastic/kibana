@@ -70,10 +70,10 @@ export function AddSeriesButton() {
               }
             )
           : isAddDisabled
-          ? i18n.translate('xpack.exploratoryView.expView.seriesBuilder.addSeries.limitation', {
-              defaultMessage: 'You can only add one series of this report type.',
-            })
-          : ''
+            ? i18n.translate('xpack.exploratoryView.expView.seriesBuilder.addSeries.limitation', {
+                defaultMessage: 'You can only add one series of this report type.',
+              })
+            : ''
       }
     >
       <EuiButton

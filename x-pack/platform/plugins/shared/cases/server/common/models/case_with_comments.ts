@@ -368,8 +368,8 @@ export class CaseCommentModel {
       const broadcastMetadataIndex = Array.isArray(rawMetadataIndex)
         ? rawMetadataIndex
         : rawMetadataIndex != null
-        ? ids.map(() => rawMetadataIndex)
-        : undefined;
+          ? ids.map(() => rawMetadataIndex)
+          : undefined;
       const newMetadataIndex =
         broadcastMetadataIndex != null
           ? removeItemsByPosition(broadcastMetadataIndex, idPositionsThatAlreadyExistInCase)

@@ -55,7 +55,7 @@ const createMonitorSO = (
       [ConfigKey.MONITOR_QUERY_ID]: opts.monitorQueryId ?? id,
       [ConfigKey.LOCATIONS]: opts.locations ?? [],
     },
-  } as unknown as SavedObject<EncryptedSyntheticsMonitorAttributes>);
+  }) as unknown as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
 const createPrivateLocation = (
   id: string,
@@ -72,7 +72,7 @@ const createPackagePolicy = (policyId: string, agentPolicyIds: string[]): Packag
   ({
     id: policyId,
     policy_ids: agentPolicyIds,
-  } as unknown as PackagePolicy);
+  }) as unknown as PackagePolicy;
 
 interface BuildApiOverrides {
   monitorConfigRepository?: { getAcrossSpaces: jest.Mock };
@@ -96,7 +96,7 @@ const buildApi = (overrides: BuildApiOverrides = {}): MonitorIntegrationHealthAp
     () =>
       ({
         getByIds: packagePolicyServiceGetByIds,
-      } as any)
+      }) as any
   );
 
   const fleetAgentPolicyGetByIds =
@@ -188,7 +188,7 @@ describe('MonitorIntegrationHealthApi', () => {
               };
             }
           ),
-        } as any)
+        }) as any
     );
 
     mockedGetPrivateLocationsForNamespaces.mockResolvedValue([]);
@@ -782,7 +782,7 @@ describe('MonitorIntegrationHealthApi', () => {
               hasAnyLegacyPolicyId: false,
               legacyPolicyIds: [],
             })),
-          } as any)
+          }) as any
       );
 
       const so = createMonitorSO('mon-1');
@@ -827,7 +827,7 @@ describe('MonitorIntegrationHealthApi', () => {
                 };
               }
             ),
-          } as any)
+          }) as any
       );
 
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
@@ -924,7 +924,7 @@ describe('MonitorIntegrationHealthApi', () => {
                 legacyPolicyIds: [],
               })
             ),
-          } as any)
+          }) as any
       );
 
       // Simulate the policy being absent in 'default' but present in CUSTOM_SPACE.
@@ -981,7 +981,7 @@ describe('MonitorIntegrationHealthApi', () => {
                 legacyPolicyIds: [],
               })
             ),
-          } as any)
+          }) as any
       );
 
       mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);

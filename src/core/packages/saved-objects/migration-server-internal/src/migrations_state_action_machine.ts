@@ -70,7 +70,7 @@ export async function migrationStateActionMachine({
               (doc) =>
                 ({
                   _id: doc._id,
-                } as SavedObjectsRawDoc)
+                }) as SavedObjectsRawDoc
             ),
           },
           ...{

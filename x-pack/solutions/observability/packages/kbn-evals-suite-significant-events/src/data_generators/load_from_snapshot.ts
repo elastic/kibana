@@ -113,7 +113,7 @@ async function loadDocsFromSnapshot<T>({
     const total =
       typeof searchResult.hits.total === 'number'
         ? searchResult.hits.total
-        : searchResult.hits.total?.value ?? 0;
+        : (searchResult.hits.total?.value ?? 0);
     if (total > SEARCH_LIMIT) {
       throw new Error(
         `${label}: ${total} docs in snapshot "${snapshotName}" exceed the load limit of ${SEARCH_LIMIT}; ` +

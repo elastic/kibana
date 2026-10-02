@@ -66,8 +66,10 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   rowIndex: number;
 }
 
-export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
-  extends CellContext<G, unknown> {
+export interface CascadeRowCellPrimitiveProps<
+  G extends GroupNode,
+  L extends LeafNode,
+> extends CellContext<G, unknown> {
   /**
    * Size of the row cell
    */
@@ -167,8 +169,10 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
  * @internal
  * @description Internal cascade row primitive component props.
  */
-export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
-  extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
+export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode> extends Omit<
+  CascadeRowHeaderPrimitiveProps<G, L>,
+  'isGroupNode'
+> {
   /**
    * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
    */
@@ -239,7 +243,8 @@ export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
  * @internal
  */
 interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
+  extends
+    Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
    * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
@@ -267,7 +272,7 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
 
 export type DataCascadeImplProps<
   G extends GroupNode,
-  L extends LeafNode
+  L extends LeafNode,
 > = DataCascadeImplBaseProps<G, L> &
   (
     | {

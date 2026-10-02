@@ -69,12 +69,10 @@ export type StateUpdater<State, Props = {}> = (
   prevProps: Readonly<Props>
 ) => State | null;
 
-export type PropsOfContainer<Container> = Container extends InferableComponentEnhancerWithProps<
-  infer InjectedProps,
-  any
->
-  ? InjectedProps
-  : never;
+export type PropsOfContainer<Container> =
+  Container extends InferableComponentEnhancerWithProps<infer InjectedProps, any>
+    ? InjectedProps
+    : never;
 
 export function composeStateUpdaters<State, Props>(...updaters: Array<StateUpdater<State, Props>>) {
   return (state: State, props: Props) =>

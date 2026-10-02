@@ -49,8 +49,7 @@ export enum WorkflowLifecycleEventTypes {
  * workflowId will be undefined if the creation failed.
  */
 export interface ReportWorkflowCreatedActionParams
-  extends BaseResultActionParams,
-    BaseEditorContextParams {
+  extends BaseResultActionParams, BaseEditorContextParams {
   eventName: string;
   /**
    * The workflow ID if creation succeeded. Undefined if creation failed.
@@ -216,8 +215,7 @@ export interface ReportWorkflowClonedActionParams extends BaseResultActionParams
  * Parameters for workflow enabled state change attempt telemetry.
  */
 export interface ReportWorkflowEnabledStateChangedActionParams
-  extends BaseResultActionParams,
-    BaseEditorContextParams {
+  extends BaseResultActionParams, BaseEditorContextParams {
   eventName: string;
   workflowId: string;
   /**

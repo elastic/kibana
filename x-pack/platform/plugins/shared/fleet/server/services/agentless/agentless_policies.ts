@@ -526,7 +526,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         var_group_selections: data.var_group_selections ?? {},
         supports_cloud_connector: cloudConnectorEnabled,
         cloud_connector_id: cloudConnectorEnabled
-          ? data.cloud_connector?.cloud_connector_id ?? null
+          ? (data.cloud_connector?.cloud_connector_id ?? null)
           : null,
       };
 
@@ -751,9 +751,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
     // Batched agentless guard: missing or non-agentless ids become per-policy 404
     // failures rather than failing the whole batch
-    const { agentlessPackagePolicies, guardFailures } = await this.partitionAgentlessPolicyIds(
-      policyIds
-    );
+    const { agentlessPackagePolicies, guardFailures } =
+      await this.partitionAgentlessPolicyIds(policyIds);
 
     const results: BulkUpgradeAgentlessPolicyResult[] = [...guardFailures];
 
@@ -762,9 +761,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
 
     // Skip already-latest policies: report `success: true` without the engine's needless SO re-persist + redeploy churn.
-    const { upgradeIds, noopResults } = await this.partitionAlreadyLatestPolicies(
-      agentlessPackagePolicies
-    );
+    const { upgradeIds, noopResults } =
+      await this.partitionAlreadyLatestPolicies(agentlessPackagePolicies);
     results.push(...noopResults);
 
     if (upgradeIds.length > 0) {
@@ -801,9 +799,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   ): Promise<AgentlessPolicyUpgradeDryRunResponse> {
     this.logger.debug(`Computing upgrade dry-run for ${policyIds.length} agentless policies`);
 
-    const { agentlessPackagePolicies, guardFailures } = await this.partitionAgentlessPolicyIds(
-      policyIds
-    );
+    const { agentlessPackagePolicies, guardFailures } =
+      await this.partitionAgentlessPolicyIds(policyIds);
 
     // A guard failure (missing / non-agentless) is surfaced as a dry-run item with
     // `hasErrors: true` plus the per-policy statusCode/body, keeping the response a flat

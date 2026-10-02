@@ -20,7 +20,7 @@ const actionDataFallback = (spaceId: string) => ({
 const createMockEsClient = (searchResponse: object): ElasticsearchClient =>
   ({
     search: jest.fn().mockResolvedValue(searchResponse),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('getResultCountsForActions', () => {
   it('returns empty map when no action IDs provided', async () => {

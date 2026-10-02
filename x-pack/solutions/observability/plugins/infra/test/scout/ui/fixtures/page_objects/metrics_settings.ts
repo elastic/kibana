@@ -23,7 +23,10 @@ export class MetricsSettingsPage {
   public readonly remoteClusterDangerCallout: Locator;
   public readonly usedByRulesWarningCallout: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.nameInput = this.page.getByTestId('nameInput');
     this.metricIndicesInput = this.page.getByTestId('metricIndicesInput');
     this.saveButton = this.page.getByTestId('infraBottomBarActionsButton');

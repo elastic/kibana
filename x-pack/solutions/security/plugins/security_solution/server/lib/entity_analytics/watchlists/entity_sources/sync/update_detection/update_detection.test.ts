@@ -25,7 +25,7 @@ const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
       .fn()
       .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
     bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<CRUDClient>);
+  }) as unknown as jest.Mocked<CRUDClient>;
 
 jest.mock('../../infra/entity_source_client');
 

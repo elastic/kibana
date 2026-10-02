@@ -92,7 +92,7 @@ export const useEventDetails = ({
   const currentSpaceId = useSpaceId();
   // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
   //  https://github.com/elastic/kibana/issues/113063
-  const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
+  const eventIndex = indexName ? (getAlertIndexAlias(indexName, currentSpaceId) ?? indexName) : '';
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
     pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;

@@ -142,17 +142,16 @@ export const onAnnotationDrop: Visualization<XYVisualizationState>['onDrop'] = (
         }
         return {
           ...prevState,
-          layers: prevState.layers.map(
-            (l): XYLayerConfig =>
-              l.layerId === target.layerId
-                ? {
-                    ...targetLayer,
-                    annotations: [
-                      ...targetLayer.annotations,
-                      getDefaultQueryAnnotation(target.columnId, source.field.name, timeField),
-                    ],
-                  }
-                : l
+          layers: prevState.layers.map((l): XYLayerConfig =>
+            l.layerId === target.layerId
+              ? {
+                  ...targetLayer,
+                  annotations: [
+                    ...targetLayer.annotations,
+                    getDefaultQueryAnnotation(target.columnId, source.field.name, timeField),
+                  ],
+                }
+              : l
           ),
         };
       case 'field_replace':
@@ -162,27 +161,26 @@ export const onAnnotationDrop: Visualization<XYVisualizationState>['onDrop'] = (
 
         return {
           ...prevState,
-          layers: prevState.layers.map(
-            (l): XYLayerConfig =>
-              l.layerId === target.layerId
-                ? {
-                    ...targetLayer,
-                    annotations: [
-                      ...targetLayer.annotations.map((a) =>
-                        a === targetAnnotation
-                          ? {
-                              ...targetAnnotation,
-                              ...getDefaultQueryAnnotation(
-                                target.columnId,
-                                source.field.name,
-                                timeField
-                              ),
-                            }
-                          : a
-                      ),
-                    ],
-                  }
-                : l
+          layers: prevState.layers.map((l): XYLayerConfig =>
+            l.layerId === target.layerId
+              ? {
+                  ...targetLayer,
+                  annotations: [
+                    ...targetLayer.annotations.map((a) =>
+                      a === targetAnnotation
+                        ? {
+                            ...targetAnnotation,
+                            ...getDefaultQueryAnnotation(
+                              target.columnId,
+                              source.field.name,
+                              timeField
+                            ),
+                          }
+                        : a
+                    ),
+                  ],
+                }
+              : l
           ),
         };
     }
@@ -233,8 +231,8 @@ export const onAnnotationDrop: Visualization<XYVisualizationState>['onDrop'] = (
             return {
               ...targetLayer,
               annotations: [
-                ...targetLayer.annotations.map(
-                  (a): EventAnnotationConfig => (a === targetAnnotation ? sourceAnnotation : a)
+                ...targetLayer.annotations.map((a): EventAnnotationConfig =>
+                  a === targetAnnotation ? sourceAnnotation : a
                 ),
               ],
             };
@@ -243,8 +241,8 @@ export const onAnnotationDrop: Visualization<XYVisualizationState>['onDrop'] = (
             return {
               ...sourceLayer,
               annotations: [
-                ...sourceLayer.annotations.map(
-                  (a): EventAnnotationConfig => (a === sourceAnnotation ? targetAnnotation : a)
+                ...sourceLayer.annotations.map((a): EventAnnotationConfig =>
+                  a === sourceAnnotation ? targetAnnotation : a
                 ),
               ],
             };
@@ -285,21 +283,20 @@ export const onAnnotationDrop: Visualization<XYVisualizationState>['onDrop'] = (
       }
       return {
         ...prevState,
-        layers: prevState.layers.map(
-          (l): XYLayerConfig =>
-            l.layerId === target.layerId
-              ? {
-                  ...targetLayer,
-                  annotations: [
-                    ...targetLayer.annotations,
-                    createCopiedAnnotation(
-                      target.columnId,
-                      getStaticDate(getDataLayers(prevState.layers), frame),
-                      sourceAnnotation
-                    ),
-                  ],
-                }
-              : l
+        layers: prevState.layers.map((l): XYLayerConfig =>
+          l.layerId === target.layerId
+            ? {
+                ...targetLayer,
+                annotations: [
+                  ...targetLayer.annotations,
+                  createCopiedAnnotation(
+                    target.columnId,
+                    getStaticDate(getDataLayers(prevState.layers), frame),
+                    sourceAnnotation
+                  ),
+                ],
+              }
+            : l
         ),
       };
     case 'replace_duplicate_compatible':

@@ -12,9 +12,12 @@ import type { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } fro
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
-export class CloudDataMigrationPlugin
-  implements Plugin<void, void, CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart>
-{
+export class CloudDataMigrationPlugin implements Plugin<
+  void,
+  void,
+  CloudDataMigrationPluginSetup,
+  CloudDataMigrationPluginStart
+> {
   private breadcrumbService = new BreadcrumbService();
 
   public setup(core: CoreSetup, { cloud, management }: CloudDataMigrationPluginSetup) {

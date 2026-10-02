@@ -57,13 +57,11 @@ export const LanguageSelectorModal = ({
   const modalTitleId = useGeneratedHtmlId();
   const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
   const [options, setOptions] = useState<EuiSelectableOption[]>(
-    AVAILABLE_LANGUAGES.map(
-      (lang): EuiSelectableOption => ({
-        label: lang.label,
-        key: lang.value,
-        'data-test-subj': `languageOption-${lang.value}`,
-      })
-    )
+    AVAILABLE_LANGUAGES.map((lang): EuiSelectableOption => ({
+      label: lang.label,
+      key: lang.value,
+      'data-test-subj': `languageOption-${lang.value}`,
+    }))
   );
 
   const noOptionsSelected = options.every((option) => !option.checked);

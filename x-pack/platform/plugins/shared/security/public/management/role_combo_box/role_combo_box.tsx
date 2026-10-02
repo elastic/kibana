@@ -22,11 +22,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '../../../common';
 import { isRoleAdmin, isRoleDeprecated, isRoleReserved, isRoleSystem } from '../../../common/model';
 
-interface Props
-  extends Omit<
-    EuiComboBoxProps<string>,
-    'onChange' | 'options' | 'selectedOptions' | 'renderOption'
-  > {
+interface Props extends Omit<
+  EuiComboBoxProps<string>,
+  'onChange' | 'options' | 'selectedOptions' | 'renderOption'
+> {
   availableRoles: Role[];
   selectedRoleNames: readonly string[];
   onChange: (selectedRoleNames: string[]) => void;
@@ -76,12 +75,12 @@ export const RoleComboBox = (props: Props) => {
     const type = option.value?.isDeprecated
       ? 'deprecated'
       : option.value?.isSystem
-      ? 'system'
-      : option.value?.isAdmin
-      ? 'admin'
-      : option.value?.isReserved
-      ? 'user'
-      : 'custom';
+        ? 'system'
+        : option.value?.isAdmin
+          ? 'admin'
+          : option.value?.isReserved
+            ? 'user'
+            : 'custom';
     if (!acc[type]) {
       acc[type] = [];
     }

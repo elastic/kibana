@@ -30,22 +30,21 @@ import type { HttpConfig } from './http_config';
 import type { SelfClientUiamAttestationGetter } from './self_client';
 
 /** @internal */
-export interface InternalHttpServicePreboot
-  extends Pick<
-    InternalHttpServiceSetup,
-    | 'auth'
-    | 'csp'
-    | 'staticAssets'
-    | 'basePath'
-    | 'externalUrl'
-    | 'registerStaticDir'
-    | 'registerRouteHandlerContext'
-    | 'server'
-    | 'getServerInfo'
-    | 'prototypeHardening'
-  > {
+export interface InternalHttpServicePreboot extends Pick<
+  InternalHttpServiceSetup,
+  | 'auth'
+  | 'csp'
+  | 'staticAssets'
+  | 'basePath'
+  | 'externalUrl'
+  | 'registerStaticDir'
+  | 'registerRouteHandlerContext'
+  | 'server'
+  | 'getServerInfo'
+  | 'prototypeHardening'
+> {
   registerRoutes<
-    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
   >(
     path: string,
     callback: (router: IRouter<DefaultRequestHandlerType>) => void
@@ -53,8 +52,10 @@ export interface InternalHttpServicePreboot
 }
 
 /** @internal */
-export interface InternalHttpServiceSetup
-  extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext' | 'staticAssets'> {
+export interface InternalHttpServiceSetup extends Omit<
+  HttpServiceSetup,
+  'createRouter' | 'registerRouteHandlerContext' | 'staticAssets'
+> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   staticAssets: InternalStaticAssets;
@@ -74,7 +75,7 @@ export interface InternalHttpServiceSetup
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContextBase,
-    ContextName extends keyof Omit<Context, 'resolve'>
+    ContextName extends keyof Omit<Context, 'resolve'>,
   >(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,

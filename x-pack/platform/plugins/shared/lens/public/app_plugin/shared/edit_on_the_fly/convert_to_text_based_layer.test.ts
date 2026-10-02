@@ -59,7 +59,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
           displayName: 'Records',
           type: 'document',
         },
-      }[name]),
+      })[name],
     getFormatterForField: () => ({ id: 'number', params: {} }),
     hasRestrictions: false,
   } as unknown as IndexPattern;

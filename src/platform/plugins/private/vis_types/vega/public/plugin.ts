@@ -142,9 +142,8 @@ export class VegaPlugin implements Plugin<void, void> {
     // The embeddable definition is always registered (see setup) so existing Vega panels keep
     // rendering even after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
-      const { getAddVegaEmbeddableAction } = await import(
-        './embeddable/add_vega_embeddable_action'
-      );
+      const { getAddVegaEmbeddableAction } =
+        await import('./embeddable/add_vega_embeddable_action');
       return getAddVegaEmbeddableAction();
     });
 

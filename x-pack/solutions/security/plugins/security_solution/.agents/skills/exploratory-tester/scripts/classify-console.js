@@ -27,9 +27,9 @@
     '/internal/osquery/',
   ];
 
-  messages.forEach(msg => {
+  messages.forEach((msg) => {
     // ── Suppressed noise ────────────────────────────────────────────────────
-    if (SUPPRESS.some(p => msg.includes(p))) {
+    if (SUPPRESS.some((p) => msg.includes(p))) {
       r.suppressed.push({ type: 'noise', text: msg.substring(0, 200) });
       return;
     }
@@ -58,4 +58,4 @@
   });
 
   return r;
-})(/*MESSAGES*/)
+})(/*MESSAGES*/);

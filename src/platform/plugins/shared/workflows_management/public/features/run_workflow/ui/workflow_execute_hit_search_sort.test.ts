@@ -35,8 +35,8 @@ describe('workflow_execute_hit_search_sort', () => {
         name === '@timestamp'
           ? { sortable: true, name, type: 'date' }
           : name === 'message'
-          ? { sortable: true, name, type: 'string' }
-          : null,
+            ? { sortable: true, name, type: 'string' }
+            : null,
     };
 
     const esSort = buildWorkflowExecuteHitSearchEsSort([['@timestamp', 'desc']], dataView as never);

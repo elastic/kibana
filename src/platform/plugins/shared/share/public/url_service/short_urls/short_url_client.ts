@@ -175,13 +175,12 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 }
 
 export interface ShortUrlCreateResponse<
-  LocatorParams extends SerializableRecord = SerializableRecord
+  LocatorParams extends SerializableRecord = SerializableRecord,
 > extends ShortUrl<LocatorParams> {
   locator: LocatorPublic<ShortUrlRedirectLocatorParams>;
   params: ShortUrlRedirectLocatorParams;
 }
 
-export interface ShortUrlCreateFromLongUrlResponse
-  extends ShortUrlCreateResponse<LegacyShortUrlLocatorParams> {
+export interface ShortUrlCreateFromLongUrlResponse extends ShortUrlCreateResponse<LegacyShortUrlLocatorParams> {
   url: string;
 }

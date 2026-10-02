@@ -45,7 +45,7 @@ export const CommentsLayer = () => {
   const overlayOpen = useCommentsState((state) => state.overlayOpen);
   const notice = useCommentsState((state) => state.notice);
   const guided = useCommentsState(({ guide, comments }) =>
-    guide ? comments.find(({ id }) => id === guide.id) ?? null : null
+    guide ? (comments.find(({ id }) => id === guide.id) ?? null) : null
   );
 
   useEffect(() => {

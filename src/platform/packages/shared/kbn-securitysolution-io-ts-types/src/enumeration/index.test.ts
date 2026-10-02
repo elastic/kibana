@@ -13,7 +13,7 @@ import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('enumeration', () => {
   enum TestEnum {
-    'test' = 'test',
+    test = 'test',
   }
 
   it('should validate a string from the enum', () => {

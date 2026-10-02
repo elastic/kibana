@@ -30,7 +30,7 @@ const createAlertHit = (): DataTableRecord =>
     raw: {},
     flattened: { 'event.kind': 'signal' },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockDataView = {
   hasMatchedIndices: () => true,

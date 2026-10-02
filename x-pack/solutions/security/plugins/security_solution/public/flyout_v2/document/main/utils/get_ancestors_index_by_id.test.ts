@@ -35,7 +35,7 @@ const makeHit = ({
       },
     },
     flattened: ruleType ? { 'kibana.alert.rule.type': [ruleType] } : {},
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 describe('getAncestorsIndexById', () => {
   it('maps a single ancestor id to its index', () => {

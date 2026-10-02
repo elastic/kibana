@@ -45,8 +45,9 @@ export function InvestigationRowHoverAction({
         position: relative;
         width: 100%;
 
-        ${shouldShowActionOverlay
-          ? `
+        ${
+          shouldShowActionOverlay
+            ? `
         &:hover
           .${investigationRowHoverActionOverlayClassName},
           &:focus-within
@@ -55,7 +56,8 @@ export function InvestigationRowHoverAction({
           pointer-events: auto;
           background: ${createFadeOverlayBackground(hoverOverlayBackgroundColor)};
         }`
-          : ''}
+            : ''
+        }
       `}
     >
       {children}
@@ -73,7 +75,8 @@ export function InvestigationRowHoverAction({
             position: absolute;
             right: 0;
             top: 0;
-            transition: ${nightshiftOpacityTransition(euiTheme)},
+            transition:
+              ${nightshiftOpacityTransition(euiTheme)},
               ${nightshiftBackgroundColorTransition(euiTheme)};
 
             @media (prefers-reduced-motion: reduce) {

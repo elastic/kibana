@@ -99,7 +99,7 @@ const mkConnector = (id: string, isPreconfigured = true): AIConnector =>
     isSystemAction: false,
     config: {},
     isConnectorTypeDeprecated: false,
-  } as AIConnector);
+  }) as AIConnector;
 
 interface RenderOptions {
   connectors?: AIConnector[];

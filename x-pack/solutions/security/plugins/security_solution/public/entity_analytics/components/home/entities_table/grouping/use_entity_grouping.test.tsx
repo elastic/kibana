@@ -65,7 +65,7 @@ const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityU
     onSort: jest.fn(),
     onChangePage: jest.fn(),
     ...overrides,
-  } as EntityURLStateResult);
+  }) as EntityURLStateResult;
 
 describe('getAggregationsByGroupField', () => {
   it('returns empty array for none group', () => {

@@ -122,8 +122,8 @@ export const LocationSelectionList: React.FC<LocationSelectionListProps> = ({
   const selectableTestSubj = isLoading
     ? loadingTestSubj
     : total === 0 && !isError
-    ? emptyTestSubj
-    : listTestSubj;
+      ? emptyTestSubj
+      : listTestSubj;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

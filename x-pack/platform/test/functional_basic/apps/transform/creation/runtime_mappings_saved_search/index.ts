@@ -13,9 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     // The transform UI should work the same as with a trial license
     loadTestFile(
-      require.resolve(
-        '../../../../../functional/apps/transform/creation/runtime_mappings_saved_search'
-      )
+      require.resolve('../../../../../functional/apps/transform/creation/runtime_mappings_saved_search')
     );
   });
 }

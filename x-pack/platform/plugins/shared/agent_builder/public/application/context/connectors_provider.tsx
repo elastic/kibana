@@ -33,7 +33,7 @@ const toActionConnector = (c: ConnectorItem): ActionConnector =>
     isMissingSecrets: c.isMissingSecrets ?? false,
     authMode: c.authMode,
     secrets: {},
-  } as ActionConnector);
+  }) as ActionConnector;
 
 export interface ConnectorsActionsContextType {
   openCreateFlyout: () => void;

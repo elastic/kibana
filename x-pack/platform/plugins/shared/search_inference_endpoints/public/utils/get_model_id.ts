@@ -16,6 +16,6 @@ export const getModelId = (endpoint: InferenceInferenceEndpointInfo): string | u
   return 'model_id' in serviceSettings
     ? serviceSettings.model_id
     : 'model' in serviceSettings
-    ? serviceSettings.model
-    : undefined;
+      ? serviceSettings.model
+      : undefined;
 };

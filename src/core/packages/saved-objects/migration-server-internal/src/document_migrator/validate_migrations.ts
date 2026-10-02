@@ -43,7 +43,7 @@ export function validateTypeMigrations({
     );
 
     const migrationMap =
-      typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
+      typeof type.migrations === 'function' ? type.migrations() : (type.migrations ?? {});
 
     assertObject(
       migrationMap,
@@ -80,7 +80,7 @@ export function validateTypeMigrations({
 
   if (type.modelVersions) {
     const modelVersionMap =
-      typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
+      typeof type.modelVersions === 'function' ? type.modelVersions() : (type.modelVersions ?? {});
 
     if (Object.keys(modelVersionMap).length > 0) {
       Object.entries(modelVersionMap).forEach(([version, definition]) => {

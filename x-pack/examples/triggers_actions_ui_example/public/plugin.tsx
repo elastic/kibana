@@ -41,9 +41,11 @@ export interface TriggersActionsUiExamplePublicStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
 }
 
-export class TriggersActionsUiExamplePlugin
-  implements Plugin<void, void, TriggersActionsUiExamplePublicSetupDeps>
-{
+export class TriggersActionsUiExamplePlugin implements Plugin<
+  void,
+  void,
+  TriggersActionsUiExamplePublicSetupDeps
+> {
   public setup(
     core: CoreSetup<TriggersActionsUiExamplePublicStartDeps, void>,
     setup: TriggersActionsUiExamplePublicSetupDeps

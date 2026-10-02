@@ -231,14 +231,12 @@ const createCrudServiceMock = () => {
       async (_id, _spaceId, params: ReadModifyWriteWorkflowDocumentParams) =>
         params.mutate(createWorkflowSource({}))
     ),
-    deleteWorkflows: jest.fn(
-      async (ids: string[]): Promise<DeleteWorkflowsResponse> => ({
-        total: ids.length,
-        deleted: ids.length,
-        failures: [],
-        successfulIds: ids,
-      })
-    ),
+    deleteWorkflows: jest.fn(async (ids: string[]): Promise<DeleteWorkflowsResponse> => ({
+      total: ids.length,
+      deleted: ids.length,
+      failures: [],
+      successfulIds: ids,
+    })),
     disableWorkflow: jest.fn().mockResolvedValue(undefined),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
@@ -375,7 +373,7 @@ const getLastIndexedDocument = (
 const createExecutionEngineMock = () =>
   ({
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
-  } as unknown as WorkflowsExecutionEnginePluginStart);
+  }) as unknown as WorkflowsExecutionEnginePluginStart;
 
 const createService = (crudService = createCrudServiceMock()) => {
   const workflowsExecutionEngine = createExecutionEngineMock();

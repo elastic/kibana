@@ -181,7 +181,7 @@ const buildEsClient = () => {
     process.env.ES_URL ?? config.elasticsearch?.hosts ?? config['elasticsearch.hosts'];
   const resolvedNode = Array.isArray(nodeFromEnvOrConfig)
     ? nodeFromEnvOrConfig[0]
-    : nodeFromEnvOrConfig ?? 'http://localhost:9200';
+    : (nodeFromEnvOrConfig ?? 'http://localhost:9200');
   const usingLocalFallback = nodeFromEnvOrConfig == null;
   const rawUser =
     process.env.ES_USERNAME ?? config.elasticsearch?.username ?? config['elasticsearch.username'];

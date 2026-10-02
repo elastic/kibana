@@ -40,7 +40,7 @@ const makeRow = (id: string): AlertEpisode =>
     first_timestamp: '2024-01-01T00:00:00Z',
     last_timestamp: '2024-01-01T00:01:00Z',
     duration: 60000,
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 describe('RelatedAlertEpisodesList', () => {
   it('renders one row per episode', () => {

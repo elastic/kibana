@@ -20,12 +20,10 @@ import { Filters } from '../filters/filters';
 import { SortFilter } from '../filters/sort';
 import { useFilters } from './use_filters';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 let providerIdCounter = 0;
 const nextProviderId = () => `use-filters-test-${++providerIdCounter}`;

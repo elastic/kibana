@@ -183,7 +183,7 @@ export function useAssigneePickers<T>({
       const readOnly = isReadOnlyRef.current?.(item) ?? false;
 
       const selected: UserProfileWithAvatar[] = isUpdating
-        ? pendingAssignees.get(rowKey) ?? []
+        ? (pendingAssignees.get(rowKey) ?? [])
         : toSelectedProfiles(getAssigneeUidsRef.current(item), profilesByUid);
 
       return (

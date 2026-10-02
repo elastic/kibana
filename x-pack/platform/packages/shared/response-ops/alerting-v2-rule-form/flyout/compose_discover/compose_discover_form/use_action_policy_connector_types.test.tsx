@@ -34,7 +34,7 @@ const policy = (id: string, workflowIds: string[]): ActionPolicyResponse =>
     id,
     name: id,
     destinations: workflowIds.map((wfId) => ({ type: 'workflow' as const, id: wfId })),
-  } as unknown as ActionPolicyResponse);
+  }) as unknown as ActionPolicyResponse;
 
 describe('useActionPolicyConnectorTypes', () => {
   beforeEach(() => {

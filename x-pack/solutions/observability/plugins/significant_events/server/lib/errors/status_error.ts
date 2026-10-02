@@ -11,7 +11,10 @@ export class StatusError extends Error {
    * to the response as `attributes.data`.
    */
   public data?: unknown;
-  constructor(message: string, public readonly statusCode: number) {
+  constructor(
+    message: string,
+    public readonly statusCode: number
+  ) {
     super(message);
   }
 }

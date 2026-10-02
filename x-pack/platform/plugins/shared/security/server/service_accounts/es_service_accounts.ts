@@ -791,8 +791,8 @@ const getExchangeRetryDelay = (error: Error): number | null => {
   const headers = Boom.isBoom(error)
     ? error.output.headers
     : error instanceof errors.ResponseError
-    ? error.headers
-    : undefined;
+      ? error.headers
+      : undefined;
   const retryAfter = headers?.['retry-after'];
   if (typeof retryAfter !== 'string' || retryAfter.trim() === '') {
     return 0;

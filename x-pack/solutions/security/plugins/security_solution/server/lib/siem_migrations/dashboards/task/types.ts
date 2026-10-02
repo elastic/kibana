@@ -19,8 +19,10 @@ import type { EnrichedMigrationResources } from '../../common/task/util/enrich_l
 
 export type MigrationAgent = ReturnType<typeof getDashboardMigrationAgent>;
 
-export interface DashboardMigrationInput
-  extends Pick<StoredDashboardMigrationDashboard, 'id' | 'original_dashboard'> {
+export interface DashboardMigrationInput extends Pick<
+  StoredDashboardMigrationDashboard,
+  'id' | 'original_dashboard'
+> {
   resources: EnrichedMigrationResources;
 }
 

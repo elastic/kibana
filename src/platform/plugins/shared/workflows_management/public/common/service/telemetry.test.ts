@@ -59,7 +59,7 @@ const createMockValidationResult = (
     owner: 'yaml',
     ruleId: 'schemaViolation',
     ...overrides,
-  } as YamlValidationResult);
+  }) as YamlValidationResult;
 
 describe('WorkflowsBaseTelemetry', () => {
   let mockClient: TelemetryServiceClient;

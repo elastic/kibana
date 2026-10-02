@@ -20,9 +20,7 @@ export interface SearchIndexManagementLocatorDependencies {
   indexManagementLocator?: LocatorPublic<IndexManagementLocatorParams>;
 }
 
-export class SearchIndexManagementLocatorDefinition
-  implements LocatorDefinition<SearchIndexManagementLocatorParams>
-{
+export class SearchIndexManagementLocatorDefinition implements LocatorDefinition<SearchIndexManagementLocatorParams> {
   public readonly id = SEARCH_INDEX_MANAGEMENT_LOCATOR_ID;
 
   constructor(private readonly deps: SearchIndexManagementLocatorDependencies) {}

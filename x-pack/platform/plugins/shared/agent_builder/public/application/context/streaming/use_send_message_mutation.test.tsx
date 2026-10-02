@@ -59,7 +59,7 @@ const aborted = createExecutionAbortedEvent({
 });
 
 const savedConversation = (events: Conversation['events']) =>
-  ({ id: conversationId, rounds: [], events } as unknown as Conversation);
+  ({ id: conversationId, rounds: [], events }) as unknown as Conversation;
 
 const setup = () => {
   const eventsService = new EventsService();

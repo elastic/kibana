@@ -49,8 +49,8 @@ export const Toggle = ({
         ? 'false'
         : ''
       : metadata.default === true
-      ? 'true'
-      : 'false';
+        ? 'true'
+        : 'false';
 
   const rules = useMemo(() => {
     if (!isRequired) {

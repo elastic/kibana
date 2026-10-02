@@ -97,7 +97,7 @@ function convertTreeToEuiTreeViewItems(
     // branches still prefer a resolved display label over a raw index.
     const displayLabel = !Number.isNaN(iterationIndex)
       ? formatIterationLabel(iterationIndex)
-      : item.displayLabel ?? stepId;
+      : (item.displayLabel ?? stepId);
 
     // Check if this is a skeleton step (not yet received from server) or a loading placeholder
     const isSkeletonStep =

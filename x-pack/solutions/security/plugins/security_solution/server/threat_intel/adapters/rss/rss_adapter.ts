@@ -84,7 +84,7 @@ export const rssAdapter: FetchAdapter = {
       const fullBodyText =
         entry.body?.kind === 'markup'
           ? htmlFragmentToStructuredText(entry.body.html)
-          : entry.body?.text ?? '';
+          : (entry.body?.text ?? '');
       // Untruncated, so a revision differing only past the stored-body cap is still
       // detected as a change.
       const bodyText = truncate(fullBodyText, BODY_TEXT_MAX_LENGTH);

@@ -13,7 +13,10 @@ import { mergeGlobalContext } from './global_context';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
-  constructor(private logger: Logger, private globalContext: GlobalContext = {}) {}
+  constructor(
+    private logger: Logger,
+    private globalContext: GlobalContext = {}
+  ) {}
 
   /**
    * The current logger can be updated "on the fly", e.g. when the log config

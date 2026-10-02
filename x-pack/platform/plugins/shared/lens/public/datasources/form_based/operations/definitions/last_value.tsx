@@ -140,8 +140,8 @@ function setDefaultShowArrayValues(
 ) {
   return Boolean(
     isScriptedField(field) ||
-      (isRuntimeField(field) && field.type !== 'number') ||
-      oldParams?.showArrayValues
+    (isRuntimeField(field) && field.type !== 'number') ||
+    oldParams?.showArrayValues
   );
 }
 
@@ -302,10 +302,10 @@ export const lastValueOperation: OperationDefinition<
     const newTimeField = newIndexPattern.getFieldByName(column.params.sortField);
     return Boolean(
       newField &&
-        newField.type === column.dataType &&
-        !newField.aggregationRestrictions &&
-        newTimeField?.type === 'date' &&
-        supportedTypes.has(newField.type)
+      newField.type === column.dataType &&
+      !newField.aggregationRestrictions &&
+      newTimeField?.type === 'date' &&
+      supportedTypes.has(newField.type)
     );
   },
   allowAsReference: true,

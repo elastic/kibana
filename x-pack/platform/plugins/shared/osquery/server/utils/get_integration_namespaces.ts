@@ -28,11 +28,14 @@ export const getIntegrationNamespaces = async ({
   agentPolicyService,
   integrationNames = [],
 }: GetIntegrationNamespacesOptions): Promise<Record<string, string[]>> => {
-  const integrationToNamespaceMap = integrationNames.reduce((acc, name) => {
-    acc[name] = new Set<string>();
+  const integrationToNamespaceMap = integrationNames.reduce(
+    (acc, name) => {
+      acc[name] = new Set<string>();
 
-    return acc;
-  }, {} as Record<string, Set<string>>);
+      return acc;
+    },
+    {} as Record<string, Set<string>>
+  );
   const agentPolicyIdsToRetrieve: Record<string, Set<Set<string>>> = {};
 
   if (integrationNames.length > 0) {

@@ -333,7 +333,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                 sloStatusFilter: sloStatusFilter ?? [],
                 connectionFilter: connectionFilter ?? [],
                 anomalySeverityFilter: anomalySeverityFilter ?? [],
-              } as ServiceMapViewFilters),
+              }) as ServiceMapViewFilters,
             [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
           );
 

@@ -17,15 +17,12 @@ import type {
 import { registerApp } from './application';
 import { type WorkplaceAIServices } from './services';
 
-export class WorkplaceAIAppPlugin
-  implements
-    Plugin<
-      WorkplaceAIAppPluginSetup,
-      WorkplaceAIAppPluginStart,
-      WorkplaceAIAppPluginSetupDependencies,
-      WorkplaceAIAppPluginStartDependencies
-    >
-{
+export class WorkplaceAIAppPlugin implements Plugin<
+  WorkplaceAIAppPluginSetup,
+  WorkplaceAIAppPluginStart,
+  WorkplaceAIAppPluginSetupDependencies,
+  WorkplaceAIAppPluginStartDependencies
+> {
   private services?: WorkplaceAIServices;
   private readonly logger: Logger;
   private readonly config: WorkplaceAIClientConfig;

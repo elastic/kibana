@@ -140,7 +140,7 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        /* 
+        /*
         The `elasticsearch` config option is meant to grant read-only access to a remote cluster and
         redirects every profiling ES client to it. This setup call would write to the remote cluster,
         which is not allowed. Therefore, we reject the setup request if a remote profiling cluster is configured.

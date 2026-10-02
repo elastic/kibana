@@ -37,7 +37,10 @@ export class ReferencedPanelManager {
   private panelUidToId = new Map<string, string>();
   private panelsTypeById = new Map<string, string>();
 
-  constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
+  constructor(
+    private logger: Logger,
+    private soClient: SavedObjectsClientContract
+  ) {}
 
   async fetchReferencedPanels(): Promise<void> {
     if (this.panelsTypeById.size === 0) {

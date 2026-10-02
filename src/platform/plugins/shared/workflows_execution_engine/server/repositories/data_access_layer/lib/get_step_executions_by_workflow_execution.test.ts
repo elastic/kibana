@@ -16,7 +16,7 @@ const stepDoc = (id: string): EsWorkflowStepExecution =>
     id,
     stepId: id,
     status: 'completed',
-  } as EsWorkflowStepExecution);
+  }) as EsWorkflowStepExecution;
 
 describe('getStepExecutionsByWorkflowExecution', () => {
   const workflowExecutionId = 'exec-1';

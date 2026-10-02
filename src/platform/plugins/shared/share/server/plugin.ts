@@ -56,15 +56,12 @@ export interface SharePublicStartDependencies {
   taskManager?: TaskManagerStartContract;
 }
 
-export class SharePlugin
-  implements
-    Plugin<
-      SharePublicSetup,
-      SharePublicStart,
-      SharePublicSetupDependencies,
-      SharePublicStartDependencies
-    >
-{
+export class SharePlugin implements Plugin<
+  SharePublicSetup,
+  SharePublicStart,
+  SharePublicSetupDependencies,
+  SharePublicStartDependencies
+> {
   private url?: ServerUrlService;
   private readonly version: string;
   private readonly logger: Logger;

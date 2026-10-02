@@ -26,7 +26,7 @@ export type StartServices = [
     | 'userProfile'
   >,
   ReportingPublicPluginStartDependencies,
-  unknown
+  unknown,
 ];
 
 /*

@@ -26,4 +26,4 @@ export const createRouteContextMock = ({
     core: Promise.resolve({
       uiSettings: { client: { get: jest.fn().mockResolvedValue(settingEnabled) } },
     }),
-  } as unknown as AlertZeroRequestHandlerContext);
+  }) as unknown as AlertZeroRequestHandlerContext;

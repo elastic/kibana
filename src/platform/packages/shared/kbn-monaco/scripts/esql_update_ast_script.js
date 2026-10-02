@@ -92,12 +92,6 @@ function getUnquotedText(ctx: ParserRuleContext) {
         },
         rules: {
           '@kbn/imports/no_unresolvable_imports': 'off',
-          'prettier/prettier': [
-            'error',
-            {
-              parser: 'typescript',
-            },
-          ],
         },
       },
     });

@@ -96,7 +96,7 @@ describe('DiscoverRouter', () => {
 
 describe('getReadOnlyBadge', () => {
   const capabilitiesWithSave = (save: boolean) =>
-    ({ discover_v2: { save } } as unknown as Capabilities);
+    ({ discover_v2: { save } }) as unknown as Capabilities;
 
   it('returns undefined when the user has save privileges', () => {
     expect(getReadOnlyBadge({ capabilities: capabilitiesWithSave(true) })).toBeUndefined();

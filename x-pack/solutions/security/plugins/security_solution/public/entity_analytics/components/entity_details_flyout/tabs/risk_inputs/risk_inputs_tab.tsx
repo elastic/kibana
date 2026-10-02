@@ -160,7 +160,7 @@ export const RiskInputsTab = <T extends EntityType>({
   // The record has loaded. No `asset.criticality` on it means the level was removed, not that
   // we failed to read it.
   const liveCriticality: CriticalityLevelWithUnassigned | undefined = entityRecord
-    ? entityRecord.asset?.criticality ?? 'unassigned'
+    ? (entityRecord.asset?.criticality ?? 'unassigned')
     : undefined;
 
   const entityFilterQuery = useMemo(
@@ -850,7 +850,7 @@ const ContextsSection = <T extends EntityType>({
         ? (contributorMember && getEntityName(contributorMember)) || criticality.contributorEUID
         : undefined;
     const relatedEntities = isResolutionView
-      ? contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
+      ? (contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-')
       : '';
     items.push({
       field: (
@@ -882,7 +882,7 @@ const ContextsSection = <T extends EntityType>({
     const watchlistId =
       typeof watchlistMetadata?.watchlist_id === 'string' ? watchlistMetadata.watchlist_id : '';
     const watchlistLabel = watchlistId
-      ? watchlistNamesById.get(watchlistId) ?? getWatchlistName(watchlistId)
+      ? (watchlistNamesById.get(watchlistId) ?? getWatchlistName(watchlistId))
       : i18n.translate(
           'xpack.securitySolution.flyout.entityDetails.riskInputs.unknownWatchlistLabel',
           {
@@ -915,7 +915,7 @@ const ContextsSection = <T extends EntityType>({
         />
       ),
       contribution: formatContribution(watchlist.contribution),
-      entities: isResolutionView ? watchlistEntityNames.get(watchlistId)?.join(', ') ?? '-' : '',
+      entities: isResolutionView ? (watchlistEntityNames.get(watchlistId)?.join(', ') ?? '-') : '',
     });
   });
 

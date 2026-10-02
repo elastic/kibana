@@ -63,7 +63,7 @@ export const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 export const useTableInterval = (): [
   TableInterval,
   (v: TableInterval) => void,
-  UrlStateService<TableInterval>
+  UrlStateService<TableInterval>,
 ] => {
   const [interval, updateCallback, tableIntervalUrlStateService] =
     usePageUrlState<TableIntervalPageUrlState>('mlSelectInterval', TABLE_INTERVAL_DEFAULT);

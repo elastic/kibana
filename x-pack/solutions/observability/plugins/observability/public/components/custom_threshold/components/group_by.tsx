@@ -36,8 +36,8 @@ export function GroupBy({ options, onChange, fields, ...rest }: Props) {
   const selectedOptions = Array.isArray(options.groupBy)
     ? options.groupBy.map((field) => ({ label: field }))
     : options.groupBy
-    ? [{ label: options.groupBy }]
-    : [];
+      ? [{ label: options.groupBy }]
+      : [];
 
   return (
     <EuiComboBox

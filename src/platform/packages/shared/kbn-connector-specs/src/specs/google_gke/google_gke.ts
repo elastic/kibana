@@ -261,11 +261,13 @@ const trimNodePool = (pool: GkeNodePool) => ({
   autoscaling: {
     enabled: pool.autoscaling?.enabled === true,
     minNodeCount:
-      pool.autoscaling?.maxNodeCount !== undefined ? pool.autoscaling.minNodeCount ?? 0 : undefined,
+      pool.autoscaling?.maxNodeCount !== undefined
+        ? (pool.autoscaling.minNodeCount ?? 0)
+        : undefined,
     maxNodeCount: pool.autoscaling?.maxNodeCount,
     totalMinNodeCount:
       pool.autoscaling?.totalMaxNodeCount !== undefined
-        ? pool.autoscaling.totalMinNodeCount ?? 0
+        ? (pool.autoscaling.totalMinNodeCount ?? 0)
         : undefined,
     totalMaxNodeCount: pool.autoscaling?.totalMaxNodeCount,
     locationPolicy: pool.autoscaling?.locationPolicy,
@@ -990,7 +992,7 @@ export const GoogleGke: ConnectorSpec = {
             update: {
               desiredMasterAuthorizedNetworksConfig: {
                 enabled: input.enabled,
-                cidrBlocks: input.enabled ? input.cidrBlocks ?? [] : [],
+                cidrBlocks: input.enabled ? (input.cidrBlocks ?? []) : [],
                 ...(gcpPublicCidrsAccessEnabled !== undefined
                   ? { gcpPublicCidrsAccessEnabled }
                   : {}),

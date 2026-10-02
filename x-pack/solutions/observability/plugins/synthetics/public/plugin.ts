@@ -148,9 +148,12 @@ export interface SyntheticsPluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
-export class SyntheticsPlugin
-  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
-{
+export class SyntheticsPlugin implements Plugin<
+  ClientSetup,
+  ClientStart,
+  ClientPluginsSetup,
+  ClientPluginsStart
+> {
   private readonly _packageInfo: Readonly<PackageInfo>;
 
   constructor(private readonly initContext: PluginInitializerContext) {

@@ -17,7 +17,7 @@ import {
   getDiscoverTimeRangeAroundTimestamp,
 } from './discover_href_for_episode';
 
-const getCapabilities = (show: boolean) => ({ discover_v2: { show } } as unknown as Capabilities);
+const getCapabilities = (show: boolean) => ({ discover_v2: { show } }) as unknown as Capabilities;
 const defaultUiSettingsGet = (key: string) => (key === ENABLE_ESQL ? true : false);
 
 describe('getDiscoverTimeRangeAroundTimestamp', () => {

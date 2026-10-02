@@ -196,7 +196,7 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
     const stepEvents = sortedSteps(execution.events);
     // Only an `execution_terminated` may carry a steps snapshot; interrupted terminals never do.
     const snapshotSteps =
-      terminal.type === TimelineEventType.executionTerminated ? terminal.data.steps ?? [] : [];
+      terminal.type === TimelineEventType.executionTerminated ? (terminal.data.steps ?? []) : [];
     rounds.push({
       id: parseExecutionId(executionId)?.roundId ?? executionId,
       userMessage,

@@ -28,7 +28,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('createVisPanelResolver', () => {
   const logger = createMockLogger();
@@ -43,7 +43,7 @@ describe('createVisPanelResolver', () => {
       selectedChartType: 'metric',
       authoringNote: 'Created a titleless metric showing total requests.',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
-    } as Awaited<ReturnType<typeof buildLensConfig>>);
+    }) as Awaited<ReturnType<typeof buildLensConfig>>;
 
   beforeEach(() => {
     mockedBuildLensConfig.mockReset();

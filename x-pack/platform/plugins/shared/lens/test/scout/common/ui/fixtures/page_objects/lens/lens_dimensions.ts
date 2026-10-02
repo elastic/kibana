@@ -53,7 +53,10 @@ export class LensDimensions {
   readonly dimensionNameInput;
   private readonly textBasedDimensionFieldCombo: EuiComboBoxObject;
 
-  constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly deps: LensDimensionsDeps
+  ) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
     this.editorCloseButton = deps.closeDimensionEditorButton;
     this.quickFunctionsTab = this.page.testSubj.locator('lens-dimensionTabs-quickFunctions');

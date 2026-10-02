@@ -148,7 +148,7 @@ describe('getPrivateLocationAgentStats route', () => {
       () =>
         ({
           listByAgentPolicy: mockListByAgentPolicy,
-        } as unknown as PackagePolicyService)
+        }) as unknown as PackagePolicyService
     );
   });
 

@@ -32,7 +32,7 @@ const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock
 const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
 
 const buildApplicationMock = (): ApplicationStart =>
-  ({ navigateToApp: jest.fn() } as unknown as ApplicationStart);
+  ({ navigateToApp: jest.fn() }) as unknown as ApplicationStart;
 
 const renderActions = (
   identifier: EntityAttachmentIdentifier,

@@ -73,7 +73,7 @@ const makeActionsStart = (
         supportedFeatureIds: ['agentBuilder'],
       }))
     ),
-  } as unknown as ActionsPluginStart);
+  }) as unknown as ActionsPluginStart;
 
 /**
  * Build a minimal `ToolHandlerContext` carrying a real `AttachmentStateManager`

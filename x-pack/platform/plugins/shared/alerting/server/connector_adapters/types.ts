@@ -28,7 +28,7 @@ interface BuildActionParamsArgs<RuleActionParams> {
 
 export interface ConnectorAdapter<
   RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-  ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams,
 > {
   connectorTypeId: string;
   /**

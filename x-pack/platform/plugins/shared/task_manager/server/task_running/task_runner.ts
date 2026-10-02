@@ -511,8 +511,8 @@ export class TaskManagerRunner implements TaskRunner {
             err instanceof Error
               ? String(err)
               : typeof err === 'object' && err !== null
-              ? JSON.stringify(err)
-              : String(err);
+                ? JSON.stringify(err)
+                : String(err);
           this.logger.error(`Task ${this} failed: ${errorMessage}`, {
             tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
             error: { stack_trace: err instanceof Error ? err.stack : undefined },
@@ -819,10 +819,10 @@ export class TaskManagerRunner implements TaskRunner {
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
       : fieldUpdates.status === TaskStatus.ShouldDelete
-      ? TaskRunResult.Deleted
-      : hasTaskRunFailed
-      ? TaskRunResult.SuccessRescheduled
-      : TaskRunResult.RetryScheduled;
+        ? TaskRunResult.Deleted
+        : hasTaskRunFailed
+          ? TaskRunResult.SuccessRescheduled
+          : TaskRunResult.RetryScheduled;
   }
 
   private async processResultWhenDone(): Promise<TaskRunResult> {

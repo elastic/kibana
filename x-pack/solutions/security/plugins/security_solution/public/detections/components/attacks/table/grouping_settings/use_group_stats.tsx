@@ -41,7 +41,7 @@ export const useGroupStats = ({ getAttack }: UseGroupStatsProps) => {
       const attack = getAttack(selectedGroup, bucket);
       const totalAlerts = attack
         ? attack.alertIds.length
-        : bucket.attackRelatedAlerts?.doc_count ?? 0;
+        : (bucket.attackRelatedAlerts?.doc_count ?? 0);
 
       return [
         {

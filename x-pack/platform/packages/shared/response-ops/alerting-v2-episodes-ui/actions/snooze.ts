@@ -38,7 +38,7 @@ export const createSnoozeAction = (
     episodes.some((ep) =>
       ep.source_id == null
         ? !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
-        : extension?.isCompatible(ep) ?? false
+        : (extension?.isCompatible(ep) ?? false)
     ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const snoozedUntil = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
@@ -50,12 +50,10 @@ export const createSnoozeAction = (
         nativeExecute: (eps, http) =>
           bulkSnoozeSeriesActions(
             http,
-            uniqueByGroup(eps).map(
-              (ep): BulkSnoozeSeriesActionItem => ({
-                group_hash: ep.group_hash,
-                ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
-              })
-            )
+            uniqueByGroup(eps).map((ep): BulkSnoozeSeriesActionItem => ({
+              group_hash: ep.group_hash,
+              ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
+            }))
           ),
         extension,
         extensionContext: { snoozedUntil },

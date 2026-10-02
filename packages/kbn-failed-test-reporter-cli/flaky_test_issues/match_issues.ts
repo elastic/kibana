@@ -98,8 +98,8 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
     filePath: location
       ? undot(location)
       : SOURCE_FILE.test(classLocation)
-      ? classLocation
-      : undefined,
+        ? classLocation
+        : undefined,
     jestDirectory: className.startsWith(JEST_CLASS_PREFIX) ? classLocation : undefined,
     testName: metadataString(issue.body, 'test.name'),
     testFramework: testType === undefined ? undefined : TEST_TYPE_FRAMEWORKS[testType],

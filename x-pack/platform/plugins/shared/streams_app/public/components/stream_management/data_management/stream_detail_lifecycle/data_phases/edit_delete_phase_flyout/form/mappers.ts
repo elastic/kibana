@@ -23,9 +23,9 @@ export const mapDeletePhaseToFormValues = ({
   );
   const retentionPeriod = initialValue.deletePhaseEnabled
     ? isUsingDefaultRetention
-      ? defaultRetentionPeriod ?? initialValue.dataRetention
+      ? (defaultRetentionPeriod ?? initialValue.dataRetention)
       : initialValue.dataRetention
-    : defaultRetentionPeriod ?? FALLBACK_RETENTION_PERIOD;
+    : (defaultRetentionPeriod ?? FALLBACK_RETENTION_PERIOD);
   const { value, unit } = parseIntervalWithDefaultUnit(retentionPeriod);
 
   return {

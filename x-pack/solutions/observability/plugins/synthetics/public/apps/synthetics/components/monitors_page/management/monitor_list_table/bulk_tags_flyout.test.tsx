@@ -61,7 +61,7 @@ const makeMonitor = (
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.TAGS]: tags,
     ...(spaces ? { [ConfigKey.KIBANA_SPACES]: spaces } : {}),
-  } as unknown as EncryptedSyntheticsSavedMonitor);
+  }) as unknown as EncryptedSyntheticsSavedMonitor;
 
 const typeAndEnter = (input: Element | null, value: string) => {
   fireEvent.change(input as Element, { target: { value } });

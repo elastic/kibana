@@ -45,7 +45,8 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
 }
 
 export interface CustomLangModuleType<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData>
-  extends Omit<LangModuleType, 'getSuggestionProvider' | 'onLanguage'>,
+  extends
+    Omit<LangModuleType, 'getSuggestionProvider' | 'onLanguage'>,
     LanguageProvidersModule<Deps, MarkerDataType> {
   onLanguage: NonNullable<LangModuleType['onLanguage']>;
 }

@@ -21,7 +21,7 @@ const createUser = (overrides: Partial<AuthenticatedUser> = {}) =>
     email: 'jane@elastic.co',
     roles: [],
     ...overrides,
-  } as AuthenticatedUser);
+  }) as AuthenticatedUser;
 
 describe('useAuthenticatedUser', () => {
   const getCurrentUser = jest.fn();

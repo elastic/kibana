@@ -36,7 +36,7 @@ const makeContext = (
     config,
     log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
     getClient: jest.fn().mockResolvedValue(pool),
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 
 // Convenience wrapper when pool behaviour needs to be inspected in the test.
 const makeContextWithPool = (

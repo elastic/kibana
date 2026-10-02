@@ -15,15 +15,12 @@ import type {
   QueryActivityPluginStart,
 } from './types';
 
-export class QueryActivityPlugin
-  implements
-    Plugin<
-      QueryActivityPluginSetup,
-      QueryActivityPluginStart,
-      QueryActivitySetupDependencies,
-      QueryActivityStartDependencies
-    >
-{
+export class QueryActivityPlugin implements Plugin<
+  QueryActivityPluginSetup,
+  QueryActivityPluginStart,
+  QueryActivitySetupDependencies,
+  QueryActivityStartDependencies
+> {
   public setup(
     core: CoreSetup<QueryActivityStartDependencies>,
     plugins: QueryActivitySetupDependencies

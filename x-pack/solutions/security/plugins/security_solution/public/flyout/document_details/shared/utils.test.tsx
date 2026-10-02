@@ -63,8 +63,9 @@ const emptyGetFieldsData: GetFieldsData = () => [];
 describe('resolveUserNameForEntityInsights', () => {
   it('prefers user.name from document over user.id in identity map', () => {
     expect(
-      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'entity.id': 'e-1' }, (field: string) =>
-        field === 'user.name' ? ['alice'] : []
+      resolveUserNameForEntityInsights(
+        { 'user.id': 'id-1', 'entity.id': 'e-1' },
+        (field: string) => (field === 'user.name' ? ['alice'] : [])
       )
     ).toBe('alice');
   });

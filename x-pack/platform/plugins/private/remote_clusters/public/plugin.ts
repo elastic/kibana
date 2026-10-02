@@ -23,9 +23,12 @@ export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
 }
 
-export class RemoteClustersUIPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
-{
+export class RemoteClustersUIPlugin implements Plugin<
+  RemoteClustersPluginSetup,
+  void,
+  Dependencies,
+  any
+> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private canUseApiKeyTrustModel: boolean = false;

@@ -101,7 +101,7 @@ const buildConnectorType = (id: string): ConnectorType =>
     id,
     name: `Type ${id}`,
     supportedFeatureIds: ['contextEngine'],
-  } as unknown as ConnectorType);
+  }) as unknown as ConnectorType;
 
 const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
@@ -172,7 +172,7 @@ describe('ai indices routes', () => {
           },
         },
       }),
-    } as unknown as Parameters<RequestHandler>[0]);
+    }) as unknown as Parameters<RequestHandler>[0];
 
   const getRoute = (method: string, path: string): RegisteredRoute => {
     const route = routes[`${method}:${path}`];

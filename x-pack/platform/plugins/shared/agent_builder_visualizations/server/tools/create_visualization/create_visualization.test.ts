@@ -44,7 +44,7 @@ const createLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 interface MockAttachments {
   getAttachmentRecord: jest.Mock;

@@ -41,4 +41,4 @@ export const getMockSearchConfig = ({
       enabled,
       defaultExpiration,
     } as SearchSessionsConfigSchema,
-  } as SearchConfigSchema);
+  }) as SearchConfigSchema;

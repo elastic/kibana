@@ -122,7 +122,7 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
   );
 
   return {
-    entityIds: isFilterActive ? data ?? [] : undefined,
+    entityIds: isFilterActive ? (data ?? []) : undefined,
     // Keep "loading" until the resolution finishes so the anomaly queries do
     // not run unconstrained (and then re-run) while IDs are still resolving.
     isLoading: isFilterActive && (isLoading || data === undefined),

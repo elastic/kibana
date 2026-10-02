@@ -16,7 +16,10 @@ const POLL_INTERVAL = 5; // seconds
 export class AutoDeploy {
   private inferError: Error | null = null;
   private inferFinished: boolean = false;
-  constructor(private readonly http: HttpSetup, private readonly inferenceId: string) {}
+  constructor(
+    private readonly http: HttpSetup,
+    private readonly inferenceId: string
+  ) {}
 
   public async deploy(signal?: AbortSignal) {
     this.inferError = null;

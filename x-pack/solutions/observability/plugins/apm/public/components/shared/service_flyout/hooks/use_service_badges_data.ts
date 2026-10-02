@@ -103,7 +103,7 @@ export function useServiceBadgesData({
   );
 
   const alertsResolved = alertsStatus === FETCH_STATUS.SUCCESS;
-  const alertsCount = alertsResolved ? alertsData?.alertsCount ?? 0 : 0;
+  const alertsCount = alertsResolved ? (alertsData?.alertsCount ?? 0) : 0;
   const canShowAlerts = canReadAlerts && alertsResolved && alertsCount > 0;
 
   const anomalyResolved = anomalyStatus === FETCH_STATUS.SUCCESS;

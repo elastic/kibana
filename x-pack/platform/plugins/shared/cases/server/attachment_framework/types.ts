@@ -50,8 +50,10 @@ export interface AttachmentWorkflowDefinition {
   validateTargets?: (context: WorkflowAttachmentValidationContext) => void;
 }
 
-export interface UnifiedAttachmentType
-  extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+export interface UnifiedAttachmentType extends Omit<
+  PersistableState<UnifiedAttachmentState>,
+  'migrations' | 'inject' | 'extract'
+> {
   id: string;
   /** Full-payload zod schema. Sole validation source for unified attachments. */
   schema: z.ZodType;
@@ -63,11 +65,10 @@ export interface UnifiedAttachmentType
   workflow?: AttachmentWorkflowDefinition;
 }
 
-export interface UnifiedAttachmentTypeSetup
-  extends Omit<
-    PersistableStateDefinition<UnifiedAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
+export interface UnifiedAttachmentTypeSetup extends Omit<
+  PersistableStateDefinition<UnifiedAttachmentState>,
+  'migrations' | 'inject' | 'extract'
+> {
   id: string;
   /** Full-payload zod schema. Sole validation source for unified attachments. */
   schema: z.ZodType;

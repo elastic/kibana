@@ -29,14 +29,16 @@ export interface HeaderPageProps extends HeaderProps {
 
 const getHeaderCss = (euiTheme: EuiThemeComputed<{}>, border?: boolean) => css`
   margin-bottom: ${euiTheme.size.l};
-  ${border &&
-  css`
-    border-bottom: ${euiTheme.border.thin};
-    padding-bottom: ${euiTheme.size.l};
-    .euiProgress {
-      top: ${euiTheme.size.l};
-    }
-  `}
+  ${
+    border &&
+    css`
+      border-bottom: ${euiTheme.border.thin};
+      padding-bottom: ${euiTheme.size.l};
+      .euiProgress {
+        top: ${euiTheme.size.l};
+      }
+    `
+  }
 `;
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({

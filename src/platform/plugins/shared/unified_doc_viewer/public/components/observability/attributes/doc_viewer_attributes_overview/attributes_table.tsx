@@ -21,11 +21,10 @@ import {
 } from '../../../doc_viewer_table/table_cell_actions';
 import type { AttributeField } from './attributes_overview';
 
-interface AttributesTableProps
-  extends Pick<
-    DocViewRenderProps,
-    'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
-  > {
+interface AttributesTableProps extends Pick<
+  DocViewRenderProps,
+  'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+> {
   fields: AttributeField[];
   searchTerm: string;
   isEsqlMode: boolean;

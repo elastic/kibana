@@ -12,7 +12,7 @@
  */
 export interface HasLibraryTransforms<
   ByReferenceSerializedState extends object = object,
-  ByValueSerializedState extends object = object
+  ByValueSerializedState extends object = object,
 > {
   /**
    * @returns {Promise<boolean>}
@@ -60,13 +60,12 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
 ): unknownApi is HasLibraryTransforms<StateT> => {
   return Boolean(
     unknownApi &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).canLinkToLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByReference ===
-        'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue ===
-        'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).hasLibraryItemWithTitle === 'function'
+    typeof (unknownApi as HasLibraryTransforms<StateT>).canLinkToLibrary === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByReference ===
+      'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).hasLibraryItemWithTitle === 'function'
   );
 };

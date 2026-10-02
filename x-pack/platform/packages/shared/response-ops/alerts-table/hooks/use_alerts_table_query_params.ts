@@ -12,23 +12,22 @@ import type { SetRequired } from 'type-fest';
 import type { AlertsTableProps, BulkActionsReducerAction } from '../types';
 import { BulkActionsVerbs } from '../types';
 
-export interface UseAlertsTableQueryParamsOptions
-  extends SetRequired<
-    Pick<
-      AlertsTableProps,
-      | 'ruleTypeIds'
-      | 'consumers'
-      | 'projectRouting'
-      | 'query'
-      | 'sort'
-      | 'runtimeMappings'
-      | 'pageIndex'
-      | 'pageSize'
-      | 'minScore'
-      | 'trackScores'
-    >,
-    'sort'
-  > {
+export interface UseAlertsTableQueryParamsOptions extends SetRequired<
+  Pick<
+    AlertsTableProps,
+    | 'ruleTypeIds'
+    | 'consumers'
+    | 'projectRouting'
+    | 'query'
+    | 'sort'
+    | 'runtimeMappings'
+    | 'pageIndex'
+    | 'pageSize'
+    | 'minScore'
+    | 'trackScores'
+  >,
+  'sort'
+> {
   fields: Array<{
     field: string;
     include_unmapped: boolean;

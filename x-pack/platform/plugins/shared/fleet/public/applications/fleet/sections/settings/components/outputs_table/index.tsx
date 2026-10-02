@@ -110,14 +110,14 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                         'This output uses {provider} for private network connectivity.',
                       values: {
                         provider: getPrivateLinkProvider(
-                          isBeatsOutput(output) ? output.hosts ?? [] : []
+                          isBeatsOutput(output) ? (output.hosts ?? []) : []
                         ),
                       },
                     }
                   )}
                 >
                   <EuiBadge tabIndex={0}>
-                    {getPrivateLinkProvider(isBeatsOutput(output) ? output.hosts ?? [] : [])}
+                    {getPrivateLinkProvider(isBeatsOutput(output) ? (output.hosts ?? []) : [])}
                   </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -140,7 +140,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         truncateText: true,
         render: (output: Output) => (
           <FlexGroupWithMinWidth direction="column" gutterSize="xs">
-            {(isBeatsOutput(output) ? output.hosts ?? [] : []).map((host) => (
+            {(isBeatsOutput(output) ? (output.hosts ?? []) : []).map((host) => (
               <EuiFlexItem key={host}>
                 <p title={host} className={`eui-textTruncate`}>
                   {host}

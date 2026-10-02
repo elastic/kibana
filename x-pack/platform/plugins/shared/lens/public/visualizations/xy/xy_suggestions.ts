@@ -598,8 +598,8 @@ function buildSuggestion({
       mainPalette?.type === 'legacyPalette'
         ? mainPalette.value
         : existingLayer && 'palette' in existingLayer
-        ? (existingLayer as XYDataLayerConfig).palette
-        : undefined,
+          ? (existingLayer as XYDataLayerConfig).palette
+          : undefined,
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
@@ -613,8 +613,8 @@ function buildSuggestion({
     colorMapping: !mainPalette
       ? getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(seriesType) })
       : mainPalette?.type === 'colorMapping'
-      ? mainPalette.value
-      : undefined,
+        ? mainPalette.value
+        : undefined,
   };
 
   const hasDateHistogramDomain = isDateHistogramOperation(xValue?.operation);
@@ -715,8 +715,8 @@ function getScore(
     changeType === 'reduced' || changeType === 'layers'
       ? 0.3
       : changeType === 'unchanged'
-      ? 0.5
-      : 1;
+        ? 0.5
+        : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
   return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }

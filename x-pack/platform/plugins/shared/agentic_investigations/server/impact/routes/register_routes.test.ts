@@ -61,7 +61,7 @@ const registerAndCollect = (
       update: jest.fn(),
       get: jest.fn(),
       delete: jest.fn(),
-    } as never),
+    }) as never,
   getConversationClient: ImpactRouteDependencies['getConversationClient'] = async () =>
     ownerConversation as never
 ) => {
@@ -86,7 +86,7 @@ const registerAndCollect = (
         ...service,
         attach,
         getByConversationId: service.getByConversationId ?? impactReadsAfterAttach(attach),
-      } as unknown as ImpactService),
+      }) as unknown as ImpactService,
     getSpaceId: () => 'default',
     resolveUser: async () => ANALYST,
     getAttachmentClient,
@@ -153,7 +153,7 @@ describe('investigation impact routes', () => {
     };
     const { posts } = registerAndCollect(
       { attach },
-      async () => ({ create } as never),
+      async () => ({ create }) as never,
       async () => conversations as never
     );
     const response = httpServerMock.createResponseFactory();
@@ -185,13 +185,13 @@ describe('investigation impact routes', () => {
     const attach = jest.fn();
     const { posts } = registerAndCollect(
       { attach },
-      async () => ({ create: jest.fn() } as never),
+      async () => ({ create: jest.fn() }) as never,
       async () =>
         ({
           get: jest.fn().mockResolvedValue({
             permissions: { update_access_control: false },
           }),
-        } as never)
+        }) as never
     );
     const response = httpServerMock.createResponseFactory();
 

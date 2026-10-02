@@ -16,7 +16,7 @@ const createLogger = (): Logger =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createPolicy = (routeEntriesJson: string): NewPackagePolicy =>
   ({
@@ -32,7 +32,7 @@ const createPolicy = (routeEntriesJson: string): NewPackagePolicy =>
         type: 'textarea',
       },
     },
-  } as unknown as NewPackagePolicy);
+  }) as unknown as NewPackagePolicy;
 
 describe('putCriblRoutingPipeline', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;

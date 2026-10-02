@@ -21,9 +21,12 @@ import { initMetricIndicesRoute } from './routes/metric_indices';
 export type MetricsDataPluginSetup = ReturnType<MetricsDataPlugin['setup']>;
 export type MetricsDataPluginStart = ReturnType<MetricsDataPlugin['start']>;
 
-export class MetricsDataPlugin
-  implements Plugin<MetricsDataPluginSetup, MetricsDataPluginStart, {}, MetricsDataPluginStartDeps>
-{
+export class MetricsDataPlugin implements Plugin<
+  MetricsDataPluginSetup,
+  MetricsDataPluginStart,
+  {},
+  MetricsDataPluginStartDeps
+> {
   private metricsClient: MetricsDataClient | null = null;
 
   constructor(context: PluginInitializerContext) {}

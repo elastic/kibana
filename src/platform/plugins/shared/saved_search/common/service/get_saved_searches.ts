@@ -63,7 +63,7 @@ export const getSearchSavedObject = async (
 
 export const convertToSavedSearch = async <
   Serialized extends boolean = false,
-  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch,
 >(
   {
     savedSearchId,
@@ -116,7 +116,7 @@ export const convertToSavedSearch = async <
 
 export const getSavedSearch = async <
   Serialized extends boolean = false,
-  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch,
 >(
   savedSearchId: string,
   deps: GetSavedSearchDependencies,

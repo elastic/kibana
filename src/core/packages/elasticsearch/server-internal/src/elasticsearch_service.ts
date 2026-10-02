@@ -59,9 +59,10 @@ export interface SetupDeps {
 }
 
 /** @internal */
-export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart>
-{
+export class ElasticsearchService implements CoreService<
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart
+> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private readonly isServerless: boolean;
@@ -112,11 +113,11 @@ export class ElasticsearchService
 
     // TODO we should find a better method to determine whether the underlying ES is CPS-capable.
     const cpsEnabled = this.isServerless
-      ? (
+      ? ((
           await firstValueFrom(
             this.coreContext.configService.atPath<{ cpsEnabled?: boolean }>('cps')
           ).catch(() => ({ cpsEnabled: false }))
-        ).cpsEnabled ?? false
+        ).cpsEnabled ?? false)
       : false;
     this.esTimingEnabled = deps.http.config.serverTimingElasticsearch;
     this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled, this.esTimingEnabled);

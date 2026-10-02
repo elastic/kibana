@@ -175,7 +175,7 @@ export const ParsedTemplateDefinitionSchema = z.object({
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(
-        fields.map((field) => (isRefField(field) ? field.name ?? field.$ref : field.name))
+        fields.map((field) => (isRefField(field) ? (field.name ?? field.$ref) : field.name))
       );
       return fieldNames.size === fields.length;
     },

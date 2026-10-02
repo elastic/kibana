@@ -35,7 +35,7 @@ const matchesExpectedChartType = (actual: string | undefined, expected: string[]
  */
 export function createChartTypeVsIntentEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   expectedChartTypeExtractor: (expected: TExample['output']) => ExpectedChartType | undefined;

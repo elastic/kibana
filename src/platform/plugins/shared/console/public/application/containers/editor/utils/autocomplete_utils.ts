@@ -615,8 +615,8 @@ const getSuggestions = (
   const fieldBeingTyped = quotedFieldWithDotMatch
     ? quotedFieldWithDotMatch[1]
     : unquotedFieldWithDotMatch
-    ? unquotedFieldWithDotMatch[1]
-    : null;
+      ? unquotedFieldWithDotMatch[1]
+      : null;
   const isQuotedField = !!quotedFieldWithDotMatch;
   // Adjust the range start column if we have a field with a dot
   let startColumn = wordUntilPosition.startColumn;

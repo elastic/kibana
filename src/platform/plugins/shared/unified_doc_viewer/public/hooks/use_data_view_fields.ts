@@ -24,15 +24,18 @@ export const useDataViewFields = ({
 }: UseFieldTypesProps): { dataViewFields: Record<string, DataViewField | undefined> } => {
   const dataViewFields = useMemo(
     () =>
-      fields.reduce((acc, fieldName) => {
-        acc[fieldName] = getDataViewFieldOrCreateFromColumnMeta({
-          fieldName,
-          dataView,
-          columnMeta: columnsMeta?.[fieldName],
-        });
+      fields.reduce(
+        (acc, fieldName) => {
+          acc[fieldName] = getDataViewFieldOrCreateFromColumnMeta({
+            fieldName,
+            dataView,
+            columnMeta: columnsMeta?.[fieldName],
+          });
 
-        return acc;
-      }, {} as Record<string, DataViewField | undefined>),
+          return acc;
+        },
+        {} as Record<string, DataViewField | undefined>
+      ),
     [fields, dataView, columnsMeta]
   );
 

@@ -129,16 +129,15 @@ export const createExampleSolutionViewRootProfileProvider = (): RootProfileProvi
 });
 
 const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocDataViews'] =
-  (prev) => () =>
-    [
-      ...prev(),
-      {
-        id: 'example-root-profile-ad-hoc-data-view',
-        name: 'Example profile data view',
-        title: 'my-example-*',
-        timeFieldName: '@timestamp',
-      },
-    ];
+  (prev) => () => [
+    ...prev(),
+    {
+      id: 'example-root-profile-ad-hoc-data-view',
+      name: 'Example profile data view',
+      title: 'my-example-*',
+      timeFieldName: '@timestamp',
+    },
+  ];
 
 const getDefaultEsqlQuery: RootProfileProvider['profile']['getDefaultEsqlQuery'] =
   (prev) => () => ({

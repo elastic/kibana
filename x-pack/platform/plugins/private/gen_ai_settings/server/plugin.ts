@@ -26,15 +26,12 @@ import { NO_DEFAULT_CONNECTOR, FALLBACK_DEFAULT_CONNECTOR_ID } from '../common/c
 export type GenAiSettingsPluginSetup = Record<string, never>;
 export type GenAiSettingsPluginStart = Record<string, never>;
 
-export class GenAiSettingsPlugin
-  implements
-    Plugin<
-      GenAiSettingsPluginSetup,
-      GenAiSettingsPluginStart,
-      GenAiSettingsPluginSetupDependencies,
-      GenAiSettingsPluginStartDependencies
-    >
-{
+export class GenAiSettingsPlugin implements Plugin<
+  GenAiSettingsPluginSetup,
+  GenAiSettingsPluginStart,
+  GenAiSettingsPluginSetupDependencies,
+  GenAiSettingsPluginStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {

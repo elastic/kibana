@@ -193,9 +193,8 @@ async function executor(
   const resources = await initResources(request);
 
   const coreContext = await resources.context.core;
-  const chatExperience = await coreContext.uiSettings.client.get<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE
-  );
+  const chatExperience =
+    await coreContext.uiSettings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
   if (chatExperience === AIChatExperience.Agent) {
     execOptions.logger.debug(

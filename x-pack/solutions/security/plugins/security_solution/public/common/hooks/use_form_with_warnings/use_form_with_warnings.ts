@@ -18,8 +18,10 @@ export type FormWithWarningsSubmitHandler<T extends FormData = FormData> = (
   validationResults: ValidationResults
 ) => Promise<void>;
 
-interface FormWithWarningsConfig<T extends FormData = FormData, I extends FormData = T>
-  extends Omit<FormConfig<T, I>, 'onSubmit'> {
+interface FormWithWarningsConfig<
+  T extends FormData = FormData,
+  I extends FormData = T,
+> extends Omit<FormConfig<T, I>, 'onSubmit'> {
   onSubmit?: FormWithWarningsSubmitHandler<T>;
   options: FormConfig['options'] & {
     warningValidationCodes: Readonly<string[]>;

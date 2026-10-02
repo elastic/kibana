@@ -20,9 +20,9 @@ export const hasWorkflowAccess = async (
 ): Promise<boolean> => {
   const profileId =
     workflow.access_control?.access_mode === 'private'
-      ? (await core.userProfile.getCurrentProfileId({
+      ? ((await core.userProfile.getCurrentProfileId({
           request: getWorkflowOriginalRequest(request),
-        })) ?? undefined
+        })) ?? undefined)
       : undefined;
   return getWorkflowPermissions(workflow, profileId)[operation];
 };

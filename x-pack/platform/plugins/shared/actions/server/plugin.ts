@@ -141,14 +141,14 @@ export interface PluginSetupContract {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
 
   registerSubActionConnectorType<
     Config extends ActionTypeConfig = ActionTypeConfig,
-    Secrets extends ActionTypeSecrets = ActionTypeSecrets
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
@@ -283,10 +283,12 @@ const includedHiddenTypes = [
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
-export class ActionsPlugin
-  implements
-    Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
-{
+export class ActionsPlugin implements Plugin<
+  PluginSetupContract,
+  PluginStartContract,
+  ActionsPluginsSetup,
+  ActionsPluginsStart
+> {
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
@@ -538,7 +540,7 @@ export class ActionsPlugin
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
         Params extends ActionTypeParams = ActionTypeParams,
-        ExecutorResultData = void
+        ExecutorResultData = void,
       >(
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
@@ -547,7 +549,7 @@ export class ActionsPlugin
       },
       registerSubActionConnectorType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
-        Secrets extends ActionTypeSecrets = ActionTypeSecrets
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets,
       >(
         connector: SubActionConnectorType<Config, Secrets>
       ) => {

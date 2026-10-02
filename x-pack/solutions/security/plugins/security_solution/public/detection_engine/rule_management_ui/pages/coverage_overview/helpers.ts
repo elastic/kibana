@@ -12,7 +12,7 @@ import type {
 } from '../../../../../common/api/detection_engine';
 
 export const extractSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity,
 >(
   options: EuiSelectableOption[]
 ): T[] => {
@@ -20,7 +20,7 @@ export const extractSelected = <
 };
 
 export const populateSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity,
 >(
   allOptions: Array<EuiSelectableOption<{ label: T }>>,
   selected: string[]

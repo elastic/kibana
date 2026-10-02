@@ -86,8 +86,7 @@ export interface PolicyDetailsArtifactsPageListLocationParams {
   filter: string;
 }
 
-export interface PolicyDetailsArtifactsPageLocation
-  extends PolicyDetailsArtifactsPageListLocationParams {
+export interface PolicyDetailsArtifactsPageLocation extends PolicyDetailsArtifactsPageListLocationParams {
   show?: 'list';
 }
 

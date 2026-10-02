@@ -503,8 +503,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           queryParamsPolicyId
             ? [queryParamsPolicyId]
             : defaultPolicyData?.policy_ids
-            ? defaultPolicyData?.policy_ids
-            : []
+              ? defaultPolicyData?.policy_ids
+              : []
         }
       />
     ),

@@ -12,11 +12,10 @@ import { ProjectPicker, DisabledProjectPicker } from '@kbn/cps-utils';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-export interface MlProjectPickerPanelProps
-  extends Pick<
-    ComponentProps<typeof ProjectPicker>,
-    'onProjectRoutingChange' | 'defaultProjectRoutingGetter' | 'fetchProjectsByRouting'
-  > {
+export interface MlProjectPickerPanelProps extends Pick<
+  ComponentProps<typeof ProjectPicker>,
+  'onProjectRoutingChange' | 'defaultProjectRoutingGetter' | 'fetchProjectsByRouting'
+> {
   projectRouting?: ProjectRouting;
   totalProjectCount: number;
   isReadonly?: boolean;

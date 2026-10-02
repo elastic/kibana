@@ -54,15 +54,12 @@ export interface HomePluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
 }
 
-export class HomePublicPlugin
-  implements
-    Plugin<
-      HomePublicPluginSetup,
-      HomePublicPluginStart,
-      HomePluginSetupDependencies,
-      HomePluginStartDependencies
-    >
-{
+export class HomePublicPlugin implements Plugin<
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+  HomePluginSetupDependencies,
+  HomePluginStartDependencies
+> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();

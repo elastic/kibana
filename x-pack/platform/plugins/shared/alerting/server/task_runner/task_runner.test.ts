@@ -939,7 +939,7 @@ describe('Task Runner', () => {
   type SnoozeTestParams = [
     muteAll: boolean,
     snoozeEndTime: string | undefined | null,
-    shouldBeSnoozed: boolean
+    shouldBeSnoozed: boolean,
   ];
 
   const snoozeTestParams: SnoozeTestParams[] = [

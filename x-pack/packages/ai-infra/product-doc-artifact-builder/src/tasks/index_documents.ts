@@ -35,10 +35,13 @@ export const indexDocuments = async ({
     const response = await client.bulk(
       {
         refresh: 'wait_for',
-        operations: chunk.reduce((operations, document) => {
-          operations!.push(...[{ index: { _index: index } }, document]);
-          return operations;
-        }, [] as BulkRequest['operations']),
+        operations: chunk.reduce(
+          (operations, document) => {
+            operations!.push(...[{ index: { _index: index } }, document]);
+            return operations;
+          },
+          [] as BulkRequest['operations']
+        ),
       },
       { requestTimeout: 10 * 60 * 1000 }
     );

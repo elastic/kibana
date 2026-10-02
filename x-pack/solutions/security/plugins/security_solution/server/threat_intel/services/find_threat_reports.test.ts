@@ -39,7 +39,7 @@ const buildSearchResponse = (hits: ReturnType<typeof buildHit>[], pitId = 'pit-1
     pit_id: pitId,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: { total: { value: hits.length, relation: 'eq' as const }, max_score: null, hits },
-  } as const);
+  }) as const;
 
 const createEsClient = () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

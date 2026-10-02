@@ -53,7 +53,7 @@ export class UnenrollActionRunner extends ActionRunner {
 export function isAgentUnenrolled(agent: Agent, revoke?: boolean): boolean {
   return Boolean(
     (revoke && agent.unenrolled_at) ||
-      (!revoke && (agent.unenrollment_started_at || agent.unenrolled_at))
+    (!revoke && (agent.unenrollment_started_at || agent.unenrolled_at))
   );
 }
 

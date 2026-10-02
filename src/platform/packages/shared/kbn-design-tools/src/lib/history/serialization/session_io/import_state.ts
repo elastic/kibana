@@ -358,7 +358,7 @@ export const importState = async (
       }
 
       const referenceEl = exported.referenceElPath
-        ? resolveElement(exported.referenceElPath, 'reference element', warnings) ?? undefined
+        ? (resolveElement(exported.referenceElPath, 'reference element', warnings) ?? undefined)
         : undefined;
 
       // When the color mode differs, remap stale Emotion class names

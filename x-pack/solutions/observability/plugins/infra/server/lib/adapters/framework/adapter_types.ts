@@ -112,8 +112,10 @@ export interface InfraDatabaseResponse {
   timeout: boolean;
 }
 
-export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
-  extends InfraDatabaseResponse {
+export interface InfraDatabaseSearchResponse<
+  Hit = {},
+  Aggregations = undefined,
+> extends InfraDatabaseResponse {
   _shards: {
     total: number;
     successful: number;

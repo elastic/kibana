@@ -401,9 +401,8 @@ export const langChainExecute = async ({
     },
   };
 
-  const result: StreamResponseWithHeaders | StaticReturnType = await callAssistantGraph(
-    executorParams
-  );
+  const result: StreamResponseWithHeaders | StaticReturnType =
+    await callAssistantGraph(executorParams);
 
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };

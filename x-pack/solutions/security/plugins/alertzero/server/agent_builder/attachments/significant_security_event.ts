@@ -161,8 +161,8 @@ const formatSignificantSecurityEventForAgent = (
         indicator.type === 'technique' && indicator.technique_id
           ? ` [${indicator.technique_id}]`
           : indicator.type === 'ioc' && indicator.ioc
-          ? ` [${indicator.ioc.type}: ${indicator.ioc.value}]`
-          : '';
+            ? ` [${indicator.ioc.type}: ${indicator.ioc.value}]`
+            : '';
       return `  ${indicator.type}: ${indicator.value}${detail}${confidence}`;
     });
   }
@@ -190,8 +190,8 @@ const formatSignificantSecurityEventForAgent = (
             event.matched.ioc
               ? `ioc ${event.matched.ioc.value}`
               : event.matched.technique_id
-              ? `technique ${event.matched.technique_id}`
-              : 'unspecified'
+                ? `technique ${event.matched.technique_id}`
+                : 'unspecified'
           } on ${event.matched.field}]`
         : '';
       return `  ${event.event_id} (${event.source_index})${matched}`;

@@ -367,7 +367,7 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
       indexMode: indexModeValue,
       ...rest
     } = formData;
-    const dataStream = doCreateDataStream ? initialTemplateData.dataStream ?? {} : undefined;
+    const dataStream = doCreateDataStream ? (initialTemplateData.dataStream ?? {}) : undefined;
     const indexMode = setIndexMode ? indexModeValue : undefined;
     return { ...rest, dataStream, indexMode };
   };

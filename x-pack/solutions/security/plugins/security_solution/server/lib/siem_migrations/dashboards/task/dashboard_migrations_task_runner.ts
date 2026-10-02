@@ -27,8 +27,10 @@ import {
   type EnrichedMigrationResources,
 } from '../../common/task/util/enrich_lookup_resources';
 
-export interface DashboardMigrationTaskInput
-  extends Pick<StoredDashboardMigrationDashboard, 'id' | 'original_dashboard'> {
+export interface DashboardMigrationTaskInput extends Pick<
+  StoredDashboardMigrationDashboard,
+  'id' | 'original_dashboard'
+> {
   resources: EnrichedMigrationResources;
 }
 export type DashboardMigrationTaskOutput = MigrateDashboardState;

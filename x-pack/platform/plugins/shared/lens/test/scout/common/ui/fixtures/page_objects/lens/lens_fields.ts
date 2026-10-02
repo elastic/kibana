@@ -23,7 +23,10 @@ export class LensFields {
   private readonly confirmButton;
   private readonly fieldListLoading;
 
-  constructor(private readonly page: ScoutPage, private readonly deps: LensFieldsDeps) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly deps: LensFieldsDeps
+  ) {
     this.dataViewSwitcher = this.page.testSubj.locator('lns-dataView-switch-link');
     this.addFieldButton = this.page.testSubj.locator('indexPattern-add-field');
     this.fieldEditor = this.page.testSubj.locator('fieldEditor');

@@ -37,7 +37,7 @@ const defaultResourceIdentifier = () =>
   ({
     fromOriginal: jest.fn().mockResolvedValue([]),
     fromResources: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>);
+  }) as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>;
 
 describe('ResourceRetriever', () => {
   let retriever: ResourceRetriever;
@@ -93,7 +93,7 @@ describe('ResourceRetriever', () => {
         ({
           ...defaultResourceIdentifier(),
           fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentified),
-        } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>)
+        }) as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>
     );
 
     const result = await retriever.getResources(migrationItem.original_rule);
@@ -133,7 +133,7 @@ describe('ResourceRetriever', () => {
           ...defaultResourceIdentifier(),
           fromOriginal: jest.fn().mockResolvedValue(mockResourcesIdentifiedFromRule),
           fromResources: jest.fn().mockResolvedValue([]).mockResolvedValueOnce(mockNestedResources),
-        } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>)
+        }) as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>
     );
 
     const result = await retriever.getResources(migrationItem.original_rule);

@@ -137,7 +137,7 @@ export const useEditTimelineBatchActions = ({
                 ? timelineType === TimelineTypeEnum.template
                   ? i18n.SELECTED_TEMPLATES(selectedItems?.length ?? 0)
                   : i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
-                : selectedItems[0]?.title ?? ''
+                : (selectedItems[0]?.title ?? '')
             }
           />
           <EuiContextMenuPanel items={items} />

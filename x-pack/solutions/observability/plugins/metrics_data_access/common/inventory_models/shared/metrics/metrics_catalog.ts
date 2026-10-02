@@ -17,9 +17,9 @@ import type {
   SchemaWrappedEntry,
 } from './types';
 
-export class MetricsCatalog<TConfig extends MetricConfigMap>
-  implements BaseMetricsCatalog<TConfig>
-{
+export class MetricsCatalog<
+  TConfig extends MetricConfigMap,
+> implements BaseMetricsCatalog<TConfig> {
   private readonly catalog: ResolvedMetricMap<TConfig>;
   private readonly includeLegacyMetrics: boolean;
   private readonly legacyMetrics: Set<keyof TConfig>;

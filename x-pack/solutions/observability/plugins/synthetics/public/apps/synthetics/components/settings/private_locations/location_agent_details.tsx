@@ -187,8 +187,8 @@ export const LocationAgentDetails = ({
           agent.usedMemoryMib != null && agent.totalMemoryMib != null
             ? MEMORY_USED_OF_TOTAL(formatRam(agent.usedMemoryMib), formatRam(agent.totalMemoryMib))
             : agent.usedMemoryMib != null
-            ? formatRam(agent.usedMemoryMib)
-            : null;
+              ? formatRam(agent.usedMemoryMib)
+              : null;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>

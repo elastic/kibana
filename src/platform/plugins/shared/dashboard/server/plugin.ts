@@ -71,9 +71,12 @@ export interface StartDeps {
   security?: SecurityPluginStart;
 }
 
-export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
-{
+export class DashboardPlugin implements Plugin<
+  DashboardPluginSetup,
+  DashboardPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
 

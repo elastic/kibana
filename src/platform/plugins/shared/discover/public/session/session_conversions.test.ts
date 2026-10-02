@@ -529,7 +529,7 @@ describe('Discover session conversion and UI preparation', () => {
 
     const beforeSave = cloneDeep(session);
     const apiTab = toDiscoverSessionApiData(session).tabs[1];
-    const filters = 'filters' in apiTab ? apiTab.filters ?? [] : [];
+    const filters = 'filters' in apiTab ? (apiTab.filters ?? []) : [];
     expect(apiTab.data_source).toStrictEqual({ ...inlineApiDataView, id: 'runtime-inline-id' });
     expect(filters[0].data_view_id).toBe('runtime-inline-id');
     expect(filters[1].data_view_id).toBe('foreign-data-view-id');

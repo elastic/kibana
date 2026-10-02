@@ -55,7 +55,7 @@ const makeMonitor = (
     [ConfigKey.NAME]: name,
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.APM_SERVICE_NAME]: serviceName,
-  } as unknown as EncryptedSyntheticsSavedMonitor);
+  }) as unknown as EncryptedSyntheticsSavedMonitor;
 
 describe('<BulkServiceNameFlyout />', () => {
   const onClose = jest.fn();

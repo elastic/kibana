@@ -31,7 +31,7 @@ const mockAddContent = jest.fn<
       props: {
         removeClusterSettings: (settings: string[]) => Promise<void>;
       };
-    }
+    },
   ]
 >();
 const mockRemoveContent = jest.fn<void, [id: string]>();

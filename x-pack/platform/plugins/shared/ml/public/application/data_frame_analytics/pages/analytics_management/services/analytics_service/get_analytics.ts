@@ -137,9 +137,8 @@ export const useGetAnalytics = (
 
       try {
         const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics(analyticsId);
-        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(
-          analyticsId
-        );
+        const analyticsStats =
+          await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(analyticsId);
 
         let savedObjectsSpaces: Record<string, string[]> = {};
         if (canManageSpacesAndSavedObjects && mlApi.savedObjects.jobsSpaces) {

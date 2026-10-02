@@ -15,15 +15,12 @@ import type {
   ServerlessServerStartDependencies,
 } from './types';
 
-export class ServerlessPlugin
-  implements
-    Plugin<
-      ServerlessServerSetup,
-      ServerlessServerStart,
-      ServerlessServerSetupDependencies,
-      ServerlessServerStartDependencies
-    >
-{
+export class ServerlessPlugin implements Plugin<
+  ServerlessServerSetup,
+  ServerlessServerStart,
+  ServerlessServerSetupDependencies,
+  ServerlessServerStartDependencies
+> {
   private projectSettingsAdded: boolean = false;
 
   private setupProjectSettings(core: CoreSetup, keys: string[]): void {

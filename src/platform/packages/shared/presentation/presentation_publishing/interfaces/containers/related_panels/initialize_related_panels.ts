@@ -37,7 +37,7 @@ import { apiHasSections, apiPublishesChildren } from '../presentation_container'
  */
 export const initializeRelatedPanels = <
   SiblingDependentValues extends unknown[],
-  const DependentObservables extends readonly Observable<unknown>[] = readonly []
+  const DependentObservables extends readonly Observable<unknown>[] = readonly [],
 >({
   uuid,
   parentApi,
@@ -155,7 +155,7 @@ export const initializeRelatedPanels = <
 
 export interface RelatedPanelsConfig<
   DependentObservables extends readonly Observable<unknown>[] = readonly [],
-  SiblingDependentValues extends readonly unknown[] = readonly []
+  SiblingDependentValues extends readonly unknown[] = readonly [],
 > {
   dependentObservables?: DependentObservables;
   siblingDependentObservableNames?: string[];
@@ -168,22 +168,21 @@ export interface RelatedPanelsConfig<
 
 export type InitializeRelatedPanelsArgs<
   DependentObservables extends readonly Observable<unknown>[] = readonly [],
-  SiblingDependentValues extends readonly unknown[] = readonly []
+  SiblingDependentValues extends readonly unknown[] = readonly [],
 > = {
   uuid: string;
   parentApi: unknown;
 } & RelatedPanelsConfig<DependentObservables, SiblingDependentValues>;
 
-type ObservableEmittedValue<TObservable> = TObservable extends Observable<infer TValue>
-  ? TValue
-  : never;
+type ObservableEmittedValue<TObservable> =
+  TObservable extends Observable<infer TValue> ? TValue : never;
 
 type ObservableEmittedValueTuple<
   Observables extends readonly Observable<unknown>[],
-  Accumulated extends unknown[] = []
+  Accumulated extends unknown[] = [],
 > = Observables extends readonly [
   infer Head extends Observable<unknown>,
-  ...infer Tail extends readonly Observable<unknown>[]
+  ...infer Tail extends readonly Observable<unknown>[],
 ]
   ? ObservableEmittedValueTuple<Tail, [...Accumulated, ObservableEmittedValue<Head>]>
   : Accumulated;

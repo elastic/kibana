@@ -115,7 +115,7 @@ describe('ExampleScoresTable', () => {
           data: options?.enabled ? buildDetails(repetitionIndex) : undefined,
           isLoading: false,
           error: null,
-        } as ReturnType<typeof useExperimentExampleDetails>)
+        }) as ReturnType<typeof useExperimentExampleDetails>
     );
   });
 
@@ -338,7 +338,7 @@ describe('ExampleScoresTable', () => {
           data: undefined,
           isLoading: false,
           error: options?.enabled ? new Error('detail unavailable') : null,
-        } as ReturnType<typeof useExperimentExampleDetails>)
+        }) as ReturnType<typeof useExperimentExampleDetails>
     );
     renderTable([buildExample('example-error')]);
 
@@ -358,7 +358,7 @@ describe('ExampleScoresTable', () => {
           data: undefined,
           isLoading: Boolean(options?.enabled),
           error: null,
-        } as ReturnType<typeof useExperimentExampleDetails>)
+        }) as ReturnType<typeof useExperimentExampleDetails>
     );
     const { container } = renderTable([buildExample('example-loading')]);
 

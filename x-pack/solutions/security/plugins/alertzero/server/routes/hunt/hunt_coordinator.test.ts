@@ -55,7 +55,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       ({
         getInference: () => ({}),
         getSearchInferenceEndpoints: () => undefined,
-      } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
+      }) as unknown as ReturnType<RouteDependencies['getHuntServices']>,
   } as unknown as RouteDependencies);
 
   const asCurrentUser = { search: jest.fn() };

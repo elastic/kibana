@@ -59,13 +59,18 @@ export function getBaseTypeIconsStyles(euiThemeContext: UseEuiTheme) {
       top: -1px;
       bottom: -1px;
       width: 20px;
-      background: linear-gradient(${borderColor}, ${borderColor}) no-repeat left / 1px 100%,
+      background:
+        linear-gradient(${borderColor}, ${borderColor}) no-repeat left / 1px 100%,
         ${euiTheme.colors.textPrimary};
       /* Two mask layers composited: 1px separator line + flask icon */
       mask-image: linear-gradient(#000, #000), url('${HardcodedIcons.flask}');
-      mask-size: 1px 100%, 11px 11px;
+      mask-size:
+        1px 100%,
+        11px 11px;
       mask-repeat: no-repeat;
-      mask-position: left center, center center;
+      mask-position:
+        left center,
+        center center;
       mask-composite: add;
       -webkit-mask-composite: source-over;
     }

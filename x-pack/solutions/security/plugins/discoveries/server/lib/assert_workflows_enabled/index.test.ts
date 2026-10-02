@@ -25,7 +25,7 @@ const createMockContext = (
         },
       },
     }),
-  } as unknown as RequestHandlerContext);
+  }) as unknown as RequestHandlerContext;
 
 describe('assertWorkflowsEnabled', () => {
   const response = httpServerMock.createResponseFactory();

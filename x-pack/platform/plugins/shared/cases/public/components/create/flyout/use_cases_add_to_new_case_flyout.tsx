@@ -64,7 +64,7 @@ export const useCasesAddToNewCaseFlyout = ({
             if (theCase) {
               const resolvedForToast = getAttachments
                 ? getAttachments(theCase.owner)
-                : attachments ?? [];
+                : (attachments ?? []);
               casesToasts.showSuccessAttach({
                 theCase,
                 attachments: resolvedForToast,

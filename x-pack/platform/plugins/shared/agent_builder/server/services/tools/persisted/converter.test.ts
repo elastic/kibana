@@ -40,7 +40,7 @@ describe('convertPersistedDefinition', () => {
     convertFromPersistence: jest.fn(() => convertedConfig as any),
     getDynamicProps: jest.fn(() => {
       return {
-        getSchema: jest.fn(async () => ({} as any)),
+        getSchema: jest.fn(async () => ({}) as any),
         getHandler: jest.fn(async () => (async () => ({ results: [] })) as any),
       };
     }),

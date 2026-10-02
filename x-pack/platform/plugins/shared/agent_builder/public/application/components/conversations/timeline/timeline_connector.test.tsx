@@ -70,8 +70,8 @@ jest.mock('./timeline', () => ({
           {item.kind === 'agentTurn'
             ? item.status
             : item.kind === 'userMessage'
-            ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
-            : ''}
+              ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
+              : ''}
         </li>
       ))}
     </ul>
@@ -111,7 +111,7 @@ const setState = ({
 };
 
 const conversationWith = (events: ConversationEvent[], attachments?: VersionedAttachment[]) =>
-  ({ id: conversationId, events, attachments, rounds: [] } as unknown as Conversation);
+  ({ id: conversationId, events, attachments, rounds: [] }) as unknown as Conversation;
 
 const renderedItems = () => screen.getAllByTestId('item').map((el) => el.textContent);
 

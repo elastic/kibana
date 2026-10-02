@@ -19,7 +19,7 @@ jest.mock('../../../context/external_services', () => ({
 const mockedUseExternalServices = useExternalServices as jest.Mock;
 
 const buildDiscoverShared = (getById: jest.Mock): DiscoverSharedPublicStart =>
-  ({ features: { registry: { getById } } } as unknown as DiscoverSharedPublicStart);
+  ({ features: { registry: { getById } } }) as unknown as DiscoverSharedPublicStart;
 
 describe('useStreamsFieldRenderer', () => {
   beforeEach(() => {

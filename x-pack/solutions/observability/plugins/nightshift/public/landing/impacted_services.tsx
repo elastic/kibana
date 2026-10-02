@@ -56,12 +56,14 @@ function ImpactedServiceButton({ count, isSelected, name, onClick }: ImpactedSer
       })}
       css={css`
         align-items: center;
-        background: ${isSelected
-          ? euiTheme.colors.backgroundBaseDanger
-          : euiTheme.colors.backgroundBasePlain};
-        border: ${isSelected
-          ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.danger}`
-          : euiTheme.border.thin};
+        background: ${
+          isSelected ? euiTheme.colors.backgroundBaseDanger : euiTheme.colors.backgroundBasePlain
+        };
+        border: ${
+          isSelected
+            ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.danger}`
+            : euiTheme.border.thin
+        };
         border-radius: ${euiTheme.size.base};
         box-sizing: border-box;
         cursor: pointer;
@@ -74,12 +76,14 @@ function ImpactedServiceButton({ count, isSelected, name, onClick }: ImpactedSer
         transition: ${nightshiftInteractiveSurfaceTransition(euiTheme)};
 
         &:hover {
-          background: ${isSelected
-            ? euiTheme.colors.backgroundBaseDanger
-            : euiTheme.colors.backgroundBaseInteractiveHover};
-          border-color: ${isSelected
-            ? euiTheme.colors.danger
-            : euiTheme.colors.borderInteractiveFormsHoverPlain};
+          background: ${
+            isSelected
+              ? euiTheme.colors.backgroundBaseDanger
+              : euiTheme.colors.backgroundBaseInteractiveHover
+          };
+          border-color: ${
+            isSelected ? euiTheme.colors.danger : euiTheme.colors.borderInteractiveFormsHoverPlain
+          };
         }
 
         &:focus-visible {

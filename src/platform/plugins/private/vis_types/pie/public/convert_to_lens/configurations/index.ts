@@ -43,9 +43,9 @@ const getLayers = (
       numberDisplay:
         showValuesInLegend === false
           ? NumberDisplayTypes.HIDDEN
-          : vis.params.labels.valuesFormat ?? vis.type.visConfig.defaults.labels.valuesFormat,
+          : (vis.params.labels.valuesFormat ?? vis.type.visConfig.defaults.labels.valuesFormat),
       categoryDisplay: vis.params.labels.show
-        ? vis.params.labels.position ?? vis.type.visConfig.defaults.labels.position
+        ? (vis.params.labels.position ?? vis.type.visConfig.defaults.labels.position)
         : CategoryDisplayTypes.HIDE,
       legendDisplay:
         legendDisplayFromUiState ??

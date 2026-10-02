@@ -630,7 +630,7 @@ describe('AnalyticsService', () => {
         time_to_last_token: 20,
         model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 4, output_tokens: 2 },
         ...parts,
-      } as ConversationRound);
+      }) as ConversationRound;
 
     const telemetry = (parts: Partial<ExecutionTelemetry> = {}): ExecutionTelemetry => ({
       roundId: 'round-1',

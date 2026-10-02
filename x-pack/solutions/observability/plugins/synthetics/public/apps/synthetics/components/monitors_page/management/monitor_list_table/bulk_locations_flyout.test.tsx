@@ -71,7 +71,7 @@ const makeMonitor = (
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.LOCATIONS]: locations,
     [ConfigKey.MONITOR_TYPE]: type,
-  } as unknown as EncryptedSyntheticsSavedMonitor);
+  }) as unknown as EncryptedSyntheticsSavedMonitor;
 
 describe('<BulkLocationsFlyout />', () => {
   const onClose = jest.fn();

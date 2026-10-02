@@ -174,9 +174,11 @@ export const EpisodesFilterBar = ({
             grid-template-areas:
               'search time'
               'filters filters';
-            grid-template-columns: ${isNarrowContainer
-                ? 'minmax(0, 1fr)'
-                : `minmax(min(${euiTheme.base * 15}px, 100%), 1fr)`} auto;
+            grid-template-columns: ${
+                isNarrowContainer
+                  ? 'minmax(0, 1fr)'
+                  : `minmax(min(${euiTheme.base * 15}px, 100%), 1fr)`
+              } auto;
           }
         `}
       >

@@ -59,7 +59,7 @@ const createHit = (entryId?: string): DataTableRecord =>
     raw: {},
     flattened: entryId ? { [CUSTOM_YARA_SIGNATURE_ENTRY_ID_FIELD_NAME]: entryId } : {},
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const renderLink = (hit?: DataTableRecord) =>
   render(

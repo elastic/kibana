@@ -24,8 +24,10 @@ interface DeprecatedColorMappingColumn extends Omit<ColumnState, 'colorMapping'>
  *
  * @deprecated Use respective vis state (i.e. `DatatableVisualizationState`)
  */
-export interface DeprecatedColorMappingsDatatableState
-  extends Omit<DatatableVisualizationState, 'columns'> {
+export interface DeprecatedColorMappingsDatatableState extends Omit<
+  DatatableVisualizationState,
+  'columns'
+> {
   columns: Array<ColumnState | DeprecatedColorMappingColumn>;
 }
 

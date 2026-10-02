@@ -62,10 +62,10 @@ const taskManager = () =>
   ({
     registerTaskDefinitions: jest.fn(),
     removeIfExists: jest.fn().mockResolvedValue(undefined),
-  } as never);
+  }) as never;
 
-const setupDeps = () => ({ taskManager: taskManager(), workflowsExtensions: {} } as never);
-const startDeps = () => ({ taskManager: taskManager() } as never);
+const setupDeps = () => ({ taskManager: taskManager(), workflowsExtensions: {} }) as never;
+const startDeps = () => ({ taskManager: taskManager() }) as never;
 
 describe('threat intel wiring', () => {
   beforeEach(() => {

@@ -78,7 +78,7 @@ const renderEmbeddable = async (
         ...api,
         uuid: 'test-uuid',
         parentApi: parentApiStub,
-      } as unknown as MarkdownEditorApi),
+      }) as unknown as MarkdownEditorApi,
     uuid: 'test-uuid',
   });
 

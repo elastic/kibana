@@ -16,7 +16,10 @@ import {
 } from './error_symbols';
 
 export class DataStreamMigrationError extends Error {
-  constructor(message: string, public readonly symbol: symbol) {
+  constructor(
+    message: string,
+    public readonly symbol: symbol
+  ) {
     super(message);
   }
 }

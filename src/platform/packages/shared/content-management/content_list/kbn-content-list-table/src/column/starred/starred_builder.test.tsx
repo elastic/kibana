@@ -36,12 +36,10 @@ jest.mock('@kbn/content-management-favorites-public', () => {
 
 type StarredColumn = EuiTableFieldDataColumnType<ContentListItem>;
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockFavoritesService: FavoritesClientPublic = {
   getFavorites: async () => ({ favoriteIds: [], favoriteMetadata: {} as Record<string, never> }),
@@ -72,18 +70,17 @@ const defaultContext: ColumnBuilderContext = {
 
 const createWrapper =
   (initialSearch?: string) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-        dataSource={{ findItems: mockFindItems }}
-        services={{ favorites: mockFavoritesService }}
-        features={initialSearch ? { search: { initialSearch } } : undefined}
-      >
-        {children}
-      </ContentListProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+      dataSource={{ findItems: mockFindItems }}
+      services={{ favorites: mockFavoritesService }}
+      features={initialSearch ? { search: { initialSearch } } : undefined}
+    >
+      {children}
+    </ContentListProvider>
+  );
 
 describe('starred column builder', () => {
   it('returns undefined when starred support is unavailable', () => {

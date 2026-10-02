@@ -67,7 +67,7 @@ const getExternalIncidentFieldContent = (theCase: CaseUI): ListItemFieldContent 
         {externalTitle ?? externalUrl}
       </EuiLink>
     ) : (
-      externalTitle ?? theCase.externalService.externalId ?? i18n.NOT_PUSHED
+      (externalTitle ?? theCase.externalService.externalId ?? i18n.NOT_PUSHED)
     );
   return {
     label: i18n.EXTERNAL_INCIDENT,

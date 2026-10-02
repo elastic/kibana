@@ -40,7 +40,7 @@ const createPackagePolicy = (props: Partial<InMemoryPackagePolicy> = {}): InMemo
     upgradeVersion: '0.5.0',
     package: { name: 'nginx', title: 'Nginx', version: '0.4.0' },
     ...props,
-  } as InMemoryPackagePolicy);
+  }) as InMemoryPackagePolicy;
 
 function renderCell(props: Partial<React.ComponentProps<typeof PackagePolicyUpgradeCell>> = {}) {
   return render(

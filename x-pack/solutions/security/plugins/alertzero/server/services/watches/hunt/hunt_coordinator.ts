@@ -762,8 +762,8 @@ export const huntCoordinator = async (
         skipReason === 'no_matched_scope'
           ? "The scope was every log source and Tier 1 left no matched index Tier 2 could be pointed at (no hit, or a hit reached only through an alias), so Tier 2 had no safe target. Install an integration for the report's vendor, or pin a technology, to hunt its behaviors."
           : tier1Raw.status === 'environment_hits_found'
-          ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
-          : 'No environment matches. Consider widening time_range.',
+            ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
+            : 'No environment matches. Consider widening time_range.',
     });
   }
 
@@ -900,8 +900,8 @@ export const huntCoordinator = async (
           ? `Behaviors proposed, but ${gaps.length} part(s) of this hunt did not run: ` +
             `${gaps.map(({ detail }) => detail).join(' ')}`
           : hasConfirmedHit
-          ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
-          : 'Behaviors proposed for Investigation staging.'
+            ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
+            : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
     has_confirmed_hit: hasConfirmedHit,
     completeness,

@@ -29,4 +29,4 @@ export const getOriginalAlertIds = ({
   alertIds: string[];
   replacements?: Record<string, string>;
 }): string[] =>
-  alertIds.map((alertId) => (replacements != null ? replacements[alertId] ?? alertId : alertId));
+  alertIds.map((alertId) => (replacements != null ? (replacements[alertId] ?? alertId) : alertId));

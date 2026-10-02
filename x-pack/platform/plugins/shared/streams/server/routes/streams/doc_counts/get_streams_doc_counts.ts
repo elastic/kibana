@@ -347,12 +347,10 @@ export async function getIngestionDocCountsForStreams(options: {
     }
   }
 
-  return Array.from(countsByStream.entries()).map(
-    ([stream, count]): StreamDocsStat => ({
-      stream,
-      count,
-    })
-  );
+  return Array.from(countsByStream.entries()).map(([stream, count]): StreamDocsStat => ({
+    stream,
+    count,
+  }));
 }
 
 /**
@@ -440,10 +438,8 @@ FROM *::failures METADATA _index
     countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + failedCount);
   }
 
-  return Array.from(countsByStream.entries()).map(
-    ([stream, count]): StreamDocsStat => ({
-      stream,
-      count,
-    })
-  );
+  return Array.from(countsByStream.entries()).map(([stream, count]): StreamDocsStat => ({
+    stream,
+    count,
+  }));
 }

@@ -342,7 +342,7 @@ const resolveSamples = async (
 }> => {
   if (!samples || samples.source === 'stream') {
     const size =
-      samples?.source === 'stream' ? samples.size ?? DEFAULT_SAMPLE_SIZE : DEFAULT_SAMPLE_SIZE;
+      samples?.source === 'stream' ? (samples.size ?? DEFAULT_SAMPLE_SIZE) : DEFAULT_SAMPLE_SIZE;
     const documents = await fetchSampleDocuments(esClient, streamName, size);
     return {
       documents,

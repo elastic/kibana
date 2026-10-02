@@ -250,7 +250,7 @@ export function useLatencyCorrelations() {
       if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
         setResponse({
-          error: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
+          error: 'response' in err ? (err.body?.message ?? err.response?.statusText) : err.message,
           isRunning: false,
         });
         setResponse.flush();

@@ -56,7 +56,7 @@ const createMockWiredStream = (name: string) =>
         routing: [],
       },
     },
-  } as unknown as SchemaEditorProps['stream']);
+  }) as unknown as SchemaEditorProps['stream'];
 
 const renderWithContext = (
   field: SchemaEditorField,

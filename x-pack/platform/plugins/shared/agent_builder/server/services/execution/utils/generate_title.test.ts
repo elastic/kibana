@@ -17,14 +17,14 @@ import { generateTitle } from './generate_title';
 const createChatModel = (invoke: jest.Mock): InferenceChatModel =>
   ({
     withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
-  } as unknown as InferenceChatModel);
+  }) as unknown as InferenceChatModel;
 
 const createConversation = (): Conversation =>
   ({
     id: 'conversation-id',
     title: DEFAULT_CONVERSATION_TITLE,
     rounds: [],
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 const nextInput: ConverseInput = { message: 'generate an ultra long title, ~1500 characters' };
 

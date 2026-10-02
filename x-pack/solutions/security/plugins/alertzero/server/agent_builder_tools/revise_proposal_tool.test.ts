@@ -33,7 +33,7 @@ const agenticWith = (opts: {
     ({
       getProposalPrivileges: () => ({ assertCanManage }),
       getProposalsService: () => ({ revise, getLatestRevision }),
-    } as unknown as ProposalsPluginStart);
+    }) as unknown as ProposalsPluginStart;
 };
 
 const assertEnabled = jest.fn().mockResolvedValue(undefined);

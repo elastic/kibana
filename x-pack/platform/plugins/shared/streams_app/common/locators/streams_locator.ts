@@ -22,16 +22,13 @@ import type {
 } from '../url_schema/enrichment_url_schema';
 
 export interface StreamsAppLocatorDefinitionParams
-  extends SerializableRecord,
-    Pick<StreamsAppLocationParams, 'name' | 'managementTab'> {
+  extends SerializableRecord, Pick<StreamsAppLocationParams, 'name' | 'managementTab'> {
   pageState?: SerializableRecord & EnrichmentUrlState;
 }
 
 export type StreamsAppLocator = LocatorPublic<StreamsAppLocatorDefinitionParams>;
 
-export class StreamsAppLocatorDefinition
-  implements LocatorDefinition<StreamsAppLocatorDefinitionParams>
-{
+export class StreamsAppLocatorDefinition implements LocatorDefinition<StreamsAppLocatorDefinitionParams> {
   public readonly id = STREAMS_APP_LOCATOR_ID;
 
   constructor() {}

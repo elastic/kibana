@@ -35,18 +35,18 @@ jest.mock('../../../containers/user_profiles/api', () => ({
 const mockSetModelMarkers = monaco.editor.setModelMarkers as jest.Mock;
 const mockBulkGetUserProfiles = api.bulkGetUserProfiles as jest.Mock;
 
-const makeSecurity = (): SecurityPluginStart => ({} as unknown as SecurityPluginStart);
+const makeSecurity = (): SecurityPluginStart => ({}) as unknown as SecurityPluginStart;
 
 const makeModel = () =>
   ({
     uri: { toString: () => 'test-uri' },
     isDisposed: jest.fn(() => false),
-  } as unknown as monaco.editor.ITextModel);
+  }) as unknown as monaco.editor.ITextModel;
 
 const makeEditor = (model: monaco.editor.ITextModel) =>
   ({
     getModel: jest.fn(() => model),
-  } as unknown as monaco.editor.IStandaloneCodeEditor);
+  }) as unknown as monaco.editor.IStandaloneCodeEditor;
 
 const makeProfile = (uid: string, fullName: string) => ({
   uid,

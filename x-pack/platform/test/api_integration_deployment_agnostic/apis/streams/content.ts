@@ -61,7 +61,7 @@ const lensEntry = (id: string, padding: number): ContentPackEntry =>
     id,
     attributes: { title: id, padding: 'a'.repeat(padding) },
     references: [],
-  } as unknown as ContentPackEntry);
+  }) as unknown as ContentPackEntry;
 
 const dashboardEntry = (id: string, lensIds: string[]): ContentPackEntry =>
   ({
@@ -69,7 +69,7 @@ const dashboardEntry = (id: string, lensIds: string[]): ContentPackEntry =>
     id,
     attributes: { title: id },
     references: lensIds.map((lensId, i) => ({ name: `ref_${i}`, type: 'lens', id: lensId })),
-  } as unknown as ContentPackEntry);
+  }) as unknown as ContentPackEntry;
 
 const wiredStreamEntry = (name: string, description: string): ContentPackStream => ({
   type: 'stream',

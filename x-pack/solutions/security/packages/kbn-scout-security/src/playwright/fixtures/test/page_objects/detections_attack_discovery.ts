@@ -90,7 +90,10 @@ export class DetectionsAttackDiscoveryPage {
   public readonly attackRunByAvatar: Locator;
   public readonly manualAttackSubtitle: Locator;
 
-  constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    _config: ScoutTestConfig
+  ) {
     this.attacksPageContent = this.page.testSubj.locator(ATTACKS_PAGE_CONTENT_TEST_ID);
     this.attacksPageActions = this.page.testSubj.locator(ATTACKS_PAGE_ACTIONS_TEST_ID);
     this.attacksPageSearchBar = this.page.testSubj.locator(ATTACKS_PAGE_SEARCH_BAR_TEST_ID);

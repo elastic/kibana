@@ -9,6 +9,6 @@ export const csvToArray = (indices?: string | string[]): string[] | undefined =>
   return indices && Array.isArray(indices)
     ? indices
     : typeof indices === 'string'
-    ? indices.split(',')
-    : undefined;
+      ? indices.split(',')
+      : undefined;
 };

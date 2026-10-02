@@ -34,21 +34,20 @@ import {
 import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
 import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 
-export interface ReviewSuggestionsFormProps
-  extends Pick<
-    UseReviewSuggestionsFormResult,
-    | 'resetForm'
-    | 'isLoadingSuggestions'
-    | 'previewSuggestion'
-    | 'acceptSuggestion'
-    | 'rejectSuggestion'
-    | 'updateSuggestion'
-    | 'selectedSuggestionNames'
-    | 'toggleSuggestionSelection'
-    | 'isSuggestionSelected'
-    | 'selectAllSuggestions'
-    | 'clearSuggestionSelection'
-  > {
+export interface ReviewSuggestionsFormProps extends Pick<
+  UseReviewSuggestionsFormResult,
+  | 'resetForm'
+  | 'isLoadingSuggestions'
+  | 'previewSuggestion'
+  | 'acceptSuggestion'
+  | 'rejectSuggestion'
+  | 'updateSuggestion'
+  | 'selectedSuggestionNames'
+  | 'toggleSuggestionSelection'
+  | 'isSuggestionSelected'
+  | 'selectAllSuggestions'
+  | 'clearSuggestionSelection'
+> {
   suggestions: PartitionSuggestion[];
   onRegenerate: (connectorId: string, userPrompt?: string) => void;
   definition: Streams.WiredStream.GetResponse;

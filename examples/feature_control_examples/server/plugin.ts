@@ -19,9 +19,12 @@ export interface FeatureControlExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export class FeatureControlsPluginExample
-  implements Plugin<void, void, any, FeatureControlExampleDeps>
-{
+export class FeatureControlsPluginExample implements Plugin<
+  void,
+  void,
+  any,
+  FeatureControlExampleDeps
+> {
   public setup(core: CoreSetup, { features }: FeatureControlExampleDeps) {
     features.registerKibanaFeature({
       id: FEATURE_PRIVILEGES_PLUGIN_ID,

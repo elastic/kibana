@@ -25,7 +25,7 @@ export const getAnomaliesUserTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesByUser>,
   Columns<Anomaly['entityValue'], AnomaliesByUser>,
   Columns<Anomaly['influencers'], AnomaliesByUser>,
-  Columns<Anomaly['time'], AnomaliesByUser>
+  Columns<Anomaly['time'], AnomaliesByUser>,
 ] => [
   {
     name: i18n.USER_NAME,

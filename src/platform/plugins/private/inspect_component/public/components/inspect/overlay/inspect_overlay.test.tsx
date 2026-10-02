@@ -63,7 +63,7 @@ describe('InspectOverlay', () => {
   it('should update highlight position on pointer move', () => {
     const fakeTarget = document.createElement('div');
     fakeTarget.getBoundingClientRect = jest.fn(
-      () => ({ top: 10, left: 10, width: 100, height: 50 } as DOMRect)
+      () => ({ top: 10, left: 10, width: 100, height: 50 }) as DOMRect
     );
     (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
     (findSourceComponent as jest.Mock).mockReturnValue({

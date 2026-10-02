@@ -810,7 +810,7 @@ describe('PackagePolicyInputStreamConfig', () => {
             vars: [],
           },
         ],
-      } as unknown as PackageInfo);
+      }) as unknown as PackageInfo;
 
     const makeInputStream = (
       input: string,

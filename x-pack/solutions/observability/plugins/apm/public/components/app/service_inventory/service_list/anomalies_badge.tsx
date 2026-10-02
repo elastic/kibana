@@ -174,7 +174,9 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
     : formatLabelWithScore(getI18nLabel(severity), score);
 
   const isInteractive = Boolean(navigationProps && score !== undefined && !isNone);
-  const locator = isInteractive ? navigationProps?.locators.get(APM_APP_LOCATOR_ID) ?? null : null;
+  const locator = isInteractive
+    ? (navigationProps?.locators.get(APM_APP_LOCATOR_ID) ?? null)
+    : null;
 
   // `getRedirectUrl` points at `/app/r` (share redirect) and causes a full Kibana reload
   // that can drop comparison query params. `getUrl` (via useLocatorUrl) is the in-app path.

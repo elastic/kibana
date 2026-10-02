@@ -686,7 +686,7 @@ describe('WatchDetailPage', () => {
   it('blocks Save while the Worker reload has failed and allows the retry with the original revision', async () => {
     const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
     const workersQuery = (error: Error | null) =>
-      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
+      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() }) as never;
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
       isLoading: false,
@@ -1329,7 +1329,7 @@ describe('WatchDetailPage', () => {
           isLoading: false,
           error: null,
           refetch: jest.fn(),
-        } as never);
+        }) as never;
       mockUseWatch.mockReturnValue(watchQuery(SYSTEM_SECURITY_WATCH_DETECTION_ID));
       const history = createMemoryHistory({
         initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`],

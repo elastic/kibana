@@ -152,8 +152,8 @@ export function ServiceMap({
   const mapHeight = isFullscreen
     ? windowHeight - PADDING_BOTTOM
     : useStoredHeight
-    ? heightBeforeFullscreenRef.current
-    : heightWithPadding;
+      ? heightBeforeFullscreenRef.current
+      : heightWithPadding;
 
   const onToggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => {

@@ -127,8 +127,8 @@ export const createRunAutomationTool = ({
             ? ' The workflow is currently disabled and will be enabled in order to run, and stays enabled afterwards even if the run fails.'
             : ' The workflow is disabled and you do not have permission to enable it, so it cannot be run.'
           : saved === undefined
-          ? ' If the workflow is disabled, it will be enabled in order to run and stays enabled afterwards even if the run fails.'
-          : '';
+            ? ' If the workflow is disabled, it will be enabled in order to run and stays enabled afterwards even if the run fails.'
+            : '';
 
       return {
         title: 'Run workflow automation',

@@ -213,8 +213,8 @@ export const useTopNavLinks = ({
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
         : currentDataView.isPersisted()
-        ? { dataViewId: currentDataView.id }
-        : { dataViewSpec: currentDataView.toMinimalSpec() };
+          ? { dataViewId: currentDataView.id }
+          : { dataViewSpec: currentDataView.toMinimalSpec() };
       const newSearchMenuItem = getNewSearchAppMenuItem({
         newSearchUrl: services.locator.getRedirectUrl(locatorParams),
         onNewSearch: () => {

@@ -22,7 +22,7 @@ import {
 } from './extended_field_columns';
 
 const field = (control: FieldType, type = 'keyword'): InlineField =>
-  ({ name: 'my_field', type, control } as InlineField);
+  ({ name: 'my_field', type, control }) as InlineField;
 
 describe('extended_field_columns helpers', () => {
   describe('getExtendedFieldColumnKey', () => {

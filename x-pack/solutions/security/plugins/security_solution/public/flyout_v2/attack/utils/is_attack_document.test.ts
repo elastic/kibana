@@ -14,7 +14,7 @@ const createHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
     raw: { _id: '1', _index: 'test', _source: {} },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 describe('isAttackDocument', () => {
   it('returns true for a scheduled attack discovery alert', () => {

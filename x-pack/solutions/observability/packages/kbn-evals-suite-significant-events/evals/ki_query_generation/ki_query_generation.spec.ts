@@ -375,9 +375,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   existingQueries: input.existing_queries ?? [],
                 });
 
-                const { stream: logsStream } = await apiServices.streams.getStreamDefinition(
-                  MANAGED_STREAM_NAME
-                );
+                const { stream: logsStream } =
+                  await apiServices.streams.getStreamDefinition(MANAGED_STREAM_NAME);
 
                 // Tool target IDs must resolve to a real stream, not a search pattern.
                 const stream = logsStream as Streams.all.Definition;

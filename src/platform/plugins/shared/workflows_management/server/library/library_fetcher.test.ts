@@ -36,10 +36,10 @@ const jsonResponse = (body: unknown, init: { status?: number; etag?: string } = 
     status: init.status ?? 200,
     ok: (init.status ?? 200) < 400,
     headers: {
-      get: (name: string) => (name.toLowerCase() === 'etag' ? init.etag ?? null : null),
+      get: (name: string) => (name.toLowerCase() === 'etag' ? (init.etag ?? null) : null),
     },
     text: jest.fn().mockResolvedValue(typeof body === 'string' ? body : JSON.stringify(body)),
-  } as unknown as Awaited<ReturnType<typeof fetch>>);
+  }) as unknown as Awaited<ReturnType<typeof fetch>>;
 
 const notModifiedResponse = () =>
   ({
@@ -47,7 +47,7 @@ const notModifiedResponse = () =>
     ok: false,
     headers: { get: () => null },
     text: jest.fn().mockResolvedValue(''),
-  } as unknown as Awaited<ReturnType<typeof fetch>>);
+  }) as unknown as Awaited<ReturnType<typeof fetch>>;
 
 // `node-fetch` is auto-mocked, so its `FetchError` no longer extends `Error`
 // (p-retry rejects a non-Error before our guards run). Build a real Error and

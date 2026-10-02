@@ -217,7 +217,7 @@ export function makeService(params?: {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
   const v2RulesClient =
-    params?.v2RulesClient === null ? undefined : params?.v2RulesClient ?? makeV2RulesClient();
+    params?.v2RulesClient === null ? undefined : (params?.v2RulesClient ?? makeV2RulesClient());
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
@@ -277,7 +277,7 @@ export function makeService(params?: {
   const investigations =
     params?.investigations === null
       ? undefined
-      : params?.investigations ?? { deleted: 0, failures: [] };
+      : (params?.investigations ?? { deleted: 0, failures: [] });
   const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;
 
   const globalUiSettingsClient = makeUiSettingsClient(

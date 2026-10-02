@@ -138,7 +138,8 @@ export const SpaceCopyResultDetails = (props: Props) => {
         const childWrapperStyles = (isOpen: boolean) => css`
           overflow: hidden;
           transform: translateZ(0);
-          transition: height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+          transition:
+            height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
             ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
 
           visibility: ${isOpen ? 'visible' : 'hidden'};

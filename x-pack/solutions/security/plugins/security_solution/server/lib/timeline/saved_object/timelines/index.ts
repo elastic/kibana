@@ -149,11 +149,11 @@ const getTimelineTypeFilter = (
     timelineType == null
       ? null
       : timelineType === TimelineTypeEnum.template
-      ? `siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}` /** Show only whose timelineType exists and equals to "template" */
-      : /** Show me every timeline whose timelineType is not "template".
-         * which includes timelineType === 'default' and
-         * those timelineType doesn't exists */
-        `not siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}`;
+        ? `siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}` /** Show only whose timelineType exists and equals to "template" */
+        : /** Show me every timeline whose timelineType is not "template".
+           * which includes timelineType === 'default' and
+           * those timelineType doesn't exists */
+          `not siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}`;
 
   /** Show me every timeline whose status is not "draft".
    * which includes status === 'active' and
@@ -167,8 +167,8 @@ const getTimelineTypeFilter = (
     status == null
       ? null
       : status === TimelineStatusEnum.immutable
-      ? `siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`
-      : `not siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`;
+        ? `siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`
+        : `not siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`;
 
   const filters = [typeFilter, draftFilter, immutableFilter];
   return combineFilters(filters);
@@ -922,9 +922,8 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  const savedObjects = await savedObjectsClient.find<SavedObjectTimelineWithoutExternalRefs>(
-    options
-  );
+  const savedObjects =
+    await savedObjectsClient.find<SavedObjectTimelineWithoutExternalRefs>(options);
 
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {

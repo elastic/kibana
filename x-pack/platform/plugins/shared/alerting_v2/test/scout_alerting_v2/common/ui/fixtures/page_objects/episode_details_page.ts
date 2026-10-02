@@ -22,7 +22,10 @@ export class EpisodeDetailsPage {
   public readonly emptyPrompt: Locator;
   public readonly filteredEmptyPrompt: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.pageContainer = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
     this.actionPolicyHistoryTab = this.page.testSubj.locator(
       'alertingV2EpisodeDetailsMainTabActionPolicyHistory'

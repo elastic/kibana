@@ -56,19 +56,19 @@ const createMockLogger = (): jest.Mocked<Logger> =>
     get: jest.fn(),
     isLevelEnabled: jest.fn(),
     log: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 const createMockUsageReportingService = (): jest.Mocked<UsageReportingService> =>
   ({
     reportUsage: jest.fn().mockResolvedValue({ ok: true, status: 200 }),
-  } as unknown as jest.Mocked<UsageReportingService>);
+  }) as unknown as jest.Mocked<UsageReportingService>;
 
 const createMockCloudSetup = (overrides: Partial<CloudSetup> = {}): CloudSetup =>
   ({
     serverless: { projectId: 'test-project-id' },
     deploymentId: undefined,
     ...overrides,
-  } as unknown as CloudSetup);
+  }) as unknown as CloudSetup;
 
 describe('WorkflowsMeteringService', () => {
   let meteringService: WorkflowsMeteringService;

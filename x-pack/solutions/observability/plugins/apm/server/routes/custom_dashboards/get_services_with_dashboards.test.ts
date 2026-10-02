@@ -67,7 +67,7 @@ describe('getServicesWithDashboards', () => {
 
     const [operationName, ...searches] = apmEventClient.msearch.mock.calls[0] as [
       string,
-      ...FilteredSearchRequest[]
+      ...FilteredSearchRequest[],
     ];
     expect(operationName).toBe('get_services_with_dashboards');
     expect(searches).toHaveLength(2);

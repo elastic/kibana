@@ -54,15 +54,12 @@ import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 
-export class AlertZeroPlugin
-  implements
-    Plugin<
-      AlertZeroPluginSetup,
-      AlertZeroPluginStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPlugin implements Plugin<
+  AlertZeroPluginSetup,
+  AlertZeroPluginStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;
   private readonly isServerless: boolean;

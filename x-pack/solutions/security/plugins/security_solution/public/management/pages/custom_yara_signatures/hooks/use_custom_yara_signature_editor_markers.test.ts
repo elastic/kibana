@@ -48,9 +48,9 @@ const createModel = ({
 const createEditor = (
   model: ReturnType<typeof createModel> | null
 ): Parameters<typeof useCustomYaraSignatureEditorMarkers>[0]['editor'] =>
-  ({ getModel: () => model } as Parameters<
+  ({ getModel: () => model }) as Parameters<
     typeof useCustomYaraSignatureEditorMarkers
-  >[0]['editor']);
+  >[0]['editor'];
 
 describe('toCustomYaraSignatureEditorMarkers', () => {
   const model = createModel({ lineCount: 4, lineMaxColumn: 9 });

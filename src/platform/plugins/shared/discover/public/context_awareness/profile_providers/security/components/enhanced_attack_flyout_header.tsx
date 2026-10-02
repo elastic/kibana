@@ -35,5 +35,5 @@ export const EnhancedAttackFlyoutHeader = ({
 
   return renderHeader
     ? renderHeader({ hit, ...docViewProps, onAttackUpdated: handleAttackUpdated })
-    : fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null;
+    : (fallbackRenderHeader?.({ hit, ...docViewProps }) ?? null);
 };

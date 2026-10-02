@@ -41,7 +41,7 @@ const makeYamlChangedEvent = (payload: Record<string, unknown>): BrowserChatEven
       custom_event: WORKFLOW_YAML_CHANGED_EVENT,
       data: payload,
     },
-  } as unknown as BrowserChatEvent);
+  }) as unknown as BrowserChatEvent;
 
 /**
  * The chat UI publishes the active conversation and exposes one event stream per

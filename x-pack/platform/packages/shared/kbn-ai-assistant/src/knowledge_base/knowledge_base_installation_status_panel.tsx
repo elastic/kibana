@@ -37,14 +37,14 @@ const WarmUpModel = ({
         knowledgeBase.isWarmingUpModel
           ? 'xpack.aiAssistant.welcomeMessage.redeployingKnowledgeBaseTextLabel'
           : pendingDeployment
-          ? 'xpack.aiAssistant.welcomeMessage.knowledgeBaseStoppedTextLabel'
-          : 'xpack.aiAssistant.welcomeMessage.knowledgeBasePausedTextLabel',
+            ? 'xpack.aiAssistant.welcomeMessage.knowledgeBaseStoppedTextLabel'
+            : 'xpack.aiAssistant.welcomeMessage.knowledgeBasePausedTextLabel',
         {
           defaultMessage: knowledgeBase.isWarmingUpModel
             ? 'Redeploying knowledge base model...'
             : pendingDeployment
-            ? 'Your knowledge base model has been stopped'
-            : 'Knowledge base model paused due to inactivity.',
+              ? 'Your knowledge base model has been stopped'
+              : 'Knowledge base model paused due to inactivity.',
         }
       )}
     </EuiText>

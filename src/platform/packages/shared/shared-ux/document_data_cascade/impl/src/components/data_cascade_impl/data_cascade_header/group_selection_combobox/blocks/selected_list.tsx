@@ -18,8 +18,10 @@ import {
   EuiDroppable,
 } from '@elastic/eui';
 
-interface SelectionListComponentProps
-  extends Pick<ComponentProps<typeof EuiDragDropContext>, 'onDragEnd'> {
+interface SelectionListComponentProps extends Pick<
+  ComponentProps<typeof EuiDragDropContext>,
+  'onDragEnd'
+> {
   selectionListItems: string[];
 }
 

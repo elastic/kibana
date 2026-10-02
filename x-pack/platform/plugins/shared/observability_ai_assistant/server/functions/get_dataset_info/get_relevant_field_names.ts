@@ -59,7 +59,7 @@ export async function getRelevantFieldNames({
   const hitCount =
     typeof hasAnyHitsResponse.hits.total === 'number'
       ? hasAnyHitsResponse.hits.total
-      : hasAnyHitsResponse.hits.total?.value ?? 0;
+      : (hasAnyHitsResponse.hits.total?.value ?? 0);
 
   // all fields are empty in this case, so get them all
   const includeEmptyFields = hitCount === 0;

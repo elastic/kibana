@@ -136,11 +136,9 @@ interface MockContextOptions {
 }
 
 const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
-  const askForConfirmation = jest.fn(
-    (def: ConfirmPromptDefinition): ToolHandlerPromptReturn => ({
-      prompt: { type: AgentPromptType.confirmation, ...def },
-    })
-  );
+  const askForConfirmation = jest.fn((def: ConfirmPromptDefinition): ToolHandlerPromptReturn => ({
+    prompt: { type: AgentPromptType.confirmation, ...def },
+  }));
   const checkConfirmationStatus = jest.fn().mockReturnValue({
     status: options.promptStatus ?? ConfirmationStatus.unprompted,
   });

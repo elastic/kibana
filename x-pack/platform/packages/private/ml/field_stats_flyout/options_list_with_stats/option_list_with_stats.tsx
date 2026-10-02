@@ -33,8 +33,10 @@ export const optionCss = css`
   }
 `;
 
-interface OptionListWithFieldStatsProps
-  extends Pick<EuiFormControlLayoutProps, 'prepend' | 'compressed'> {
+interface OptionListWithFieldStatsProps extends Pick<
+  EuiFormControlLayoutProps,
+  'prepend' | 'compressed'
+> {
   options: DropDownLabel[];
   placeholder?: string;
   'aria-label'?: string;

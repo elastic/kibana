@@ -24,7 +24,7 @@ export function GenAiMessageContent({ message }: Props) {
         {message.parts.map((part, i) => (
           <React.Fragment key={i}>
             {i > 0 && <EuiSpacer size="s" />}
-            <GenAiFieldValue value={part.type === 'text' ? part.content ?? '' : part} />
+            <GenAiFieldValue value={part.type === 'text' ? (part.content ?? '') : part} />
           </React.Fragment>
         ))}
       </>

@@ -96,8 +96,8 @@ export const useNewEntityCount = ({
         entityIds: Array.isArray(rawIds)
           ? (rawIds as string[]).filter(Boolean)
           : typeof rawIds === 'string' && rawIds
-          ? [rawIds]
-          : [],
+            ? [rawIds]
+            : [],
       };
     },
     {
@@ -118,7 +118,7 @@ export const useNewEntityCount = ({
 
   return {
     count: result?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (result?.entityIds ?? EMPTY_ENTITY_IDS),
     isLoading: isIndexLoading || isLoading || isFetching,
     error: (error as SecurityAppError | undefined) ?? indexError,
   };

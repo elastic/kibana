@@ -30,7 +30,7 @@ const allowAllRulesAuthz: DetectionRulesAuthz = {
 };
 
 const buildParams = (overrides: Record<string, unknown> = {}): RuleParams =>
-  ({ ...getQueryRuleParams(), ...overrides } as unknown as RuleParams);
+  ({ ...getQueryRuleParams(), ...overrides }) as unknown as RuleParams;
 
 const exceptionListItem = () => ({
   id: 'exc-1',

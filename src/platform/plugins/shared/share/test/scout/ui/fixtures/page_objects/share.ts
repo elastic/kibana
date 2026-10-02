@@ -10,7 +10,10 @@
 import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 
 export class SharePageObject {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoNonExistentShortUrl(shortUrlId: string) {
     const url = this.kbnUrl.get(`/app/r/s/${shortUrlId}`);

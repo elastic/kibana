@@ -33,9 +33,9 @@ export interface PlainIndexDataClientDeps {
   logger: Logger;
 }
 
-export class PlainIndexDataClient<TExecution extends { id: string }>
-  implements DataClient<TExecution>
-{
+export class PlainIndexDataClient<
+  TExecution extends { id: string },
+> implements DataClient<TExecution> {
   constructor(private readonly deps: PlainIndexDataClientDeps) {}
 
   public async search(

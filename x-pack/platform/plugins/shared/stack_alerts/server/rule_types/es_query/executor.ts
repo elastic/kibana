@@ -100,38 +100,38 @@ export async function executor(
         sourceFields,
       })
     : esqlQueryRule
-    ? await fetchEsqlQuery({
-        ruleId,
-        alertLimit,
-        params: params as OnlyEsqlQueryRuleParams,
-        spacePrefix,
-        services: {
-          share,
-          scopedClusterClient,
-          logger,
-          ruleResultService,
-        },
-        dateStart,
-        dateEnd,
-        sourceFields,
-      })
-    : await fetchEsQuery({
-        ruleId,
-        name,
-        alertLimit,
-        params: params as OnlyEsQueryRuleParams,
-        timestamp: latestTimestamp,
-        spacePrefix,
-        services: {
-          share,
-          scopedClusterClient,
-          logger,
-          ruleResultService,
-        },
-        dateStart,
-        dateEnd,
-        sourceFields,
-      });
+      ? await fetchEsqlQuery({
+          ruleId,
+          alertLimit,
+          params: params as OnlyEsqlQueryRuleParams,
+          spacePrefix,
+          services: {
+            share,
+            scopedClusterClient,
+            logger,
+            ruleResultService,
+          },
+          dateStart,
+          dateEnd,
+          sourceFields,
+        })
+      : await fetchEsQuery({
+          ruleId,
+          name,
+          alertLimit,
+          params: params as OnlyEsQueryRuleParams,
+          timestamp: latestTimestamp,
+          spacePrefix,
+          services: {
+            share,
+            scopedClusterClient,
+            logger,
+            ruleResultService,
+          },
+          dateStart,
+          dateEnd,
+          sourceFields,
+        });
 
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {

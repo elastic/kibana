@@ -57,7 +57,7 @@ const buildUsableStatsResponse = ({
         ? { value: Date.parse(lastEnrich), value_as_string: lastEnrich }
         : { value: null },
     },
-  } as const);
+  }) as const;
 
 const buildDefaultDeps = (
   overrides: Partial<ReadinessDeps> = {}

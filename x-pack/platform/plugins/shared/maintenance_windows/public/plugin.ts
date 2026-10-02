@@ -13,15 +13,12 @@ import type {
   MaintenanceWindowsPublicSetupDependencies,
   MaintenanceWindowsPublicStartDependencies,
 } from './types';
-export class MaintenanceWindowsPublicPlugin
-  implements
-    Plugin<
-      void,
-      void,
-      MaintenanceWindowsPublicSetupDependencies,
-      MaintenanceWindowsPublicStartDependencies
-    >
-{
+export class MaintenanceWindowsPublicPlugin implements Plugin<
+  void,
+  void,
+  MaintenanceWindowsPublicSetupDependencies,
+  MaintenanceWindowsPublicStartDependencies
+> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: MaintenanceWindowsPublicSetupDependencies) {
@@ -37,7 +34,7 @@ export class MaintenanceWindowsPublicPlugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           MaintenanceWindowsPublicStartDependencies,
-          unknown
+          unknown,
         ];
 
         return renderApp({

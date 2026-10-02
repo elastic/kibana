@@ -59,8 +59,10 @@ export interface ExitFullScreenButtonProps {
 /**
  * Props for the `ExitFullScreenButton` component.
  */
-export interface ExitFullScreenButtonComponentProps
-  extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
+export interface ExitFullScreenButtonComponentProps extends Pick<
+  HTMLAttributes<HTMLDivElement>,
+  'className'
+> {
   /** Handler to invoke when one clicks the button. */
   onClick: MouseEventHandler<HTMLButtonElement>;
   /** If set, custom logo is displayed instead of Elastic logo */

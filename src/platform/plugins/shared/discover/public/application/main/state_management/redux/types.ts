@@ -189,7 +189,7 @@ export type ProfileAppStateDefaultField = (typeof PROFILE_APP_STATE_DEFAULT_FIEL
 
 type NonEmptyProfileAppStateDefaultFields = [
   ProfileAppStateDefaultField,
-  ...ProfileAppStateDefaultField[]
+  ...ProfileAppStateDefaultField[],
 ];
 
 export type ProfileAppStateDefaultFields = 'all' | 'none' | NonEmptyProfileAppStateDefaultFields;

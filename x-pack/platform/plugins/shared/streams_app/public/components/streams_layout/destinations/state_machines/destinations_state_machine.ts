@@ -421,10 +421,10 @@ export const destinationsStateMachine = setup({
     canCreateDestination: ({ context }) =>
       Boolean(
         context.creationContext &&
-          canSubmitDestinationForm({
-            formData: context.creationContext.formData,
-            unitDefinition: context.unitDefinition,
-          })
+        canSubmitDestinationForm({
+          formData: context.creationContext.formData,
+          unitDefinition: context.unitDefinition,
+        })
       ),
     isCreatedDestination: ({ context, event }) => {
       const createdDestinationId = context.creationContext?.createdDestination?.id;
@@ -452,9 +452,9 @@ export const destinationsStateMachine = setup({
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedDestinationId &&
-          !getConfiguredDestinations(event.unitDefinition).some(
-            ({ id }) => id === context.selectedDestinationId
-          )
+        !getConfiguredDestinations(event.unitDefinition).some(
+          ({ id }) => id === context.selectedDestinationId
+        )
       ),
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',

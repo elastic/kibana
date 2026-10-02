@@ -294,13 +294,16 @@ export const ReviewApproveModal: React.FC<{
         defaultMessage: 'Version is required.',
       })
     : isZeroVersion
-    ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroNotAllowed', {
-        defaultMessage: 'Version {invalidVersion} is not allowed.',
-        values: { invalidVersion: INVALID_VERSION },
-      })
-    : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionInvalid', {
-        defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
-      });
+      ? i18n.translate(
+          'xpack.fleet.epmList.manageIntegrations.actions.reviewVersionZeroNotAllowed',
+          {
+            defaultMessage: 'Version {invalidVersion} is not allowed.',
+            values: { invalidVersion: INVALID_VERSION },
+          }
+        )
+      : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewVersionInvalid', {
+          defaultMessage: 'Enter a valid semantic version (for example, 1.0.0).',
+        });
 
   const handleApproveAndInstall = useCallback(async () => {
     const version = reviewVersion.trim();

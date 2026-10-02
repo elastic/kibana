@@ -63,7 +63,7 @@ export const persistNoteRoute = (
 
           // For updates, the request body may omit eventId; fall back to the persisted value.
           const documentId =
-            note.eventId ?? (!isCreate ? res.note.eventId ?? undefined : undefined);
+            note.eventId ?? (!isCreate ? (res.note.eventId ?? undefined) : undefined);
           if (eventBus && documentId) {
             const { noteId } = res.note;
             if (!noteId) {

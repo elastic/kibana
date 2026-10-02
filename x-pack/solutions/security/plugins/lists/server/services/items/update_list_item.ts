@@ -126,7 +126,7 @@ export const updateListItem = async ({
         created_by: listItem.created_by,
         id,
         list_id: listItem.list_id,
-        meta: isPatch ? meta ?? listItem.meta : meta,
+        meta: isPatch ? (meta ?? listItem.meta) : meta,
         tie_breaker_id: listItem.tie_breaker_id,
         type: listItem.type,
         updated_at: updatedAt,

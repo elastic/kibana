@@ -17,8 +17,12 @@ import type {
 type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknown, unknown, Method>;
 
 // We disallow options to set 'body' because we override them.
-interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
-  extends RouteConfig<P, Q, B, Method> {
+interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod> extends RouteConfig<
+  P,
+  Q,
+  B,
+  Method
+> {
   validate: Omit<RouteValidatorFullConfigRequest<P, Q, B>, 'body'>;
   options?: Omit<RouteConfigOptions<Method>, 'body'>;
 }

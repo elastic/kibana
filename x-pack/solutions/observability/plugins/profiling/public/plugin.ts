@@ -27,15 +27,12 @@ import type { ProfilingEmbeddablesDependencies } from './embeddables/profiling_e
 export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;
 
-export class ProfilingPlugin
-  implements
-    Plugin<
-      ProfilingPluginSetup,
-      ProfilingPluginStart,
-      ProfilingPluginPublicSetupDeps,
-      ProfilingPluginPublicStartDeps
-    >
-{
+export class ProfilingPlugin implements Plugin<
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+  ProfilingPluginPublicSetupDeps,
+  ProfilingPluginPublicStartDeps
+> {
   public setup(
     coreSetup: CoreSetup<ProfilingPluginPublicStartDeps>,
     pluginsSetup: ProfilingPluginPublicSetupDeps

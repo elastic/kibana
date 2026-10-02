@@ -16,9 +16,7 @@ export { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR, type TransactionDetailsByTrace
 export type TransactionDetailsByTraceIdLocator =
   LocatorPublic<TransactionDetailsByTraceIdLocatorParams>;
 
-export class TransactionDetailsByTraceIdLocatorDefinition
-  implements LocatorDefinition<TransactionDetailsByTraceIdLocatorParams>
-{
+export class TransactionDetailsByTraceIdLocatorDefinition implements LocatorDefinition<TransactionDetailsByTraceIdLocatorParams> {
   public readonly id = TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR;
 
   public readonly getLocation = async ({

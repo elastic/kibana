@@ -49,9 +49,8 @@ export const registerSiemDashboardMigrationsTranslationStatsRoute = (
               const dashboardMigrationsClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-              const stats = await dashboardMigrationsClient.data.items.getTranslationStats(
-                migrationId
-              );
+              const stats =
+                await dashboardMigrationsClient.data.items.getTranslationStats(migrationId);
 
               if (stats.dashboards.total === 0) {
                 return res.noContent();

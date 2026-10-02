@@ -27,15 +27,12 @@ import type {
   StartDependencies,
 } from './types';
 
-export class ServerlessVectordbPlugin
-  implements
-    Plugin<
-      ServerlessVectordbPluginSetup,
-      ServerlessVectordbPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class ServerlessVectordbPlugin implements Plugin<
+  ServerlessVectordbPluginSetup,
+  ServerlessVectordbPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   // @ts-ignore config is not used for now
   private readonly config: ServerlessVectordbConfig;
   private readonly logger: Logger;

@@ -29,7 +29,7 @@ export const getMockCustomizationWithCustomSetFunction = (
 };
 
 export const getEventDataWithPreventableEvent = <
-  T extends ClickTriggerEventData | BrushTriggerEvent['data']
+  T extends ClickTriggerEventData | BrushTriggerEvent['data'],
 >(
   eventData: T
 ): WithPreventableEvent<T> => ({

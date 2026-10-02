@@ -74,11 +74,11 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
     error,
   } = useFollowExecution(executionId);
   const liveNestedStep = nestedStep
-    ? (executionSteps.find(
+    ? ((executionSteps.find(
         (s) =>
           s.type === ConversationRoundStepType.toolCall &&
           (s as ToolCallStep).tool_call_id === nestedStep.tool_call_id
-      ) as ToolCallStep | undefined) ?? nestedStep
+      ) as ToolCallStep | undefined) ?? nestedStep)
     : null;
   const { euiTheme } = useEuiTheme();
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();

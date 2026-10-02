@@ -35,7 +35,7 @@ const createConfig = (
   },
 });
 
-const createProcs = () => ({ run: jest.fn() } as unknown as ProcRunner);
+const createProcs = () => ({ run: jest.fn() }) as unknown as ProcRunner;
 
 const getArgs = (procs: ProcRunner) => (procs.run as jest.Mock).mock.calls[0][1].args as string[];
 

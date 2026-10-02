@@ -20,7 +20,7 @@ const createCloudMock = (overrides: Record<string, unknown> = {}): CloudStart =>
       billingUrl: 'https://cloud.elastic.co/billing',
     }),
     ...overrides,
-  } as unknown as CloudStart);
+  }) as unknown as CloudStart;
 
 const renderCloudLinks = (cloud?: CloudStart) =>
   render(

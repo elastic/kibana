@@ -136,7 +136,7 @@ const HostDetailsAssetCriticalitySection: React.FC<{
     <AssetCriticalityAccordion
       entity={{ name: detailName, type: EntityType.host }}
       onChange={onCriticalityChange}
-      entityRecord={entityStoreV2Enabled ? observedHostEntityRecord ?? undefined : undefined}
+      entityRecord={entityStoreV2Enabled ? (observedHostEntityRecord ?? undefined) : undefined}
       criticalityFromEntityStore={
         entityStoreV2Enabled && observedHostEntityRecord
           ? storeRecord?.asset?.criticality
@@ -465,16 +465,16 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                         setQuery={setQuery}
                         refetch={
                           entityStoreV2Enabled
-                            ? observedHost.refetchEntityStore ??
+                            ? (observedHost.refetchEntityStore ??
                               observedHost.refetchObservedDetails ??
-                              refetch
+                              refetch)
                             : refetch
                         }
                         inspect={
                           entityStoreV2Enabled
-                            ? entityFromStoreResult?.inspect ??
+                            ? (entityFromStoreResult?.inspect ??
                               observedHost.observedDetailsInspect ??
-                              inspect
+                              inspect)
                             : inspect
                         }
                         hostName={detailName}
@@ -486,12 +486,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                         riskScoreState={hostRiskScoreStateFromEntityStore}
                         firstSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedHost.firstSeen?.date ?? undefined
+                            ? (observedHost.firstSeen?.date ?? undefined)
                             : undefined
                         }
                         lastSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedHost.lastSeen?.date ?? undefined
+                            ? (observedHost.lastSeen?.date ?? undefined)
                             : undefined
                         }
                       />
@@ -553,7 +553,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               type={HostsType.details}
               setQuery={setQuery}
               entityRecord={
-                entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined
+                entityStoreV2Enabled ? (observedHost.entityRecord ?? undefined) : undefined
               }
               filterQuery={stringifiedHostDetailsIdentityFilterQuery}
               hostDetailsPagePath={hostDetailsPagePath}

@@ -67,12 +67,15 @@ interface TransitionDatum {
 }
 
 const groupBy = <T, K extends string>(items: T[], key: (item: T) => K): Record<K, T[]> => {
-  return items.reduce((acc, item) => {
-    const k = key(item);
-    if (!acc[k]) acc[k] = [];
-    acc[k].push(item);
-    return acc;
-  }, {} as Record<K, T[]>);
+  return items.reduce(
+    (acc, item) => {
+      const k = key(item);
+      if (!acc[k]) acc[k] = [];
+      acc[k].push(item);
+      return acc;
+    },
+    {} as Record<K, T[]>
+  );
 };
 
 interface TooltipPanelProps {

@@ -17,11 +17,11 @@ import {
 
 export const FULLSCREEN_BODY_STYLES_CLASS = css`
   *:not(
-      .euiFlyout,
-      .${METRICS_GRID_FULL_SCREEN_CLASS}, .${METRICS_GRID_FULL_SCREEN_CLASS} *,
-      [data-euiportal='true'],
-      [data-euiportal='true'] *
-    ) {
+  .euiFlyout,
+  .${METRICS_GRID_FULL_SCREEN_CLASS}, .${METRICS_GRID_FULL_SCREEN_CLASS} *,
+  [data-euiportal='true'],
+  [data-euiportal='true'] *
+  ) {
     z-index: unset;
   }
 `;

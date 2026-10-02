@@ -204,7 +204,7 @@ export const useImportLifecycleFlyout = ({
 
   const previewLifecycle: IngestStreamEffectiveLifecycle | null = inspectedIlmPolicyName
     ? { ilm: { policy: inspectedIlmPolicyName } }
-    : selectedEffectiveLifecycle ?? null;
+    : (selectedEffectiveLifecycle ?? null);
 
   const previewFailureStore: EffectiveFailureStore | null =
     (inspectedStream ?? selectedStream)?.effective_failure_store ?? null;

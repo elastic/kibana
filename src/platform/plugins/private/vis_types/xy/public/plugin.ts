@@ -35,10 +35,12 @@ export interface VisTypeXyPluginStartDependencies {
 type VisTypeXyCoreSetup = CoreSetup<{}, VisTypeXyPluginStart>;
 
 /** @internal */
-export class VisTypeXyPlugin
-  implements
-    Plugin<VisTypeXyPluginSetup, VisTypeXyPluginStart, VisTypeXyPluginSetupDependencies, {}>
-{
+export class VisTypeXyPlugin implements Plugin<
+  VisTypeXyPluginSetup,
+  VisTypeXyPluginStart,
+  VisTypeXyPluginSetupDependencies,
+  {}
+> {
   initializerContext: PluginInitializerContext<XyPublicConfig>;
 
   constructor(initializerContext: PluginInitializerContext<XyPublicConfig>) {

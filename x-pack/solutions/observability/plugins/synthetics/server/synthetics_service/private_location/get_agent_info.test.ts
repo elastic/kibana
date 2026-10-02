@@ -34,7 +34,7 @@ const pagedListAgents = (pages: FakeAgent[][], total?: number) =>
 const makeServer = (listAgents: jest.Mock): SyntheticsServerSetup =>
   ({
     fleet: { agentService: { asInternalUser: { listAgents } } },
-  } as unknown as SyntheticsServerSetup);
+  }) as unknown as SyntheticsServerSetup;
 
 const openSignal = () => new AbortController().signal;
 

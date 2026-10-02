@@ -43,7 +43,7 @@ const defaultParams: Params = {
 };
 
 export const defaultValueFormatter = (value: unknown) => {
-  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  const content = typeof value === 'object' ? JSON.stringify(value) : (String(value) ?? '-');
   return renderToString(<>{content}</>);
 };
 
@@ -293,9 +293,9 @@ export const FieldPreviewProvider: FC<
           controller.getInternalFieldType() === 'concrete'
             ? get(document?.fields, name ?? '')
             : // if its a runtime field, look at source or the returned value
-            script === null && Boolean(document)
-            ? get(document?._source, name ?? '')
-            : field?.value;
+              script === null && Boolean(document)
+              ? get(document?._source, name ?? '')
+              : field?.value;
 
         const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
 

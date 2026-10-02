@@ -53,7 +53,10 @@ class FakeApp implements App {
   public title: string;
   public mount = () => () => {};
 
-  constructor(public id: string, public chromeless?: boolean) {
+  constructor(
+    public id: string,
+    public chromeless?: boolean
+  ) {
     this.title = `${this.id} App`;
   }
 }

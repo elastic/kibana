@@ -66,7 +66,7 @@ const makeStoredEvent = (
     summary: 'Test summary',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 /**
  * Returns a typed eventSearchClient mock (SignificantEventsReadClient) with default no-op
@@ -96,7 +96,7 @@ const makeEventClient = (
     bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     emitTrigger: jest.fn(),
     ...overrides,
-  } as jest.Mocked<EventClient>);
+  }) as jest.Mocked<EventClient>;
 
 const makeAlertEventsClient = (
   overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
@@ -104,7 +104,7 @@ const makeAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const makeLogger = (): jest.Mocked<Logger> =>
   ({
@@ -112,7 +112,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {

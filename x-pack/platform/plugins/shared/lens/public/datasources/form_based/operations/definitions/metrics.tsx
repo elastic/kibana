@@ -142,9 +142,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       const newField = newIndexPattern.getFieldByName(column.sourceField);
       return Boolean(
         newField &&
-          supportedTypes.includes(newField.type) &&
-          newField.aggregatable &&
-          (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
+        supportedTypes.includes(newField.type) &&
+        newField.aggregatable &&
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
     getDefaultLabel: (column, columns, indexPattern) =>

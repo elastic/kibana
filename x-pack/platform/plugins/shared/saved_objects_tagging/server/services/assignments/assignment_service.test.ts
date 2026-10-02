@@ -215,7 +215,7 @@ describe('AssignmentService', () => {
               management: {
                 defaultSearchField: `${name}-search-field`,
               },
-            } as any)
+            }) as any
         );
         savedObjectClient.find.mockResolvedValue({
           saved_objects: [],
@@ -368,7 +368,7 @@ describe('AssignmentService', () => {
               management: {
                 defaultSearchField: `${name}-search-field`,
               },
-            } as any)
+            }) as any
         );
         savedObjectClient.find.mockResolvedValue({
           saved_objects: [],

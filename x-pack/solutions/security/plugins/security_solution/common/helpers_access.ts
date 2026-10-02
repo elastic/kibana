@@ -16,9 +16,9 @@ import {
 export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean {
   return Boolean(
     capabilities[SECURITY_FEATURE_ID]?.show ||
-      capabilities.securitySolutionAttackDiscovery?.['attack-discovery'] ||
-      hasAccessToRules(capabilities) ||
-      hasAccessToAlerts(capabilities)
+    capabilities.securitySolutionAttackDiscovery?.['attack-discovery'] ||
+    hasAccessToRules(capabilities) ||
+    hasAccessToAlerts(capabilities)
   );
 }
 

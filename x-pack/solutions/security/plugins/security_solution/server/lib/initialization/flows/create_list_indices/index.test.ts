@@ -21,7 +21,7 @@ const createMockInitializationFlowContext = (listsContext: unknown): Initializat
       lists: listsContext,
     },
     logger: loggerMock.create(),
-  } as unknown as InitializationFlowContext);
+  }) as unknown as InitializationFlowContext;
 
 describe('createListIndicesInitializationFlow', () => {
   it('has the correct id', () => {

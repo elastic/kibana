@@ -92,8 +92,10 @@ export interface ComputedFeatureGenerationResult {
 export const DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS = 60_000;
 
 /** `signal` is absent here — it is built from `requestSignal` and `timeoutMs`. */
-export interface GenerateAllComputedFeaturesOptions
-  extends Omit<ComputedFeatureGeneratorOptions, 'signal'> {
+export interface GenerateAllComputedFeaturesOptions extends Omit<
+  ComputedFeatureGeneratorOptions,
+  'signal'
+> {
   requestSignal?: AbortSignal;
   timeoutMs?: number;
 }

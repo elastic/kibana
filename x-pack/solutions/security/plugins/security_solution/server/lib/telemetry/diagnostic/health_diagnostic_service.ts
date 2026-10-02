@@ -167,7 +167,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   private buildSkippedStats(skipped: SkippedQuery): HealthDiagnosticQueryStats {
     const { query } = skipped;
-    const name = query.name ? query.name : query.id ?? 'unknown';
+    const name = query.name ? query.name : (query.id ?? 'unknown');
     const now = new Date();
     return {
       name,
@@ -310,10 +310,13 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private circuitBreakersStats(circuitBreakers: CircuitBreaker[]): Record<string, unknown> {
-    return circuitBreakers.reduce((acc, cb) => {
-      acc[cb.constructor.name] = cb.stats();
-      return acc;
-    }, {} as Record<string, unknown>);
+    return circuitBreakers.reduce(
+      (acc, cb) => {
+        acc[cb.constructor.name] = cb.stats();
+        return acc;
+      },
+      {} as Record<string, unknown>
+    );
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
@@ -343,10 +346,13 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
               const stats = await this.runHealthDiagnosticQueries(
                 cloneDeep(state.lastExecutionByQuery)
               );
-              const lastExecutionByQuery = stats.reduce((acc, stat) => {
-                acc[stat.name] = new Date(stat.finished).getTime();
-                return acc;
-              }, {} as Record<string, number>);
+              const lastExecutionByQuery = stats.reduce(
+                (acc, stat) => {
+                  acc[stat.name] = new Date(stat.finished).getTime();
+                  return acc;
+                },
+                {} as Record<string, number>
+              );
 
               return {
                 state: {

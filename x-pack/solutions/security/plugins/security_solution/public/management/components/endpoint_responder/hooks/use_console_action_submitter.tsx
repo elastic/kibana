@@ -29,7 +29,7 @@ import type { CommandExecutionComponentProps } from '../../console';
 
 export interface ConsoleActionSubmitter<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   /**
    * The ui to be returned to the console. This UI will display different states of the action,
@@ -44,7 +44,7 @@ export interface ConsoleActionSubmitter<
  */
 export interface CommandResponseActionApiState<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   actionApiState?: {
     request: {
@@ -60,15 +60,15 @@ export interface CommandResponseActionApiState<
 export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > extends Pick<
-    CommandExecutionComponentProps<
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any,
-      CommandResponseActionApiState<TOutputContent, TParameters>
-    >,
-    'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
-  > {
+  CommandExecutionComponentProps<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
+    CommandResponseActionApiState<TOutputContent, TParameters>
+  >,
+  'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
+> {
   actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError, TReqBody>;
   /**
    * The API request body. If `undefined`, then API will not be called.
@@ -102,7 +102,7 @@ export interface UseConsoleActionSubmitterOptions<
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 >({
   actionCreator,
   actionRequestBody,

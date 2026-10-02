@@ -48,7 +48,7 @@ export const useShowRelatedAlertsByAncestry = ({
   const isRulePreview = isRulePreviewDocument(hit);
 
   const ancestorId = (getFieldValue(hit, ALERT_ANCESTORS_ID) as string) ?? '';
-  const ancestryDocumentId = isRulePreview ? ancestorId : hit.raw._id ?? '';
+  const ancestryDocumentId = isRulePreview ? ancestorId : (hit.raw._id ?? '');
 
   // Mirror the index the Analyzer preview threads: for rule-preview documents the ancestry lookup
   // targets the ancestor (which can live in a linked project even though the preview alert is

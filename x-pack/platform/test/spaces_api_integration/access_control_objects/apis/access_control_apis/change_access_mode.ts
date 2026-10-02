@@ -219,9 +219,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(createResponse.body).not.to.have.property('accessControl');
 
-      const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        supertestWithoutAuth
-      );
+      const { cookie: adminCookie, profileUid: adminProfileUid } =
+        await loginAsKibanaAdmin(supertestWithoutAuth);
 
       let getResponse = await supertestWithoutAuth
         .get(`/access_control_objects/${objectId}`)

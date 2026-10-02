@@ -21,8 +21,10 @@ import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/a
 import { coreWorkerFixtures } from '@kbn/scout';
 import { getSynthtraceClient } from './get_synthtrace_client';
 
-export interface ApmSynthtraceFixtureClient
-  extends Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'> {
+export interface ApmSynthtraceFixtureClient extends Pick<
+  SynthtraceEsClient<ApmFields>,
+  'index' | 'clean'
+> {
   setPipeline: SynthtraceEsClient<ApmFields>['setPipeline'];
   resolvePipelineType: ApmSynthtraceEsClient['resolvePipelineType'];
 }

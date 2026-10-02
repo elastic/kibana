@@ -237,7 +237,7 @@ const getDetailsList = (
         {dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME}
       </EuiLink>
     ) : (
-      dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME
+      (dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME)
     ),
   },
 ];

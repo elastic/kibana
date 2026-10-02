@@ -136,7 +136,7 @@ describe('fetchEsql', () => {
               },
             })
           ),
-        } as unknown as ExecutionContract);
+        }) as unknown as ExecutionContract;
 
       const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
 
@@ -173,7 +173,7 @@ describe('fetchEsql', () => {
               },
             })
           ),
-        } as unknown as ExecutionContract);
+        }) as unknown as ExecutionContract;
 
       const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
 

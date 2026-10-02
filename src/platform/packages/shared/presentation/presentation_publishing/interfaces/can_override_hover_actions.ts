@@ -25,7 +25,7 @@ export const canOverrideHoverActions = (
 ): unknownApi is CanOverrideHoverActions => {
   return Boolean(
     unknownApi &&
-      (unknownApi as CanOverrideHoverActions)?.overrideHoverActions$ !== undefined &&
-      (unknownApi as CanOverrideHoverActions).OverriddenHoverActionsComponent !== undefined
+    (unknownApi as CanOverrideHoverActions)?.overrideHoverActions$ !== undefined &&
+    (unknownApi as CanOverrideHoverActions).OverriddenHoverActionsComponent !== undefined
   );
 };

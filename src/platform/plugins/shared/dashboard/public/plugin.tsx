@@ -144,10 +144,12 @@ export interface DashboardStart {
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
 }
 
-export class DashboardPlugin
-  implements
-    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
-{
+export class DashboardPlugin implements Plugin<
+  DashboardSetup,
+  DashboardStart,
+  DashboardSetupDependencies,
+  DashboardStartDependencies
+> {
   constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }

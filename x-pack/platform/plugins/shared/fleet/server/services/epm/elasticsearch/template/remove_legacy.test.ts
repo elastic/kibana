@@ -72,7 +72,7 @@ const createMockTemplate = ({ name, composedOf = [] }: { name: string; composedO
     index_template: {
       composed_of: composedOf,
     },
-  } as IndicesGetIndexTemplateIndexTemplateItem);
+  }) as IndicesGetIndexTemplateIndexTemplateItem;
 
 const makeArrayOf = (arraySize: number, fn = (i: any) => i) => {
   return [...Array(arraySize)].map(fn);

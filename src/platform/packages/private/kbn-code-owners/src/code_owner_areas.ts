@@ -35,12 +35,15 @@ let cachedAreaMappings: { [area in CodeOwnerArea]: string[] } | undefined;
 export function getCodeOwnerAreaMappings(): { [area in CodeOwnerArea]: string[] } {
   if (cachedAreaMappings === undefined) {
     const teams = getTeams();
-    cachedAreaMappings = CODE_OWNER_AREAS.reduce((mappings, area) => {
-      mappings[area] = teams
-        .filter((team) => team.github.team !== undefined && team.areas?.includes(area))
-        .map((team) => team.github.team as string);
-      return mappings;
-    }, {} as { [area in CodeOwnerArea]: string[] });
+    cachedAreaMappings = CODE_OWNER_AREAS.reduce(
+      (mappings, area) => {
+        mappings[area] = teams
+          .filter((team) => team.github.team !== undefined && team.areas?.includes(area))
+          .map((team) => team.github.team as string);
+        return mappings;
+      },
+      {} as { [area in CodeOwnerArea]: string[] }
+    );
   }
 
   return cachedAreaMappings;

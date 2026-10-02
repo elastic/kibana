@@ -192,7 +192,7 @@ describe('stripLegacyKeyForExport', () => {
         definition: 'name: my_text\ntype: keyword\ncontrol: INPUT_TEXT\n',
         ...attrs,
       },
-    } as SavedObject<FieldDefinition>);
+    }) as SavedObject<FieldDefinition>;
 
   it('removes legacyKey from the attributes', () => {
     const so = makeSO({ legacyKey: 'cf_priority' });

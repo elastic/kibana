@@ -15,7 +15,7 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 const solutions = ['es', 'oblt', 'security'] as const;
 
 const solutionSchemaLiterals = [...solutions].map((s) => schema.literal(s)) as [
-  ReturnType<typeof schema.literal<Exclude<SolutionId, 'workplaceai' | 'vectordb'>>>
+  ReturnType<typeof schema.literal<Exclude<SolutionId, 'workplaceai' | 'vectordb'>>>,
 ];
 
 export const ConfigSchema = schema.object({
@@ -88,6 +88,7 @@ export const ConfigSchema = schema.object({
 export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>();
 }
-export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
-  ? P
-  : ReturnType<typeof createConfig$>;
+export type ConfigType =
+  ReturnType<typeof createConfig$> extends Observable<infer P>
+    ? P
+    : ReturnType<typeof createConfig$>;

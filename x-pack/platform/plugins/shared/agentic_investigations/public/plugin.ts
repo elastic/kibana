@@ -20,15 +20,12 @@ import type {
  * Registers Impact workflow steps and the Impact attachment UI. Escalations
  * and user profiles are consumed directly by a solution's UI.
  */
-export class AgenticInvestigationsPublicPlugin
-  implements
-    Plugin<
-      AgenticInvestigationsPublicPluginSetup,
-      AgenticInvestigationsPublicPluginStart,
-      AgenticInvestigationsPublicSetupDependencies,
-      AgenticInvestigationsPublicStartDependencies
-    >
-{
+export class AgenticInvestigationsPublicPlugin implements Plugin<
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+  AgenticInvestigationsPublicSetupDependencies,
+  AgenticInvestigationsPublicStartDependencies
+> {
   setup(
     _core: CoreSetup,
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies

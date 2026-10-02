@@ -21,7 +21,7 @@ jest.mock('../../../hooks/use_fetch_matching_rules', () => ({
 }));
 
 const createRule = (id: string, name: string, tags?: string[]): RuleApiResponse =>
-  ({ id, metadata: { name, tags } } as RuleApiResponse);
+  ({ id, metadata: { name, tags } }) as RuleApiResponse;
 
 const renderFlyout = (matcher?: PolicyMatcher | null) => {
   const locators = createMockLocators();

@@ -772,10 +772,10 @@ describe('getPersistedLayerVisualizationTypeId', () => {
     ({
       visualizationType,
       state: { visualization: { some: 'state' } },
-    } as unknown as LensDocument);
+    }) as unknown as LensDocument;
 
   const buildVisualizationMap = (id: string): VisualizationMap =>
-    ({ [id]: createMockVisualization(id) } as unknown as VisualizationMap);
+    ({ [id]: createMockVisualization(id) }) as unknown as VisualizationMap;
 
   it('returns undefined when there is no persisted document', () => {
     expect(

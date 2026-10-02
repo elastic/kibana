@@ -61,7 +61,7 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
         'DETAILS (WITH REPLACEMENTS)',
       ...overrides,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 describe('AISummarySection (v2)', () => {
   beforeEach(() => {

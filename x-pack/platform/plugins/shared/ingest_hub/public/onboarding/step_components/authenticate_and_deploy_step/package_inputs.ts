@@ -96,14 +96,14 @@ function resolveActiveInputs(
   return dsVars.enabledInputs.length
     ? dsVars.enabledInputs
     : isSingleDs
-    ? dsInfo?.inputs ?? service.inputs ?? []
-    : dsInfo?.defaultEnabledInputs?.length
-    ? dsInfo.defaultEnabledInputs
-    : dsInfo?.inputs?.length
-    ? dsInfo.inputs.slice(0, 1)
-    : service.defaultEnabledInputs?.length
-    ? service.defaultEnabledInputs.slice(0, 1)
-    : (service.inputs ?? []).slice(0, 1);
+      ? (dsInfo?.inputs ?? service.inputs ?? [])
+      : dsInfo?.defaultEnabledInputs?.length
+        ? dsInfo.defaultEnabledInputs
+        : dsInfo?.inputs?.length
+          ? dsInfo.inputs.slice(0, 1)
+          : service.defaultEnabledInputs?.length
+            ? service.defaultEnabledInputs.slice(0, 1)
+            : (service.inputs ?? []).slice(0, 1);
 }
 
 /**

@@ -37,7 +37,7 @@ const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
     shiftKey: false,
     preventDefault: jest.fn(),
     ...overrides,
-  } as unknown as React.MouseEvent);
+  }) as unknown as React.MouseEvent;
 
 const makeCollectionCard = (groupId: string, memberCount: number) => ({
   id: `collection:${groupId}`,

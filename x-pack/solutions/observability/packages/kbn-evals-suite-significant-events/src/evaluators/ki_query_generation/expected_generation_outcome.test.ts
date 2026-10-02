@@ -28,7 +28,7 @@ const objectOutput = (
   ({
     queries: [],
     ...overrides,
-  } as KIQueryGenerationOutput);
+  }) as KIQueryGenerationOutput;
 
 const defaultToolUsage = (): SignificantEventsToolUsage => ({
   get_stream_features: { calls: 1, failures: 0, latency_ms: 0 },

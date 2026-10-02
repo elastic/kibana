@@ -294,7 +294,7 @@ function renderPopoverContent({
 
   const formattedValue =
     field?.type === 'string' && typeof value === 'string'
-      ? tryPrettyPrintJsonBlocks(value) ?? value
+      ? (tryPrettyPrintJsonBlocks(value) ?? value)
       : value;
 
   return (

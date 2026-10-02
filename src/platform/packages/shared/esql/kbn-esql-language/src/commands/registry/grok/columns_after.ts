@@ -35,7 +35,7 @@ export const columnsAfter = (
           name: column.name,
           type: column.type,
           userDefined: false,
-        } as ESQLColumnData)
+        }) as ESQLColumnData
     ),
   ];
 };

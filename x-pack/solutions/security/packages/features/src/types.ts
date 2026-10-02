@@ -75,7 +75,7 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
  */
 export type ProductFeaturesConfig<
   K extends ProductFeatureKeyType = ProductFeatureKeyType,
-  T extends string = string
+  T extends string = string,
 > = Partial<Record<K, ProductFeatureKibanaConfig<T>>>;
 
 export type SecurityProductFeaturesConfig = ProductFeaturesConfig<
@@ -102,7 +102,7 @@ export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConf
 
 export interface ProductFeatureParams<
   K extends ProductFeatureKeyType = ProductFeatureKeyType,
-  S extends string = string
+  S extends string = string,
 > {
   baseKibanaFeature: BaseKibanaFeatureConfig;
   baseKibanaSubFeatureIds?: S[];
@@ -111,24 +111,19 @@ export interface ProductFeatureParams<
 }
 
 /** Infers the key type from ProductFeatureParams */
-export type ProductFeatureParamsKey<P> = P extends ProductFeatureParams<infer K, infer _S>
-  ? K
-  : never;
+export type ProductFeatureParamsKey<P> =
+  P extends ProductFeatureParams<infer K, infer _S> ? K : never;
 
 /** Infers the sub-feature id type from ProductFeatureParams */
-export type ProductFeatureParamsSubFeatureId<P> = P extends ProductFeatureParams<infer _K, infer S>
-  ? S
-  : never;
+export type ProductFeatureParamsSubFeatureId<P> =
+  P extends ProductFeatureParams<infer _K, infer S> ? S : never;
 
 /** Infers the key type from a ProductFeaturesConfig-like type (Partial<Record<K, ...>>) */
-export type ProductFeaturesConfigKey<C> = C extends Partial<
-  Record<infer K, ProductFeatureKibanaConfig<string>>
->
-  ? K
-  : never;
+export type ProductFeaturesConfigKey<C> =
+  C extends Partial<Record<infer K, ProductFeatureKibanaConfig<string>>> ? K : never;
 
 export interface ConfigExtensions<
-  C extends ProductFeaturesConfig<ProductFeaturesConfigKey<C> & ProductFeatureKeyType>
+  C extends ProductFeaturesConfig<ProductFeaturesConfigKey<C> & ProductFeatureKeyType>,
 > {
   /** The `allVersions` is used to extend all the versions of the feature group */
   allVersions: C;

@@ -27,7 +27,7 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
       }),
     }),
     server: {} as HandlerParams['server'],
-  } as unknown as HandlerParams);
+  }) as unknown as HandlerParams;
 
 describe('streamsWithIndicatorsRoute', () => {
   beforeEach(() => {

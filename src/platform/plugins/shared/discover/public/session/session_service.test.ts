@@ -262,35 +262,33 @@ const createSaveFixture = () => {
     tags: ['tag-1'],
     tabs: [
       // Identical specs may have different IDs after editing. Saving must keep both IDs.
-      ...['inline-a', 'inline-b'].map(
-        (id): DiscoverSessionTab => ({
-          ...runtimeTab,
-          id,
-          label: id,
-          usesAdHocDataView: true,
-          serializedSearchSource: {
-            index: {
-              id: `runtime-${id}`,
-              title: 'logs-*',
-              timeFieldName: '@timestamp',
-              sourceFilters: [{ value: 'secret.*' }],
-              fieldFormats: {},
-              runtimeFieldMap: {},
-              fieldAttrs: {},
-              allowNoIndex: false,
-              allowHidden: false,
-              managed: false,
-            },
-            filter: [
-              {
-                meta: { index: `runtime-${id}` },
-                query: { match_all: {} },
-                $state: { store: FilterStateStore.GLOBAL_STATE },
-              },
-            ],
+      ...['inline-a', 'inline-b'].map((id): DiscoverSessionTab => ({
+        ...runtimeTab,
+        id,
+        label: id,
+        usesAdHocDataView: true,
+        serializedSearchSource: {
+          index: {
+            id: `runtime-${id}`,
+            title: 'logs-*',
+            timeFieldName: '@timestamp',
+            sourceFilters: [{ value: 'secret.*' }],
+            fieldFormats: {},
+            runtimeFieldMap: {},
+            fieldAttrs: {},
+            allowNoIndex: false,
+            allowHidden: false,
+            managed: false,
           },
-        })
-      ),
+          filter: [
+            {
+              meta: { index: `runtime-${id}` },
+              query: { match_all: {} },
+              $state: { store: FilterStateStore.GLOBAL_STATE },
+            },
+          ],
+        },
+      })),
       {
         ...runtimeTab,
         id: 'esql',

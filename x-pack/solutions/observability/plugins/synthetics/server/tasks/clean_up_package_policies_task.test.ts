@@ -88,7 +88,7 @@ const taskInstance = ({
     retryAt: null,
     state,
     params,
-  } as const);
+  }) as const;
 
 const expiredTestNowIds = (ids: string[]) =>
   fleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(

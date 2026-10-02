@@ -131,15 +131,18 @@ const migrateArtifactsToSpaceAware = async (
     itemsNeedingUpdates: 0,
     successUpdates: 0,
     failedUpdates: 0,
-    artifacts: listIds.reduce((acc, listId) => {
-      acc[listId] = {
-        success: 0,
-        failed: 0,
-        errors: [],
-      };
+    artifacts: listIds.reduce(
+      (acc, listId) => {
+        acc[listId] = {
+          success: 0,
+          failed: 0,
+          errors: [],
+        };
 
-      return acc;
-    }, {} as Record<string, { success: number; failed: number; errors: string[] }>),
+        return acc;
+      },
+      {} as Record<string, { success: number; failed: number; errors: string[] }>
+    ),
     priorRuns: [] as Array<typeof migrationState.metadata>,
   };
 

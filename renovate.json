@@ -926,21 +926,6 @@
       "enabled": true
     },
     {
-      "groupName": "prettier",
-      "matchDepNames": [
-        "prettier",
-        "eslint-plugin-prettier",
-        "eslint-config-prettier",
-        "@types/prettier"
-      ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "allowedVersions": "<3.0",
-      "enabled": true
-    },
-    {
       "groupName": "eslint",
       "matchDepNames": [
         "@typescript-eslint/eslint-plugin",
@@ -948,6 +933,7 @@
         "@typescript-eslint/typescript-estree",
         "@elastic/eslint-plugin-eui",
         "eslint",
+        "eslint-config-prettier",
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",
@@ -2391,7 +2377,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint", "@oxlint/plugins"],
+      "matchDepNames": ["oxlint", "@oxlint/plugins", "oxfmt"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

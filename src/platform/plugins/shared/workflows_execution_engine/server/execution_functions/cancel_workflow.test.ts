@@ -27,7 +27,7 @@ const buildExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflo
     spaceId: 'default',
     status: ExecutionStatus.RUNNING,
     ...overrides,
-  } as EsWorkflowExecution);
+  }) as EsWorkflowExecution;
 
 const buildRepository = (
   execution: EsWorkflowExecution | null

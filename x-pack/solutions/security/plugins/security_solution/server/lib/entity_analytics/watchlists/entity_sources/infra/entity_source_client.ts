@@ -111,7 +111,7 @@ export class WatchlistEntitySourceClient {
     const currentSource = await this.get(entitySource.id);
     const newType = entitySource.type ?? currentSource?.type;
     const indexPatternToCheck =
-      newType === 'index' ? entitySource.indexPattern ?? currentSource?.indexPattern : undefined;
+      newType === 'index' ? (entitySource.indexPattern ?? currentSource?.indexPattern) : undefined;
     if (indexPatternToCheck) {
       await validateIndexPermissions(esClient, indexPatternToCheck);
     }

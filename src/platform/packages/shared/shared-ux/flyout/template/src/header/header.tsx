@@ -118,7 +118,9 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
       opacity: 1;
       visibility: visible;
       @media (prefers-reduced-motion: no-preference) {
-        transition: grid-template-rows ${duration} ${easing}, opacity ${duration} ${easing},
+        transition:
+          grid-template-rows ${duration} ${easing},
+          opacity ${duration} ${easing},
           visibility 0s;
       }
     `,
@@ -127,7 +129,9 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
       opacity: 0;
       visibility: hidden;
       @media (prefers-reduced-motion: no-preference) {
-        transition: grid-template-rows ${duration} ${easing}, opacity ${duration} ${easing},
+        transition:
+          grid-template-rows ${duration} ${easing},
+          opacity ${duration} ${easing},
           visibility 0s ${duration};
       }
     `,

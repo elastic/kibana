@@ -19,8 +19,10 @@ const fetchCrowdstrikeLogoSvg = (): Promise<string> =>
 const fetchMicrosoftDefenderEndpointLogoSvg = (): Promise<string> =>
   import('./images/microsoft_defender_endpoint.svg').then((response) => response.default);
 
-export interface AgentTypeVendorLogoProps
-  extends Pick<EuiIconProps, 'size' | 'data-test-subj' | 'color'> {
+export interface AgentTypeVendorLogoProps extends Pick<
+  EuiIconProps,
+  'size' | 'data-test-subj' | 'color'
+> {
   agentType: ResponseActionAgentType;
 }
 

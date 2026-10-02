@@ -171,7 +171,7 @@ export const useActionResults = ({
       },
       initialData: {
         edges: [],
-        total: isScheduled ? 0 : agentIds?.length ?? 0,
+        total: isScheduled ? 0 : (agentIds?.length ?? 0),
         currentPage: 0,
         pageSize: limit,
         totalPages: 0,
@@ -179,7 +179,7 @@ export const useActionResults = ({
           totalRowCount: 0,
           totalResponded: 0,
           successful: 0,
-          pending: isScheduled ? 0 : agentIds?.length ?? 0,
+          pending: isScheduled ? 0 : (agentIds?.length ?? 0),
           failed: 0,
         },
         inspect: { dsl: [], response: [] },

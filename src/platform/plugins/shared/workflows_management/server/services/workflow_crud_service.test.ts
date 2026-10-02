@@ -92,7 +92,7 @@ const makeSecurityMock = (username: string = 'alice') =>
     authc: {
       getCurrentUser: jest.fn().mockReturnValue({ username }),
     },
-  } as any);
+  }) as any;
 
 const makeDeps = (
   clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>,

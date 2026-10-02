@@ -39,9 +39,8 @@ export function registerAnomalyChartsCasesAttachment(
           />
         ),
         children: React.lazy(async () => {
-          const { initializeAnomalyChartsAttachment } = await import(
-            './anomaly_charts_attachments'
-          );
+          const { initializeAnomalyChartsAttachment } =
+            await import('./anomaly_charts_attachments');
           const services = await getAnomalyChartsServiceDependencies(
             coreStart,
             pluginStart,

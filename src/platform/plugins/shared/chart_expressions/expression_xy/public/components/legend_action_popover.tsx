@@ -105,8 +105,8 @@ export const LegendActionPopover: React.FunctionComponent<{
           ? defaultFilterActions.map((action) => ({ ...action, disabled: true, execute: () => {} }))
           : []
         : !hasFilterCellAction(legendCellValueActions)
-        ? defaultFilterActions
-        : []
+          ? defaultFilterActions
+          : []
     ).map(toMenuItem);
 
     const cellValuePanelItems = legendCellValueActions.map(toMenuItem);

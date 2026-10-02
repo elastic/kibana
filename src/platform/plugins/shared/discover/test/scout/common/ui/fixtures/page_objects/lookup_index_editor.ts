@@ -24,7 +24,10 @@ export class LookupIndexEditor {
   readonly flyout: Locator;
   readonly unsavedChangesModal: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly dataGrid: DataGrid) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly dataGrid: DataGrid
+  ) {
     this.flyout = page.testSubj.locator('lookupIndexFlyout');
     this.unsavedChangesModal = page.testSubj.locator('indexEditorUnsavedChangesModal');
   }

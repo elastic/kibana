@@ -50,9 +50,7 @@ export type SignificantEventsAppLocator = LocatorPublic<SignificantEventsAppLoca
  */
 const EXPLICIT_EMPTY_PARAMS = new Set<string>(['status', 'severity']);
 
-export class SignificantEventsAppLocatorDefinition
-  implements LocatorDefinition<SignificantEventsAppLocatorParams>
-{
+export class SignificantEventsAppLocatorDefinition implements LocatorDefinition<SignificantEventsAppLocatorParams> {
   public readonly id = SIGNIFICANT_EVENTS_APP_LOCATOR_ID;
 
   public readonly getLocation = async ({

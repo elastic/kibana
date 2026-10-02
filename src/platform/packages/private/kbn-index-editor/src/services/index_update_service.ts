@@ -723,7 +723,7 @@ export class IndexUpdateService {
               .map((row) => {
                 const update =
                   updatedIds.has(row.id) && savingDocs.has(row.id)
-                    ? (savingDocs.get(row.id) as PendingDocUpdate).update ?? {}
+                    ? ((savingDocs.get(row.id) as PendingDocUpdate).update ?? {})
                     : {};
                 const mergedSource = { ...row.raw, ...update };
                 return { ...row, raw: mergedSource, flattened: mergedSource };

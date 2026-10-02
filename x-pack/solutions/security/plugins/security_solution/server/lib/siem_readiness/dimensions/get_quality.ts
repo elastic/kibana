@@ -74,8 +74,8 @@ export const getQuality = async ({
     qualityResults.length === 0
       ? ('noData' as const)
       : actionableFindings.length > 0
-      ? ('actionsRequired' as const)
-      : ('healthy' as const);
+        ? ('actionsRequired' as const)
+        : ('healthy' as const);
 
   const summary = buildQualitySummary(status, qualityResults.length, actionableFindings.length);
 

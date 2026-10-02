@@ -41,7 +41,7 @@ const buildCase = (id = 'case-1'): Case =>
     category: null,
     duration: null,
     version: 'abc',
-  } as unknown as Case);
+  }) as unknown as Case;
 
 const buildAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),

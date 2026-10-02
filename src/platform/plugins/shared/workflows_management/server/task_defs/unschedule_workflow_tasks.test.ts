@@ -14,7 +14,7 @@ const makeMockScheduler = (): jest.Mocked<WorkflowTaskScheduler> =>
   ({
     bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
     unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-  } as any);
+  }) as any;
 
 describe('unscheduleWorkflowTasks', () => {
   beforeEach(() => jest.clearAllMocks());

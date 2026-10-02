@@ -42,8 +42,10 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../common/endpoint/service/artifacts/constants';
 
-interface FindExceptionListItemSchemaQueryParams
-  extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {
+interface FindExceptionListItemSchemaQueryParams extends Omit<
+  FindExceptionListItemSchema,
+  'page' | 'per_page'
+> {
   page?: number;
   per_page?: number;
 }

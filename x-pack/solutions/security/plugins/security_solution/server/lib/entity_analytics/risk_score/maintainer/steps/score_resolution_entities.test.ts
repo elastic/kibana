@@ -22,7 +22,7 @@ const buildLogger = (): ScopedLogger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as ScopedLogger);
+  }) as unknown as ScopedLogger;
 
 const collectPages = async <T>(generator: AsyncGenerator<T>): Promise<T[]> => {
   const pages: T[] = [];

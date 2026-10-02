@@ -11,7 +11,7 @@ import type { RouteMap } from '../types';
 import { RouterBreadcrumb } from './breadcrumb';
 
 export function createRouterBreadcrumbComponent<
-  TRouteMap extends RouteMap
+  TRouteMap extends RouteMap,
 >(): RouterBreadcrumb<TRouteMap> {
   return RouterBreadcrumb as RouterBreadcrumb<TRouteMap>;
 }

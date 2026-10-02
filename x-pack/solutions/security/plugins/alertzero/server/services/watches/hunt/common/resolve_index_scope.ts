@@ -248,8 +248,8 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntS
         ? 'blocked:pinned'
         : 'blocked:no_report'
       : pinned
-      ? 'pinned'
-      : 'static';
+        ? 'pinned'
+        : 'static';
 
   return {
     technologies: present.map((scope) => scope.technology),

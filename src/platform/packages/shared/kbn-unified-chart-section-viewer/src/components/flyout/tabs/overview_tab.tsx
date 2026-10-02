@@ -131,13 +131,15 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
               paddingSize="none"
               css={css`
                 padding: ${euiTheme.size.xs} ${euiTheme.size.m};
-                ${containerHeight
-                  ? css`
-                      height: ${containerHeight}px;
-                    `
-                  : css`
-                      max-height: 400px;
-                    `}
+                ${
+                  containerHeight
+                    ? css`
+                        height: ${containerHeight}px;
+                      `
+                    : css`
+                        max-height: 400px;
+                      `
+                }
                 display: flex;
                 flex-direction: column;
               `}

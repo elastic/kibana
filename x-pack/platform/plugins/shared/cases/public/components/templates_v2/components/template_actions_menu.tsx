@@ -247,8 +247,8 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     const ruleDisabledHint = bufferHasErrors
       ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
       : isFieldDefinition
-      ? i18n.ACTIONS_MENU_NO_FIELD_YET
-      : i18n.ACTIONS_MENU_SELECT_A_FIELD;
+        ? i18n.ACTIONS_MENU_NO_FIELD_YET
+        : i18n.ACTIONS_MENU_SELECT_A_FIELD;
     // In fieldDefinition mode picking a type replaces the whole (single-field) document, so once a
     // field exists the section reads "Change field type" instead of "New field".
     const newFieldTitle =

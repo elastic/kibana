@@ -24,7 +24,7 @@ const createCpsManager = ({
     whenReady: jest.fn().mockResolvedValue(undefined),
     hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
     getDefaultProjectRouting: jest.fn().mockReturnValue(defaultProjectRouting),
-  } as unknown as ICPSManager);
+  }) as unknown as ICPSManager;
 
 const startServicesWithCps = (
   hasLinkedProjects: boolean,

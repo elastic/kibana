@@ -19,18 +19,16 @@ export const registerSyntheticsEmbeddables = (
   pluginsSetup.embeddable.registerEmbeddablePublicDefinition(
     SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     async () => {
-      const { getStatsOverviewEmbeddableFactory } = await import(
-        './stats_overview/stats_overview_embeddable_factory'
-      );
+      const { getStatsOverviewEmbeddableFactory } =
+        await import('./stats_overview/stats_overview_embeddable_factory');
       return getStatsOverviewEmbeddableFactory(core.getStartServices);
     }
   );
   pluginsSetup.embeddable.registerLegacyURLTransform(
     SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-      const { getTransformOut } = await import(
-        '../../../common/embeddables/stats_overview/get_transform_out'
-      );
+      const { getTransformOut } =
+        await import('../../../common/embeddables/stats_overview/get_transform_out');
       return getTransformOut(transformDrilldownsOut);
     }
   );
@@ -38,16 +36,14 @@ export const registerSyntheticsEmbeddables = (
   pluginsSetup.embeddable.registerEmbeddablePublicDefinition(
     SYNTHETICS_MONITORS_EMBEDDABLE,
     async () => {
-      const { getMonitorsEmbeddableFactory } = await import(
-        './monitors_overview/monitors_embeddable_factory'
-      );
+      const { getMonitorsEmbeddableFactory } =
+        await import('./monitors_overview/monitors_embeddable_factory');
       return getMonitorsEmbeddableFactory(core.getStartServices);
     }
   );
   pluginsSetup.embeddable.registerLegacyURLTransform(SYNTHETICS_MONITORS_EMBEDDABLE, async () => {
-    const { getTransformOut } = await import(
-      '../../../common/embeddables/monitors_overview/get_transform_out'
-    );
+    const { getTransformOut } =
+      await import('../../../common/embeddables/monitors_overview/get_transform_out');
     return getTransformOut();
   });
 };

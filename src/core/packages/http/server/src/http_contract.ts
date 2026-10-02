@@ -197,7 +197,7 @@ export interface HttpSelfService {
  * @public
  */
 export interface HttpServicePreboot<
-  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
 > {
   /**
    * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
@@ -306,7 +306,7 @@ export interface HttpServicePreboot<
  * @public
  */
 export interface HttpServiceSetup<
-  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
 > {
   /**
    * Creates cookie based session storage factory {@link SessionStorageFactory}
@@ -415,7 +415,7 @@ export interface HttpServiceSetup<
    * @public
    */
   createRouter: <
-    Context extends DefaultRequestHandlerType = DefaultRequestHandlerType
+    Context extends DefaultRequestHandlerType = DefaultRequestHandlerType,
   >() => IRouter<Context>;
 
   /**
@@ -448,7 +448,7 @@ export interface HttpServiceSetup<
    */
   registerRouteHandlerContext: <
     Context extends DefaultRequestHandlerType,
-    ContextName extends keyof Omit<Context, 'resolve'>
+    ContextName extends keyof Omit<Context, 'resolve'>,
   >(
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>

@@ -213,12 +213,12 @@ export const sendEndpointActionResponse = async (
       const filePath =
         action.command === 'execute'
           ? '/execute/file/path'
-          : (
+          : ((
               action as unknown as ActionDetails<
                 ResponseActionGetFileOutputContent,
                 ResponseActionGetFileParameters
               >
-            )?.parameters?.path ?? '/execute/file/path';
+            )?.parameters?.path ?? '/execute/file/path');
 
       const fileName = basename(filePath.replace(/\\/g, '/'));
       const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
@@ -347,7 +347,7 @@ export const sendEndpointActionResponse = async (
 };
 
 type ResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
 const getOutputDataIfNeeded = (

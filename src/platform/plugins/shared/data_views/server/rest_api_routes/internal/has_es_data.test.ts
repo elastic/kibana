@@ -65,8 +65,8 @@ describe('has_es_data route', () => {
             name === patterns
               ? { local: { matching_indices: false } }
               : name === crossClusterPatterns
-              ? { remote: { matching_indices: true } }
-              : {}
+                ? { remote: { matching_indices: true } }
+                : {}
           ),
       },
     };

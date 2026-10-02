@@ -210,10 +210,10 @@ export const assertAgentTrace = (
     // Errored tool spans store the result array or thrown error rather than the handler envelope.
     const traceResults = Array.isArray(result)
       ? result
-      : result.results ??
+      : (result.results ??
         (typeof result.error === 'string'
           ? [{ type: ToolResultType.error, data: { message: result.error } }]
-          : undefined);
+          : undefined));
     assert(Array.isArray(traceResults), `Malformed tool result for ${callId}`);
     // Result IDs can be assigned after the execution span has already been exported.
     assert.deepStrictEqual(

@@ -16,35 +16,32 @@ import {
 } from '@kbn/content-list-provider';
 import { useSorting } from './use_sorting';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const createWrapper =
   (options?: {
     initialSort?: { field: string; direction: 'asc' | 'desc' };
     supportsSorting?: boolean;
   }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'item', entityPlural: 'items' }}
-        dataSource={{ findItems: mockFindItems }}
-        features={
-          options?.supportsSorting === false
-            ? { sorting: false }
-            : options?.initialSort
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'item', entityPlural: 'items' }}
+      dataSource={{ findItems: mockFindItems }}
+      features={
+        options?.supportsSorting === false
+          ? { sorting: false }
+          : options?.initialSort
             ? { sorting: { initialSort: options.initialSort } }
             : undefined
-        }
-      >
-        {children}
-      </ContentListProvider>
-    );
+      }
+    >
+      {children}
+    </ContentListProvider>
+  );
 
 describe('useSorting', () => {
   beforeEach(() => {

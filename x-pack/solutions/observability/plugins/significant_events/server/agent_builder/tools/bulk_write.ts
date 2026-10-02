@@ -19,7 +19,10 @@ export interface CompactBulkError {
 export type BulkWriteErrorCode = 'validation_error' | 'outcome_unknown' | 'bulk_error';
 
 export class BulkWriteError extends Error {
-  constructor(public readonly code: BulkWriteErrorCode, message: string) {
+  constructor(
+    public readonly code: BulkWriteErrorCode,
+    message: string
+  ) {
     super(message);
     this.name = 'BulkWriteError';
   }

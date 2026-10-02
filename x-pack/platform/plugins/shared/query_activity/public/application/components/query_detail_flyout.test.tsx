@@ -63,7 +63,7 @@ const mockContext = (
       isLoading: false,
       missingClusterPrivileges: [],
     },
-  } as QueryActivityAppContextValue);
+  }) as QueryActivityAppContextValue;
 
 const renderFlyout = (
   query: RunningQuery,

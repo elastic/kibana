@@ -56,10 +56,13 @@ export function SchemaEditor({
     async (selection: string[]) => {
       setIsLoadingRecommendations(true);
       const client = await fieldsMetadata.getClient();
-      const ecsToOriginalField = selection.reduce((acc, name) => {
-        acc[getRegularEcsField(name)] = name;
-        return acc;
-      }, {} as Record<string, string>);
+      const ecsToOriginalField = selection.reduce(
+        (acc, name) => {
+          acc[getRegularEcsField(name)] = name;
+          return acc;
+        },
+        {} as Record<string, string>
+      );
 
       try {
         const response = await client.find({

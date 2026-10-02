@@ -16,7 +16,7 @@ const createRiskEngineDataClientMock = () =>
     init: jest.fn(),
     scheduleNow: jest.fn(),
     tearDown: jest.fn(),
-  } as unknown as jest.Mocked<RiskEngineDataClient>);
+  }) as unknown as jest.Mocked<RiskEngineDataClient>;
 
 export const riskEngineDataClientMock = {
   create: createRiskEngineDataClientMock,

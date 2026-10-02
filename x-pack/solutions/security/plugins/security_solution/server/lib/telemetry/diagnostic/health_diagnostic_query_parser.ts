@@ -222,18 +222,21 @@ const validateEncryptDocument = (
 
 // V3 API integrations: accepts a comma-separated string OR a YAML string[] sequence,
 // unlike v2 integrations which only accepts a string.
-const v3IntegrationsSchema = z.preprocess((val) => {
-  if (val === undefined || val === null) return undefined;
-  if (typeof val === 'string') {
-    const parts = val
-      .split(',')
-      .map((p) => p.trim())
-      .filter((p) => p.length > 0);
-    return parts.length > 0 ? parts : undefined;
-  }
-  if (Array.isArray(val)) return val.length > 0 ? val : undefined;
-  return val; // invalid types pass through to schema validation
-}, z.array(z.string().min(1)).min(1).optional());
+const v3IntegrationsSchema = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null) return undefined;
+    if (typeof val === 'string') {
+      const parts = val
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+      return parts.length > 0 ? parts : undefined;
+    }
+    if (Array.isArray(val)) return val.length > 0 ? val : undefined;
+    return val; // invalid types pass through to schema validation
+  },
+  z.array(z.string().min(1)).min(1).optional()
+);
 
 // V3 API: targets a Kibana/ES HTTP endpoint + all previous attributes.
 const v3ApiSchema = z
@@ -368,12 +371,15 @@ const v4ApiSchema = z
 // .catch() maps any parse failure to ParseFailureQuery so callers never deal
 // with Zod errors directly — the output type is always HealthDiagnosticQuery.
 const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
-  .preprocess((raw) => {
-    if (!raw || typeof raw !== 'object') return raw;
-    const obj = raw as Record<string, unknown>;
-    // Descriptors without a version field are legacy v1.
-    return 'version' in obj ? obj : { ...obj, version: 1 };
-  }, z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema, v4ApiSchema, v4IndexSchema]))
+  .preprocess(
+    (raw) => {
+      if (!raw || typeof raw !== 'object') return raw;
+      const obj = raw as Record<string, unknown>;
+      // Descriptors without a version field are legacy v1.
+      return 'version' in obj ? obj : { ...obj, version: 1 };
+    },
+    z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema, v4ApiSchema, v4IndexSchema])
+  )
   .catch((ctx) => {
     const raw = ctx.value as Record<string, unknown> | null;
     const version = raw?.version;

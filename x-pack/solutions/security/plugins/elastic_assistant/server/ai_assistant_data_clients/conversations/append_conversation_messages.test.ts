@@ -42,7 +42,7 @@ const createMockDataWriter = (): jest.Mocked<DocumentsDataWriter> =>
     bulk: jest.fn(),
     getFilterByUser: jest.fn(),
     getFilterByConversationUser: jest.fn(),
-  } as unknown as jest.Mocked<DocumentsDataWriter>);
+  }) as unknown as jest.Mocked<DocumentsDataWriter>;
 // Use existing mocks to keep tests DRY
 const createMockConversation = (
   overrides?: Partial<ConversationResponse>

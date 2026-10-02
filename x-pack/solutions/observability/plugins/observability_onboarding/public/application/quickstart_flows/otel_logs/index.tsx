@@ -249,8 +249,8 @@ export const OtelLogsPanel: React.FC = () => {
               status: (hasData || hasPreExistingDataFinal
                 ? 'complete'
                 : isMonitoringStepActive
-                ? 'current'
-                : 'incomplete') as EuiStepStatus,
+                  ? 'current'
+                  : 'incomplete') as EuiStepStatus,
               children: (
                 <OtelLogsVisualizeStep
                   isMonitoringStepActive={isMonitoringStepActive}

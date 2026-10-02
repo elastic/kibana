@@ -20,12 +20,10 @@ const mockItems = [
 ];
 
 describe('useContentListSelection', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: mockItems,
-      total: mockItems.length,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: mockItems,
+    total: mockItems.length,
+  }));
 
   const createWrapper = (options?: { selectionDisabled?: boolean; isReadOnly?: boolean }) => {
     const { selectionDisabled, isReadOnly } = options ?? {};

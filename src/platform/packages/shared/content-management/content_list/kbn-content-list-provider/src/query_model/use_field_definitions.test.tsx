@@ -32,12 +32,10 @@ const mockUsers = [
   },
 ];
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockTagsService: ContentManagementTagsServices = {
   getTagList: () => [

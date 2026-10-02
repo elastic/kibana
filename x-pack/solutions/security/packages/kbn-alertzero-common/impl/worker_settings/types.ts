@@ -14,7 +14,7 @@ import type { WatchAutonomyLevel, WorkerScheduleInterval, WorkerSettingsExtras }
  * offers — is derived from this, so there is no second list to keep in step with it.
  */
 export interface WorkerSettingsDeclaration<
-  TExtras extends WorkerSettingsExtras = WorkerSettingsExtras
+  TExtras extends WorkerSettingsExtras = WorkerSettingsExtras,
 > {
   workerId: string;
   /**

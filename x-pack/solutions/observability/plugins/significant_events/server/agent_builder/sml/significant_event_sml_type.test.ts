@@ -66,7 +66,7 @@ describe('createSignificantEventSmlType', () => {
             findLatestPaginated,
             findLatestByEventId,
           })),
-        } as unknown as EventService)
+        }) as unknown as EventService
     );
   });
 
@@ -159,7 +159,7 @@ describe('createSignificantEventSmlType', () => {
 
   it('forwards getUseRuleEventsRead() to EventService.getClient() when listing', async () => {
     const getClient = jest.fn(() => ({ findLatestPaginated, findLatestByEventId }));
-    jest.mocked(EventService).mockImplementation(() => ({ getClient } as unknown as EventService));
+    jest.mocked(EventService).mockImplementation(() => ({ getClient }) as unknown as EventService);
     getUseRuleEventsRead.mockResolvedValue(true);
     findLatestPaginated.mockResolvedValue({ hits: [] });
 

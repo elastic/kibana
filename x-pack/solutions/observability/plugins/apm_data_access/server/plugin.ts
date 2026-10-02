@@ -20,9 +20,10 @@ import type {
 } from './types';
 import { getServices } from './services/get_services';
 
-export class ApmDataAccessPlugin
-  implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
-{
+export class ApmDataAccessPlugin implements Plugin<
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart
+> {
   public config?: APMIndices;
   public logger: Logger;
 

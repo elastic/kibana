@@ -22,10 +22,10 @@ export function getIntegrationStatus(statuses: SyncStatus[]): SyncStatus {
   return statuses.some((current) => current === SyncStatus.FAILED)
     ? SyncStatus.FAILED
     : statuses.some((current) => current === SyncStatus.WARNING)
-    ? SyncStatus.WARNING
-    : statuses.some((current) => current === SyncStatus.SYNCHRONIZING)
-    ? SyncStatus.SYNCHRONIZING
-    : SyncStatus.COMPLETED;
+      ? SyncStatus.WARNING
+      : statuses.some((current) => current === SyncStatus.SYNCHRONIZING)
+        ? SyncStatus.SYNCHRONIZING
+        : SyncStatus.COMPLETED;
 }
 
 export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ output }) => {

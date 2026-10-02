@@ -53,7 +53,7 @@ const userMessage = (id: string): TimelineEvent =>
     created_at: at,
     actor: user,
     data: { message: 'hi' },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 const started = (
   id: string,
@@ -69,7 +69,7 @@ const started = (
     execution_id: execId,
     trigger_event_id: trigger,
     data: { trigger_type: triggerType },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 const step = (id: string, execId: string, sequence: number, s: unknown): TimelineEvent =>
   ({
@@ -79,7 +79,7 @@ const step = (id: string, execId: string, sequence: number, s: unknown): Timelin
     actor,
     execution_id: execId,
     data: { step: s, sequence },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 const terminated = (
   id: string,
@@ -100,7 +100,7 @@ const terminated = (
       time_to_last_token: 0,
       ...extra,
     },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 const promptResponse = (
   id: string,
@@ -113,7 +113,7 @@ const promptResponse = (
     created_at: at,
     actor: user,
     data: { prompt_requested_event_id: requestedId, responses },
-  } as TimelineEvent);
+  }) as TimelineEvent;
 
 const responded = { type: 'responded', response: { message: 'ok' } };
 const reasoning = (text: string): ReasoningStep => ({
@@ -393,7 +393,7 @@ const toolStep = (toolCallId: string, results: unknown[]): ConversationRoundStep
     tool_id: 'my_tool',
     params: {},
     results,
-  } as ConversationRoundStep);
+  }) as ConversationRoundStep;
 
 describe('foldConversationTurns — interrupted executions', () => {
   it('folds a failed exec_0 into a turn with steps, no pending prompts, an interruption', () => {

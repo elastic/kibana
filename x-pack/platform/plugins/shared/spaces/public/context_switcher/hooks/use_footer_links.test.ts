@@ -33,7 +33,7 @@ const createApplication = (
     getUrlForApp: jest.fn((appId: string, opts?: { path?: string }) =>
       opts?.path ? `/app/${appId}/${opts.path}` : `/app/${appId}`
     ),
-  } as unknown as CoreStart['application']);
+  }) as unknown as CoreStart['application'];
 
 const createCloud = (
   overrides: Partial<Pick<CloudStart, 'isCloudEnabled' | 'serverless' | 'getPrivilegedUrls'>> = {}
@@ -43,7 +43,7 @@ const createCloud = (
     serverless: { projectType: 'security' } as CloudStart['serverless'],
     getPrivilegedUrls: jest.fn().mockResolvedValue({ usersAndRolesUrl: undefined }),
     ...overrides,
-  } as unknown as CloudStart);
+  }) as unknown as CloudStart;
 
 describe('useFooterLinks', () => {
   const cloud = createCloud();

@@ -10,9 +10,8 @@ import type { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/pu
 
 export const LazyOsqueryManagedPolicyCreateImportExtension =
   lazy<PackagePolicyCreateExtensionComponent>(async () => {
-    const { OsqueryManagedPolicyCreateImportExtension } = await import(
-      './osquery_managed_policy_create_import_extension'
-    );
+    const { OsqueryManagedPolicyCreateImportExtension } =
+      await import('./osquery_managed_policy_create_import_extension');
 
     return {
       default: OsqueryManagedPolicyCreateImportExtension,

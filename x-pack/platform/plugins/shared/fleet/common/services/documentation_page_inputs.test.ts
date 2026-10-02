@@ -24,7 +24,7 @@ const minimalIntegrationPkg = (
     release: 'ga',
     type: 'integration',
     ...partial,
-  } as PackageInfo);
+  }) as PackageInfo;
 
 describe('getDocumentationPageInputs', () => {
   it('uses distinct keys when two inputs share a type but have different names', () => {

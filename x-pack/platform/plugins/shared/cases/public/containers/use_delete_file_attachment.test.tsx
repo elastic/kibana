@@ -119,8 +119,7 @@ describe('useDeleteFileAttachment', () => {
     const getWrapper =
       (qc: QueryClient): React.FC<{ children: React.ReactNode }> =>
       // eslint-disable-next-line react/display-name
-      ({ children }) =>
-        <TestProviders queryClient={qc}>{children}</TestProviders>;
+      ({ children }) => <TestProviders queryClient={qc}>{children}</TestProviders>;
 
     it('decrements the file stats count optimistically on mutate', async () => {
       queryClient.setQueryData(statsKey, { total: 3 });

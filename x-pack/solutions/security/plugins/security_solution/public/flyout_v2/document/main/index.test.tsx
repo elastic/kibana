@@ -75,7 +75,7 @@ const createAlertHit = (
     raw: source ? { _source: source } : {},
     flattened: { 'event.kind': 'signal', ...extra },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 describe('<DocumentFlyout />', () => {
   const startServices = createStartServicesMock();

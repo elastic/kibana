@@ -14,12 +14,10 @@ import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useContentListSort } from './use_content_list_sort';
 
 describe('useContentListSort', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const createWrapper = (options?: {
     initialSort?: { field: string; direction: 'asc' | 'desc' };
@@ -29,8 +27,8 @@ describe('useContentListSort', () => {
     const features = sortingDisabled
       ? { sorting: false as const }
       : initialSort
-      ? { sorting: { initialSort } }
-      : undefined;
+        ? { sorting: { initialSort } }
+        : undefined;
 
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider

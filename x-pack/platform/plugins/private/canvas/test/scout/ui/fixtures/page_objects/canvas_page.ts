@@ -75,7 +75,10 @@ export class CanvasPage {
   /** The "Generate" button inside the PDF reports share panel. */
   public readonly generateReportButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.workpadListItems = this.page.testSubj.locator(
       'canvasWorkpadTable > canvasWorkpadTableWorkpad'
     );

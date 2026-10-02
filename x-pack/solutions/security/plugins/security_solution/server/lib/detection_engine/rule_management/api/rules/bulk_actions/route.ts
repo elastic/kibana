@@ -503,9 +503,8 @@ export const performBulkActionRoute = (
 
             case BulkActionTypeEnum.fill_gaps: {
               const uiSettingsClient = ctx.core.uiSettings.client;
-              const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
-                EXCLUDED_GAP_REASONS_KEY
-              );
+              const excludedReasons =
+                await uiSettingsClient.get<GapReasonType[]>(EXCLUDED_GAP_REASONS_KEY);
 
               const {
                 backfilled,

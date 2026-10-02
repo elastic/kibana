@@ -32,8 +32,8 @@ export const getTotalHitsValue = (totalHits: number | { value: number } | undefi
   typeof totalHits === 'undefined'
     ? -1
     : typeof totalHits === 'number'
-    ? totalHits
-    : totalHits.value;
+      ? totalHits
+      : totalHits.value;
 
 export interface FindListItemOptions {
   listId: ListId;

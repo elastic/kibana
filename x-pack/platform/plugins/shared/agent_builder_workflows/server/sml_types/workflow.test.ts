@@ -29,13 +29,13 @@ const createMockEsClient = (hits: unknown[] = []) => {
 const createMockLogger = (): Logger =>
   ({
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createMockApi = (overrides: Partial<WorkflowsManagementApi> = {}) =>
   ({
     getWorkflow: jest.fn().mockResolvedValue(null),
     ...overrides,
-  } as unknown as WorkflowsManagementApi);
+  }) as unknown as WorkflowsManagementApi;
 
 const createSmlDocument = (originId = 'workflow-abc'): SmlDocument => ({
   type: 'workflow',

@@ -32,8 +32,9 @@ export interface InitialyzeDataTableSettings extends Partial<DataTableModelSetti
   id: string;
 }
 
-export interface DataTablePersistInput
-  extends Partial<Omit<DataTableModel, keyof DataTableModelSettings>> {
+export interface DataTablePersistInput extends Partial<
+  Omit<DataTableModel, keyof DataTableModelSettings>
+> {
   id: string;
   columns: ColumnHeaderOptions[];
   indexNames: string[];

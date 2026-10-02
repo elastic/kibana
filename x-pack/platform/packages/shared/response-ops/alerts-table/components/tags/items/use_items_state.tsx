@@ -168,8 +168,8 @@ const getInitialItemsState = ({
     const itemState = isCheckedItem
       ? ItemState.CHECKED
       : isPartialItem
-      ? ItemState.PARTIAL
-      : ItemState.UNCHECKED;
+        ? ItemState.PARTIAL
+        : ItemState.UNCHECKED;
 
     const icon = getSelectionIcon(itemState);
 

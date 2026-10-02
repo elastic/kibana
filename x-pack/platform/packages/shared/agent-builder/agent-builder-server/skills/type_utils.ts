@@ -34,22 +34,20 @@ export type FilePathsFromStructure<T, Prefix extends string = ''> = T extends {
             >;
           }[keyof Omit<T, '__canContainFiles'> & string]
   : T extends object
-  ? {
-      [K in keyof T & string]: FilePathsFromStructure<
-        T[K],
-        Prefix extends '' ? K : `${Prefix}/${K}`
-      >;
-    }[keyof T & string]
-  : never;
+    ? {
+        [K in keyof T & string]: FilePathsFromStructure<
+          T[K],
+          Prefix extends '' ? K : `${Prefix}/${K}`
+        >;
+      }[keyof T & string]
+    : never;
 
 type ContainsSlash<S extends string> = S extends `${string}/${string}` ? true : false;
 
-export type StringWithoutSlash<S extends string = string> = ContainsSlash<S> extends true
-  ? never
-  : S;
+export type StringWithoutSlash<S extends string = string> =
+  ContainsSlash<S> extends true ? never : S;
 
 type ContainsSpace<S extends string> = S extends `${string} ${string}` ? true : false;
 
-export type StringWithoutSpace<S extends string = string> = ContainsSpace<S> extends true
-  ? never
-  : S;
+export type StringWithoutSpace<S extends string = string> =
+  ContainsSpace<S> extends true ? never : S;

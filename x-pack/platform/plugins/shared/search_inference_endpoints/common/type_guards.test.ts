@@ -20,7 +20,7 @@ const baseEndpoint = (overrides: Partial<InferenceInferenceEndpointInfo> = {}) =
     task_type: 'chat_completion',
     service: 'elastic',
     ...overrides,
-  } as InferenceInferenceEndpointInfo);
+  }) as InferenceInferenceEndpointInfo;
 
 describe('isInferenceEndpointWithKibanaConnectorHeuristic', () => {
   it('returns true when heuristics list kibana-connector for chat_completion', () => {

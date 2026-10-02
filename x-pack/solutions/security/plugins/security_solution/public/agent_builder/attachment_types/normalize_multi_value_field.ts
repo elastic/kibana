@@ -23,5 +23,5 @@ export const normalizeMultiValueField = (value: unknown): string[] =>
   Array.isArray(value)
     ? value.filter((v): v is string => typeof v === 'string' && v.length > 0)
     : typeof value === 'string' && value.length > 0
-    ? [value]
-    : [];
+      ? [value]
+      : [];

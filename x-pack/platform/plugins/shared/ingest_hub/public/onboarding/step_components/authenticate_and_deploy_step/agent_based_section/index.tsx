@@ -255,8 +255,8 @@ export function AgentBasedSection({
   const isNextReady = isPolicyCreated
     ? isCredentialReady
     : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0 && isCredentialReady
-    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
+      ? selectedAgentPolicyIds.length > 0 && isCredentialReady
+      : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
 
   const onNextReadyChangeRef = useRef(onNextReadyChange);
   onNextReadyChangeRef.current = onNextReadyChange;

@@ -55,7 +55,10 @@ export interface DescribedEnumValue {
 const LARGE_ENUM_THRESHOLD = 20;
 
 export class SchemaTranslationError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown
+  ) {
     super(message);
     this.name = 'SchemaTranslationError';
   }
@@ -363,14 +366,14 @@ function formatVariantSchemas(jsonSchema: unknown): string {
       return p.const !== undefined || (p.enum && (p.enum as string[]).length === 1);
     });
     const discriminatorValue = discriminatorKey
-      ? ((props[discriminatorKey] as JsonSchemaNode).const as string) ??
-        ((props[discriminatorKey] as JsonSchemaNode).enum as string[])?.[0]
+      ? (((props[discriminatorKey] as JsonSchemaNode).const as string) ??
+        ((props[discriminatorKey] as JsonSchemaNode).enum as string[])?.[0])
       : undefined;
 
     const label =
       discriminatorKey && discriminatorValue
         ? `\`${discriminatorKey}: "${discriminatorValue}"\``
-        : variant.description ?? 'Variant';
+        : (variant.description ?? 'Variant');
 
     const tables = formatObjectTables(variant, '#####');
     if (tables) {

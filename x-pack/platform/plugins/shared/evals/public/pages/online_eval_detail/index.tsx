@@ -185,7 +185,7 @@ const buildAverageScoreByNameLensConfig = ({
         },
       },
     ],
-  } satisfies LensApiConfig);
+  }) satisfies LensApiConfig;
 
 const buildScoreCountByLabelLensConfig = ({
   dataViewId,
@@ -236,7 +236,7 @@ const buildScoreCountByLabelLensConfig = ({
         },
       },
     ],
-  } satisfies LensApiConfig);
+  }) satisfies LensApiConfig;
 
 export const OnlineEvalDetailPage: React.FC = () => {
   const history = useHistory();

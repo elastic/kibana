@@ -10,7 +10,10 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class NavigationPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoHome() {
     await this.page.goto(this.kbnUrl.app('home'));

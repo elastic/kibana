@@ -36,7 +36,7 @@ describe('Data stream routes - upload samples', () => {
         esClient: { search: mockEsSearch },
         isAvailable: () => true,
       }),
-    } as unknown as AutomaticImportPluginRequestHandlerContext);
+    }) as unknown as AutomaticImportPluginRequestHandlerContext;
 
   beforeEach(() => {
     mockAddSamplesToDataStream = jest.fn().mockResolvedValue({ items: [], errors: false });

@@ -46,7 +46,7 @@ describe('Blocklists API validations', () => {
         osTypes,
         tags: [GLOBAL_ARTIFACT_TAG],
         entries,
-      } as unknown as CreateExceptionListItemOptions);
+      }) as unknown as CreateExceptionListItemOptions;
 
     const filePathEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
       { field: 'file.path', type: 'match_any', operator: 'included', value },

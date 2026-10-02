@@ -218,7 +218,7 @@ export const buildCandidateQuery = async (
       total =
         typeof response.hits.total === 'number'
           ? response.hits.total
-          : response.hits.total?.value ?? pageIds.length;
+          : (response.hits.total?.value ?? pageIds.length);
     }
 
     for (const id of pageIds) {

@@ -151,7 +151,7 @@ const runFields = (
   if (terminal.type === TimelineEventType.executionTerminated) {
     const { data } = terminal;
     const summary = {
-      steps: stepEvents.length > 0 ? stepEvents : data.steps ?? [],
+      steps: stepEvents.length > 0 ? stepEvents : (data.steps ?? []),
       model_usage: data.model_usage ?? ZERO_MODEL_USAGE,
       time_to_first_token: data.time_to_first_token ?? 0,
       time_to_last_token: data.time_to_last_token ?? 0,
@@ -225,7 +225,7 @@ const mergeModelUsage = (
   ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
     ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
     : {}),
-  ...(a.model ?? b.model ? { model: a.model ?? b.model } : {}),
+  ...((a.model ?? b.model) ? { model: a.model ?? b.model } : {}),
 });
 
 /**

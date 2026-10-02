@@ -66,8 +66,8 @@ jest.mock('@kbn/core-di-browser', () => {
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
               : id === 'alerting:v2:experimentalFeatures'
-              ? mockAlertingV2ExperimentalFeaturesEnabled
-              : undefined,
+                ? mockAlertingV2ExperimentalFeaturesEnabled
+                : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },
@@ -171,7 +171,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
     updatedBy: 'elastic',
     updatedAt: '2026-01-02T03:04:05.000Z',
     ...overrides,
-  } as RuleApiResponse);
+  }) as RuleApiResponse;
 
 const mockRules: RuleApiResponse[] = [
   createRule(),

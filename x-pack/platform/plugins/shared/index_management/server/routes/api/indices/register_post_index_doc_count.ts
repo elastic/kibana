@@ -46,10 +46,13 @@ export function registerPostIndexDocCountRoute({
         const indexNameIndex = result.columns.findIndex((col) => col.name === '_index');
         const countIndex = result.columns.findIndex((col) => col.name === 'count()');
 
-        const values = (result.values || []).reduce((col, vals) => {
-          col[vals[indexNameIndex] as string] = vals[countIndex] as number;
-          return col;
-        }, {} as Record<string, number>);
+        const values = (result.values || []).reduce(
+          (col, vals) => {
+            col[vals[indexNameIndex] as string] = vals[countIndex] as number;
+            return col;
+          },
+          {} as Record<string, number>
+        );
 
         // add zeros back in since they won't be present in the results
         indexNames.forEach((indexName) => {

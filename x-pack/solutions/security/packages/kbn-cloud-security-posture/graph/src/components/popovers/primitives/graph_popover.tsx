@@ -10,7 +10,8 @@ import type { CommonProps, EuiWrappingPopoverProps } from '@elastic/eui';
 import { EuiWrappingPopover } from '@elastic/eui';
 
 export interface GraphPopoverProps
-  extends PropsWithChildren,
+  extends
+    PropsWithChildren,
     CommonProps,
     Pick<
       EuiWrappingPopoverProps,

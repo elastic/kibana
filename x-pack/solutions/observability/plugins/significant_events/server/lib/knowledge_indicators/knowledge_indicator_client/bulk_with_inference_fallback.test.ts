@@ -25,7 +25,7 @@ const createLogger = (): Logger =>
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const okResponse = (): BulkResponse => ({
   errors: false,

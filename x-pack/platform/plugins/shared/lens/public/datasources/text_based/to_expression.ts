@@ -27,7 +27,7 @@ function getExpressionForLayer(
     // `interval: never` discriminant that doesn't apply to text-based columns.
     const entry: OriginalColumn = {
       id: col.columnId,
-      label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
+      label: col.customLabel ? (col.label ?? col.fieldName) : col.fieldName,
       variable: col.variable,
       ...(col.params?.dropPartials !== undefined ? { dropPartials: col.params.dropPartials } : {}),
       format: col.params?.format,

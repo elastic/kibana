@@ -168,9 +168,9 @@ export function SubChart({
                         `}
                         arrowProps={{
                           css: css`
-                            transform: ${currentAccordionState === 'open'
-                              ? 'rotate(-90deg)'
-                              : 'rotate(0deg)'} !important;
+                            transform: ${
+                              currentAccordionState === 'open' ? 'rotate(-90deg)' : 'rotate(0deg)'
+                            } !important;
                           `,
                         }}
                         id={`accordion_${frame.AddressOrLine}`}

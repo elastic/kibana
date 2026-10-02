@@ -106,8 +106,8 @@ const InvestigationRow = ({
           {status === 'running'
             ? ` · ${getRunningDurationText(duration)}`
             : completedAt
-            ? ` · ${duration}`
-            : null}
+              ? ` · ${duration}`
+              : null}
         </EuiText>
       }
       extraAction={

@@ -576,8 +576,8 @@ async function installPackageFromRegistry({
           force
             ? 'force flag'
             : allowOutdatedVersion
-            ? 'allow_outdated_version flag'
-            : `install type ${installType}`
+              ? 'allow_outdated_version flag'
+              : `install type ${installType}`
         }`
       );
     }

@@ -48,8 +48,8 @@ const PhaseTab = ({
   const className = hasErrors
     ? 'streamsIlmPhasesTab--hasErrors'
     : hasWarnings
-    ? 'streamsIlmPhasesTab--hasWarnings'
-    : undefined;
+      ? 'streamsIlmPhasesTab--hasWarnings'
+      : undefined;
 
   const prepend = hasErrors ? (
     <EuiIcon

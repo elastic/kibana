@@ -21,12 +21,12 @@ const createClient = (values: Record<string, boolean | number>) =>
   ({
     get: jest.fn((key: string, defaultValue: boolean | number) => values[key] ?? defaultValue),
     set: jest.fn().mockResolvedValue(undefined),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 const createHttp = () =>
   ({
     put: jest.fn().mockResolvedValue({}),
-  } as unknown as HttpSetup);
+  }) as unknown as HttpSetup;
 
 describe('useScheduledDiscoverySettings', () => {
   it('saves scheduled discovery settings through the Significant Events settings route', async () => {

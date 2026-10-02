@@ -33,7 +33,7 @@ jest.mock('../../../../agent_builder/components/new_agent_builder_attachment', (
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
-    UseAgentBuilderAttachmentParams
+    UseAgentBuilderAttachmentParams,
   ];
   return attachment;
 };

@@ -196,7 +196,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(
     Type<N>,
     Type<O>,
     Type<P>,
-    Type<Q>
+    Type<Q>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q>
 ): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q>;
@@ -217,7 +217,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(
     Type<M>,
     Type<N>,
     Type<O>,
-    Type<P>
+    Type<P>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P>
 ): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P>;
@@ -237,7 +237,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(
     Type<L>,
     Type<M>,
     Type<N>,
-    Type<O>
+    Type<O>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O>
 ): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O>;
@@ -256,7 +256,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N>(
     Type<K>,
     Type<L>,
     Type<M>,
-    Type<N>
+    Type<N>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N>
 ): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N>;
@@ -274,7 +274,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M>(
     Type<J>,
     Type<K>,
     Type<L>,
-    Type<M>
+    Type<M>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M>
 ): Type<A | B | C | D | E | F | G | H | I | J | K | L | M>;
@@ -291,7 +291,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L>(
     Type<I>,
     Type<J>,
     Type<K>,
-    Type<L>
+    Type<L>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L>
 ): Type<A | B | C | D | E | F | G | H | I | J | K | L>;
@@ -307,7 +307,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
     Type<H>,
     Type<I>,
     Type<J>,
-    Type<K>
+    Type<K>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
 ): Type<A | B | C | D | E | F | G | H | I | J | K>;
@@ -365,7 +365,7 @@ function discriminatedUnion<
   I extends PropsWithDiscriminator<Discriminator, Props>,
   J extends PropsWithDiscriminator<Discriminator, Props>,
   K extends PropsWithDiscriminator<Discriminator, Props>,
-  L extends PropsWithDiscriminator<Discriminator, Props>
+  L extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [
@@ -380,7 +380,7 @@ function discriminatedUnion<
     ObjectType<I>,
     ObjectType<J>,
     ObjectType<K>,
-    ObjectType<L>
+    ObjectType<L>,
   ],
   options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K | L>>
 ): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K | L>>;
@@ -396,7 +396,7 @@ function discriminatedUnion<
   H extends PropsWithDiscriminator<Discriminator, Props>,
   I extends PropsWithDiscriminator<Discriminator, Props>,
   J extends PropsWithDiscriminator<Discriminator, Props>,
-  K extends PropsWithDiscriminator<Discriminator, Props>
+  K extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [
@@ -410,7 +410,7 @@ function discriminatedUnion<
     ObjectType<H>,
     ObjectType<I>,
     ObjectType<J>,
-    ObjectType<K>
+    ObjectType<K>,
   ],
   options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K>>
 ): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K>>;
@@ -425,7 +425,7 @@ function discriminatedUnion<
   G extends PropsWithDiscriminator<Discriminator, Props>,
   H extends PropsWithDiscriminator<Discriminator, Props>,
   I extends PropsWithDiscriminator<Discriminator, Props>,
-  J extends PropsWithDiscriminator<Discriminator, Props>
+  J extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [
@@ -438,7 +438,7 @@ function discriminatedUnion<
     ObjectType<G>,
     ObjectType<H>,
     ObjectType<I>,
-    ObjectType<J>
+    ObjectType<J>,
   ],
   options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J>>
 ): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J>>;
@@ -452,7 +452,7 @@ function discriminatedUnion<
   F extends PropsWithDiscriminator<Discriminator, Props>,
   G extends PropsWithDiscriminator<Discriminator, Props>,
   H extends PropsWithDiscriminator<Discriminator, Props>,
-  I extends PropsWithDiscriminator<Discriminator, Props>
+  I extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [
@@ -464,7 +464,7 @@ function discriminatedUnion<
     ObjectType<F>,
     ObjectType<G>,
     ObjectType<H>,
-    ObjectType<I>
+    ObjectType<I>,
   ],
   options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I>>
 ): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I>>;
@@ -477,7 +477,7 @@ function discriminatedUnion<
   E extends PropsWithDiscriminator<Discriminator, Props>,
   F extends PropsWithDiscriminator<Discriminator, Props>,
   G extends PropsWithDiscriminator<Discriminator, Props>,
-  H extends PropsWithDiscriminator<Discriminator, Props>
+  H extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [
@@ -488,7 +488,7 @@ function discriminatedUnion<
     ObjectType<E>,
     ObjectType<F>,
     ObjectType<G>,
-    ObjectType<H>
+    ObjectType<H>,
   ],
   options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H>>
 ): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H>>;
@@ -500,7 +500,7 @@ function discriminatedUnion<
   D extends PropsWithDiscriminator<Discriminator, Props>,
   E extends PropsWithDiscriminator<Discriminator, Props>,
   F extends PropsWithDiscriminator<Discriminator, Props>,
-  G extends PropsWithDiscriminator<Discriminator, Props>
+  G extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [
@@ -510,7 +510,7 @@ function discriminatedUnion<
     ObjectType<D>,
     ObjectType<E>,
     ObjectType<F>,
-    ObjectType<G>
+    ObjectType<G>,
   ],
   options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G>>
 ): Type<ObjectResultUnionType<A | B | C | D | E | F | G>>;
@@ -521,7 +521,7 @@ function discriminatedUnion<
   C extends PropsWithDiscriminator<Discriminator, Props>,
   D extends PropsWithDiscriminator<Discriminator, Props>,
   E extends PropsWithDiscriminator<Discriminator, Props>,
-  F extends PropsWithDiscriminator<Discriminator, Props>
+  F extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
@@ -533,7 +533,7 @@ function discriminatedUnion<
   B extends PropsWithDiscriminator<Discriminator, Props>,
   C extends PropsWithDiscriminator<Discriminator, Props>,
   D extends PropsWithDiscriminator<Discriminator, Props>,
-  E extends PropsWithDiscriminator<Discriminator, Props>
+  E extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>],
@@ -544,7 +544,7 @@ function discriminatedUnion<
   A extends PropsWithDiscriminator<Discriminator, Props>,
   B extends PropsWithDiscriminator<Discriminator, Props>,
   C extends PropsWithDiscriminator<Discriminator, Props>,
-  D extends PropsWithDiscriminator<Discriminator, Props>
+  D extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>],
@@ -554,7 +554,7 @@ function discriminatedUnion<
   Discriminator extends string,
   A extends PropsWithDiscriminator<Discriminator, Props>,
   B extends PropsWithDiscriminator<Discriminator, Props>,
-  C extends PropsWithDiscriminator<Discriminator, Props>
+  C extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [ObjectType<A>, ObjectType<B>, ObjectType<C>],
@@ -563,7 +563,7 @@ function discriminatedUnion<
 function discriminatedUnion<
   Discriminator extends string,
   A extends PropsWithDiscriminator<Discriminator, Props>,
-  B extends PropsWithDiscriminator<Discriminator, Props>
+  B extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [ObjectType<A>, ObjectType<B>],
@@ -571,7 +571,7 @@ function discriminatedUnion<
 ): Type<ObjectResultUnionType<A | B>>;
 function discriminatedUnion<
   Discriminator extends string,
-  A extends PropsWithDiscriminator<Discriminator, Props>
+  A extends PropsWithDiscriminator<Discriminator, Props>,
 >(
   discriminator: Discriminator,
   types: [ObjectType<A>],
@@ -596,7 +596,7 @@ function allOf<
   H extends Props,
   I extends Props,
   J extends Props,
-  K extends Props
+  K extends Props,
 >(
   types: [
     ObjectType<A>,
@@ -609,7 +609,7 @@ function allOf<
     ObjectType<H>,
     ObjectType<I>,
     ObjectType<J>,
-    ObjectType<K>
+    ObjectType<K>,
   ],
   options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I & J & K>
 ): Type<ObjectResultType<A & B & C & D & E & F & G & H & I & J & K>>;
@@ -623,7 +623,7 @@ function allOf<
   G extends Props,
   H extends Props,
   I extends Props,
-  J extends Props
+  J extends Props,
 >(
   types: [
     ObjectType<A>,
@@ -635,7 +635,7 @@ function allOf<
     ObjectType<G>,
     ObjectType<H>,
     ObjectType<I>,
-    ObjectType<J>
+    ObjectType<J>,
   ],
   options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I & J>
 ): Type<ObjectResultType<A & B & C & D & E & F & G & H & I & J>>;
@@ -648,7 +648,7 @@ function allOf<
   F extends Props,
   G extends Props,
   H extends Props,
-  I extends Props
+  I extends Props,
 >(
   types: [
     ObjectType<A>,
@@ -659,7 +659,7 @@ function allOf<
     ObjectType<F>,
     ObjectType<G>,
     ObjectType<H>,
-    ObjectType<I>
+    ObjectType<I>,
   ],
   options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I>
 ): Type<ObjectResultType<A & B & C & D & E & F & G & H & I>>;
@@ -671,7 +671,7 @@ function allOf<
   E extends Props,
   F extends Props,
   G extends Props,
-  H extends Props
+  H extends Props,
 >(
   types: [
     ObjectType<A>,
@@ -681,7 +681,7 @@ function allOf<
     ObjectType<E>,
     ObjectType<F>,
     ObjectType<G>,
-    ObjectType<H>
+    ObjectType<H>,
   ],
   options?: UnionTypeOptions<A & B & C & D & E & F & G & H>
 ): Type<ObjectResultType<A & B & C & D & E & F & G & H>>;
@@ -692,7 +692,7 @@ function allOf<
   D extends Props,
   E extends Props,
   F extends Props,
-  G extends Props
+  G extends Props,
 >(
   types: [
     ObjectType<A>,
@@ -701,7 +701,7 @@ function allOf<
     ObjectType<D>,
     ObjectType<E>,
     ObjectType<F>,
-    ObjectType<G>
+    ObjectType<G>,
   ],
   options?: UnionTypeOptions<A & B & C & D & E & F & G>
 ): Type<ObjectResultType<A & B & C & D & E & F & G>>;
@@ -711,7 +711,7 @@ function allOf<
   C extends Props,
   D extends Props,
   E extends Props,
-  F extends Props
+  F extends Props,
 >(
   types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
   options?: UnionTypeOptions<A & B & C & D & E & F>

@@ -93,10 +93,10 @@ export const classifyArtifactError = (error: unknown): ArtifactErrorType => {
       'statusCode' in error
         ? (error as { statusCode: number }).statusCode
         : 'body' in error
-        ? (error as { body?: { statusCode?: number } }).body?.statusCode
-        : 'output' in error
-        ? (error as { output?: { statusCode?: number } }).output?.statusCode
-        : undefined;
+          ? (error as { body?: { statusCode?: number } }).body?.statusCode
+          : 'output' in error
+            ? (error as { output?: { statusCode?: number } }).output?.statusCode
+            : undefined;
 
     if (statusCode === 403) {
       return 'not_authorized';

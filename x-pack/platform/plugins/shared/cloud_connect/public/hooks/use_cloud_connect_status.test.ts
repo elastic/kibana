@@ -14,7 +14,7 @@ describe('useCloudConnectStatus', () => {
   const createMockHttp = (mockGet: jest.Mock): HttpSetup =>
     ({
       get: mockGet,
-    } as unknown as HttpSetup);
+    }) as unknown as HttpSetup;
 
   const createMockClusterDetails = (overrides: Partial<ClusterDetails> = {}): ClusterDetails => ({
     id: 'cluster-123',

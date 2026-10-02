@@ -49,17 +49,17 @@ jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accord
       {isLoading
         ? 'Initializing validation...'
         : (validationErrors ?? []).length === 0
-        ? 'No validation errors'
-        : (validationErrors ?? []).map((error) => (
-            <button
-              key={error.id}
-              type="button"
-              data-test-subj={`workflowYamlValidationError-${error.id}`}
-              onClick={() => onErrorClick?.(error)}
-            >
-              {error.message}
-            </button>
-          ))}
+          ? 'No validation errors'
+          : (validationErrors ?? []).map((error) => (
+              <button
+                key={error.id}
+                type="button"
+                data-test-subj={`workflowYamlValidationError-${error.id}`}
+                onClick={() => onErrorClick?.(error)}
+              >
+                {error.message}
+              </button>
+            ))}
       {extraAction}
     </div>
   ),

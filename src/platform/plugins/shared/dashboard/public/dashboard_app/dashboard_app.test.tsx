@@ -295,7 +295,7 @@ describe('Dashboard App', () => {
                 serializedState: {},
               },
             ],
-          } as unknown as EmbeddableStateTransfer)
+          }) as unknown as EmbeddableStateTransfer
       );
       render(
         <DashboardApp

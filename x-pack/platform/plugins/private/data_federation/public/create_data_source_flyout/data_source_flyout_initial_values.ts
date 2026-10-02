@@ -21,7 +21,7 @@ export const dataSourceFromListItem = (item: DataSource): DataSourceWithSecrets 
     ...item,
     description: item.description ?? '',
     settings: asSettingsRecord(item.settings),
-  } as DataSourceWithSecrets);
+  }) as DataSourceWithSecrets;
 
 const asSettingsRecord = (
   settings: DataSourceWithSecrets['settings'] | undefined | null

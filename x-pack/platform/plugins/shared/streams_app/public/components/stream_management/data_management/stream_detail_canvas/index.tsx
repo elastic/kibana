@@ -250,19 +250,17 @@ function StreamsCanvasInner() {
       ...unconfiguredSourceNodes,
       ...configuredDestinationNodes,
       ...unconfiguredDestinationNodes,
-      ...nextGraph.nodes.map(
-        (node): ClassicCanvasNode =>
-          node.type === DESTINATION_NODE_TYPE
-            ? {
-                ...node,
-                deletable: false,
-                data: {
-                  ...node.data,
-                  onProcessingClick: (streamName: string) =>
-                    openFlyoutTab(streamName, 'processing'),
-                },
-              }
-            : { ...node, deletable: false }
+      ...nextGraph.nodes.map((node): ClassicCanvasNode =>
+        node.type === DESTINATION_NODE_TYPE
+          ? {
+              ...node,
+              deletable: false,
+              data: {
+                ...node.data,
+                onProcessingClick: (streamName: string) => openFlyoutTab(streamName, 'processing'),
+              },
+            }
+          : { ...node, deletable: false }
       ),
     ];
     return {

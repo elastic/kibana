@@ -14,11 +14,14 @@ import type { Streams } from '../models/streams';
 export const getInheritedSettings = (
   ancestors: Streams.WiredStream.Definition[]
 ): WiredIngestStreamEffectiveSettings => {
-  return ancestors.reduce((acc, def) => {
-    Object.entries(def.ingest.settings).forEach(([key, value]) => {
-      acc[key] = { ...value, from: def.name };
-    });
+  return ancestors.reduce(
+    (acc, def) => {
+      Object.entries(def.ingest.settings).forEach(([key, value]) => {
+        acc[key] = { ...value, from: def.name };
+      });
 
-    return acc;
-  }, {} as Record<string, WiredIngestStreamEffectiveSettings[keyof IngestStreamSettings]>);
+      return acc;
+    },
+    {} as Record<string, WiredIngestStreamEffectiveSettings[keyof IngestStreamSettings]>
+  );
 };

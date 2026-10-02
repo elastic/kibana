@@ -73,8 +73,8 @@ type FromToolSchemaString<TToolSchemaString extends ToolSchemaTypeString> =
   TToolSchemaString extends { const: string }
     ? TToolSchemaString['const']
     : TToolSchemaString extends { enum: string[] } | { enum: readonly string[] }
-    ? ValuesType<TToolSchemaString['enum']>
-    : string;
+      ? ValuesType<TToolSchemaString['enum']>
+      : string;
 
 /**
  * Defines the schema for a {@link ToolDefinition}
@@ -88,11 +88,11 @@ export type FromToolSchema<TToolSchema extends ToolSchemaType> =
   TToolSchema extends ToolSchemaTypeObject
     ? FromToolSchemaObject<TToolSchema>
     : TToolSchema extends ToolSchemaTypeArray
-    ? FromToolSchemaArray<TToolSchema>
-    : TToolSchema extends ToolSchemaTypeBoolean
-    ? boolean
-    : TToolSchema extends ToolSchemaTypeNumber
-    ? number
-    : TToolSchema extends ToolSchemaTypeString
-    ? FromToolSchemaString<TToolSchema>
-    : never;
+      ? FromToolSchemaArray<TToolSchema>
+      : TToolSchema extends ToolSchemaTypeBoolean
+        ? boolean
+        : TToolSchema extends ToolSchemaTypeNumber
+          ? number
+          : TToolSchema extends ToolSchemaTypeString
+            ? FromToolSchemaString<TToolSchema>
+            : never;

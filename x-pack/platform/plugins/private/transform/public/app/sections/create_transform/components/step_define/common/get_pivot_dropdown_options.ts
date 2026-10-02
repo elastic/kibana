@@ -80,14 +80,12 @@ export function getPivotDropdownOptions(
         // even when the TS interface is a non-optional `string`.
         typeof field.type !== 'undefined'
     )
-    .map(
-      (field): Field => ({
-        name: field.name,
-        type: isCounterTimeSeriesMetric(field)
-          ? TIME_SERIES_METRIC_TYPES.COUNTER
-          : (field.type as KBN_FIELD_TYPES),
-      })
-    );
+    .map((field): Field => ({
+      name: field.name,
+      type: isCounterTimeSeriesMetric(field)
+        ? TIME_SERIES_METRIC_TYPES.COUNTER
+        : (field.type as KBN_FIELD_TYPES),
+    }));
 
   // Support for runtime_mappings that are defined by queries
   let runtimeFields: Field[] = [];

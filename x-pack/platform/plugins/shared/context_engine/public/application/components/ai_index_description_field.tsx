@@ -47,7 +47,7 @@ export const AiIndexDescriptionField = ({
     fullWidth
     isInvalid={error !== undefined}
     error={error}
-    helpText={error === undefined ? warning ?? descriptionHelpText : undefined}
+    helpText={error === undefined ? (warning ?? descriptionHelpText) : undefined}
   >
     <EuiTextArea
       fullWidth

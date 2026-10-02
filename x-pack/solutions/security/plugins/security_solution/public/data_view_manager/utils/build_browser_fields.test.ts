@@ -14,19 +14,22 @@ const createDataView = (fields: Array<Partial<FieldSpec>>, id = 'test-id'): Data
   const spec: DataViewSpec = {
     id,
     title: 'test-title',
-    fields: fields.reduce((acc, f) => {
-      if (f.name !== undefined) {
-        acc[f.name] = {
-          name: f.name,
-          type: f.type ?? 'string',
-          esTypes: ['keyword'],
-          aggregatable: true,
-          searchable: true,
-          scripted: false,
-        };
-      }
-      return acc;
-    }, {} as Record<string, FieldSpec>),
+    fields: fields.reduce(
+      (acc, f) => {
+        if (f.name !== undefined) {
+          acc[f.name] = {
+            name: f.name,
+            type: f.type ?? 'string',
+            esTypes: ['keyword'],
+            aggregatable: true,
+            searchable: true,
+            scripted: false,
+          };
+        }
+        return acc;
+      },
+      {} as Record<string, FieldSpec>
+    ),
   };
   // @ts-expect-error: DataView constructor expects more, but this is enough for our test
   return new DataView({ spec, fieldFormats: { getDefaultInstance: () => ({}) } });

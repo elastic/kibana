@@ -78,7 +78,7 @@ export interface PartFactory<
   TPresetMap extends object = Record<string, unknown>,
   TOutput = ReactNode,
   TContext = void,
-  TSkeleton = never
+  TSkeleton = never,
 > {
   /**
    * Create a preset component. The props type is inferred from the
@@ -235,7 +235,7 @@ export interface AssemblyFactory<TName extends string = string> {
     TPresetMap extends object = Record<string, unknown>,
     TOutput = ReactNode,
     TContext = void,
-    TSkeleton = never
+    TSkeleton = never,
   >(partDefinition: {
     name: string;
   }) => PartFactory<TPresetMap, TOutput, TContext, TSkeleton>;
@@ -326,7 +326,7 @@ export const defineAssembly = <const TName extends string>(config: {
     TPresetMap extends object = Record<string, unknown>,
     TOutput = ReactNode,
     TContext = void,
-    TSkeleton = never
+    TSkeleton = never,
   >(partDefinition: {
     name: string;
   }): PartFactory<TPresetMap, TOutput, TContext, TSkeleton> => {
