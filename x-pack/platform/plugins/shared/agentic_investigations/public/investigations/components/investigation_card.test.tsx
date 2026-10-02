@@ -15,6 +15,7 @@ import { InvestigationCard } from './investigation_card';
 const investigation = (overrides: Partial<InvestigationSummary> = {}): InvestigationSummary => ({
   id: 'conv-1',
   title: 'Checkout latency spike',
+  title_pending: false,
   created_at: '2026-07-28T14:00:00.000Z',
   updated_at: '2026-07-28T14:00:00.000Z',
   agent_id: 'nightshift.investigation',
@@ -89,6 +90,40 @@ describe('InvestigationCard', () => {
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSubject')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [
+      'the first subject',
+      investigation({ title: 'New conversation', title_pending: true }),
+      'Checkout latency',
+    ],
+    [
+      "a Slack thread's question rather than its channel",
+      investigation({
+        title: 'New conversation',
+        title_pending: true,
+        subjects: [
+          {
+            type: 'slack_thread',
+            id: 'team:T1/channel:C1/thread:1.0',
+            summary: 'why is checkout slow?',
+            slack: { channel: 'C1', thread_ts: '1.0' },
+            created_at: '2026-07-28T14:00:00.000Z',
+          },
+        ],
+      }),
+      'why is checkout slow?',
+    ],
+    [
+      'a generic title without a subject',
+      investigation({ title: 'New conversation', title_pending: true, subjects: [] }),
+      'New investigation',
+    ],
+  ])('names an investigation Agent Builder has not titled yet after %s', (_, item, expected) => {
+    renderCard({ investigation: item });
+
+    expect(screen.getByTestId('investigationCardTitle')).toHaveTextContent(expected);
   });
 
   it('calls onClick with the investigation on click and on Enter', () => {

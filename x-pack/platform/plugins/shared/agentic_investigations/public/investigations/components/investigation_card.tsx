@@ -18,7 +18,8 @@ import {
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { InvestigationSubjectResponse, InvestigationSummary } from '../../../common';
 import { SUBJECT_ICONS } from '../../subjects/attachments/subject_view';
-import { SUBJECT_TYPE_LABELS, slackChannelLabel } from '../../subjects/attachments/translations';
+import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
+import { getInvestigationDisplayTitle, getSubjectLabel } from './investigation_display_title';
 import {
   CLOSED_LABEL,
   INVESTIGATION_SEVERITY_COLORS,
@@ -38,16 +39,6 @@ export interface InvestigationCardProps {
   isSelected?: boolean;
 }
 
-const subjectLabel = (subject: InvestigationSubjectResponse): string => {
-  if (subject.type === 'alert') {
-    return subject.snapshot?.rule_name ?? subject.summary ?? subject.id;
-  }
-  if (subject.type === 'slack_thread' && subject.slack) {
-    return slackChannelLabel(subject.slack.channel);
-  }
-  return subject.summary ?? SUBJECT_TYPE_LABELS[subject.type];
-};
-
 const SubjectChip = ({ subjects }: { subjects: InvestigationSubjectResponse[] }) => {
   const [first] = subjects;
   if (!first) {
@@ -61,7 +52,7 @@ const SubjectChip = ({ subjects }: { subjects: InvestigationSubjectResponse[] })
         title={SUBJECT_TYPE_LABELS[first.type]}
         data-test-subj="investigationCardSubject"
       >
-        {subjectLabel(first)}
+        {getSubjectLabel(first)}
         {subjects.length > 1 ? ` ${moreSubjectsLabel(subjects.length - 1)}` : ''}
       </EuiBadge>
     </EuiFlexItem>
@@ -106,7 +97,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   isSelected = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { title, metadata, in_progress: inProgress, created_at: createdAt } = investigation;
+  const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
+  const title = getInvestigationDisplayTitle(investigation);
   const { severity, summary, status } = metadata;
   const pending = investigation.pending_proposal_count ?? 0;
 

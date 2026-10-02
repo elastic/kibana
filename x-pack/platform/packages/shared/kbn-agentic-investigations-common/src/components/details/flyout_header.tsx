@@ -43,6 +43,11 @@ export interface ConversationDetailsFlyoutHeaderProps {
    * When present, it replaces the severity badge read from the conversation.
    */
   liveStateNode?: React.ReactNode;
+  /**
+   * Optional pre-rendered title from the consuming plugin, for example one that names an
+   * investigation Agent Builder has not titled yet. Falls back to the investigation's title.
+   */
+  titleNode?: React.ReactNode;
 }
 
 /**
@@ -54,6 +59,7 @@ export const ConversationDetailsFlyoutHeader = ({
   assigneesNode,
   statusNode,
   liveStateNode,
+  titleNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
   const { title, createdAt, severity } = investigation;
 
@@ -62,9 +68,7 @@ export const ConversationDetailsFlyoutHeader = ({
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h2>
-              <EuiTextTruncate text={title} />
-            </h2>
+            <h2>{titleNode ?? <EuiTextTruncate text={title} />}</h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
