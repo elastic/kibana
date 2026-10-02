@@ -23,7 +23,7 @@ export const DataRetention = ({ metadata }: DataRetentionProps) => {
     return (
       <EuiBadge
         color="success"
-        iconType="check"
+        iconType="checkCircleFill"
         iconSide="left"
         data-test-subj="modelDetailFlyoutDataRetentionBadge"
       >
