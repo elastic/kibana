@@ -32,10 +32,13 @@ export const addConversationEventStepDefinition = ({
         const client = await getConversationClient(request);
         const input = context.input;
 
-        const [event] = await client.addCustomEvents({
-          id: input.conversation_id,
-          events: [{ type: input.type, data: input.data ?? {} }],
-        });
+        const [event] = await client.addCustomEvents(
+          {
+            id: input.conversation_id,
+            events: [{ type: input.type, data: input.data ?? {} }],
+          },
+          { source: 'workflow' }
+        );
 
         return {
           output: {

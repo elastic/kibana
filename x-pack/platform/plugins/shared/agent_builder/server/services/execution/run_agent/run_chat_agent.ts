@@ -293,7 +293,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const updateConversationMetadata =
     conversationId && conversation?.template_id
       ? (updates: Record<string, MetadataFieldValue>) =>
-          conversationClient.patchMetadata(conversationId, updates)
+          conversationClient.patchMetadata(conversationId, updates, { source: 'execution' })
       : undefined;
 
   const conversationTemplate = conversation?.template_id

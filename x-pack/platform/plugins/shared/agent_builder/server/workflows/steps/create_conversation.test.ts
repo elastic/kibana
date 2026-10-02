@@ -65,7 +65,8 @@ describe('createConversationStepDefinition', () => {
       expect.objectContaining({
         agent_id: 'elastic-default-agent',
         title: 'New conversation',
-      })
+      }),
+      { source: 'workflow' }
     );
     expect(result).toEqual({
       output: {
@@ -99,7 +100,8 @@ describe('createConversationStepDefinition', () => {
       expect.objectContaining({
         template_id: 'incident-response',
         metadata: { severity: 'high', services: ['checkout'] },
-      })
+      }),
+      { source: 'workflow' }
     );
     expect(result).toEqual({
       output: {

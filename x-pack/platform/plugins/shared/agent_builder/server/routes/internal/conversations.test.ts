@@ -151,7 +151,7 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
       kibanaResponseFactory
     );
 
-    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing');
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1' });
   });
@@ -248,7 +248,11 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
       kibanaResponseFactory
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { severity: 'high' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { severity: 'high' },
+      { source: 'http_api' }
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', metadata: { severity: 'high' } });
   });

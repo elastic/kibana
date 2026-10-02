@@ -63,7 +63,7 @@ export function registerInternalConversationRoutes({
       const client = await conversationsService.getScopedClient({ request });
       const updatedConversation = await client.update(
         { id: conversationId, title },
-        { access: 'rename', retryOnConflict: true }
+        { access: 'rename', retryOnConflict: true, source: 'http_api' }
       );
 
       return response.ok<RenameConversationResponse>({
@@ -98,7 +98,9 @@ export function registerInternalConversationRoutes({
         const { template_id: templateId } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
-        const updatedConversation = await client.applyTemplate(conversationId, templateId);
+        const updatedConversation = await client.applyTemplate(conversationId, templateId, {
+          source: 'http_api',
+        });
 
         return response.ok<ApplyTemplateResponse>({
           body: { id: updatedConversation.id },
@@ -148,7 +150,10 @@ export function registerInternalConversationRoutes({
         const client = await conversationsService.getScopedClient({ request });
         const { conversation: updatedConversation } = await client.patchMetadata(
           conversationId,
-          metadata
+          metadata,
+          {
+            source: 'http_api',
+          }
         );
 
         return response.ok<PatchConversationMetadataResponse>({

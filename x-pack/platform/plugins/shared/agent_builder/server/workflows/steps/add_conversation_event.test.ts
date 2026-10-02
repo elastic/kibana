@@ -65,10 +65,13 @@ describe('addConversationEventStepDefinition', () => {
 
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
-    expect(conv.addCustomEvents).toHaveBeenCalledWith({
-      id: conversationId,
-      events: [{ type: 'text_note', data: { text: 'Escalated by workflow' } }],
-    });
+    expect(conv.addCustomEvents).toHaveBeenCalledWith(
+      {
+        id: conversationId,
+        events: [{ type: 'text_note', data: { text: 'Escalated by workflow' } }],
+      },
+      { source: 'workflow' }
+    );
     expect(result).toEqual({
       output: {
         conversation_id: conversationId,
@@ -88,10 +91,13 @@ describe('addConversationEventStepDefinition', () => {
       createStepHandlerContext({ input: { conversation_id: conversationId, type: 'text_note' } })
     );
 
-    expect(conv.addCustomEvents).toHaveBeenCalledWith({
-      id: conversationId,
-      events: [{ type: 'text_note', data: {} }],
-    });
+    expect(conv.addCustomEvents).toHaveBeenCalledWith(
+      {
+        id: conversationId,
+        events: [{ type: 'text_note', data: {} }],
+      },
+      { source: 'workflow' }
+    );
   });
 
   it('returns an error without writing when experimental features are disabled', async () => {

@@ -109,7 +109,7 @@ export const createAttachmentPublicClient = ({
         events,
         attachments: { snapshot: conversation.attachments ?? [], produced: stateManager.getAll() },
       },
-      { access: 'converse' }
+      { access: 'converse', source }
     );
   };
 

@@ -450,7 +450,7 @@ export class AgentBuilderPlugin
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
           const agentRegistry = await agents.getRegistry({ request });
-          return createConversationPublicClient({ client, agentRegistry });
+          return createConversationPublicClient({ client, agentRegistry, source: 'server_api' });
         },
       },
       attachments: {
