@@ -141,7 +141,7 @@ export const conversationUpdatedTriggerCommonDefinition: CommonTriggerDefinition
       'xpack.agentBuilder.workflowTriggers.conversationUpdated.documentation.details',
       {
         defaultMessage:
-          'Emitted once per successful conversation write that changes something; writes that change nothing emit nothing. The payload describes the write but never carries values: read the conversation if you need them. In trigger conditions, an array field matches when any of its elements matches (event.eventTypes: "user_message"), wildcards work on strings (event.eventTypes: attachment_*), and a wildcard on an absent field is false (event.executionId: * matches only writes that persisted an execution). To coalesce bursts, set a concurrency key that includes the workflow id, for example "workflow.id:event.conversationId" rendered as a Liquid template, with strategy queue, max 1 and queue-size 1. To avoid reacting to your own writes, match the changes you care about rather than excluding the field you write.',
+          'Emitted once per successful conversation write that changes something; writes that change nothing emit nothing. The payload describes the write but never carries values: read the conversation if you need them. In trigger conditions, an array field matches when any of its elements matches (event.eventTypes: "user_message"), wildcards work on strings (event.eventTypes: attachment_*), and a wildcard on an absent field is false (event.executionId: * matches only writes that persisted an execution). To coalesce bursts, set a concurrency key that includes both the workflow id and the conversation id (see the first example for the exact key), with strategy queue, max 1 and queue-size 1. To avoid reacting to your own writes, match the changes you care about rather than excluding the field you write.',
       }
     ),
     examples: [
@@ -175,6 +175,7 @@ steps:
       message: 'Conversation {{ event.conversationId }} changed: {{ event.changeKinds }}'
 \`\`\``,
       `## React to a new dashboard attachment
+The payload arrays are flat and cannot tie an attachment type to an operation, so this matches any write that added an attachment and touched a dashboard (for example, adding a text attachment while updating a dashboard).
 \`\`\`yaml
 version: '1'
 name: React to dashboards

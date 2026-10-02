@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ConversationUpdatedTriggerId } from '@kbn/agent-builder-common';
@@ -21,13 +22,17 @@ import {
 const VERSION_HEADERS = { 'elastic-api-version': ELASTIC_API_VERSION };
 const INTERNAL_WORKFLOWS_VERSION_HEADERS = { 'elastic-api-version': '1' };
 const WORKFLOW_ID = `conversation-updated-trigger-${Date.now()}`;
+// Client-supplied ids let the workflow ignore other suites' conversations on a shared deployment.
+// Both ids are listed so the escalation is still excluded by the template condition alone.
+const INVESTIGATION_ID = randomUUID();
+const ESCALATION_ID = randomUUID();
 
 const WORKFLOW_YAML = `name: ai.conversation.updated e2e
 enabled: true
 triggers:
   - type: ${ConversationUpdatedTriggerId}
     on:
-      condition: 'event.templateId: "investigation" and (event.eventTypes: "user_message" or event.changedFields: "severity")'
+      condition: 'event.conversationId: ("${INVESTIGATION_ID}" or "${ESCALATION_ID}") and event.templateId: "investigation" and (event.eventTypes: "user_message" or event.changedFields: "severity")'
 steps:
   - name: log
     type: console
@@ -39,14 +44,18 @@ interface TriggeredExecution {
   context?: { event?: { conversationId?: string; source?: string; changeKinds?: string[] } };
 }
 
-const createConversation = async (client: AuthedApiClient, templateId: string) => {
+const createConversation = async (
+  client: AuthedApiClient,
+  { conversationId, templateId }: { conversationId: string; templateId: string }
+) => {
   const res = await client.post(`${API_AGENT_BUILDER}/conversations`, {
     headers: VERSION_HEADERS,
-    body: { template_id: templateId },
+    body: { conversation_id: conversationId, template_id: templateId },
     responseType: 'json',
   });
   expect(res).toHaveStatusCode(200);
-  return (res.body as CreateConversationResponse).id;
+  expect((res.body as CreateConversationResponse).id).toBe(conversationId);
+  return conversationId;
 };
 
 const postUserMessage = async (client: AuthedApiClient, conversationId: string) => {
@@ -187,9 +196,15 @@ apiTest.describe(
         apiTest.setTimeout(180_000);
         const since = new Date().toISOString();
 
-        const investigationId = await createConversation(asAdmin, 'investigation');
+        const investigationId = await createConversation(asAdmin, {
+          conversationId: INVESTIGATION_ID,
+          templateId: 'investigation',
+        });
         createdConversationIds.push(investigationId);
-        const escalationId = await createConversation(asAdmin, 'escalation');
+        const escalationId = await createConversation(asAdmin, {
+          conversationId: ESCALATION_ID,
+          templateId: 'escalation',
+        });
         createdConversationIds.push(escalationId);
 
         await apiTest.step('a user message on the investigation triggers one run', async () => {
