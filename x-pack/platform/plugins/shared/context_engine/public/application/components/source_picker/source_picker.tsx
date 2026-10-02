@@ -19,6 +19,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useHasRendered } from '../../hooks/use_has_rendered';
 import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
@@ -43,9 +44,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     () => selectedSources.some((source) => source.type === 'connector'),
     [selectedSources]
   );
+  const canReadConnectors = useCanReadConnectors();
 
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
-    enabled: hasSelectedConnectorSources,
+    enabled: hasSelectedConnectorSources && canReadConnectors,
   });
 
   const selectedEsqlCount = useMemo(

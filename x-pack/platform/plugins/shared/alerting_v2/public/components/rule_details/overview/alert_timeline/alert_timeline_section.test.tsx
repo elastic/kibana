@@ -148,7 +148,7 @@ describe('AlertTimelineSection', () => {
     jest.useRealTimers();
   });
 
-  it('episodes link params resolve to management episodes URL with filters', async () => {
+  it('episodes link params resolve to management alerts URL with filters', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
@@ -157,7 +157,7 @@ describe('AlertTimelineSection', () => {
     const [params] = jest.mocked(episodesLocators.useUrl).mock.calls[0];
     const location = await AlertingV2EpisodesLocatorDefinition.getLocation(params);
     expect(location.app).toBe('management');
-    expect(location.path).toMatch(/^\/alertingV2\/episodes\?_a=/);
+    expect(location.path).toMatch(/^\/alertingV2\/alerts\?_a=/);
     jest.useRealTimers();
   });
 
