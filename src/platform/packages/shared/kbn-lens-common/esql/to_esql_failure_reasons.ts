@@ -21,10 +21,15 @@ export type EsqlConversionFailureReason =
   | 'function_not_supported'
   | 'drop_partials_not_supported'
   | 'include_empty_rows_not_supported'
-  | 'terms_not_supported'
+  | 'terms_date_histogram_not_supported'
+  | 'terms_multi_level_not_supported'
+  | 'terms_multiple_fields_not_supported'
+  | 'terms_accuracy_mode_not_supported'
+  | 'terms_include_exclude_not_supported'
   | 'terms_other_bucket_not_supported'
   | 'terms_order_by_not_supported'
-  | 'terms_multi_level_not_supported'
+  | 'terms_custom_order_by_not_supported'
+  | 'terms_rank_metric_not_supported'
   | 'saved_to_library_not_supported'
   | 'query_annotations_not_supported'
   | 'reference_line_not_supported'
@@ -32,6 +37,33 @@ export type EsqlConversionFailureReason =
   | 'unsupported_settings'
   | 'unknown';
 
+/** Top values reasons whose tooltip body is a sentence under a shared title. */
+const TERMS_FAILURE_REASONS = new Set<EsqlConversionFailureReason>([
+  'terms_date_histogram_not_supported',
+  'terms_multi_level_not_supported',
+  'terms_multiple_fields_not_supported',
+  'terms_accuracy_mode_not_supported',
+  'terms_include_exclude_not_supported',
+  'terms_other_bucket_not_supported',
+  'terms_order_by_not_supported',
+  'terms_custom_order_by_not_supported',
+  'terms_rank_metric_not_supported',
+]);
+
+export const isTermsEsqlConversionFailureReason = (reason: EsqlConversionFailureReason): boolean =>
+  TERMS_FAILURE_REASONS.has(reason);
+
+export const esqlConversionFailureTitle = i18n.translate(
+  'xpack.lens.config.cannotConvertToEsqlTitle',
+  {
+    defaultMessage: 'Cannot convert to ES|QL',
+  }
+);
+
+/**
+ * Full tooltip strings for non-Top-values reasons, and sentence-only bodies for
+ * Top values reasons (paired with {@link esqlConversionFailureTitle}).
+ */
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
     defaultMessage:
@@ -76,28 +108,62 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
         'Cannot convert to ES|QL: "Include empty rows" will be supported in an upcoming update.',
     }
   ),
-  terms_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTermsTooltip', {
-    defaultMessage:
-      'Cannot convert to ES|QL: Top values (terms) aggregation will be supported in an upcoming update.',
-  }),
-  terms_other_bucket_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
-    {
-      defaultMessage: 'Cannot convert to ES|QL: "Group other values as Other" is not supported.',
-    }
-  ),
-  terms_order_by_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTermsOrderByTooltip',
+  terms_date_histogram_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsDateHistogramTooltip',
     {
       defaultMessage:
-        'Cannot convert to ES|QL: This Top values ranking option is not supported for conversion.',
+        'Top values combined with a date histogram will be supported in an upcoming update.',
     }
   ),
   terms_multi_level_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlTermsMultiLevelTooltip',
     {
+      defaultMessage: 'More than two Top values dimensions is not supported.',
+    }
+  ),
+  terms_multiple_fields_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsMultipleFieldsTooltip',
+    {
+      defaultMessage: 'Top values with more than one field is not supported.',
+    }
+  ),
+  terms_accuracy_mode_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsAccuracyModeTooltip',
+    {
+      defaultMessage: '"Enable accuracy mode" for Top values has no ES|QL equivalent.',
+    }
+  ),
+  terms_include_exclude_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsIncludeExcludeTooltip',
+    {
       defaultMessage:
-        'Cannot convert to ES|QL: More than two Top values dimensions will be supported in an upcoming update.',
+        'Top values filtered by "Include values" or "Exclude values" is not supported.',
+    }
+  ),
+  terms_other_bucket_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
+    {
+      defaultMessage:
+        'Grouping remaining values as "Other" will be supported in an upcoming update.',
+    }
+  ),
+  terms_order_by_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsOrderByTooltip',
+    {
+      defaultMessage: 'Ranking Top values by rarity or significance has no ES|QL equivalent.',
+    }
+  ),
+  terms_custom_order_by_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsCustomOrderByTooltip',
+    {
+      defaultMessage:
+        'Ranking Top values by a custom metric that is not in the chart is not supported.',
+    }
+  ),
+  terms_rank_metric_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsRankMetricTooltip',
+    {
+      defaultMessage: 'The metric used to rank Top values cannot be converted.',
     }
   ),
   saved_to_library_not_supported: i18n.translate(
@@ -138,12 +204,55 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
   }),
 };
 
-export const getFailureTooltip = (reason: EsqlConversionFailureReason | undefined): string => {
-  if (!reason) {
-    return esqlConversionFailureReasonMessages.unknown;
+export interface EsqlFailureTooltip {
+  title?: string;
+  messages: string[];
+}
+
+export interface GetFailureTooltipOptions {
+  showAllReasons?: boolean;
+}
+
+const resolveMessage = (reason: EsqlConversionFailureReason): string =>
+  esqlConversionFailureReasonMessages[reason] ??
+  esqlConversionFailureReasonMessages.unsupported_settings;
+
+/**
+ * Builds tooltip content for a conversion failure. Top values reasons use a shared
+ * title plus sentence-only bodies; other reasons keep a single full message.
+ * Pass `showAllReasons` to list every blocker; otherwise only the first is shown.
+ */
+export const getFailureTooltip = (
+  reasons: EsqlConversionFailureReason[] | undefined,
+  { showAllReasons = false }: GetFailureTooltipOptions = {}
+): EsqlFailureTooltip => {
+  const allReasons =
+    reasons && reasons.length > 0 ? reasons : (['unknown'] as EsqlConversionFailureReason[]);
+  const reasonList = showAllReasons ? allReasons : [allReasons[0]];
+
+  if (reasonList.some(isTermsEsqlConversionFailureReason)) {
+    return {
+      title: esqlConversionFailureTitle,
+      messages: reasonList.map(resolveMessage),
+    };
   }
-  return (
-    esqlConversionFailureReasonMessages[reason] ??
-    esqlConversionFailureReasonMessages.unsupported_settings
-  );
+
+  return {
+    messages: [resolveMessage(reasonList[0])],
+  };
+};
+
+/** Plain-text form of {@link getFailureTooltip} for aria-labels and string-only call sites. */
+export const getFailureTooltipPlainText = (
+  reasons: EsqlConversionFailureReason[] | undefined,
+  options?: GetFailureTooltipOptions
+): string => {
+  const { title, messages } = getFailureTooltip(reasons, options);
+  if (!title) {
+    return messages[0];
+  }
+  if (messages.length === 1) {
+    return `${title}: ${messages[0]}`;
+  }
+  return `${title}: ${messages.join(' ')}`;
 };

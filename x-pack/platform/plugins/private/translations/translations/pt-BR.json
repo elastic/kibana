@@ -28656,7 +28656,6 @@
     "xpack.lens.config.cannotConvertToEsqlOperationTooltip": "Não é possível converter para ES|QL: o suporte para uma ou mais funções utilizadas estará disponível em uma atualização futura.",
     "xpack.lens.config.cannotConvertToEsqlReducedTimeRangeTooltip": "Não é possível converter para ES|QL: intervalo de tempo reduzido será aceito em uma atualização futura.",
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip": "Não é possível converter para ES|QL: campos de tempo de execução serão aceitos em uma atualização futura.",
-    "xpack.lens.config.cannotConvertToEsqlTermsTooltip": "Não é possível converter para ES|QL: a agregação de valores principais (termos) será suportada em uma atualização futura.",
     "xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip": "Não é possível converter para ES|QL: deslocamento de tempo será aceito em uma atualização futura.",
     "xpack.lens.config.cannotConvertToEsqlTrendlineTooltip": "Não é possível converter para ES|QL: a camada de linha de tendência usa uma configuração que ainda não é compatível com a conversão.",
     "xpack.lens.config.cannotConvertToEsqlUnknownTooltip": "Não é possível converter para ES|QL: esta visualização terá suporte em uma atualização futura.",

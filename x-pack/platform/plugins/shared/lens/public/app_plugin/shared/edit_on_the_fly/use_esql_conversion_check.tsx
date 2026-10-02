@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { partition } from 'lodash';
 
@@ -25,7 +26,7 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   generateEsqlQuery,
   isEsqlQuerySuccess,
-  esqlConversionFailureReasonMessages,
+  isEsqlQueryFailure,
   type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
@@ -37,19 +38,23 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 import { useLensSelector, selectPersistedDoc } from '../../../state_management';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
+import {
+  buildEsqlFailureTooltip,
+  renderEsqlFailureTooltipContent,
+} from './esql_failure_tooltip_content';
 
 interface EsqlConversionSettings {
   isConvertToEsqlButtonDisabled: boolean;
-  convertToEsqlButtonTooltip: string;
+  convertToEsqlButtonTooltip: ReactNode;
   convertibleLayers: ConvertibleLayer[];
   attributes?: TypedLensSerializedState['attributes'];
 }
 
 const getEsqlConversionDisabledSettings = (
-  tooltip: string = esqlConversionFailureReasonMessages.unknown
+  reasons: EsqlConversionFailureReason[] = ['unknown']
 ): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
-  convertToEsqlButtonTooltip: tooltip,
+  convertToEsqlButtonTooltip: renderEsqlFailureTooltipContent(buildEsqlFailureTooltip(reasons)),
   convertibleLayers: [],
 });
 
@@ -92,7 +97,7 @@ export const hasUnsupportedAnnotations = (visualizationState: unknown): boolean 
 const makeNonConvertibleLayer = (
   layerId: string,
   type: ConvertibleLayer['type'],
-  failureReason?: EsqlConversionFailureReason
+  failureReasons?: EsqlConversionFailureReason[]
 ): ConvertibleLayer => ({
   id: layerId,
   icon: 'layers',
@@ -101,7 +106,7 @@ const makeNonConvertibleLayer = (
   query: '',
   isConvertibleToEsql: false,
   conversionData: { esAggsIdMap: {}, partialRows: false },
-  failureReason,
+  failureReasons,
 });
 
 export const useEsqlConversionCheck = (
@@ -144,16 +149,12 @@ export const useEsqlConversionCheck = (
 
     // Guard: charts saved to the library
     if (isSavedToLibrary(persistedDoc)) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.saved_to_library_not_supported
-      );
+      return getEsqlConversionDisabledSettings(['saved_to_library_not_supported']);
     }
 
     // Guard: query-based annotations require data views and are not yet supported on ES|QL charts
     if (hasUnsupportedAnnotations(state)) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.query_annotations_not_supported
-      );
+      return getEsqlConversionDisabledSettings(['query_annotations_not_supported']);
     }
 
     // Detect trendline layer from metric visualization state
@@ -179,9 +180,7 @@ export const useEsqlConversionCheck = (
       );
     });
     if (hasNonStaticReferenceLine) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.reference_line_not_supported
-      );
+      return getEsqlConversionDisabledSettings(['reference_line_not_supported']);
     }
 
     // Extract column roles from visualization state for semantic ES|QL column naming
@@ -215,7 +214,7 @@ export const useEsqlConversionCheck = (
 
       const layer = layers[layerId];
       if (!layer || !layer.columnOrder || !layer.columns) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, ['unknown']));
         continue;
       }
 
@@ -242,12 +241,15 @@ export const useEsqlConversionCheck = (
           columnRoles
         );
       } catch (e) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, ['unknown']));
         continue;
       }
 
       if (!isEsqlQuerySuccess(esqlLayer)) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, esqlLayer.reason));
+        const failure = isEsqlQueryFailure(esqlLayer) ? esqlLayer : undefined;
+        convertibleLayers.push(
+          makeNonConvertibleLayer(layerId, layerTypes.DATA, failure?.reasons ?? ['unknown'])
+        );
         continue;
       }
 
@@ -280,9 +282,7 @@ export const useEsqlConversionCheck = (
     // If a trendline layer exists but failed to convert, disable the button
     // rather than silently dropping the trendline
     if (trendlineLayerId && trendlineResult && !trendlineResult.success) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.trendline_not_supported
-      );
+      return getEsqlConversionDisabledSettings(['trendline_not_supported']);
     }
 
     // Guard: converting only a subset of data layers would leave a form-based data
@@ -293,7 +293,7 @@ export const useEsqlConversionCheck = (
     );
     if (nonConvertibleDataLayer) {
       return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages[nonConvertibleDataLayer.failureReason ?? 'unknown']
+        nonConvertibleDataLayer.failureReasons ?? ['unknown']
       );
     }
 
@@ -369,7 +369,9 @@ function tryConvertTrendlineLayer(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   columnRoles: ColumnRoles
-): { success: true; layer: ConvertibleLayer } | { success: false; reason?: string } {
+):
+  | { success: true; layer: ConvertibleLayer }
+  | { success: false; reasons?: EsqlConversionFailureReason[] } {
   if (!layer?.columnOrder || !layer?.columns) return { success: false };
 
   // Defensive patching of date_histogram columns for trendline conversion.
@@ -422,7 +424,10 @@ function tryConvertTrendlineLayer(
       columnRoles
     );
     if (!isEsqlQuerySuccess(esqlLayer)) {
-      return { success: false, reason: esqlLayer?.reason };
+      return {
+        success: false,
+        reasons: isEsqlQueryFailure(esqlLayer) ? esqlLayer.reasons : undefined,
+      };
     }
 
     return {

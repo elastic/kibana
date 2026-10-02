@@ -28676,7 +28676,6 @@
     "xpack.lens.config.cannotConvertToEsqlOperationTooltip": "无法转换为 ES|QL：对其中一个或多个函数的支持将在未来的更新中提供。",
     "xpack.lens.config.cannotConvertToEsqlReducedTimeRangeTooltip": "无法转换为 ES|QL：即将发布的更新将支持缩短的时间范围。",
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip": "无法转换为 ES|QL：即将发布的更新将支持运行时字段。",
-    "xpack.lens.config.cannotConvertToEsqlTermsTooltip": "无法转换为 ES|QL：即将推出的更新将支持顶值（术语）聚合。",
     "xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip": "无法转换为 ES|QL：即将发布的更新将支持时间偏移。",
     "xpack.lens.config.cannotConvertToEsqlTrendlineTooltip": "无法转换为 ES|QL：趋势线图层使用了尚不支持转换的配置。",
     "xpack.lens.config.cannotConvertToEsqlUnknownTooltip": "无法转换为 ES|QL：即将发布的更新将支持此可视化。",

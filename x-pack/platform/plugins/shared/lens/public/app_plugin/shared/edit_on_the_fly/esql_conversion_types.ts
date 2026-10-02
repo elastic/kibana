@@ -44,7 +44,7 @@ export interface ConvertibleLayer {
   isConvertibleToEsql: boolean;
   conversionData: EsqlConversionData;
   /** Why the layer could not be converted; only set when isConvertibleToEsql is false. */
-  failureReason?: EsqlConversionFailureReason;
+  failureReasons?: EsqlConversionFailureReason[];
 }
 
 /** Type alias for ES|QL query strings. */

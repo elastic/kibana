@@ -27,7 +27,7 @@ import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { buildOuterTopNFilter } from './build_outer_top_n_filter';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import { getTermsConversionFailure } from './get_terms_conversion_failure';
+import { getTermsConversionFailures } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
@@ -68,7 +68,8 @@ interface EsqlQuerySuccess {
 
 interface EsqlQueryFailure {
   success: false;
-  reason: EsqlConversionFailureReason;
+  /** One or more conversion blockers, in check order. */
+  reasons: EsqlConversionFailureReason[];
   operationType?: string;
 }
 
@@ -90,10 +91,14 @@ export const isEsqlQueryFailure = (result: unknown): result is EsqlQueryFailure 
  * Helper function to create a consistent failure result for ES|QL query generation.
  */
 function getEsqlQueryFailedResult(
-  reason: EsqlConversionFailureReason,
+  reasons: EsqlConversionFailureReason | EsqlConversionFailureReason[],
   operationType?: string
 ): EsqlQueryFailure {
-  return operationType ? { success: false, reason, operationType } : { success: false, reason };
+  return {
+    success: false,
+    reasons: Array.isArray(reasons) ? reasons : [reasons],
+    ...(operationType !== undefined ? { operationType } : {}),
+  };
 }
 
 /**
@@ -392,7 +397,7 @@ export function generateEsqlQuery(
     const metricError = metricsResult.find(isEsqlQueryFailure);
     if (isEsqlQueryFailure(metricError)) {
       return getEsqlQueryFailedResult(
-        metricError.reason,
+        metricError.reasons,
         'operationType' in metricError ? metricError.operationType : undefined
       );
     }
@@ -403,20 +408,25 @@ export function generateEsqlQuery(
   const termsBuckets = bucketEsAggsEntries.flatMap(([, col], index) =>
     isColumnOfType<TermsIndexPatternColumn>('terms', col) ? [{ col, index }] : []
   );
+  const termsConversionContext = {
+    hasDateHistogram,
+    termsBucketCount: termsBuckets.length,
+  };
+  // Collect every Top values blocker before other bucket failures so the tooltip
+  // can list them together; metric failures above still take precedence.
+  const termsFailureReasons = [
+    ...new Set(
+      termsBuckets.flatMap(({ col }) => getTermsConversionFailures(col, termsConversionContext))
+    ),
+  ];
+  if (termsFailureReasons.length > 0) {
+    return getEsqlQueryFailedResult(termsFailureReasons);
+  }
+
   const resolvedBucketExprs = new Map<number, string>();
   const usedBucketAliases = new Set<string>();
   const bucketAliasesByExpression = new Map<string, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
-    if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-      const termsFailure = getTermsConversionFailure(col, {
-        hasDateHistogram,
-        termsBucketCount: termsBuckets.length,
-      });
-      if (termsFailure) {
-        return getEsqlQueryFailedResult(termsFailure);
-      }
-    }
-
     const toESQL = getToEsqlFn(col.operationType);
     if (!toESQL) {
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
@@ -540,7 +550,7 @@ export function generateEsqlQuery(
     const bucketError = bucketsResult.find(isEsqlQueryFailure);
     if (isEsqlQueryFailure(bucketError)) {
       return getEsqlQueryFailedResult(
-        bucketError.reason,
+        bucketError.reasons,
         'operationType' in bucketError ? bucketError.operationType : undefined
       );
     }
@@ -598,7 +608,7 @@ export function generateEsqlQuery(
       const innerSortKey = resolveTermsSortKey(innerTermsBucket.col, innerTermsBucket.index);
 
       if (!innerSortKey) {
-        return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
       }
 
       const outerBuckets = [...resolvedBucketExprs.entries()]
@@ -644,7 +654,7 @@ export function generateEsqlQuery(
         }
 
         if (!outerSortKey || !scoreFragment) {
-          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+          return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
         }
         outerSortKeys.push(outerSortKey);
 

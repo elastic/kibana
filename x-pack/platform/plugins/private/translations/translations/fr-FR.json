@@ -28511,7 +28511,6 @@
     "xpack.lens.config.cannotConvertToEsqlOperationTooltip": "Impossible de convertir en ES|QL : la prise en charge d'une ou plusieurs fonctions utilisées sera disponible dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlReducedTimeRangeTooltip": "Impossible de convertir en ES|QL : la période réduite sera prise en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip": "Impossible de convertir en ES|QL : les champs runtime seront pris en charge dans une prochaine mise à jour.",
-    "xpack.lens.config.cannotConvertToEsqlTermsTooltip": "Impossible de convertir en ES|QL : l’agrégation des valeurs principales (termes) sera prise en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip": "Impossible de convertir en ES|QL : le décalage temporel sera pris en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlTrendlineTooltip": "Impossible de convertir en ES|QL : la couche de courbe de tendance utilise une configuration qui n'est pas encore prise en charge pour la conversion.",
     "xpack.lens.config.cannotConvertToEsqlUnknownTooltip": "Impossible de convertir en ES|QL : cette visualisation sera prise en charge dans une prochaine mise à jour.",

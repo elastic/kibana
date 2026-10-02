@@ -43,7 +43,7 @@ export interface EsqlConversionSuccess {
 
 export interface EsqlConversionFailure {
   readonly success: false;
-  readonly reason: string;
+  readonly reasons: readonly string[];
 }
 
 export type SuccessfulEsqlConversionCase = EsqlConversionCase & {

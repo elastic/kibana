@@ -229,7 +229,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
         },
       },
       columnOrder: ['col1'],
-      expected: { success: false, reason: 'formula_not_supported' },
+      expected: { success: false, reasons: ['formula_not_supported'] },
     },
     {
       group: 'core',
@@ -237,7 +237,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       description: 'time shift is not convertible',
       columns: { col1: metric('average', 'taxful_total_price', { timeShift: '1h' }) },
       columnOrder: ['col1'],
-      expected: { success: false, reason: 'time_shift_not_supported' },
+      expected: { success: false, reasons: ['time_shift_not_supported'] },
     },
     {
       group: 'core',
@@ -245,7 +245,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       description: 'reduced time range is not convertible',
       columns: { col1: metric('average', 'taxful_total_price', { reducedTimeRange: '5m' }) },
       columnOrder: ['col1'],
-      expected: { success: false, reason: 'reduced_time_range_not_supported' },
+      expected: { success: false, reasons: ['reduced_time_range_not_supported'] },
     },
   ];
 };

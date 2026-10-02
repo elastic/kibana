@@ -73,7 +73,7 @@ const runSuccessfulCase = (conversionCase: SuccessfulEsqlConversionCase) => {
 const runFailedCase = (conversionCase: FailedEsqlConversionCase) => {
   const result = generateQueryForCase(conversionCase);
 
-  expect(result).toMatchObject({ success: false, reason: conversionCase.expected.reason });
+  expect(result).toMatchObject({ success: false, reasons: conversionCase.expected.reasons });
 };
 
 const casesByGroup = buildEsqlConversionCasesByGroup();

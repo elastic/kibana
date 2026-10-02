@@ -10,8 +10,6 @@
 import type { TermsIndexPatternColumn } from '../datasources/operations';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 
-const UNSUPPORTED_ORDER_BY_TYPES = new Set(['rare', 'significant', 'custom']);
-
 /**
  * `LIMIT n BY <outer>` expresses a single nesting level, so each extra Top values
  * dimension beyond the outer/inner pair would need its own filtering stage.
@@ -25,44 +23,68 @@ export interface TermsConversionContext {
 }
 
 /**
- * Returns a conversion failure reason when a terms dimension cannot be
- * translated to ES|QL, or `undefined` when the column is eligible.
+ * Returns every conversion failure reason for a terms dimension, in priority order
+ * (first entry is what the Convert tooltip shows when only one reason is displayed):
+ * 1. Other bucket (default-on; also covers missing values)
+ * 2. Date histogram / time series
+ * 3. More than two Top values dimensions
+ * 4. Multiple fields on one Top values dimension
+ * 5. Include / exclude filters
+ * 6. Accuracy mode
+ * 7. Unsupported ranking (custom, then rarity / significance)
  *
  * Callers may combine eligible terms with other convertible categorical
  * buckets via `LIMIT n BY` (non-time-series). Date histogram remains unsupported.
  */
-export const getTermsConversionFailure = (
+export const getTermsConversionFailures = (
   { params }: TermsIndexPatternColumn,
   { hasDateHistogram, termsBucketCount }: TermsConversionContext
-): EsqlConversionFailureReason | undefined => {
+): EsqlConversionFailureReason[] => {
+  const reasons: EsqlConversionFailureReason[] = [];
+
+  // Match UI `Boolean(otherBucket)` and toEsAggsFn: unset/false = Other off.
+  // No dedicated missingBucket reason: the UI only enables "Include documents without
+  // the selected field" when Other is on, and toEsAggsFn forces
+  // missingBucket = otherBucket && missingBucket. So this Other failure also covers
+  // missing values for real configs; a separate reason would never surface alone.
+  if (params.otherBucket === true) {
+    reasons.push('terms_other_bucket_not_supported');
+  }
+
   if (hasDateHistogram) {
-    return 'terms_not_supported';
+    reasons.push('terms_date_histogram_not_supported');
   }
 
   if (termsBucketCount > MAX_SUPPORTED_TERMS_BUCKETS) {
-    return 'terms_multi_level_not_supported';
+    reasons.push('terms_multi_level_not_supported');
   }
 
   if ((params.secondaryFields?.length ?? 0) > 0) {
-    return 'terms_not_supported';
-  }
-
-  if (params.accuracyMode === true) {
-    return 'terms_not_supported';
+    reasons.push('terms_multiple_fields_not_supported');
   }
 
   if ((params.include?.length ?? 0) > 0 || (params.exclude?.length ?? 0) > 0) {
-    return 'terms_not_supported';
+    reasons.push('terms_include_exclude_not_supported');
   }
 
-  // Match UI `Boolean(otherBucket)` and toEsAggsFn: unset/false = Other off.
-  if (params.otherBucket === true) {
-    return 'terms_other_bucket_not_supported';
+  if (params.accuracyMode === true) {
+    reasons.push('terms_accuracy_mode_not_supported');
   }
 
-  if (UNSUPPORTED_ORDER_BY_TYPES.has(params.orderBy.type)) {
-    return 'terms_order_by_not_supported';
+  if (params.orderBy.type === 'custom') {
+    reasons.push('terms_custom_order_by_not_supported');
+  } else if (params.orderBy.type === 'rare' || params.orderBy.type === 'significant') {
+    reasons.push('terms_order_by_not_supported');
   }
 
-  return undefined;
+  return reasons;
 };
+
+/**
+ * Returns the first conversion failure reason for a terms dimension, or
+ * `undefined` when the column is eligible.
+ */
+export const getTermsConversionFailure = (
+  column: TermsIndexPatternColumn,
+  context: TermsConversionContext
+): EsqlConversionFailureReason | undefined => getTermsConversionFailures(column, context)[0];

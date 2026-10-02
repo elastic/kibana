@@ -28,11 +28,14 @@ import { esql } from '@elastic/esql';
 
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { getFailureTooltip } from '@kbn/lens-common';
-
 import { layerTypes } from '../../..';
 
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
+import {
+  buildEsqlFailureTooltip,
+  getEsqlFailureTooltipPlainText,
+  renderEsqlFailureTooltipContent,
+} from './esql_failure_tooltip_content';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
   data: (count: number) =>
@@ -111,9 +114,11 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                 <EuiIconTip
                   type="warning"
                   color="warning"
-                  content={getFailureTooltip(layer.failureReason)}
+                  content={renderEsqlFailureTooltipContent(
+                    buildEsqlFailureTooltip(layer.failureReasons)
+                  )}
                   iconProps={{
-                    'aria-label': getFailureTooltip(layer.failureReason),
+                    'aria-label': getEsqlFailureTooltipPlainText(layer.failureReasons),
                     'data-test-subj': `lnsEsqlConversionFailureReason-${layer.id}`,
                   }}
                 />
