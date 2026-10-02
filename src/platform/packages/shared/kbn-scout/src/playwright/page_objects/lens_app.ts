@@ -403,35 +403,34 @@ export class LensApp {
 
   private async selectField(field: string) {
     const fieldPicker = this.page.testSubj.locator(FIELD_PICKER_TEST_SUBJ);
-    const committedField = await fieldPicker.getAttribute('data-selected-field');
-    if (committedField !== field) {
-      await this.page.testSubj.click(`${FIELD_PICKER_TEST_SUBJ} > comboBoxInput`);
-      await this.page.testSubj.fill(`${FIELD_PICKER_TEST_SUBJ} > comboBoxSearchInput`, field);
-      // Address the option by label, not by a position read before Lens repaints the list.
-      // `fullText` is EuiTextTruncate's whole label; the highlighted text it wraps is split
-      // into `mark` nodes that also match every label the search term is only a prefix of.
-      const option = this.page.testSubj
-        .locator(`~${FIELD_PICKER_TEST_SUBJ}-optionsList`)
-        .getByRole('option')
-        .filter({
-          has: this.page.testSubj
-            .locator('fullText')
-            .filter({ hasText: new RegExp(`^${escapeRegExp(field)}$`) }),
-        });
-      await option.click();
-    }
-    // ComboBox can show the typed option before Lens layer state commits.
-    // data-selected-field is the committed display name and updates only after
-    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
-    // metacharacters are not interpolated into a selector.
-    await this.page.waitForFunction(
-      (expected) =>
-        document
-          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
-          ?.getAttribute('data-selected-field') === expected,
-      field,
-      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
-    );
+    // Address the option by label, not by a position read before Lens repaints the list.
+    // `fullText` is EuiTextTruncate's whole label; the highlighted text it wraps is split
+    // into `mark` nodes that also match every label the search term is only a prefix of.
+    const option = this.page.testSubj
+      .locator(`~${FIELD_PICKER_TEST_SUBJ}-optionsList`)
+      .getByRole('option')
+      .filter({
+        has: this.page.testSubj
+          .locator('fullText')
+          .filter({ hasText: new RegExp(`^${escapeRegExp(field)}$`) }),
+      });
+
+    // Lens regroups the open list as field existence and compatibility resolve, moving the row
+    // out from under an in-flight click; re-picking is a no-op once `data-selected-field` holds
+    // the committed display name, which insertOrReplaceColumn sets (`count` commits `Records`).
+    await expect(async () => {
+      if ((await fieldPicker.getAttribute('data-selected-field')) === field) {
+        return;
+      }
+      await this.page.testSubj.click(`${FIELD_PICKER_TEST_SUBJ} > comboBoxInput`, {
+        timeout: 5_000,
+      });
+      await this.page.testSubj.fill(`${FIELD_PICKER_TEST_SUBJ} > comboBoxSearchInput`, field, {
+        timeout: 5_000,
+      });
+      await option.click({ timeout: 5_000 });
+      await expect(fieldPicker).toHaveAttribute('data-selected-field', field, { timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
   }
 
   /**
