@@ -139,7 +139,9 @@ export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => 
   }
 };
 
-const readResolutionRuleState = async (kbnClient: KbnClientFixture): Promise<ResolutionRuleState> => {
+const readResolutionRuleState = async (
+  kbnClient: KbnClientFixture
+): Promise<ResolutionRuleState> => {
   const response = await kbnClient.request({
     method: 'GET',
     path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_LIST,
@@ -365,7 +367,8 @@ export const installEntityStoreSuiteWithKbnClient = async ({
     headers: publicHeaders,
   });
   expect(statusResponse.status).toBe(200);
-  const initiallyInstalled = (statusResponse.body as { status?: string }).status !== 'not_installed';
+  const initiallyInstalled =
+    (statusResponse.body as { status?: string }).status !== 'not_installed';
   const initialResolutionRuleState = await readResolutionRuleState(kbnClient);
   suiteInstallState.set(suiteId, {
     previousEntityStoreV2Setting,
