@@ -24,7 +24,7 @@ const DEFAULT_SET = 'default';
  * Sets that must stay separate on purpose, with the reason. The audit leaves them out of every
  * merge suggestion. Add a set here only when its owners confirmed the separate server is needed.
  */
-export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
+export const MUST_STAY_SEPARATE: Readonly<Record<string, string>> = {
   shared_ux_no_data: 'tests need a clean ES and Kibana with no data from other suites',
   trial_license: 'tests permanently downgrade the license and would break a shared cluster',
 };
@@ -266,7 +266,7 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
   const failed: ConfigSetsReport['failed'] = [];
   const runInCi = findSetsRunInCi();
   for (const entry of listConfigSetFiles(repoRoot)) {
-    if (entry.name in KEEP_SEPARATE || !runInCi.has(entry.name)) continue;
+    if (entry.name in MUST_STAY_SEPARATE || !runInCi.has(entry.name)) continue;
     let set: ScoutServerConfig;
     let base: ScoutServerConfig;
     try {

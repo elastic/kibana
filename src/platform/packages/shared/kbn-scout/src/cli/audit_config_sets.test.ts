@@ -13,7 +13,7 @@ import Path from 'path';
 import { testConfigs } from '@kbn/scout-reporting';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
 import { getScoutCiExcludedConfigs } from '../tests_discovery/search_configs';
-import { auditConfigSets, findSetsRunInCi, KEEP_SEPARATE } from './audit_config_sets';
+import { auditConfigSets, findSetsRunInCi, MUST_STAY_SEPARATE } from './audit_config_sets';
 
 jest.mock('@kbn/repo-packages', () => ({ getPackages: () => [] }));
 jest.mock('@kbn/scout-reporting', () => ({ testConfigs: { all: [] as unknown[] } }));
@@ -90,7 +90,7 @@ describe('config sets audit', () => {
     });
 
     it('skips sets that are kept separate on purpose', async () => {
-      const [kept] = Object.keys(KEEP_SEPARATE);
+      const [kept] = Object.keys(MUST_STAY_SEPARATE);
       writeSet(repoRoot, kept);
 
       setConfigs(
@@ -106,7 +106,7 @@ describe('config sets audit', () => {
 
     it('only keeps separate the config sets that exist', () => {
       const setsDir = Path.resolve(__dirname, '../servers/configs/config_sets');
-      Object.keys(KEEP_SEPARATE).forEach((name) => {
+      Object.keys(MUST_STAY_SEPARATE).forEach((name) => {
         expect(Fs.existsSync(Path.join(setsDir, name))).toBe(true);
       });
     });
