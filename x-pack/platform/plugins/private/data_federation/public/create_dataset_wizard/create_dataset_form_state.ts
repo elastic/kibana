@@ -100,7 +100,7 @@ export interface CreateDatasetFormValues {
     additionalAdvancedSettingsIsOpen: boolean;
     /**
      * Passthrough-only dataset settings not managed by the wizard UI.
-     * Used to preserve API-supported settings on edit, and included in review/request output.
+     * Used to preserve API-supported settings on edit, and included in request output.
      */
     unmanagedSettings: SerializableRecord;
   };
