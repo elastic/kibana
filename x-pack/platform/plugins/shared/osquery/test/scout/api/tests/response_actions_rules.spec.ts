@@ -21,6 +21,8 @@ apiTest.describe(
     let savedQueryId: string;
     let savedQuerySoId: string;
     const createdRuleIds: string[] = [];
+    // Import responds with counts, not saved-object ids, so imported rules are tracked by rule_id.
+    const importedRuleRuleIds: string[] = [];
 
     apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
       credentials = await requestAuth.getApiKeyForPrivilegedUser();
@@ -61,6 +63,15 @@ apiTest.describe(
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/detection_engine/rules?id=${ruleId}`,
+          headers: { 'elastic-api-version': testData.OSQUERY_API_VERSION },
+          ignoreErrors: [404],
+        });
+      }
+
+      for (const ruleRuleId of importedRuleRuleIds) {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `/api/detection_engine/rules?rule_id=${ruleRuleId}`,
           headers: { 'elastic-api-version': testData.OSQUERY_API_VERSION },
           ignoreErrors: [404],
         });
@@ -490,8 +501,12 @@ apiTest.describe(
     apiTest(
       'rejects a mismatched query on rule import for a runSavedQueries-only author',
       async ({ apiClient }) => {
+        const ruleRuleId = `ra-import-${Date.now()}`;
+        // Register before importing: if authorization ever regresses, the import really does
+        // create the rule, and the failing assertion below would otherwise leak it.
+        importedRuleRuleIds.push(ruleRuleId);
         const rule = testData.getMinimalRule({
-          rule_id: `ra-import-${Date.now()}`,
+          rule_id: ruleRuleId,
           response_actions: [mismatchedOsqueryAction()],
         });
         const multipart = buildRulesImportMultipart(rule);

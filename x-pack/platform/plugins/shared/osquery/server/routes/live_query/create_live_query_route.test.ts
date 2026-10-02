@@ -337,7 +337,8 @@ describe('createLiveQueryRoute', () => {
     await invokeRoute({ saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] }, { coreStart });
 
     const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
-    expect(soClient.get).not.toHaveBeenCalled();
+    // The SO-uuid namespace is checked too (and misses), so the public-id match wins.
+    expect(soClient.resolve).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
     expect(mockedCreateActionHandler).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ saved_query_id: SAVED_QUERY_ID }),

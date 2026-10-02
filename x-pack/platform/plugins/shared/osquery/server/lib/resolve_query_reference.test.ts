@@ -92,7 +92,32 @@ describe('resolveQueryReference', () => {
         perPage: 2,
       })
     );
-    expect(soClient.get).not.toHaveBeenCalled();
+    // The SO-uuid namespace is still checked (and misses) so a shadowing object can be detected.
+    expect(soClient.resolve).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
+  });
+
+  it('should fail closed when a public id shadows a different saved query SO uuid', async () => {
+    // Query B's public id equals query A's SO uuid; the reference must not silently bind to B.
+    const coreStart = createMockCoreStart({
+      default: {
+        [SAVED_QUERY_SO_ID]: { id: 'query-a', query: 'select 1;' },
+        'so-uuid-b': { id: SAVED_QUERY_SO_ID, query: 'select 2;' },
+      },
+    });
+
+    await expect(
+      resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_SO_ID })
+    ).resolves.toBeUndefined();
+  });
+
+  it('should resolve a saved query whose public id equals its own SO uuid', async () => {
+    const coreStart = createMockCoreStart({
+      default: { [SAVED_QUERY_SO_ID]: { id: SAVED_QUERY_SO_ID, query: 'select 1;' } },
+    });
+
+    await expect(
+      resolveQueryReference(coreStart, 'default', { saved_query_id: SAVED_QUERY_SO_ID })
+    ).resolves.toEqual({ savedObjectId: SAVED_QUERY_SO_ID, query: 'select 1;' });
   });
 
   it('should fail closed when more than one saved query has the same attributes.id', async () => {
@@ -140,6 +165,27 @@ describe('resolveQueryReference', () => {
       savedObjectId: PACK_ID,
       isPack: true,
       queries: ['select 1;', 'select 2;'],
+      enabledQueries: ['select 1;', 'select 2;'],
+      queryEcsMappings: [undefined, undefined],
+    });
+  });
+
+  it('should keep disabled pack queries for matching but exclude them from enabledQueries', async () => {
+    const coreStart = createMockCoreStart({
+      default: {
+        [PACK_ID]: {
+          queries: [{ query: 'select 1;' }, { query: 'select 2;', enabled: false }],
+        },
+      },
+    });
+
+    await expect(
+      resolveQueryReference(coreStart, 'default', { pack_id: PACK_ID })
+    ).resolves.toEqual({
+      savedObjectId: PACK_ID,
+      isPack: true,
+      queries: ['select 1;', 'select 2;'],
+      enabledQueries: ['select 1;'],
       queryEcsMappings: [undefined, undefined],
     });
   });
@@ -165,6 +211,7 @@ describe('resolveQueryReference', () => {
       savedObjectId: PACK_ID,
       isPack: true,
       queries: ['select 1;', 'select 2;'],
+      enabledQueries: ['select 1;', 'select 2;'],
       queryEcsMappings: [undefined, { 'host.name': { field: 'name' } }],
     });
   });
@@ -233,6 +280,7 @@ describe('resolveQueryReference', () => {
       savedObjectId: PACK_ID,
       isPack: true,
       queries: ['select 2;'],
+      enabledQueries: ['select 2;'],
       queryEcsMappings: [undefined],
     });
   });
@@ -328,5 +376,34 @@ describe('lookupSavedQuery', () => {
     };
 
     await expect(lookupSavedQuery(soClient, 'legacy-id')).resolves.toBeUndefined();
+  });
+
+  it('should fail closed when a public-id match coexists with an alias conflict', async () => {
+    const soClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [{ id: 'so-a', attributes: { id: 'shared-id', query: 'select 1;' } }],
+        total: 1,
+      }),
+      resolve: jest.fn().mockResolvedValue({
+        saved_object: { id: 'shared-id', attributes: { query: 'select 2;' } },
+        outcome: 'conflict',
+      }),
+    };
+
+    await expect(lookupSavedQuery(soClient, 'shared-id')).resolves.toBeUndefined();
+  });
+
+  it('should propagate a non-404 SO-uuid lookup error even when the public id matched', async () => {
+    const soClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [{ id: 'so-a', attributes: { id: 'query-a', query: 'select 1;' } }],
+        total: 1,
+      }),
+      resolve: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
+    };
+
+    await expect(lookupSavedQuery(soClient, 'query-a')).rejects.toThrow(
+      'elasticsearch unavailable'
+    );
   });
 });

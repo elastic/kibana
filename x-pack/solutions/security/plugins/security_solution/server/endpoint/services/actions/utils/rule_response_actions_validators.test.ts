@@ -475,7 +475,10 @@ describe('Rules Endpoint response actions validators', () => {
       });
 
       it('should skip runscript payload revalidation when skipRunscriptPayloadValidation is set', async () => {
-        scriptsClientMock.list.mockResolvedValue({ total: 0, data: [] });
+        const emptyListResponse = { ...(await scriptsClientMock.list()), total: 0, data: [] };
+        // Drop the call above so the "never listed" assertion below only sees the validator.
+        scriptsClientMock.list.mockClear();
+        scriptsClientMock.list.mockResolvedValue(emptyListResponse);
         rulePayload.response_actions = [
           createRulePayloadResponseActionMock({
             params: {
@@ -878,6 +881,26 @@ describe('Rules Endpoint response actions validators', () => {
         queries: undefined,
         ecs_mapping: undefined,
       });
+    });
+
+    it('should not re-authorize the removed copy of a duplicated osquery action ([A, A] -> [A])', async () => {
+      // The removed copy still equals the one that stays, so a value-membership check would
+      // treat it as kept and re-authorize it, blocking the removal when authz now fails.
+      mockOsqueryAuthz.mockRejectedValue(new Error('should not be called'));
+      options.rulePayload = {
+        response_actions: [
+          { action_type_id: '.osquery', params: { saved_query_id: 'existing-saved-query' } },
+        ],
+      } as typeof options.rulePayload;
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+
+      expect(mockOsqueryAuthz).not.toHaveBeenCalled();
     });
   });
 });

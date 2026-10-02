@@ -13,6 +13,7 @@ import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/typ
 import type { PackSavedObject, SavedQuerySavedObject } from '../common/types';
 import { getInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 import { convertECSMappingToObject } from '../routes/utils';
+import { isPackQueryEnabled } from '../../common/pack_execution';
 
 /** Normalizes SO `ecs_mapping` (array or record) to the record form used on live-query bodies. */
 export const toEcsMappingRecord = (
@@ -46,6 +47,12 @@ export interface ResolvedQueryReference {
    * caller-supplied top-level mapping is matched against these instead of `ecs_mapping`.
    */
   queryEcsMappings?: Array<Record<string, unknown> | undefined>;
+  /**
+   * Set for packs: the SQL of queries that dispatch actually sends (disabled ones are skipped).
+   * `queries` keeps every entry because a rule's persisted copy of the pack may include
+   * disabled queries and still has to match at attach time.
+   */
+  enabledQueries?: string[];
   isPack?: boolean;
 }
 
@@ -58,10 +65,40 @@ const toSavedQueryReference = (savedQuerySO: {
   ecs_mapping: toEcsMappingRecord(savedQuerySO.attributes.ecs_mapping),
 });
 
+const AMBIGUOUS = Symbol('ambiguous');
+
+/** Looks the id up as an SO uuid (or legacy alias). */
+const resolveBySavedObjectId = async (
+  soClient: Pick<SavedObjectsClientContract, 'resolve'>,
+  savedObjectId: string
+): Promise<{ id: string; attributes: SavedQuerySavedObject } | typeof AMBIGUOUS | undefined> => {
+  try {
+    const { saved_object: savedQuerySO, outcome } = await soClient.resolve<SavedQuerySavedObject>(
+      savedQuerySavedObjectType,
+      savedObjectId
+    );
+
+    // Exact id plus a legacy alias for a different object — do not pick one.
+    if (outcome === 'conflict' || isSavedObjectErrorResult(savedQuerySO)) {
+      return AMBIGUOUS;
+    }
+
+    return savedQuerySO;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+
+    throw error;
+  }
+};
+
 /**
- * Body `saved_query_id` is `attributes.id` (public id). Path `/{id}` is the SO uuid.
- * Find the documented identity first; fall back to SO uuid for callers that already send it.
- * Multiple `attributes.id` matches fail closed.
+ * Body `saved_query_id` is `attributes.id` (public id). Path `/{id}` is the SO uuid, and callers
+ * may send it as a compatibility alias. Both namespaces are checked: `attributes.id` is not
+ * prevented from equaling another object's SO uuid, so a public-id hit alone could shadow the
+ * object the caller named by uuid. Any ambiguity — multiple public-id matches, an alias conflict,
+ * or the two namespaces naming different objects — fails closed.
  */
 export const lookupSavedQuery = async (
   soClient: Pick<SavedObjectsClientContract, 'find' | 'resolve'>,
@@ -84,29 +121,20 @@ export const lookupSavedQuery = async (
     return undefined;
   }
 
-  if (found.saved_objects.length === 1) {
-    return toSavedQueryReference(found.saved_objects[0]);
+  const publicIdMatch = found.saved_objects[0];
+  const savedObjectIdMatch = await resolveBySavedObjectId(soClient, trimmedSavedQueryId);
+
+  if (savedObjectIdMatch === AMBIGUOUS) {
+    return undefined;
   }
 
-  try {
-    const { saved_object: savedQuerySO, outcome } = await soClient.resolve<SavedQuerySavedObject>(
-      savedQuerySavedObjectType,
-      trimmedSavedQueryId
-    );
-
-    // Exact id plus a legacy alias for a different object — do not pick one.
-    if (outcome === 'conflict' || isSavedObjectErrorResult(savedQuerySO)) {
-      return undefined;
-    }
-
-    return toSavedQueryReference(savedQuerySO);
-  } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return undefined;
-    }
-
-    throw error;
+  if (publicIdMatch && savedObjectIdMatch && publicIdMatch.id !== savedObjectIdMatch.id) {
+    return undefined;
   }
+
+  const match = publicIdMatch ?? savedObjectIdMatch;
+
+  return match ? toSavedQueryReference(match) : undefined;
 };
 
 /**
@@ -145,6 +173,7 @@ export const resolveQueryReference = async (
         savedObjectId: packSO.id,
         isPack: true,
         queries: packQueries.map(({ query }) => query),
+        enabledQueries: packQueries.filter(isPackQueryEnabled).map(({ query }) => query),
         queryEcsMappings: packQueries.map(({ ecs_mapping: ecsMapping }) =>
           toEcsMappingRecord(ecsMapping)
         ),

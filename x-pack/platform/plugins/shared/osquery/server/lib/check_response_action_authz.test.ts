@@ -189,7 +189,8 @@ describe('isOsqueryResponseActionAuthorized', () => {
           perPage: 2,
         })
       );
-      expect(soClient.get).not.toHaveBeenCalled();
+      // The SO-uuid namespace is checked too (and misses), so the public-id match wins.
+      expect(soClient.resolve).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
     });
 
     it('should authorize a resolvable pack_id', async () => {

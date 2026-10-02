@@ -101,6 +101,7 @@ describe('createActionService', () => {
         savedObjectId: 'so-1',
         isPack: true,
         queries: [STATIC_SQL, PARAMETERIZED_SQL],
+        enabledQueries: [STATIC_SQL, PARAMETERIZED_SQL],
       };
 
       mockedResolveQueryReference.mockResolvedValue(storedQuery);
@@ -108,6 +109,50 @@ describe('createActionService', () => {
       await expect(
         service.containsDynamicQueries({ pack_id: 'pack-1', queries: [{ query: STATIC_SQL }] })
       ).resolves.toEqual({ isDynamic: true, storedQuery });
+    });
+
+    it('reports false when the only parameterized pack query is disabled', async () => {
+      // Dispatch skips disabled pack queries, so a template there must not switch the run to
+      // per-alert fan-out — even though the rule's persisted copy of the pack still carries it.
+      const { context } = buildContext();
+      const service = createActionService(context);
+      const storedQuery = {
+        savedObjectId: 'so-1',
+        isPack: true,
+        queries: [STATIC_SQL, PARAMETERIZED_SQL],
+        enabledQueries: [STATIC_SQL],
+      };
+
+      mockedResolveQueryReference.mockResolvedValue(storedQuery);
+
+      await expect(
+        service.containsDynamicQueries({
+          pack_id: 'pack-1',
+          queries: [{ query: STATIC_SQL }, { query: PARAMETERIZED_SQL }],
+        })
+      ).resolves.toEqual({ isDynamic: false, storedQuery });
+    });
+
+    it('ignores a parameterized persisted copy once the stored content resolves as static', async () => {
+      // Rule runs dispatch the stored SQL, so a stale persisted template must not force fan-out.
+      const { context } = buildContext();
+      const service = createActionService(context);
+      const storedQuery = { savedObjectId: 'so-1', query: STATIC_SQL };
+
+      mockedResolveQueryReference.mockResolvedValue(storedQuery);
+
+      await expect(
+        service.containsDynamicQueries({ saved_query_id: 'sq-1', query: PARAMETERIZED_SQL })
+      ).resolves.toEqual({ isDynamic: false, storedQuery });
+    });
+
+    it('falls back to the persisted copy when the reference does not resolve', async () => {
+      const { context } = buildContext();
+      const service = createActionService(context);
+
+      await expect(
+        service.containsDynamicQueries({ saved_query_id: 'missing', query: PARAMETERIZED_SQL })
+      ).resolves.toEqual({ isDynamic: true });
     });
 
     it('reports false when the stored content is static', async () => {

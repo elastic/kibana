@@ -456,6 +456,12 @@ describe('create queries', () => {
         total: 1,
       });
       const get = jest.fn();
+      // 'sq-1' is a public id, not an SO uuid, so the uuid lookup misses.
+      const resolve = jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(savedQuerySavedObjectType, 'sq-1')
+        );
 
       const queries = await createDynamicQueries({
         params: { saved_query_id: 'sq-1', agent_ids: [TEST_AGENT] },
@@ -464,11 +470,12 @@ describe('create queries', () => {
           service: { getPackageService: jest.fn().mockReturnValue(undefined) },
         } as unknown as OsqueryAppContext,
         spaceId,
-        spaceScopedClient: { find, get } as unknown as SavedObjectsClient,
+        spaceScopedClient: { find, get, resolve } as unknown as SavedObjectsClient,
         useStoredQuery: true,
       });
 
       expect(get).not.toHaveBeenCalled();
+      expect(resolve).toHaveBeenCalledWith(savedQuerySavedObjectType, 'sq-1');
       expect(queries[0].query).toBe('select 1;');
       expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
     });

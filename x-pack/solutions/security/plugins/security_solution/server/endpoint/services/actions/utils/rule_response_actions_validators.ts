@@ -208,10 +208,19 @@ export const validateRuleResponseActions = async <
   ) as unknown as RuleResponseAction[];
   // Multiset symmetric difference: extra payload copies must be authorized (`[A] -> [A, A]`),
   // and removals still flow through so endpoint authz on delete is unchanged.
+  const removedActions = excessOccurrences(
+    normalizedExistingActions,
+    normalizedPayloadActions,
+    isEqual
+  );
   const responseActionsToValidate = [
     ...excessOccurrences(normalizedPayloadActions, normalizedExistingActions, isEqual),
-    ...excessOccurrences(normalizedExistingActions, normalizedPayloadActions, isEqual),
+    ...removedActions,
   ];
+  // `excessOccurrences` returns the source objects themselves, so membership here identifies
+  // the removed *occurrence*. A value check cannot: for `[A, A] -> [A]` the removed copy still
+  // equals the one that stays.
+  const removedOccurrences = new Set<unknown>(removedActions);
 
   if (responseActionsToValidate.length === 0) {
     logger.debug(() => `Nothing to do - no changes were made to response actions`);
@@ -298,7 +307,7 @@ export const validateRuleResponseActions = async <
       // rule is being *removed*, and there is nothing to authorize. Without this, a saved query
       // that is later deleted or moved out of the space would pin the action in place forever,
       // because the user could neither keep it (403) nor take it off the rule.
-      if (!isActionInPayload(actionData)) {
+      if (removedOccurrences.has(actionData)) {
         logger.debug(
           () =>
             `Skipping validation of osquery response action - not present in rule payload (being removed): ${stringify(
