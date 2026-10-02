@@ -682,6 +682,13 @@ describe('aiIndexAutomationsSkill', () => {
       );
     });
 
+    it('describes the document template as writing through createKi, with no child workflow', () => {
+      expect(prose).not.toMatch(/system-context-engine-document-summary/);
+      expect(prose).toMatch(
+        /Each parallel branch summarizes one document and writes it through `context-engine\.createKi` with its verifiers/
+      );
+    });
+
     it('exempts the Targeted KI writer in the pilot rule itself, before the counting', () => {
       const rule = prose.slice(prose.indexOf('**Pilot a template install'));
       expect(rule.indexOf('A Targeted KI writer has no pilot')).toBeLessThan(

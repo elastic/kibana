@@ -10,7 +10,7 @@ version: "1"
 #      string takes the whole index.
 #   2. Add any further fields the summary should draw on to the `KEEP` in `discover_documents`,
 #      remembering that `KEEP` fixes the column order the `foreach` reads by position.
-#   3. Tell the prompt what these documents are. "Support article" and "incident record" produce
+#   3. Tell the prompt what these documents are. "Product manual" and "incident record" produce
 #      different summaries from the same text, and the model cannot tell which it is holding.
 #
 # One KI per document is the right granularity only for a bounded corpus of documents that each

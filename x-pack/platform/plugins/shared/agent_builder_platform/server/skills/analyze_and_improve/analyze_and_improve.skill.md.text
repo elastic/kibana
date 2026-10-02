@@ -172,7 +172,7 @@ documents that triggered it, and the full-text `field : "value"` match operator.
    A few high-leverage KIs beat many thin ones.
 
 2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins, query
-   templates. Materialize a literal answer only for **immutable** facts, such as a resolved case's
+   templates. Materialize a literal answer only for **immutable** facts, such as a closed incident's
    root cause. Never materialize volatile facts (status, priority, counts, dates): they rot and
    produce confidently wrong answers. Immutability sets the durability tier — immutable-fact KIs
    omit `expires_at`; anything that can drift gets a TTL and is refreshed on re-run.
@@ -209,7 +209,7 @@ Metadata, Bottom-Up, Selective / Outlier, Atomic Facts, Cumulative / Wiki-style,
 Feature) as worked examples of those three answers, with their `type` values and the signals in the
 data that call for each. Choose from those signals, not from a default: a strategy the data does not
 call for spends the KI budget on indicators nobody retrieves. When the findings fit an example,
-name it. When they do not — a case corpus with a root-cause structure, a
+name it. When they do not — an incident corpus with a root-cause structure, a
 unit grounded from three indices — write the three answers from the findings rather than picking
 the nearest name and inheriting a shape that does not fit. State the strategy in the proposal as
 the three answers even when it has a name, because the person reading it has not read the catalog.

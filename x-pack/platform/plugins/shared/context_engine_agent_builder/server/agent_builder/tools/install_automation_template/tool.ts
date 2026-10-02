@@ -72,7 +72,7 @@ const installAutomationTemplateSchema = z
       .refine((v) => v.trim().length > 0, { message: 'name must not be blank or whitespace-only' })
       .refine((v) => !v.includes('/'), { message: 'name must not contain a forward slash' })
       .describe(
-        'REQUIRED. Human-readable name for this automation within the AI index (e.g. "flight-activity-docs", "loyalty-tier-profile"). No forward slashes. If an automation with this name already exists on the AI index it is replaced in-place; a different name installs an additional copy. Must be provided on every call.'
+        'REQUIRED. Human-readable name for this automation within the AI index (e.g. "kb-articles-docs", "product-profile"). No forward slashes. Installing the same template with the same name replaces that automation in place; a different name installs an additional copy. Must be provided on every call.'
       ),
     sourceIndex: z
       .string()

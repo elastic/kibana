@@ -325,10 +325,8 @@ Pass `corpusFilter`, `maxDocuments` and `bodyMaxChars` when the corpus needs a b
 to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` within the KI budget
 (`strategy_catalog`, "The KI budget"). `corpusFilter` is inserted after `FROM`.
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
-Each parallel branch is one `workflow.execute` of the system workflow
-`system-context-engine-document-summary`, which is already installed and is not an automation on
-the AI index. Do not save it and do not start a subagent. Run the orchestration's workflow id, not
-the system summary. When the pass yields many near-identically-titled entries, say so: the installed
+Each parallel branch summarizes one document and writes it through `context-engine.createKi` with its
+verifiers. Do not save it and do not start a subagent. When the pass yields many near-identically-titled entries, say so: the installed
 summary writes one indicator per document, and clustering them is a custom workflow.
 
 **Cumulative / Wiki-style** (`type: entity`) — call
@@ -352,7 +350,7 @@ keep it within that budget (`strategy_catalog`, "The KI budget").
 Units are found by one ranked query capped at `maxUnits`, most active first, and
 a re-run regenerates every unit and replaces its indicator.
 The template reads one index. A unit that needs data from a second index — a customer's profile
-plus what they bought from a products index, a case header plus its events — is a custom workflow
+plus what they bought from a products index, an incident header plus its events — is a custom workflow
 built through a subagent from the template's shape, not this install.
 To accumulate across runs rather than replace, read the stored indicator and merge through
 `context-engine.updateKi` — that is a custom workflow, not this template.
@@ -590,9 +588,7 @@ full run.
 **Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
 definition ephemerally — nothing is persisted, nothing needs enabling. It waits for completion and
 returns step outputs and the failure message when a step throws. A custom workflow whose branch is
-`workflow.execute` needs its child saved first, because that step needs a saved workflow id. The
-installed document automation does not: its child is `system-context-engine-document-summary`,
-already installed, and you do not save or pilot that workflow.
+`workflow.execute` needs its child saved first, because that step needs a saved workflow id.
 
 **Read what it wrote, not whether it ran.** A workflow completes cleanly and still emits indicators
 with empty `content`, absent `attributes`, or titles too alike to tell apart under retrieval. Query
@@ -713,8 +709,7 @@ is neither: it does not confirm and it does not start a run.
 write the YAML and do not call
 `platform.context_engine.save_automation` for these. Installing the same template with the same
 `name` replaces that automation in place and keeps its workflow id, and the result says `replaced: true`; a different
-`name` adds another automation. The install does not start a run. The document summary workflow is
-`system-context-engine-document-summary`. It is not attached to the AI index.
+`name` adds another automation. The install does not start a run.
 
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save
 with the user before writing anything. It returns `workflowId`. Save the YAML the subagent returned.

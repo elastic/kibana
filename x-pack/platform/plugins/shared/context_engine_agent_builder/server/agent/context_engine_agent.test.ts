@@ -50,6 +50,16 @@ describe('Context Engine agent instructions', () => {
       );
     });
 
+    it('names no document summary workflow, which the document template does not use', () => {
+      expect(instructions).not.toMatch(/system-context-engine-document-summary/);
+    });
+
+    it('stops after a pilot that failed or wrote fewer indicators than it covered', () => {
+      expect(instructions).toMatch(
+        /unless it failed or wrote fewer indicators than it covered: then report that and stop/
+      );
+    });
+
     it('uses the catalog names for the template strategies, not variants of them', () => {
       expect(instructions).not.toMatch(/Cumulative entity-profile|Bottom-Up document/);
     });
