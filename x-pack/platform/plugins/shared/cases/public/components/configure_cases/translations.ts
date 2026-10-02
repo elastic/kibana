@@ -323,7 +323,7 @@ export const WORKFLOW_TAGS_DESCRIPTION = i18n.translate(
   'xpack.cases.configureCases.workflowTags.description',
   {
     defaultMessage:
-      'Select one or more tags to limit which workflows appear in Cases workflow selectors. When no tags are configured, all workflows are shown. Tags only filter the list; they do not restrict which workflows users can run.',
+      'Select one or more tags to limit which workflows appear in Cases workflow selectors. When no tags are configured, all workflows are shown. Tags only filter the list. They do not restrict which workflows users can run.',
   }
 );
 
