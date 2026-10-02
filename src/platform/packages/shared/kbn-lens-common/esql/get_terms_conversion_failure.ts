@@ -38,8 +38,8 @@ export interface TermsConversionContext {
  * Callers may combine eligible terms with other convertible categorical
  * buckets via `LIMIT n BY` (non-time-series). Date histogram remains unsupported.
  *
- * All blockers are evaluated so the priority list stays authoritative, but only
- * the first reason is returned — Convert tooltips show a single reason for now.
+ * All blockers are evaluated so the priority list stays authoritative; only the
+ * highest-priority reason is returned.
  */
 export const getTermsConversionFailure = (
   { params }: TermsIndexPatternColumn,
@@ -78,7 +78,6 @@ export const getTermsConversionFailure = (
     reasons.push('terms_order_by_not_supported');
   }
 
-  // Keep evaluating every gate above for a stable priority order, but surface
-  // only the highest-priority blocker until multi-reason tooltips are enabled.
+  // Evaluate every gate above for a stable priority order; return only the first.
   return reasons[0];
 };

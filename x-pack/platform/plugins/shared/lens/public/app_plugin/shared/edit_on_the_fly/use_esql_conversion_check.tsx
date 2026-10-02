@@ -24,9 +24,8 @@ import type { CoreStart } from '@kbn/core/public';
 
 import {
   generateEsqlQuery,
+  getFailureTooltip,
   isEsqlQuerySuccess,
-  esqlConversionFailureReasonMessages,
-  esqlConversionFailureTitle,
   type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
@@ -48,11 +47,14 @@ interface EsqlConversionSettings {
 
 const getEsqlConversionDisabledSettings = (
   reason: EsqlConversionFailureReason = 'unknown'
-): EsqlConversionSettings => ({
-  isConvertToEsqlButtonDisabled: true,
-  convertToEsqlButtonTooltip: `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages[reason]}`,
-  convertibleLayers: [],
-});
+): EsqlConversionSettings => {
+  const { title, message } = getFailureTooltip(reason);
+  return {
+    isConvertToEsqlButtonDisabled: true,
+    convertToEsqlButtonTooltip: `${title}: ${message}`,
+    convertibleLayers: [],
+  };
+};
 
 const getConvertibleLayerName = (layerId: string): string =>
   i18n.translate('xpack.lens.config.convertToEsqlLayerName', {

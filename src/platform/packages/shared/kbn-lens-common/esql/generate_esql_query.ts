@@ -407,8 +407,8 @@ export function generateEsqlQuery(
     hasDateHistogram,
     termsBucketCount: termsBuckets.length,
   };
-  // Prefer Top values blockers before other bucket failures; metric failures
-  // above still take precedence. One reason per terms column; take the first.
+  // Fail fast on terms blockers before building bucket expressions; metric
+  // failures above still take precedence. One reason per terms column; take the first.
   const termsFailureReason = termsBuckets
     .map(({ col }) => getTermsConversionFailure(col, termsConversionContext))
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
