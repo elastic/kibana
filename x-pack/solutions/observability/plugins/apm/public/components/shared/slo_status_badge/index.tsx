@@ -7,6 +7,7 @@
 
 import type { MouseEventHandler, ReactNode } from 'react';
 import React from 'react';
+import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -33,7 +34,7 @@ interface SloStatusConfig {
 
 export const SLO_COUNT_CAP = 50;
 
-export const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = {
+const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = {
   violated: {
     id: 'Violated',
     color: 'danger',
@@ -123,11 +124,37 @@ export const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = 
   },
 };
 
+/** The badge's inner row: the status icon, when the status has one, beside the caller's label. */
+const SloBadgeRow = ({
+  showIcon,
+  rowStyles,
+  children,
+}: {
+  showIcon: boolean;
+  rowStyles?: SerializedStyles;
+  children: ReactNode;
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false} css={rowStyles}>
+    {showIcon && (
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="chartGauge" aria-hidden={true} />
+      </EuiFlexItem>
+    )}
+    {children}
+  </EuiFlexGroup>
+);
+
 /** Presentation descriptor shared by {@link SloStatusBadge} and the service flyout header badge. */
 export interface SloStatusBadgeDescriptor {
   color: SloStatusConfig['color'];
-  /** Badge content (status icon + label) for the non-compact layout. */
+  /** Badge content (status icon + label) for the default, non-responsive layout. */
   label: ReactNode;
+  /** Label text alone, for callers composing their own row. */
+  labelText: string;
+  /** Whether the status has an icon beside its label. */
+  showIcon: boolean;
+  /** `sloCount` capped at {@link SLO_COUNT_CAP}; `undefined` when the status shows no count. */
+  cappedCount?: number | string;
   toolTipContent: string;
   ariaLabel: string;
 }
@@ -148,22 +175,22 @@ export function getSloStatusBadgeDescriptor({
         ? `${SLO_COUNT_CAP}+`
         : sloCount
       : undefined;
+  const labelText = config.badgeLabel(cappedCount);
+  const showIcon = sloStatus !== 'noSLOs';
 
   return {
     color: config.color,
     ariaLabel: config.ariaLabel(serviceName),
     toolTipContent: config.tooltipContent,
+    labelText,
+    showIcon,
+    cappedCount,
     label: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-        {sloStatus !== 'noSLOs' && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="chartGauge" aria-hidden={true} />
-          </EuiFlexItem>
-        )}
+      <SloBadgeRow showIcon={showIcon}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+          <EuiText size="xs">{labelText}</EuiText>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </SloBadgeRow>
     ),
   };
 }
@@ -194,16 +221,11 @@ export function SloStatusBadge({
 }) {
   /** Min-width `m` only — avoid `useEuiBreakpoint(['m','l','xl'])`, which can cap at `xl` and hide the wide label on larger viewports. */
   const mUpMedia = useEuiMinBreakpoint('m');
-  const config = SLO_STATUS_CONFIG[sloStatus];
-  const cappedCount =
-    config.showCount && sloCount
-      ? sloCount >= SLO_COUNT_CAP
-        ? `${SLO_COUNT_CAP}+`
-        : sloCount
-      : undefined;
+  const { color, label, labelText, showIcon, cappedCount, toolTipContent, ariaLabel } =
+    getSloStatusBadgeDescriptor({ sloStatus, sloCount, serviceName });
 
-  const useNarrowCompact =
-    compactLabelOnNarrowScreens && config.showCount && cappedCount !== undefined;
+  // `cappedCount` is only set for statuses that show a count, so it also stands in for that check.
+  const useNarrowCompact = compactLabelOnNarrowScreens && cappedCount !== undefined;
 
   const ebtProps = onClick && ebt ? getEbtProps(ebt) : {};
 
@@ -228,39 +250,22 @@ export function SloStatusBadge({
     <EuiBadge
       data-test-subj="apmSloBadge"
       data-slo-status={sloStatus}
-      color={config.color}
+      color={color}
       {...ebtProps}
-      {...(onClick
-        ? { onClick, onClickAriaLabel: config.ariaLabel(serviceName) }
-        : { 'aria-label': config.ariaLabel(serviceName) })}
+      {...(onClick ? { onClick, onClickAriaLabel: ariaLabel } : { 'aria-label': ariaLabel })}
     >
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        wrap={false}
-        css={responsiveCompactRowStyles}
-      >
-        {sloStatus !== 'noSLOs' && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="chartGauge" aria-hidden={true} />
+      {useNarrowCompact ? (
+        <SloBadgeRow showIcon={showIcon} rowStyles={responsiveCompactRowStyles}>
+          <EuiFlexItem grow={false} className="apmSloBadgeNarrowCount">
+            <EuiText size="xs">{cappedCount}</EuiText>
           </EuiFlexItem>
-        )}
-        {useNarrowCompact ? (
-          <>
-            <EuiFlexItem grow={false} className="apmSloBadgeNarrowCount">
-              <EuiText size="xs">{cappedCount}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="apmSloBadgeWideLabel">
-              <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
-            </EuiFlexItem>
-          </>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+          <EuiFlexItem grow={false} className="apmSloBadgeWideLabel">
+            <EuiText size="xs">{labelText}</EuiText>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+        </SloBadgeRow>
+      ) : (
+        label
+      )}
     </EuiBadge>
   );
 
@@ -270,14 +275,14 @@ export function SloStatusBadge({
 
   if (onClick) {
     return (
-      <EuiToolTip position="bottom" content={config.tooltipContent}>
+      <EuiToolTip position="bottom" content={toolTipContent}>
         {badge}
       </EuiToolTip>
     );
   }
 
   return (
-    <EuiToolTip position="bottom" content={config.tooltipContent}>
+    <EuiToolTip position="bottom" content={toolTipContent}>
       <span tabIndex={0}>{badge}</span>
     </EuiToolTip>
   );
