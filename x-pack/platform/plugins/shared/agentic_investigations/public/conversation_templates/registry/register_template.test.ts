@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import {
@@ -14,6 +16,7 @@ import {
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import { escalationTemplate } from '../templates/escalation/register';
 import { investigationTemplate } from '../templates/investigation/register';
+import { resetInvestigationsPrivilegesCache } from '../../investigations/hooks/use_can_manage_investigations';
 import { registerTemplate } from './register_template';
 
 jest.mock('@kbn/agentic-investigations-common', () => ({
@@ -26,17 +29,12 @@ const mockRegisterInvestigation = registerAgenticInvestigationTemplateUI as jest
 const mockRegisterEscalation = registerEscalationTemplateUI as jest.Mock;
 
 const register = ({
-  capabilities = {},
   proposals,
+  core = coreMock.createStart(),
 }: {
-  capabilities?: Record<string, boolean>;
   proposals?: ProposalsPublicPluginStart;
+  core?: ReturnType<typeof coreMock.createStart>;
 } = {}) => {
-  const core = coreMock.createStart();
-  core.application.capabilities = {
-    ...core.application.capabilities,
-    agenticInvestigations: capabilities,
-  };
   registerTemplate({
     core,
     startDeps: { agentBuilder: agentBuilderMocks.createStart(), proposals },
@@ -51,6 +49,7 @@ const register = ({
 describe('registerTemplate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetInvestigationsPrivilegesCache();
   });
 
   it('registers both templates with the shared names and icons', () => {
@@ -68,40 +67,17 @@ describe('registerTemplate', () => {
     );
   });
 
-  it('renders only read-only slots without the agentic investigations capabilities', () => {
+  it('registers every write slot without the UI capabilities, so they can decide at render time', () => {
+    // A user can hold the API privileges through another feature, which the privileges probe
+    // reports only after `start`, so registration does not depend on the UI capabilities.
     const { investigation, escalation } = register();
 
     expect(investigation.renderAssignees).toEqual(expect.any(Function));
-    expect(investigation.renderStatus).toBeUndefined();
-    expect(investigation.renderCloseInvestigationModal).toBeUndefined();
-    expect(investigation.renderEscalationModal).toBeUndefined();
-    expect(escalation.renderAssignees).toEqual(expect.any(Function));
-    expect(escalation.renderStatus).toBeUndefined();
-    expect(escalation.renderLinkedInvestigations).toBeUndefined();
-  });
-
-  it('enables the investigation write actions with manageInvestigations', () => {
-    const { investigation, escalation } = register({
-      capabilities: { manageInvestigations: true },
-    });
-
     expect(investigation.renderStatus).toEqual(expect.any(Function));
     expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
-    expect(investigation.renderEscalationModal).toBeUndefined();
-    // Closing an escalation needs manageEscalations too.
-    expect(escalation.renderStatus).toBeUndefined();
-  });
-
-  it('enables the escalation actions with the escalation capabilities', () => {
-    const { investigation, escalation } = register({
-      capabilities: {
-        manageInvestigations: true,
-        manageEscalations: true,
-        showEscalations: true,
-      },
-    });
-
     expect(investigation.renderEscalationModal).toEqual(expect.any(Function));
+    expect(investigation.wrapEscalationButton).toEqual(expect.any(Function));
+    expect(escalation.renderAssignees).toEqual(expect.any(Function));
     expect(escalation.renderStatus).toEqual(expect.any(Function));
     expect(escalation.renderLinkedInvestigations).toEqual(expect.any(Function));
   });
@@ -114,5 +90,42 @@ describe('registerTemplate', () => {
     expect(register({ proposals: {} }).investigation.renderProposedActions).toEqual(
       expect.any(Function)
     );
+  });
+
+  describe('the escalation button without the UI capability', () => {
+    const renderButton = (manageEscalations: boolean) => {
+      const core = coreMock.createStart();
+      core.http.get.mockResolvedValue({
+        investigations: { read: true, manage: true },
+        escalations: { read: manageEscalations, manage: manageEscalations },
+      });
+      const { investigation } = register({ core });
+      render(
+        React.createElement(
+          React.Fragment,
+          null,
+          investigation.wrapEscalationButton(
+            React.createElement('button', { type: 'button' }, 'Open escalation')
+          )
+        )
+      );
+      return core;
+    };
+
+    it('shows the button when the probe reports the escalations manage privilege', async () => {
+      const core = renderButton(true);
+
+      expect(await screen.findByRole('button', { name: 'Open escalation' })).toBeInTheDocument();
+      expect(core.http.get).toHaveBeenCalledWith('/internal/investigations/_privileges', {
+        version: '1',
+      });
+    });
+
+    it('hides the button when the probe reports no escalations manage privilege', async () => {
+      const core = renderButton(false);
+
+      await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+      expect(screen.queryByRole('button', { name: 'Open escalation' })).not.toBeInTheDocument();
+    });
   });
 });

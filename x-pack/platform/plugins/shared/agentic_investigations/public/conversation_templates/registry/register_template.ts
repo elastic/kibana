@@ -8,7 +8,6 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { RenderAssignees, RenderStatus } from '@kbn/agentic-investigations-common';
-import { getAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import { EscalationModalBoundary } from '../shared/escalation_modal/escalation_modal_boundary';
 import type {
   TemplateDefinition,
@@ -25,7 +24,8 @@ export interface RegisterTemplateOptions {
 
 /**
  * Registers the conversation details flyout UI of the given conversation templates. Write actions
- * are gated on the agentic investigations UI capabilities.
+ * are gated at render time on the agentic investigations UI capabilities or, without them, on the
+ * API privileges the privileges probe reports (see `PrivilegeGate`).
  */
 export const registerTemplate = ({ core, startDeps, templates }: RegisterTemplateOptions): void => {
   const services: TemplateServices = { ...core, ...startDeps };
@@ -97,7 +97,6 @@ export const registerTemplate = ({ core, startDeps, templates }: RegisterTemplat
     core,
     startDeps,
     services,
-    capabilities: getAgenticInvestigationsCapabilities(core.application.capabilities),
     makeLazyWithProviders,
     renderAssignees,
     renderStatus,

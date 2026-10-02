@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   registerAgenticInvestigationTemplateUI,
   type CloseInvestigationModalRenderProps,
+  type EscalationModalRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
@@ -29,24 +30,33 @@ export const investigationTemplate: TemplateDefinition = {
     templateId,
     startDeps,
     services,
-    capabilities,
     makeLazyWithProviders,
     renderAssignees,
     renderStatus,
   }) => {
     const { agentBuilder, proposals } = startDeps;
-    const {
-      manageEscalations: canManageEscalations,
-      manageInvestigations: canManageInvestigations,
-    } = capabilities;
 
-    const LazyEscalationModal = makeLazyWithProviders(async () => {
-      const { ConnectedEscalationModal } = await import(
-        '../../shared/escalation_modal/connected_escalation_modal'
-      );
-      return ConnectedEscalationModal as React.ComponentType<
-        React.ComponentProps<typeof ConnectedEscalationModal>
-      >;
+    // Write actions are registered unconditionally and decide at render time, inside these lazy
+    // chunks, whether the user may use them: the privileges probe cannot answer during `start`.
+    const LazyEscalationModal = makeLazyWithProviders<EscalationModalRenderProps>(async () => {
+      const [{ ConnectedEscalationModal }, { PrivilegeGate }] = await Promise.all([
+        import('../../shared/escalation_modal/connected_escalation_modal'),
+        import('../../shared/privileges/privilege_gate'),
+      ]);
+      const GatedEscalationModal: React.FC<EscalationModalRenderProps> = (props) =>
+        React.createElement(
+          PrivilegeGate,
+          { privilege: 'manageEscalations' },
+          React.createElement(ConnectedEscalationModal, props)
+        );
+      return GatedEscalationModal;
+    });
+
+    const LazyManageEscalationsGate = makeLazyWithProviders<React.PropsWithChildren>(async () => {
+      const { PrivilegeGate } = await import('../../shared/privileges/privilege_gate');
+      const ManageEscalationsGate: React.FC<React.PropsWithChildren> = ({ children }) =>
+        React.createElement(PrivilegeGate, { privilege: 'manageEscalations' }, children);
+      return ManageEscalationsGate;
     });
 
     // Shares `getSharedInvestigationsQueryClient()` with a solution's queue page rather than
@@ -80,23 +90,29 @@ export const investigationTemplate: TemplateDefinition = {
       return { default: WrappedSlot };
     });
 
-    const LazyConnectedCloseInvestigationModal = makeLazyWithProviders(async () => {
-      const { ConnectedCloseInvestigationModal } = await import(
-        '../../shared/connected_status/connected_close_investigation_modal'
-      );
-      return ConnectedCloseInvestigationModal as React.ComponentType<
-        React.ComponentProps<typeof ConnectedCloseInvestigationModal>
-      >;
-    });
-
-    const renderCloseInvestigationModal = canManageInvestigations
-      ? (props: CloseInvestigationModalRenderProps) =>
+    const LazyConnectedCloseInvestigationModal =
+      makeLazyWithProviders<CloseInvestigationModalRenderProps>(async () => {
+        const [{ ConnectedCloseInvestigationModal }, { PrivilegeGate }] = await Promise.all([
+          import('../../shared/connected_status/connected_close_investigation_modal'),
+          import('../../shared/privileges/privilege_gate'),
+        ]);
+        const GatedCloseInvestigationModal: React.FC<CloseInvestigationModalRenderProps> = (
+          props
+        ) =>
           React.createElement(
-            EscalationModalBoundary,
-            null,
-            React.createElement(LazyConnectedCloseInvestigationModal, props)
-          )
-      : undefined;
+            PrivilegeGate,
+            { privilege: 'manageInvestigations' },
+            React.createElement(ConnectedCloseInvestigationModal, props)
+          );
+        return GatedCloseInvestigationModal;
+      });
+
+    const renderCloseInvestigationModal = (props: CloseInvestigationModalRenderProps) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedCloseInvestigationModal, props)
+      );
 
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
@@ -104,16 +120,21 @@ export const investigationTemplate: TemplateDefinition = {
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'magnifyExclamation',
       renderAssignees,
-      renderStatus: canManageInvestigations ? renderStatus : undefined,
+      // The toggle itself disables when the user may not change the status.
+      renderStatus,
       renderCloseInvestigationModal,
-      renderEscalationModal: canManageEscalations
-        ? (props) =>
-            React.createElement(
-              EscalationModalBoundary,
-              null,
-              React.createElement(LazyEscalationModal, props)
-            )
-        : undefined,
+      renderEscalationModal: (props) =>
+        React.createElement(
+          EscalationModalBoundary,
+          null,
+          React.createElement(LazyEscalationModal, props)
+        ),
+      wrapEscalationButton: (button) =>
+        React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(LazyManageEscalationsGate, null, button)
+        ),
       // Listing and deciding proposals needs the proposals plugin, which is optional here.
       renderProposedActions: proposals
         ? (props) =>

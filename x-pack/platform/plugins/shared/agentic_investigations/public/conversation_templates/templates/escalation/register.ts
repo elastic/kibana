@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   registerEscalationTemplateUI,
+  type LinkedInvestigationsSlotRenderProps,
   type RenderLinkedInvestigations,
 } from '@kbn/agentic-investigations-common';
 import { ESCALATION_TEMPLATE_ID } from '../../../../common';
@@ -28,27 +29,25 @@ const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
 /** The `escalation` template: status and the linked investigations. */
 export const escalationTemplate: TemplateDefinition = {
   templateId: ESCALATION_TEMPLATE_ID,
-  register: ({
-    templateId,
-    startDeps,
-    capabilities,
-    makeLazyWithProviders,
-    renderAssignees,
-    renderStatus,
-  }) => {
+  register: ({ templateId, startDeps, makeLazyWithProviders, renderAssignees, renderStatus }) => {
     const { agentBuilder } = startDeps;
-    const {
-      manageEscalations: canManageEscalations,
-      manageInvestigations: canManageInvestigations,
-      showEscalations: canShowEscalations,
-    } = capabilities;
 
-    const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
-      const { ConnectedLinkedInvestigations } = await import('./flyout/linked_investigations');
-      return ConnectedLinkedInvestigations as React.ComponentType<
-        React.ComponentProps<typeof ConnectedLinkedInvestigations>
-      >;
-    });
+    // Registered unconditionally: whether the user may see escalations is decided at render time,
+    // inside the lazy chunk, because the privileges probe cannot answer during `start`.
+    const LazyConnectedLinkedInvestigations =
+      makeLazyWithProviders<LinkedInvestigationsSlotRenderProps>(async () => {
+        const [{ ConnectedLinkedInvestigations }, { PrivilegeGate }] = await Promise.all([
+          import('./flyout/linked_investigations'),
+          import('../../shared/privileges/privilege_gate'),
+        ]);
+        const GatedLinkedInvestigations: React.FC<LinkedInvestigationsSlotRenderProps> = (props) =>
+          React.createElement(
+            PrivilegeGate,
+            { privilege: 'readEscalations' },
+            React.createElement(ConnectedLinkedInvestigations, props)
+          );
+        return GatedLinkedInvestigations;
+      });
 
     const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
       React.createElement(
@@ -63,8 +62,9 @@ export const escalationTemplate: TemplateDefinition = {
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
-      renderStatus: canManageEscalations && canManageInvestigations ? renderStatus : undefined,
-      renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
+      // The toggle itself disables when the user may not change the status.
+      renderStatus,
+      renderLinkedInvestigations,
     });
   },
 };
