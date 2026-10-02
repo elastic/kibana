@@ -47,6 +47,7 @@ export {
 export {
   OverviewTab,
   type OverviewTabProps,
+  type OverviewSections,
 } from './src/components/details/details_flyout_tab_contents';
 export {
   EscalationFlyoutHeader,
@@ -89,6 +90,12 @@ export {
   type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
   type LinkedInvestigationsSlotRenderProps,
+  type RenderOverview,
+  type OverviewSlotRenderProps,
+  type RenderLiveState,
+  type LiveStateSlotRenderProps,
+  type RenderTitle,
+  type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {
   LinkedInvestigationsList,

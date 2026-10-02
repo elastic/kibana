@@ -18,7 +18,7 @@ import type { AgenticInvestigationsConfig } from './config';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
-import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
+import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
 import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
@@ -41,6 +41,13 @@ import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
+import { deleteInvestigationDataAcrossSpaces } from './investigations/services/delete_investigation_data_across_spaces';
+import { InvestigationDriverWorkflowRegistry } from './investigations/services/driver_workflows';
+import { InProgressResolver } from './investigations/services/in_progress';
+import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
+import { createInvestigationsClient } from './investigations/services/investigations_client';
+import { createGetInvestigationTool } from './investigations/tools/get_investigation_tool';
+import { createConversationReadCheck } from './investigation_attachments';
 import { createUserResolver } from './services/resolve_user';
 import type { ResolveUser } from './services/resolve_user';
 import type {
@@ -67,6 +74,11 @@ export class AgenticInvestigationsPlugin
   private escalationsService?: EscalationsService;
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
+  private investigationsQueryService?: InvestigationsQueryService;
+  private readonly driverWorkflows = new InvestigationDriverWorkflowRegistry();
+  private workflowsManagement?: NonNullable<
+    AgenticInvestigationsSetupDependencies['workflowsManagement']
+  >['management'];
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
@@ -78,31 +90,45 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
+    {
+      features,
+      workflowsExtensions,
+      agentBuilder,
+      workflowsManagement,
+    }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
+    // Executions API lives on the setup contract only.
+    this.workflowsManagement = workflowsManagement?.management;
 
     // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
     // captured here — `security.authz` does not exist yet.
-    const impactPrivileges = createImpactPrivilegesChecker({
+    const investigationsPrivileges = createInvestigationsPrivilegesChecker({
       getSecurity: async () => (await coreSetup.getStartServices())[1].security,
       logger: this.logger,
     });
 
+    const assertCanReadConversation = createConversationReadCheck({
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
     registerImpactAttachment(agentBuilder, {
       getImpactService: () => this.requireImpactService(),
-      privileges: impactPrivileges,
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
       logger: this.logger,
     });
     registerSubjectAttachment(agentBuilder, {
       getSubjectsService: () => this.requireSubjectsService(),
-      privileges: impactPrivileges,
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
       logger: this.logger,
     });
     registerHypothesesAttachment(agentBuilder, {
       getHypothesesService: () => this.requireHypothesesService(),
-      privileges: impactPrivileges,
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
       logger: this.logger,
     });
 
@@ -110,7 +136,7 @@ export class AgenticInvestigationsPlugin
       createSetImpactTool({
         getImpactService: () => this.requireImpactService(),
         resolveUser: (request) => this.requireUserResolver()(request),
-        privileges: impactPrivileges,
+        privileges: investigationsPrivileges,
         logger: this.logger,
       })
     );
@@ -118,7 +144,15 @@ export class AgenticInvestigationsPlugin
       createSetHypothesesTool({
         getHypothesesService: () => this.requireHypothesesService(),
         resolveUser: (request) => this.requireUserResolver()(request),
-        privileges: impactPrivileges,
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+
+    agentBuilder.tools.register(
+      createGetInvestigationTool({
+        getQueryService: () => this.requireInvestigationsQueryService(),
+        privileges: investigationsPrivileges,
         logger: this.logger,
       })
     );
@@ -127,7 +161,7 @@ export class AgenticInvestigationsPlugin
       workflowsExtensions,
       getImpactService: () => this.requireImpactService(),
       resolveUser: (request) => this.requireUserResolver()(request),
-      privileges: impactPrivileges,
+      privileges: investigationsPrivileges,
       getAttachmentClient: (request) => this.getAttachmentClient(request),
       getConversationClient: (request) => this.getConversationClient(request),
     });
@@ -159,6 +193,7 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
       getAssignmentsService: () => this.requireAssignmentsService(),
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getInvestigationsQueryService: () => this.requireInvestigationsQueryService(),
       privileges: createInvestigationsPrivilegesReader({
         getSecurity: async () => (await coreSetup.getStartServices())[1].security,
         escalationsEnabled: this.escalationsEnabled,
@@ -171,7 +206,9 @@ export class AgenticInvestigationsPlugin
       getConversationClient: (request) => this.getConversationClient(request),
     });
 
-    return {};
+    return {
+      registerInvestigationWorkflow: (workflowId) => this.driverWorkflows.register(workflowId),
+    };
   }
 
   start(
@@ -214,6 +251,22 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    this.investigationsQueryService = new InvestigationsQueryService({
+      getConversationClient: (request) => this.getConversationClient(request),
+      getSpaceId: (request) => this.getSpaceId(request),
+      getImpactService: () => this.requireImpactService(),
+      getSubjectsService: () => this.requireSubjectsService(),
+      getHypothesesService: () => this.requireHypothesesService(),
+      getProposals: () => plugins.proposals,
+      inProgress: new InProgressResolver({
+        getAgentExecutions: () => plugins.agentBuilder.execution,
+        getWorkflowsManagement: () => this.workflowsManagement,
+        driverWorkflows: this.driverWorkflows,
+        logger: this.logger,
+      }),
+      logger: this.logger,
+    });
+
     if (this.escalationsEnabled) {
       this.escalationsService = new EscalationsService({
         logger: this.logger,
@@ -229,7 +282,7 @@ export class AgenticInvestigationsPlugin
         plugins.agentBuilder.conversations.getScopedClient({ request }),
     });
 
-    const startPrivileges = createImpactPrivilegesChecker({
+    const startPrivileges = createInvestigationsPrivilegesChecker({
       getSecurity: async () => plugins.security,
       logger: this.logger,
     });
@@ -247,9 +300,35 @@ export class AgenticInvestigationsPlugin
       getAttachmentClient: (request) => this.getAttachmentClient(request),
     });
 
+    const getInvestigationsClient = createInvestigationsClient({
+      getQueryService: () => this.requireInvestigationsQueryService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      deleteAllInSpace: async (spaceId) => {
+        const { subjects, claims } = await this.requireSubjectsService().deleteAllInSpace(spaceId);
+        const impact = await this.requireImpactService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        const hypotheses = await this.requireHypothesesService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        return { subjects, subjectClaims: claims, impact, hypotheses };
+      },
+    });
+
     return {
       getImpactClient,
       getSubjectsClient,
+      getInvestigationsClient,
+      deleteSubjectInvestigationDataAcrossSpaces: () => {
+        const subjects = this.requireSubjectsService();
+        return deleteInvestigationDataAcrossSpaces({
+          subjects: subjects.getDocumentService(),
+          impact: this.requireImpactService().getDocumentService(),
+          hypotheses: this.requireHypothesesService().getDocumentService(),
+          deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
+        });
+      },
       getEscalationsService: () => this.requireEscalationsService(),
     };
   }
@@ -279,6 +358,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.hypothesesService;
+  }
+
+  private requireInvestigationsQueryService(): InvestigationsQueryService {
+    if (!this.investigationsQueryService) {
+      throw new Error(
+        'Investigations query service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationsQueryService;
   }
 
   private requireEscalationsService(): EscalationsService {

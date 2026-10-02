@@ -10,8 +10,9 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { attachImpactStepInputSchema } from '../../../common/impact/step_types/attach_impact_step';
 import type { ImpactService } from '../services/impact_service';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
-import { ImpactConflictError, ImpactForbiddenError, ImpactNotFoundError } from '../services/errors';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { ImpactConflictError, ImpactNotFoundError } from '../services/errors';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { getAttachImpactStepDefinition } from './attach_impact_step';
 import { getGetImpactStepDefinition } from './get_impact_step';
 
@@ -26,7 +27,7 @@ const resolvedUser = {
 };
 const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
 
-const allowAll = (): jest.Mocked<ImpactPrivilegesChecker> => ({
+const allowAll = (): jest.Mocked<InvestigationsPrivilegesChecker> => ({
   assertCanManage: jest.fn().mockResolvedValue(undefined),
   assertCanRead: jest.fn().mockResolvedValue(undefined),
 });
@@ -141,7 +142,7 @@ describe('investigations.attachImpact step', () => {
   it('should assert manage before writing anything', async () => {
     const attach = jest.fn();
     const privileges = allowAll();
-    privileges.assertCanManage.mockRejectedValue(new ImpactForbiddenError('nope'));
+    privileges.assertCanManage.mockRejectedValue(new InvestigationsForbiddenError('nope'));
     const { definition } = createDefinition(attach, privileges);
 
     await expect(
@@ -274,7 +275,7 @@ describe('investigations.getImpact step', () => {
   it('should fail the step when the reader lacks the privilege', async () => {
     const getByConversationId = jest.fn();
     const privileges = allowAll();
-    privileges.assertCanRead.mockRejectedValue(new ImpactForbiddenError('nope'));
+    privileges.assertCanRead.mockRejectedValue(new InvestigationsForbiddenError('nope'));
 
     await expect(
       getDefinition(getByConversationId, privileges).handler(
