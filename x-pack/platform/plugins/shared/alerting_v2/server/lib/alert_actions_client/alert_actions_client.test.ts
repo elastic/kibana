@@ -74,7 +74,7 @@ describe('AlertActionsClient', () => {
         episode_id: null,
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
-        actor: 'test-uid',
+        actor: { type: 'user', profile_uid: 'test-uid' },
         space_id: 'default',
       });
     });
@@ -115,7 +115,7 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
-    it('handles null profile uid when security is not available', async () => {
+    it('records a user actor without profile_uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
       userProfileService.getCurrentProfileId.mockResolvedValueOnce(null);
 
@@ -124,7 +124,8 @@ describe('AlertActionsClient', () => {
         action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       });
 
-      expect(getDocs()[0]).toMatchObject({ actor: null });
+      expect(getDocs()[0]).toMatchObject({ actor: { type: 'user' } });
+      expect(getDocs()[0]).not.toHaveProperty(['actor', 'profile_uid']);
     });
   });
 
@@ -153,7 +154,7 @@ describe('AlertActionsClient', () => {
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
         episode_id: 'episode-3',
         group_hash: 'resolved-group',
-        actor: 'test-uid',
+        actor: { type: 'user', profile_uid: 'test-uid' },
       });
       expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
         expect.objectContaining({ episode_id: 'episode-3' }),
@@ -230,7 +231,7 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-3', status: 'inactive' },
+        alert: { id: 'episode-3', status: 'inactive' },
         status: 'recovered',
       });
       expect(operations[2]).toEqual({ create: { _index: '.alert-actions' } });
@@ -540,7 +541,7 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-1', status: 'active' },
+        alert: { id: 'episode-1', status: 'active' },
         status: 'breached',
       });
       expect(operations[3]).toMatchObject({
