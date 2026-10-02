@@ -16,7 +16,6 @@ const HTTP_MAX_INITIAL_LINE_LENGTH = 4096;
 // https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules
 const MAX_RESULT_WINDOW = 10_000;
 // `EsqlParser.MAX_LENGTH`, in characters.
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const ESQL_MAX_QUERY_LENGTH = 1_000_000;
 // Elasticsearch documents no limit on the number of search targets, sort clauses, _source
 // fields, aggregations, runtime mappings, or ES|QL params.

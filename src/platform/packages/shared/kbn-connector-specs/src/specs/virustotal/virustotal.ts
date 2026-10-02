@@ -34,7 +34,6 @@ const VIRUSTOTAL_URL_SCHEMA = z.url({
 });
 
 // VirusTotal accepts direct file uploads up to 32 MB; base64 encoding inflates that by 4/3.
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const VIRUSTOTAL_MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((32 * 1024 * 1024) / 3);
 // VirusTotal documents no URL length limit; URLs beyond 2048 characters are legal.
 const MAX_URL_LENGTH = 8192;

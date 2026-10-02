@@ -12,7 +12,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const DEFAULT_MAX_RESULTS = 1000;
 const MAX_RESULTS_LIMIT = 10000;
 const MAX_TIMEOUT_MS = 300000;
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_UNRESOLVED_QUERY_BYTES = 1024 * 1024;
 const MAX_LOCATION_LENGTH = 64;
 const MAX_PROJECT_ID_LENGTH = 200;
