@@ -75,6 +75,8 @@ export const AutomationsPanel = ({
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
+  const canCreateWorkflow = application.capabilities.workflowsManagement?.createWorkflow === true;
+
   const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
 
   const handleCreate = async () => {
@@ -94,7 +96,11 @@ export const AutomationsPanel = ({
 
   const canAddMore = automations.length < MAX_AI_INDEX_AUTOMATIONS;
   const hasAutomations = automations.length > 0;
-  const createTooltip = !canAddMore
+  const createTooltip = !canCreateWorkflow
+    ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.missingCreateWorkflowTooltip', {
+        defaultMessage: 'You need the Workflows create privilege to create a workflow.',
+      })
+    : !canAddMore
     ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.maxAutomationsTooltip', {
         defaultMessage: 'You have reached the maximum number of automations.',
       })
@@ -130,7 +136,7 @@ export const AutomationsPanel = ({
       key="create"
       icon="workflow"
       onClick={handleCreate}
-      disabled={isCreating || !canAddMore}
+      disabled={isCreating || !canAddMore || !canCreateWorkflow}
       toolTipContent={createTooltip}
       data-test-subj="contextCreateAutomationButton"
       {...getEbtProps({
