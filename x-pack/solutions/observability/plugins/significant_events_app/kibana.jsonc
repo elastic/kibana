@@ -12,6 +12,7 @@
     "requiredPlugins": [
       "charts",
       "data",
+      "inference",
       "licensing",
       "nightshiftSources",
       "share",
@@ -19,7 +20,7 @@
       "unifiedSearch",
     ],
     "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
-    "requiredBundles": ["esql", "kibanaReact", "observabilityAIAssistant", "stackConnectors"],
+    "requiredBundles": ["esql", "kibanaReact", "stackConnectors"],
     "extraPublicDirs": ["common"],
   },
 }

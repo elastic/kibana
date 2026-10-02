@@ -1159,6 +1159,11 @@ Back returns to the conversation details flyout. Closing any flyout in the group
 A flyout opened with a different `historyKey` hides the conversation details flyout until it closes,
 with no Back button.
 
+In the full-screen conversation, Agent Builder's own flyouts (canvas, trace, execution JSON, tool
+response, sub-agent execution, clarification questions) join the same group, so they stack on top of
+the conversation details flyout and of each other. Outside-click doesn't close them; use Back, the
+close button or Escape. In the embeddable sidebar these flyouts are not managed and don't stack.
+
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.

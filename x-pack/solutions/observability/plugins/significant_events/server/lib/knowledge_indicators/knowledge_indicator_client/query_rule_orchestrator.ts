@@ -515,6 +515,10 @@ export class QueryRuleOrchestrator {
     return this.rulesManagementClient.findStreamNamesWithOwnedRules();
   }
 
+  findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return this.rulesManagementClient.findOwnedRuleIds(streamName);
+  }
+
   async reconcileStream(
     sourceId: string
   ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {

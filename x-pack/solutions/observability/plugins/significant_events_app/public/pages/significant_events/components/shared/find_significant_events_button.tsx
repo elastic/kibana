@@ -92,7 +92,6 @@ export const FindSignificantEventsButton = ({
       buildPanels={buildPanels}
       color="text"
       size={size}
-      hideModelSettings
       data-test-subj="significant_events_discovery_split_button"
     />
   );

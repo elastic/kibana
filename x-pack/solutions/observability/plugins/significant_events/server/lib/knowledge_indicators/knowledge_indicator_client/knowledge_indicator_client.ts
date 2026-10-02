@@ -98,6 +98,10 @@ export class KnowledgeIndicatorClient {
     return computeExpiresAt(new Date().toISOString(), this.ttlDays);
   }
 
+  countKnowledgeIndicators(type: KnowledgeIndicatorType): Promise<number> {
+    return this.reader.countKnowledgeIndicators(type);
+  }
+
   keepAlivePersistentIndicators(
     sourceId: string,
     options: { lastRefreshedBefore: string }
@@ -203,6 +207,10 @@ export class KnowledgeIndicatorClient {
   /** Source ids that still have a Nightshift-owned rule. One tag-prefix lookup. */
   findStreamNamesWithOwnedRules(): Promise<string[]> {
     return this.orchestrator.findStreamNamesWithOwnedRules();
+  }
+
+  findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return this.orchestrator.findOwnedRuleIds(streamName);
   }
 
   findIndicators(

@@ -22,6 +22,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { deriveQueryType, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { installKIQueryGenerationAgent } from '../../../../agent_builder/agents/ki_query_generation';
@@ -609,7 +610,7 @@ const generateQueriesRoute = createServerRoute({
           .max(MAX_ID_LENGTH)
           .optional()
           .describe(
-            'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
+            'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
           ),
         runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
       })
@@ -671,7 +672,15 @@ const generateQueriesRoute = createServerRoute({
       {
         kiClient,
         agentBuilder: server.agentBuilder,
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        resolveModel: (requestedId) =>
+          resolveNightshiftModelForRequest({
+            request,
+            inference: server.inference,
+            savedObjects: server.core.savedObjects,
+            uiSettings: server.core.uiSettings,
+            step: 'kiQueryGeneration',
+            requestedId,
+          }),
         request,
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),

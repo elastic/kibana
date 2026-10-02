@@ -8,14 +8,9 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import {
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  type SignificantEventsQueriesGenerationResult,
-} from '@kbn/significant-events-schema';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 export interface GenerateKIQueriesParams {
@@ -27,7 +22,7 @@ export interface GenerateKIQueriesParams {
 export interface GenerateKIQueriesDependencies {
   kiClient: KnowledgeIndicatorClient;
   agentBuilder: AgentBuilderPluginStart;
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
+  resolveModel: (requestedId?: string) => Promise<string>;
   request: KibanaRequest;
   logger: Logger;
   signal: AbortSignal;
@@ -39,17 +34,9 @@ export async function generateKIQueries(
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
   const { source, connectorId: connectorIdOverride, runId } = params;
-  const { kiClient, agentBuilder, searchInferenceEndpoints, request, logger, signal, telemetry } =
-    deps;
+  const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
 
-  const connectorId =
-    connectorIdOverride ??
-    (await resolveConnectorForFeature({
-      searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-      featureName: 'query generation',
-      request,
-    }));
+  const connectorId = await resolveModel(connectorIdOverride);
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 

@@ -16,6 +16,7 @@ import {
 import { combineWhere, inPredicate, inSpace, IS_NOT_DELETED } from '../esql_helpers';
 import {
   esqlToObjects,
+  executeCountQuery,
   executeAndDecodeSource,
   pickLatestPerGroup,
   withSort,
@@ -46,6 +47,19 @@ export class RevisionReader {
     private readonly logger: Logger,
     private readonly space: string
   ) {}
+
+  async countLatestRevisions(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition
+  ): Promise<number> {
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']);
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = withWhere(query, postGroupingWhere);
+    query = query.pipe`STATS total = COUNT(*)`.keep('total').limit(1);
+
+    return executeCountQuery({ esClient: this.esClient, query });
+  }
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,

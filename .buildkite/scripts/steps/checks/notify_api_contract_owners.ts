@@ -23,6 +23,8 @@ export interface ImpactEntry {
   source?: string;
   tier: Tier;
   since?: string;
+  reportOnly?: boolean;
+  policyReason?: string;
 }
 
 interface ImpactReport {
@@ -81,29 +83,66 @@ ${renderTable(entries)}
 `;
 };
 
+const renderReportOnlySection = (entries: ImpactEntry[]): string => {
+  if (entries.length === 0) {
+    return '';
+  }
+  const reasons = [...new Set(entries.map((e) => e.policyReason).filter(Boolean))]
+    .map((reason) => `- ${reason}`)
+    .join('\n');
+
+  return `### Reported only — not blocking merge (${entries.length})
+
+These match oasdiff rules Kibana treats as additive, so they do not fail this check. A release note may still be worth adding.
+
+${reasons ? `${reasons}\n\n` : ''}${renderTable(entries)}
+`;
+};
+
 export const buildCommentBody = (entries: ImpactEntry[]): string => {
+  const gating = entries.filter((e) => !e.reportOnly);
+
   const gatingSections = [
     renderTierSection(
       'stable',
-      entries.filter((e) => e.tier === 'stable')
+      gating.filter((e) => e.tier === 'stable')
     ),
     renderTierSection(
       'tech_preview',
-      entries.filter((e) => e.tier === 'tech_preview')
+      gating.filter((e) => e.tier === 'tech_preview')
     ),
   ]
     .filter(Boolean)
     .join('\n');
 
   const experimentalSection = renderExperimentalSection(
-    entries.filter((e) => e.tier === 'experimental')
+    gating.filter((e) => e.tier === 'experimental')
   );
 
-  const sections = [gatingSections, experimentalSection].filter(Boolean).join('\n');
+  const reportOnlySection = renderReportOnlySection(entries.filter((e) => e.reportOnly));
+
+  const sections = [gatingSections, experimentalSection, reportOnlySection]
+    .filter(Boolean)
+    .join('\n');
+
+  const hasGating = gating.some((e) => e.tier !== 'experimental');
+
+  if (!hasGating) {
+    return `## API Contract Breaking Changes
+
+No stable or Technical Preview breaking changes were detected. The change(s) below are informational and do not fail this check.
+
+${sections}
+### What to do
+
+Nothing here blocks merge. Consider whether a release note is worth adding for the listed change(s).
+
+See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the rule policy.`;
+  }
 
   return `## API Contract Breaking Changes
 
-The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental changes are informational.
+The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental and reported-only changes are informational.
 
 ${sections}
 ### What to do

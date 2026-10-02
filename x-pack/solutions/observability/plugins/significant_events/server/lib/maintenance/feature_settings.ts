@@ -21,6 +21,7 @@ import {
   SCHEDULED_DISCOVERY_WORKFLOW_IDS,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
+import { toMessage } from './to_message';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -36,8 +37,13 @@ export interface PausedFeatureSettings {
   scheduledDiscoveryEnabledSpaceIds: SpaceId[];
 }
 
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+/**
+ * Toggles that still read on after Reset failed to turn them off. Continuous
+ * onboarding is per space, so it lists the spaces rather than carrying a flag.
+ */
+export interface StillOnFeatureSettings extends PausedFeatureSettings {
+  continuousOnboardingSpaceIds: SpaceId[];
+}
 
 /** Failure targets for the settings step. */
 const CONTINUOUS_SETTING_TARGET_PREFIX = 'settings:continuous-onboarding@';
@@ -69,8 +75,16 @@ export const hasPausedSettings = (pausedSettings: PausedFeatureSettings | undefi
 /** Whether Resume should turn this settings-backed workflow back on. */
 export const shouldRestoreSettingsBackedWorkflow = (
   workflow: { id: string; spaceId: SpaceId },
-  pausedSettings: PausedFeatureSettings | undefined
+  pausedSettings: (PausedFeatureSettings & Partial<StillOnFeatureSettings>) | undefined
 ): boolean => {
+  // Resume gates a continuous document on its own setting write, so only Reset
+  // (which passes the spaces whose toggle is still on) filters it here.
+  if (
+    isContinuousOnboardingWorkflowId(workflow.id) &&
+    pausedSettings?.continuousOnboardingSpaceIds
+  ) {
+    return pausedSettings.continuousOnboardingSpaceIds.includes(workflow.spaceId);
+  }
   if (isScheduledDiscoveryWorkflowId(workflow.id)) {
     return pausedSettings?.scheduledDiscoveryEnabledSpaceIds.includes(workflow.spaceId) === true;
   }
@@ -319,6 +333,22 @@ export const createFeatureSettingsController = ({
    * While paused, keep feature settings off if something turned them back on
    * (e.g. a stale client). Does not change the restore snapshot.
    */
+  /** Whether a toggle currently reads on; an unreadable toggle counts as off. */
+  const readsOn = async (client: Pick<IUiSettingsClient, 'get'>, key: string): Promise<boolean> => {
+    try {
+      return Boolean(await client.get<boolean>(key));
+    } catch {
+      return false;
+    }
+  };
+
+  /**
+   * Turn every feature toggle off. Returns the toggles that still read on after
+   * a failed write, in `StillOnFeatureSettings` shape, so callers can keep the
+   * matching settings-backed workflows running instead of leaving a toggle on
+   * with its workflow disabled. A failed write on a toggle that was already off
+   * (or cannot be read) is only recorded; keeping activity off wins.
+   */
   const reassertFeatureSettingsOff = async ({
     request,
     spaceIds,
@@ -327,12 +357,18 @@ export const createFeatureSettingsController = ({
     request: KibanaRequest;
     spaceIds: SpaceId[];
     failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<void> => {
+  }): Promise<StillOnFeatureSettings> => {
+    const stillOn: StillOnFeatureSettings = {
+      continuousOnboardingWasEnabled: false,
+      continuousOnboardingSpaceIds: [],
+      scheduledDiscoveryEnabledSpaceIds: [],
+    };
     // Re-assert runs without a user request (e.g. after a feature-flag flip).
     const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
     for (const spaceId of spaceIds) {
+      let spaceClient: IUiSettingsClient | undefined;
       try {
-        const spaceClient = await uiSettingsClients.space(spaceId);
+        spaceClient = await uiSettingsClients.space(spaceId);
         try {
           if (
             await spaceClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
@@ -340,6 +376,9 @@ export const createFeatureSettingsController = ({
             await spaceClient.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, false);
           }
         } catch (error) {
+          if (await readsOn(spaceClient, OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)) {
+            stillOn.continuousOnboardingSpaceIds.push(spaceId);
+          }
           failures.push({
             target: continuousSettingTarget(spaceId),
             error: `Failed to keep continuous onboarding off while paused: ${toMessage(error)}`,
@@ -350,12 +389,22 @@ export const createFeatureSettingsController = ({
           false
         );
       } catch (error) {
+        if (
+          spaceClient !== undefined &&
+          (await readsOn(
+            spaceClient,
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          ))
+        ) {
+          stillOn.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        }
         failures.push({
           target: scheduledSettingTarget(spaceId),
           error: `Failed to keep scheduled discovery off while paused: ${toMessage(error)}`,
         });
       }
     }
+    return stillOn;
   };
 
   return {
