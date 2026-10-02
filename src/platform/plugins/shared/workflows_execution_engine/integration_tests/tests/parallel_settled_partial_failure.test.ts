@@ -4,6 +4,15 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License v 1".
  */
 
@@ -128,7 +137,7 @@ steps:
     expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
 
     // The aggregate still reports the branch failure, so an author can inspect it.
-    const aggregate = parallel.output as AggregateOutput;
+    const aggregate = parallel.output as unknown as AggregateOutput;
     expect(aggregate).toMatchObject({ total: 3, succeeded: 2, failed: 1, status: 'failed' });
   });
 
@@ -178,14 +187,13 @@ describe('static parallel with mode: settled tolerates one branch killed by bran
 
   beforeAll(async () => {
     fixture = new WorkflowRunFixture();
-    (
-      fixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock
-    ).mockImplementation((id: string) =>
-      id === 'integration.parallelSettledNeverPoll' ? neverCompletingPoll : undefined
+    (fixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock).mockImplementation(
+      (id: string) =>
+        id === 'integration.parallelSettledNeverPoll' ? neverCompletingPoll : undefined
     );
-    (
-      fixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock
-    ).mockImplementation((id: string) => id === 'integration.parallelSettledNeverPoll');
+    (fixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock).mockImplementation(
+      (id: string) => id === 'integration.parallelSettledNeverPoll'
+    );
 
     const yaml = `
 steps:
@@ -236,7 +244,7 @@ steps:
     const [parallel] = stepExecutionsFor(fixture, 'materialize_workspaces');
     expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
 
-    const aggregate = parallel.output as AggregateOutput;
+    const aggregate = parallel.output as unknown as AggregateOutput;
     expect(aggregate).toMatchObject({ total: 3, succeeded: 2, failed: 1, status: 'failed' });
     expect(aggregate.branches?.memory.status).toBe('timed_out');
     expect(aggregate.branches?.cortex.status).toBe('completed');

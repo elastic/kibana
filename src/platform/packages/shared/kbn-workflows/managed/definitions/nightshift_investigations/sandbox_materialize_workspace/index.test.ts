@@ -37,7 +37,8 @@ const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) a
     mode?: string;
     timeout?: string;
     'on-failure'?: unknown;
-    with?: Record<string, string>;
+    // `with` values are YAML that may nest arrays/objects (e.g. compose_prompt's writers).
+    with?: Record<string, unknown>;
     branches?: Array<{
       name: string;
       steps: Array<{
@@ -82,7 +83,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
       NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID
     );
-    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(3);
+    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(4);
     expect(workflow.triggers[0].inputs.properties.round_execution_index).toMatchObject({
       type: 'integer',
       default: 0,
@@ -98,7 +99,9 @@ describe('nightshift sandbox materialize workspace workflow', () => {
       expect.objectContaining({
         name: 'materialize_workspaces',
         type: 'parallel',
-        mode: 'fail-fast',
+        // A writer failure must not abort the round: this workflow is a before-agent
+        // hook, and run_before_agent_workflows.ts throws on a failed execution.
+        mode: 'settled',
         if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}',
         branches: [
           expect.objectContaining({
@@ -148,13 +151,60 @@ describe('nightshift sandbox materialize workspace workflow', () => {
         type: 'nightshift.composeHydrateNotifications',
         if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}',
         with: {
-          notifications: [
-            '{{ steps.hydrate_cortex.output.notification }}',
-            '{{ steps.memory_materialize_to_sandbox.output.notification }}',
+          writers: [
+            {
+              name: 'cortex',
+              directory: '/workspace/cortex',
+              notification: '{{ steps.hydrate_cortex.output.notification }}',
+              completed: '${{ steps.hydrate_cortex.output != null }}',
+            },
+            {
+              name: 'memory',
+              directory: '/workspace/memories',
+              notification: '{{ steps.memory_materialize_to_sandbox.output.notification }}',
+              completed: '${{ steps.memory_materialize_to_sandbox.output != null }}',
+            },
+            {
+              name: 'decision_trees',
+              directory: '/workspace/decision-trees',
+              notification: '{{ steps.hydrate_decision_trees.output.notification }}',
+              completed: '${{ steps.hydrate_decision_trees.output != null }}',
+            },
           ],
           recalled_ids: '${{ steps.memory_materialize_to_sandbox.output.recalled_ids }}',
         },
       }),
+    ]);
+  });
+
+  // The decision-tree writer must reach compose_prompt, or a tree failure is invisible to
+  // the model: the branch produces no notification of its own under branch-timeout, and
+  // nothing else would tell the model /workspace/decision-trees may be incomplete.
+  // `completed` is load-bearing and depends on two template behaviors that would otherwise
+  // fail silently: `${{ }}` must yield a real boolean (a `{{ }}` string "false" is truthy,
+  // so every writer would look incomplete), and a branch that never ran must read as
+  // `null` rather than an empty object (which would look like a completed writer).
+  it('renders `completed` as a boolean that is false only for a writer with no output', () => {
+    const engine = createWorkflowLiquidEngine();
+    const render = (context: Record<string, unknown>) =>
+      engine.evalValueSync('steps.hydrate_memory.output != null', context as never);
+
+    expect(render({ steps: { hydrate_memory: { output: { notification: '' } } } })).toBe(true);
+    // branch-timeout: the step exists but wrote nothing at all.
+    expect(render({ steps: { hydrate_memory: {} } })).toBe(false);
+    expect(typeof render({ steps: { hydrate_memory: {} } })).toBe('boolean');
+  });
+
+  it('gives compose_prompt every writer, including the decision-tree one', () => {
+    const compose = workflow.steps.find((step) => step.name === 'compose_prompt');
+    const writers = compose?.with?.writers as Array<{ name: string; directory: string }>;
+
+    expect(writers.map((writer) => writer.name)).toEqual(['cortex', 'memory', 'decision_trees']);
+    // Directories must be the real sandbox roots the handlers write to.
+    expect(writers.map((writer) => writer.directory)).toEqual([
+      '/workspace/cortex',
+      '/workspace/memories',
+      '/workspace/decision-trees',
     ]);
   });
 

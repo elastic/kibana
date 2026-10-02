@@ -11,6 +11,8 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
+import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { formatIncompleteMaterializationNotice } from '../lib/hydrate_notification';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -55,6 +57,13 @@ export const decisionTreeHydrateStepDefinition = ({
         .describe('Unscoped conversation id derived from the sandbox key.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
       skipped: z.boolean().optional(),
+      failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
+      notification: z
+        .string()
+        .describe(
+          'Always empty on success. On failure, the incomplete-materialization notice for ' +
+            '/workspace/decision-trees.'
+        ),
     }),
     handler: async (context) => {
       const { sandbox_id: sandboxId, prompt } = context.input;
@@ -71,6 +80,7 @@ export const decisionTreeHydrateStepDefinition = ({
             conversation_id: conversationId,
             tree_count: 0,
             skipped: true,
+            notification: '',
           },
         };
       }
@@ -90,22 +100,48 @@ export const decisionTreeHydrateStepDefinition = ({
 
       context.logger.info(`Hydrating decision trees into sandbox ${sandboxId} (space ${spaceId})`);
 
-      const treeCount = await withTimeout(
-        (signal) =>
-          hydrateDecisionTreeWorkspace({
-            session,
-            esClient: context.contextManager.getScopedEsClient(),
-            logger,
-            spaceId,
-            prompt,
-            signal,
-          }),
-        HYDRATE_TIMEOUT_MS,
-        `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
-      );
+      // A failed write degrades to a system_update line rather than a failed step: this
+      // step is also a before-agent hook for the reinforcement agent, so throwing would
+      // abort that round over one writer.
+      let treeCount: number;
+      try {
+        treeCount = await withTimeout(
+          (signal) =>
+            hydrateDecisionTreeWorkspace({
+              session,
+              esClient: context.contextManager.getScopedEsClient(),
+              logger,
+              spaceId,
+              prompt,
+              signal,
+            }),
+          HYDRATE_TIMEOUT_MS,
+          `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        );
+      } catch (error) {
+        context.logger.error(
+          `Decision tree hydrate failed for sandbox ${sandboxId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: conversationId,
+            tree_count: 0,
+            failed: true,
+            notification: formatIncompleteMaterializationNotice(DECISION_TREE_WORKSPACE_ROOT),
+          },
+        };
+      }
 
       return {
-        output: { sandbox_id: sandboxId, conversation_id: conversationId, tree_count: treeCount },
+        output: {
+          sandbox_id: sandboxId,
+          conversation_id: conversationId,
+          tree_count: treeCount,
+          notification: '',
+        },
       };
     },
   });

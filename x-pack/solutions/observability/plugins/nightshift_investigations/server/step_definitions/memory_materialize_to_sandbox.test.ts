@@ -45,8 +45,12 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     getSessionForSpace: jest.fn().mockReturnValue(mockSession),
   });
 
+  // The handlers log the degradation through `context.logger`, not the injected one.
+  const contextLogger = loggerMock.create();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    contextLogger.error.mockClear();
     getScopedEsClient.mockReturnValue(esClient);
     getMemoryEsClient.mockResolvedValue(esClient);
   });
@@ -79,7 +83,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
         renderInputTemplate: jest.fn((val) => val),
         callKibanaApi: jest.fn(),
       },
-      logger: loggerMock.create(),
+      logger: contextLogger,
       abortSignal: new AbortController().signal,
       stepId: 'memory_materialize_to_sandbox',
       stepType: 'nightshift.memoryMaterializeToSandbox',
@@ -207,7 +211,9 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
   });
 
-  it('reports one terminal failure when materialization fails', async () => {
+  // This used to reject. The step is a before-agent hook, so a throw aborted the whole
+  // investigator round over one writer; it now degrades to a system_update line.
+  it('reports one terminal failure and degrades when materialization fails', async () => {
     hydrateMemoryWorkspaceMock.mockRejectedValueOnce(new Error('write failed'));
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
@@ -216,11 +222,21 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       telemetry: telemetry as never,
     });
 
-    await expect(
-      definition.handler(
-        createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
-      )
-    ).rejects.toThrow('write failed');
+    const result = await definition.handler(
+      createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
+    );
+
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        failed: true,
+        recalled_ids: [],
+        notification:
+          'Materialization of /workspace/memories/ encountered an error; ' +
+          'its contents may be incomplete or missing.',
+      },
+    });
+    expect(contextLogger.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
       agent_id: 'nightshift.investigation',
@@ -298,7 +314,9 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
   });
 
-  it('fails clearly when the internal Memory client is unavailable', async () => {
+  // This used to reject. It is a before-agent hook, so throwing aborted the whole
+  // investigator round over one writer; it now degrades to a system_update line.
+  it('degrades to an incomplete-materialization notice when the Memory client is unavailable', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
       getMemoryEsClient: async () => {
@@ -308,11 +326,51 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       telemetry: telemetry as never,
     });
 
-    await expect(
-      definition.handler(
-        createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
-      )
-    ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
+    const result = await definition.handler(
+      createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
+    );
+
     expect(getScopedEsClient).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        failed: true,
+        recalled_ids: [],
+        notification:
+          'Materialization of /workspace/memories/ encountered an error; ' +
+          'its contents may be incomplete or missing.',
+      },
+    });
+    expect(contextLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Semantic Memory internal Elasticsearch client is unavailable')
+    );
+    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'failure' })
+    );
+  });
+
+  // A feature-off no-op is not a failure: it must stay silent, so the model is not told
+  // a directory is incomplete when it was simply never meant to be written this round.
+  it('stays silent when the feature is disabled', async () => {
+    const definition = memoryMaterializeToSandboxStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      getMemoryEsClient,
+      logger: loggerMock.create(),
+      isEnabled: () => false,
+      telemetry: telemetry as never,
+    });
+
+    const result = await definition.handler(
+      createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
+    );
+
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        skipped: true,
+        recalled_ids: [],
+        notification: '',
+      },
+    });
   });
 });

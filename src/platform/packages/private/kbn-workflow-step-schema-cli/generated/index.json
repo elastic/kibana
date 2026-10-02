@@ -991,11 +991,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "38beaa893e44d604023fc0525486a6c507bfbbe0c58ec5d9676bc38627d84325"
+      "sha256": "1a6307e484481269d79b225b9c862750b1d91c6742b27cdd9f4cdf822e51b6f6"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "405e4f4fe603ebad1442b8881203b0f6b336d764b282415c6a096128533e12ef"
+      "sha256": "ed4004f5890ad4a691fda2a4dad6cda6581f049497c2b9bfd9b9870d935e44e3"
     }
   }
 }

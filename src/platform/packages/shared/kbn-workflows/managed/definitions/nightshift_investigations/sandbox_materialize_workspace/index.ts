@@ -23,10 +23,12 @@ export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID =
  * Obtain returns one `sandbox_id` shared by every writer so they cannot re-scope
  * or re-allocate within the round.
  *
- * `mode: fail-fast` — a writer that fails fails the round, decision trees included.
- * A parallel branch body must stay a straight line of atomic steps, so the tree
- * branch carries no `if`/`on-failure`/`timeout`; the feature flag is honored inside
- * the step handler instead.
+ * `mode: settled` — a writer that fails or blows `branch-timeout` does not fail the round.
+ * Each writer catches its own error and returns the incomplete-materialization notice for
+ * its own directory; `compose_prompt` covers the branch-timeout case, where the branch
+ * produced no output to report it with. A parallel branch body must stay a straight line
+ * of atomic steps, so the tree branch carries no `if`/`on-failure`/`timeout`; the feature
+ * flag is honored inside the step handler instead.
  *
  * `enablement: 'enforced'` — a disabled workflow makes the beforeAgent hook
  * throw, which aborts the investigation.
@@ -34,7 +36,7 @@ export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID =
 export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   id: NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 3,
+  version: 4,
   billable: false,
   yaml: SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_YAML,
   management: {

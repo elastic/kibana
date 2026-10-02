@@ -11,6 +11,8 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
+import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
+import { formatIncompleteMaterializationNotice } from '../lib/hydrate_notification';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -60,10 +62,12 @@ export const cortexHydrateStepDefinition = ({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
       conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
       skipped: z.boolean().optional(),
+      failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       notification: z
         .string()
         .describe(
-          'Always empty. Cortex writes the full wiki every turn, so it does not list pages in the system update.'
+          'Empty on success. On failure, the incomplete-materialization notice for ' +
+            '/workspace/cortex.'
         ),
     }),
     handler: async (context) => {
@@ -105,20 +109,40 @@ export const cortexHydrateStepDefinition = ({
 
       context.logger.info(`Hydrating Cortex into sandbox ${sandboxId} (space ${spaceId})`);
 
-      await withTimeout(
-        (signal) =>
-          hydrateCortexWorkspace({
-            session,
-            esClient: context.contextManager.getScopedEsClient(),
-            spaceId,
-            signal,
-            analytics,
-            conversationId: resolvedConversationId,
-            logger,
-          }),
-        HYDRATE_TIMEOUT_MS,
-        `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
-      );
+      // A failed write degrades to a system_update line rather than a failed step:
+      // this is a before-agent hook, and aborting the investigator round because one
+      // writer could not reach the sandbox is worse than telling the model the
+      // directory may be incomplete.
+      try {
+        await withTimeout(
+          (signal) =>
+            hydrateCortexWorkspace({
+              session,
+              esClient: context.contextManager.getScopedEsClient(),
+              spaceId,
+              signal,
+              analytics,
+              conversationId: resolvedConversationId,
+              logger,
+            }),
+          HYDRATE_TIMEOUT_MS,
+          `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        );
+      } catch (error) {
+        context.logger.error(
+          `Cortex hydrate failed for sandbox ${sandboxId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: resolvedConversationId,
+            failed: true,
+            notification: formatIncompleteMaterializationNotice(CORTEX_WORKSPACE_ROOT),
+          },
+        };
+      }
 
       return {
         output: {

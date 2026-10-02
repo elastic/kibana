@@ -46,7 +46,12 @@ steps:
   - name: materialize_workspaces
     type: parallel
     if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
-    mode: fail-fast
+    # `settled`, not `fail-fast`: a writer that fails (or blows `branch-timeout`) must not
+    # abort the round. This is a before-agent hook, and run_before_agent_workflows.ts turns a
+    # failed execution into a thrown error. Each writer degrades on its own to a
+    # <system_update> line naming its own directory; compose_prompt covers the
+    # branch-timeout case, where the branch produced no output to report it with.
+    mode: settled
     timeout: 45s
     branch-timeout: 45s
     branches:
@@ -79,8 +84,22 @@ steps:
     type: nightshift.composeHydrateNotifications
     if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
     with:
-      notifications:
-        - '{{ steps.hydrate_cortex.output.notification }}'
-        - '{{ steps.memory_materialize_to_sandbox.output.notification }}'
+      # Every writer, so a directory that never reported (branch-timeout, which produces
+      # no step output at all) still gets its incomplete-materialization line. `completed`
+      # is false in exactly that case; a writer that ran reports its own failure in
+      # `notification` instead.
+      writers:
+        - name: cortex
+          directory: /workspace/cortex
+          notification: '{{ steps.hydrate_cortex.output.notification }}'
+          completed: '${{ steps.hydrate_cortex.output != null }}'
+        - name: memory
+          directory: /workspace/memories
+          notification: '{{ steps.memory_materialize_to_sandbox.output.notification }}'
+          completed: '${{ steps.memory_materialize_to_sandbox.output != null }}'
+        - name: decision_trees
+          directory: /workspace/decision-trees
+          notification: '{{ steps.hydrate_decision_trees.output.notification }}'
+          completed: '${{ steps.hydrate_decision_trees.output != null }}'
       # ${{ }} preserves the array; Liquid `{{ }}` stringifies a one-item array.
       recalled_ids: '${{ steps.memory_materialize_to_sandbox.output.recalled_ids }}'

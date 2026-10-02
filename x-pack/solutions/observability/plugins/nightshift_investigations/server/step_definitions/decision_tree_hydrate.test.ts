@@ -24,8 +24,12 @@ describe('decisionTreeHydrateStepDefinition', () => {
     getSessionForSpace: jest.fn().mockReturnValue(mockSession),
   });
 
+  // The handler logs the degradation through `context.logger`, not the injected one.
+  const contextLogger = loggerMock.create();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    contextLogger.error.mockClear();
     getScopedEsClient.mockReturnValue(esClient);
   });
 
@@ -40,7 +44,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
         renderInputTemplate: jest.fn((val) => val),
         callKibanaApi: jest.fn(),
       },
-      logger: loggerMock.create(),
+      logger: contextLogger,
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_decision_trees',
       stepType: 'nightshift.decisionTreeHydrate',
@@ -70,6 +74,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
         tree_count: 3,
+        notification: '',
       },
     });
   });
@@ -94,6 +99,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
         sandbox_id: 'marketing__conv-1',
         conversation_id: 'conv-1',
         tree_count: 3,
+        notification: '',
       },
     });
   });
@@ -131,6 +137,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
         conversation_id: 'conv-1',
         tree_count: 0,
         skipped: true,
+        notification: '',
       },
     });
   });
@@ -143,6 +150,35 @@ describe('decisionTreeHydrateStepDefinition', () => {
 
     await expect(definition.handler(createContext('default__conv-1'))).rejects.toThrow(
       'The sandbox is not configured'
+    );
+  });
+
+  // This step is also a before-agent hook for the reinforcement agent, so throwing here
+  // aborted that round too. It now degrades to a system_update line.
+  it('degrades to an incomplete-materialization notice when the write throws', async () => {
+    jest
+      .mocked(hydrateDecisionTreeWorkspace)
+      .mockRejectedValueOnce(new Error('sandbox write refused'));
+    const definition = decisionTreeHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext('default__conv-1'));
+
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        tree_count: 0,
+        failed: true,
+        notification:
+          'Materialization of /workspace/decision-trees/ encountered an error; ' +
+          'its contents may be incomplete or missing.',
+      },
+    });
+    expect(contextLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('sandbox write refused')
     );
   });
 

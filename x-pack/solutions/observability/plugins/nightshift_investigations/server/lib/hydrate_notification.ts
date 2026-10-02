@@ -20,16 +20,53 @@ export const formatHydrateNotification = (
 };
 
 /**
+ * One line telling the model that a writer's directory did not materialize.
+ *
+ * Used both by the writer handlers (which catch their own failures) and by the
+ * compose step (which covers the branch-timeout case, where the writer produced
+ * no output at all and so cannot report the failure itself).
+ */
+export const formatIncompleteMaterializationNotice = (directory: string): string =>
+  `Materialization of ${directory.replace(/\/$/, '')}/ encountered an error; ` +
+  'its contents may be incomplete or missing.';
+
+/** One workspace writer, as reported to {@link composeHydrateNotificationContext}. */
+export interface HydrateWriter {
+  /** Display name, for logging only. */
+  name: string;
+  /** Absolute sandbox directory this writer materializes into. */
+  directory: string;
+  /** The writer's own markdown fragment, empty when it wrote nothing. */
+  notification?: string | null;
+  /**
+   * False when the writer produced no output at all — a branch killed by
+   * `branch-timeout`, which never reaches its handler. Such a writer cannot
+   * report the failure itself, so the notice is synthesized from `directory`.
+   */
+  completed?: boolean;
+}
+
+/**
  * Join non-empty hydrate fragments into model-only context. Nodes do not wrap;
  * this is the only place that builds the `<system_update>` tag.
  */
 export const composeHydrateNotificationContext = ({
-  notifications,
+  writers,
 }: {
-  notifications: ReadonlyArray<string | null | undefined>;
+  writers: ReadonlyArray<HydrateWriter>;
 }): { model_context?: string } => {
-  const fragments = notifications
-    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+  const fragments = writers
+    .flatMap((writer) => {
+      const notification =
+        typeof writer.notification === 'string' ? writer.notification.trim() : '';
+      if (notification.length > 0) {
+        // A handler that caught its own failure already reported the reason.
+        return [notification];
+      }
+      return writer.completed === false
+        ? [formatIncompleteMaterializationNotice(writer.directory)]
+        : [];
+    })
     .filter((entry) => entry.length > 0);
   if (fragments.length === 0) {
     return {};
