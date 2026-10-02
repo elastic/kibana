@@ -27,7 +27,7 @@ const signalTypeColors: Record<SignalType, string> = {
   metric: 'success',
 };
 
-const isSignalType = (value: string | undefined): value is SignalType =>
+export const isSignalType = (value: string | undefined): value is SignalType =>
   value !== undefined && (CATALOG_SIGNAL_TYPES as readonly string[]).includes(value);
 
 export const SignalTypeBadge = ({ signalType }: { signalType?: string }) => (
