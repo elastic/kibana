@@ -582,7 +582,10 @@ Bound the run to a handful of documents while you are iterating. `maxUnits`, `ma
 `corpusFilter` are arguments to the install tool on the automations it installs, so narrowing a run is a re-install rather than an edit, and you do not edit those
 workflows by hand. A custom workflow should put its own bound in `consts` the same way, rather
 than threading the limit through every query. The targeted KI writer needs no bound: its `kis`
-list is the whole corpus.
+list is the whole corpus. Pilot on one full batch of the loop: as many units as its `concurrency`,
+5 unless the workflow sets another. A `parallel` loop runs a batch in about the time of its slowest
+unit, so a smaller pilot finishes in about the time of one unit and its per-unit time overstates the
+full run.
 
 **Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
 definition ephemerally — nothing is persisted, nothing needs enabling. It waits for completion and
@@ -679,8 +682,9 @@ over the filtered corpus, so the cost of that run has to be on the table before 
 duration and the number of units it wrote, divide to get a per-unit time, and multiply by the
 number of units the saved run will write: the unit count from the proposal's Unit section
 (units, not rows — a unit profile over 62,884 sales rows may have 2,517 units), or the
-automation's own bound when that is lower: "the pilot wrote 4 indicators in 64 seconds; the full run writes 100
-units, so expect roughly 27 minutes". Say *roughly*: rate limits and the pause between batches can
+automation's own bound when that is lower: "the pilot wrote 5 indicators in 80 seconds; the full run writes 100
+units, so expect roughly 27 minutes". When the pilot wrote fewer indicators than the batch it
+covered, say how many and do not project: the others failed or did not pass verification. Say *roughly*: rate limits and the pause between batches can
 slow a full run, and fixed costs the pilot paid once can speed it up, so the projection is neither a
 floor nor a ceiling. Show the three numbers, not only the result, so the reader can see what was
 assumed.

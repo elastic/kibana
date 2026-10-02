@@ -315,6 +315,21 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/Show the three numbers, not only the result/);
     });
 
+    it('has the subagent pilot one full batch of its loop, so the per-unit arithmetic holds', () => {
+      const prose = content.replace(/\s+/g, ' ');
+      expect(prose).toMatch(
+        /Pilot on one full batch of the loop: as many units as its `concurrency`, 5 unless the workflow sets another/
+      );
+      expect(prose).toMatch(/a smaller pilot finishes in about the time of one unit/);
+      expect(prose).toMatch(
+        /"the pilot wrote 5 indicators in 80 seconds; the full run writes 100 units, so expect roughly 27 minutes"/
+      );
+      expect(prose).not.toMatch(/4 indicators in 64 seconds/);
+      expect(prose).toMatch(
+        /When the pilot wrote fewer indicators than the batch it covered, say how many and do not project/
+      );
+    });
+
     it('flags a projection over one hour in bold between siren markers', () => {
       expect(content).toMatch(
         /\*\*When the projection exceeds one hour, put the estimate in bold between 🚨 markers\*\*/
