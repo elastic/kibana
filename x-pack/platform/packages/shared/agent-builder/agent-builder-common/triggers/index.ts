@@ -70,6 +70,7 @@ export type ConversationWriteSource = (typeof conversationWriteSources)[number];
 
 /** The kinds of change a conversation write can make. */
 export const conversationChangeKinds = [
+  'created',
   'events',
   'attachments',
   'metadata',

@@ -40,7 +40,8 @@ const isExecutionLifecycleEvent = (event: ConversationEvent): boolean =>
   Boolean(event.execution_id) &&
   (event.type === TimelineEventType.executionStarted || isExecutionTerminalEvent(event));
 
-// Hidden attachments are agent-only: their events must not reach subscribers.
+// Hidden attachments are agent-only, so their events are not reported to subscribers.
+// Forward-compatible: attachment events carry no `hidden` flag yet, so this matches nothing today.
 const isHiddenAttachmentEvent = (event: ConversationEvent): boolean =>
   isAttachmentEvent(event) &&
   'hidden' in event.data &&
@@ -66,8 +67,11 @@ const diffAttachments = (
   });
 };
 
-// Order-sensitive for arrays, like `computeChangedFields` in the conversation client.
-const diffMetadata = (
+/**
+ * Names of the metadata fields whose serialized value differs. Order-sensitive for arrays on
+ * purpose: metadata arrays (e.g. ordered checklists) preserve insertion order.
+ */
+export const diffMetadata = (
   stored: Record<string, unknown>,
   written: Record<string, unknown>
 ): string[] =>
@@ -102,7 +106,8 @@ export const describeConversationWrite = ({
   const changedAttachments = diffAttachments(before?.attachments ?? [], after.attachments ?? []);
   const changedFields = diffMetadata(before?.metadata ?? {}, after.metadata ?? {});
 
-  const changeKinds: ConversationChangeKind[] = [];
+  // A create is diffed against an empty conversation, so it also reports whatever it set.
+  const changeKinds: ConversationChangeKind[] = before ? [] : ['created'];
   if (addedEvents.length > 0) {
     changeKinds.push('events');
   }

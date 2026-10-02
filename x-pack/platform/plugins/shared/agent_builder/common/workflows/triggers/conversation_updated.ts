@@ -60,7 +60,7 @@ const conversationUpdatedEventSchema = z.object({
       'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.changeKinds',
       {
         defaultMessage:
-          'What this write changed: `events`, `attachments`, `metadata`, `title`, `template` and/or `access`. Never empty.',
+          'What this write changed: `created` (the write created the conversation, and also reports everything set at creation, such as template defaults in `changedFields`), `events`, `attachments`, `metadata`, `title`, `template` and/or `access`. Never empty.',
       }
     ),
   }),
@@ -141,11 +141,12 @@ export const conversationUpdatedTriggerCommonDefinition: CommonTriggerDefinition
       'xpack.agentBuilder.workflowTriggers.conversationUpdated.documentation.details',
       {
         defaultMessage:
-          'Emitted once per successful conversation write that changes something; writes that change nothing emit nothing. The payload describes the write but never carries values: read the conversation if you need them. In trigger conditions, an array field matches when any of its elements matches (event.eventTypes: "user_message"), wildcards work on strings (event.eventTypes: attachment_*), and a wildcard on an absent field is false (event.executionId: * matches only writes that persisted an execution). To coalesce bursts, set a concurrency key that includes both the workflow id and the conversation id (see the first example for the exact key), with strategy queue, max 1 and queue-size 1. To avoid reacting to your own writes, match the changes you care about rather than excluding the field you write.',
+          'Emitted once per successful conversation write that changes something; writes that change nothing emit nothing. The payload describes the write but never carries values: read the conversation if you need them. In trigger conditions, an array field matches when any of its elements matches (event.eventTypes: "user_message"), wildcards work on strings (event.eventTypes: attachment_*), and a wildcard on an absent field is false (event.executionId: * matches only writes that persisted an execution). To coalesce bursts, set a concurrency key that includes both the workflow id and the conversation id (see the first example for the exact key), with strategy queue, max 1 and queue-size 1. To avoid reacting to your own writes, match the changes you care about rather than excluding the field you write. A create reports `created` plus everything it set, including template defaults: add not event.changeKinds: "created" to the clauses that should only match changes to an existing conversation. Deleting a conversation, marking it as read, pinning it and round feedback emit nothing.',
       }
     ),
     examples: [
       `## Refresh an investigation summary when it gains content
+Creating an investigation seeds its \`status\`, so the metadata clauses exclude creates. The first user message, which can arrive with the create, still matches.
 \`\`\`yaml
 version: '1'
 name: Refresh investigation summary
@@ -164,9 +165,14 @@ triggers:
           event.eventTypes: "user_message"
           or event.executionId: *
           or event.changeKinds: "attachments"
-          or event.changedFields: "status"
-          or event.changedFields: "severity"
-          or event.changedFields: "verdict"
+          or (
+            not event.changeKinds: "created"
+            and (
+              event.changedFields: "status"
+              or event.changedFields: "severity"
+              or event.changedFields: "verdict"
+            )
+          )
         )
 steps:
   - name: log

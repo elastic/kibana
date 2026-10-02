@@ -112,23 +112,15 @@ import {
   type Document,
 } from './converters';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
-import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
+import {
+  describeConversationWrite,
+  diffMetadata,
+} from '../../../workflows/triggers/describe_conversation_write';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
   validateConversationEvents,
 } from '../../conversation_events';
-
-// Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
-// This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
-function computeChangedFields(
-  updates: Record<string, SerializedMetadataValue>,
-  stored: Record<string, SerializedMetadataValue>
-): string[] {
-  return Object.keys(updates).filter(
-    (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
-  );
-}
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -1248,9 +1240,10 @@ class ConversationClientImpl implements ConversationClient {
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
-        changedFields = computeChangedFields(serialized, storedMetadata);
+        const metadata = { ...storedMetadata, ...serialized };
+        changedFields = diffMetadata(storedMetadata, metadata);
 
-        return { metadata: { ...storedMetadata, ...serialized } };
+        return { metadata };
       },
     });
 

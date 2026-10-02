@@ -3939,7 +3939,7 @@ describe('ConversationClient', () => {
       expect(emitConversationUpdated).not.toHaveBeenCalled();
     });
 
-    it('create emits title and the initial events with the caller source', async () => {
+    it('create emits created, title and the initial events with the caller source', async () => {
       mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
       mockGetReturnsIndexedDocument();
 
@@ -3957,7 +3957,7 @@ describe('ConversationClient', () => {
       expect(emitted()).toMatchObject({
         conversationId: 'conversation-1',
         source: 'execution',
-        changeKinds: ['events', 'title'],
+        changeKinds: ['created', 'events', 'title'],
         eventTypes: ['user_message'],
       });
     });

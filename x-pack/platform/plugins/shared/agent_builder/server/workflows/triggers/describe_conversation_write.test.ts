@@ -315,7 +315,7 @@ describe('describeConversationWrite', () => {
       templateId: 'investigation',
       parentId: 'parent-1',
       source: 'execution',
-      changeKinds: ['events', 'metadata', 'title', 'template'],
+      changeKinds: ['created', 'events', 'metadata', 'title', 'template'],
       eventTypes: ['user_message'],
       actorTypes: ['user'],
       attachmentTypes: [],
@@ -324,12 +324,12 @@ describe('describeConversationWrite', () => {
     });
   });
 
-  it('reports title for a bare create', () => {
+  it('reports created and title for a bare create', () => {
     expect(
       describeConversationWrite({
         after: snapshot({ title: 'New conversation' }),
         source: 'http_api',
       })?.changeKinds
-    ).toEqual(['title']);
+    ).toEqual(['created', 'title']);
   });
 });
