@@ -46,7 +46,7 @@ describe('decision tree reinforce workflow', () => {
       ['prepare_turn', 'nightshift.decisionTreePrepare'],
       ['resolve_model', 'nightshift.resolveModel'],
       ['ensure_reinforcement_agent', 'nightshift.ensureInvestigationAgent'],
-      ['reinforce_decision_trees', 'ai.agent'],
+      ['reinforce_decision_trees', 'nightshift.decisionTreeReinforce'],
     ]);
   });
 
@@ -64,6 +64,7 @@ describe('decision tree reinforce workflow', () => {
         'round_connector_id',
         'round_id',
         'tool_calls',
+        'tool_results',
         'workflow_context',
       ].sort()
     );
@@ -79,16 +80,24 @@ describe('decision tree reinforce workflow', () => {
 
   it('runs the reinforcement agent on the message the prepare step built', () => {
     const [, , , reinforce] = workflow.steps;
-    expect(reinforce['agent-id']).toBe('significant-events.decision-tree-reinforcement');
-    expect(reinforce).toMatchObject({
-      'connector-id': '{{ steps.resolve_model.output.connector_id }}',
-      'plugin-id': 'nightshift_investigation_memory',
-      'aggregate-by': 'nightshift',
-      'product-solution': 'observability',
-      'product-feature': 'nightshift',
+    expect(reinforce.with).toMatchObject({
+      message: '{{ steps.prepare_turn.output.message }}',
+      turn_kind: '{{ steps.prepare_turn.output.turn_kind }}',
+      connector_id: '{{ steps.resolve_model.output.connector_id }}',
     });
-    expect(reinforce['connector-id-by-feature']).toBeUndefined();
-    expect(reinforce.with?.message).toBe('{{ steps.prepare_turn.output.message }}');
+  });
+
+  // The agent replays the investigator's round as tool messages, so it needs the calls, their
+  // results, and the round's prompt and answer. ${{ }} keeps the arrays intact.
+  it("hands the reinforcement step the investigator's whole round", () => {
+    const [, , , reinforce] = workflow.steps;
+    expect(reinforce.with).toMatchObject({
+      prompt: '{{ inputs.prompt }}',
+      response: '{{ inputs.response }}',
+      round_id: '{{ inputs.round_id }}',
+      tool_calls: '${{ inputs.tool_calls }}',
+      tool_results: '${{ inputs.tool_results }}',
+    });
   });
 
   it('declares strict and round model inputs and resolves them after prepare', () => {
@@ -112,8 +121,8 @@ describe('decision tree reinforce workflow', () => {
 
   // Nothing else installs it, so the agent step resolves a missing agent without this.
   it('installs the agent it is about to run', () => {
-    const [, , ensure, reinforce] = workflow.steps;
-    expect(ensure.with?.agent_id).toBe(reinforce['agent-id']);
+    const [, , ensure] = workflow.steps;
+    expect(ensure.with?.agent_id).toBe('significant-events.decision-tree-reinforcement');
   });
 
   it('skips the agent, and installing it, for rounds the prepare step ruled ineligible', () => {

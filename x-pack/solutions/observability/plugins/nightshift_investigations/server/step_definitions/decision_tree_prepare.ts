@@ -28,10 +28,9 @@ export const decisionTreePrepareStepDefinition = ({
     label: 'Prepare Decision Tree Reinforcement Turn',
     category: StepCategory.Ai,
     description:
-      'Builds the reinforcement agent message for a completed investigation round: the transcript, ' +
-      'the decision trees available to edit, the learnings already on file, and the turn script.',
+      'Builds the closing reinforcement message for a completed investigation round: the decision ' +
+      'trees available to edit, the learnings already on file, and the turn script.',
     inputSchema: z.object({
-      prompt: z.string().max(MAX_INPUT_CHARS).describe('The user message that started the round.'),
       response: z
         .string()
         .max(MAX_INPUT_CHARS)
@@ -48,21 +47,30 @@ export const decisionTreePrepareStepDefinition = ({
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
       tree_count: z.number().describe('Number of decision trees the agent may edit.'),
+      turn_kind: z
+        .enum(['initial_investigation', 'feedback_reinforcement'])
+        .describe('Whether this round seeds the trees or follows up on them.'),
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
     }),
     handler: async (context) => {
-      const { prompt, response, agent_id: agentId, tool_calls: toolCalls } = context.input;
+      const { response, agent_id: agentId, tool_calls: toolCalls } = context.input;
 
       // Only the Nightshift investigator's rounds feed the decision trees: this workflow is its
       // post-execution hook, and another agent's round must not rewrite the trees.
       if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
-        return { output: { message: '', tree_count: 0, skipped: true } };
+        return {
+          output: {
+            message: '',
+            tree_count: 0,
+            turn_kind: 'initial_investigation' as const,
+            skipped: true,
+          },
+        };
       }
 
       const telemetryConnectorId = getTelemetryConnectorId();
       const { spaceId } = context.contextManager.getContext().workflow;
-      const { message, treeCount } = await prepareReinforcementTurn({
-        prompt,
+      const { message, treeCount, turnKind } = await prepareReinforcementTurn({
         response,
         connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
         esClient: context.contextManager.getScopedEsClient(),
@@ -71,6 +79,8 @@ export const decisionTreePrepareStepDefinition = ({
         toolCalls: (toolCalls ?? []) as InvestigationToolCall[],
       });
 
-      return { output: { message, tree_count: treeCount, skipped: false } };
+      return {
+        output: { message, tree_count: treeCount, turn_kind: turnKind, skipped: false },
+      };
     },
   });
