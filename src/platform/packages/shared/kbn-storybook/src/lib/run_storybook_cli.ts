@@ -84,10 +84,13 @@ export async function buildStorybook({
     // Some transitive deps of addon-docs are ESM and not loading properly
     // See: https://github.com/storybookjs/storybook/issues/29467
     require('fix-esm').require('react-docgen');
+    // in dev mode this resolves once the server is up, so the shared watcher must stay open
     await build(config);
+  } catch (error) {
+    await sharedBuild?.close?.();
+    throw error;
   } finally {
     require('fix-esm').unregister();
-    await sharedBuild?.close?.();
   }
 }
 
