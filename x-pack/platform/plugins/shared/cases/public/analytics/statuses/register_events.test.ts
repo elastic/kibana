@@ -39,7 +39,10 @@ describe('registerStatusEvents', () => {
   });
 
   it.each([
-    [CASES_STATUS_CHANGED_EVENT_TYPE, ['category', 'entry_point', 'is_custom', 'owner']],
+    [
+      CASES_STATUS_CHANGED_EVENT_TYPE,
+      ['category', 'entry_point', 'is_custom', 'owner', 'pause_reason', 'pauses_time_tracking'],
+    ],
     [CASES_STATUS_CONFIGURATION_EDITED_EVENT_TYPE, ['action', 'category', 'owner']],
   ])('registers %s with exactly the documented fields', (eventType, expectedFields) => {
     expect(Object.keys(getSchema(eventType)).sort()).toEqual(expectedFields);

@@ -401,6 +401,11 @@ describe('getCasesTelemetryData', () => {
             inProgress: 4,
             open: 1,
           },
+          pausedCases: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
           extractObservablesOff: 1,
@@ -772,6 +777,20 @@ describe('getCasesTelemetryData', () => {
               },
               "nested": Object {
                 "path": "cases.attributes.observables",
+              },
+            },
+            "pausedCases": Object {
+              "aggs": Object {
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
+              },
+              "filter": Object {
+                "exists": Object {
+                  "field": "cases.attributes.paused_at",
+                },
               },
             },
             "securitySolution": Object {

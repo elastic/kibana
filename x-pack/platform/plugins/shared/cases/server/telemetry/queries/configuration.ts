@@ -12,7 +12,7 @@ import {
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import { CASE_STATUS_CATEGORIES } from '../../../common/utils/statuses';
+import { CASE_STATUS_CATEGORIES, DEFAULT_CASE_PAUSE_REASONS } from '../../../common/utils/statuses';
 import type { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { findValueInBuckets, getCustomFieldsTelemetry } from './utils';
@@ -24,7 +24,9 @@ export const getConfigurationTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['configuration']> => {
   const res = await savedObjectsClient.find<
-    Pick<ConfigurationPersistedAttributes, 'customFields' | 'statuses'> & { owner: Owner },
+    Pick<ConfigurationPersistedAttributes, 'customFields' | 'statuses' | 'pauseReasons'> & {
+      owner: Owner;
+    },
     {
       closureType: Buckets;
     }
@@ -63,6 +65,23 @@ export const getConfigurationTelemetryData = async ({
   const countCustomStatuses = (category: string) =>
     customStatuses.filter((status) => status.category === category).length;
 
+  const pausingPerConfiguration = res.saved_objects.map((sObj) =>
+    (sObj.attributes.statuses ?? []).filter(
+      (status) => status.pausesTimeTracking && !status.disabled
+    )
+  );
+  const pausingStatuses = pausingPerConfiguration.flat();
+  const countPausingStatuses = (category: string) =>
+    pausingStatuses.filter((status) => status.category === category).length;
+  const customizedReasons = res.saved_objects.filter((sObj) => {
+    const reasons = sObj.attributes.pauseReasons ?? [];
+    return (
+      reasons.length > 0 &&
+      (reasons.length !== DEFAULT_CASE_PAUSE_REASONS.length ||
+        reasons.some((reason, index) => reason !== DEFAULT_CASE_PAUSE_REASONS[index]))
+    );
+  }).length;
+
   return {
     all: {
       closure: {
@@ -79,6 +98,15 @@ export const getConfigurationTelemetryData = async ({
           open: countCustomStatuses('open'),
           inProgress: countCustomStatuses('in-progress'),
           closed: countCustomStatuses('closed'),
+        },
+        pausing: {
+          configurations: pausingPerConfiguration.filter((statuses) => statuses.length > 0).length,
+          statuses: {
+            open: countPausingStatuses('open'),
+            inProgress: countPausingStatuses('in-progress'),
+            closed: countPausingStatuses('closed'),
+          },
+          customizedReasons,
         },
       },
     },

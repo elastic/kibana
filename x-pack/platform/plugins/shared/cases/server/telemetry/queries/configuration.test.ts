@@ -67,6 +67,11 @@ describe('configuration', () => {
       customStatuses: {
         configurations: 0,
         statuses: { open: 0, inProgress: 0, closed: 0 },
+        pausing: {
+          configurations: 0,
+          statuses: { open: 0, inProgress: 0, closed: 0 },
+          customizedReasons: 0,
+        },
       },
     };
 
@@ -261,6 +266,11 @@ describe('configuration', () => {
       expect(res.all.customStatuses).toEqual({
         configurations: 1,
         statuses: { open: 0, inProgress: 2, closed: 1 },
+        pausing: {
+          configurations: 0,
+          statuses: { open: 0, inProgress: 0, closed: 0 },
+          customizedReasons: 0,
+        },
       });
     });
 

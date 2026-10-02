@@ -98,6 +98,7 @@ export const getCasesTelemetryData = async ({
       aggs: casesRes.aggregations,
       keys: ['counts', 'syncAlerts', 'extractObservables', 'status', 'users', 'totalAssignees'],
     });
+    const pausedCaseBuckets = casesRes.aggregations?.pausedCases?.status?.buckets ?? [];
     const customStatusesByCategory = (casesRes.aggregations?.customStatuses?.buckets ?? [])
       .flatMap((bucket) => bucket.status.buckets)
       .reduce<Record<number, number>>(
@@ -129,6 +130,11 @@ export const getCasesTelemetryData = async ({
           open: customStatusesByCategory[CasePersistedStatus.OPEN] ?? 0,
           inProgress: customStatusesByCategory[CasePersistedStatus.IN_PROGRESS] ?? 0,
           closed: customStatusesByCategory[CasePersistedStatus.CLOSED] ?? 0,
+        },
+        pausedCases: {
+          open: findValueInBuckets(pausedCaseBuckets, CasePersistedStatus.OPEN),
+          inProgress: findValueInBuckets(pausedCaseBuckets, CasePersistedStatus.IN_PROGRESS),
+          closed: findValueInBuckets(pausedCaseBuckets, CasePersistedStatus.CLOSED),
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
@@ -278,6 +284,16 @@ const getAssigneesAggregations = () => ({
 // Saved object aggregations only allow `term`/`exists` filters, so custom keys are found by
 // excluding the built-in ones from a terms aggregation and summing per category afterwards.
 const getCustomStatusesAggregation = () => ({
+  pausedCases: {
+    filter: { exists: { field: `${CASE_SAVED_OBJECT}.attributes.paused_at` } },
+    aggs: {
+      status: {
+        terms: {
+          field: `${CASE_SAVED_OBJECT}.attributes.status`,
+        },
+      },
+    },
+  },
   customStatuses: {
     terms: {
       field: `${CASE_SAVED_OBJECT}.attributes.status_key`,

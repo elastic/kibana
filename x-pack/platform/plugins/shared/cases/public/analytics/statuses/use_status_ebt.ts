@@ -11,6 +11,7 @@ import {
   CASES_STATUS_CHANGED_EVENT_TYPE,
   CASES_STATUS_CONFIGURATION_EDITED_EVENT_TYPE,
 } from '../../../common/constants';
+import { DEFAULT_CASE_PAUSE_REASONS } from '../../../common/utils/statuses';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 import { getEbtOwner } from '../get_ebt_owner';
@@ -28,7 +29,9 @@ export type StatusConfigurationAction =
   | 'reordered'
   | 'default_changed'
   | 'disabled'
-  | 'enabled';
+  | 'enabled'
+  | 'pausing_changed'
+  | 'reasons_edited';
 
 export const useStatusChangedEBT = () => {
   const { analytics } = useKibana().services;
@@ -39,16 +42,27 @@ export const useStatusChangedEBT = () => {
       category,
       isCustom,
       entryPoint,
+      pausesTimeTracking = false,
+      pauseReason,
     }: {
       category: CaseStatuses;
       isCustom: boolean;
       entryPoint: StatusChangeEntryPoint;
+      pausesTimeTracking?: boolean;
+      pauseReason?: string;
     }) => {
       analytics.reportEvent(CASES_STATUS_CHANGED_EVENT_TYPE, {
         owner: getEbtOwner(owner),
         category,
         is_custom: isCustom,
         entry_point: entryPoint,
+        pauses_time_tracking: pausesTimeTracking,
+        // Configurable text never leaves the cluster; only the seeded defaults are named.
+        ...(pauseReason != null && {
+          pause_reason: (DEFAULT_CASE_PAUSE_REASONS as readonly string[]).includes(pauseReason)
+            ? pauseReason
+            : 'custom',
+        }),
       });
     },
     [analytics, owner]

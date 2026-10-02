@@ -50,7 +50,26 @@ describe('status EBT hooks', () => {
         category: 'in-progress',
         is_custom: true,
         entry_point: 'case_view_header',
+        pauses_time_tracking: false,
       });
+    });
+
+    it('reports a pause with whether the reason is one of the defaults, never the reason itself', () => {
+      const { result } = renderHook(() => useStatusChangedEBT());
+
+      result.current({
+        category: CaseStatuses['in-progress'],
+        isCustom: true,
+        entryPoint: 'case_view_header',
+        pausesTimeTracking: true,
+        pauseReason: 'Waiting on legal',
+      });
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        CASES_STATUS_CHANGED_EVENT_TYPE,
+        expect.objectContaining({ pauses_time_tracking: true, pause_reason: 'custom' })
+      );
+      expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('Waiting on legal');
     });
 
     it('reports the owner from the cases context', () => {

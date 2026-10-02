@@ -8246,6 +8246,19 @@
                     }
                   }
                 },
+                "pausedCases": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "syncAlertsOn": {
                   "type": "long"
                 },
@@ -9107,6 +9120,35 @@
                         },
                         "closed": {
                           "type": "long"
+                        }
+                      }
+                    },
+                    "pausing": {
+                      "properties": {
+                        "configurations": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of configurations with at least one enabled status that pauses time tracking"
+                          }
+                        },
+                        "statuses": {
+                          "properties": {
+                            "open": {
+                              "type": "long"
+                            },
+                            "inProgress": {
+                              "type": "long"
+                            },
+                            "closed": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "customizedReasons": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of configurations whose pause reasons differ from the defaults"
+                          }
                         }
                       }
                     }

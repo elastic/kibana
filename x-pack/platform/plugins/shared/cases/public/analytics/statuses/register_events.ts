@@ -51,6 +51,22 @@ export const registerStatusEvents = ({
           optional: false,
         },
       },
+      pauses_time_tracking: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the status the case moved to pauses time tracking',
+          optional: true,
+        },
+      },
+      pause_reason: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The pause reason when it is one of the seeded defaults, otherwise "custom". ' +
+            'Configured reason text is never reported',
+          optional: true,
+        },
+      },
     },
   });
 
@@ -64,7 +80,7 @@ export const registerStatusEvents = ({
         _meta: {
           description:
             'The edit made in the statuses settings: added, renamed, reordered, default_changed, ' +
-            'disabled, or enabled. No label or key is reported',
+            'disabled, enabled, pausing_changed, or reasons_edited. No label or key is reported',
           optional: false,
         },
       },
