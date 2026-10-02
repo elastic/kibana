@@ -593,7 +593,7 @@ const AlertEpisodesListPageContent = () => {
 
   return (
     <div
-      data-test-subj="alertingV2EpisodesListPage"
+      data-test-subj="alertingV2AlertsListPage"
       css={css`
         display: flex;
         flex-direction: column;

@@ -351,6 +351,11 @@ export function ComposeDiscoverFlyout({
   const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
 
+  /*
+   * Seeds the initial view only. A saved rule the form cannot show opens in
+   * YAML, but the toggle follows the live form state: once the YAML parses
+   * back into a representable shape, the user can return to the form.
+   */
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
   const inlineResult = useMemo(
@@ -676,12 +681,14 @@ export function ComposeDiscoverFlyout({
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
   const watchedRecovery = useWatch({ control: methods.control, name: 'recovery' });
   const watchedNoData = useWatch({ control: methods.control, name: 'noData' });
+  const watchedStateTransition = useWatch({ control: methods.control, name: 'stateTransition' });
   const hasCustomRecovery = watchedRecovery?.strategy === recoveryStrategy.condition;
 
   const isFormStateNonRepresentable = isNonRepresentableFormState({
     kind: isAlert ? 'alert' : 'signal',
     recovery: watchedRecovery,
     noData: watchedNoData,
+    stateTransition: watchedStateTransition,
   });
 
   const timeFieldResolutionQuery = useMemo(
@@ -971,8 +978,6 @@ export function ComposeDiscoverFlyout({
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
-      if (forceYamlMode) return;
-
       if (enabled) {
         manualSplitUncommittedRef.current = false;
         if (isDirtyRef.current) {
@@ -1025,7 +1030,6 @@ export function ComposeDiscoverFlyout({
       yamlText,
       applyYamlValuesToFormAndSandbox,
       dispatch,
-      forceYamlMode,
       builderType,
       uiState.step,
     ]
@@ -1358,10 +1362,10 @@ export function ComposeDiscoverFlyout({
    * form state reached from Form mode must still be able to open YAML to fix it.
    */
   const yamlLockedByFormState = uiState.yamlMode && isFormStateNonRepresentable;
-  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked || yamlLockedByFormState;
+  const modeToggleDisabled = modeToggleSandboxLocked || yamlLockedByFormState;
 
   const getModeToggleTooltip = (): string | undefined => {
-    if (forceYamlMode || yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
+    if (yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
     if (modeToggleSandboxLocked) return SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP;
     return undefined;
   };

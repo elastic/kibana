@@ -30,7 +30,6 @@ import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
-import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -165,7 +164,6 @@ export const RulesListPage = () => {
           onCreateWithAgent={navigateToAgentBuilder}
           onBuildSequence={navigateToSequenceBuilder}
         />
-        <CentralizedActionPoliciesBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
