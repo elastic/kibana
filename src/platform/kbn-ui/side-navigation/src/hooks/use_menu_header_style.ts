@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
@@ -15,13 +15,15 @@ import { css } from '@emotion/react';
  */
 export function useMenuHeaderStyle(isPanel = false) {
   const { euiTheme } = useEuiTheme();
+  const { fontSize, lineHeight } = useEuiFontSize('s');
   // In the side panel, center the title on the adjacent 64px App Header row
-  // and keep it quieter than the App Header title.
+  // and keep it smaller than the App Header title.
   const panelStyles = css`
-    padding-top: calc(${euiTheme.size.base} + ${euiTheme.size.xs});
+    padding-top: calc((64px - ${lineHeight}) / 2);
 
     & h4 {
-      color: ${euiTheme.colors.textSubdued};
+      font-size: ${fontSize};
+      line-height: ${lineHeight};
     }
   `;
 
