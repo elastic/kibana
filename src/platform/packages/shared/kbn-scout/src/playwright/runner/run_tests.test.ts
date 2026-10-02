@@ -8,7 +8,11 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getPlaywrightProject, hasTestsInPlaywrightConfig } from './run_tests';
+import {
+  getPlaywrightProject,
+  getUiModeLaunchMessage,
+  hasTestsInPlaywrightConfig,
+} from './run_tests';
 import { execPromise } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
@@ -43,6 +47,32 @@ describe('getPlaywrightProject', () => {
         domain: 'classic',
       } as unknown as ScoutTestTarget)
     ).toThrow(/Unable to determine Playwright project for test target/);
+  });
+});
+
+describe('getUiModeLaunchMessage', () => {
+  it('tells local users that Scout starts and keeps the test servers', () => {
+    expect(getUiModeLaunchMessage('local')).toBe(
+      'scout: Launching Playwright UI mode. Test servers will be started first and kept running until the UI is closed.'
+    );
+  });
+
+  it('does not claim Scout starts servers for a cloud (ech) target', () => {
+    const message = getUiModeLaunchMessage('ech');
+
+    expect(message).not.toMatch(/servers will be started/i);
+    expect(message).toBe(
+      `scout: Launching Playwright UI mode against the pre-provisioned 'ech' servers.`
+    );
+  });
+
+  it('does not claim Scout starts servers for a cloud (mki) target', () => {
+    const message = getUiModeLaunchMessage('mki');
+
+    expect(message).not.toMatch(/servers will be started/i);
+    expect(message).toBe(
+      `scout: Launching Playwright UI mode against the pre-provisioned 'mki' servers.`
+    );
   });
 });
 
