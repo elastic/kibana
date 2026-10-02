@@ -96,19 +96,22 @@ interface TriggerEventsSearchResponse {
 }
 
 const TRIGGER_EVENTS_PAGE_SIZE = 100;
+/** Stops a scan that never reaches a short page (a busy deployment); the caller's poll retries. */
+const TRIGGER_EVENTS_MAX_PAGES = 20;
 
 /**
  * The logged dispatch of an `ai.conversation.updated` event, with the workflows it matched.
  *
  * `.workflows-events` is a system data stream, so it is read through the workflows trigger event
  * log API rather than Elasticsearch. `payload` is not indexed, so the API can only narrow on
- * `triggerId` and time; every page is read and the conversation is matched in code.
+ * `triggerId` and time; pages are read until a match or a short page, up to
+ * `TRIGGER_EVENTS_MAX_PAGES`, and the conversation is matched in code.
  */
 const findLoggedTriggerEvent = async (
   client: AuthedApiClient,
   { since, conversationId, eventType }: { since: string; conversationId: string; eventType: string }
 ) => {
-  for (let page = 1; ; page++) {
+  for (let page = 1; page <= TRIGGER_EVENTS_MAX_PAGES; page++) {
     const res = await client.post('internal/workflows/trigger_events/_search', {
       headers: INTERNAL_WORKFLOWS_VERSION_HEADERS,
       body: {
@@ -131,6 +134,7 @@ const findLoggedTriggerEvent = async (
       return match;
     }
   }
+  return undefined;
 };
 
 apiTest.describe(
@@ -149,20 +153,24 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ asAdmin }) => {
-      // A force delete is refused (409) while a triggered run is still in flight.
+      // A force delete is refused (409) while a triggered run is still in flight; only that is retried.
+      let deleteStatus: number | undefined;
       await expect
         .poll(
-          async () =>
-            (
+          async () => {
+            deleteStatus = (
               await asAdmin.delete('api/workflows?force=true', {
                 headers: VERSION_HEADERS,
                 body: { ids: [WORKFLOW_ID] },
                 responseType: 'json',
               })
-            ).statusCode,
+            ).statusCode;
+            return deleteStatus;
+          },
           { timeout: 60_000 }
         )
-        .toBe(200);
+        .not.toBe(409);
+      expect(deleteStatus).toBe(200);
       await Promise.allSettled(
         createdConversationIds.map((id) =>
           asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
@@ -197,22 +205,20 @@ apiTest.describe(
 
         await apiTest.step('a user message on the escalation does not match', async () => {
           await postUserMessage(asAdmin, escalationId);
+          let logged: LoggedTriggerEvent | undefined;
           await expect
             .poll(
-              async () =>
-                (await findLoggedTriggerEvent(asAdmin, {
+              async () => {
+                logged = await findLoggedTriggerEvent(asAdmin, {
                   since,
                   conversationId: escalationId,
                   eventType: 'user_message',
-                })) !== undefined,
+                });
+                return logged !== undefined;
+              },
               { timeout: 60_000 }
             )
             .toBe(true);
-          const logged = await findLoggedTriggerEvent(asAdmin, {
-            since,
-            conversationId: escalationId,
-            eventType: 'user_message',
-          });
           expect(logged?.subscriptions).not.toContain(WORKFLOW_ID);
         });
 
