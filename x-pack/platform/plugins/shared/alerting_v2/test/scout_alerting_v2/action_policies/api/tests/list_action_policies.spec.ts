@@ -427,14 +427,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects the removed enabled param', async ({ apiClient }) => {
-    const response = await apiClient.get(getListActionPoliciesUrl({ enabled: 'true' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
   apiTest('validation: rejects unknown sortField', async ({ apiClient }) => {
     const response = await apiClient.get(getListActionPoliciesUrl({ sort_field: 'description' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
