@@ -220,6 +220,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
       {workersData?.canModifyWorkers === false ? (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="lock"
             data-test-subj="alertZeroOnboardingModifyForbidden"
