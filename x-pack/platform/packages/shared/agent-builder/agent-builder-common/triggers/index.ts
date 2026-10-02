@@ -52,3 +52,53 @@ export interface AttachmentDeletedTriggerEvent {
   hardDelete: boolean;
   source: AttachmentEventSource;
 }
+
+/**
+ * Trigger ID for the conversation updated event: emitted after every conversation write that
+ * changes something a subscriber can observe.
+ */
+export const ConversationUpdatedTriggerId = 'ai.conversation.updated' as const;
+
+/** The code path that performed a conversation write. */
+export const conversationWriteSources = [
+  'execution',
+  'http_api',
+  'server_api',
+  'workflow',
+] as const;
+export type ConversationWriteSource = (typeof conversationWriteSources)[number];
+
+/** The kinds of change a conversation write can make. */
+export const conversationChangeKinds = [
+  'events',
+  'attachments',
+  'metadata',
+  'title',
+  'template',
+  'access',
+] as const;
+export type ConversationChangeKind = (typeof conversationChangeKinds)[number];
+
+export interface ConversationUpdatedTriggerEvent {
+  conversationId: string;
+  /** Set when the conversation has a template. */
+  templateId?: string;
+  /** Set when the conversation is a child conversation (e.g. a persistent sub-agent). */
+  parentId?: string;
+  /** The code path that performed the write. */
+  source: ConversationWriteSource;
+  /** What this write changed. Never empty. */
+  changeKinds: ConversationChangeKind[];
+  /** Types of the events this write added, de-duplicated. */
+  eventTypes: string[];
+  /** Actor types of the events this write added, de-duplicated. */
+  actorTypes: string[];
+  /** The execution this write persisted, when it persisted one. */
+  executionId?: string;
+  /** Types of the attachments this write changed, de-duplicated. */
+  attachmentTypes: string[];
+  /** Ids of the attachments this write changed. */
+  attachmentIds: string[];
+  /** Names of the metadata fields whose stored value changed. */
+  changedFields: string[];
+}
