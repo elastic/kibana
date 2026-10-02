@@ -8,11 +8,13 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { htmlIdGenerator } from '@elastic/eui';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
+import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
 
@@ -22,6 +24,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 export const openConversationDetailsFlyout = async ({
@@ -30,6 +33,7 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
+  trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
@@ -49,9 +53,10 @@ export const openConversationDetailsFlyout = async ({
       title: FLYOUT_TITLE,
       size: 's',
       flyoutMenuDisplayMode: 'always',
-      flyoutMenuProps: {},
+      flyoutMenuProps: { trailingActions },
       type: 'push',
       paddingSize: 'm',
+      css: flyoutMenuRowStyles,
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',
       'aria-labelledby': titleId,

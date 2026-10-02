@@ -31,6 +31,8 @@ const mockFormatter = AttackDiscoveryMarkdownFormatter as jest.MockedFunction<
   typeof AttackDiscoveryMarkdownFormatter
 >;
 
+const ANONYMIZED_HOST = '3d241119-f77a-454e-8ee3-d36e05a8714f';
+
 const makeAttachment = (
   data: AttackDiscoveryAttachment['data'] = {}
 ): AttackDiscoveryAttachment => ({
@@ -49,6 +51,19 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
     expect(definition.getLabel(makeAttachment({ title: 'Lateral movement' }))).toBe(
       'Lateral movement'
     );
+  });
+
+  it('labels the attachment with the de-anonymized title', () => {
+    const definition = createAttackDiscoveryAttachmentDefinition();
+
+    expect(
+      definition.getLabel(
+        makeAttachment({
+          replacements: { [ANONYMIZED_HOST]: 'SRVWIN04' },
+          title: `Attack on ${ANONYMIZED_HOST}`,
+        })
+      )
+    ).toBe('Attack on SRVWIN04');
   });
 
   it('falls back to a default label when the title is missing', () => {
@@ -162,5 +177,44 @@ describe('AttackDiscoveryInlineContent', () => {
     });
 
     expect(mockFormatter.mock.calls[1][0].markdown).toBe(detailsMarkdown);
+  });
+
+  // The view and the agent insert the original values from the same replacements.
+  it('renders the markdown with the original values from the replacements', () => {
+    renderInline({
+      details_markdown: `Details for {{ host.name ${ANONYMIZED_HOST} }}`,
+      replacements: { [ANONYMIZED_HOST]: 'SRVWIN04' },
+      summary_markdown: `Summary for {{ host.name ${ANONYMIZED_HOST} }}`,
+    });
+
+    expect(mockFormatter.mock.calls.map(([props]) => props.markdown)).toEqual([
+      'Summary for {{ host.name SRVWIN04 }}',
+      'Details for {{ host.name SRVWIN04 }}',
+    ]);
+  });
+
+  it('renders the anonymized markdown when there are no replacements', () => {
+    renderInline({
+      details_markdown: `Details for {{ host.name ${ANONYMIZED_HOST} }}`,
+      summary_markdown: summaryMarkdown,
+    });
+
+    expect(mockFormatter.mock.calls[1][0].markdown).toBe(
+      `Details for {{ host.name ${ANONYMIZED_HOST} }}`
+    );
+  });
+
+  // Original values can be longer than the UUIDs they replace, and the markdown parser slows
+  // down sharply on long input.
+  it('truncates the de-anonymized markdown to its bound', () => {
+    renderInline({
+      details_markdown: `${ANONYMIZED_HOST} `.repeat(1350),
+      replacements: { [ANONYMIZED_HOST]: 'a'.repeat(1024) },
+      summary_markdown: `${ANONYMIZED_HOST} `.repeat(200),
+    });
+
+    expect(mockFormatter.mock.calls.map(([props]) => props.markdown.length)).toEqual([
+      8001, 50_001,
+    ]);
   });
 });

@@ -140,6 +140,38 @@ describe('readResponseStream', () => {
     expect(result.truncated).toBe(false);
   });
 
+  it('cancels and rejects when aborted while waiting for a response body', async () => {
+    let resolveRead: (result: { done: boolean; value?: Uint8Array }) => void;
+    let signalReadStarted: () => void;
+    const readStarted = new Promise<void>((resolve) => {
+      signalReadStarted = resolve;
+    });
+    const pendingRead = new Promise<{ done: boolean; value?: Uint8Array }>((resolve) => {
+      resolveRead = resolve;
+    });
+    const cancel = jest.fn(() => resolveRead({ done: true }));
+    const response = {
+      body: {
+        getReader: () => ({
+          read: () => {
+            signalReadStarted();
+            return pendingRead;
+          },
+          releaseLock: () => {},
+          cancel,
+        }),
+      },
+    } as unknown as Response;
+    const controller = new AbortController();
+
+    const result = readResponseStream(response, 1024, controller.signal);
+    await readStarted;
+    controller.abort();
+
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
   it('should return truncated: true when exceeding maxBytes', async () => {
     const data = new Uint8Array(500);
     data.fill(0xff);

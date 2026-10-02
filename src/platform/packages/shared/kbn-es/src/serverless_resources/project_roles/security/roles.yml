@@ -3,8 +3,8 @@
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -104,15 +104,14 @@ viewer:
         - feature_alertzero.read
         - feature_agenticInvestigations.read
         - feature_proposals.read
-        - feature_agenticInvestigations.escalations_read
       resources: '*'
   run_as: []
 
 # modeled after t3_analyst
 editor:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -235,6 +234,7 @@ editor:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -250,16 +250,16 @@ editor:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
 
 t1_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -362,14 +362,14 @@ t1_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 t2_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -456,6 +456,7 @@ t2_analyst:
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
@@ -473,14 +474,14 @@ t2_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 t3_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -592,6 +593,7 @@ t3_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -608,14 +610,13 @@ t3_analyst:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 threat_intelligence_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -707,6 +708,7 @@ threat_intelligence_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -721,14 +723,14 @@ threat_intelligence_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 rule_author:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -829,6 +831,7 @@ rule_author:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -844,14 +847,13 @@ rule_author:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 soc_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -962,6 +964,7 @@ soc_manager:
         - feature_siemV5.soc_management_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -981,14 +984,13 @@ soc_manager:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 detections_admin:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
@@ -1063,6 +1065,7 @@ detections_admin:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1078,14 +1081,13 @@ detections_admin:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 platform_engineer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - manage
     - 'read_project_routing'
@@ -1186,6 +1188,7 @@ platform_engineer:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1204,14 +1207,13 @@ platform_engineer:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 endpoint_operations_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -1321,6 +1323,7 @@ endpoint_operations_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1338,14 +1341,14 @@ endpoint_operations_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 endpoint_policy_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -1438,6 +1441,7 @@ endpoint_policy_manager:
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -1456,12 +1460,15 @@ endpoint_policy_manager:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

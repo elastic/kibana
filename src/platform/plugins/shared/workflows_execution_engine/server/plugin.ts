@@ -76,6 +76,7 @@ import {
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -106,7 +107,7 @@ import {
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
-import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { WorkflowLogsQueryService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -956,6 +957,7 @@ export class WorkflowsExecutionEnginePlugin
 
                 const workflowExecution = buildWorkflowExecutionDocument({
                   workflow: toWorkflowExecutionEngineModel(workflow),
+                  spaceId,
                   context: executionContext,
                   defaultTriggeredBy: 'scheduled',
                   authenticatedUser: executedBy,
@@ -1242,15 +1244,13 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      await ensureServiceAccountBinding(
-        args.workflow,
-        (args.context.spaceId as string | undefined) || 'default'
-      );
+      await ensureServiceAccountBinding(args.workflow, args.spaceId);
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1289,12 +1289,9 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
-      await ensureExecutionAccess(
-        workflow,
-        (context.spaceId as string | undefined) || 'default',
-        request
-      );
-      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+      const spaceId = (context.spaceId as string | undefined) || 'default';
+      await ensureExecutionAccess(workflow, spaceId, request);
+      await ensureWorkflowEnabled(workflow, spaceId);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1304,6 +1301,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        spaceId,
         context,
         defaultTriggeredBy,
         authenticatedUser,
@@ -1578,8 +1576,8 @@ export class WorkflowsExecutionEnginePlugin
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
+          const spaceId = spaceIdFor(item);
           if (!item.workflow.isEphemeral) {
-            const spaceId = spaceIdFor(item);
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
             if (state && !getWorkflowPermissions(state, profileId).execute) {
               throw new Error('You do not have permission to execute this workflow.');
@@ -1592,6 +1590,7 @@ export class WorkflowsExecutionEnginePlugin
           }
           const workflowExecution = await buildExecutionDocument({
             workflow: item.workflow,
+            spaceId,
             context: item.context,
             defaultTriggeredBy: 'alert',
             authenticatedUser,
@@ -1750,11 +1749,9 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
-
       const spaceId = workflow.spaceId || 'default';
+      await ensureWorkflowEnabled(workflow, spaceId);
       const context: Record<string, unknown> = {
-        spaceId,
         ...(executionContext ?? {}),
         contextOverride,
       };
@@ -1766,6 +1763,7 @@ export class WorkflowsExecutionEnginePlugin
       );
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        spaceId,
         context,
         defaultTriggeredBy: 'manual',
         authenticatedUser: executedBy,
@@ -1965,11 +1963,8 @@ export class WorkflowsExecutionEnginePlugin
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
 
-    const workflowEventLoggerService = new WorkflowEventLoggerService(
-      coreStart.dataStreams,
-      this.logger,
-      this.config.logging.console
-    );
+    const logsRepository = new LogsRepository(coreStart.dataStreams, this.logger);
+    const workflowEventLoggerService = new WorkflowLogsQueryService(logsRepository, this.logger);
 
     const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
 

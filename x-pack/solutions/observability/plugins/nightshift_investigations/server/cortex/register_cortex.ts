@@ -7,23 +7,23 @@
 
 import type {
   AnalyticsServiceSetup,
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import {
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import {
+  createInvestigationOptimizeTelemetry,
+  createOptimizeModel,
+} from '../lib/create_optimize_model';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -61,6 +61,13 @@ export const registerCortexAiIndex = (
     traces: [],
   });
 };
+
+/** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
+const MIN_OPTIMIZE_TOOL_CALLS = 3;
+
+// Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
+// progress reports) would spend its transcript budget and count towards the minimum.
+const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
 
 /** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */
 const GRPC_UNAVAILABLE = 14;
@@ -108,82 +115,83 @@ export const runCortexOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
+  toolCalls,
   esClient,
   spaceId,
   interactionId,
   signal,
+  getAgentBuilder,
   analytics,
   conversationId,
   roundId,
+  requestedConnectorId,
+  roundConnectorId,
   getInference,
-  getSearchInferenceEndpoints,
+  getSavedObjects,
+  getUiSettings,
   logger,
 }: {
   request: KibanaRequest;
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
   esClient: ElasticsearchClient;
   spaceId: string;
   interactionId: string;
   signal?: AbortSignal;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   roundId?: string;
+  requestedConnectorId?: string;
+  roundConnectorId?: string;
   getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
 }): Promise<void> => {
-  /**
-   * Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
-   * hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
-   * caller is refused rather than trusted because the optimize workflow has a manual trigger.
-   */
+  // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
+  // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
+  // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
+  // be run without an agent id.
   if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+    logger.info('Cortex optimizer skipped — round was not produced by the Nightshift investigator');
+    return;
+  }
+
+  const sandboxToolCalls = toolCalls.filter(
+    ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
+  );
+  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
     logger.debug(
-      'Cortex optimizer skipped — round was not produced by the Nightshift investigator'
+      `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
     );
     return;
   }
 
-  const inference = getInference();
-  const searchInferenceEndpoints = getSearchInferenceEndpoints();
-  if (!inference || !searchInferenceEndpoints) {
-    logger.debug('Cortex optimizer skipped — inference or connectors unavailable');
-    return;
-  }
-
-  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-    SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-    request
-  );
-  const connectorId = endpoints[0]?.connectorId;
-  if (!connectorId) {
-    logger.debug('Cortex optimizer skipped — no investigation inference connector');
+  const model = await createOptimizeModel({
+    request,
+    requestedConnectorId,
+    roundConnectorId,
+    agentBuilder: getAgentBuilder(),
+    inference: getInference(),
+    savedObjects: getSavedObjects(),
+    uiSettings: getUiSettings(),
+    telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
+    logger,
+  });
+  if (!model) {
     return;
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  const inferenceClient = inference.getClient({
-    request,
-    bindTo: {
-      connectorId,
-      metadata: {
-        connectorTelemetry: {
-          pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-          productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-          productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-          interactionId,
-        },
-      },
-    },
-  });
   await optimizeCortex({
     store,
-    proposeEdits: createLlmProposeCortexEdits({ inferenceClient }),
+    proposeEdits: createLlmProposeCortexEdits({ inferenceClient: model.inferenceClient }),
     userMessage,
     assistantMessage,
+    toolCalls: sandboxToolCalls,
     telemetry: createCortexTelemetry({
       analytics,
       conversationId,
