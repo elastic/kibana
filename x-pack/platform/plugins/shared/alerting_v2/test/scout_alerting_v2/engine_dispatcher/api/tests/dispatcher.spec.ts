@@ -1020,7 +1020,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         group_hash: 'rule-006-series-1',
         last_series_event_timestamp: eventTs(60),
         action_type: 'fire',
-        actor: 'system',
+        actor: { type: 'internal' },
         source: 'internal',
       });
     }
