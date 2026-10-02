@@ -19,6 +19,15 @@ export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title
   defaultMessage: 'Enable your workers',
 });
 
+export const ONBOARDING_INTRO_GREETING = i18n.translate(
+  'xpack.alertzero.onboarding.intro.greeting',
+  { defaultMessage: "Hello, I'm AlertZero." }
+);
+
+export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboarding.intro.heading', {
+  defaultMessage: "Let's add your data?",
+});
+
 export const ONBOARDING_SUBTITLE = i18n.translate('xpack.alertzero.onboarding.subtitle', {
   defaultMessage:
     'Choose the workers you need — each covers a job. New workers default to the lowest autonomy; previously configured workers keep their saved settings.',

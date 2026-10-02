@@ -8,12 +8,14 @@
 import React from 'react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingContinueFooter } from './onboarding_continue_footer';
 import { OnboardingIntroPromo } from './onboarding_intro_promo';
 import { OnboardingSetUpDataPanel } from './onboarding_set_up_data_panel';
 import { OnboardingUiPreview } from './onboarding_ui_preview';
+import * as i18n from './translations';
 
 interface Props {
   onContinue: () => void;
@@ -43,6 +45,13 @@ export const OnboardingIntro: React.FC<Props> = ({ onContinue }) => {
           width: 100%;
         `}
       >
+        <AlertZeroPageHeader
+          greeting={i18n.ONBOARDING_INTRO_GREETING}
+          title={i18n.ONBOARDING_INTRO_HEADING}
+        />
+
+        <EuiSpacer size="l" />
+
         <OnboardingIntroPromo />
 
         <EuiSpacer size="l" />
