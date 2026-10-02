@@ -51,8 +51,11 @@ export function TransactionDetailFlyoutHeader({
   const {
     apm: { transactionDetailsHref },
   } = useTransactionDetailFlyoutLinks();
-  const { show: showAlertsBadge, count: alertsCount, href: alertsHref } =
-    useTransactionDetailFlyoutAlertsBadge();
+  const {
+    show: showAlertsBadge,
+    count: alertsCount,
+    href: alertsHref,
+  } = useTransactionDetailFlyoutAlertsBadge();
 
   return (
     <EuiFlyoutHeader>
