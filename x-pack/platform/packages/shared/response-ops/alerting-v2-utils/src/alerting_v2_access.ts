@@ -6,27 +6,69 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID } from '@kbn/alerting-v2-constants';
 
-/** Feature id from `@kbn/alerting-v2-plugin/common/feature_privileges`. */
-const ALERTING_V2_RULES_FEATURE_ID = 'alerting_v2_rules';
+/**
+ * Feature ids from `@kbn/alerting-v2-plugin/common/feature_privileges`.
+ * Duplicated here so this package does not depend on the plugin.
+ */
+const ALERTING_V2_FEATURE_IDS = {
+  alerts: 'alerting_v2_alerts',
+  rules: 'alerting_v2_rules',
+  actionPolicies: 'alerting_v2_action_policies',
+  executionHistory: 'alerting_v2_execution_history',
+} as const;
 
-const getAlertingV2RulesCapabilities = (core: CoreStart): Record<string, boolean> | undefined =>
-  core.application.capabilities[ALERTING_V2_RULES_FEATURE_ID] as
+export type AlertingV2CapabilityFeature = keyof typeof ALERTING_V2_FEATURE_IDS;
+export type AlertingV2CapabilityLevel = 'read' | 'all';
+
+/**
+ * Returns whether the user holds the requested Alerting v2 UI capability.
+ * `read` is granted by either the top-level `all` or `read` flag. `all` requires write.
+ */
+export const hasAlertingV2Capability = (
+  core: CoreStart,
+  feature: AlertingV2CapabilityFeature,
+  capability: AlertingV2CapabilityLevel = 'read'
+): boolean => {
+  const featureCapabilities = core.application.capabilities[ALERTING_V2_FEATURE_IDS[feature]] as
     | Record<string, boolean>
     | undefined;
+
+  if (capability === 'all') {
+    return featureCapabilities?.all === true;
+  }
+
+  return featureCapabilities?.all === true || featureCapabilities?.read === true;
+};
 
 /**
  * Returns whether the current user has read (or write, since `all` implies `read`) access to
  * Alerting v2 rules.
  */
-export const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean => {
-  const rulesCapabilities = getAlertingV2RulesCapabilities(core);
-  return rulesCapabilities?.all === true || rulesCapabilities?.read === true;
-};
+export const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean =>
+  hasAlertingV2Capability(core, 'rules');
 
 /**
  * Returns whether Alerting v2 create-rule UI should be shown for the current user. Absence of the
  * plugin already yields `false` here, so no separate availability check is needed.
  */
 export const shouldShowAlertingV2CreateRuleFlyout = (core: CoreStart): boolean =>
-  getAlertingV2RulesCapabilities(core)?.all === true;
+  hasAlertingV2Capability(core, 'rules', 'all');
+
+/**
+ * Returns whether the V1 Observability alerts table should appear in solution navigation.
+ * Shown only when the space-scoped `alerting:v1:showV1ObservabilityAlertsTable` setting is true.
+ */
+export const shouldShowV1ObservabilityAlertsTable = (core: CoreStart): boolean =>
+  core.settings.client.get<boolean>(
+    ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
+    false
+  ) === true;
+
+/**
+ * Returns whether the current user can reach Alerting v2 rules: rules read access
+ * ({@link hasAlertingV2Capability}).
+ */
+export const canAccessAlertingV2Rules = (core: CoreStart): boolean =>
+  hasAlertingV2Capability(core, 'rules');

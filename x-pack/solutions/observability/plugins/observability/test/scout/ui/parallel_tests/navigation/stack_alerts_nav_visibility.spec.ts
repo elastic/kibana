@@ -24,7 +24,7 @@ test.describe(
       await pageObjects.observabilityNavigation.waitForLoad();
     });
 
-    test('hides Stack Alerts under Alerts and Insights', async ({ config, pageObjects }) => {
+    test('hides Stack Alerts and Stack Rules', async ({ config, pageObjects }) => {
       const nav = pageObjects.observabilityNavigation;
       const panelId = config.serverless ? 'admin_and_settings' : 'stack_management';
       const opener = nav.navItemInFooterById(panelId);
@@ -35,10 +35,12 @@ test.describe(
       const panel = nav.sidePanel(panelId);
       await expect(panel).toBeVisible();
 
-      // Rules stays as the control that the panel finished resolving deep links.
+      await expect(
+        panel.locator('[data-test-subj~="nav-item-id-management:triggersActionsConnectors"]')
+      ).toBeVisible();
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActions"]')
-      ).toBeVisible();
+      ).toHaveCount(0);
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActionsAlerts"]')
       ).toHaveCount(0);

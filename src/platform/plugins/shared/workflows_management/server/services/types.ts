@@ -17,7 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  IWorkflowEventLoggerService,
+  IWorkflowLogsQueryService,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
@@ -63,7 +63,7 @@ export interface WorkflowExecutionQueryDeps {
   esClient: ElasticsearchClient;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
-  workflowEventLoggerService: IWorkflowEventLoggerService;
+  workflowEventLoggerService: IWorkflowLogsQueryService;
 }
 
 /** Deps for WorkflowValidationService. */
@@ -72,4 +72,5 @@ export interface WorkflowValidationDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  getCoreStart: () => CoreStart;
 }

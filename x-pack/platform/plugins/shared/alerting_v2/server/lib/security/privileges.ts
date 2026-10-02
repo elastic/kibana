@@ -49,7 +49,8 @@ const buildKibanaFeature = (
   feature: AlertingV2FeatureDefinition,
   description: string
 ): KibanaFeatureConfig => {
-  const managementApps = [...getFeatureManagementApps(feature)];
+  const ownedManagementApps = [...getFeatureManagementApps(feature)];
+  const readManagementApps = [feature.managementApp];
   const app = [APP_ID];
 
   return {
@@ -59,13 +60,13 @@ const buildKibanaFeature = (
     category,
     app,
     management: {
-      [ALERTING_V2_SECTION_ID]: managementApps,
+      [ALERTING_V2_SECTION_ID]: ownedManagementApps,
     },
     privileges: {
       all: {
         app,
         management: {
-          [ALERTING_V2_SECTION_ID]: managementApps,
+          [ALERTING_V2_SECTION_ID]: ownedManagementApps,
         },
         ...(feature.privileges.all.aiIndex
           ? { aiIndex: { ...feature.privileges.all.aiIndex } }
@@ -81,7 +82,7 @@ const buildKibanaFeature = (
       read: {
         app,
         management: {
-          [ALERTING_V2_SECTION_ID]: managementApps,
+          [ALERTING_V2_SECTION_ID]: readManagementApps,
         },
         ...(feature.privileges.read.aiIndex
           ? { aiIndex: { ...feature.privileges.read.aiIndex } }

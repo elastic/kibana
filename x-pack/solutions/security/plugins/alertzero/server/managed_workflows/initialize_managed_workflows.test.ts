@@ -9,8 +9,10 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { RULE_TUNING_DEFAULT_EXTRAS } from '@kbn/alertzero-common';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ALERTZERO_PROPOSAL_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -55,6 +57,8 @@ describe('initializeManagedWorkflows', () => {
       ...ALERTZERO_ACTION_WORKFLOW_IDS,
       ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
       ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+      ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+      ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
     ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),

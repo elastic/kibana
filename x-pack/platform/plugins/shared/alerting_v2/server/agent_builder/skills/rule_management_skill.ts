@@ -98,7 +98,7 @@ Build the request for ${
       ALERTING_TOOL_IDS.manageRule
     } as an ordered \`operations\` array. Operations run in sequence.
 
-For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`.
+For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, \`set_query\`, \`set_recovery\`, and \`set_no_data\`.
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
@@ -113,7 +113,7 @@ ${generateRuleOperationsDoc()}
   Omit \`breach\` to treat every row returned by \`base\` as a breach:
   \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" }\`
 - \`base\` is the only place a \`FROM\` belongs. A \`breach.segment\` is a bare clause such as \`WHERE avg_cpu > 0.9\`, appended to \`base\`.
-- \`set_query\` also accepts optional \`recovery\` and \`no_data\` objects. See the [recovery-strategy reference](./references/recovery-strategy.md) and the [no-data-strategy reference](./references/no-data-strategy.md).
+- \`set_query\` defines the ES|QL query only. Use \`set_recovery\` and \`set_no_data\` for lifecycle settings. See the [recovery-strategy reference](./references/recovery-strategy.md) and the [no-data-strategy reference](./references/no-data-strategy.md).
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
@@ -141,6 +141,8 @@ After calling ${
 \`\`\`
 <render_attachment id="<ruleAttachment.id>" version="<version>" />
 \`\`\`
+
+The \`version\` attribute is **always required**, even when the version is \`1\`. Omitting it breaks the attachment renderer.
 
 This displays the interactive rule card with Preview and Create/Update buttons.
 
@@ -188,10 +190,10 @@ When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\`
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ### Recovery Strategy
-When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
+When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, use \`set_recovery\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
 
 ### No-Data Strategy
-When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), set \`no_data\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
+When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,

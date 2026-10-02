@@ -79,9 +79,12 @@ describe('UiamServiceAccounts', () => {
 
   const validResponse: UiamServiceAccount = {
     id: 'service-account-id',
-    type: 'project' as const,
+    type: 'organization' as const,
+    scope: 'project' as const,
     name: 'nightshift-relay',
     organization_id: 'organization-id',
+    project_type: 'security',
+    project_id: 'project-id',
     role_assignments: expectedRoleAssignments,
     assumable_by: [
       {
@@ -122,7 +125,17 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#create', () => {
-    it('forwards the caller access token, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
+    it('rejects unsupported descriptions without sending a UIAM request', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          description: 'description',
+        })
+      ).rejects.toThrow('Service account descriptions are not supported on Serverless.');
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('forwards the caller access token, the project, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
       await expect(
@@ -135,6 +148,8 @@ describe('UiamServiceAccounts', () => {
         {
           organization_id: 'organization-id',
           name: 'nightshift-relay',
+          project_type: 'security',
+          project_id: 'project-id',
           role_assignments: expectedRoleAssignments,
           assumable_by: [
             {
@@ -1068,6 +1083,47 @@ describe('UiamServiceAccounts', () => {
         expect(() =>
           serviceAccounts.releaseFakeRequest(httpServerMock.createFakeKibanaRequest({}))
         ).not.toThrow();
+      });
+    });
+
+    describe('#getFakeRequestPrincipal', () => {
+      it('describes a request this backend minted as a UIAM service account', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+
+        expect(serviceAccounts.getFakeRequestPrincipal(request)).toEqual({
+          type: 'service_account',
+          serviceAccountId: 'service-account-id',
+          variant: 'uiam',
+        });
+      });
+
+      it('returns null for requests this backend did not mint', () => {
+        expect(
+          serviceAccounts.getFakeRequestPrincipal(httpServerMock.createFakeKibanaRequest({}))
+        ).toBeNull();
+        expect(
+          serviceAccounts.getFakeRequestPrincipal(httpServerMock.createKibanaRequest())
+        ).toBeNull();
+      });
+
+      it('returns null once the request has been released', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        serviceAccounts.releaseFakeRequest(request);
+
+        expect(serviceAccounts.getFakeRequestPrincipal(request)).toBeNull();
+      });
+
+      it('returns null once the request carries a credential other than the one it was minted with', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        (request.headers as Record<string, string>).authorization = 'ApiKey someone-else';
+
+        expect(serviceAccounts.getFakeRequestPrincipal(request)).toBeNull();
       });
     });
   });
