@@ -22,7 +22,7 @@ suite issue is filed, at most `--max-new-issues` (default 10) per run, titled
 owning teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the
 branch each test qualified on, the suite details including what the config runs, the suite's
 distinct errors with their share of its failures and the pipelines, branches, targets and job each
-was last seen in, and breakdowns by branch, by Scout target (deployment mode and location, for
+was last seen in, and breakdowns by branch (with the ones every setup skips it on marked ⏭️), by Scout target (deployment mode and location, for
 suites that recorded one) and by pipeline naming the branches each failed on; issues that merely
 mention the file are linked as possibly related. A suite is
 skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
