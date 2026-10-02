@@ -290,6 +290,23 @@ describe('discover session API transforms', () => {
   });
 
   describe('transform out', () => {
+    it('replaces an unsupported Classic chart interval with auto in the response', () => {
+      const [tab] = discoverSessionAttributes.tabs;
+      const attributes = {
+        ...discoverSessionAttributes,
+        tabs: [{ ...tab, attributes: { ...tab.attributes, chartInterval: '5m' } }],
+      };
+
+      const { sessionState } = transformDiscoverSessionOut(attributes);
+
+      expect(sessionState.tabs[0]).toHaveProperty('chart_interval', 'auto');
+      expect(discoverSessionApiDataSchema.safeParse(sessionState).success).toBe(true);
+      expect(attributes.tabs[0].attributes.chartInterval).toBe('5m');
+      expect(
+        transformDiscoverSessionIn(sessionState).attributes.tabs[0].attributes.chartInterval
+      ).toBe('auto');
+    });
+
     it('maps saved object attributes to API data', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);

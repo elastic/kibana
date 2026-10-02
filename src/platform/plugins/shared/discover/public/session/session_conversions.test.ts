@@ -727,6 +727,17 @@ describe('Discover session conversion and UI preparation', () => {
     });
   });
 
+  it('replaces an unsupported Classic chart interval with auto before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[0].chartInterval = '5m';
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[0]).toHaveProperty('chart_interval', 'auto');
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(session.tabs[0].chartInterval).toBe('5m');
+  });
+
   it('omits the fields that ES|QL tabs do not use before saving', () => {
     const session = fromDiscoverSessionApiResponse(response);
     session.tabs[2].sampleSize = 500;

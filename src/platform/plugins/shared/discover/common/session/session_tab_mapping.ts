@@ -8,11 +8,12 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-  DiscoverSessionApiTabBase,
+import {
+  discoverSessionApiClassicTabSchema,
+  type DiscoverSessionApiClassicTab,
+  type DiscoverSessionApiEsqlTab,
+  type DiscoverSessionApiTab,
+  type DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
@@ -83,7 +84,9 @@ export const fromStoredClassicSessionSettings = (
 ) => ({
   ...fromStoredCommonSessionSettings(tab),
   ...(tab.chartInterval !== undefined && {
-    chart_interval: tab.chartInterval as DiscoverSessionApiClassicTab['chart_interval'],
+    chart_interval: discoverSessionApiClassicTabSchema.shape.chart_interval
+      .catch('auto')
+      .parse(tab.chartInterval),
   }),
   ...(tab.hideAggregatedPreview !== undefined && {
     hide_aggregated_preview: tab.hideAggregatedPreview,
