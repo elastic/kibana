@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaCodeEditorWrapper } from './monaco_editor';
-import { EsqlEditor } from './esql_editor';
-
-export { KibanaCodeEditorWrapper, EsqlEditor };
-export type { EsqlControlOptions, LookupIndexEditor } from './esql_editor';
+export { EsqlEditor } from './esql_editor';
+export type { EsqlControlOptions } from './esql_editor';
+export type { LookupIndexEditor } from './lookup_index_editor';
