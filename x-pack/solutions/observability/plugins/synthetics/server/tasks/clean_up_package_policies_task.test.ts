@@ -70,6 +70,7 @@ const server = {
     savedObjects: { createInternalRepository: jest.fn().mockReturnValue(soClient) },
   },
   pluginsStart: { taskManager, fleet },
+  fleet: { runWithCache: jest.fn((fn: () => Promise<unknown>) => fn()) },
   logger,
 } as unknown as SyntheticsServerSetup;
 
@@ -126,6 +127,26 @@ describe('clean up package policies task', () => {
         paramsSchema: expect.anything(),
       }),
     });
+  });
+
+  it('runs inside the Fleet cache', async () => {
+    registerCleanUpTask(taskManagerSetup as any, server);
+    const [[definitions]] = taskManagerSetup.registerTaskDefinitions.mock.calls;
+    const { createTaskRunner } = definitions[SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE];
+
+    await createTaskRunner({
+      taskInstance: taskInstance({ params: { packagePolicyIds: ['tn-1'] } }),
+      signal,
+    } as any).run();
+
+    expect(server.fleet.runWithCache).toHaveBeenCalledTimes(1);
+    expect(deletePackagePoliciesMock).toHaveBeenCalledWith(
+      ['tn-1'],
+      soClient,
+      esClient,
+      server,
+      signal
+    );
   });
 
   describe('Test Now run', () => {
