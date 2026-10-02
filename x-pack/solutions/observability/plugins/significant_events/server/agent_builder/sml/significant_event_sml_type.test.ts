@@ -20,15 +20,14 @@ jest.mock('../../lib/significant_events/events/event_service', () => ({
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'payment-outage',
   workflow_execution_id: 'workflow-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.8,
 };
 

@@ -9,6 +9,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+const MAX_QUERY_LENGTH = 400;
+const MAX_URL_LENGTH = 2048;
+const MAX_EXTRACT_URLS = 20;
+const MAX_INSTRUCTIONS_LENGTH = 2000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -21,6 +26,7 @@ export const SearchInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(MAX_QUERY_LENGTH)
       .describe(
         'The search query to execute. Example: "latest AI research 2025" or "how to configure Elasticsearch index mappings".'
       ),
@@ -52,10 +58,11 @@ export type SearchInput = z.infer<typeof SearchInputSchema>;
 export const ExtractInputSchema = lazySchema(() =>
   z.object({
     urls: z
-      .array(z.string())
+      .array(z.string().max(MAX_URL_LENGTH))
       .min(1)
+      .max(MAX_EXTRACT_URLS)
       .describe(
-        'List of one or more URLs to extract content from. Example: ["https://example.com/article", "https://docs.elastic.co/guide"]. At least one URL is required.'
+        `List of one to ${MAX_EXTRACT_URLS} URLs to extract content from. Example: ["https://example.com/article", "https://docs.elastic.co/guide"]. At least one URL is required.`
       ),
     extract_depth: z
       .enum(['basic', 'advanced'])
@@ -80,6 +87,7 @@ export const CrawlInputSchema = lazySchema(() =>
     url: z
       .string()
       .min(1)
+      .max(MAX_URL_LENGTH)
       .describe(
         'The root URL to begin the crawl. The crawler will start here and follow links outward. Example: "https://docs.elastic.co/kibana".'
       ),
@@ -106,6 +114,7 @@ export const CrawlInputSchema = lazySchema(() =>
       ),
     instructions: z
       .string()
+      .max(MAX_INSTRUCTIONS_LENGTH)
       .optional()
       .describe(
         'Optional natural language instructions guiding which types of pages to include or exclude. Example: "Only return pages about API reference documentation" or "Skip blog posts and focus on product pages."'
@@ -126,6 +135,7 @@ export const MapInputSchema = lazySchema(() =>
     url: z
       .string()
       .min(1)
+      .max(MAX_URL_LENGTH)
       .describe(
         'The root URL to begin the site mapping. The mapper will discover links starting here. Example: "https://docs.elastic.co/kibana".'
       ),
@@ -152,6 +162,7 @@ export const MapInputSchema = lazySchema(() =>
       ),
     instructions: z
       .string()
+      .max(MAX_INSTRUCTIONS_LENGTH)
       .optional()
       .describe(
         'Optional natural language instructions guiding which types of URLs to include or exclude during mapping. Example: "Only include URLs under the /api/ path" or "Skip any URLs containing /blog/".'
@@ -165,11 +176,12 @@ export const CallToolInputSchema = lazySchema(() =>
     name: z
       .string()
       .min(1)
+      .max(200)
       .describe(
         'Name of the MCP tool to call on the Tavily MCP server. Use the listTools action first to discover available tool names if you are unsure. Example: "tavily_search".'
       ),
     arguments: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe(
         'Arguments to pass to the tool as a key-value object. The required and optional keys depend on the specific tool being called. Use listTools to see each tool\'s parameter schema. Example: { "query": "AI news", "max_results": 5 }.'

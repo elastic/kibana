@@ -1,12 +1,12 @@
 {
-  "sha1": "251aa41169f10ca36f81bf298aabd890f90ecd6b",
+  "sha1": "3d44cbd8e4f96b155d5f527919ffa8d0e8d98623",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "d7094cddc0c6f94-cb1e9e4209be320",
-      "title": "Escalation access control — private escalations and collaborators a collaborator (editor) can see the private escalation in their list",
+      "id": "d7094cddc0c6f94-b4be65c73e6c0f0",
+      "title": "Escalation access control — private escalations and assignees an assignee (editor) can see the private escalation in their list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -19,8 +19,8 @@
       }
     },
     {
-      "id": "d7094cddc0c6f94-8cbfae84dd6cb6f",
-      "title": "Escalation access control — private escalations and collaborators an unrelated user (viewer) cannot see the private escalation in their list",
+      "id": "d7094cddc0c6f94-19bbde01f1031a8",
+      "title": "Escalation access control — private escalations and assignees an unrelated user (viewer) cannot see the private escalation in their list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -33,8 +33,8 @@
       }
     },
     {
-      "id": "d7094cddc0c6f94-2262e8e4372ca7d",
-      "title": "Escalation access control — private escalations and collaborators PATCH title from a collaborator returns 403 — collaborator lacks manage_escalations",
+      "id": "d7094cddc0c6f94-133ed08d06cd6cd",
+      "title": "Escalation access control — private escalations and assignees PATCH title from an assignee returns 403 — assignee lacks manage_escalations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -47,6 +47,104 @@
       }
     },
     {
+      "id": "228184a3291e0f6-801dbd490bc1117",
+      "title": "Escalation assignees endpoint — authorization and ACL sync viewer (no manage_escalations) receives 403 on a public escalation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 197,
+        "column": 44
+      }
+    },
+    {
+      "id": "228184a3291e0f6-3d96b94bdc9b778",
+      "title": "Escalation assignees endpoint — authorization and ACL sync admin (manage_escalations) can reassign a public escalation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 212,
+        "column": 25
+      }
+    },
+    {
+      "id": "228184a3291e0f6-6abcbcc02d60b2b",
+      "title": "Escalation assignees endpoint — authorization and ACL sync non-member with manage_escalations receives 404 on a private escalation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 229,
+        "column": 50
+      }
+    },
+    {
+      "id": "228184a3291e0f6-fadb64b9b7ae32c",
+      "title": "Escalation assignees endpoint — authorization and ACL sync owner assigns a non-collaborator; the new assignee can then list the escalation and reassign it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 254,
+        "column": 17
+      }
+    },
+    {
+      "id": "228184a3291e0f6-a5d133e255fb907",
+      "title": "Escalation assignees endpoint — authorization and ACL sync an assignee with converse access can reassign a private escalation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 292,
+        "column": 46
+      }
+    },
+    {
+      "id": "228184a3291e0f6-70e9a79a5c172de",
+      "title": "Escalation assignees endpoint — authorization and ACL sync removing a uid from assignees revokes their ACL membership (two-way ACL sync)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 314,
+        "column": 31
+      }
+    },
+    {
+      "id": "228184a3291e0f6-54dd19961dddc7e",
+      "title": "Escalation assignees endpoint — authorization and ACL sync removing one assignee leaves the other assignee with full access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/assignees.spec.ts",
+        "line": 363,
+        "column": 20
+      }
+    },
+    {
       "id": "404003fa1507e8e-565294cbf08d984",
       "title": "POST /internal/investigations/escalations — create escalation creates a public escalation and returns 200",
       "expectedStatus": "passed",
@@ -56,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 60,
+        "column": 25
       }
     },
     {
@@ -70,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 66,
-        "column": 11
+        "line": 80,
+        "column": 14
       }
     },
     {
@@ -84,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 83,
-        "column": 17
+        "line": 100,
+        "column": 16
       }
     },
     {
@@ -98,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 100,
-        "column": 32
+        "line": 116,
+        "column": 25
       }
     },
     {
@@ -112,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 118,
-        "column": 32
+        "line": 137,
+        "column": 25
       }
     },
     {
@@ -126,13 +224,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 132,
-        "column": 31
+        "line": 156,
+        "column": 25
       }
     },
     {
-      "id": "404003fa1507e8e-721506ee04e213f",
-      "title": "POST /internal/investigations/escalations — create escalation returns 400 when public + collaborators is provided",
+      "id": "404003fa1507e8e-ad5f19ebb652e57",
+      "title": "POST /internal/investigations/escalations — create escalation returns 400 when assignees is empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -140,13 +238,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 150,
-        "column": 31
+        "line": 175,
+        "column": 23
       }
     },
     {
-      "id": "404003fa1507e8e-83705b51fb93f87",
-      "title": "POST /internal/investigations/escalations — create escalation returns 400 when private + no collaborators",
+      "id": "404003fa1507e8e-825884511e3a376",
+      "title": "POST /internal/investigations/escalations — create escalation returns 400 when assignees is missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -154,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 165,
-        "column": 14
+        "line": 187,
+        "column": 11
       }
     },
     {
@@ -168,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 176,
-        "column": 10
+        "line": 199,
+        "column": 44
       }
     },
     {
@@ -182,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 207,
-        "column": 44
+        "line": 230,
+        "column": 60
       }
     },
     {
@@ -196,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
-        "line": 217,
-        "column": 60
+        "line": 248,
+        "column": 17
       }
     },
     {
@@ -210,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 115,
-        "column": 9
+        "line": 126,
+        "column": 7
       }
     },
     {
@@ -224,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 136,
-        "column": 44
+        "line": 146,
+        "column": 23
       }
     },
     {
@@ -238,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 147,
-        "column": 81
+        "line": 158,
+        "column": 18
       }
     },
     {
@@ -252,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 158,
-        "column": 13
+        "line": 167,
+        "column": 85
       }
     },
     {
@@ -266,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 166,
-        "column": 19
+        "line": 178,
+        "column": 13
       }
     },
     {
@@ -280,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 176,
-        "column": 28
+        "line": 187,
+        "column": 7
       }
     },
     {
@@ -294,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 187,
-        "column": 11
+        "line": 199,
+        "column": 30
       }
     },
     {
@@ -308,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 199,
-        "column": 60
+        "line": 210,
+        "column": 11
       }
     },
     {
@@ -322,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 211,
-        "column": 24
+        "line": 221,
+        "column": 23
       }
     },
     {
@@ -336,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 219,
-        "column": 7
+        "line": 230,
+        "column": 72
       }
     },
     {
@@ -350,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/space_isolation.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 73,
+        "column": 5
       }
     },
     {
@@ -364,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/space_isolation.spec.ts",
-        "line": 77,
-        "column": 14
+        "line": 89,
+        "column": 24
       }
     },
     {
@@ -378,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/space_isolation.spec.ts",
-        "line": 87,
-        "column": 4
+        "line": 102,
+        "column": 14
       }
     },
     {
@@ -392,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 82,
+        "column": 47
       }
     },
     {
@@ -406,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 82,
-        "column": 24
+        "line": 94,
+        "column": 23
       }
     },
     {
@@ -420,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 94,
-        "column": 23
+        "line": 108,
+        "column": 14
       }
     },
     {
@@ -434,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 110,
-        "column": 90
+        "line": 123,
+        "column": 11
       }
     },
     {
@@ -448,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 123,
-        "column": 55
+        "line": 135,
+        "column": 24
       }
     },
     {
@@ -462,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 133,
-        "column": 78
+        "line": 145,
+        "column": 24
       }
     },
     {
@@ -476,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 147,
-        "column": 9
+        "line": 160,
+        "column": 20
       }
     },
     {
@@ -490,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 171,
+        "column": 16
       }
     },
     {
@@ -504,8 +602,64 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
-        "line": 165,
+        "line": 180,
+        "column": 6
+      }
+    },
+    {
+      "id": "96e854089e9ae48-4438bd0c7a8361e",
+      "title": "Investigation assignees endpoint — authorization viewer (no manage_investigations) receives 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/assignees.spec.ts",
+        "line": 91,
+        "column": 23
+      }
+    },
+    {
+      "id": "96e854089e9ae48-2293e8fa3d9a56b",
+      "title": "Investigation assignees endpoint — authorization admin (manage_investigations) can reassign a public investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/assignees.spec.ts",
+        "line": 103,
+        "column": 29
+      }
+    },
+    {
+      "id": "96e854089e9ae48-63d25129d1de712",
+      "title": "Investigation assignees endpoint — authorization editor (has manage_investigations) can reassign a public investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/assignees.spec.ts",
+        "line": 119,
         "column": 11
+      }
+    },
+    {
+      "id": "96e854089e9ae48-3c65b1dbc05a838",
+      "title": "Investigation assignees endpoint — authorization supplying an escalation id to the investigation assignees route returns 404 (wrong template)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/assignees.spec.ts",
+        "line": 138,
+        "column": 15
       }
     }
   ]
