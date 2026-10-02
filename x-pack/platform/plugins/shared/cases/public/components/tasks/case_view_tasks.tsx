@@ -73,7 +73,7 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
         <EuiButton
           key="add"
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => setDialog({ kind: 'add' })}
           data-test-subj="cases-tasks-add"
         >

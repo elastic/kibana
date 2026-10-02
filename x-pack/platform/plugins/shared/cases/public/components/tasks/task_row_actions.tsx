@@ -50,7 +50,7 @@ export const TaskRowActions: React.FC<TaskRowActionsProps> = ({
   };
 
   const items = [
-    <EuiContextMenuItem key="open" icon="expand" onClick={() => (setIsOpen(false), onOpen(task))}>
+    <EuiContextMenuItem key="open" icon="inspect" onClick={() => (setIsOpen(false), onOpen(task))}>
       {i18n.OPEN_TASK}
     </EuiContextMenuItem>,
     permissions.update && (

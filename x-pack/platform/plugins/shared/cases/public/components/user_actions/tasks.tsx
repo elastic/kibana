@@ -38,7 +38,7 @@ const build =
 
 export const createCreateTaskUserActionBuilder: UserActionBuilder = (params) => {
   const { payload } = params.userAction as SnakeToCamelCase<CreateTaskUserAction>;
-  return build(i18n.ADDED_TASK(payload.task.title), 'plusInCircle')(params);
+  return build(i18n.ADDED_TASK(payload.task.title), 'plusCircle')(params);
 };
 
 export const createUpdateTaskUserActionBuilder: UserActionBuilder = (params) => {

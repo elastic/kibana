@@ -401,7 +401,7 @@ export const TaskListFlyout: React.FC<TaskListFlyoutProps> = ({ template, onClos
               {totalRows < MAX_TASKS_PER_CASE && (
                 <EuiButtonEmpty
                   size="s"
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => setTasks((prev) => [...prev, { ...emptyRow(), subtasks: [] }])}
                   data-test-subj="cases-task-list-add-task"
                 >
