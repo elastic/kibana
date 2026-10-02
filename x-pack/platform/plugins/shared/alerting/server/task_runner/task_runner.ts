@@ -85,6 +85,8 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
+import type { AlertStatusChangedV1Payload } from '../common/workflows/triggers';
+import { ALERT_STATUS_CHANGED_BATCH_EVENT_TYPE } from '../lib/workflow_extensions/events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -573,6 +575,64 @@ export class TaskRunner<
       );
     }
 
+    // Collect alert status-change events for lifecycle rules on non-cancelled
+    // runs. The batch is returned and published to the bus only after
+    // processRunResults() completes — so executor-recorded errors and processing
+    // failures both gate the publish, and the next run reclassifies from
+    // originalState when the batch is not published.
+    let alertStatusChangedBatch:
+      | { alerts: AlertStatusChangedV1Payload[]; request: typeof fakeRequest }
+      | undefined;
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      this.shouldLogAndScheduleActionsForAlerts()
+    ) {
+      const newAlerts = alertsClient.getProcessedAlerts('new');
+      const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
+      const newEntries = Object.entries(newAlerts);
+      const recoveredEntries = Object.entries(recoveredAlerts);
+
+      if (newEntries.length > 0 || recoveredEntries.length > 0) {
+        const rulePayload: AlertStatusChangedV1Payload['rule'] = {
+          id: ruleId,
+          name: rule.name,
+          spaceId,
+          consumer: rule.consumer,
+          ruleTypeId: this.ruleType.id,
+          tags: rule.tags,
+          ruleCategory: this.ruleType.name,
+        };
+
+        alertStatusChangedBatch = {
+          request: fakeRequest,
+          alerts: [
+            ...newEntries.map(([, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'active' as const,
+                actionGroup: alert.getScheduledActionOptions()?.actionGroup ?? null,
+                start: alert.getStart(),
+              },
+            })),
+            ...recoveredEntries.map(([, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'recovered' as const,
+                actionGroup: alert.getLastScheduledActions()?.group ?? null,
+                start: alert.getStart(),
+              },
+            })),
+          ],
+        };
+      }
+    }
+
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       state: {
@@ -581,6 +641,7 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      alertStatusChangedBatch,
       expiredSnoozedInstances:
         expiredInstances.length > 0 || conditionExpiredInstances.length > 0
           ? [
@@ -926,6 +987,24 @@ export class TaskRunner<
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
       this.processRunResults({ schedule, runRuleResult })
     );
+
+    // Publish alert status-change events only after processRunResults() has
+    // completed. This gates publication on executor-recorded errors that do
+    // not cause runRule() to throw, and ensures processing failures suppress
+    // the batch entirely so the next run reclassifies from originalState.
+    if (
+      isOk(runRuleResult) &&
+      this.ruleResult.getLastRunResults().errors.length === 0 &&
+      this.context.alertingEventBus
+    ) {
+      const batch = runRuleResult.value.alertStatusChangedBatch;
+      if (batch && batch.alerts.length > 0) {
+        this.context.alertingEventBus.publish(
+          { type: ALERT_STATUS_CHANGED_BATCH_EVENT_TYPE, alerts: batch.alerts },
+          { request: batch.request }
+        );
+      }
+    }
 
     return {
       state: getState({

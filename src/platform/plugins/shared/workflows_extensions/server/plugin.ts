@@ -169,6 +169,11 @@ export class WorkflowsExtensionsServerPlugin
           'No workflows client provider set, using noop emitEvent to avoid errors. Trigger event ignored.'
         );
       },
+      emitBatch: async () => {
+        this.logger.warn(
+          'No workflows client provider set, using noop emitBatch to avoid errors. Trigger batch ignored.'
+        );
+      },
       managedWorkflows: {
         install: async () => {
           this.logger.warn(

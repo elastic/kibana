@@ -26,7 +26,12 @@ import {
   getEventChainContext,
   getEventChainDepthFromHeaders,
 } from './event_context/event_chain_context';
-import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
+import {
+  initializeTriggerEventsClient,
+  writeTriggerEvent,
+  writeTriggerEventsBulk,
+  type TriggerEventWriteParams,
+} from './event_logs';
 import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_data_stream';
 import {
   classifyWorkflowTriggerMatch,
@@ -56,6 +61,14 @@ export interface EmitEventParams {
 }
 
 export type EmitEvent = (params: EmitEventParams) => Promise<void>;
+
+export interface EmitBatchParams {
+  triggerId: string;
+  payloads: Record<string, unknown>[];
+  request: KibanaRequest;
+}
+
+export type EmitBatch = (params: EmitBatchParams) => Promise<void>;
 
 export interface TriggerEventHandlerDeps {
   coreStart: CoreStart;
@@ -288,6 +301,144 @@ export class TriggerEventHandler {
       resolutionStats,
       scheduleStats,
     });
+  }
+
+  /**
+   * Processes a batch of payloads for a single triggerId in one pass:
+   * 1. ONE subscriber lookup for (triggerId, spaceId).
+   * 2. Per-payload: validate schema, evaluate KQL conditions against subscribers.
+   * 3. ONE bulk write for all trigger-event docs (when logEvents is enabled).
+   * 4. Schedule matching workflows per payload (reuses scheduleMatchingWorkflows).
+   *
+   * Empty payloads array is a no-op (no PIT, no writes).
+   */
+  async handleBatch(params: EmitBatchParams): Promise<void> {
+    if (params.payloads.length === 0) {
+      return;
+    }
+
+    if (!this.config.enabled && !this.config.logEvents) {
+      this.logger.debug(
+        'Event-driven triggers are off (execution and trigger-event logging both disabled); skipping batch.'
+      );
+      return;
+    }
+
+    const { triggerId, payloads, request } = params;
+    const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+    const definition = this.workflowsExtensions.getTriggerDefinition(triggerId);
+    if (!definition) {
+      throw new Error(
+        `Trigger "${triggerId}" is not registered. Register it during plugin setup via registerTriggerDefinition.`
+      );
+    }
+
+    let eventChainContext = getEventChainContext(request);
+    if (eventChainContext === undefined) {
+      eventChainContext = await this.resolveEventChainContextFromEmitterExecution(
+        request,
+        spaceId,
+        this.config.maxChainDepth
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+
+    // ONE subscriber lookup for the whole batch.
+    const allWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
+      triggerId,
+      spaceId
+    );
+    const requiresConnectorId = definition.requiresConnectorId === true;
+
+    const triggerEventDocs: TriggerEventWriteParams[] = [];
+    const schedulePromises: Array<Promise<void>> = [];
+
+    for (const payload of payloads) {
+      // Validate schema per payload.
+      if (definition.eventSchema && typeof definition.eventSchema.safeParse === 'function') {
+        const result = definition.eventSchema.safeParse(payload);
+        if (!result.success) {
+          const message =
+            result.error instanceof Error ? result.error.message : String(result.error);
+          this.logger.warn(
+            `Skipping payload for trigger "${triggerId}" (space: ${spaceId}): did not match eventSchema. ${message}`
+          );
+          continue;
+        }
+      }
+
+      const eventId = generateUuid();
+      const eventContextForResolution = {
+        ...payload,
+        timestamp,
+        spaceId,
+        eventChainDepth: nextScheduledEventChainDepth(eventChainContext),
+      };
+
+      // Evaluate KQL conditions against the already-fetched subscriber list.
+      const matchingWorkflows: WorkflowDetailDto[] = [];
+      for (const workflow of allWorkflows) {
+        const outcome = classifyWorkflowTriggerMatch(
+          workflow,
+          triggerId,
+          eventContextForResolution,
+          this.logger,
+          { requiresConnectorId }
+        );
+        if (outcome === 'matched') {
+          matchingWorkflows.push(workflow);
+        }
+      }
+
+      if (this.config.logEvents) {
+        triggerEventDocs.push({
+          timestamp,
+          eventId,
+          triggerId,
+          spaceId,
+          subscriptions: matchingWorkflows.map((w) => w.id),
+          payload,
+          ...(eventChainContext?.sourceExecutionId
+            ? { sourceExecutionId: eventChainContext.sourceExecutionId }
+            : {}),
+        });
+      }
+
+      if (this.config.enabled && matchingWorkflows.length > 0) {
+        const eventParams: ScheduleEventParams = {
+          payload,
+          timestamp,
+          spaceId,
+          eventId,
+          eventChainContext,
+          triggerId,
+        };
+        schedulePromises.push(
+          this.scheduleMatchingWorkflows(matchingWorkflows, request, eventParams).then(() => {})
+        );
+      }
+    }
+
+    // ONE bulk write for all trigger-event docs.
+    if (this.config.logEvents && triggerEventDocs.length > 0) {
+      try {
+        const triggerEventsClient = await this.triggerEventsClientPromise;
+        if (triggerEventsClient) {
+          await writeTriggerEventsBulk(triggerEventsClient, triggerEventDocs);
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to bulk-write trigger events to data stream (trigger: ${triggerId}): ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
+    // Run all per-payload schedule operations.
+    await Promise.allSettled(schedulePromises);
   }
 
   /**
