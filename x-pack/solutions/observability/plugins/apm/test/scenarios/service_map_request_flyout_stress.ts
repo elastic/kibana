@@ -8,67 +8,66 @@
 /**
  * Stress-test scenario for the service map request flyout.
  *
- * Purpose: produce a dense, realistic-looking map with 500+ services and
- * several high-traffic, high-error edges between core services. Use it to:
+ * ─── What you will see ───────────────────────────────────────────────────────
  *
- *   • Open the flyout on any focus edge and see 50 operations and 50
- *     transactions in the corresponding tables — enough data to page through.
- *   • See all three failure buckets (caller / server / client) on every
- *     service→service edge and the dependency bucket on every s→dep edge.
- *   • Trigger the MAX_IDS (1 000) sampled callout by raising errorRate > 33.
- *   • Reproduce the HTTP span-name collapse (spike A): HTTP exit spans have
- *     span.name = method only ("POST" / "GET"), so all HTTP calls collapse
- *     to 2 operation rows. gRPC and db spans work correctly.
- *   • Measure flyout query latency on a 500-node map via the browser network
- *     tab (routes: service-map/connection/failed_calls, …/transactions, …/operations).
+ * ONE fully-connected service map. Every service has at least one edge to the
+ * core cluster; background services also chain to their neighbours so the graph
+ * has no isolated islands.
  *
- * ─── Core service topology ────────────────────────────────────────────────────
+ * Open the flyout on any focus edge and you will see:
  *
- *   checkout-gateway
- *     └─► orders-api       (s→s, 50 ops, 50 txns, all 3 failure buckets)
- *           ├─► payment-api (s→s, 40 ops, 40 txns, all 3 failure buckets)
- *           │     ├─► fraud-api       (s→s, 30 ops, 30 txns)
- *           │     └─► inventory-api   (s→s, 30 ops, 30 txns)
- *           ├─► notification-service  (s→s, 20 ops, 20 txns)
- *           ├─► postgresql   (s→dep, 25 SQL statements, ~10% fail)
- *           └─► redis        (s→dep, 25 commands,       ~5% fail)
- *   orders-api
- *           ├─► elasticsearch (s→dep, 20 queries, ~8% fail)
- *           └─► kafka         (s→dep, messaging, no RED metrics)
- *   payment-api
- *           ├─► postgresql   (s→dep, 25 SQL statements)
- *           └─► redis        (s→dep, 15 commands)
+ *   Operations table  — 30 distinct span names, each with > 500 calls
+ *   Transactions table — 25 distinct transaction names, each with > 500 calls
+ *   Failed calls       — caller / server / client buckets, each with > 500 errors
  *
- * All focus edges produce > 500 errors over 30 min at the default errorRate.
- * Each gateway service has 50 entry-transaction names so pagination is needed.
+ * The numbers are large enough to need pagination and to make the flyout
+ * query latency visible in the network tab.
  *
- * ─── Background ───────────────────────────────────────────────────────────────
+ * ─── Core topology ───────────────────────────────────────────────────────────
  *
- * The remaining (services − 7) services fill out a 500-node map. They are
- * arranged in gateway→backend clusters of ~10, with every third cluster
- * calling the next cluster's gateway to produce cross-cluster edges and a
- * denser, more realistic graph.
+ *   checkout-gateway ──► orders-api ──► payment-api ──► fraud-api
+ *                    │              │               └──► inventory-api
+ *                    │              └──► notification-service
+ *                    │              └──► postgresql (25 SQL ops, 10% fail)
+ *                    │              └──► redis      (25 cmds,   5% fail)
+ *                    │              └──► elasticsearch (20 queries, 8% fail)
+ *                    │              └──► kafka (messaging)
+ *                    │
+ *                    └── payment-api ──► postgresql (25 SQL ops)
+ *                                   └──► redis      (15 cmds)
  *
- * ─── Advanced Settings to raise before running ──────────────────────────────
+ * ─── Background topology (fully connected) ───────────────────────────────────
+ *
+ * Background services are split into tiers. Every tier-N service calls one
+ * tier-(N+1) service AND one core service, so the whole map is one connected
+ * component. Cross-tier edges at the top of each tier keep the graph dense.
+ *
+ * ─── Volume per focus edge ───────────────────────────────────────────────────
+ *
+ *   checkout-gateway → orders-api:  500 tpm  →  15 000 calls / 30 min
+ *                                   30% error →   4 500 errors / 30 min (1 500 per bucket)
+ *   orders-api → payment-api:       400 tpm  →  12 000 calls / 30 min
+ *   payment-api → fraud-api:        300 tpm  →   9 000 calls / 30 min
+ *   payment-api → inventory-api:    300 tpm  →   9 000 calls / 30 min
+ *   orders-api → notification-svc:  200 tpm  →   6 000 calls / 30 min
+ *
+ * ─── Advanced Settings ───────────────────────────────────────────────────────
  *
  * Kibana → Stack Management → Advanced Settings:
- *   observability:apmServiceGroupMaxNumberOfServices → 600 (or higher)
+ *   observability:apmServiceGroupMaxNumberOfServices → 600
  *
  * ─── Usage ───────────────────────────────────────────────────────────────────
  *
  * node scripts/synthtrace \
  *   x-pack/solutions/observability/plugins/apm/test/scenarios/service_map_request_flyout_stress.ts \
- *   --target=https://<ES_URL> \
- *   --kibana=https://<KIBANA_URL> \
- *   --apiKey=<ENCODED_API_KEY> \
+ *   --target=https://<ES_URL> --kibana=https://<KIBANA_URL> --apiKey=<KEY> \
  *   --from=now-30m --to=now \
  *   --scenarioOpts="services=500,errorRate=30"
  *
  * scenarioOpts:
- *   services   – total services (default 500, must be ≥ 7)
- *   errorRate  – integer % of focus-edge calls that fail, split ~1:1:1 among
- *                caller / server / client buckets (default 30, gives > 500
- *                errors per edge over 30 min)
+ *   services   – total number of services (default 500, minimum 7)
+ *   errorRate  – integer % of focus-edge calls that fail (default 30)
+ *                split ~1:1:1 → caller / server / client buckets
  */
 
 import type { ApmFields, Instance } from '@kbn/synthtrace-client';
@@ -92,22 +91,14 @@ const SERVER_ERRORS = [
   { message: 'Fraud score threshold exceeded', type: 'FraudDetectionException' },
 ];
 
-/**
- * Build a list of exit-span operation specs for a service→service edge.
- * Every third span is gRPC (useful name); the rest are OTel HTTP (collapses).
- */
+/** Mix of gRPC (named) and OTel HTTP (collapses to method) exit spans. */
 function makeOperationSpecs(
   count: number,
-  serviceName: string
+  pkg: string
 ): Array<{ spanName: string; spanType: string; spanSubtype: string }> {
   return times(count, (i) => {
     if (i % 3 === 0) {
-      const pkg = serviceName.replace(/-/g, '.').replace(/api$/, 'Service');
-      return {
-        spanName: `${pkg}/Method${i}`,
-        spanType: 'external',
-        spanSubtype: 'grpc',
-      };
+      return { spanName: `${pkg}/Method${i}`, spanType: 'external', spanSubtype: 'grpc' };
     }
     return {
       spanName: i % 2 === 0 ? 'POST' : 'GET',
@@ -117,10 +108,7 @@ function makeOperationSpecs(
   });
 }
 
-/**
- * Emit one focus edge's traces per tick.
- * Splits errorRate% into caller / server / client buckets ~1:1:1.
- */
+/** One high-volume service→service edge with all three failure buckets. */
 function makeFocusEdgeGenerator(opts: {
   range: any;
   tpm: number;
@@ -135,105 +123,112 @@ function makeFocusEdgeGenerator(opts: {
   const callerThreshold = Math.max(1, Math.round((errorRatePct * 1) / 3));
   const serverThreshold = Math.max(callerThreshold, Math.round((errorRatePct * 2) / 3));
   const clientThreshold = errorRatePct;
+  const targetName = target.fields['service.name'] as string;
 
   return range.ratePerMinute(tpm).generator((timestamp: number) => {
     const txName = txNames[Math.floor(Math.random() * txNames.length)];
     const op = operationSpecs[Math.floor(Math.random() * operationSpecs.length)];
     const roll = random(1, 100);
-    const targetName = target.fields['service.name'] as string;
 
     if (roll <= callerThreshold) {
-      const exitDuration = random(50, 300);
-      const exitSpan = caller
-        .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
-        .timestamp(timestamp + 5)
-        .duration(exitDuration)
-        .failure()
-        .destination(targetName)
-        .defaults({ 'http.response.status_code': 503 });
+      const dur = random(50, 300);
       return caller
         .transaction({ transactionName: txName })
         .timestamp(timestamp)
-        .duration(exitDuration + 10)
+        .duration(dur + 10)
         .failure()
-        .children(exitSpan);
+        .children(
+          caller
+            .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
+            .timestamp(timestamp + 5)
+            .duration(dur)
+            .failure()
+            .destination(targetName)
+            .defaults({ 'http.response.status_code': 503 })
+        );
     }
 
     if (roll <= serverThreshold) {
       const errInfo = SERVER_ERRORS[Math.floor(Math.random() * SERVER_ERRORS.length)];
-      const childDuration = random(30, 150);
-      const exitDuration = childDuration + random(5, 20);
-      const childTx = target
-        .transaction({ transactionName: targetTxName })
-        .timestamp(timestamp + 7)
-        .duration(childDuration)
-        .failure()
-        .errors(
-          target
-            .error({ message: errInfo.message, type: errInfo.type })
-            .timestamp(timestamp + 10)
-        );
-      const exitSpan = caller
-        .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
-        .timestamp(timestamp + 5)
-        .duration(exitDuration)
-        .failure()
-        .destination(targetName)
-        .children(childTx);
+      const childDur = random(30, 150);
+      const exitDur = childDur + random(5, 20);
       return caller
         .transaction({ transactionName: txName })
         .timestamp(timestamp)
-        .duration(exitDuration + 10)
+        .duration(exitDur + 10)
         .failure()
-        .children(exitSpan);
+        .children(
+          caller
+            .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
+            .timestamp(timestamp + 5)
+            .duration(exitDur)
+            .failure()
+            .destination(targetName)
+            .children(
+              target
+                .transaction({ transactionName: targetTxName })
+                .timestamp(timestamp + 7)
+                .duration(childDur)
+                .failure()
+                .errors(
+                  target
+                    .error({ message: errInfo.message, type: errInfo.type })
+                    .timestamp(timestamp + 10)
+                )
+            )
+        );
     }
 
     if (roll <= clientThreshold) {
-      const statusCode = Math.random() < 0.5 ? 404 : 400;
-      const childDuration = random(20, 100);
-      const exitDuration = childDuration + random(5, 20);
-      const childTx = target
-        .transaction({ transactionName: targetTxName })
-        .timestamp(timestamp + 7)
-        .duration(childDuration)
-        .success();
-      const exitSpan = caller
-        .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
-        .timestamp(timestamp + 5)
-        .duration(exitDuration)
-        .failure()
-        .destination(targetName)
-        .defaults({ 'http.response.status_code': statusCode })
-        .children(childTx);
+      const code = Math.random() < 0.5 ? 404 : 400;
+      const childDur = random(20, 100);
+      const exitDur = childDur + random(5, 20);
       return caller
         .transaction({ transactionName: txName })
         .timestamp(timestamp)
-        .duration(exitDuration + 10)
+        .duration(exitDur + 10)
         .failure()
-        .children(exitSpan);
+        .children(
+          caller
+            .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
+            .timestamp(timestamp + 5)
+            .duration(exitDur)
+            .failure()
+            .destination(targetName)
+            .defaults({ 'http.response.status_code': code })
+            .children(
+              target
+                .transaction({ transactionName: targetTxName })
+                .timestamp(timestamp + 7)
+                .duration(childDur)
+                .success()
+            )
+        );
     }
 
     // success
-    const childDuration = random(10, 100);
-    const exitDuration = childDuration + random(3, 15);
-    const childTx = target
-      .transaction({ transactionName: targetTxName })
-      .timestamp(timestamp + 7)
-      .duration(childDuration)
-      .success();
-    const exitSpan = caller
-      .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
-      .timestamp(timestamp + 5)
-      .duration(exitDuration)
-      .success()
-      .destination(targetName)
-      .children(childTx);
+    const childDur = random(10, 100);
+    const exitDur = childDur + random(3, 15);
     return caller
       .transaction({ transactionName: txName })
       .timestamp(timestamp)
-      .duration(exitDuration + 10)
+      .duration(exitDur + 10)
       .success()
-      .children(exitSpan);
+      .children(
+        caller
+          .span({ spanName: op.spanName, spanType: op.spanType, spanSubtype: op.spanSubtype })
+          .timestamp(timestamp + 5)
+          .duration(exitDur)
+          .success()
+          .destination(targetName)
+          .children(
+            target
+              .transaction({ transactionName: targetTxName })
+              .timestamp(timestamp + 7)
+              .duration(childDur)
+              .success()
+          )
+      );
   });
 }
 
@@ -241,31 +236,24 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const numServices = getNumberOpt(scenarioOpts, 'services', 500);
   const errorRatePct = getNumberOpt(scenarioOpts, 'errorRate', 30);
 
-  logger.info(
-    `Service map request flyout stress: services=${numServices}, errorRate=${errorRatePct}%`
-  );
+  logger.info(`Service map stress: services=${numServices}, errorRate=${errorRatePct}%`);
 
   // ─── Core services ──────────────────────────────────────────────────────────
   const checkoutGateway = apm
     .service({ name: 'checkout-gateway', environment: ENVIRONMENT, agentName: 'opentelemetry/go' })
     .instance('checkout-gateway-1');
-
   const ordersApi = apm
     .service({ name: 'orders-api', environment: ENVIRONMENT, agentName: 'opentelemetry/java' })
     .instance('orders-api-1');
-
   const paymentApi = apm
     .service({ name: 'payment-api', environment: ENVIRONMENT, agentName: 'opentelemetry/python' })
     .instance('payment-api-1');
-
   const fraudApi = apm
     .service({ name: 'fraud-api', environment: ENVIRONMENT, agentName: 'opentelemetry/nodejs' })
     .instance('fraud-api-1');
-
   const inventoryApi = apm
     .service({ name: 'inventory-api', environment: ENVIRONMENT, agentName: 'opentelemetry/go' })
     .instance('inventory-api-1');
-
   const notificationService = apm
     .service({
       name: 'notification-service',
@@ -274,23 +262,31 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
     })
     .instance('notification-service-1');
 
-  // ─── Operation / transaction name lists per edge ─────────────────────────────
-  // 50 ops on primary edges → 50 rows in the Operations table (pagination needed).
-  // 50 tx names per caller → 50 rows in the Transactions table.
-  const checkoutOps = makeOperationSpecs(50, 'orders-api');
-  const checkoutTxNames = times(50, (i) => `POST /api/checkout/order-${i}`);
+  const coreInstances = [
+    checkoutGateway,
+    ordersApi,
+    paymentApi,
+    fraudApi,
+    inventoryApi,
+    notificationService,
+  ];
 
-  const ordersToPaymentOps = makeOperationSpecs(40, 'payment-api');
-  const ordersTxNames = times(40, (i) => `POST /internal/orders/process-${i}`);
+  // ─── Operation and transaction name lists ────────────────────────────────────
+  // 30 operation specs → 30 rows in Operations table, each with > 500 calls
+  const checkoutOps = makeOperationSpecs(30, 'orders.OrderService');
+  const checkoutTxNames = times(25, (i) => `POST /api/checkout/order-${i}`);
 
-  const paymentToFraudOps = makeOperationSpecs(30, 'fraud-api');
-  const paymentToInventoryOps = makeOperationSpecs(30, 'inventory-api');
-  const paymentTxNames = times(30, (i) => `POST /internal/payments/charge-${i}`);
+  const ordersToPaymentOps = makeOperationSpecs(30, 'payment.PaymentService');
+  const ordersTxNames = times(25, (i) => `POST /internal/orders/process-${i}`);
 
-  const ordersToNotifOps = makeOperationSpecs(20, 'notification-service');
+  const paymentToFraudOps = makeOperationSpecs(30, 'fraud.FraudService');
+  const paymentToInventoryOps = makeOperationSpecs(30, 'inventory.InventoryService');
+  const paymentTxNames = times(25, (i) => `POST /internal/payments/charge-${i}`);
+
+  const ordersToNotifOps = makeOperationSpecs(25, 'notification.NotifyService');
   const notifTxNames = times(20, (i) => `POST /internal/notify/event-${i}`);
 
-  // ─── Dependency operation names ──────────────────────────────────────────────
+  // ─── Dependency operation lists ──────────────────────────────────────────────
   const pgStatements = times(25, (i) => `SELECT * FROM orders WHERE status = $${i + 1}`);
   const redisCommands = times(25, (i) => {
     const cmds = ['GET', 'SET', 'HGET', 'HSET', 'ZADD', 'ZRANGE', 'DEL', 'EXPIRE'];
@@ -305,11 +301,14 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      // ─── Background services ─────────────────────────────────────────────────
-      // Fill out the map. Every third cluster calls the next cluster's gateway
-      // to create cross-cluster edges and a denser graph.
-      const numBackground = Math.max(0, numServices - 7);
-      const backgroundInstances: Instance[] = times(numBackground, (i) => {
+      // ─── Background services: fully connected ────────────────────────────────
+      // Split into TIER_SIZE tiers. Each service:
+      //   1. Calls a core service (so everything connects to the core cluster)
+      //   2. Calls the next service in its tier (chain within the tier)
+      //   3. Every TIER_SIZE-th service in a tier also calls the first service
+      //      in the next tier (cross-tier link → one connected graph)
+      const numBackground = Math.max(0, numServices - coreInstances.length);
+      const bgInstances: Instance[] = times(numBackground, (i) => {
         const lang = ['go', 'dotnet', 'java', 'python', 'nodejs', 'php'][i % 6];
         return apm
           .service({
@@ -320,91 +319,102 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           .instance(`instance-${i}`);
       });
 
-      const clusterSize = 10;
-      const numClusters = Math.ceil(backgroundInstances.length / clusterSize);
+      const TIER_SIZE = 20;
+      const bgGenerators = bgInstances.flatMap((svc, i) => {
+        const coreTarget = coreInstances[i % coreInstances.length];
+        const coreTargetName = coreTarget.fields['service.name'] as string;
 
-      const backgroundGenerators = times(numClusters).flatMap((ci) => {
-        const gwIdx = ci * clusterSize;
-        if (gwIdx >= backgroundInstances.length) return [];
-        const bgGateway = backgroundInstances[gwIdx];
-        const bgBackends = times(clusterSize - 1)
-          .map((b) => gwIdx + 1 + b)
-          .filter((i) => i < backgroundInstances.length)
-          .map((i) => backgroundInstances[i]);
-
-        const generators = [
-          range.ratePerMinute(2).generator((timestamp: number) => {
-            const backendSpans = bgBackends.map((backend, j) =>
-              bgGateway
-                .span({
-                  spanName: `call ${backend.fields['service.name']}`,
-                  spanType: 'external',
-                  spanSubtype: 'http',
-                })
-                .timestamp(timestamp + j * 5)
-                .duration(random(20, 200))
+        // Each background service calls one core service at low volume (keeps map connected).
+        const toCore = range.ratePerMinute(2).generator((timestamp: number) =>
+          svc
+            .transaction({ transactionName: 'GET /api/request' })
+            .timestamp(timestamp)
+            .duration(random(30, 300))
+            .success()
+            .children(
+              svc
+                .span({ spanName: 'GET', spanType: 'external', spanSubtype: 'http' })
+                .timestamp(timestamp + 3)
+                .duration(random(25, 280))
                 .success()
-                .destination(backend.fields['service.name'] as string)
+                .destination(coreTargetName)
                 .children(
-                  backend
+                  coreTarget
                     .transaction({ transactionName: 'GET /internal' })
-                    .timestamp(timestamp + j * 5 + 2)
-                    .duration(random(15, 195))
+                    .timestamp(timestamp + 5)
+                    .duration(random(20, 270))
                     .success()
                 )
-            );
-            return bgGateway
-              .transaction({ transactionName: 'GET /api/request' })
-              .timestamp(timestamp)
-              .duration(random(50, 500))
-              .success()
-              .children(...backendSpans);
-          }),
-        ];
+            )
+        );
 
-        // Every third cluster calls the next cluster's gateway (cross-cluster edge).
-        if (ci % 3 === 2) {
-          const nextGwIdx = ((ci + 1) % numClusters) * clusterSize;
-          if (nextGwIdx < backgroundInstances.length && nextGwIdx !== gwIdx) {
-            const nextGateway = backgroundInstances[nextGwIdx];
-            generators.push(
-              range.ratePerMinute(1).generator((timestamp: number) =>
-                bgGateway
-                  .transaction({ transactionName: 'GET /api/cross-call' })
-                  .timestamp(timestamp)
-                  .duration(random(30, 300))
+        // Chain: each service also calls the next one in its tier.
+        const nextIdx = i + 1 < bgInstances.length ? i + 1 : 0;
+        const nextSvc = bgInstances[nextIdx];
+        const nextName = nextSvc.fields['service.name'] as string;
+        const toNext = range.ratePerMinute(1).generator((timestamp: number) =>
+          svc
+            .transaction({ transactionName: 'GET /api/forward' })
+            .timestamp(timestamp)
+            .duration(random(20, 200))
+            .success()
+            .children(
+              svc
+                .span({ spanName: 'POST', spanType: 'external', spanSubtype: 'http' })
+                .timestamp(timestamp + 2)
+                .duration(random(15, 180))
+                .success()
+                .destination(nextName)
+                .children(
+                  nextSvc
+                    .transaction({ transactionName: 'GET /internal' })
+                    .timestamp(timestamp + 4)
+                    .duration(random(10, 170))
+                    .success()
+                )
+            )
+        );
+
+        // Cross-tier link: last service in each tier calls the first of the next tier.
+        if ((i + 1) % TIER_SIZE === 0) {
+          const nextTierFirstIdx = (i + 1) % bgInstances.length;
+          const nextTierSvc = bgInstances[nextTierFirstIdx];
+          const nextTierName = nextTierSvc.fields['service.name'] as string;
+          const toCrossTier = range.ratePerMinute(1).generator((timestamp: number) =>
+            svc
+              .transaction({ transactionName: 'GET /api/cross-tier' })
+              .timestamp(timestamp)
+              .duration(random(20, 150))
+              .success()
+              .children(
+                svc
+                  .span({ spanName: 'GET', spanType: 'external', spanSubtype: 'http' })
+                  .timestamp(timestamp + 2)
+                  .duration(random(15, 140))
                   .success()
+                  .destination(nextTierName)
                   .children(
-                    bgGateway
-                      .span({ spanName: 'GET', spanType: 'external', spanSubtype: 'http' })
-                      .timestamp(timestamp + 3)
-                      .duration(random(25, 280))
+                    nextTierSvc
+                      .transaction({ transactionName: 'GET /internal' })
+                      .timestamp(timestamp + 4)
+                      .duration(random(10, 130))
                       .success()
-                      .destination(nextGateway.fields['service.name'] as string)
-                      .children(
-                        nextGateway
-                          .transaction({ transactionName: 'GET /internal' })
-                          .timestamp(timestamp + 5)
-                          .duration(random(20, 270))
-                          .success()
-                      )
                   )
               )
-            );
-          }
+          );
+          return [toCore, toNext, toCrossTier];
         }
 
-        return generators;
+        return [toCore, toNext];
       });
 
-      // ─── Focus edges: core service chain ─────────────────────────────────────
-      // Each edge runs at enough tpm + errorRate to accumulate > 500 errors over 30 min.
-      // e.g. 120 tpm × 30% errorRate × 30 min = 1 080 errors.
+      // ─── Focus edges: high-volume core service chain ─────────────────────────
+      // 500 tpm × 30 min = 15 000 calls; 30% error = 4 500 errors (1 500 per bucket)
+      // 25 tx names → each tx row shows ~600 calls; 30 ops → each op row shows ~500 calls
 
-      // checkout-gateway → orders-api  (primary edge, highest traffic)
       const checkoutToOrdersGen = makeFocusEdgeGenerator({
         range,
-        tpm: 120,
+        tpm: 500,
         errorRatePct,
         caller: checkoutGateway,
         target: ordersApi,
@@ -413,10 +423,9 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         targetTxName: 'POST /internal/orders',
       });
 
-      // orders-api → payment-api
       const ordersToPaymentGen = makeFocusEdgeGenerator({
         range,
-        tpm: 100,
+        tpm: 400,
         errorRatePct,
         caller: ordersApi,
         target: paymentApi,
@@ -425,10 +434,9 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         targetTxName: 'POST /internal/payments',
       });
 
-      // payment-api → fraud-api
       const paymentToFraudGen = makeFocusEdgeGenerator({
         range,
-        tpm: 80,
+        tpm: 300,
         errorRatePct,
         caller: paymentApi,
         target: fraudApi,
@@ -437,10 +445,9 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         targetTxName: 'POST /internal/fraud/check',
       });
 
-      // payment-api → inventory-api
       const paymentToInventoryGen = makeFocusEdgeGenerator({
         range,
-        tpm: 80,
+        tpm: 300,
         errorRatePct,
         caller: paymentApi,
         target: inventoryApi,
@@ -449,10 +456,9 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         targetTxName: 'POST /internal/inventory/reserve',
       });
 
-      // orders-api → notification-service (lower volume)
       const ordersToNotifGen = makeFocusEdgeGenerator({
         range,
-        tpm: 60,
+        tpm: 200,
         errorRatePct,
         caller: ordersApi,
         target: notificationService,
@@ -462,8 +468,9 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
       });
 
       // ─── Dependency edges from orders-api ────────────────────────────────────
+      // 200 tpm × 30 min = 6 000 calls; 25 SQL ops → each op row ~240 calls
 
-      const pgGen = range.ratePerMinute(50).generator((timestamp: number) => {
+      const pgGen = range.ratePerMinute(200).generator((timestamp: number) => {
         const stmt = pgStatements[Math.floor(Math.random() * pgStatements.length)];
         const dur = random(5, 200);
         const isFailed = random(1, 10) === 1;
@@ -481,7 +488,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           .children(isFailed ? pgSpan.failure() : pgSpan.success());
       });
 
-      const redisGen = range.ratePerMinute(80).generator((timestamp: number) => {
+      const redisGen = range.ratePerMinute(300).generator((timestamp: number) => {
         const cmd = redisCommands[Math.floor(Math.random() * redisCommands.length)];
         const dur = random(1, 20);
         const isFailed = random(1, 20) === 1;
@@ -499,7 +506,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           .children(isFailed ? redisSpan.failure() : redisSpan.success());
       });
 
-      const esGen = range.ratePerMinute(30).generator((timestamp: number) => {
+      const esGen = range.ratePerMinute(100).generator((timestamp: number) => {
         const q = esQueries[Math.floor(Math.random() * esQueries.length)];
         const dur = random(10, 300);
         const isFailed = random(1, 12) === 1;
@@ -520,7 +527,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           .children(isFailed ? esSpan.failure() : esSpan.success());
       });
 
-      const kafkaGen = range.ratePerMinute(10).generator((timestamp: number) =>
+      const kafkaGen = range.ratePerMinute(50).generator((timestamp: number) =>
         ordersApi
           .transaction({ transactionName: 'POST /internal/events' })
           .timestamp(timestamp)
@@ -528,18 +535,25 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           .success()
           .children(
             ordersApi
-              .span({ spanName: 'send orders.created', spanType: 'messaging', spanSubtype: 'kafka' })
+              .span({
+                spanName: 'send orders.created',
+                spanType: 'messaging',
+                spanSubtype: 'kafka',
+              })
               .timestamp(timestamp + 2)
               .duration(random(2, 10))
               .success()
               .destination('kafka')
-              .defaults({ 'service.target.type': 'kafka', 'service.target.name': 'orders-events' })
+              .defaults({
+                'service.target.type': 'kafka',
+                'service.target.name': 'orders-events',
+              })
           )
       );
 
       // ─── Dependency edges from payment-api ──────────────────────────────────
 
-      const paymentPgGen = range.ratePerMinute(40).generator((timestamp: number) => {
+      const paymentPgGen = range.ratePerMinute(150).generator((timestamp: number) => {
         const stmt =
           paymentPgStatements[Math.floor(Math.random() * paymentPgStatements.length)];
         const dur = random(5, 150);
@@ -561,7 +575,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           .children(isFailed ? pgSpan.failure() : pgSpan.success());
       });
 
-      const paymentRedisGen = range.ratePerMinute(60).generator((timestamp: number) => {
+      const paymentRedisGen = range.ratePerMinute(200).generator((timestamp: number) => {
         const cmd =
           paymentRedisCommands[Math.floor(Math.random() * paymentRedisCommands.length)];
         const dur = random(1, 15);
@@ -586,7 +600,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
       return withClient(
         apmEsClient,
         logger.perf('generating_service_map_stress_events', () => [
-          ...backgroundGenerators,
+          ...bgGenerators,
           checkoutToOrdersGen,
           ordersToPaymentGen,
           paymentToFraudGen,
