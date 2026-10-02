@@ -16,15 +16,9 @@ import { css } from '@emotion/react';
 export function useMenuHeaderStyle(isPanel = false) {
   const { euiTheme } = useEuiTheme();
   const { fontSize, lineHeight } = useEuiFontSize('s');
-  // In the side panel, center the title on the adjacent 64px App Header row
-  // and keep it smaller than the App Header title.
+  // In the side panel, center the title on the adjacent 64px App Header row.
   const panelStyles = css`
     padding-top: calc((64px - ${lineHeight}) / 2);
-
-    & h4 {
-      font-size: ${fontSize};
-      line-height: ${lineHeight};
-    }
   `;
 
   return css`
@@ -36,7 +30,11 @@ export function useMenuHeaderStyle(isPanel = false) {
     padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xxs}
       var(--horizontal-padding);
     margin: 0 1px;
-    min-height: 42px;
     ${isPanel && panelStyles}
+
+    & h4 {
+      font-size: ${fontSize};
+      line-height: ${lineHeight};
+    }
   `;
 }
