@@ -249,6 +249,49 @@ describe('InvestigationAttachmentDocService', () => {
     ).resolves.toEqual(['conv-1']);
   });
 
+  it('reads a missing index as empty', async () => {
+    const { storage, service } = setup();
+    jest.mocked(storage.search).mockRejectedValue(
+      Object.assign(new Error('no such index'), {
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+      })
+    );
+
+    await expect(service.get(noteId(), SPACE_ID)).resolves.toBeUndefined();
+    await expect(service.listByConversationIds(['conv-1'], SPACE_ID)).resolves.toEqual([]);
+    await expect(service.searchConversationIds({ spaceId: SPACE_ID, filter: [] })).resolves.toEqual(
+      []
+    );
+  });
+
+  it('retries a read while the new index has no available shard', async () => {
+    jest.useFakeTimers();
+    try {
+      const { storage, service } = setup();
+      storage.put(noteId(), body());
+      jest.mocked(storage.search).mockRejectedValueOnce(
+        Object.assign(new Error('all shards failed'), {
+          statusCode: 503,
+          body: {
+            error: {
+              type: 'search_phase_execution_exception',
+              root_cause: [{ type: 'no_shard_available_action_exception' }],
+            },
+          },
+        })
+      );
+
+      const documents = service.listByConversationIds([CONVERSATION_ID], SPACE_ID);
+      await jest.advanceTimersByTimeAsync(200);
+
+      await expect(documents).resolves.toEqual([{ ...body(), id: noteId() }]);
+      expect(storage.search).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('deletes by conversation and by space for maintenance', async () => {
     const { storage, service } = setup();
     storage.put('a', body({ conversationId: 'conv-1' }));
