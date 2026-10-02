@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBadgeProps } from '@elastic/eui';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiMarkdownFormat,
+  EuiSpacer,
   EuiText,
-  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type {
   Hypothesis,
@@ -31,6 +34,14 @@ const NO_HYPOTHESES = i18n.translate('xpack.agenticInvestigations.hypotheses.att
   defaultMessage: 'No hypotheses recorded yet.',
 });
 
+const HYPOTHESIS_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.candidateLabel', {
+  defaultMessage: 'Hypothesis:',
+});
+
+const NO_REASON = i18n.translate('xpack.agenticInvestigations.hypotheses.noReason', {
+  defaultMessage: 'No reasoning recorded yet.',
+});
+
 const HYPOTHESIS_STATUS_LABELS: Record<HypothesisStatus, string> = {
   investigating: i18n.translate('xpack.agenticInvestigations.hypotheses.status.investigating', {
     defaultMessage: 'Investigating',
@@ -43,17 +54,38 @@ const HYPOTHESIS_STATUS_LABELS: Record<HypothesisStatus, string> = {
   }),
 };
 
+const HYPOTHESIS_STATUS_ICONS: Record<Exclude<HypothesisStatus, 'investigating'>, string> = {
+  dismissed: 'dashedCircle',
+  confirmed: 'checkCircle',
+};
+
+const confidenceBadgeLabel = (confidence: number): string =>
+  i18n.translate('xpack.agenticInvestigations.hypotheses.confidenceBadge', {
+    defaultMessage: '{confidence, number, percent}',
+    values: { confidence },
+  });
+
 const confidenceLabel = (confidence: number): string =>
   i18n.translate('xpack.agenticInvestigations.hypotheses.confidence', {
     defaultMessage: '{confidence}% confidence',
     values: { confidence: Math.round(confidence * 100) },
   });
 
-const STATUS_COLORS: Record<HypothesisStatus, EuiBadgeProps['color']> = {
-  investigating: 'primary',
-  dismissed: 'default',
-  confirmed: 'success',
-};
+const HypothesisStatusIcon = ({ status }: { status: HypothesisStatus }) =>
+  status === 'investigating' ? (
+    <EuiLoadingSpinner
+      size="s"
+      aria-label={HYPOTHESIS_STATUS_LABELS[status]}
+      data-test-subj={`investigationHypothesisStatus-${status}`}
+    />
+  ) : (
+    <EuiIcon
+      type={HYPOTHESIS_STATUS_ICONS[status]}
+      color="text"
+      title={HYPOTHESIS_STATUS_LABELS[status]}
+      data-test-subj={`investigationHypothesisStatus-${status}`}
+    />
+  );
 
 const HypothesisItem = ({
   hypothesis: { candidate, confidence, status, reason, evidence = [] },
@@ -61,45 +93,62 @@ const HypothesisItem = ({
 }: {
   hypothesis: Hypothesis;
   variant: InvestigationAttachmentVariant;
-}) => (
-  <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="investigationHypothesis">
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={STATUS_COLORS[status]} data-test-subj="investigationHypothesisStatus">
-            {HYPOTHESIS_STATUS_LABELS[status]}
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" data-test-subj="investigationHypothesisConfidence">
-            {confidenceLabel(confidence)}
+}) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationHypothesis' });
+  return (
+    <EuiAccordion
+      id={accordionId}
+      data-test-subj="investigationHypothesis"
+      paddingSize="s"
+      buttonProps={{ 'data-test-subj': 'investigationHypothesisToggle' }}
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <HypothesisStatusIcon status={status} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiText size="xs" color="text">
+              <strong>{HYPOTHESIS_LABEL}</strong> <span>{candidate}</span>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      extraAction={
+        <EuiBadge
+          color={status === 'confirmed' ? 'success' : 'hollow'}
+          title={confidenceLabel(confidence)}
+          data-test-subj="investigationHypothesisConfidence"
+        >
+          {confidenceBadgeLabel(confidence)}
+        </EuiBadge>
+      }
+    >
+      <div data-test-subj="investigationHypothesisReason">
+        {reason?.trim() ? (
+          <EuiMarkdownFormat textSize="xs" color="subdued">
+            {reason}
+          </EuiMarkdownFormat>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <p>{NO_REASON}</p>
           </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="xxs">
-        <h4>{candidate}</h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    {reason?.trim() && (
-      <EuiFlexItem grow={false} data-test-subj="investigationHypothesisReason">
-        <EuiMarkdownFormat textSize="s">{reason}</EuiMarkdownFormat>
-      </EuiFlexItem>
-    )}
-    {variant === 'details' &&
-      evidence.map((item, index) => (
-        <EuiFlexItem grow={false} key={index}>
-          <EvidenceView evidence={item} />
-        </EuiFlexItem>
-      ))}
-  </EuiFlexGroup>
-);
+        )}
+      </div>
+      {variant === 'details' &&
+        evidence.map((item, index) => (
+          <React.Fragment key={index}>
+            <EuiSpacer size="s" />
+            <EvidenceView evidence={item} />
+          </React.Fragment>
+        ))}
+    </EuiAccordion>
+  );
+};
 
 /**
- * The hypotheses an investigation considered, in the order the agent reported them, each with
- * its status, confidence, and reason. The details flyout also shows each hypothesis's evidence;
- * the inline chat render leaves it out to stay compact.
+ * The hypotheses an investigation considered, in the order the agent reported them: one collapsed
+ * row each with its status and confidence, expanding to its reason. The details flyout also shows
+ * each hypothesis's evidence when expanded; the inline chat render leaves it out to stay compact.
  */
 export const HypothesesView: React.FC<
   InvestigationAttachmentContentProps<InvestigationHypotheses>
