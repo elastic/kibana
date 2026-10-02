@@ -116,7 +116,10 @@ export const createModelProvider = ({
     async (): Promise<ConnectorTelemetryMetadata> => {
       const traceId = getCurrentTraceId();
       const spaceId = spaces ? getCurrentSpaceId({ request, spaces }) : undefined;
-      const userId =
+      // Only forward an actual profile UID: toStableUserId() falls back to a
+      // `realm:[type,name,username]` synthetic id (used internally for ownership checks) when
+      // the user has no activated profile, and that string embeds the raw username.
+      const resolvedUserId =
         security && elasticsearch
           ? (
               await getUserFromRequest({
@@ -126,6 +129,8 @@ export const createModelProvider = ({
               })
             ).id
           : undefined;
+      const userId =
+        resolvedUserId && !resolvedUserId.startsWith('realm:') ? resolvedUserId : undefined;
 
       return {
         ...MODEL_TELEMETRY_METADATA,
