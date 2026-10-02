@@ -56,15 +56,20 @@ export interface INightshiftCapabilities {
   canShow: boolean;
   canManage: boolean;
   canConfigure: boolean;
+  /** Settings routes require both the manage and configure API privileges. */
+  canManageAndConfigure: boolean;
 }
 
 export function getNightshiftCapabilities(
   nightshift: Record<string, unknown> | undefined
 ): INightshiftCapabilities {
+  const canManage = nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true;
+  const canConfigure = nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true;
   return {
     canShow: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.show] === true,
-    canManage: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true,
-    canConfigure: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true,
+    canManage,
+    canConfigure,
+    canManageAndConfigure: canManage && canConfigure,
   };
 }
 
