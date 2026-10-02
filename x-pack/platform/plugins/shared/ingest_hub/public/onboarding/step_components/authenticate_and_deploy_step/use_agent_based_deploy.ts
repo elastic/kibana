@@ -22,6 +22,7 @@ import {
 import type { AgentCredentialVars } from './package_inputs';
 import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
+import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
 import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
@@ -41,8 +42,6 @@ export interface UseAgentBasedDeployResult {
   /** Trigger a deploy (or retry). Defaults to all targets; pass specific instanceIds for retry.
    *  Returns a Promise that resolves to `{ failed: boolean }` when the deploy settles. */
   handleDeploy: (instanceIds?: string[]) => Promise<{ failed: boolean }>;
-  namespace: string;
-  setNamespace: (ns: string) => void;
   /** Update the in-memory credential values used on the next deploy. Secrets (secret_access_key,
    *  session_token) are kept in a ref — never written to session storage. */
   setAgentCredentials: (creds: AgentCredentialVars | undefined) => void;
@@ -69,7 +68,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     { globalRegion: '', serviceVars: {} }
   );
 
-  const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
   // In-memory credential ref — secrets (secret_access_key, session_token) are never persisted.
   const agentCredentialsRef = useRef<AgentCredentialVars | undefined>(undefined);
@@ -85,9 +83,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       buildAgentBasedTargets(
         serviceSettings?.instances ?? [],
         selectedServiceIds,
-        servicesMap ?? new Map()
+        servicesMap ?? new Map(),
+        serviceSettings?.serviceVars ?? {}
       ),
-    [serviceSettings?.instances, selectedServiceIds, servicesMap]
+    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
   );
 
   // true when every target has a package policy and no cleanup is pending. false on pending
@@ -187,7 +186,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       try {
         const baseOpts = {
-          namespace,
+          namespace: DEFAULT_NAMESPACE,
           globalRegion,
           storedServiceVars,
           authenticateAndDeployStep,
@@ -209,7 +208,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
-            namespace,
+            namespace: DEFAULT_NAMESPACE,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
             // Cleanup never changes agent-policy selection; keep the policy's current policy_ids.
@@ -656,7 +655,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     },
     [
       targets,
-      namespace,
       serviceSettings,
       selectedServiceIds,
       authenticateAndDeployStep,
@@ -680,8 +678,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     failedInstances,
     isAlreadyDeployed,
     handleDeploy,
-    namespace,
-    setNamespace,
     setAgentCredentials,
   };
 }
