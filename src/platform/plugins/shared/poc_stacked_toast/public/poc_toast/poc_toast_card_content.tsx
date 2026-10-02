@@ -7,42 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiButton, EuiLink, type UseEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { POC_STACKED_TOAST_CTA_EVENT } from './poc_toast_events';
 import type { PocToast } from './poc_toast_types';
-import {
-  POC_TOAST_BODY_MAX_CHARS_BEFORE_EXPAND,
-  pocToastBodyClampClassName,
-  pocToastCtaRowStyles,
-  pocToastReadMoreLinkStyles,
-} from './poc_toast_styles';
 
-export interface PocToastCardContentProps {
-  toast: PocToast;
-  euiThemeContext: UseEuiTheme;
-}
+/** Bodies longer than this are clamped to two lines with a "Read more" toggle. */
+const BODY_MAX_CHARS_BEFORE_EXPAND = 120;
 
-export const PocToastCardContent = ({ toast, euiThemeContext }: PocToastCardContentProps) => {
+const readMoreLabel = i18n.translate('pocStackedToast.readMore', {
+  defaultMessage: 'Read more',
+});
+const showLessLabel = i18n.translate('pocStackedToast.showLess', {
+  defaultMessage: 'Show less',
+});
+
+export const PocToastCardContent = ({ toast }: { toast: PocToast }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const bodyText = toast.text?.trim();
-
-  const isExpandable = Boolean(
-    bodyText && bodyText.length > POC_TOAST_BODY_MAX_CHARS_BEFORE_EXPAND
-  );
-  const readMoreLinkStyles = useMemo(
-    () => pocToastReadMoreLinkStyles(euiThemeContext),
-    [euiThemeContext]
-  );
-  const ctaRowStyles = useMemo(() => pocToastCtaRowStyles(euiThemeContext), [euiThemeContext]);
-
-  const readMoreLabel = i18n.translate('pocStackedToast.readMore', {
-    defaultMessage: 'Read more',
-  });
-  const showLessLabel = i18n.translate('pocStackedToast.showLess', {
-    defaultMessage: 'Show less',
-  });
+  const isExpandable = Boolean(bodyText && bodyText.length > BODY_MAX_CHARS_BEFORE_EXPAND);
+  const isClamped = isExpandable && !isExpanded;
 
   const handleCtaClick = () => {
     window.dispatchEvent(
@@ -56,29 +41,21 @@ export const PocToastCardContent = ({ toast, euiThemeContext }: PocToastCardCont
     <div className="pocToastCardCopy">
       <p className="pocToastCardTitle">{toast.title}</p>
       {bodyText ? (
-        <>
-          <p
-            className={
-              isExpandable && !isExpanded
-                ? `pocToastCardBody ${pocToastBodyClampClassName}`
-                : 'pocToastCardBody'
-            }
-          >
-            {bodyText}
-          </p>
-          {isExpandable ? (
-            <EuiLink
-              css={readMoreLinkStyles}
-              onClick={() => setIsExpanded((expanded) => !expanded)}
-              data-test-subj={isExpanded ? 'pocToastShowLess' : 'pocToastReadMore'}
-            >
-              {isExpanded ? showLessLabel : readMoreLabel}
-            </EuiLink>
-          ) : null}
-        </>
+        <p className={isClamped ? 'pocToastCardBody pocToastCardBodyClamped' : 'pocToastCardBody'}>
+          {bodyText}
+        </p>
+      ) : null}
+      {isExpandable ? (
+        <EuiLink
+          className="pocToastCardReadMore"
+          onClick={() => setIsExpanded((expanded) => !expanded)}
+          data-test-subj={isExpanded ? 'pocToastShowLess' : 'pocToastReadMore'}
+        >
+          {isExpanded ? showLessLabel : readMoreLabel}
+        </EuiLink>
       ) : null}
       {toast.cta ? (
-        <div css={ctaRowStyles}>
+        <div className="pocToastCardCta">
           <EuiButton
             size="s"
             color="text"

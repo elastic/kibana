@@ -8,10 +8,9 @@
  */
 
 import React from 'react';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { createRoot, type Root } from 'react-dom/client';
-import { pocToastBridge } from './poc_toast/poc_toast_bridge';
 import { POC_STACKED_TOAST_ADD_EVENT } from './poc_toast/poc_toast_events';
 import { createRandomPocToastInput } from './poc_toast/poc_toast_random';
 import { PocToastStack } from './poc_toast/poc_toast_stack';
@@ -25,91 +24,63 @@ export class PocStackedToastPlugin implements Plugin {
   private reactRoot: Root | undefined;
   private toastHost: HTMLDivElement | undefined;
   private unregisterChromeTrigger: (() => void) | undefined;
-  private removeWindowListener: (() => void) | undefined;
   private toasts: PocToast[] = [];
 
-  constructor(_initializerContext: unknown) {}
-
-  public setup(_core: CoreSetup) {
+  public setup() {
     return {};
   }
 
-  private renderToastUi = () => {
+  private setToasts = (toasts: PocToast[]) => {
+    this.toasts = toasts;
     if (!this.reactRoot || !this.core) {
       return;
     }
-
     this.reactRoot.render(
       this.core.rendering.addContext(
-        <PocToastStack
-          toasts={this.toasts}
-          onDismiss={this.dismissToast}
-          onClearAll={this.clearAll}
-        />
+        <PocToastStack toasts={toasts} onDismiss={this.dismissToast} onClearAll={this.clearAll} />
       )
     );
   };
 
-  private addToast = (input: PocToastInput) => {
-    const toast: PocToast = {
-      id: String(nextToastId++),
-      ...input,
-    };
-    this.toasts = [...this.toasts, toast];
-    this.renderToastUi();
-  };
+  private addToast = (input: PocToastInput) =>
+    this.setToasts([...this.toasts, { id: String(nextToastId++), ...input }]);
 
   /** Removes toast from state; {@link PocToastStack} runs exit via `AnimatePresence`. */
-  private dismissToast = (id: string) => {
-    this.toasts = this.toasts.filter((toast) => toast.id !== id);
-    this.renderToastUi();
-  };
+  private dismissToast = (id: string) =>
+    this.setToasts(this.toasts.filter((toast) => toast.id !== id));
 
-  private clearAll = () => {
-    if (this.toasts.length === 0) {
-      return;
+  private clearAll = () => this.setToasts([]);
+
+  private onAddFromWindow = (event: Event) => {
+    const { detail } = event as CustomEvent<PocToastInput>;
+    if (detail) {
+      this.addToast(detail);
     }
-    this.toasts = [];
-    this.renderToastUi();
   };
 
   public start(core: CoreStart) {
     this.core = core;
+    this.toastHost = document.createElement('div');
+    this.toastHost.setAttribute('data-test-subj', 'pocStackedToastHost');
+    document.body.appendChild(this.toastHost);
+    this.reactRoot = createRoot(this.toastHost);
+    this.setToasts(this.toasts);
 
-    const container = document.createElement('div');
-    container.setAttribute('data-test-subj', 'pocStackedToastHost');
-    document.body.appendChild(container);
-    this.toastHost = container;
-
-    this.reactRoot = createRoot(container);
-
-    pocToastBridge.addToast = this.addToast;
-
-    const onAddFromWindow = (event: Event) => {
-      const { detail } = event as CustomEvent<PocToastInput>;
-      if (detail) {
-        this.addToast(detail);
-      }
-    };
-    window.addEventListener(POC_STACKED_TOAST_ADD_EVENT, onAddFromWindow);
-    this.removeWindowListener = () =>
-      window.removeEventListener(POC_STACKED_TOAST_ADD_EVENT, onAddFromWindow);
-
-    this.renderToastUi();
-
-    const addRandomToast = () => this.addToast(createRandomPocToastInput());
+    window.addEventListener(POC_STACKED_TOAST_ADD_EVENT, this.onAddFromWindow);
 
     this.unregisterChromeTrigger = core.chrome.controls.aiButton.register({
-      content: toMountPoint(<PocToastStackTrigger onAdd={addRandomToast} />, core.rendering),
+      content: toMountPoint(
+        <PocToastStackTrigger onAdd={() => this.addToast(createRandomPocToastInput())} />,
+        core.rendering
+      ),
     });
 
     return {};
   }
 
   public stop() {
-    pocToastBridge.addToast = () => {};
+    window.removeEventListener(POC_STACKED_TOAST_ADD_EVENT, this.onAddFromWindow);
     this.unregisterChromeTrigger?.();
-    this.removeWindowListener?.();
     this.reactRoot?.unmount();
     this.toastHost?.remove();
     this.reactRoot = undefined;

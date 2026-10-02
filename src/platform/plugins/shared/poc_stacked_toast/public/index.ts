@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { PocStackedToastPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new PocStackedToastPlugin(initializerContext);
+export const plugin = () => new PocStackedToastPlugin();

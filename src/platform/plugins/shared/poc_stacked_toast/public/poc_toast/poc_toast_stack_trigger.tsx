@@ -10,33 +10,18 @@
 import React from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { pocToastBridge } from './poc_toast_bridge';
-import { createRandomPocToastInput } from './poc_toast_random';
 
-export interface PocToastStackTriggerProps {
-  /** Wired from plugin.start so the bell works even when chrome uses a separate React root. */
-  onAdd?: () => void;
-}
+const triggerLabel = i18n.translate('pocStackedToast.stackTrigger', {
+  defaultMessage: 'Add random POC toast',
+});
 
-export const PocToastStackTrigger = ({ onAdd }: PocToastStackTriggerProps) => {
-  const triggerLabel = i18n.translate('pocStackedToast.stackTrigger', {
-    defaultMessage: 'Add random POC toast',
-  });
-
-  return (
-    <EuiHeaderSectionItemButton
-      aria-label={triggerLabel}
-      title={triggerLabel}
-      data-test-subj="pocToastStackTrigger"
-      onClick={() => {
-        if (onAdd) {
-          onAdd();
-          return;
-        }
-        pocToastBridge.addToast(createRandomPocToastInput());
-      }}
-    >
-      <EuiIcon type="bell" size="m" aria-hidden />
-    </EuiHeaderSectionItemButton>
-  );
-};
+export const PocToastStackTrigger = ({ onAdd }: { onAdd: () => void }) => (
+  <EuiHeaderSectionItemButton
+    aria-label={triggerLabel}
+    title={triggerLabel}
+    data-test-subj="pocToastStackTrigger"
+    onClick={onAdd}
+  >
+    <EuiIcon type="bell" size="m" aria-hidden />
+  </EuiHeaderSectionItemButton>
+);

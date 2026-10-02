@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion, useIsPresent } from 'framer-motion';
 import {
   copyToClipboard,
@@ -18,79 +18,57 @@ import {
   type IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PocToast } from './poc_toast_types';
+import type { PocToast, PocToastType } from './poc_toast_types';
 import { createPocToastVariants } from './poc_toast_motion';
 import { PocToastCardContent } from './poc_toast_card_content';
-import { PocToastCardPeekContent } from './poc_toast_card_peek_content';
-import {
-  getPocToastMotionCardInteractionClassName,
-  getPocToastMotionCardLayoutClassName,
-  pocToastCardStyles,
-} from './poc_toast_styles';
+import { getPocToastCardMotionClassName, pocToastCardStyles } from './poc_toast_styles';
 
-const iconByType: Record<PocToast['type'], IconType> = {
-  info: 'info',
-  warning: 'warning',
-  error: 'error',
+const iconByType: Record<PocToastType, { type: IconType; color: string }> = {
+  info: { type: 'info', color: 'primary' },
+  warning: { type: 'warning', color: 'warning' },
+  error: { type: 'error', color: 'danger' },
 };
 
-const colorByType: Record<PocToast['type'], string> = {
-  info: 'primary',
-  warning: 'warning',
-  error: 'danger',
-};
+const copyLabel = i18n.translate('pocStackedToast.copyToClipboard', {
+  defaultMessage: 'Copy to clipboard',
+});
 
 export interface PocToastCardProps {
   toast: PocToast;
   index: number;
-  arrayLength: number;
-  isHovered: boolean;
+  isExpanded: boolean;
   onDismiss: (id: string) => void;
 }
 
-const PocToastCardComponent = forwardRef<HTMLDivElement, PocToastCardProps>(function PocToastCard(
-  { toast, index, arrayLength, isHovered, onDismiss },
-  ref
-) {
+export const PocToastCard = memo(function PocToastCard({
+  toast,
+  index,
+  isExpanded,
+  onDismiss,
+}: PocToastCardProps) {
   const euiThemeContext = useEuiTheme();
   const isPresent = useIsPresent();
-  const isFrontCard = index === 0;
-  const isPeekCard = !isHovered && index > 0;
-  const useSolidBackground = isFrontCard || isHovered;
+  const isPeekCard = !isExpanded && index > 0;
+  const { type, title, text } = toast;
 
-  const toastVariants = useMemo(
-    () => createPocToastVariants({ isHovered, index, maxToasts: arrayLength }),
-    [arrayLength, index, isHovered]
-  );
-
+  const variants = useMemo(() => createPocToastVariants(index, isExpanded), [index, isExpanded]);
   const motionClassName = useMemo(
-    () =>
-      `${getPocToastMotionCardLayoutClassName(
-        index,
-        isHovered,
-        isPresent
-      )} ${getPocToastMotionCardInteractionClassName(index, isHovered)}`,
-    [index, isHovered, isPresent]
+    () => getPocToastCardMotionClassName(index, isExpanded, isPresent),
+    [index, isExpanded, isPresent]
+  );
+  const cardStyles = useMemo(
+    () => pocToastCardStyles(euiThemeContext, type, isPeekCard),
+    [euiThemeContext, isPeekCard, type]
   );
 
-  const copyLabel = i18n.translate('pocStackedToast.copyToClipboard', {
-    defaultMessage: 'Copy to clipboard',
-  });
   const dismissLabel = i18n.translate('pocStackedToast.dismiss', {
     defaultMessage: 'Dismiss {title}',
-    values: { title: toast.title },
+    values: { title },
   });
-
-  const cardStyles = useMemo(
-    () => pocToastCardStyles(euiThemeContext, toast.type, useSolidBackground, isPeekCard),
-    [euiThemeContext, isPeekCard, toast.type, useSolidBackground]
-  );
 
   return (
     <motion.div
-      ref={ref}
-      custom={index}
-      variants={toastVariants}
+      variants={variants}
       initial="initial"
       animate="animate"
       exit="exit"
@@ -101,52 +79,50 @@ const PocToastCardComponent = forwardRef<HTMLDivElement, PocToastCardProps>(func
         role="status"
         aria-live={isPeekCard ? 'off' : 'polite'}
         aria-hidden={isPeekCard}
-        data-test-subj={`pocToast-${toast.type}`}
+        data-test-subj={`pocToast-${type}`}
       >
-        {isPeekCard ? (
-          <PocToastCardPeekContent toast={toast} euiThemeContext={euiThemeContext} />
-        ) : (
-          <>
-            <div className="pocToastCardLeading">
-              <span className="pocToastCardIcon">
-                <EuiIcon
-                  type={iconByType[toast.type]}
-                  color={colorByType[toast.type]}
-                  size="m"
-                  aria-hidden={true}
-                />
-              </span>
-              <PocToastCardContent toast={toast} euiThemeContext={euiThemeContext} />
-            </div>
-            <div className="pocToastCardActions">
-              <EuiToolTip content={copyLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="copy"
-                  size="xs"
-                  color="text"
-                  aria-label={copyLabel}
-                  onClick={() =>
-                    copyToClipboard([toast.title, toast.text].filter(Boolean).join('\n'))
-                  }
-                  data-test-subj="pocToastCopyButton"
-                />
-              </EuiToolTip>
-              <EuiToolTip content={dismissLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="cross"
-                  size="xs"
-                  color="text"
-                  aria-label={dismissLabel}
-                  onClick={() => onDismiss(toast.id)}
-                  data-test-subj="pocToastDismissButton"
-                />
-              </EuiToolTip>
-            </div>
-          </>
+        <div
+          className={isPeekCard ? 'pocToastCardLeading pocToastCardPeek' : 'pocToastCardLeading'}
+        >
+          <span className="pocToastCardIcon">
+            <EuiIcon
+              type={iconByType[type].type}
+              color={iconByType[type].color}
+              size="m"
+              aria-hidden={true}
+            />
+          </span>
+          {isPeekCard ? (
+            <p className="pocToastCardTitle">{title}</p>
+          ) : (
+            <PocToastCardContent toast={toast} />
+          )}
+        </div>
+        {isPeekCard ? null : (
+          <div className="pocToastCardActions">
+            <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="copy"
+                size="xs"
+                color="text"
+                aria-label={copyLabel}
+                onClick={() => copyToClipboard([title, text].filter(Boolean).join('\n'))}
+                data-test-subj="pocToastCopyButton"
+              />
+            </EuiToolTip>
+            <EuiToolTip content={dismissLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={dismissLabel}
+                onClick={() => onDismiss(toast.id)}
+                data-test-subj="pocToastDismissButton"
+              />
+            </EuiToolTip>
+          </div>
         )}
       </article>
     </motion.div>
   );
 });
-
-export const PocToastCard = memo(PocToastCardComponent);
