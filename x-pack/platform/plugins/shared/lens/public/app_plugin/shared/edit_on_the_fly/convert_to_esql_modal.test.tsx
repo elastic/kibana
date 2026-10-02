@@ -70,7 +70,7 @@ const mockLayers: ConvertibleLayer[] = [
     query: '',
     isConvertibleToEsql: false,
     conversionData: mockConversionData,
-    failureReason: 'formula_not_supported',
+    failureReason: 'formula_not_supported' as const,
   },
 ];
 

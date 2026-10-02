@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render, renderHook } from '@testing-library/react';
-import React from 'react';
+import { renderHook } from '@testing-library/react';
 
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import {
   generateEsqlQuery,
   esqlConversionFailureReasonMessages,
+  esqlConversionFailureTitle,
   type FramePublicAPI,
   type TypedLensSerializedState,
   type Visualization,
@@ -21,9 +21,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { hasUnsupportedAnnotations, useEsqlConversionCheck } from './use_esql_conversion_check';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import type { LensPluginStartDependencies } from '../../../plugin';
-
-const renderTooltip = (tooltip: React.ReactNode) =>
-  render(React.createElement(React.Fragment, null, tooltip));
 
 jest.mock('@kbn/lens-common', () => ({
   ...jest.requireActual('@kbn/lens-common'),
@@ -178,8 +175,9 @@ describe('useEsqlConversionCheck', () => {
     const { result } = renderHook(() => useEsqlConversionCheck(true, hookParams, hookServices));
 
     expect(result.current.isConvertToEsqlButtonDisabled).toBe(true);
-    const { container } = renderTooltip(result.current.convertToEsqlButtonTooltip);
-    expect(container).toHaveTextContent(esqlConversionFailureReasonMessages.formula_not_supported);
+    expect(result.current.convertToEsqlButtonTooltip).toBe(
+      `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages.formula_not_supported}`
+    );
     expect(convertFormBasedToTextBasedLayer).not.toHaveBeenCalled();
   });
 

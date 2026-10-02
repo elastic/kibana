@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { partition } from 'lodash';
 
@@ -25,7 +24,8 @@ import type { CoreStart } from '@kbn/core/public';
 
 import {
   generateEsqlQuery,
-  getFailureTooltip,
+  esqlConversionFailureReasonMessages,
+  esqlConversionFailureTitle,
   isEsqlQuerySuccess,
   isEsqlQueryFailure,
   type EsqlConversionFailureReason,
@@ -39,11 +39,10 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 import { useLensSelector, selectPersistedDoc } from '../../../state_management';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
-import { renderEsqlFailureTooltipContent } from './esql_failure_tooltip_content';
 
 interface EsqlConversionSettings {
   isConvertToEsqlButtonDisabled: boolean;
-  convertToEsqlButtonTooltip: ReactNode;
+  convertToEsqlButtonTooltip: string;
   convertibleLayers: ConvertibleLayer[];
   attributes?: TypedLensSerializedState['attributes'];
 }
@@ -52,7 +51,7 @@ const getEsqlConversionDisabledSettings = (
   reason: EsqlConversionFailureReason = 'unknown'
 ): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
-  convertToEsqlButtonTooltip: renderEsqlFailureTooltipContent(getFailureTooltip(reason)),
+  convertToEsqlButtonTooltip: `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages[reason]}`,
   convertibleLayers: [],
 });
 

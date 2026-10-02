@@ -28,11 +28,10 @@ import { esql } from '@elastic/esql';
 
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { getFailureTooltip, getFailureTooltipPlainText } from '@kbn/lens-common';
+import { getFailureTooltip } from '@kbn/lens-common';
 import { layerTypes } from '../../..';
 
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
-import { renderEsqlFailureTooltipContent } from './esql_failure_tooltip_content';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
   data: (count: number) =>
@@ -104,6 +103,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           if (layer.isConvertibleToEsql || layer.type !== layerTypes.DATA) {
             return name;
           }
+          const { title, message } = getFailureTooltip(layer.failureReason);
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>{name}</EuiFlexItem>
@@ -111,9 +111,14 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                 <EuiIconTip
                   type="warning"
                   color="warning"
-                  content={renderEsqlFailureTooltipContent(getFailureTooltip(layer.failureReason))}
+                  content={
+                    <>
+                      <div>{title}</div>
+                      <div>{message}</div>
+                    </>
+                  }
                   iconProps={{
-                    'aria-label': getFailureTooltipPlainText(layer.failureReason),
+                    'aria-label': `${title}: ${message}`,
                     'data-test-subj': `lnsEsqlConversionFailureReason-${layer.id}`,
                   }}
                 />

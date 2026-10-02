@@ -44,9 +44,7 @@ export const esqlConversionFailureTitle = i18n.translate(
   }
 );
 
-/**
- * Sentence-only tooltip bodies for each conversion failure reason.
- */
+/** Sentence-only tooltip bodies for each conversion failure reason */
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
     defaultMessage: 'Formula operations will be supported in an upcoming update.',
@@ -180,9 +178,7 @@ export interface EsqlFailureTooltip {
   message: string;
 }
 
-/**
- * Builds tooltip content for a conversion failure: shared title plus the reason body.
- */
+/** Builds tooltip content for a conversion failure */
 export const getFailureTooltip = (
   reason: EsqlConversionFailureReason | undefined
 ): EsqlFailureTooltip => ({
@@ -191,11 +187,3 @@ export const getFailureTooltip = (
     esqlConversionFailureReasonMessages[reason ?? 'unknown'] ??
     esqlConversionFailureReasonMessages.unsupported_settings,
 });
-
-/** Plain-text form of {@link getFailureTooltip} for aria-labels and string-only call sites. */
-export const getFailureTooltipPlainText = (
-  reason: EsqlConversionFailureReason | undefined
-): string => {
-  const { title, message } = getFailureTooltip(reason);
-  return `${title}: ${message}`;
-};
