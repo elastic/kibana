@@ -57,13 +57,13 @@ export function useFetchMetricsData({
   // "Unable to load visualization". The post-fetch state wipe (against
   // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
   const appliedDimensions = useMemo(() => {
-    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+    if (!selectedDimensionNames?.length || !fetchParams.columnsMap) {
       return selectedDimensionNames;
     }
     return selectedDimensionNames.filter(
-      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
+      (dimension) => fetchParams.columnsMap![dimension.name] != null
     );
-  }, [selectedDimensionNames, fetchParams.dataView]);
+  }, [selectedDimensionNames, fetchParams.columnsMap]);
 
   const appliedDimensionNames = useMemo(
     () => appliedDimensions?.map((dimension) => dimension.name),
@@ -112,7 +112,7 @@ export function useFetchMetricsData({
             esqlQuery: metricsInfoQuery,
             search: services.data.search.search,
             signal,
-            dataView: fetchParams.dataView,
+            timeFieldName: fetchParams.dataSource?.timeFieldName,
             timeRange: fetchParams.timeRange,
             filters: fetchParams.filters ?? [],
             variables: fetchParams.esqlVariables,
@@ -129,8 +129,8 @@ export function useFetchMetricsData({
       );
 
       const getFieldType = (name: string) => {
-        const field = fetchParams.dataView?.getFieldByName(name);
-        return field ? getFieldIconType(field) : undefined;
+        const column = fetchParams.columnsMap?.[name];
+        return column ? getFieldIconType({ name, type: column.meta.type }) : undefined;
       };
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
@@ -149,7 +149,8 @@ export function useFetchMetricsData({
     [
       metricsInfoQuery,
       trackRequest,
-      fetchParams.dataView,
+      fetchParams.dataSource,
+      fetchParams.columnsMap,
       fetchParams.timeRange,
       fetchParams.filters,
       fetchParams.esqlVariables,
@@ -162,7 +163,7 @@ export function useFetchMetricsData({
   );
 
   useEffect(() => {
-    if (!shouldFetch || !fetchParams.dataView) {
+    if (!shouldFetch) {
       return;
     }
     const abortController = new AbortController();
@@ -172,7 +173,7 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    fetchParams.dataView,
+    fetchParams.dataSource,
     fetchParams.timeRange,
     fetchParams.abortController,
     fetchParams.filters,

@@ -45,6 +45,9 @@ const ERROR_MODE_OPTIONS: ErrorModeOption[] = [
   },
 ];
 
+export const getErrorModeDisplayLabel = (value: string): string =>
+  ERROR_MODE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export function ErrorModeSelect({
   value,
   onChange,

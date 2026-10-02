@@ -38,7 +38,7 @@ export class AlertEpisodesListPage {
   public readonly rowActionsMenuButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.pageContainer = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.pageContainer = this.page.testSubj.locator('alertingV2AlertsListPage');
     this.tableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
     this.itemCount = this.page.testSubj.locator('alertEpisodesItemCount');
     this.kpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
@@ -57,7 +57,7 @@ export class AlertEpisodesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/episodes');
+    await this.page.gotoApp('management/alertingV2/alerts');
   }
 
   async openTagsFilter(): Promise<void> {
