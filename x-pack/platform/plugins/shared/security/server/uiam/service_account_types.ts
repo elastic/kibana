@@ -81,6 +81,7 @@ export interface UiamServiceAccount {
   type: 'organization';
   scope: 'project';
   name: string;
+  description?: string;
   organization_id: string;
   project_type: UiamProjectType;
   project_id: string;
