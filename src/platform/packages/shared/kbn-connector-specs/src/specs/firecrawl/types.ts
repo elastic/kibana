@@ -13,6 +13,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // Action input schemas & inferred types
 // =============================================================================
 
+const URL_MAX_LENGTH = 2048;
+const QUERY_MAX_LENGTH = 2000;
+const UUID_LENGTH = 36;
+
 const MAX_MARKDOWN_LENGTH_DESCRIBE =
   'Maximum characters of markdown to return. Default 100000; max 500000 to avoid context overflow. Only set a lower value if you already got truncated output and need to fit within a smaller context.';
 
@@ -21,6 +25,7 @@ export const ScrapeInputSchema = lazySchema(() =>
     url: z
       .string()
       .url()
+      .max(URL_MAX_LENGTH)
       .describe('The URL of the webpage to scrape. e.g. https://example.com/page'),
     onlyMainContent: z
       .boolean()
@@ -55,6 +60,7 @@ export const SearchInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(QUERY_MAX_LENGTH)
       .describe('Search query string. e.g. "elasticsearch query DSL tutorial"'),
     limit: z
       .number()
@@ -70,9 +76,14 @@ export type SearchInput = z.infer<typeof SearchInputSchema>;
 
 export const MapInputSchema = lazySchema(() =>
   z.object({
-    url: z.string().url().describe('Base URL of the website to map. e.g. https://example.com'),
+    url: z
+      .string()
+      .url()
+      .max(URL_MAX_LENGTH)
+      .describe('Base URL of the website to map. e.g. https://example.com'),
     search: z
       .string()
+      .max(QUERY_MAX_LENGTH)
       .optional()
       .describe(
         'Optional keyword to filter discovered URLs. Only URLs matching this term will be returned. e.g. "blog" to find blog pages.'
@@ -98,7 +109,11 @@ export type MapInput = z.infer<typeof MapInputSchema>;
 
 export const CrawlInputSchema = lazySchema(() =>
   z.object({
-    url: z.string().url().describe('Base URL to start crawling from. e.g. https://example.com'),
+    url: z
+      .string()
+      .url()
+      .max(URL_MAX_LENGTH)
+      .describe('Base URL to start crawling from. e.g. https://example.com'),
     limit: z
       .number()
       .int()
@@ -130,7 +145,11 @@ export type CrawlInput = z.infer<typeof CrawlInputSchema>;
 
 export const CrawlAndWaitInputSchema = lazySchema(() =>
   z.object({
-    url: z.string().url().describe('Base URL to start crawling from. e.g. https://example.com'),
+    url: z
+      .string()
+      .url()
+      .max(URL_MAX_LENGTH)
+      .describe('Base URL to start crawling from. e.g. https://example.com'),
     limit: z
       .number()
       .int()
@@ -182,7 +201,7 @@ export type CrawlAndWaitInput = z.infer<typeof CrawlAndWaitInputSchema>;
 
 export const GetCrawlStatusInputSchema = lazySchema(() =>
   z.object({
-    id: z.string().uuid().describe('Crawl job ID (UUID) from the crawl action'),
+    id: z.string().uuid().max(UUID_LENGTH).describe('Crawl job ID (UUID) from the crawl action'),
   })
 );
 export type GetCrawlStatusInput = z.infer<typeof GetCrawlStatusInputSchema>;

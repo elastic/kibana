@@ -103,11 +103,6 @@ describe('GenAiSettingsApp', () => {
       advancedSettings: { show: true, save: true },
     };
 
-    // Mock feature flags to enable AI Agents by default
-    jest
-      .spyOn(coreStart.featureFlags, 'getBooleanValue')
-      .mockImplementation((_flagName: string, _fallbackValue: boolean) => true as boolean);
-
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
     coreStart.http.fetch.mockResolvedValue({
@@ -283,9 +278,6 @@ describe('GenAiSettingsApp', () => {
         }
         return fallback;
       });
-      jest
-        .spyOn(coreStart.featureFlags, 'getBooleanValue')
-        .mockImplementation((_flagName, _fallbackValue) => true);
 
       renderComponent();
 

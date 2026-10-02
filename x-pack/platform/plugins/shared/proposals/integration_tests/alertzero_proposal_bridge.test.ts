@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { StepCategory } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
+import { z } from '@kbn/zod/v4';
 
 /**
  * The bridge forwards its own trigger inputs on to the gate, which no other
@@ -34,8 +37,27 @@ const bridgeYaml = (): string => {
   return definition.yaml;
 };
 
-const runBridge = async (inputs: Record<string, unknown>) => {
+// A stand-in for the agenticInvestigations step, which this plugin cannot
+// import: only its `reopened` output matters to the forward.
+const REOPEN_STEP_ID = 'investigations.reopen';
+const reopenStep = (reopened: boolean) =>
+  createServerStepDefinition({
+    id: REOPEN_STEP_ID,
+    category: StepCategory.Kibana,
+    label: 'Reopen investigation (stub)',
+    description: 'Reports a fixed reopened flag',
+    inputSchema: z.object({ conversationId: z.string() }),
+    outputSchema: z.object({ reopened: z.boolean(), title: z.string() }),
+    handler: async () => ({ output: { reopened, title: 'Investigation' } }),
+  });
+
+const runBridge = async (inputs: Record<string, unknown>, { reopened = false } = {}) => {
   const engine = new WorkflowRunFixture();
+  const { getStepDefinition, hasStepDefinition } = engine.dependencies.workflowsExtensions;
+  (getStepDefinition as jest.Mock).mockImplementation((id: string) =>
+    id === REOPEN_STEP_ID ? reopenStep(reopened) : undefined
+  );
+  (hasStepDefinition as jest.Mock).mockImplementation((id: string) => id === REOPEN_STEP_ID);
   await engine.runWorkflow({ workflowYaml: bridgeYaml(), inputs });
 
   const [execution] = [...engine.stepExecutionRepositoryMock.stepExecutions.values()].filter(
@@ -72,7 +94,7 @@ describe('system-create-alertzero-proposal forwarding', () => {
   // The failure this is really guarding: `''` reaching a `boolean` or `object`
   // field fails the gate's trigger validation, so an omitted optional input
   // would take down a run that has nothing wrong with it.
-  it.each(['autoApprove', 'actionInput', 'title', 'impact', 'confidence', 'expiresIn'])(
+  it.each(['actionInput', 'title', 'impact', 'confidence', 'expiresIn'])(
     'leaves an omitted %s unset rather than blank',
     async (field) => {
       const forwarded = await runBridge(MINIMAL_INPUTS);
@@ -81,4 +103,24 @@ describe('system-create-alertzero-proposal forwarding', () => {
       expect(forwarded[field]).not.toBe('');
     }
   );
+
+  // `autoApprove` is the one forward that is computed rather than passed
+  // through, so an omitted one arrives as a real boolean, never `''`.
+  describe('autoApprove', () => {
+    it('forwards false when the caller omits it', async () => {
+      await expect(runBridge(MINIMAL_INPUTS)).resolves.toMatchObject({ autoApprove: false });
+    });
+
+    it('forwards the caller value when the investigation was already open', async () => {
+      await expect(
+        runBridge({ ...MINIMAL_INPUTS, autoApprove: true }, { reopened: false })
+      ).resolves.toMatchObject({ autoApprove: true });
+    });
+
+    it('forwards false when the investigation had to be reopened, even if the caller asked for true', async () => {
+      await expect(
+        runBridge({ ...MINIMAL_INPUTS, autoApprove: true }, { reopened: true })
+      ).resolves.toMatchObject({ autoApprove: false });
+    });
+  });
 });
