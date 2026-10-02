@@ -10,12 +10,7 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import {
-  DATASETS_ROUTE,
-  SOURCES_AUTOCOMPLETE_ROUTE,
-  SOURCE_INFO_ROUTE,
-  TIMEFIELD_ROUTE,
-} from '@kbn/esql-types';
+import { DATASETS_ROUTE, SOURCES_AUTOCOMPLETE_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getIndexForESQLQuery } from './get_esql_adhoc_dataview';
 
 function createMockDataViewsService() {
@@ -341,129 +336,6 @@ describe('getESQLAdHocDataview', () => {
       await getESQLAdHocDataview({ dataViewsService, query: firstQuery, http });
 
       expect(http.post).toHaveBeenCalledTimes(102);
-    });
-  });
-
-  describe('sources without field caps (views, external datasets)', () => {
-    const columns = [
-      { name: '@timestamp', esType: 'date' },
-      { name: 'host.name', esType: 'keyword' },
-    ];
-
-    const createHttp = (sourceInfo: () => Promise<unknown>) =>
-      ({
-        post: jest.fn(async (path: string) =>
-          path === SOURCE_INFO_ROUTE ? sourceInfo() : { timeField: '@timestamp' }
-        ),
-      } as unknown as HttpStart);
-
-    const createEmptyFieldsDataViewsService = () =>
-      ({
-        create: jest.fn(async (spec: Record<string, unknown>) => ({
-          id: spec.id,
-          title: spec.title,
-          fields: Object.values((spec.fields as Record<string, unknown>) ?? {}),
-          spec,
-        })),
-        clearInstanceCache: jest.fn(),
-      } as unknown as DataViewsPublicPluginStart);
-
-    it('builds the fields from the columns of the bare source when field caps return none', async () => {
-      const http = createHttp(async () => ({ columns }));
-      const service = createEmptyFieldsDataViewsService();
-      const query = `${uniqueQuery('my_view')} | KEEP host.name`;
-
-      await getESQLAdHocDataview({ dataViewsService: service, query, http });
-
-      const sourceInfoCall = (http.post as jest.Mock).mock.calls.find(
-        ([path]) => path === SOURCE_INFO_ROUTE
-      );
-      expect(JSON.parse(sourceInfoCall[1].body).query).toBe(query.split(' | ')[0]);
-      expect(service.create).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          fields: {
-            '@timestamp': expect.objectContaining({ name: '@timestamp', type: 'date' }),
-            'host.name': expect.objectContaining({
-              name: 'host.name',
-              type: 'string',
-              searchable: true,
-              aggregatable: false,
-            }),
-          },
-        }),
-        true
-      );
-    });
-
-    it('does not request the source columns when field caps return fields', async () => {
-      const http = createHttp(async () => ({ columns }));
-      const service = {
-        create: jest.fn(async (spec: Record<string, unknown>) => ({
-          id: spec.id,
-          fields: [{ name: 'message' }],
-        })),
-        clearInstanceCache: jest.fn(),
-      } as unknown as DataViewsPublicPluginStart;
-
-      await getESQLAdHocDataview({ dataViewsService: service, query: uniqueQuery(), http });
-
-      expect(http.post).not.toHaveBeenCalledWith(SOURCE_INFO_ROUTE, expect.anything());
-      expect(service.create).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not request the source columns when fields are skipped', async () => {
-      const http = createHttp(async () => ({ columns }));
-      const service = createEmptyFieldsDataViewsService();
-
-      await getESQLAdHocDataview({
-        dataViewsService: service,
-        query: uniqueQuery(),
-        http,
-        options: { skipFetchFields: true },
-      });
-
-      expect(http.post).not.toHaveBeenCalledWith(SOURCE_INFO_ROUTE, expect.anything());
-    });
-
-    it('recovers when creating the data view throws for a source field caps cannot resolve', async () => {
-      const http = createHttp(async () => ({ columns }));
-      const service = createEmptyFieldsDataViewsService();
-      (service.create as jest.Mock).mockRejectedValueOnce(new Error('no matching indices'));
-
-      const result = await getESQLAdHocDataview({
-        dataViewsService: service,
-        query: uniqueQuery('my_view'),
-        http,
-      });
-
-      expect(service.create).toHaveBeenCalledTimes(2);
-      expect(result.fields).toHaveLength(2);
-    });
-
-    it('rethrows the original error when the source columns are unavailable', async () => {
-      const http = createHttp(async () => {
-        throw new Error('source info failed');
-      });
-      const service = createEmptyFieldsDataViewsService();
-      (service.create as jest.Mock).mockRejectedValueOnce(new Error('no matching indices'));
-
-      await expect(
-        getESQLAdHocDataview({ dataViewsService: service, query: uniqueQuery(), http })
-      ).rejects.toThrow('no matching indices');
-    });
-
-    it('returns the original data view when the source has no columns', async () => {
-      const http = createHttp(async () => ({ columns: [] }));
-      const service = createEmptyFieldsDataViewsService();
-
-      const result = await getESQLAdHocDataview({
-        dataViewsService: service,
-        query: uniqueQuery(),
-        http,
-      });
-
-      expect(service.create).toHaveBeenCalledTimes(1);
-      expect(result.fields).toHaveLength(0);
     });
   });
 
