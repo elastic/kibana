@@ -468,21 +468,24 @@ export const registerRulePreviewAttachment = ({
 
 /**
  * Registers the `security.attack_discovery` attachment renderer (inline summary
- * and details via `AttackDiscoveryMarkdownFormatter`).
+ * and details via `AttackDiscoveryMarkdownFormatter`, and an "Open in Attacks" link
+ * built with `getUrlForApp`).
  *
  * Dynamically imports
  * [./attack_discovery](./attack_discovery) so the markdown field-plugin stack stays
  * off the main `securitySolution` page-load bundle.
  *
  * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
- * resolves, `security.attack_discovery` attachments are header-only.
+ * resolves, `security.attack_discovery` attachments are not rendered.
  */
 export const registerAttackDiscoveryAttachment = ({
   attachments,
+  getUrlForApp,
   getSpaceId,
   resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
   getSpaceId: () => Promise<string>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
@@ -490,7 +493,7 @@ export const registerAttackDiscoveryAttachment = ({
     /* webpackChunkName: "security_attack_discovery_attachment" */
     './attack_discovery'
   ).then(({ registerAttackDiscoveryAttachment: register }) => {
-    register({ attachments, getSpaceId, resolveSecurityCanvasContext });
+    register({ attachments, getUrlForApp, getSpaceId, resolveSecurityCanvasContext });
   });
 };
 
@@ -504,7 +507,7 @@ export const registerAttackDiscoveryAttachment = ({
  * stack stays off the main `securitySolution` page-load bundle.
  *
  * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
- * resolves, `security.attack_discovery.verdict` attachments are header-only.
+ * resolves, `security.attack_discovery.verdict` attachments are not rendered.
  */
 export const registerAttackDiscoveryVerdictAttachment = ({
   attachments,
