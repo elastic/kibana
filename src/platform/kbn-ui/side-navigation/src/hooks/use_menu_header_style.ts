@@ -13,8 +13,17 @@ import { css } from '@emotion/react';
 /**
  * Menu header rendered above the scrolling menu body, so it stays in view.
  */
-export function useMenuHeaderStyle() {
+export function useMenuHeaderStyle(isPanel = false) {
   const { euiTheme } = useEuiTheme();
+  // In the side panel, center the title on the adjacent 64px App Header row
+  // and keep it quieter than the App Header title.
+  const panelStyles = css`
+    padding-top: calc(${euiTheme.size.base} + ${euiTheme.size.xs});
+
+    & h4 {
+      color: ${euiTheme.colors.textSubdued};
+    }
+  `;
 
   return css`
     --border-width: ${euiTheme.border.width.thin};
@@ -26,5 +35,6 @@ export function useMenuHeaderStyle() {
       var(--horizontal-padding);
     margin: 0 1px;
     min-height: 42px;
+    ${isPanel && panelStyles}
   `;
 }
