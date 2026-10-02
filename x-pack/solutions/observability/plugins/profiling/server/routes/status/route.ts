@@ -13,6 +13,7 @@ import type { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
 import { handleRouteHandlerError } from '../../utils/handle_route_error_handler';
 import { getHasSetupPrivileges } from '../universal_profiling/setup/lib/get_has_setup_privileges';
+import { PROFILING_API_PRIVILEGE } from '../../feature';
 
 export function registerStatusRoute({ router, logger, dependencies }: RouteRegisterParameters) {
   const { buildFlavor, setup, start } = dependencies;
@@ -38,7 +39,7 @@ export function registerStatusRoute({ router, logger, dependencies }: RouteRegis
       path: getRoutePaths().Status,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: false,

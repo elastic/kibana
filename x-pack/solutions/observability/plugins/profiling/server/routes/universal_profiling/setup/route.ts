@@ -20,6 +20,7 @@ import { setupStatusOASOperationObject } from './oas_examples';
 import { setupStatusResponseSchema } from './schemas';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
+import { PROFILING_API_PRIVILEGE } from '../../../feature';
 
 const SERVERLESS_ERROR_MESSAGE = 'Universal Profiling is not supported in serverless';
 
@@ -42,7 +43,7 @@ export function registerSetupRoute({
       path: paths.HasSetupESResources,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: {
@@ -113,7 +114,7 @@ export function registerSetupRoute({
       path: paths.HasSetupESResources,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: {
@@ -262,7 +263,7 @@ export function registerSetupRoute({
       path: paths.SetupDataCollectionInstructions,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: false,
