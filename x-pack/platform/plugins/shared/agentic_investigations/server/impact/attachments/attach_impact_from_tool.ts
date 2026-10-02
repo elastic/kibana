@@ -10,6 +10,7 @@ import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import type { Impact } from '../../../common/impact/impact';
 import { attachFromTool, type ToolAttachmentOutcome } from '../../investigation_attachments';
 import type { WrittenAttach } from '../services/impact_service';
+import { impactAttachment } from './impact_attachment_type';
 
 /**
  * Agent tool path: writes the impact index first, then adds or updates the by-reference
@@ -32,4 +33,5 @@ export const attachImpactFromTool = ({
     read: readImpact,
     write: writeImpact,
     revert: revertImpact,
+    hidden: impactAttachment.hiddenInConversation,
   }).then(({ document, attachment }) => ({ impact: document, attachment }));

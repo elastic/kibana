@@ -60,11 +60,12 @@ export const impactAttachment = defineInvestigationAttachment<
   type: IMPACT_ATTACHMENT_TYPE,
   storageSettings: impactStorageSettings,
   schema: impactSchema,
+  // The investigation overview shows impact; the chat does not.
+  hiddenInConversation: true,
   format: formatImpactForAgent,
   agentDescription:
     'Investigation impact is what an investigation found was affected: a summary, its evidence, and the entities (users, hosts, services) involved.\n\n' +
     'Rules:\n' +
     '- Treat entity ids as opaque; do not invent labels or additional entities.\n' +
-    '- Whenever you mention impact in your response, render it inline with ' +
-    '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id).',
+    "- The investigation's overview shows the impact, not the chat; do not render it inline.",
 });
