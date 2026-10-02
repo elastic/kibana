@@ -57,8 +57,14 @@ describe('kiRetrievalSkill', () => {
   });
 
   it('keeps retrieval to the AI indices assigned to the agent', () => {
-    expect(kiRetrievalSkill.content).toContain('search the AI Indices assigned to you');
+    expect(kiRetrievalSkill.content).toContain('search the AI indices assigned to you');
     expect(kiRetrievalSkill.content).toContain('`assigned_to_agent: true`');
+  });
+
+  it('filters multi-valued tags with the match operator, not equality', () => {
+    expect(kiRetrievalSkill.content).toContain('| WHERE tags:"<tag>"\n');
+    expect(kiRetrievalSkill.content).toContain('filter `tags` with `:`, not `==`');
+    expect(kiRetrievalSkill.content).not.toMatch(/tags\s*==/);
   });
 
   it('has no referencedContent', () => {

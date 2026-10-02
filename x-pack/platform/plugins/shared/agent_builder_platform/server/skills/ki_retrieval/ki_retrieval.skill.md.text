@@ -9,16 +9,17 @@ This skill is not about generating these KIs, that is a separate skill.
 
 ## What a KI index looks like
 
-Each AI index is queried through the ES|QL target listed for it: its backing index or data stream,
-matching `ai-index-*` for AI indices created in Kibana and `.ai-index-*` for the ones Elastic
+Each AI Index is queried through the ES|QL target listed for it: its backing index or data stream,
+matching `ai-index-*` for AI Indices created in Kibana and `.ai-index-*` for the ones Elastic
 manages.
 
-The AI INDICES section of your instructions lists the targets available to this agent. When that
-section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
-in this space, each with its target as `esql_target`. Where a template below says `<targets>`,
-list the `esql_target` of every AI index in the AI INDICES section, comma-separated, for example
-`ai-index-idx-runbooks, .ai-index-idx-elastic-index`. `ai-index-*` alone misses the AI indices
-Elastic manages.
+The AI INDICES section of your instructions lists the AI Indices assigned to this agent, with
+their targets. Search those. Call `platform.context_engine.list_ai_indices` only when that section
+gives no target you can use, or when the user asks for an AI Index it does not name. It returns
+the AI Indices you can read in this space, each with its target as `esql_target`; keep to entries
+with `assigned_to_agent: true` unless the user asked for another. Where a template below says
+`<targets>`, list the targets of every AI Index you are searching, comma-separated, for example `ai-index-idx-runbooks, .ai-index-idx-elastic-index`. `ai-index-*`
+alone misses the AI Indices Elastic manages.
 
 Start every query with `FROM <targets> METADATA _id, _index, _score`: `SORT _score DESC`, the `:`
 match operators and `FUSE` need those fields.
@@ -140,9 +141,9 @@ Then re-run the retrieval query with the most relevant tag added as a filter.
 
 ## ES|QL query
 
-Use FORK+FUSE hybrid search. It runs keyword and semantic branches in parallel and combines
-them with reciprocal rank fusion, so documents matching both branches score higher than
-documents matching only one.
+Use FORK+FUSE hybrid search. It runs a keyword search and a semantic search side by side, takes
+the top 20 results from each, and merges the two lists. KIs found in both lists rank first. A KI
+that matches a search but is not in its top 20 counts as not found by that search.
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
@@ -201,9 +202,25 @@ FROM <targets> METADATA _id, _index, _score
 | LIMIT <n>
 ```
 
-Replace `type == "index_metadata"` with any combination of `type` or `tags` filters. Filter
-`tags` with `:`, not `==`: it is multi-valued, and `==` skips every KI that carries more than one
-tag.
+To scope by tag, filter `tags` with `:`, not `==`: it is multi-valued, and `==` skips every KI
+that carries more than one tag.
+
+```esql
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
+| WHERE tags:"<tag>"
+| FORK
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| KEEP title, description, content, type, tags
+| LIMIT <n>
+```
+
+Combine `type` and `tags` filters in the same `WHERE` as needed, for example
+`WHERE type == "index_metadata" AND tags:"<tag>"`.
 
 ---
 
@@ -220,11 +237,8 @@ tag.
 
 ## Suggested retrieval flow
 
-1. **Discover** — search the AI Indices assigned to you, which the AI INDICES section of your
-   instructions lists with their targets. Call `platform.context_engine.list_ai_indices` only when
-   that section gives no target you can use, or when the user asks for an AI Index it does not
-   name. From its results, keep to entries with `assigned_to_agent: true` unless the user asked
-   for another. If no assigned AI Index fits the question, continue with other data or tools.
+1. **Discover** — search the AI Indices assigned to you, as described above. If none fits the
+   question, continue with other data or tools.
 2. **Orient** — `platform.context_engine.describe_ai_index` returns an index's fields, type and
    tag counts, and example queries. Across several targets, run `STATS ki_count = COUNT(*) BY type`
    instead. Sample a few KIs (`WHERE type == "..." | LIMIT 2`) only when type names are ambiguous.
