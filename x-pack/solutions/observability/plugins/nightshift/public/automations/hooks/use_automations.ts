@@ -16,9 +16,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 type AutomationsResponse =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations'>;
-type Automation = AutomationsResponse['automations'][number] & {
-  author: { username: string };
-};
+type Automation = AutomationsResponse['automations'][number];
 type CreateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'POST /internal/nightshift/automations'>['params']['body'];
 

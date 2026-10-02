@@ -67,7 +67,7 @@ export const getAutomationFacets = (
     ...(isRateLimited ? [statusLabels.rateLimited] : []),
   ],
   tags: automation.tags ?? [],
-  author: automation.author.username === currentUsername ? youLabel : automation.author.username,
+  author: automation.author === currentUsername ? youLabel : automation.author,
   triggers: automation.trigger.rows.map((row) => getTriggerDisplay(row).label),
 });
 
