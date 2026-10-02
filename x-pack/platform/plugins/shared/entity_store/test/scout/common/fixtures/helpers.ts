@@ -20,8 +20,6 @@ import { hashEuid } from '../../../../common/domain/euid';
 
 import {
   ENTITY_STORE_ROUTES,
-  INTERNAL_HEADERS,
-  PUBLIC_HEADERS,
   HISTORY_INDEX_PATTERN,
   LATEST_ALIAS,
   LATEST_INDEX,
@@ -38,7 +36,6 @@ import {
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
 type KbnClientFixture = ApiWorkerFixtures['kbnClient'];
-type SamlAuthFixture = ApiWorkerFixtures['samlAuth'];
 type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
 type ResolutionRuleState = Record<string, boolean>;
 
@@ -195,7 +192,7 @@ const restoreResolutionRuleState = async ({
 };
 
 /**
- * API client shape required by forceUserExtraction.
+ * API client shape required by forceLogExtraction.
  * Use this instead of importing Scout's ApiClient type.
  */
 export interface ForceLogExtractionApiClient {
@@ -299,54 +296,6 @@ export const teardownQueryTranslationTestDataStream = async (esClient: EsClient)
     .catch(() => {});
 };
 
-export const installEntityStoreSuite = async ({
-  apiClient,
-  samlAuth,
-}: {
-  apiClient: ApiClientFixture;
-  samlAuth: SamlAuthFixture;
-}) => {
-  const credentials = await samlAuth.asInteractiveUser('admin');
-  const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
-  const internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
-
-  const installResponse = await installAllEntityTypes(apiClient, defaultHeaders);
-  expect([200, 201]).toContain(installResponse.statusCode);
-
-  // Always normalize mutable extraction config so each suite starts from the same baseline,
-  // including the already-installed (200) path that preserves previous settings.
-  await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
-
-  const enableEmailRuleResponse = await apiClient.put(
-    ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
-    { headers: defaultHeaders, responseType: 'json' }
-  );
-  expect(enableEmailRuleResponse.statusCode).toBe(200);
-
-  const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
-  expect(stopResponse.statusCode).toBe(200);
-
-  const initMaintainersResponse = await apiClient.post(
-    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
-    {
-      headers: internalHeaders,
-      responseType: 'json',
-      body: {},
-    }
-  );
-  expect(initMaintainersResponse.statusCode).toBe(200);
-
-  const startAutomatedResolutionMaintainerResponse = await apiClient.put(
-    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
-    {
-      headers: internalHeaders,
-      responseType: 'json',
-      body: {},
-    }
-  );
-  expect(startAutomatedResolutionMaintainerResponse.statusCode).toBe(200);
-};
-
 export const installEntityStoreSuiteWithKbnClient = async ({
   kbnClient,
   suiteId = 'default',
@@ -427,23 +376,6 @@ export const installEntityStoreSuiteWithKbnClient = async ({
     body: {},
   });
   expect(startAutomatedResolutionMaintainerResponse.status).toBe(200);
-};
-
-export const uninstallEntityStoreSuite = async ({
-  apiClient,
-  esClient,
-  samlAuth,
-}: {
-  apiClient: ApiClientFixture;
-  esClient: EsClient;
-  samlAuth: SamlAuthFixture;
-}) => {
-  const credentials = await samlAuth.asInteractiveUser('admin');
-  const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
-
-  const uninstallResponse = await uninstallAllEntityTypes(apiClient, defaultHeaders);
-  expect(uninstallResponse.statusCode).toBe(200);
-  await clearEntityStoreIndices(esClient);
 };
 
 export const updateLogExtractionConfig = async ({
