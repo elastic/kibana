@@ -193,7 +193,9 @@ export function UnifiedHistogramChart({
       }
 
       const adapterTables = adapters?.tables?.tables;
-      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+      const totalHits =
+        computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord) ??
+        getResponseTotalHits(response);
 
       if (response?._shards?.failed || response?.timed_out) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
@@ -459,3 +461,7 @@ const computeTotalHits = (
     return adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
   }
 };
+
+// Same source as the chart table's `totalCount`, so a missing table can't report a stale count.
+const getResponseTotalHits = (response: estypes.SearchResponse | undefined) =>
+  typeof response?.hits?.total === 'number' ? response.hits.total : response?.hits?.total?.value;

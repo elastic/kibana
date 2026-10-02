@@ -15,6 +15,7 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 import { checkChartAvailability } from './utils/check_chart_availability';
+import { createDefaultInspectorAdapters, type Datatable } from '@kbn/expressions-plugin/common';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getFetchParamsMock, getFetch$Mock } from '../../__mocks__/fetch_params';
@@ -138,6 +139,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     isChartLoading: Boolean(isChartLoading),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
+    onTotalHitsChange: jest.fn(),
     withDefaultActions: undefined,
     withLensActions,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
@@ -157,10 +159,72 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     });
   });
 
-  return { mockOnEditVisualization: mockUseEditVisualization };
+  return { mockOnEditVisualization: mockUseEditVisualization, props };
 };
 
+const getLensOnLoad = () => {
+  const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent as jest.Mock;
+  expect(embeddable).toHaveBeenCalled();
+
+  return embeddable.mock.calls[embeddable.mock.calls.length - 1][0].onLoad;
+};
+
+const mockLensResponse = (
+  adapters: ReturnType<typeof createDefaultInspectorAdapters>,
+  total: number | { value: number; relation: 'eq' | 'gte' }
+) =>
+  jest
+    .spyOn(adapters.requests, 'getRequests')
+    .mockReturnValue([
+      { response: { json: { rawResponse: { hits: { total } } } } },
+    ] as unknown as ReturnType<typeof adapters.requests.getRequests>);
+
 describe('Chart', () => {
+  describe('total hits reporting on load', () => {
+    test('reports the count from the loaded chart table', async () => {
+      const { props } = await mountComponent();
+      const adapters = createDefaultInspectorAdapters();
+
+      adapters.tables.tables.unifiedHistogram = {
+        meta: { statistics: { totalCount: 5 } },
+      } as unknown as Datatable;
+      mockLensResponse(adapters, 5);
+
+      act(() => {
+        getLensOnLoad()(false, adapters);
+      });
+
+      expect(props.onTotalHitsChange).toHaveBeenLastCalledWith('complete', 5);
+    });
+
+    test('reports the count of the loaded response instead of the previous one when the chart table is unavailable', async () => {
+      const { props } = await mountComponent();
+      const adapters = createDefaultInspectorAdapters();
+
+      mockLensResponse(adapters, 5);
+
+      act(() => {
+        getLensOnLoad()(false, adapters);
+      });
+
+      // `hits.total` of the mounted props is 2, which must not be reported as a settled count
+      expect(props.onTotalHitsChange).toHaveBeenLastCalledWith('complete', 5);
+    });
+
+    test('reports the count of the loaded response when it is not shimmed to a number', async () => {
+      const { props } = await mountComponent();
+      const adapters = createDefaultInspectorAdapters();
+
+      mockLensResponse(adapters, { value: 5, relation: 'eq' });
+
+      act(() => {
+        getLensOnLoad()(false, adapters);
+      });
+
+      expect(props.onTotalHitsChange).toHaveBeenLastCalledWith('complete', 5);
+    });
+  });
+
   test('renders a hidden placeholder when chart is undefined', async () => {
     await mountComponent({ noChart: true });
 
