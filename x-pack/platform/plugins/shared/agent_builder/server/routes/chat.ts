@@ -17,11 +17,11 @@ import {
   agentBuilderDefaultAgentId,
   CONVERSATION_ID_MAX_LENGTH,
   createBadRequestError,
+  createInternalError,
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
-import { ChatTriggerMode } from '../../common/http_api/chat';
 import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
@@ -212,7 +212,7 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.5.0' },
+          availability: { stability: 'stable', since: '9.5.0' },
           description: 'Optional conversation access control. Defaults to private.',
         },
       }
@@ -322,19 +322,6 @@ export const conversePayloadSchema = schema.object({
         description: 'define how to execute the agent (local execution or via task_manager)',
       },
     })
-  ),
-});
-
-export const chatPayloadSchema = conversePayloadSchema.extends({
-  trigger_mode: schema.oneOf(
-    [schema.literal(ChatTriggerMode.Always), schema.literal(ChatTriggerMode.Never)],
-    {
-      defaultValue: ChatTriggerMode.Always,
-      meta: {
-        description:
-          'Use never to append a user message to an existing conversation without executing the agent. Only conversation_id, input and attachments are read; the execution options are ignored.',
-      },
-    }
   ),
 });
 
@@ -573,16 +560,21 @@ export function registerChatRoutes({
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const { executionId } = await executeAgent({
+        const { executionId, conversationId } = await executeAgent({
           payload,
           request,
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),
         });
 
+        if (!conversationId) {
+          throw createInternalError('Chat execution did not resolve a conversation');
+        }
+
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {
             execution_id: executionId,
+            conversation_id: conversationId,
           },
         });
       })

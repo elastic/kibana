@@ -88,6 +88,17 @@ describe('getTestRunTooltipContent', () => {
     expect(result).toBe('Fix errors to run workflow');
   });
 
+  it('explains an ACL denial separately from a feature privilege denial', () => {
+    expect(
+      getTestRunTooltipContent({
+        isValid: true,
+        canRunWorkflow: true,
+        isExecutionsTab: false,
+        hasWorkflowAccess: false,
+      })
+    ).toBe('You need Executor or Editor access to run this workflow.');
+  });
+
   it('returns execute privilege message when canRunWorkflow is false', () => {
     const result = getTestRunTooltipContent({
       isValid: true,

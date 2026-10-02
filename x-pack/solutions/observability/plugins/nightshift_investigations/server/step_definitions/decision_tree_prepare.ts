@@ -9,31 +9,12 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
+import { toolCallsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
-const MAX_TOOL_CALLS = 2_000;
-
-const toolCallSchema = z
-  .object({
-    tool_id: z.string().max(512).optional(),
-    tool_call_id: z.string().max(512).optional(),
-    params: z.record(z.string(), z.unknown()).optional(),
-  })
-  .passthrough();
-
-const toolCallsSchema = z.preprocess((value) => {
-  if (typeof value === 'string') {
-    try {
-      return JSON.parse(value) as unknown;
-    } catch {
-      return [];
-    }
-  }
-  return value;
-}, z.array(toolCallSchema).max(MAX_TOOL_CALLS).optional());
 
 export const decisionTreePrepareStepDefinition = ({
   getTelemetryConnectorId,
@@ -72,9 +53,9 @@ export const decisionTreePrepareStepDefinition = ({
     handler: async (context) => {
       const { prompt, response, agent_id: agentId, tool_calls: toolCalls } = context.input;
 
-      // Only the deductive investigator's rounds feed the decision trees: this workflow is its
+      // Only the Nightshift investigator's rounds feed the decision trees: this workflow is its
       // post-execution hook, and another agent's round must not rewrite the trees.
-      if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+      if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
         return { output: { message: '', tree_count: 0, skipped: true } };
       }
 
