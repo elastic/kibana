@@ -20,11 +20,29 @@ const DEFAULT_SET = 'default';
 
 /**
  * Sets that must stay separate on purpose, with the reason. The audit leaves them out of every
- * merge suggestion. Add a set here only when its owners confirmed the separate server is needed.
+ * merge suggestion. Add a set here only when its tests or docs show the separate server is needed.
  */
 export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
   shared_ux_no_data: 'tests need a clean ES and Kibana with no data from other suites',
   trial_license: 'tests permanently downgrade the license and would break a shared cluster',
+  interactive_setup_no_tls_api:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_no_tls_ui:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_enrollment_api:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_enrollment_ui:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_manual_api:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_manual_ui:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  initial_solution_setup:
+    'completing the setup is one way, so the UI and API suites need fresh servers',
+  initial_solution_setup_api:
+    'completing the setup is one way, so the UI and API suites need fresh servers',
+  workflows_extensions:
+    'grows with every plugin gated trigger, merging would load those flags on the Nightshift tests',
 };
 
 /** Config keys core lets tests change at runtime through `/internal/core/_settings`. */
