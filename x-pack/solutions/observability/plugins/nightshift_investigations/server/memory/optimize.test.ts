@@ -28,6 +28,7 @@ import {
 import type { MemoryPageStore } from './page_store';
 import type { TranscriptStep } from './transcript';
 import type { MemoryPage } from '../../common/memory';
+import { MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   id,
@@ -360,7 +361,7 @@ describe('createLlmProposeMemoryExtractions', () => {
         {
           slug: 'kafka-lag',
           title: 'Kafka lag',
-          tags: ['kafka', 'consumer lag'],
+          tags: ['kafka', 'consumer-lag'],
           replaces: ['memory_a', 'memory_b'],
         },
       ],
@@ -411,6 +412,59 @@ describe('createLlmProposeMemoryExtractions', () => {
     const item = schema.properties.extractions.items;
     expect(Object.keys(item.properties)).toEqual(['title', 'keywords', 'replaces']);
     expect(item.required).toEqual(['title', 'keywords', 'replaces']);
+  });
+
+  it('canonicalizes proposed keywords and drops the ones that fold to nothing', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        extractions: [
+          {
+            title: 'Agent builder spans',
+            keywords: [
+              'Invoke Agent',
+              'invoke_agent',
+              'cart cache',
+              '  ',
+              'gen_ai.conversation.id',
+              'traces-*',
+            ],
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      extractions: [
+        {
+          slug: 'agent-builder-spans',
+          title: 'Agent builder spans',
+          tags: ['invoke-agent', 'cart-cache', 'gen_ai.conversation.id', 'traces-*'],
+          replaces: [],
+        },
+      ],
+    });
+  });
+
+  it('caps a proposal at the per-page tag limit', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        extractions: [
+          {
+            title: 'Wide memory',
+            keywords: Array.from({ length: MAX_MEMORY_TAGS_PER_PAGE + 8 }, (_, i) => `tag ${i}`),
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    const { extractions } = await propose({ transcript: 'task', recalledMemories: [] });
+    expect(extractions[0].tags).toHaveLength(MAX_MEMORY_TAGS_PER_PAGE);
   });
 });
 
@@ -1398,6 +1452,93 @@ describe('applyMemoryEdits', () => {
     expect(store.retrieve).not.toHaveBeenCalled();
     expect(synthesizeMemoryGroup).not.toHaveBeenCalled();
     expect(summary.safetySkipCount).toBe(1);
+  });
+
+  it('canonicalizes and dedupes the merge union, and drops the internal marker', async () => {
+    const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
+    existing.tags = ['memory', 'Cart Cache', 'redis', 'invoke_agent', 'Cart-Cache'];
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === existing.id ? existing : undefined)),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: existing,
+        seqNo: 7,
+        primaryTerm: 2,
+      }),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          // The same tag as the source page, spelled the other way, plus an
+          // identifier whose punctuation must survive.
+          tags: ['memory', 'CART_CACHE', 'Invoke Agent', 'gen_ai.conversation.id'],
+          replaces: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Old and new facts.' }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledWith(
+      existing.id,
+      expect.objectContaining({
+        tags: [
+          'cart-cache',
+          'redis',
+          'invoke-agent',
+          'gen_ai.conversation.id',
+        ],
+      }),
+      expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
+    );
+  });
+
+  it('caps the merge union at the per-page tag limit', async () => {
+    const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
+    existing.tags = [
+      'memory',
+      ...Array.from({ length: MAX_MEMORY_TAGS_PER_PAGE }, (_, i) => `source ${i}`),
+    ];
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === existing.id ? existing : undefined)),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: existing,
+        seqNo: 1,
+        primaryTerm: 1,
+      }),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          tags: Array.from({ length: MAX_MEMORY_TAGS_PER_PAGE }, (_, i) => `proposed ${i}`),
+          replaces: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Old and new facts.' }),
+      logger: loggerMock.create(),
+    });
+
+    const write = store.update.mock.calls[0][1] as { tags: string[] };
+    expect(write.tags).toHaveLength(MAX_MEMORY_TAGS_PER_PAGE);
+    // The union is ordered sources-first, so the cap drops the proposed tail
+    // rather than the tags the merged pages already carried.
+    expect(write.tags[0]).toBe('source-0');
+    expect(write.tags).not.toContain('memory');
   });
 
   it('keeps extraction slugs and merge page ids out of info logs', async () => {

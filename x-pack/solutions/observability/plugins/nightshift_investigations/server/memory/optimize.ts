@@ -24,6 +24,7 @@ import {
 } from './page_store';
 import { toCounterUpdates } from './ranking';
 import { type MemoryPage } from '../../common/memory';
+import { canonicalizeTags, MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const MAX_EXTRACTIONS = 3;
 
@@ -385,7 +386,12 @@ Investigation transcript:\n${transcript}`,
           return {
             slug: canonicalizeSlug(title),
             title,
-            tags: Array.isArray(candidate.keywords) ? candidate.keywords.map(String) : [],
+            // Canonicalized here rather than at read time: a tag the model spells
+            // `Invoke Agent` and one spelled `invoke_agent` are the same tag, and a
+            // graph that ranked them separately would split the evidence.
+            tags: Array.isArray(candidate.keywords)
+              ? canonicalizeTags(candidate.keywords).slice(0, MAX_MEMORY_TAGS_PER_PAGE)
+              : [],
             replaces: Array.isArray(candidate.replaces)
               ? canonicalizeMemoryLabelIds(candidate.replaces.map(String))
               : [],
@@ -921,10 +927,15 @@ const mergeMemoryGroup = async ({
       content,
       // Recall matches the next round's task against this key, so it is this round's task.
       context: task || (versionedCanonical?.page.context ?? ''),
-      tags: unionStrings(
-        currentSources.flatMap((page) => page.tags),
-        extract.tags
-      ).filter((tag) => tag !== 'memory'),
+      // Merges union every source page's tags, so the list grows with each merge
+      // and the same tag arrives spelled differently each time. Canonicalizing
+      // after the union is what collapses those into one tag again.
+      tags: canonicalizeTags([
+        ...currentSources.flatMap((page) => page.tags),
+        ...extract.tags,
+      ])
+        .filter((tag) => tag !== 'memory')
+        .slice(0, MAX_MEMORY_TAGS_PER_PAGE),
       categories: unionStrings(currentSources.flatMap((page) => page.categories)),
       references: unionStrings(currentSources.flatMap((page) => page.references)),
       agent_id: agentId,
