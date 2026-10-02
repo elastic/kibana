@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType, FormEvent, FunctionComponent, ReactNode } from 'react';
-import React, { Suspense, useId, useState } from 'react';
+import React, { Suspense, useId, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -87,6 +87,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   const [name, setName] = useState(view?.name ?? '');
   const [description, setDescription] = useState(view?.description ?? '');
   const [query, setQuery] = useState(view?.query ?? DEFAULT_ESQL_VIEW_QUERY);
+  const queryRef = useRef(query);
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [queryError, setQueryError] = useState<string>();
   const [nameConflict, setNameConflict] = useState<NameConflict>();
@@ -107,6 +108,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
     description.length > MAX_ESQL_VIEW_DESCRIPTION_LENGTH
       ? translations.descriptionTooLongErrorMessage
       : undefined;
+  const isQueryEmpty = query.trim().length === 0;
 
   const nameError: ReactNode =
     nameConflict?.type === 'existingView' ? (
@@ -301,9 +303,10 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               }
             >
               <EsqlEditor
-                allowQueryCancellation
+                allowQueryCancellation={!isQueryEmpty}
                 dataTestSubj="esqlViewQueryEditor"
                 disableAutoFocus
+                disableSubmitAction={isQueryEmpty}
                 editorIsInline
                 errors={[
                   ...(queryError ? [new Error(queryError)] : []),
@@ -314,14 +317,20 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
                 isLoading={preview.isLoading}
                 mergeExternalMessages
                 onTextLangQueryChange={(nextQuery) => {
+                  queryRef.current = nextQuery.esql;
                   setQuery(nextQuery.esql);
                   setQueryError(undefined);
                   setSaveError(undefined);
-                  preview.resetPreview();
+                  preview.resetPreviewIfQueryChanged(nextQuery.esql);
                 }}
-                onTextLangQuerySubmit={async (submittedQuery, abortController) => {
+                onTextLangQuerySubmit={async (_submittedQuery, abortController) => {
+                  const currentQuery = queryRef.current;
+                  if (currentQuery.trim().length === 0) {
+                    return;
+                  }
+
                   setIsPreviewOpen(true);
-                  await preview.runPreview(submittedQuery, abortController);
+                  await preview.runPreview({ esql: currentQuery }, abortController);
                 }}
                 query={{ esql: query }}
                 queryStats={preview.result?.queryStats}

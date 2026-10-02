@@ -29,6 +29,7 @@ type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
 
 const mockRunPreview = jest.fn().mockResolvedValue(undefined);
 const mockResetPreview = jest.fn();
+const mockResetPreviewIfQueryChanged = jest.fn();
 const mockUseEsqlViewPreview = jest.fn();
 const mockEsqlDataGrid = jest.fn();
 
@@ -140,6 +141,7 @@ describe('ManagementApp', () => {
     mockRunPreview.mockResolvedValue(undefined);
     mockUseEsqlViewPreview.mockReturnValue({
       resetPreview: mockResetPreview,
+      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
       error: undefined,
       hasRun: false,
       isLoading: false,
@@ -267,8 +269,9 @@ describe('ManagementApp', () => {
           <button
             data-test-subj="mockSelectHistoryQuery"
             onClick={() => {
+              const previouslyRenderedQuery = props.query;
               props.onTextLangQueryChange({ esql: historyQuery });
-              props.onTextLangQuerySubmit?.({ esql: historyQuery }, new AbortController());
+              props.onTextLangQuerySubmit?.(previouslyRenderedQuery, new AbortController());
             }}
             type="button"
           />
@@ -289,6 +292,7 @@ describe('ManagementApp', () => {
     expect(initialEditorProps).toEqual(
       expect.objectContaining({
         allowQueryCancellation: true,
+        disableSubmitAction: false,
         isLoading: false,
       })
     );
@@ -303,7 +307,7 @@ describe('ManagementApp', () => {
 
     fireEvent.click(screen.getByTestId('mockSelectHistoryQuery'));
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(historyQuery);
-    expect(mockResetPreview).toHaveBeenCalledTimes(1);
+    expect(mockResetPreviewIfQueryChanged).toHaveBeenCalledWith(historyQuery);
     expect(mockRunPreview).toHaveBeenLastCalledWith(
       { esql: historyQuery },
       expect.any(AbortController)
@@ -321,6 +325,43 @@ describe('ManagementApp', () => {
         query: historyQuery,
       })
     );
+  });
+
+  it('disables preview submission when the query is empty', async () => {
+    const client = createClient();
+    const editorProps = jest.fn();
+    const Editor = (props: EsqlEditorProps) => {
+      editorProps(props);
+      return (
+        <>
+          <MockEsqlEditor {...props} />
+          <button
+            data-test-subj="mockRunQuery"
+            onClick={() => props.onTextLangQuerySubmit?.(props.query, new AbortController())}
+            type="button"
+          />
+        </>
+      );
+    };
+    client.getViews.mockResolvedValue({ views: [] });
+
+    renderApp(client, { EsqlEditor: Editor });
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.change(await screen.findByTestId('esqlViewQueryEditor'), {
+      target: { value: '   ' },
+    });
+
+    expect(editorProps.mock.lastCall?.[0]).toEqual(
+      expect.objectContaining({
+        allowQueryCancellation: false,
+        disableSubmitAction: true,
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('mockRunQuery'));
+    expect(mockRunPreview).not.toHaveBeenCalled();
   });
 
   it('matches the prototype preview accordion and configures the shared result grid', async () => {
@@ -342,6 +383,7 @@ describe('ManagementApp', () => {
     };
     mockUseEsqlViewPreview.mockReturnValue({
       resetPreview: mockResetPreview,
+      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
       error: undefined,
       hasRun: true,
       isLoading: false,
@@ -644,6 +686,7 @@ describe('ManagementApp', () => {
     client.createView.mockResolvedValue({ acknowledged: true });
     mockUseEsqlViewPreview.mockReturnValue({
       resetPreview: mockResetPreview,
+      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
       error: new Error('Preview request failed'),
       hasRun: true,
       isLoading: false,

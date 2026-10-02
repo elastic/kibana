@@ -12,7 +12,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLQueryStats } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
-import { formatESQLColumns, getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import {
+  formatESQLColumns,
+  getESQLAdHocDataview,
+  getESQLResults,
+  prettifyQuery,
+} from '@kbn/esql-utils';
 
 export interface EsqlViewPreviewDependencies {
   dataViews: DataPublicPluginStart['dataViews'];
@@ -48,9 +53,18 @@ const initialState: EsqlViewPreviewState = {
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
+const normalizeQuery = (query: string): string => {
+  try {
+    return prettifyQuery(query);
+  } catch {
+    return query.trim();
+  }
+};
+
 export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewDependencies) => {
   const [state, setState] = useState<EsqlViewPreviewState>(initialState);
   const activeRequestRef = useRef<ActiveRequest>();
+  const submittedQueryRef = useRef<string>();
   const nextRequestIdRef = useRef(0);
   const isMountedRef = useRef(true);
 
@@ -70,8 +84,24 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
     const activeRequest = activeRequestRef.current;
     activeRequestRef.current = undefined;
     activeRequest?.abortController.abort();
+    submittedQueryRef.current = undefined;
     setState(initialState);
   }, []);
+
+  const resetPreviewIfQueryChanged = useCallback(
+    (query: string) => {
+      const submittedQuery = submittedQueryRef.current;
+      if (
+        submittedQuery !== undefined &&
+        (query === submittedQuery || normalizeQuery(query) === normalizeQuery(submittedQuery))
+      ) {
+        return;
+      }
+
+      resetPreview();
+    },
+    [resetPreview]
+  );
 
   const runPreview = useCallback(
     async (query?: AggregateQuery, editorAbortController?: AbortController): Promise<void> => {
@@ -86,6 +116,7 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
       const abortController = editorAbortController ?? new AbortController();
       const activeRequest = { abortController, id: requestId };
       activeRequestRef.current = activeRequest;
+      submittedQueryRef.current = esqlQuery;
 
       setState({
         hasRun: true,
@@ -166,6 +197,7 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
   return {
     ...state,
     resetPreview,
+    resetPreviewIfQueryChanged,
     runPreview,
   };
 };

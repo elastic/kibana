@@ -15,6 +15,7 @@ jest.mock('@kbn/esql-utils', () => ({
   formatESQLColumns: jest.fn(),
   getESQLAdHocDataview: jest.fn(),
   getESQLResults: jest.fn(),
+  prettifyQuery: jest.fn((value: string) => value.replace(/\s+/g, ' ').trim()),
 }));
 
 const mockFormatESQLColumns = formatESQLColumns as jest.MockedFunction<typeof formatESQLColumns>;
@@ -110,6 +111,38 @@ describe('useEsqlViewPreview', () => {
     expect(result.current.hasRun).toBe(true);
     expect(result.current.result?.rows).toEqual([]);
     expect(result.current.error).toBeUndefined();
+  });
+
+  it('preserves preview results when only query formatting changes', async () => {
+    mockGetESQLResults.mockResolvedValue(createResponse() as never);
+    const { result } = renderHook(() => useEsqlViewPreview(dependencies));
+
+    await act(async () => {
+      await result.current.runPreview(query('FROM logs-* | KEEP message'));
+    });
+
+    act(() => {
+      result.current.resetPreviewIfQueryChanged('FROM logs-*\n  | KEEP message');
+    });
+
+    expect(result.current.hasRun).toBe(true);
+    expect(result.current.result?.rows).toEqual([['hello']]);
+  });
+
+  it('resets preview results when the query meaningfully changes', async () => {
+    mockGetESQLResults.mockResolvedValue(createResponse() as never);
+    const { result } = renderHook(() => useEsqlViewPreview(dependencies));
+
+    await act(async () => {
+      await result.current.runPreview(query('FROM logs-* | KEEP message'));
+    });
+
+    act(() => {
+      result.current.resetPreviewIfQueryChanged('FROM logs-* | KEEP host.name');
+    });
+
+    expect(result.current.hasRun).toBe(false);
+    expect(result.current.result).toBeUndefined();
   });
 
   it('exposes execution errors without producing a result', async () => {
