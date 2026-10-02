@@ -139,8 +139,8 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
     },
 
     // Mirrors the user-action SO `source`: the origin of the action
-    // (agent, workflow, rule, attack, api, user). Absent on user actions
-    // persisted before source tracking. Not ECS `source.*` (network origin).
+    // (agent, workflow, rule, attack, api, user). Absent when the SO has no
+    // `source` or the row predates this mapping. Not ECS `source.*` (network origin).
     source: {
       properties: {
         type: { type: 'keyword' },

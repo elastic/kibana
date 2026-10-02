@@ -628,7 +628,9 @@ deliberate differences driven by the user-action shape:
   large, opaque strings queried with grep-style predicates.
 - **Action source.** `source.{type,id,name,run_id}` mirrors the
   user-action SO `source` (agent, workflow, rule, attack, api, user).
-  It is omitted on user actions persisted before source tracking.
+  It is omitted when the SO has no `source`, and on rows indexed before
+  `.cases-activity` mapped it. `POST /internal/cases/_analyticsV2/reset`
+  backfills those.
 - **No `index.mode: lookup`.** `.cases-activity` is the **fact** table
   in the analytics model. ES|QL queries `FROM .cases-activity | LOOKUP
   JOIN .cases ON case.id`; the lookup-mode index is on the cases side.

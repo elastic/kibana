@@ -71,6 +71,19 @@ describe('ensureActivityIndex', () => {
     );
   });
 
+  it('throws when the additive mapping sync fails', async () => {
+    const { esClient, logger } = buildDeps();
+    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.putMapping as unknown as jest.Mock).mockRejectedValue(
+      new Error('illegal_argument_exception')
+    );
+
+    await expect(ensureActivityIndex({ esClient, logger })).rejects.toThrow(
+      'illegal_argument_exception'
+    );
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+
   it('swallows resource_already_exists_exception from a concurrent bootstrap race', async () => {
     const { esClient, logger } = buildDeps();
     (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);

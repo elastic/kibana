@@ -242,7 +242,7 @@ describe('buildActivityDoc', () => {
     });
 
     it('omits source when the user action has none', () => {
-      expect(buildActivityDoc(makeUserAction('ua-1')).source).toBeUndefined();
+      expect(buildActivityDoc(makeUserAction('ua-1'))).not.toHaveProperty('source');
       expect(buildActivityDoc(makeUserAction('ua-1', { source: null }))).not.toHaveProperty(
         'source'
       );

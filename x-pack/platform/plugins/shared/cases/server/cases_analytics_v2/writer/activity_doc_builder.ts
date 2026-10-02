@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import type { ActionSourceType } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { findCommentReferenceId } from '../../common/references';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
@@ -73,12 +74,12 @@ export interface ActivityAnalyticsDoc {
     // hence the distinct name. Present only on `comment` user actions.
     attachment_reference_id?: string;
   };
-  // Omitted for user actions persisted before source tracking.
+  // Omitted when the SO has no `source`.
   source?: ActivitySourceDoc;
 }
 
 interface ActivitySourceDoc {
-  type: string;
+  type: ActionSourceType;
   id: string;
   name?: string;
   run_id?: string;
