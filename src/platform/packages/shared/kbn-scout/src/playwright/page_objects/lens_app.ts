@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { escapeRegExp } from 'lodash';
 import type { JSHandle } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '..';
@@ -406,13 +407,17 @@ export class LensApp {
     if (committedField !== field) {
       await this.page.testSubj.click(`${FIELD_PICKER_TEST_SUBJ} > comboBoxInput`);
       await this.page.testSubj.fill(`${FIELD_PICKER_TEST_SUBJ} > comboBoxSearchInput`, field);
-      // Lens repaints the options while recomputing field compatibility, so address the
-      // option by its own label rather than by a position read before that repaint.
+      // Address the option by label, not by a position read before Lens repaints the list.
+      // `fullText` is EuiTextTruncate's whole label; the highlighted text it wraps is split
+      // into `mark` nodes that also match every label the search term is only a prefix of.
       const option = this.page.testSubj
         .locator(`~${FIELD_PICKER_TEST_SUBJ}-optionsList`)
         .getByRole('option')
-        .filter({ has: this.page.getByText(field, { exact: true }) });
-      await expect(option).toHaveCount(1);
+        .filter({
+          has: this.page.testSubj
+            .locator('fullText')
+            .filter({ hasText: new RegExp(`^${escapeRegExp(field)}$`) }),
+        });
       await option.click();
     }
     // ComboBox can show the typed option before Lens layer state commits.
