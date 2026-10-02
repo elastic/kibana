@@ -621,7 +621,10 @@ export class VersionSpecificPolicyAssignmentTask {
     // Agents on a versioned `policy_id` without `policy_base_id` (enrolled by a downlevel
     // fleet-server after the last backfill). Their variant document may already be gone, in which
     // case the parent would never be visited via `.fleet-policies` alone.
-    const agentOnlyVariantIdsByParent = await getVariantPolicyIdsFromAgentsWithoutBaseId(esClient);
+    const agentOnlyVariantIdsByParent = await getVariantPolicyIdsFromAgentsWithoutBaseId(
+      esClient,
+      signal
+    );
     if (buckets.length === 0 && agentOnlyVariantIdsByParent.size === 0) {
       return;
     }

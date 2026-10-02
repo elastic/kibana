@@ -619,7 +619,7 @@ describe('getVariantPolicyIdsFromAgentsWithoutBaseId', () => {
       ])
     );
     expect(esClient.search).toHaveBeenCalledTimes(1);
-    expect(esClient.search).toHaveBeenCalledWith(
+    expect(esClient.search.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         index: '.fleet-agents',
         query: {
@@ -632,6 +632,22 @@ describe('getVariantPolicyIdsFromAgentsWithoutBaseId', () => {
         },
       })
     );
+  });
+
+  it('passes the abort signal to searches and stops paging once aborted', async () => {
+    const controller = new AbortController();
+    const esClient = {
+      search: jest.fn().mockImplementationOnce(async () => {
+        controller.abort();
+        return page(['plain-1'], { policy_id: 'plain-1' });
+      }),
+    } as any;
+
+    await expect(
+      getVariantPolicyIdsFromAgentsWithoutBaseId(esClient, controller.signal)
+    ).rejects.toThrow();
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search.mock.calls[0][1]).toEqual({ signal: controller.signal });
   });
 
   it('pages through all distinct policy ids using the composite after_key', async () => {

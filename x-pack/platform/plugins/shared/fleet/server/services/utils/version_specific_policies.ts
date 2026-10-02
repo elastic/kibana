@@ -110,7 +110,8 @@ export async function getVariantAgentsKuery(
  * variant `.fleet-policies` document they reference may also already be gone.
  */
 export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  signal?: AbortSignal
 ): Promise<Map<string, string[]>> {
   const byParent = new Map<string, string[]>();
   let afterKey: Record<string, string> | undefined;
@@ -120,6 +121,7 @@ export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
   // client-side (no `include` regex / wildcard query), keeping this compatible with
   // `search.allow_expensive_queries: false`. After the startup backfill the set is tiny.
   do {
+    signal?.throwIfAborted();
     const response: SearchResponse<
       unknown,
       {
@@ -128,29 +130,32 @@ export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
           after_key?: Record<string, string>;
         };
       }
-    > = await esClient.search({
-      index: AGENTS_INDEX,
-      ignore_unavailable: true,
-      size: 0,
-      // Unenrolled agents are excluded from reassignment, so they are not worth discovering.
-      query: {
-        bool: {
-          must_not: [
-            { exists: { field: POLICY_BASE_ID_FIELD } },
-            { exists: { field: 'unenrolled_at' } },
-          ],
+    > = await esClient.search(
+      {
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        // Unenrolled agents are excluded from reassignment, so they are not worth discovering.
+        query: {
+          bool: {
+            must_not: [
+              { exists: { field: POLICY_BASE_ID_FIELD } },
+              { exists: { field: 'unenrolled_at' } },
+            ],
+          },
         },
-      },
-      aggs: {
-        policy_ids: {
-          composite: {
-            size: POLICY_ID_DISCOVERY_PAGE_SIZE,
-            sources: [{ policy_id: { terms: { field: 'policy_id' } } }],
-            ...(afterKey ? { after: afterKey } : {}),
+        aggs: {
+          policy_ids: {
+            composite: {
+              size: POLICY_ID_DISCOVERY_PAGE_SIZE,
+              sources: [{ policy_id: { terms: { field: 'policy_id' } } }],
+              ...(afterKey ? { after: afterKey } : {}),
+            },
           },
         },
       },
-    });
+      { signal }
+    );
 
     const agg = response.aggregations?.policy_ids;
     for (const { key } of agg?.buckets ?? []) {
