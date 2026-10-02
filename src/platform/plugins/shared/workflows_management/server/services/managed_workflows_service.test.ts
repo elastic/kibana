@@ -32,6 +32,7 @@ import type {
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import { INITIAL_WORKFLOW_VERSION } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -230,7 +231,15 @@ const createCrudServiceMock = () => {
       async (_id, _spaceId, params: ReadModifyWriteWorkflowDocumentParams) =>
         params.mutate(createWorkflowSource({}))
     ),
-    deleteWorkflows: jest.fn().mockResolvedValue(undefined),
+    deleteWorkflows: jest.fn(
+      async (ids: string[]): Promise<DeleteWorkflowsResponse> => ({
+        total: ids.length,
+        deleted: ids.length,
+        failures: [],
+        successfulIds: ids,
+      })
+    ),
+    disableWorkflow: jest.fn().mockResolvedValue(undefined),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
@@ -2184,14 +2193,24 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
         includeDeleted: true,
       });
-      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(2);
+      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(4);
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
-        ['system-unregistered-owner', 'system-removed-definition'],
+        ['system-unregistered-owner'],
         SPACE_ID,
         { force: true }
       );
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
-        ['system-missing-owner', 'system-missing-definition'],
+        ['system-removed-definition'],
+        SPACE_ID,
+        { force: true }
+      );
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
+        ['system-missing-owner'],
+        'other-space',
+        { force: true }
+      );
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
+        ['system-missing-definition'],
         'other-space',
         { force: true }
       );
@@ -2213,6 +2232,120 @@ describe('ManagedWorkflowsService', () => {
         spaceId: 'other-space',
         reason: 'orphan_cleanup',
       });
+    });
+
+    it('continues removing orphans when one delete throws', async () => {
+      const knownDefinition = createDefinition({ id: 'system-known' });
+      mockManagedWorkflowDefinitions = [knownDefinition];
+      const { audit, crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-removed-definition',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+        {
+          id: 'system-unregistered-owner',
+          source: createWorkflowSource({
+            managedBy: 'removedPlugin',
+            originManagedWorkflowId: knownDefinition.id,
+          }),
+        },
+      ]);
+      crudService.deleteWorkflows.mockImplementation(async (ids: string[]) => {
+        if (ids[0] === 'system-removed-definition') {
+          throw new Error('doc delete failed');
+        }
+        return {
+          total: ids.length,
+          deleted: ids.length,
+          failures: [],
+          successfulIds: ids,
+        };
+      });
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledTimes(1);
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ id: 'system-unregistered-owner', reason: 'orphan_cleanup' })
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('system-removed-definition'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+      expect(crudService.disableWorkflow).toHaveBeenCalledTimes(1);
+      expect(crudService.disableWorkflow).toHaveBeenCalledWith(
+        'system-removed-definition',
+        SPACE_ID
+      );
+    });
+
+    it('disables an orphan the delete reports as failed', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { audit, crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-running-orphan',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteWorkflows.mockResolvedValue({
+        total: 1,
+        deleted: 0,
+        failures: [{ id: 'system-running-orphan', error: 'delete failed' }],
+        successfulIds: [],
+      });
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(audit.logWorkflowDeleted).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
+      expect(crudService.disableWorkflow).toHaveBeenCalledWith('system-running-orphan', SPACE_ID);
+    });
+
+    it('keeps sweeping when disabling an undeleted orphan fails', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-first',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+        {
+          id: 'system-second',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteWorkflows.mockImplementation(async (ids: string[]) => {
+        if (ids[0] === 'system-first') {
+          throw new Error('running executions');
+        }
+        return { total: 1, deleted: 1, failures: [], successfulIds: ids };
+      });
+      crudService.disableWorkflow.mockRejectedValueOnce(new Error('disable failed'));
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-second'], SPACE_ID, {
+        force: true,
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining("failed to disable orphaned workflow 'system-first'"),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
     });
 
     it('does not delete managed docs for registered owners with known definitions', async () => {

@@ -219,7 +219,7 @@ describe('composable pages', () => {
       const hostApp = createAlertingV2HostApp('observability', {
         rules: '/alerting',
         ruleLibrary: '/alerting/library',
-        episodes: '/alerting/inbox',
+        alerts: '/alerting/inbox',
         actionPolicies: '/alerting/action-policies',
         executionHistory: '/alerting/execution-history',
       });

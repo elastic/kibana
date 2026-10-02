@@ -219,7 +219,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('registers Update Policy button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'Update Policy')).toBeDefined();
@@ -228,7 +228,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('registers View in Policies button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'View in Policies')).toBeDefined();
@@ -237,7 +237,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('does not register Create policy button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
@@ -246,7 +246,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -265,7 +265,7 @@ describe('ActionPolicyCanvasContent', () => {
 
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -279,7 +279,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('View in Policies handler navigates with the observability host', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);

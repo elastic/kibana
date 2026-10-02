@@ -11,6 +11,7 @@ import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDatatableFromTextBasedGrid } from './build_datatable_from_text_based_grid';
 import { getGridRequestId } from './get_grid_request_id';
 import { getEsqlDatatableFromDocuments } from './get_esql_datatable_from_documents';
@@ -69,11 +70,10 @@ describe('getEsqlDatatableFromDocuments', () => {
     const result = [asEsqlRow('1', { bucket: '2023-11-15T00:00:00.000Z' })];
 
     const { table } = getEsqlDatatableFromDocuments({
-      isEsqlMode: true,
       documentsValue: {
         fetchStatus: FetchStatus.COMPLETE,
         result,
-        esqlQueryColumns: columns,
+        dataSource: createMockEsqlSource([], columns),
       },
     });
 
@@ -85,10 +85,10 @@ describe('getEsqlDatatableFromDocuments', () => {
 
   it('does not supply a table while documents are still loading', () => {
     const { table } = getEsqlDatatableFromDocuments({
-      isEsqlMode: true,
       documentsValue: {
         fetchStatus: FetchStatus.LOADING,
         result: [],
+        dataSource: createMockEsqlSource([], []),
       },
     });
 

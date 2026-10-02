@@ -169,6 +169,7 @@ describe('AlertTimelineSection', () => {
     });
     expect(location.app).toBe('test-app');
     expect(location.path).toMatch(/^\/alerting\/inbox\?_a=/);
+
     jest.useRealTimers();
   });
 

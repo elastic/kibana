@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import { euiSelectors } from '@kbn/scout';
+import type { EuiBasicTableObject, Locator, ScoutPage } from '@kbn/scout';
 import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
@@ -23,6 +24,16 @@ export class ActionPoliciesListPage {
   public readonly detailsFlyoutTakeActionButton: Locator;
   /** Content list toolbar search box. */
   private readonly searchBox: Locator;
+  /** "See all affected rules" link in the details flyout; hidden without the rules read capability. */
+  public readonly detailsFlyoutSeeAffectedRulesLink: Locator;
+  /** "Affected rules" flyout opened from the details flyout. */
+  public readonly affectedRulesFlyout: Locator;
+  /** Paginated table of the rules matching the policy scope tags. */
+  public readonly affectedRulesTable: EuiBasicTableObject;
+  /** EUI flyout-history Back button, which returns to the details flyout. */
+  public readonly affectedRulesBackButton: Locator;
+  /** Close button of the "Affected rules" flyout, which closes the whole flyout history. */
+  public readonly affectedRulesCloseButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
@@ -31,6 +42,15 @@ export class ActionPoliciesListPage {
       'detailsFlyoutTakeActionButton'
     );
     this.searchBox = this.page.testSubj.locator('contentListToolbar-searchBox');
+    this.detailsFlyoutSeeAffectedRulesLink = this.page.testSubj.locator(
+      'actionPolicyDetailsFlyoutSeeAffectedRulesLink'
+    );
+    this.affectedRulesFlyout = this.page.testSubj.locator('actionPolicyAffectedRulesFlyout');
+    this.affectedRulesTable = this.page.components.basicTable('actionPolicyAffectedRulesTable');
+    this.affectedRulesBackButton = this.affectedRulesFlyout.getByTestId('euiFlyoutMenuBackButton');
+    this.affectedRulesCloseButton = this.affectedRulesFlyout.getByTestId(
+      euiSelectors.flyout.CLOSE_BUTTON_TEST_SUBJ
+    );
   }
 
   async goto() {
@@ -54,5 +74,13 @@ export class ActionPoliciesListPage {
 
   async openDetailsFlyout(policyName: string) {
     await this.detailsLink(policyName).click();
+  }
+
+  affectedRuleRow(ruleName: string) {
+    return this.affectedRulesTable.rows.filter({ hasText: ruleName });
+  }
+
+  affectedRuleOpenLink(ruleName: string) {
+    return this.affectedRuleRow(ruleName).getByRole('link', { name: ruleName });
   }
 }

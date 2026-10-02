@@ -193,7 +193,7 @@ export const assertAgentTrace = (
       `Agent trace must retain the model tool call ${callId}`
     );
     assert(span, `Agent trace must include tool call ${callId}`);
-    // The progress schema orders recommendations and blind spots before tool execution.
+    // The progress schema orders recommendations before tool execution.
     const executedParams =
       toolId === platformSignificantEventsTools.reportInvestigationProgress
         ? investigationStateSchema.parse(params)

@@ -214,6 +214,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
+    if (params.description !== undefined) {
+      throw Boom.badRequest('Service account descriptions are not supported on Serverless.');
+    }
     const { name, roles } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
@@ -238,6 +241,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },

@@ -14,7 +14,7 @@ export {
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
 } from '@kbn/deeplinks-observability';
 
-export const OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID = 'inbox';
+export const OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID = 'alerts';
 export const OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID = 'rules-v1';
 export const OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID = 'rules-v2';
 export const OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID = 'rule-library';

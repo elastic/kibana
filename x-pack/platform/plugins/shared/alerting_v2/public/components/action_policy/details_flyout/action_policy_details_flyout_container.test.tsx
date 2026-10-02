@@ -128,6 +128,7 @@ jest.mock('../../entity_not_found_flyout', () => ({
 interface FlyoutMockProps {
   policy: ActionPolicyResponse;
   session?: string;
+  size?: string;
   onClose: () => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
@@ -141,7 +142,7 @@ interface FlyoutMockProps {
 
 jest.mock('./action_policy_details_flyout', () => ({
   ActionPolicyDetailsFlyout: (props: FlyoutMockProps) => (
-    <div data-test-subj="mockFlyout" data-session={props.session}>
+    <div data-test-subj="mockFlyout" data-session={props.session} data-size={props.size}>
       <button
         data-test-subj="flyout-edit"
         onClick={() => props.onEdit(props.policy.id)}
@@ -251,13 +252,14 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     ...overrides,
   } as ActionPolicyResponse);
 
-const renderContainer = (session?: 'start' | 'inherit') =>
+const renderContainer = (session?: 'start' | 'inherit', size?: 's' | 'm') =>
   render(
     <I18nProvider>
       <ActionPolicyDetailsFlyoutContainer
         policyId="policy-1"
         onClose={mockOnClose}
         session={session}
+        size={size}
       />
     </I18nProvider>
   );
@@ -329,12 +331,19 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer();
     expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-session', 'start');
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-size', 'm');
   });
 
   it('keeps an inherited session when opened from another flyout', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer('inherit');
     expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-session', 'inherit');
+  });
+
+  it('forwards an explicit size override to the flyout (e.g. "s" when nested)', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+    renderContainer('inherit', 's');
+    expect(screen.getByTestId('mockFlyout')).toHaveAttribute('data-size', 's');
   });
 
   it('navigates to the edit page and calls onClose on edit', async () => {

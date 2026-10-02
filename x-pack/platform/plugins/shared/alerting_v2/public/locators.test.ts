@@ -25,7 +25,7 @@ import {
 const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabilityAlerting', {
   rules: '/rules/v2',
   ruleLibrary: '/rule-library',
-  episodes: '/inbox',
+  alerts: '/inbox',
   actionPolicies: '/action-policies',
   executionHistory: '/execution-history',
 });
@@ -33,7 +33,7 @@ const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabi
 const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
   rules: '/alerting',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
@@ -121,7 +121,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     const locator = AlertingV2EpisodesLocatorDefinition;
 
     it('resolves list', async () => {
-      expect(await locator.getLocation({ host: OBSERVABILITY_HOST.episodes })).toMatchObject({
+      expect(await locator.getLocation({ host: OBSERVABILITY_HOST.alerts })).toMatchObject({
         app: 'observabilityAlerting',
         path: '/inbox',
       });
@@ -129,7 +129,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
 
     it('resolves episode details', async () => {
       expect(
-        await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.episodes })
+        await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.alerts })
       ).toMatchObject({
         app: 'observabilityAlerting',
         path: '/inbox/ep-1',
@@ -255,13 +255,13 @@ describe('createAlertingV2HostApp', () => {
     const host = createAlertingV2HostApp('myApp', {
       rules: '/r',
       ruleLibrary: '/rl',
-      episodes: '/e',
+      alerts: '/e',
       actionPolicies: '/ap',
       executionHistory: '/eh',
     });
 
     expect(host.rules).toEqual({ app: 'myApp', pathPrefix: '/r' });
-    expect(host.episodes).toEqual({ app: 'myApp', pathPrefix: '/e' });
+    expect(host.alerts).toEqual({ app: 'myApp', pathPrefix: '/e' });
   });
 });
 

@@ -10,7 +10,7 @@ import type { LocatorHost } from '@kbn/rule-data-utils';
 export interface AlertingV2HostApp {
   rules: LocatorHost;
   ruleLibrary: LocatorHost;
-  episodes: LocatorHost;
+  alerts: LocatorHost;
   actionPolicies: LocatorHost;
   executionHistory: LocatorHost;
 }
@@ -20,14 +20,14 @@ export const createAlertingV2HostApp = (
   pagePathPrefixes: {
     rules: string;
     ruleLibrary: string;
-    episodes: string;
+    alerts: string;
     actionPolicies: string;
     executionHistory: string;
   }
 ): AlertingV2HostApp => ({
   rules: { app: appId, pathPrefix: pagePathPrefixes.rules },
   ruleLibrary: { app: appId, pathPrefix: pagePathPrefixes.ruleLibrary },
-  episodes: { app: appId, pathPrefix: pagePathPrefixes.episodes },
+  alerts: { app: appId, pathPrefix: pagePathPrefixes.alerts },
   actionPolicies: { app: appId, pathPrefix: pagePathPrefixes.actionPolicies },
   executionHistory: { app: appId, pathPrefix: pagePathPrefixes.executionHistory },
 });
