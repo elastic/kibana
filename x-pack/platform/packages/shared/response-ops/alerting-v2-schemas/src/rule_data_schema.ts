@@ -213,9 +213,7 @@ export const recoverySchema = z
     z
       .object({ strategy: z.literal(recoveryStrategy.no_breach) })
       .strict()
-      .describe(
-        'Recovers the alert when its group no longer appears in the breach results.'
-      )
+      .describe('Recovers the alert when its group no longer appears in the breach results.')
       .meta({ id: 'alerting_rule_recovery_no_breach' }),
     z
       .object({
