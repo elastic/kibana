@@ -6,13 +6,17 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { RulesApiService } from '../../../common/services/rules_api_service';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
-  buildAlertEvent,
   buildCreateRuleData,
   test,
 } from '../fixtures';
+
+const SOURCE_INDEX = 'test-alerting-v2-alerts-privileges-source';
+const SOURCE_HOST = 'host-alerts-privileges';
+const RULE_NAME = 'scout-alerts-privileges-rule';
 
 /*
  * Covers the UI capability gating on the Alerts (episodes) page (PR #277710).
@@ -22,8 +26,9 @@ import {
  * which collapse into the overflow actions menu.
  *
  * Open in Discover is omitted until the episode's rule resolves (PR #294703).
- * The read role therefore also holds alerting_v2_rules read, and the suite
- * seeds a saved rule so that action is eligible.
+ * The read role therefore also holds alerting_v2_rules read. The suite creates
+ * a rule against source data and waits for it to fire an active episode, so
+ * the row and the rule are both real.
  */
 const ALERTS_V2_RULES_READ_ROLE = {
   ...ALERTING_V2_ALERTS_READ_ROLE,
@@ -46,31 +51,52 @@ test.describe(
   () => {
     let ruleId: string | undefined;
 
+    const deletePrivilegesRule = async (rules: RulesApiService): Promise<void> => {
+      await rules.deleteByQuery({
+        filter: `metadata.name: "${RULE_NAME}"`,
+        force: true,
+      });
+    };
+
     test.beforeAll(async ({ apiServices }) => {
+      test.setTimeout(180_000);
+      await deletePrivilegesRule(apiServices.alertingV2.rules);
+      await apiServices.alertingV2.sourceIndex.create({
+        index: SOURCE_INDEX,
+        mappings: {
+          'host.name': { type: 'keyword' },
+        },
+      });
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [{ '@timestamp': new Date().toISOString(), 'host.name': SOURCE_HOST }],
+      });
+
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'scout-alerts-privileges-rule' },
+          metadata: { name: RULE_NAME },
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${SOURCE_HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
         })
       );
       ruleId = rule.id;
-      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
-      // Seed a single active episode so the episodes table renders a row whose
-      // leading action controls we can assert against. The default list filter
-      // is "Active" over "now-24h", so the event must be recent and active.
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          '@timestamp': new Date().toISOString(),
-          rule: { id: ruleId, version: rule.version },
-          group_hash: 'scout-alerts-privileges-group',
-          alert: { id: 'scout-alerts-privileges-episode', status: 'active' },
-        }),
-      ]);
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
     });
 
     test.afterAll(async ({ apiServices }) => {
-      if (ruleId) {
-        await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
-        await apiServices.alertingV2.rules.delete(ruleId);
+      try {
+        if (ruleId) {
+          await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+        }
+      } finally {
+        try {
+          await deletePrivilegesRule(apiServices.alertingV2.rules);
+        } finally {
+          await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
+        }
       }
     });
 
