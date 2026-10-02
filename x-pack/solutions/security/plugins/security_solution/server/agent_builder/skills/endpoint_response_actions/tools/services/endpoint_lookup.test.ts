@@ -264,6 +264,56 @@ describe('createEndpointLookupService', () => {
     });
   });
 
+  it('reports gone Fleet statuses as unenrolled in a truncated ambiguity result', async () => {
+    // A truncated page reports every candidate (not only the live ones), so a
+    // gone record must carry the same `unenrolled` the metadata path reports
+    // rather than the mapper's `unhealthy` fallback. `orphaned` is an active
+    // Fleet status and stays `unhealthy`.
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          {
+            id: 'unenrolled-a',
+            status: 'unenrolled',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'uninstalled-b',
+            status: 'uninstalled',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T11:00:00.000Z',
+          },
+          {
+            id: 'orphaned-c',
+            status: 'orphaned',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T12:00:00.000Z',
+          },
+          {
+            id: 'online-d',
+            status: 'online',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:00:00.000Z',
+          },
+        ],
+        total: LOOKUP_PAGE_SIZE + 1,
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('duplicated-host');
+
+    expect(result).toEqual(expect.objectContaining({ kind: 'ambiguous', truncated: true }));
+    const candidates = (result as { candidates: Array<{ agentId: string; status: string }> })
+      .candidates;
+    expect(Object.fromEntries(candidates.map((c) => [c.agentId, c.status]))).toEqual({
+      'unenrolled-a': HostStatus.UNENROLLED,
+      'uninstalled-b': HostStatus.UNENROLLED,
+      'orphaned-c': HostStatus.UNHEALTHY,
+      'online-d': HostStatus.HEALTHY,
+    });
+  });
+
   it('is not ambiguous when only one of several matching agents is online', async () => {
     const { lookup } = buildService({
       listAgents: jest.fn().mockResolvedValue({

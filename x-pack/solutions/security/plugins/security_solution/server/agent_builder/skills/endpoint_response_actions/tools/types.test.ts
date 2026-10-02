@@ -13,6 +13,8 @@ import {
   summarizeActionHosts,
   summarizeActionOutputs,
   summarizeAgentState,
+  GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
+  MAX_ACTION_ERRORS,
   MAX_ACTION_HOSTS,
   MAX_AGENT_STATE_ENTRIES,
   MAX_AGENT_STATE_TOTAL_CHARS,
@@ -21,6 +23,7 @@ import {
   MAX_OUTPUT_ENTRIES_PER_AGENT,
   MAX_OUTPUT_STRING_LENGTH,
   MAX_OUTPUT_TOTAL_CHARS,
+  MAX_PARAMETER_KEYS,
 } from './types';
 import { ToolResultType } from '@kbn/agent-builder-common';
 
@@ -114,6 +117,19 @@ describe('resolveAgentTypeFromPackages', () => {
   });
 });
 
+describe('GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS', () => {
+  it('covers the capped sections at 4 characters per token (derivation in the constant JSDoc)', () => {
+    const cappedChars =
+      MAX_OUTPUT_TOTAL_CHARS +
+      MAX_AGENT_STATE_TOTAL_CHARS +
+      MAX_PARAMETER_KEYS * MAX_OUTPUT_STRING_LENGTH +
+      MAX_ACTION_ERRORS * MAX_OUTPUT_STRING_LENGTH;
+
+    expect(cappedChars).toBe(228_000);
+    expect(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS * 4).toBeGreaterThan(cappedChars);
+  });
+});
+
 describe('summarizeActionOutputs', () => {
   it('keeps the first agent summary even when it alone exceeds the total budget', () => {
     const oversized = Object.fromEntries(
@@ -124,16 +140,55 @@ describe('summarizeActionOutputs', () => {
     expect(result.agents[0].agentId).toBe('agent-1');
   });
 
-  it('flags a single retained agent summary that exceeds the total budget', () => {
+  it('shrinks an over-budget first agent to fit and names what it shortened', () => {
     const oversized = Object.fromEntries(
       Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
     );
 
     const result = summarizeActionOutputs({ 'agent-1': oversized })!;
 
-    expect(JSON.stringify(result.agents[0]).length).toBeGreaterThan(MAX_OUTPUT_TOTAL_CHARS);
-    expect(result.retainedOverBudget).toBe(true);
+    expect(JSON.stringify(result.agents[0]).length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.retainedOverBudget).toBeUndefined();
     expect(result.summaryTruncated).toBeUndefined();
+    expect(result.agents[0].truncatedFields).toContain('key-0');
+    // The earliest keys survive; the dropped tail is named, not silent.
+    expect(result.agents[0]).toHaveProperty('key-0');
+    expect(result.agents[0]).not.toHaveProperty('key-49');
+    expect(result.agents[0].truncatedFields).toContain('key-49');
+  });
+
+  it('fits a first agent whose size comes from nested list entries', () => {
+    const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT }, () =>
+      Object.fromEntries(
+        Array.from({ length: 50 }, (_, i) => [`k${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+      )
+    );
+
+    const result = summarizeActionOutputs({ 'agent-1': { content: { entries } } })!;
+
+    expect(JSON.stringify(result.agents[0]).length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.retainedOverBudget).toBeUndefined();
+    expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].truncatedFields).toContain('entries');
+  });
+
+  it('reduces to a bounded path sample when even the path list is irreducible', () => {
+    const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT }, () =>
+      Object.fromEntries(
+        Array.from({ length: 50 }, (_, i) => [`k${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+      )
+    );
+    const wideKeys = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`${'w'.repeat(1500)}${i}`, 'x'.repeat(10)])
+    );
+
+    const result = summarizeActionOutputs({
+      'agent-1': { content: { entries, ...wideKeys }, ...wideKeys },
+    })!;
+
+    expect(JSON.stringify(result.agents[0]).length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].truncatedFields!.length).toBeLessThanOrEqual(20);
   });
 
   it('does not flag retainedOverBudget when the retained summaries fit the budget', () => {
@@ -171,7 +226,6 @@ describe('summarizeActionOutputs', () => {
         {
           agentId: 'agent-1',
           type: 'json',
-          content: {},
           entries: [{ stdout: 'ok' }],
           totalEntries: 1,
         },
@@ -276,7 +330,10 @@ describe('summarizeActionOutputs', () => {
         },
       })!;
 
-      expect(result.agents[0].truncatedFields).toEqual(['content.entries[1].command']);
+      // Named as the model sees it: the list is lifted to the top level of the
+      // agent summary, so there is no `content.` prefix.
+      expect(result.agents[0].truncatedFields).toEqual(['entries[1].command']);
+      expect(result.agents[0]).not.toHaveProperty('content');
       expect(result.agents[0].totalEntries).toBe(2);
     });
 

@@ -202,6 +202,22 @@ function totalCandidatesOf(
  *        coexist; querying metadata only when Fleet is empty would silently
  *        prefer the origin host and never detect the collision.
  */
+/**
+ * Fleet statuses the shared `fleetAgentStatusToEndpointHostStatus` mapper has
+ * no entry for (it falls back to `unhealthy`) although the record is gone, not
+ * unhealthy: the metadata path reports them as `unenrolled`. They are exactly
+ * the not-live statuses (`isLive`) without a `HostStatus` entry. The shared
+ * mapper is left alone because its other caller (`host_status` on the
+ * metadata API) would change behavior. `orphaned` stays `unhealthy`: Fleet
+ * counts it as an active agent (`ActiveAgentStatuses`), so it is live here too.
+ */
+const GONE_FLEET_STATUSES: ReadonlySet<string> = new Set(['unenrolled', 'uninstalled']);
+
+const toHostStatus = (status: AgentStatus): HostStatus =>
+  GONE_FLEET_STATUSES.has(status)
+    ? HostStatus.UNENROLLED
+    : fleetAgentStatusToEndpointHostStatus(status);
+
 export function createEndpointLookupService(
   endpointAppContextService: EndpointAppContextService,
   spaceId: string,
@@ -334,9 +350,7 @@ export function createEndpointLookupService(
         // returns uses (metadata candidates, the found result); `isLive`
         // above stays on the raw Fleet status, where the active/gone
         // distinction is defined.
-        status: candidate.status
-          ? fleetAgentStatusToEndpointHostStatus(candidate.status as AgentStatus)
-          : 'unknown',
+        status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
         packages: candidate.packages,
         sortKey: candidate.enrolled_at,
       }));

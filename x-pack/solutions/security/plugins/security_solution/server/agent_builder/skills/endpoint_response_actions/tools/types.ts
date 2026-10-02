@@ -95,10 +95,25 @@ export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
  * Tool-result token budget for `get_response_action_status`. The default
  * guardrail (20k tokens) swaps an over-size payload for a truncated preview,
  * which would hide the structured truncation counters the model relies on.
- * The summary is already bounded by `MAX_OUTPUT_TOTAL_CHARS` (outputs) and
- * `MAX_AGENT_STATE_TOTAL_CHARS` (agentState) plus the hosts, parameters and
- * errors caps, and a single retained over-budget agent can push it past 20k
- * tokens, so the budget is raised to fit the bounded worst case.
+ *
+ * Guarantees (4 characters per token):
+ * - `outputs` never exceeds `MAX_OUTPUT_TOTAL_CHARS` (64k): later agents are
+ *   dropped and the always-kept first agent is shrunk to fit, reporting what
+ *   it lost in `truncatedFields` (`retainedOverBudget` only when `agentId`
+ *   alone is over budget).
+ * - `agentState` is held to `MAX_AGENT_STATE_TOTAL_CHARS` (24k), except that
+ *   one over-budget entry is kept and flagged `agentStateRetainedOverBudget`.
+ *
+ * Sizing assumption (not a guarantee): `parameters` and `errors` are capped
+ * per key / per entry, not in total. With every value a maximum-length string
+ * they add `MAX_PARAMETER_KEYS * MAX_OUTPUT_STRING_LENGTH` (100k) and
+ * `MAX_ACTION_ERRORS * MAX_OUTPUT_STRING_LENGTH` (40k) chars, so
+ * 64k + 24k + 100k + 40k = 228k chars = 57k tokens, and 60_000 tokens (240k
+ * chars) leaves ~3k tokens for `hosts` and the envelope. Nested values, a
+ * single `agentState` entry and `hosts` have no total cap, so a pathological
+ * record can still exceed the budget and get the platform's truncated
+ * preview; the budget covers the realistic worst case, not an adversarial
+ * one. `types.test.ts` pins the derivation.
  */
 export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
 
@@ -307,6 +322,82 @@ const OUTPUT_LIST_FIELDS = [
   { key: 'contents', total: 'totalContents', truncated: 'contentsTruncated' },
 ] as const;
 
+/** Paths kept in `truncatedFields` when an agent summary had to be reduced to its minimum. */
+const MAX_FITTED_TRUNCATED_FIELDS = 20;
+
+/**
+ * Shrinks one agent summary until it serializes within `budget` characters.
+ *
+ * Two passes, each naming what it touched in `truncatedFields` so the model is
+ * told what it is not seeing:
+ * 1. every field whose serialized form is longer than `MAX_OUTPUT_STRING_LENGTH`
+ *    is replaced by its truncated JSON string, largest first, until it fits;
+ * 2. if that is not enough, fields are dropped from the end (the earliest keys
+ *    survive) until it fits.
+ *
+ * `agentId` and the list counters are never touched. When the path list itself
+ * is what is over budget (path text follows the endpoint's own key names), it
+ * is cut to a bounded sample, so the result can exceed `budget` only when
+ * `agentId` alone does.
+ */
+function fitAgentSummaryToBudget(
+  summary: ActionOutputAgentSummary,
+  budget: number
+): ActionOutputAgentSummary {
+  const sizeOf = (value: unknown) => JSON.stringify(value).length;
+  if (sizeOf(summary) <= budget) {
+    return summary;
+  }
+
+  const protectedKeys = new Set<string>([
+    'agentId',
+    'truncatedFields',
+    ...OUTPUT_LIST_FIELDS.flatMap(({ total, truncated }) => [total, truncated]),
+  ]);
+  const fitted: Record<string, unknown> = { ...summary };
+  const touched: string[] = [];
+  const withPaths = () => ({
+    ...fitted,
+    truncatedFields: [...new Set([...(summary.truncatedFields ?? []), ...touched])],
+  });
+  const fits = () => sizeOf(withPaths()) <= budget;
+
+  const keys = Object.keys(summary).filter((key) => !protectedKeys.has(key));
+
+  // Pass 1: shorten, largest first.
+  const bySize = [...keys].sort((x, y) => sizeOf(summary[y]) - sizeOf(summary[x]));
+  for (const key of bySize) {
+    const serialized = JSON.stringify(fitted[key]);
+    if (serialized.length > MAX_OUTPUT_STRING_LENGTH) {
+      fitted[key] = `${serialized.slice(0, MAX_OUTPUT_STRING_LENGTH)}… [truncated, ${
+        serialized.length - MAX_OUTPUT_STRING_LENGTH
+      } more characters]`;
+      touched.push(key);
+      if (fits()) {
+        return withPaths() as ActionOutputAgentSummary;
+      }
+    }
+  }
+
+  // Pass 2: drop, last key first.
+  for (const key of [...keys].reverse()) {
+    delete fitted[key];
+    if (!touched.includes(key)) {
+      touched.push(key);
+    }
+    if (fits()) {
+      return withPaths() as ActionOutputAgentSummary;
+    }
+  }
+
+  const minimal = withPaths();
+  minimal.truncatedFields = minimal.truncatedFields
+    .slice(0, MAX_FITTED_TRUNCATED_FIELDS)
+    .map((path) => path.slice(0, MAX_OUTPUT_STRING_LENGTH));
+
+  return minimal as ActionOutputAgentSummary;
+}
+
 /**
  * Bounds an action's raw `outputs` payload into a model-safe summary.
  *
@@ -355,9 +446,13 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
             rest[contentKey] = contentValue;
           }
         }
-        const boundedContent = boundOutputValue(rest, key);
-        bounded[key] = boundedContent.value;
-        truncatedFields.push(...boundedContent.truncatedPaths);
+        // Everything lifted out leaves nothing to report under `content`, so
+        // the key is omitted rather than returned as an empty `{}`.
+        if (Object.keys(rest).length > 0 || Object.keys(value).length === 0) {
+          const boundedContent = boundOutputValue(rest, key);
+          bounded[key] = boundedContent.value;
+          truncatedFields.push(...boundedContent.truncatedPaths);
+        }
       } else {
         const boundedValue = boundOutputValue(value, key);
         bounded[key] = boundedValue.value;
@@ -374,7 +469,7 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
       const list = lists[key];
       if (Array.isArray(list)) {
         const kept = list.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT).map((item, index) => {
-          const boundedItem = boundOutputValue(item, `content.${key}[${index}]`);
+          const boundedItem = boundOutputValue(item, `${key}[${index}]`);
           truncatedFields.push(...boundedItem.truncatedPaths);
 
           return boundedItem.value;
@@ -386,18 +481,25 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
         }
       } else if (key in lists) {
         // Not an array: keep the value rather than silently dropping it.
-        const boundedValue = boundOutputValue(lists[key], `content.${key}`);
+        const boundedValue = boundOutputValue(lists[key], key);
         listSummary[key] = boundedValue.value;
         truncatedFields.push(...boundedValue.truncatedPaths);
       }
     }
 
-    const summary: ActionOutputAgentSummary = {
+    let summary: ActionOutputAgentSummary = {
       agentId,
       ...bounded,
       ...listSummary,
       ...(truncatedFields.length ? { truncatedFields } : {}),
     };
+
+    // The first agent is always kept (a too-big sample beats none), so it is
+    // fitted to the budget here instead of being allowed to exceed it: the
+    // per-value bounds do not cap the TOTAL size of a nested payload.
+    if (agents.length === 0) {
+      summary = fitAgentSummaryToBudget(summary, MAX_OUTPUT_TOTAL_CHARS);
+    }
 
     const summarySize = JSON.stringify(summary).length;
     if (retainedSize + summarySize > MAX_OUTPUT_TOTAL_CHARS && agents.length > 0) {
@@ -588,14 +690,20 @@ export interface ActionParametersSummary {
 
 export interface ActionOutputAgentSummary {
   agentId: string;
-  /** `content.entries` (get-processes), capped at `MAX_OUTPUT_ENTRIES_PER_AGENT`. */
+  /** Lifted from `content.entries` (get-processes), capped at `MAX_OUTPUT_ENTRIES_PER_AGENT`. */
   entries?: unknown[];
   totalEntries?: number;
   entriesTruncated?: number;
-  /** `content.contents` (get-file), capped at `MAX_OUTPUT_ENTRIES_PER_AGENT`. */
+  /** Lifted from `content.contents` (get-file), capped at `MAX_OUTPUT_ENTRIES_PER_AGENT`. */
   contents?: unknown[];
   totalContents?: number;
   contentsTruncated?: number;
+  /**
+   * Paths whose value was shortened, named as they appear in THIS agent
+   * summary (`stdout`, `content.stdout`, `entries[1].command`) — the lifted
+   * `entries`/`contents` lists sit at the top level of the summary, not under
+   * `content`, so the paths never mention `content.entries`.
+   */
   truncatedFields?: string[];
   [key: string]: unknown;
 }
@@ -607,9 +715,9 @@ export interface ActionOutputsSummary {
   /** Set when further agents were dropped because the cumulative `MAX_OUTPUT_TOTAL_CHARS` budget was exceeded. */
   summaryTruncated?: true;
   /**
-   * Set when the retained agents alone exceed `MAX_OUTPUT_TOTAL_CHARS`. The
-   * first agent is always kept (a too-big sample beats none), so with one
-   * agent `summaryTruncated` can never fire.
+   * Set when the retained agents still exceed `MAX_OUTPUT_TOTAL_CHARS`. The
+   * first agent is always kept but is shrunk to fit (`fitAgentSummaryToBudget`),
+   * so this fires only when its `agentId` alone is over budget.
    */
   retainedOverBudget?: true;
 }
