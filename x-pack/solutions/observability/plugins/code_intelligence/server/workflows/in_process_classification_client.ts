@@ -135,7 +135,7 @@ const sourceBackedOtelResults = (
   });
 
 export class InProcessClassificationWorkflowClient implements ClassificationWorkflowClient {
-  public constructor(
+  constructor(
     private readonly managedWorkflows: PluginScopedManagedWorkflowsApi,
     private readonly management: WorkflowsManagementApi,
     private readonly request: KibanaRequest,

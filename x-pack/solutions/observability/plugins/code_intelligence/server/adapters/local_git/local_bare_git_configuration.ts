@@ -39,7 +39,7 @@ export class LocalBareGitConfiguration {
   public readonly spoolRootPath: string;
 
   /** Validates static configuration before filesystem or Git I/O. */
-  public constructor(options: LocalBareGitOptions) {
+  constructor(options: LocalBareGitOptions) {
     if (options.cursorSecret.length < 16)
       throw new Error('Local Git cursor secret must be at least 16 characters.');
     if (options.repositories.length === 0)

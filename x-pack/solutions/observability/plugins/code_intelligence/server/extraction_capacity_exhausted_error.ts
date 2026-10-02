@@ -7,7 +7,7 @@
 
 /** Signals that this instance already tracks the maximum number of extractions. */
 export class ExtractionCapacityExhaustedError extends Error {
-  public constructor() {
+  constructor() {
     super('Extraction tracking capacity is full.');
     this.name = 'ExtractionCapacityExhaustedError';
   }
