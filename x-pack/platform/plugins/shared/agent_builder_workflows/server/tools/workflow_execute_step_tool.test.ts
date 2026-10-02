@@ -355,31 +355,33 @@ describe('registerWorkflowExecuteStepTool', () => {
       ['slack2.listChannels', { limit: 10 }],
       ['slack2.resolveChannelId', { name: 'general' }],
       ['slack2.searchMessages', { query: 'release' }],
+      ['salesforce.query', { soql: 'SELECT COUNT(Id) total FROM Case' }],
+      ['github.searchIssues', { query: 'is:open' }],
     ])('executes a %s step without prompting', async (stepType, withParams) => {
       jest.useRealTimers();
 
       const yaml = `version: '1'
-name: slack-read
+name: connector-read
 enabled: true
 triggers:
   - type: manual
 steps:
-  - name: slack_read
+  - name: read_step
     type: ${stepType}
-    connector-id: my-slack
+    connector-id: my-connector
     with: ${JSON.stringify(withParams)}
 `;
 
-      mockApi.testStep.mockResolvedValue('exec-slack-read');
+      mockApi.testStep.mockResolvedValue('exec-connector-read');
       mockApi.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.COMPLETED,
-        stepExecutions: [{ stepId: 'slack_read', status: ExecutionStatus.COMPLETED }],
+        stepExecutions: [{ stepId: 'read_step', status: ExecutionStatus.COMPLETED }],
         error: null,
         duration: 40,
       });
 
       const context = createMockContext(yaml);
-      const result = await invokeHandler(registeredTool, { stepName: 'slack_read' }, context);
+      const result = await invokeHandler(registeredTool, { stepName: 'read_step' }, context);
       const data = result.results[0].data as Record<string, unknown>;
 
       expect(data.success).toBe(true);
@@ -789,6 +791,67 @@ steps:
       expect(result.prompt.message).toContain('send_slack');
       expect(result.prompt.message).toContain('slack');
       expect(result.prompt.message).not.toBe('');
+    });
+
+    it('prompts for a write-scoped connector action', async () => {
+      const yaml = `version: '1'
+name: github-write
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: create_issue
+    type: github.createIssue
+    connector-id: my-github
+    with:
+      title: "Broken login"
+`;
+
+      const context = createMockContext(yaml, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'create_issue' },
+        context
+      );
+
+      expect(result.prompt.type).toBe(AgentPromptType.confirmation);
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('renders the step parameters as a YAML block above the agent summary', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'Posts a notification to #alerts.' },
+        context
+      );
+
+      const message = result.prompt.message ?? '';
+      expect(message).toContain('```yaml');
+      expect(message).toContain('name: send_slack');
+      expect(message).toContain('type: slack');
+      expect(message).toContain('message: notification');
+      expect(message.indexOf('```yaml')).toBeLessThan(message.indexOf('Agent summary'));
+    });
+
+    it('renders a nested unsafe descendant inside the step YAML block', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'outer_foreach' },
+        context
+      );
+
+      const message = result.prompt.message ?? '';
+      expect(message).toContain('```yaml');
+      expect(message).toContain('deep_http');
+      expect(message).toContain('https://example.com');
     });
 
     it('executes the step after the user accepts the prompt', async () => {

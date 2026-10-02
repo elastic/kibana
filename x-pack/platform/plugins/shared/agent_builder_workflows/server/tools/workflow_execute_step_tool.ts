@@ -19,6 +19,7 @@ import {
   type StepInfo,
   type WorkflowLookup,
 } from '@kbn/workflows-yaml';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -29,6 +30,11 @@ import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workf
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
+/**
+ * Step types that run without an approval dialog. Connector-spec actions are
+ * not listed here — `isReadScopedConnectorStep` derives those from the spec's
+ * own `scope` classification.
+ */
 export const SAFE_STEP_TYPES = new Set([
   'console',
   'data.set',
@@ -58,11 +64,6 @@ export const SAFE_STEP_TYPES = new Set([
   'cases.findSimilarCases',
   'cases.getAllAttachments',
   'cases.getCasesByAlertId',
-  // Slack read-only actions (.slack2 connector): query the Slack API without
-  // posting messages or mutating workspace state.
-  'slack2.searchMessages',
-  'slack2.listChannels',
-  'slack2.resolveChannelId',
 ]);
 
 /**
@@ -77,6 +78,26 @@ const DESTRUCTIVE_STEP_TYPES = new Set([
 ]);
 
 const CONDITION_STEP_TYPES = new Set(['if', 'while']);
+
+/**
+ * Connector-backed steps are typed `<connectorType>.<actionName>` (e.g.
+ * `salesforce.query`). Their spec already classifies each action as
+ * `read` / `write` / `destroy`, so read actions need no approval dialog.
+ */
+const isReadScopedConnectorStep = (stepType: string): boolean => {
+  const separatorIndex = stepType.indexOf('.');
+  if (separatorIndex <= 0) {
+    return false;
+  }
+  const connectorTypeId = `.${stepType.slice(0, separatorIndex)}`;
+  const actionName = stepType.slice(separatorIndex + 1);
+  // `scope` is optional in the spec, so an omitted scope keeps the dialog.
+  return getConnectorSpec(connectorTypeId)?.actions?.[actionName]?.scope === 'read';
+};
+
+/** A step type is safe when the allowlist holds it, or its connector action is read-scoped. */
+const isSafeStepType = (stepType: string): boolean =>
+  SAFE_STEP_TYPES.has(stepType) || isReadScopedConnectorStep(stepType);
 
 const POLL_INTERVAL_MS = 1000;
 const POLL_TIMEOUT_MS = 30_000;
@@ -133,19 +154,19 @@ const getDescendantStepIds = (stepId: string, allSteps: Record<string, StepInfo>
 };
 
 /**
- * A step is safe only if its own type and every descendant's type are in SAFE_STEP_TYPES.
+ * A step is safe only if its own type and every descendant's type are safe.
  * Returns the first unsafe step found (self or descendant), or null if fully safe.
  */
 const findUnsafeStep = (stepId: string, allSteps: Record<string, StepInfo>): StepInfo | null => {
   const step = allSteps[stepId];
   if (!step) return null;
 
-  if (!SAFE_STEP_TYPES.has(step.stepType)) return step;
+  if (!isSafeStepType(step.stepType)) return step;
 
   const descendantIds = getDescendantStepIds(stepId, allSteps);
   for (const id of descendantIds) {
     const descendant = allSteps[id];
-    if (descendant && !SAFE_STEP_TYPES.has(descendant.stepType)) {
+    if (descendant && !isSafeStepType(descendant.stepType)) {
       return descendant;
     }
   }
@@ -410,45 +431,60 @@ const executeConditionStepWithStubs = async ({
   }
 };
 
-const buildFallbackPreview = (
-  stepInfo: StepInfo,
-  unsafeStep: StepInfo,
-  contextOverride?: Record<string, unknown>
-): string => {
-  const lines: string[] = [
-    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.step', {
-      defaultMessage: '**Step:** `{stepId}`',
-      values: { stepId: stepInfo.stepId },
-    }),
-    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.type', {
-      defaultMessage: '**Type:** `{stepType}`',
-      values: { stepType: stepInfo.stepType },
-    }),
-  ];
-  if (unsafeStep.stepId !== stepInfo.stepId) {
-    lines.push(
-      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.unsafeDescendant', {
-        defaultMessage: '**Unsafe descendant:** `{stepId}` (`{stepType}`)',
-        values: { stepId: unsafeStep.stepId, stepType: unsafeStep.stepType },
-      })
-    );
+/** Max characters of rendered step YAML shown in the confirmation dialog. */
+const MAX_STEP_YAML_PREVIEW_CHARS = 2000;
+
+/**
+ * Renders the step — its `with:` block and any nested children included — as a
+ * YAML code block, so the dialog shows what runs instead of only name and type.
+ */
+const buildStepYamlPreview = (step: StepInfo): string => {
+  let rendered = YAML.stringify(step.stepYamlNode.toJSON()).trimEnd();
+  if (rendered.length > MAX_STEP_YAML_PREVIEW_CHARS) {
+    rendered = `${rendered.slice(0, MAX_STEP_YAML_PREVIEW_CHARS)}\n# … truncated`;
   }
+  return ['```yaml', rendered, '```'].join('\n');
+};
+
+/** Builds the dialog body: the step YAML as written, then the agent's summary. */
+const buildConfirmationMessage = ({
+  stepInfo,
+  contextOverride,
+  confirmationBody,
+}: {
+  stepInfo: StepInfo;
+  contextOverride?: Record<string, unknown>;
+  confirmationBody?: string;
+}): string => {
+  const lines: string[] = [buildStepYamlPreview(stepInfo)];
+
   if (contextOverride && Object.keys(contextOverride).length > 0) {
     const keys = Object.keys(contextOverride).join(', ');
     lines.push(
-      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.contextOverrideKeys', {
+      '',
+      i18n.translate('workflows.agentBuilder.executeStep.confirmation.contextOverrideKeys', {
         defaultMessage: '**Context override keys:** {keys}',
         values: { keys },
       })
     );
   }
-  lines.push(
-    '',
-    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.body', {
-      defaultMessage:
-        'This step has external side effects. Review the workflow YAML before confirming.',
-    })
-  );
+
+  lines.push('');
+  if (confirmationBody) {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.confirmation.agentSummary', {
+        defaultMessage: '**Agent summary:** {summary}',
+        values: { summary: confirmationBody },
+      })
+    );
+  } else {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.confirmation.sideEffectsWarning', {
+        defaultMessage:
+          'This step has external side effects. Review the workflow YAML before confirming.',
+      })
+    );
+  }
   return lines.join('\n');
 };
 
@@ -639,7 +675,7 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
         });
       }
 
-      const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType);
+      const isStepUnsafe = !isSafeStepType(stepInfo.stepType);
       const unsafeStep = isStepUnsafe ? stepInfo : findUnsafeStep(stepName, lookup.steps);
       const isCondition = CONDITION_STEP_TYPES.has(stepInfo.stepType);
 
@@ -703,10 +739,7 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
                   defaultMessage: 'Execute step "{stepName}" ({stepType})',
                   values: { stepName, stepType: stepInfo.stepType },
                 }),
-            // `||` (not `??`) so empty-string `confirmation_body` falls back to
-            // the generated preview instead of rendering a blank dialog body.
-            message:
-              confirmationBody || buildFallbackPreview(stepInfo, unsafeStep, contextOverride),
+            message: buildConfirmationMessage({ stepInfo, contextOverride, confirmationBody }),
             confirm_text: i18n.translate(
               'workflows.agentBuilder.executeStep.confirmation.confirmText',
               { defaultMessage: 'Run step' }
