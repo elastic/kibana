@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
+
 export const AvailableAnnotationIcons = {
   ASTERISK: 'asterisk',
   ALERT: 'alert',
@@ -23,7 +25,7 @@ export const AvailableAnnotationIcons = {
   STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
-} as const;
+} as const satisfies Record<string, VisIconType>;
 
 export const EVENT_ANNOTATION_GROUP_TYPE = 'event-annotation-group';
 
