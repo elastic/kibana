@@ -322,3 +322,27 @@ const interruptedRoundFields = (
     interruption: interruptionOfTerminal(terminal),
   };
 };
+
+/**
+ * Events carry no round feedback, so rounds rebuilt from events take it from the stored rounds by
+ * round id. `exceptRoundId` names a round whose events were rewritten: its feedback was about the
+ * previous answer and is dropped.
+ */
+export const withStoredRoundFeedback = (
+  rounds: ConversationRound[],
+  storedRounds: ConversationRound[],
+  { exceptRoundId }: { exceptRoundId?: string } = {}
+): ConversationRound[] => {
+  const feedbackById = new Map(
+    storedRounds
+      .filter((round) => round.feedback !== undefined && round.id !== exceptRoundId)
+      .map((round) => [round.id, round.feedback!])
+  );
+  if (feedbackById.size === 0) {
+    return rounds;
+  }
+  return rounds.map((round) => {
+    const feedback = feedbackById.get(round.id);
+    return feedback ? { ...round, feedback } : round;
+  });
+};

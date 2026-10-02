@@ -4335,6 +4335,70 @@ describe('ConversationClient', () => {
       });
     });
 
+    describe('round feedback on event writes', () => {
+      // Events carry no round feedback, so a write that rebuilds rounds from events must take it
+      // from the stored rounds instead of dropping it.
+      const feedback = {
+        vote: 'up' as const,
+        chips: [],
+        comment: 'helpful',
+        submitted_at: '2025-01-01T00:00:00.000Z',
+      };
+      const roundWithFeedback = {
+        ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+        feedback,
+      };
+      const round1Events = [
+        userMessage('round-1::user_message', '2026-01-01T00:00:00.000Z'),
+        terminated('round-1', '2026-01-01T00:00:05.000Z'),
+      ];
+      const round2Events = [
+        userMessage('round-2::user_message', '2026-01-01T00:01:00.000Z'),
+        terminated('round-2', '2026-01-01T00:01:05.000Z'),
+      ];
+
+      it('appendEvents keeps the feedback of earlier rounds when a later round is appended', async () => {
+        mockGetDocumentResponse(
+          eventsNativeDocument({ rounds: [roundWithFeedback], events: round1Events })
+        );
+
+        await client.appendEvents({ id: 'conversation-1', events: round2Events });
+
+        const persistedRounds = indexedDocument().conversation_rounds;
+        expect(persistedRounds.map((round) => round.id)).toEqual(['round-1', 'round-2']);
+        expect(persistedRounds[0]).toMatchObject({ feedback });
+        expect(persistedRounds[1]).not.toHaveProperty('feedback');
+      });
+
+      it('replaceRoundEvents keeps the feedback of the other rounds and drops it for the rewritten round', async () => {
+        const round2WithFeedback = {
+          ...createRound({ id: 'round-2', status: ConversationRoundStatus.completed }),
+          feedback: { ...feedback, vote: 'down' as const },
+        };
+        mockGetDocumentResponse(
+          eventsNativeDocument({
+            rounds: [roundWithFeedback, round2WithFeedback],
+            events: [...round1Events, ...round2Events],
+          })
+        );
+
+        // A regenerate rewrites round-2: its stored feedback was about the previous answer.
+        await client.replaceRoundEvents({
+          id: 'conversation-1',
+          roundId: 'round-2',
+          events: [
+            userMessage('round-2::user_message', '2026-01-01T00:02:00.000Z'),
+            terminated('round-2', '2026-01-01T00:02:05.000Z'),
+          ],
+        });
+
+        const persistedRounds = indexedDocument().conversation_rounds;
+        expect(persistedRounds.map((round) => round.id)).toEqual(['round-1', 'round-2']);
+        expect(persistedRounds[0]).toMatchObject({ feedback });
+        expect(persistedRounds[1]).not.toHaveProperty('feedback');
+      });
+    });
+
     describe('metadata_updated on update', () => {
       it('lists added, changed and removed keys', async () => {
         mockGetDocumentResponse(

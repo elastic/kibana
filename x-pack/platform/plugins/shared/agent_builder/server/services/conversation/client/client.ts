@@ -89,6 +89,7 @@ import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { agentActor } from './rounds_to_events';
+import { eventsToRounds, withStoredRoundFeedback } from './events_to_rounds';
 import {
   type ActivityContext,
   type ActivityEnvelope,
@@ -921,6 +922,8 @@ class ConversationClientImpl implements ConversationClient {
         ];
         return {
           events: appended,
+          // Rebuilt from events, which carry no feedback: keep the stored rounds' feedback.
+          rounds: withStoredRoundFeedback(eventsToRounds(appended), current.rounds),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1000,6 +1003,10 @@ class ConversationClientImpl implements ConversationClient {
         ];
         return {
           events: replaced,
+          // The rewritten round's feedback was about its previous answer; the other rounds keep theirs.
+          rounds: withStoredRoundFeedback(eventsToRounds(replaced), current.rounds, {
+            exceptRoundId: roundId,
+          }),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
