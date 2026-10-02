@@ -21,7 +21,7 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['active', 'inactive'] as const;
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(dedent`
     "active" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-    "inactive" = a previously active event is no longer active (recovered, or deactivated by an operator). Record the rationale in "assessment_note".
+    "inactive" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
   `);
 
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;

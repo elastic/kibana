@@ -107,7 +107,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'A confirms item cannot include not_checked signals; drop each not_checked detection from items; it emits no event.',
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
       });
     }
     // Continuations inherit prior severity; this cycle's signals may be
@@ -123,7 +123,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or omit the item.',
+          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
       });
     }
   });
