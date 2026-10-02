@@ -1254,6 +1254,59 @@ describe('AuthenticationService', () => {
         );
       });
 
+      it('includes space prefix in resource_metadata URL for custom spaces', async () => {
+        const mockReturnedValue = { type: 'render' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          path: '/api/agent_builder/mcp',
+          routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+        });
+
+        // Simulate a custom space: basePath.get returns /s/<space> (no server base
+        // path in serverless). The onPreResponse handler captures `http` from setup
+        // params, so mock the setup basePath.get.
+        const basePathGetMock = mockSetupAuthenticationParams.http.basePath.get as jest.Mock;
+        basePathGetMock.mockReturnValue('/s/marketing');
+
+        await onPreResponseHandler(mockRequest, { statusCode: 401 }, mockOnPreResponseToolkit);
+
+        // Restore the default so subsequent tests are not affected.
+        basePathGetMock.mockImplementation(
+          () => mockSetupAuthenticationParams.http.basePath.serverBasePath
+        );
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              'WWW-Authenticate':
+                'Bearer resource_metadata="http://myhost.com/mock-server-basepath/.well-known/oauth-protected-resource/s/marketing/api/agent_builder/mcp"',
+            }),
+          })
+        );
+      });
+
       it('does not add WWW-Authenticate header when mcp config is not set', async () => {
         const mockReturnedValue = { type: 'next' as any };
         const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();

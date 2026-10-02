@@ -28,6 +28,17 @@ const insecureFetch: typeof fetch = (url, init) => {
   return fetch(url, { ...init, dispatcher: tlsAgent } as RequestInit);
 };
 
+const mcpInitBody = (id: number) => ({
+  jsonrpc: '2.0' as const,
+  method: 'initialize',
+  params: {
+    protocolVersion: '2024-11-05',
+    capabilities: {},
+    clientInfo: { name: 'test-client', version: '1.0.0' },
+  },
+  id,
+});
+
 apiTest.describe(
   '[NON-MKI] MCP OAuth discovery and SDK client flow',
   { tag: [...tags.serverless.security.complete] },
@@ -101,16 +112,7 @@ apiTest.describe(
         const response = await insecureFetch(new URL(`${kibanaBaseUrl}/${MCP_ENDPOINT}`), {
           method: 'POST',
           headers: COMMON_HEADERS,
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'initialize',
-            params: {
-              protocolVersion: '2024-11-05',
-              capabilities: {},
-              clientInfo: { name: 'test-client', version: '1.0.0' },
-            },
-            id: 1,
-          }),
+          body: JSON.stringify(mcpInitBody(1)),
         });
 
         expect(response.status).toBe(401);
@@ -132,16 +134,7 @@ apiTest.describe(
         const apiResponse = await apiClient.post(MCP_ENDPOINT, {
           headers: COMMON_HEADERS,
           responseType: 'json',
-          body: {
-            jsonrpc: '2.0',
-            method: 'initialize',
-            params: {
-              protocolVersion: '2024-11-05',
-              capabilities: {},
-              clientInfo: { name: 'test-client', version: '1.0.0' },
-            },
-            id: 2,
-          },
+          body: mcpInitBody(2),
         });
         expect(apiResponse.statusCode).toBe(401);
       }
@@ -157,16 +150,7 @@ apiTest.describe(
             Authorization: `Bearer ${oauthAccessToken}`,
           },
           responseType: 'json',
-          body: {
-            jsonrpc: '2.0',
-            method: 'initialize',
-            params: {
-              protocolVersion: '2024-11-05',
-              capabilities: {},
-              clientInfo: { name: 'test-client', version: '1.0.0' },
-            },
-            id: 1,
-          },
+          body: mcpInitBody(1),
         });
         expect(verifyResponse.statusCode).toBe(200);
 

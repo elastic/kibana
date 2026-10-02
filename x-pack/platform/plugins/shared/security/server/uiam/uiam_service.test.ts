@@ -718,6 +718,45 @@ describe('UiamService', () => {
       );
     });
 
+    it('rejects when audience has the same host but a different space prefix', async () => {
+      const spaceAPath = '/s/space-a/api/agent_builder/mcp';
+      const spaceBPath = '/s/space-b/api/agent_builder/mcp';
+      const spaceBExpectedAudience = `https://my-project.kb.us-east-1.cloud.es.io:9243${spaceBPath}`;
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_ephemeral_token_value',
+          credentials: {
+            oauth: { audience: spaceBExpectedAudience },
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', spaceAPath)
+      ).rejects.toThrow('OAuth token audience mismatch');
+    });
+
+    it('succeeds when audience matches a space-prefixed resource path', async () => {
+      const spacePath = '/s/marketing/api/agent_builder/mcp';
+      const spaceAudience = `https://my-project.kb.us-east-1.cloud.es.io:9243${spacePath}`;
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_space_token',
+          credentials: {
+            oauth: { audience: spaceAudience },
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', spacePath)
+      ).resolves.toBe('essu_space_token');
+    });
+
     it('throws and logs error when UIAM service returns an error', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,

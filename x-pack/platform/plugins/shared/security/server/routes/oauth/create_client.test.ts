@@ -333,6 +333,45 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
+  it('includes space prefix in registered resource for custom space requests', async () => {
+    const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
+      serverless: true,
+    });
+    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
+
+    const authcMock = authenticationServiceMock.createStart();
+    mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authcMock);
+
+    // Simulate a request in a custom space: basePath.get returns /s/<space>
+    // (no server base path in serverless).
+    (mockRouteDefinitionParams.basePath.get as jest.Mock).mockReturnValue('/s/marketing');
+
+    defineCreateOAuthClientRoute(mockRouteDefinitionParams);
+
+    const [, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
+      ([{ path }]) => path === '/internal/security/oauth/clients'
+    )!;
+
+    const spaceOauthMock = authcMock.oauth as jest.Mocked<UiamOAuthType>;
+    const expectedSpaceResource =
+      'https://test-project.kb.us-central1.gcp.elastic.cloud/s/marketing/api/agent_builder/mcp';
+    spaceOauthMock.createClient.mockResolvedValue({
+      id: 'client-space',
+      resource: expectedSpaceResource,
+    });
+
+    await (handler as RequestHandler<any, any, any, any>)(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ body: { client_name: 'Space Client' } }),
+      kibanaResponseFactory
+    );
+
+    expect(spaceOauthMock.createClient).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ resource: expectedSpaceResource })
+    );
+  });
+
   it('returns error from service', async () => {
     const error = Boom.badRequest('Invalid resource');
     oauthMock.createClient.mockRejectedValue(error);
