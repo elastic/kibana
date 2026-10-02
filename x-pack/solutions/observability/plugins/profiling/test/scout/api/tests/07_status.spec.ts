@@ -87,9 +87,11 @@ apiTest.describe('Profiling status', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest('reports OTel data', async ({ apiClient }) => {
-    const status = await get(apiClient, profilingApiEndpoints.status, adminApiCredentials);
+    for (const credentials of [adminApiCredentials, viewerApiCredentials]) {
+      const status = await get(apiClient, profilingApiEndpoints.status, credentials);
 
-    expect(status.isEnabled).toBe(true);
-    expect(status.otel).toStrictEqual({ isAvailable: true, hasData: true });
+      expect(status.isEnabled).toBe(true);
+      expect(status.otel).toStrictEqual({ isAvailable: true, hasData: true });
+    }
   });
 });
