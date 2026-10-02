@@ -11,7 +11,8 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Scout server config for `security_solution/test/scout_threat_intel`.
+ * Scout server config for `security_solution/test/scout_threat_intel`. The API tests of the
+ * `agentic_investigations` and `proposals` plugins run on it too, as it already enables both.
  *
  * Threat-intel supply gates on `xpack.alertzero.enabled`. `agenticInvestigations`
  * and `proposals` are required by alertzero and default off; without them Kibana
