@@ -142,26 +142,35 @@ export class MapsPage {
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
 
-    const isLoading = () =>
-      this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true');
+    await this.waitForLoadCycleIfNeeded();
 
-    await this.waitForLoadCycleIfNeeded(isLoading);
-    await expect.poll(isLoading, { timeout: DEFAULT_MAP_LOADING_TIMEOUT }).toBe(false);
+    await expect
+      .poll(
+        () => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'),
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+      )
+      .toBe(false);
   }
 
   /**
-   * If the map is not currently loading, waits up to 500 ms for a load cycle to begin —
+   * If the map is not currently loading, waits up to 1000 ms for a load cycle to begin —
    * bridging the gap between a triggering action resolving and the new request's loading
    * state reaching the DOM. Falls through if no load starts in that window
    * (e.g. the action required no re-fetch).
    */
-  private async waitForLoadCycleIfNeeded(isLoading: () => Promise<boolean>) {
-    const alreadyLoading = await isLoading();
+  private async waitForLoadCycleIfNeeded() {
+    const alreadyLoading =
+      (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
     if (!alreadyLoading) {
-      // eslint-disable-next-line playwright/no-conditional-expect
-      await expect
-        .poll(isLoading, { timeout: 500 })
-        .toBe(true)
+      await this.page
+        .waitForFunction(
+          () =>
+            document
+              .querySelector('[data-test-subj="mapContainer"]')
+              ?.getAttribute('data-map-loading') === 'true',
+          undefined,
+          { timeout: 1000 }
+        )
         .catch(() => {});
     }
   }
