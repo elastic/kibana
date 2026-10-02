@@ -92,7 +92,7 @@ The public plugin registers the conversation template UI for `investigation` and
 
 - **No solution gates.** A solution's license or tier, its feature privileges and its settings do not gate the flyout. For example AlertZero's subscription check, its `alertzero` Read/All privileges and `securitySolution:enableAlertZero` gate AlertZero's own pages, routes and attachment renderers, not this flyout. A solution that needs stricter rules on its own pages narrows the capabilities there (AlertZero's queue also requires AlertZero All for manage actions).
 - **No fallback to API privileges yet.** UI capabilities belong to the feature that declares them, so a role that only grants `manage_investigations` through another feature (Nightshift `all` does) does not get `manageInvestigations`. Those users see a read-only flyout even though the API would accept their writes. Nightshift work (NS-1619 s5) has to either add a fallback or grant these capabilities to Nightshift users.
-- **Icons.** The investigation template uses `securitySignalDetected` and the escalation template `warning`, kept from AlertZero.
+- **Icons.** The investigation template uses the solution-neutral `magnifyExclamation` (AlertZero used the security-specific `securitySignalDetected`) and the escalation template `warning`, kept from AlertZero.
 
 The status and assignee signals and the shared query client in `public/` are module-level singletons. Solution pages must import them from `@kbn/agentic-investigations-plugin/public` so a change in the flyout reaches their queue views.
 
