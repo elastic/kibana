@@ -52,10 +52,6 @@ export const dataFederationConfig: ScoutServerConfig = {
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.dataFederation.enabled=true',
-      '--uiSettings.globalOverrides.dataFederation:enabled=true',
-    ],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--xpack.dataFederation.enabled=true'],
   },
 };
