@@ -171,6 +171,169 @@ describe('generateRecommendations', () => {
     expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
   });
 
+  it('drops a line naming a hallucinated entity in its text even with an empty entities_referenced', async () => {
+    // The actual bug: `.every()` on an empty `entities_referenced` passes unconditionally,
+    // so a model that names a host in prose but omits it from its own self-report used to
+    // get it through for free.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for WIN-ANALYST01.',
+          entities_referenced: ['WIN-ANALYST01'],
+        },
+        {
+          text: 'Isolate GHOST-HOST99 immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
+  });
+
+  it('keeps a line that legitimately names nothing specific', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Review recent privilege escalation activity for lateral movement in real-time.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual([
+      'Review recent privilege escalation activity for lateral movement in real-time.',
+    ]);
+  });
+
+  it('keeps a line naming a numeric duration, not just a bare time-of-day word', async () => {
+    // Libra P2: a standalone numeric segment next to a plain word ("24-hour") is a
+    // quantity, not an identifier — unlike a real asset name, whose digits sit inside
+    // the same segment as its letters (`HOST99`) or fill every segment (an IP).
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Review sign-in activity over a 24-hour window.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Review sign-in activity over a 24-hour window.']);
+  });
+
+  it('drops a lowercase, numeric-suffixed hostname the quantity exemption must not cover', async () => {
+    // Libra P2 (follow-up): the "24-hour" exemption must stay narrow to the
+    // number-first, exactly-two-segment shape. A hostname whose digits sit in their
+    // own segment elsewhere (three segments here, suffix rather than prefix) is not a
+    // quantity and must still be caught even though it's lowercase and no segment
+    // mixes letters with digits.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for WIN-ANALYST01.',
+          entities_referenced: ['WIN-ANALYST01'],
+        },
+        {
+          text: 'Isolate ghost-host-99 immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
+  });
+
+  it('drops an uppercase, number-prefixed hostname the quantity exemption must not cover either', async () => {
+    // Libra P3 (second follow-up): the quantity exemption ran before the uppercase
+    // check, so an all-caps number-prefixed token ("99-GHOST") was short-circuited as
+    // a quantity before ever reaching the uppercase rule that used to catch it. A
+    // quantity phrase's unit word is plain English prose, never all-caps, so the
+    // uppercase check now runs first.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for WIN-ANALYST01.',
+          entities_referenced: ['WIN-ANALYST01'],
+        },
+        {
+          text: 'Isolate 99-GHOST immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
+  });
+
+  it('drops a hallucinated entity wrapped in Markdown code formatting', async () => {
+    // Libra P2: backticks/asterisks were never stripped, so a formatted name reached
+    // `looksLikeEntity` with the wrapping still attached and failed to match — the same
+    // hallucination this whole fix exists to catch, let through by formatting alone.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for `WIN-ANALYST01`.',
+          entities_referenced: [],
+        },
+        {
+          text: 'Isolate **GHOST-HOST99** immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for `WIN-ANALYST01`.']);
+  });
+
   it('falls back to the template floor when every generated line is ungrounded', async () => {
     const invoke = jest.fn().mockResolvedValue({
       recommendations: [
