@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -19,21 +18,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { OnboardingPreviewRow } from './onboarding_preview_row';
 import { OnboardingPreviewTabs } from './onboarding_preview_tabs';
 import { useAutoAdvanceIndex } from './use_auto_advance_index';
 import * as i18n from './translations';
 
 const AUTO_ADVANCE_MS = 6000;
-
-// Single-line rows keep every slide the same height, so switching slides never shifts the layout.
-const truncateCss = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-// Assignees, open in chat, and more actions.
-const ROW_ACTION_ICONS = ['plusCircle', 'productAgent', 'boxesVertical'] as const;
 
 /**
  * Static, illustrative mock of the running AlertZero queue that cycles through its sections. Rows are
@@ -45,7 +35,10 @@ export const OnboardingUiPreview: React.FC = () => {
   const rowPaddingCss = css`
     padding: ${euiTheme.size.base};
   `;
-  const { activeIndex, select } = useAutoAdvanceIndex(i18n.PREVIEW_SLIDES.length, AUTO_ADVANCE_MS);
+  const { activeIndex, select, pauseProps } = useAutoAdvanceIndex(
+    i18n.PREVIEW_SLIDES.length,
+    AUTO_ADVANCE_MS
+  );
 
   const { label, subtitle, count, badgeColor, items } = i18n.PREVIEW_SLIDES[activeIndex];
 
@@ -71,6 +64,7 @@ export const OnboardingUiPreview: React.FC = () => {
             border-box;
       `}
       data-test-subj="alertZeroOnboardingUiPreview"
+      {...pauseProps}
     >
       <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem>
@@ -100,51 +94,8 @@ export const OnboardingUiPreview: React.FC = () => {
             <EuiBadge color={badgeColor}>{count}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {items.map(({ age, reopened, title, description }) => (
-          <React.Fragment key={title}>
-            <EuiHorizontalRule margin="none" />
-            <EuiFlexGroup
-              gutterSize="m"
-              alignItems="flexStart"
-              responsive={false}
-              css={rowPaddingCss}
-            >
-              <EuiFlexItem
-                css={css`
-                  min-inline-size: 0;
-                `}
-              >
-                <EuiText size="xs" color="subdued">
-                  {reopened ? `${age} · ${i18n.PREVIEW_REOPENED}` : age}
-                </EuiText>
-                <EuiText size="s" css={truncateCss}>
-                  <strong>{title}</strong>
-                </EuiText>
-                <EuiText size="s" css={truncateCss}>
-                  {description}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-                  {ROW_ACTION_ICONS.map((iconType) => (
-                    <EuiFlexItem grow={false} key={iconType}>
-                      <div
-                        css={css`
-                          display: flex;
-                          align-items: center;
-                          justify-content: center;
-                          block-size: ${euiTheme.size.xl};
-                          inline-size: ${euiTheme.size.xl};
-                        `}
-                      >
-                        <EuiIcon type={iconType} aria-hidden={true} />
-                      </div>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </React.Fragment>
+        {items.map((item) => (
+          <OnboardingPreviewRow key={item.title} {...item} />
         ))}
       </EuiPanel>
     </EuiPanel>
