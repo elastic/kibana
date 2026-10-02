@@ -23,6 +23,8 @@ import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { VisIconType } from '@kbn/chart-icons';
+import { resolveVisIcon } from '@kbn/chart-icons';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -97,7 +99,7 @@ const LEGACY_METRIC_DENSITY = 'compact' as const;
 type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
 
-export const iconCompat = getReversibleMappings<MetricIconName, string>([
+export const iconCompat = getReversibleMappings<MetricIconName, VisIconType>([
   ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
@@ -214,7 +216,7 @@ function convertStylingToAPIFormat(
   visualization: MetricVisualizationState,
   hasSecondary: boolean
 ): MetricStyling {
-  const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
+  const iconName = iconCompat.toAPI(resolveVisIcon(visualization.icon).id);
 
   return stripUndefined({
     density: visualization.density ?? LEGACY_METRIC_DENSITY,
