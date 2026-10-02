@@ -71,6 +71,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         registerManagedWorkflowOwner: jest.fn(),
         registerStepDefinition: jest.fn(),
       };
+      const skills = { register: jest.fn() };
 
       const result = plugin.setup(
         coreSetup as never,
@@ -78,6 +79,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features,
           workflowsExtensions,
           workflowsManagement: undefined,
+          agentBuilder: { skills },
         } as never
       );
 
@@ -86,6 +88,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         setServerlessTierAvailable: expect.any(Function),
       });
       expect(registerOwner).not.toHaveBeenCalled();
+      expect(skills.register).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
@@ -169,6 +172,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         registerManagedWorkflowOwner: jest.fn(),
         registerStepDefinition: jest.fn(),
       };
+      const skills = { register: jest.fn() };
+      const tools = { register: jest.fn() };
 
       const result = plugin.setup(
         coreSetup as never,
@@ -179,7 +184,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           proposals: {},
           agenticInvestigations: {},
           agentBuilder: {
-            tools: { register: jest.fn() },
+            skills,
+            tools,
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
           },
@@ -187,6 +193,15 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(result).toEqual({ isEnabled: true, setServerlessTierAvailable: expect.any(Function) });
+      expect(skills.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'alertzero-action-discovery',
+          availability: expect.objectContaining({ cacheMode: 'none' }),
+        })
+      );
+      expect(tools.register.mock.calls.map(([tool]) => tool.id)).toEqual([
+        'security.alertzero.actions.list',
+      ]);
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
       expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
@@ -226,6 +241,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           proposals: {},
           agenticInvestigations: {},
           agentBuilder: {
+            skills: { register: jest.fn() },
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
@@ -255,6 +271,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           proposals: {},
           agenticInvestigations: {},
           agentBuilder: {
+            skills: { register: jest.fn() },
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },
@@ -276,7 +293,9 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         registerManagedWorkflowOwner: jest.fn(),
         registerStepDefinition: jest.fn(),
       };
+      const skills = { register: jest.fn() };
       const agentBuilder = {
+        skills,
         agents: { registerType: jest.fn() },
         tools: { register: jest.fn() },
         attachments: { registerType: jest.fn() },
@@ -302,6 +321,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const searchInferenceEndpoints = { features: { register: jest.fn() } };
+      const skills = { register: jest.fn() };
 
       plugin.setup(
         coreMock.createSetup() as never,
@@ -315,6 +335,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           proposals: {},
           agenticInvestigations: {},
           agentBuilder: {
+            skills,
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
             conversationTemplates: { register: jest.fn() },

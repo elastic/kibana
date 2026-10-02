@@ -205,10 +205,9 @@ steps:
     type: ai.agent
     agent-id: 'significant-events.discovery'
     connector-id: '{{ steps.resolve_model.output.connector_id }}'
-    # Keep usage attribution IDs in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts.
-    plugin-id: 'significant_events_discovery'
-    aggregate-by: 'significant_events'
+    # Keep usage attribution IDs in sync with @kbn/significant-events-schema nightshift_usage_ids.ts.
+    plugin-id: 'nightshift_discovery'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

@@ -37,7 +37,15 @@ const createSessionMock = (isReset: boolean): SandboxSession => {
     readFiles: jest.fn(),
     writeFiles: jest.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
     mkdirs: jest.fn(),
-    statFiles: jest.fn(),
+    statFiles: jest.fn().mockImplementation(async (paths: string[]) =>
+      paths.map((path) => ({
+        path,
+        exists: true,
+        is_dir: false,
+        size: 1,
+        modified_time_sec: 0,
+      }))
+    ),
   };
   return session as unknown as SandboxSession;
 };
@@ -55,7 +63,15 @@ const createMutableSessionMock = (): {
     readFiles: jest.fn(),
     writeFiles: jest.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
     mkdirs: jest.fn(),
-    statFiles: jest.fn(),
+    statFiles: jest.fn().mockImplementation(async (paths: string[]) =>
+      paths.map((path) => ({
+        path,
+        exists: true,
+        is_dir: false,
+        size: 1,
+        modified_time_sec: 0,
+      }))
+    ),
   };
   return {
     session: session as unknown as SandboxSession,
@@ -113,6 +129,38 @@ describe('createSandboxWorkspaceManager', () => {
     await manager.ensureWorkspaceReady({ session, callContext });
 
     expect(mockWriteConnectorManifest).not.toHaveBeenCalled();
+    expect(session.statFiles).toHaveBeenCalledWith([
+      '/workspace/elastic.md',
+      '/workspace/connectors.md',
+    ]);
+  });
+
+  it('recreates manifests when reset was consumed but required files are missing', async () => {
+    const session = createSessionMock(false);
+    const callContext = createCallContext(['connector-1']);
+
+    await manager.ensureWorkspaceReady({ session, callContext });
+    mockWriteConnectorManifest.mockClear();
+    (session.statFiles as jest.Mock).mockResolvedValue([
+      {
+        path: '/workspace/elastic.md',
+        exists: false,
+        is_dir: false,
+        size: 0,
+        modified_time_sec: 0,
+      },
+      {
+        path: '/workspace/connectors.md',
+        exists: true,
+        is_dir: false,
+        size: 1,
+        modified_time_sec: 0,
+      },
+    ]);
+
+    await manager.ensureWorkspaceReady({ session, callContext });
+
+    expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
   });
 
   it('rewrites manifest when connector set changes', async () => {
