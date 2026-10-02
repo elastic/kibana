@@ -76,6 +76,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  draftSessionTitle: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
@@ -189,6 +190,14 @@ const internalStateSliceDef = createSlice({
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.persistedDiscoverSession =
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
+    },
+
+    setPersistedDiscoverSession: (state, action: PayloadAction<DiscoverSession>) => {
+      state.persistedDiscoverSession = action.payload;
+    },
+
+    setDraftSessionTitle: (state, action: PayloadAction<string | undefined>) => {
+      state.draftSessionTitle = action.payload;
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -666,7 +675,8 @@ const createMiddleware = (options: InternalStateDependencies) => {
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
-          discoverSession?.id
+          discoverSession?.id,
+          listenerApi.getState().draftSessionTitle
         );
       },
       MIDDLEWARE_THROTTLE_MS,
