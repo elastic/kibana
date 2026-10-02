@@ -44,7 +44,7 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
       _id: item._id,
       _index: item._index ?? '',
     }));
-    return <AlertWorkflowsPanel alertIds={alertIds} onClose={props.closePopoverMenu} />;
+    return <AlertWorkflowsPanel alertIds={alertIds} onClose={props.closePopoverMenu} isBulk />;
   }, []);
 
   const runWorkflowItems = useMemo<BulkActionsConfig[]>(

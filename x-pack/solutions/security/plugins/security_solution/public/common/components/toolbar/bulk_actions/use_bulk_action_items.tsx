@@ -29,7 +29,6 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
-import { RUN_WORKFLOW_TELEMETRY_ORIGIN } from '../../../../detections/components/alerts_table/timeline_actions/run_workflow_telemetry';
 import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
@@ -257,7 +256,7 @@ export const useBulkActionItems = ({
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
     documents: workflowDocuments,
     closePopover: closePopover ?? noop,
-    telemetryOrigin: RUN_WORKFLOW_TELEMETRY_ORIGIN.documentBulk,
+    isBulk: true,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {
