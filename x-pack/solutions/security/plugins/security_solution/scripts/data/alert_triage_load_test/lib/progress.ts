@@ -210,18 +210,43 @@ const listChildExecutionsOfRuns = async ({
       : undefined;
   const children = lookups.flatMap((lookup) => lookup.children);
 
+  // The children listing carries no `usage`, so read the summaries of the discovered ids.
+  const summaries = await Promise.all(
+    childWorkflowIds.map(async (workflowId) => {
+      const listed = children
+        .filter((child) => child.workflowId === workflowId)
+        .map(({ executionId, status }): ChildExecution => ({ id: executionId, status }));
+      if (listed.length === 0) return { workflowId, executions: listed, error: undefined };
+      try {
+        const found = await listExecutionsByIds({
+          kbnClient,
+          workflowId,
+          wantedIds: new Set(listed.map(({ id }) => id)),
+        });
+        const foundById = new Map(found.map((execution) => [execution.id, execution]));
+        const executions = listed.map(({ id, status }): ChildExecution => {
+          const execution = foundById.get(id);
+          return execution
+            ? { id, status: execution.status, usage: execution.usage }
+            : { id, status };
+        });
+        return { workflowId, executions, error: undefined };
+      } catch (error) {
+        return { workflowId, executions: listed, error: formatError(error) };
+      }
+    })
+  );
+
   return {
     executions: Object.fromEntries(
-      childWorkflowIds.map((workflowId) => [
-        workflowId,
-        children
-          .filter((child) => child.workflowId === workflowId)
-          .map(({ executionId, status }) => ({ id: executionId, status })),
-      ])
+      summaries.map(({ workflowId, executions }) => [workflowId, executions])
     ),
-    errors: message
-      ? Object.fromEntries(childWorkflowIds.map((workflowId) => [workflowId, message]))
-      : {},
+    errors: Object.fromEntries(
+      summaries.flatMap(({ workflowId, error }) => {
+        const reason = message ?? error;
+        return reason ? [[workflowId, reason]] : [];
+      })
+    ),
   };
 };
 

@@ -247,6 +247,15 @@ describe('fetchProgress', () => {
             ]
       );
 
+      listExecutionsByIdsMock.mockImplementation(async ({ workflowId }) =>
+        workflowId === 'analysis'
+          ? [
+              buildExecution({ id: 'a-1', status: 'completed' }),
+              buildExecution({ id: 'a-2', status: 'running' }),
+            ]
+          : [buildExecution({ id: 'p-1', status: 'waiting_for_input' })]
+      );
+
       const snapshot = await fetchScoped();
 
       expect(listChildExecutionsMock).toHaveBeenCalledTimes(2);
@@ -258,6 +267,44 @@ describe('fetchProgress', () => {
         proposal: [{ id: 'p-1', status: 'waiting_for_input' }],
       });
       expect(snapshot.childExecutionErrors).toEqual({});
+    });
+
+    it('keeps the token usage of the scoped children, which the children listing does not carry', async () => {
+      listChildExecutionsMock.mockImplementation(async ({ executionId }) =>
+        executionId === 'execution-1'
+          ? [{ executionId: 'a-1', workflowId: 'analysis', status: 'completed' }]
+          : []
+      );
+      listExecutionsByIdsMock.mockImplementation(async ({ workflowId }) =>
+        workflowId === 'analysis'
+          ? [buildExecution({ id: 'a-1', status: 'completed', usage: { totalTokens: 1200 } })]
+          : [buildExecution()]
+      );
+
+      const snapshot = await fetchScoped();
+
+      expect(snapshot.childExecutions.analysis).toEqual([
+        { id: 'a-1', status: 'completed', usage: { totalTokens: 1200 } },
+      ]);
+    });
+
+    it('reports a child workflow whose summaries could not be read instead of dropping its usage silently', async () => {
+      listChildExecutionsMock.mockImplementation(async ({ executionId }) =>
+        executionId === 'execution-1'
+          ? [{ executionId: 'a-1', workflowId: 'analysis', status: 'completed' }]
+          : []
+      );
+      listExecutionsByIdsMock.mockImplementation(async ({ workflowId }) => {
+        if (workflowId === 'analysis') throw new Error('503 Unavailable');
+        return [buildExecution()];
+      });
+
+      const snapshot = await fetchScoped();
+
+      expect(snapshot.childExecutions.analysis).toEqual([{ id: 'a-1', status: 'completed' }]);
+      expect(snapshot.childExecutionErrors).toEqual({
+        analysis: expect.stringContaining('503'),
+      });
     });
 
     it('does not list every execution since the run started', async () => {
