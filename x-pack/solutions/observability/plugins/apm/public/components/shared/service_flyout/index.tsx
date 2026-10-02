@@ -142,6 +142,7 @@ function ServiceFlyoutContent({
       onClose={onClose}
       ownFocus={false}
       size="m"
+      // No resizable — pixel-locked width re-clamps under a nested session="start".
       minWidth={660}
       session="start"
       historyKey={flyoutHistoryKey}
