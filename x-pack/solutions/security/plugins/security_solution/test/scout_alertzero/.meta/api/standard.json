@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/report_ingest.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
         "line": 38,
         "column": 20
       }
@@ -27,7 +27,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/report_ingest.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
         "line": 70,
         "column": 27
       }
@@ -41,7 +41,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/report_ingest.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
         "line": 86,
         "column": 74
       }
@@ -55,7 +55,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 43,
         "column": 11
       }
@@ -69,7 +69,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 64,
         "column": 28
       }
@@ -83,7 +83,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 88,
         "column": 16
       }
@@ -97,7 +97,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 107,
         "column": 11
       }

@@ -11,15 +11,15 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Scout server config for `security_solution/test/scout_threat_intel`. The API tests of the
- * `agentic_investigations` and `proposals` plugins run on it too, as it already enables both.
+ * Scout server config for tests that need `alertzero` and the plugins it depends on.
  *
- * Threat-intel supply gates on `xpack.alertzero.enabled`. `agenticInvestigations`
- * and `proposals` are required by alertzero and default off; without them Kibana
- * cascade-disables alertzero and the TI routes never register.
+ * `alertzero` gates threat-intel supply. `agenticInvestigations` and `proposals` are required
+ * by alertzero and default off; without them Kibana cascade-disables alertzero and the TI
+ * routes never register. The API tests of all three live under `test/scout_alertzero`
+ * (security_solution, agentic_investigations, proposals).
  *
  * Usage:
- *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet threat_intel
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

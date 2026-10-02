@@ -337,7 +337,7 @@ fileGroups:
     - test/scout_managed_mitre/**/*
     - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
-    - test/scout_threat_intel/**/*
+    - test/scout_alertzero/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json
