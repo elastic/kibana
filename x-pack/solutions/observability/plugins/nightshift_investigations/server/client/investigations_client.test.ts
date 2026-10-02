@@ -17,6 +17,7 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import { MAX_SLACK_SEEN_EVENT_IDS } from '@kbn/agentic-investigations-plugin/common';
 import {
   NIGHTSHIFT_DEFAULT_MODELS,
   NightshiftModelNotFoundError,
@@ -124,7 +125,7 @@ const makeStoredSubject = (
     subjectId: string;
     triggerType: string;
     createdAt: string;
-    slack: Record<string, string>;
+    slack: Record<string, string | string[]>;
   }> = {}
 ) => ({
   id: 'doc-1',
@@ -1764,7 +1765,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1712345678.000100' };
   const THREAD_KEY = 'team:T1/channel:C1/thread:1712345678.000100';
-  const threadSubject = (slack: Record<string, string> = {}) =>
+  const threadSubject = (slack: Record<string, string | string[]> = {}) =>
     makeStoredSubject({
       subjectType: 'slack_thread',
       subjectId: THREAD_KEY,
@@ -1783,7 +1784,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     ).resolves.toEqual({
       investigation_id: 'inv-1',
       title: 'Checkout is slow',
-      slack_message_ts: '1712345679.000200',
+      status_message_ts: '1712345679.000200',
     });
     expect(conversations.getByOrigin).toHaveBeenCalledWith({
       external_conversation_id: THREAD_KEY,
@@ -1822,8 +1823,8 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     subjectsClient.listByConversationIds.mockResolvedValue([threadSubject()]);
 
     await expect(
-      makeClient().findOrCreateSlackThread({ ...THREAD, create: false, slackMessageTs: '2.0' })
-    ).resolves.toMatchObject({ slack_message_ts: '2.0' });
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false, statusMessageTs: '2.0' })
+    ).resolves.toMatchObject({ status_message_ts: '2.0' });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
       {
         type: 'slack_thread',
@@ -1837,10 +1838,60 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
     withConversations(makeConversation({ id: 'inv-1', owner: false }));
 
-    await makeClient().findOrCreateSlackThread({ ...THREAD, create: false, slackMessageTs: '2.0' });
+    await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      create: false,
+      statusMessageTs: '2.0',
+    });
 
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
     expect(mockLogger.warn).toHaveBeenCalled();
+  });
+
+  it('records a delivered event and answers a redelivery as a duplicate', async () => {
+    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ seen_event_ids: ['Ev0'] }),
+    ]);
+
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false, eventId: 'Ev1' })
+    ).resolves.not.toHaveProperty('duplicate');
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs, seen_event_ids: ['Ev0', 'Ev1'] },
+      },
+    ]);
+
+    subjectsClient.upsertSubjects.mockClear();
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ seen_event_ids: ['Ev0', 'Ev1'] }),
+    ]);
+
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false, eventId: 'Ev1' })
+    ).resolves.toMatchObject({ investigation_id: 'inv-1', duplicate: true });
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it('remembers only the most recent delivered events', async () => {
+    const seen = Array.from({ length: MAX_SLACK_SEEN_EVENT_IDS }, (_, index) => `Ev${index}`);
+    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ seen_event_ids: seen }),
+    ]);
+
+    await makeClient().findOrCreateSlackThread({ ...THREAD, create: false, eventId: 'EvNew' });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      expect.objectContaining({
+        slack: expect.objectContaining({ seen_event_ids: [...seen.slice(1), 'EvNew'] }),
+      }),
+    ]);
   });
 
   it('does not create an investigation for a thread without create', async () => {
@@ -1885,6 +1936,32 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     ]);
   });
 
+  it('records the status message and the event on the thread it creates', async () => {
+    await expect(
+      makeClient().findOrCreateSlackThread({
+        ...THREAD,
+        create: true,
+        text: 'why is checkout slow?',
+        statusMessageTs: '2.0',
+        eventId: 'Ev1',
+      })
+    ).resolves.toEqual({
+      investigation_id: 'inv-new',
+      title: 'why is checkout slow?',
+      status_message_ts: '2.0',
+    });
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
+      expect.objectContaining({
+        slack: {
+          channel: 'C1',
+          thread_ts: THREAD.threadTs,
+          status_message_ts: '2.0',
+          seen_event_ids: ['Ev1'],
+        },
+      }),
+    ]);
+  });
+
   it('agrees with a concurrent create for the same thread', async () => {
     subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-first' });
 
@@ -1894,11 +1971,24 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     expect(conversations.create).toHaveBeenCalledWith(expect.objectContaining({ id: 'inv-first' }));
   });
 
-  it('keys a thread without a workspace by channel and thread', async () => {
-    await makeClient().findOrCreateSlackThread({ channel: 'C1', threadTs: '1.0', create: false });
+  it('tells the second of two concurrent creates for one event that it is a duplicate', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-first' });
+    withConversations(makeConversation({ id: 'inv-first' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ seen_event_ids: ['Ev1'] }),
+    ]);
+
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: true, eventId: 'Ev1' })
+    ).resolves.toMatchObject({ investigation_id: 'inv-first', duplicate: true });
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it('keys a thread by workspace, channel, and thread, since channel ids repeat across workspaces', async () => {
+    await makeClient().findOrCreateSlackThread({ ...THREAD, workspace: 'T2', create: false });
 
     expect(conversations.getByOrigin).toHaveBeenCalledWith({
-      external_conversation_id: 'channel:C1/thread:1.0',
+      external_conversation_id: 'team:T2/channel:C1/thread:1712345678.000100',
     });
   });
 

@@ -228,12 +228,26 @@ apiTest.describe(
         const recorded = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,
           create: false,
-          slack_message_ts: '1712345679.000200',
+          status_message_ts: '1712345679.000200',
+          event_id: 'EvSCOUT1',
         });
         expect(recorded.body).toStrictEqual({
           investigation_id: id,
           title,
-          slack_message_ts: '1712345679.000200',
+          status_message_ts: '1712345679.000200',
+        });
+
+        // The connector delivers at least once, so the same event comes back as a duplicate.
+        const redelivered = await findOrCreateSlackThread(apiClient, cookieHeader, {
+          ...thread,
+          create: false,
+          event_id: 'EvSCOUT1',
+        });
+        expect(redelivered.body).toStrictEqual({
+          investigation_id: id,
+          title,
+          status_message_ts: '1712345679.000200',
+          duplicate: true,
         });
 
         const listed = await listSharedInvestigations(
@@ -254,6 +268,7 @@ apiTest.describe(
               channel: thread.channel,
               thread_ts: thread.thread_ts,
               status_message_ts: '1712345679.000200',
+              seen_event_ids: ['EvSCOUT1'],
             },
           }),
         ]);
