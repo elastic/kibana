@@ -33,10 +33,6 @@ import type {
 } from '@kbn/workflows-management-plugin/server';
 
 import {
-  LocalBareGitRepositoryResolver,
-  LocalBareGitSourceReader,
-} from './adapters/local_git/local_bare_git';
-import {
   ConfigGitCredentialsProvider,
   sandboxGitSourceSessionFactory,
 } from './adapters/sandbox_git/sandbox_git';
@@ -50,7 +46,7 @@ import type { SourceSessionFactory } from './source_session';
 const managedWorkflowOwner = 'codeIntelligence';
 
 const SANDBOX_UNAVAILABLE_MESSAGE =
-  'Code Intelligence extraction uses the sandbox source, but the sandbox is not available in this deployment. Set `xpack.sandbox.enabled: true`, `xpack.sandbox.api_key`, and `xpack.sandbox.host`/`xpack.sandbox.port`, or set `xpack.code_intelligence.source: local_git`.';
+  'Code Intelligence extraction uses the sandbox source, but the sandbox is not available in this deployment. Set `xpack.sandbox.enabled: true`, `xpack.sandbox.api_key`, and `xpack.sandbox.host`/`xpack.sandbox.port`.';
 
 interface SetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -86,12 +82,6 @@ export class CodeIntelligencePlugin
     if (this.config.workflowConnectorId === undefined) {
       this.logger.warn(
         'Code Intelligence is enabled but `xpack.code_intelligence.workflowConnectorId` is missing.'
-      );
-      return;
-    }
-    if (this.config.source === 'local_git' && this.config.repositories.length === 0) {
-      this.logger.warn(
-        'Code Intelligence uses the local_git source but `xpack.code_intelligence.repositories` is empty.'
       );
       return;
     }
@@ -161,18 +151,6 @@ export class CodeIntelligencePlugin
         createSourceSession,
         validator: new SkippedQueryValidator(),
       }),
-      ...(this.config.source === 'local_git'
-        ? {
-            configuredRepositories: this.config.repositories.map(
-              ({ repository, expectedRemoteUrl }) => ({
-                repository,
-                remoteUrl: expectedRemoteUrl,
-                defaultRef: 'HEAD',
-                enabled: true,
-              })
-            ),
-          }
-        : {}),
       getSpaceId,
     };
   }
@@ -180,22 +158,11 @@ export class CodeIntelligencePlugin
   public stop(): void {}
 
   private sourceSessionFactory(sandbox?: SandboxPluginStart): SourceSessionFactory | undefined {
-    const cursorSecret = randomBytes(32).toString('hex');
-    if (this.config.source === 'local_git') {
-      const options = { repositories: this.config.repositories, cursorSecret };
-      const session = {
-        reader: new LocalBareGitSourceReader(options),
-        repositoryResolver: new LocalBareGitRepositoryResolver(options),
-        finishRepository: async () => {},
-        close: async () => {},
-      };
-      return () => session;
-    }
     if (!this.sandboxAvailable || sandbox === undefined) return undefined;
     return sandboxGitSourceSessionFactory({
       sandbox,
       credentials: new ConfigGitCredentialsProvider(this.config.github.token),
-      cursorSecret,
+      cursorSecret: randomBytes(32).toString('hex'),
       logger: this.logger.get('sandbox_git'),
     });
   }

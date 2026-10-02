@@ -306,47 +306,6 @@ describe('POST /internal/code_intelligence/extractions', () => {
     expect(start).not.toHaveBeenCalled();
   });
 
-  it('selects from the configured repositories instead of the settings index when given', async () => {
-    const start = jest.fn(async () => 'batch-id');
-    const configuredRepositories = [
-      {
-        repository: 'elastic/local',
-        remoteUrl: 'https://github.com/elastic/local.git',
-        defaultRef: 'HEAD',
-        enabled: true,
-      },
-    ];
-    const { call } = setup({
-      services: { ...withStart(start), configuredRepositories },
-      stored: [settings('elastic/indexed')],
-    });
-
-    const all = await call('POST /internal/code_intelligence/extractions', { body: {} });
-    const indexed = await call('POST /internal/code_intelligence/extractions', {
-      body: { repositories: [{ repository: 'elastic/indexed' }] },
-    });
-
-    expect(all.accepted).toHaveBeenCalledWith({ body: { id: 'batch-id' } });
-    expect(start).toHaveBeenCalledTimes(1);
-    expect(start).toHaveBeenCalledWith(
-      [
-        {
-          repository: 'elastic/local',
-          revision: 'HEAD',
-          remoteUrl: 'https://github.com/elastic/local.git',
-        },
-      ],
-      expect.anything(),
-      'default',
-      expect.anything()
-    );
-    expect(indexed.badRequest).toHaveBeenCalledWith({
-      body: expect.objectContaining({
-        attributes: { code: 'repository_not_configured', repository: 'elastic/indexed' },
-      }),
-    });
-  });
-
   it('answers 400 when no repository is enabled', async () => {
     const start = jest.fn();
 

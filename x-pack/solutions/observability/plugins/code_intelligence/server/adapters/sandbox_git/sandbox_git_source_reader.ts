@@ -21,14 +21,14 @@ import type {
   SourceWindow,
   SourceWindowRequest,
 } from '../../domain';
-import type { GitCommandFailure } from '../local_git/local_bare_git_helpers';
+import type { GitCommandFailure } from './sandbox_git_helpers';
 import {
-  LOCAL_GIT_MAX_ACTIVE_SPOOLS,
-  LOCAL_GIT_MAX_SPOOL_BYTES,
-  LOCAL_GIT_MAX_SPOOL_CONCURRENCY,
-  LOCAL_GIT_MAX_TOTAL_SPOOL_BYTES,
-  LOCAL_GIT_PAGE_SIZE,
-  LOCAL_GIT_SPOOL_TTL_MS,
+  SANDBOX_GIT_MAX_ACTIVE_SPOOLS,
+  SANDBOX_GIT_MAX_SPOOL_BYTES,
+  SANDBOX_GIT_MAX_SPOOL_CONCURRENCY,
+  SANDBOX_GIT_MAX_TOTAL_SPOOL_BYTES,
+  SANDBOX_GIT_PAGE_SIZE,
+  SANDBOX_GIT_SPOOL_TTL_MS,
   commandFailure,
   cursorRequest,
   decodeCursor,
@@ -38,7 +38,7 @@ import {
   findRecordEnd,
   isCursorPath,
   isSafePattern,
-} from '../local_git/local_bare_git_helpers';
+} from './sandbox_git_helpers';
 import {
   CHUNK_SCRIPT,
   OBJECT_MISSING_EXIT,
@@ -53,7 +53,7 @@ const MAX_RECORD_BYTES = 1_048_576;
 const MAX_SOURCE_WINDOW_BYTES = 16 * 1024 * 1024;
 /** Raw bytes per chunk read; base64 makes it about 2.7 MiB, under the 4 MiB `RunCommand` stdout limit. */
 export const SANDBOX_GIT_CHUNK_BYTES = 2 * 1024 * 1024;
-/** Waits for a scan slot as long as the local adapter does relative to its command timeout. */
+/** Waits up to 4 scan command timeouts for a scan slot. */
 const SPOOL_SLOT_WAIT_MS = 4 * SANDBOX_GIT_TIMEOUTS.scanSeconds * 1_000;
 const SCAN_RESULT = /^(\d+) (\d+) ([0-9a-f]{40}|[0-9a-f]{64})$/;
 const WINDOW_HEADER = /^(inline|spooled) (\d+)$/;
@@ -154,13 +154,13 @@ export class SandboxGitSourceReader implements SourceReader {
       throw new Error('Sandbox Git cursor secret must be at least 16 characters.');
     this.workspace = options.workspace;
     this.cursorSecret = options.cursorSecret;
-    this.pageSize = Math.min(options.pageSize ?? LOCAL_GIT_PAGE_SIZE, LOCAL_GIT_PAGE_SIZE);
+    this.pageSize = Math.min(options.pageSize ?? SANDBOX_GIT_PAGE_SIZE, SANDBOX_GIT_PAGE_SIZE);
     this.chunkBytes = options.chunkBytes ?? SANDBOX_GIT_CHUNK_BYTES;
-    this.maxSpoolBytes = options.maxSpoolBytes ?? LOCAL_GIT_MAX_SPOOL_BYTES;
-    this.maxTotalSpoolBytes = options.maxTotalSpoolBytes ?? LOCAL_GIT_MAX_TOTAL_SPOOL_BYTES;
-    this.maxActiveSpools = options.maxActiveSpools ?? LOCAL_GIT_MAX_ACTIVE_SPOOLS;
-    this.maxSpoolConcurrency = options.maxSpoolConcurrency ?? LOCAL_GIT_MAX_SPOOL_CONCURRENCY;
-    this.spoolTtlMs = options.spoolTtlMs ?? LOCAL_GIT_SPOOL_TTL_MS;
+    this.maxSpoolBytes = options.maxSpoolBytes ?? SANDBOX_GIT_MAX_SPOOL_BYTES;
+    this.maxTotalSpoolBytes = options.maxTotalSpoolBytes ?? SANDBOX_GIT_MAX_TOTAL_SPOOL_BYTES;
+    this.maxActiveSpools = options.maxActiveSpools ?? SANDBOX_GIT_MAX_ACTIVE_SPOOLS;
+    this.maxSpoolConcurrency = options.maxSpoolConcurrency ?? SANDBOX_GIT_MAX_SPOOL_CONCURRENCY;
+    this.spoolTtlMs = options.spoolTtlMs ?? SANDBOX_GIT_SPOOL_TTL_MS;
     if (
       [
         this.pageSize,

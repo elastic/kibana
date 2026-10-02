@@ -11,14 +11,6 @@ import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 import { DEFAULT_SETTINGS_INDEX } from '../common/repository_settings';
 
-/** Maps a repository to a bare clone on the Kibana host; used only when `source` is `local_git`. */
-const repositorySchema = schema.object({
-  repository: schema.string({ minLength: 3, maxLength: 256 }),
-  bareRepositoryPath: schema.string({ minLength: 1, maxLength: 4096 }),
-  remoteName: schema.string({ minLength: 1, maxLength: 128 }),
-  expectedRemoteUrl: schema.string({ minLength: 1, maxLength: 2048 }),
-});
-
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   catalogIndex: schema.string({
@@ -32,14 +24,10 @@ const configSchema = schema.object({
     maxLength: 255,
   }),
   workflowConnectorId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-  source: schema.oneOf([schema.literal('local_git'), schema.literal('sandbox')], {
-    defaultValue: 'sandbox',
-  }),
   github: schema.object({
     /** Interim Git credential for private GitHub remotes until connector-backed credentials land. */
     token: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
   }),
-  repositories: schema.arrayOf(repositorySchema, { defaultValue: [], maxSize: 32 }),
 });
 
 export type CodeIntelligenceConfig = TypeOf<typeof configSchema>;

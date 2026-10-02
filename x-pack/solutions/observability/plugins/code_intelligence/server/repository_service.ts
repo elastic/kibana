@@ -34,14 +34,12 @@ export type ExtractableRepository = Pick<
   'repository' | 'remoteUrl' | 'defaultRef' | 'enabled' | 'githubConnectorId'
 >;
 
-/** Lists the repositories a batch selects from: the configured ones when given, otherwise the settings index. */
+/** Lists the repositories a batch selects from. */
 export const listExtractableRepositories = async (
   client: ElasticsearchClient,
-  settingsIndex: string,
-  configuredRepositories: readonly ExtractableRepository[] | undefined
+  settingsIndex: string
 ): Promise<readonly ExtractableRepository[]> =>
-  configuredRepositories ??
-  (await new ElasticsearchRepositorySettingsStore(client, settingsIndex).list());
+  new ElasticsearchRepositorySettingsStore(client, settingsIndex).list();
 
 /** Why a batch cannot start; `code` is absent for plain input errors. */
 export interface ExtractionRefusal {
