@@ -30,7 +30,7 @@ export const useSendPredefinedInitialMessage = () => {
   const agentId = useAgentId();
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
-  const submitMessage = useSubmitMessage();
+  const { submitMessage } = useSubmitMessage();
   const isNewConversation = !conversationId;
 
   useEffect(() => {

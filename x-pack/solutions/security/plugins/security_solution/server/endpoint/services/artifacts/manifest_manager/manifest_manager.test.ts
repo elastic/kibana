@@ -30,6 +30,7 @@ import {
 
 import {
   buildManifestManagerContextMock,
+  createExceptionListResponse,
   mockFindExceptionListItemResponses,
 } from './manifest_manager.mock';
 
@@ -49,10 +50,26 @@ import { allowedExperimentalValues } from '../../../../../common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../common/endpoint/service/artifacts/constants';
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
 import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../../common/endpoint/types';
+import { validateYaraRule, YaraEngineUnavailableError } from '../../../lib/libyara';
 
 jest.mock('../../../lib/reference_data');
+jest.mock('../../../lib/libyara', () => ({
+  validateYaraRule: jest.fn(async () => ({
+    errors: [],
+    warnings: [],
+    errorCount: 0,
+    warningCount: 0,
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+  })),
+  YaraEngineUnavailableError: jest.requireActual('../../../lib/libyara/errors')
+    .YaraEngineUnavailableError,
+}));
+
+const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
 
 const mockedGetIsEndpointExceptionsPerPolicyEnabled =
   getIsEndpointExceptionsPerPolicyEnabled as jest.MockedFunction<
@@ -100,6 +117,9 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
   const ARTIFACT_NAME_TRUSTED_DEVICES_MACOS = 'endpoint-trusteddevicelist-macos-v1';
   const ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS = 'endpoint-trusteddevicelist-windows-v1';
+  const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS = 'endpoint-yararules-macos-v1';
+  const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS = 'endpoint-yararules-windows-v1';
+  const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX = 'endpoint-yararules-linux-v1';
 
   const getMockPolicyFetchAllItemIds = (items: string[]) =>
     jest.fn(async () =>
@@ -1211,6 +1231,528 @@ describe('ManifestManager', () => {
           trustedDevices: true,
         }),
       });
+    });
+  });
+
+  describe('buildNewManifest with customYaraSignaturesEnabled', () => {
+    const SUPPORTED_ARTIFACT_NAMES_WITH_CUSTOM_YARA_SIGNATURES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
+      ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS,
+      ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS,
+      ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX,
+    ];
+
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
+
+    beforeEach(() => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+    });
+
+    test('does not build custom YARA signature artifacts when the feature flag is disabled', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const artifactIds = getArtifactIds(manifest.getAllArtifacts());
+
+      expect(artifactIds).not.toContain(ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS);
+      expect(artifactIds).not.toContain(ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+      expect(artifactIds).not.toContain(ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX);
+    });
+
+    test('builds empty custom YARA signature artifacts when the feature flag is enabled', async () => {
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(20); // 17 standard + 3 custom YARA (macos, windows, linux)
+      expect(getArtifactIds(artifacts)).toStrictEqual(
+        SUPPORTED_ARTIFACT_NAMES_WITH_CUSTOM_YARA_SIGNATURES
+      );
+
+      const yaraMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS
+      );
+      const yaraWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS
+      );
+      const yaraLinuxArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX
+      );
+
+      expect(yaraMacosArtifact).toBeDefined();
+      expect(yaraWindowsArtifact).toBeDefined();
+      expect(yaraLinuxArtifact).toBeDefined();
+
+      expect(getArtifactObject(yaraMacosArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraLinuxArtifact!)).toStrictEqual({ entries: [] });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test('builds custom YARA signature artifacts from the exception item value', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(20);
+
+      const yaraMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS
+      );
+      const yaraWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS
+      );
+      const yaraLinuxArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX
+      );
+
+      expect(yaraMacosArtifact).toBeDefined();
+      expect(yaraWindowsArtifact).toBeDefined();
+      expect(yaraLinuxArtifact).toBeDefined();
+
+      expect(getArtifactObject(yaraMacosArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraLinuxArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
+          },
+        ],
+      });
+    });
+
+    test('builds policy-specific custom YARA signature artifacts and omits them from other policies', async () => {
+      const globalYaraRuleText = 'rule GlobalExample { condition: true }';
+      const policy2YaraRuleText = 'rule Policy2Example { condition: true }';
+      const globalYaraListItem = getExceptionListItemSchemaMock({
+        id: 'yara-global',
+        item_id: 'yara-global',
+        name: 'Global YARA rule',
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: globalYaraRuleText,
+          },
+        ],
+      });
+      const policy2YaraListItem = getExceptionListItemSchemaMock({
+        id: 'yara-policy-2',
+        item_id: 'yara-policy-2',
+        name: 'Policy 2 YARA rule',
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: policy2YaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: {
+          windows: [globalYaraListItem, policy2YaraListItem],
+        },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const windowsYaraArtifacts = manifest
+        .getAllArtifacts()
+        .filter((artifact) => artifact.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(windowsYaraArtifacts.length).toBe(2);
+
+      const defaultWindowsYaraArtifact = windowsYaraArtifacts.find((artifact) =>
+        manifest.isDefaultArtifact(artifact)
+      );
+      const policy2WindowsYaraArtifact = windowsYaraArtifacts.find(
+        (artifact) => !manifest.isDefaultArtifact(artifact)
+      );
+
+      expect(defaultWindowsYaraArtifact).toBeDefined();
+      expect(policy2WindowsYaraArtifact).toBeDefined();
+
+      // Default artifact: global rule only — policy-scoped rule must not leak here
+      expect(getArtifactObject(defaultWindowsYaraArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: globalYaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: globalYaraListItem.id,
+            entry_name: globalYaraListItem.name,
+          },
+        ],
+      });
+      // Policy 1 has no policy-specific YARA rules, so it uses the default artifact
+      expect(manifest.getArtifactTargetPolicies(defaultWindowsYaraArtifact!)).toStrictEqual(
+        new Set([TEST_POLICY_ID_1])
+      );
+
+      // Policy 2 artifact: global + policy-2 rule
+      expect(getArtifactObject(policy2WindowsYaraArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: globalYaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: globalYaraListItem.id,
+            entry_name: globalYaraListItem.name,
+          },
+          {
+            yara_rule_data: policy2YaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: policy2YaraListItem.id,
+            entry_name: policy2YaraListItem.name,
+          },
+        ],
+      });
+      expect(manifest.getArtifactTargetPolicies(policy2WindowsYaraArtifact!)).toStrictEqual(
+        new Set([TEST_POLICY_ID_2])
+      );
+    });
+
+    test('retries per-item libyara validation after a transient engine failure', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValueOnce(
+        new YaraEngineUnavailableError('libyara WASM trap')
+      );
+
+      const manifest = await manifestManager.buildNewManifest();
+      const yaraWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
+          },
+        ],
+      });
+      expect(context.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('libyara engine failed validating Custom YARA Signature')
+      );
+    });
+
+    test('aborts manifest build when per-item libyara retries are exhausted', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      await expect(manifestManager.buildNewManifest()).rejects.toBeInstanceOf(
+        YaraEngineUnavailableError
+      );
+      expect(context.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('aborting artifact build')
+      );
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
+
+    test('does not republish cached YARA signatures after a libyara failure aborts the build', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      await expect(manifestManager.buildNewManifest()).rejects.toBeInstanceOf(
+        YaraEngineUnavailableError
+      );
+
+      // License downgrade while the failed build's snapshot is still the last thing fetched.
+      // The list client still returns the signature; a cache hit would ship it once the engine recovers.
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+
+      const manifest = await manifestManager.buildNewManifest();
+      const yaraWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((artifact) => artifact.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({ entries: [] });
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
+
+    test('does not keep exception lists that finish loading after a sibling builder fails', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+      const staleTrustedApp = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'stale-trusted-app' },
+        ],
+      });
+
+      let releaseTrustedAppsFetch: () => void = () => {};
+      const trustedAppsGate = new Promise<void>((resolve) => {
+        releaseTrustedAppsFetch = resolve;
+      });
+      let resolveTrustedAppsFetchDoneCallback: () => void = () => {};
+      const trustedAppsFetchDoneCallback = new Promise<void>((resolve) => {
+        resolveTrustedAppsFetchDoneCallback = resolve;
+      });
+      const findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = jest.fn(async (...args) => {
+        const options = args[0] as { listId?: string };
+        if (options?.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id) {
+          // gated fetch for Trusted Apps
+          await trustedAppsGate;
+          resolveTrustedAppsFetchDoneCallback();
+          return createExceptionListResponse([staleTrustedApp]);
+        }
+        return findExceptionListItem(...args);
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
+      const failedBuild = manifestManager.buildNewManifest();
+
+      // Hold trusted apps until YARA has exhausted retries. With Promise.all + finally,
+      // rejection clears the cache while this fetch is still gated; releasing afterward
+      // can refill the map. allSettled waits for this sibling before clearing.
+      for (
+        let safetyCap = 0;
+        safetyCap < 50 && mockValidateYaraRule.mock.calls.length < 3;
+        safetyCap++
+      ) {
+        await yieldToEventLoop();
+      }
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+      // Let Promise.all's rejection + finally run (no-op yet under allSettled).
+      await yieldToEventLoop();
+
+      releaseTrustedAppsFetch();
+      await trustedAppsFetchDoneCallback;
+      // Allow getCachedExceptions to .set() after the awaited list fetch returns.
+      await yieldToEventLoop();
+
+      await expect(failedBuild).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+
+      const manifest = await manifestManager.buildNewManifest();
+      const trustedAppsWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((artifact) => artifact.identifier === ARTIFACT_NAME_TRUSTED_APPS_WINDOWS);
+
+      expect(getArtifactObject(trustedAppsWindowsArtifact!)).toStrictEqual({ entries: [] });
     });
   });
 
@@ -2632,6 +3174,93 @@ describe('ManifestManager', () => {
         expect(shouldRetrieve).toBe(false);
         expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
           ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+    });
+
+    describe('when customYaraSignaturesEnabled feature flag is disabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('should return false for custom YARA signatures', () => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+    });
+
+    describe('when customYaraSignaturesEnabled feature flag is enabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: ['customYaraSignaturesEnabled'],
+        });
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return false when only PLI is enabled (enterprise required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointCustomYaraSignatures;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+      });
+
+      test('should return false when only enterprise license is present (PLI required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true when both PLI and enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointCustomYaraSignatures;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+      });
+
+      test('should return false when neither PLI nor enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
         );
       });
     });

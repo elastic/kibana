@@ -7,32 +7,45 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { createEsqlViewsManagementClient } from '@kbn/esql-utils';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { PLUGIN_NAME } from '../common';
+import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { ManagementApp } from './management_app';
+import type { StartDependencies } from './plugin';
+import type { DiscoverEsqlLocatorParams } from './types';
 
-const description = i18n.translate('xpack.esqlViews.managementPage.description', {
-  defaultMessage: 'Create and manage ES|QL views.',
+const LazyEsqlEditor = React.lazy(async () => {
+  const { ESQLLangEditor } = await import('@kbn/esql/public');
+  return { default: ESQLLangEditor };
 });
 
 export const mountManagementSection = (
   coreStart: CoreStart,
+  { share }: StartDependencies,
   { element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const { docTitle } = coreStart.chrome;
   docTitle.change(PLUGIN_NAME);
   setBreadcrumbs([{ text: PLUGIN_NAME }]);
 
+  const client = createEsqlViewsManagementClient(coreStart.http);
+  const capabilities = coreStart.application.capabilities[PLUGIN_ID];
+  const discoverLocator = share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR);
+  const isDiscoverAvailable = Boolean(coreStart.application.capabilities.discover_v2?.show);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
-      <EuiEmptyPrompt
-        data-test-subj="esqlViewsManagementPage"
-        iconType="inspect"
-        title={<h1>{PLUGIN_NAME}</h1>}
-        body={<p>{description}</p>}
+      <ManagementApp
+        canCreate={capabilities?.[ESQL_VIEWS_CAPABILITIES.create] === true}
+        canEdit={capabilities?.[ESQL_VIEWS_CAPABILITIES.edit] === true}
+        client={client}
+        isDiscoverAvailable={isDiscoverAvailable}
+        discoverLocator={discoverLocator}
+        documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
+        EsqlEditor={LazyEsqlEditor}
+        toasts={coreStart.notifications.toasts}
       />
     )
   );

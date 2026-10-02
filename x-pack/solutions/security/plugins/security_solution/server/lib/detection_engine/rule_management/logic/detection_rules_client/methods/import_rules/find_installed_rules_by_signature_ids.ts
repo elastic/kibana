@@ -17,7 +17,7 @@ import { findRules } from '../../../search/find_rules';
 /**
  * Look up installed rules by `rule_id`, returned as a map keyed by `rule_id`.
  *
- * Callers must cap `ruleIds.length` at `RULE_IMPORT_BULK_CREATE_BATCH_SIZE`
+ * Callers must cap `ruleIds.length` at `RULE_IMPORT_BATCH_SIZE`
  * so the KQL OR-list stays under ES's 1024 `max_clause_count` floor.
  *
  * @param rulesClient - Alerting rules client used for the underlying `findRules` call.

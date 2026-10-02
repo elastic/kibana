@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { createCardLinkClickHandler } from './card_link_click';
 
 export const ActionButton = memo(
   ({
@@ -36,17 +37,7 @@ export const ActionButton = memo(
           color="text"
           href={href}
           data-test-subj={dataTestSubj}
-          onClick={(event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-            // The card behind this control is itself clickable, so the event must not reach it.
-            event.stopPropagation();
-            // Let modified clicks (new tab, new window) and middle clicks fall through to the
-            // browser, which is the reason for rendering a real link in the first place.
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-              return;
-            }
-            event.preventDefault();
-            onClick();
-          }}
+          onClick={createCardLinkClickHandler(onClick)}
         />
       </EuiToolTip>
     );

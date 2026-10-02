@@ -29,6 +29,10 @@ properties:
         - type
       properties:
         $ref: 'case_configure_customfields.yaml'
+  extractObservables:
+    type: boolean
+    description: >
+      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
   templates:
     $ref: 'templates.yaml'
   version:

@@ -6,22 +6,17 @@
  */
 
 /**
- * Characterization tests pinning the current io-ts behavior of the per-type
- * monitor field codecs before the zod migration, driven by fully-populated
- * fixtures so every field of every type is exercised.
+ * Accept/reject coverage for the per-type monitor field codecs, driven by
+ * fully-populated fixtures so every field of every type is exercised.
  *
- * The behaviors most at risk in the migration, and therefore pinned here:
+ * Pins:
  *  - which fields are required vs optional (an exhaustive, auto-derived list)
  *  - field-level type rules, including the hand-written codecs
- *  - unknown-key handling: a plain decode keeps extra keys, `t.exact(...)` (used
- *    by `validateMonitor`) strips them at the top level only, and nested extras
- *    survive even through `t.exact`. zod strips recursively at every
- *    `ZodObject` and does not strip through `z.intersection` at all, so all
- *    three of these have to be reproduced deliberately.
+ *  - unknown-key handling: plain decode keeps extras; `.strip()` removes
+ *    top-level extras only (nested looseObject extras stay)
  */
 
 import type { z } from '@kbn/zod';
-import * as t from 'io-ts';
 import { omit } from 'lodash';
 import { decode } from '../test_helpers/codec_agnostic';
 import {
@@ -43,7 +38,6 @@ import {
   SyntheticsMonitorCodec,
   TCPFieldsCodec,
 } from './monitor_types';
-import * as zodMonitor from '../zod/monitor_types';
 
 const COMMON_REQUIRED_KEYS = [
   ConfigKey.APM_SERVICE_NAME,
@@ -61,9 +55,8 @@ const COMMON_REQUIRED_KEYS = [
 
 interface FieldsCase {
   label: string;
-  flavor: 'io-ts' | 'zod';
-  codec: t.Mixed | z.ZodType;
-  exactCodec: t.Mixed | z.ZodType;
+  codec: z.ZodType;
+  exactCodec: z.ZodType;
   valid: MonitorFixture;
   requiredKeys: string[];
   violations: Array<[string, unknown]>;
@@ -71,23 +64,7 @@ interface FieldsCase {
 
 type LooseObjectSchema = z.ZodObject<z.ZodRawShape> & { strip: () => z.ZodType };
 
-const ioTsCase = (
-  label: string,
-  codec: t.HasProps & t.Mixed,
-  valid: MonitorFixture,
-  typeRequiredKeys: string[],
-  typeViolations: Array<[string, unknown]>
-): FieldsCase => ({
-  label,
-  flavor: 'io-ts',
-  codec,
-  exactCodec: t.exact(codec),
-  valid,
-  requiredKeys: [...COMMON_REQUIRED_KEYS, ...typeRequiredKeys].sort(),
-  violations: [...commonFieldTypeViolations, ...typeViolations],
-});
-
-const zodCase = (
+const fieldsCase = (
   label: string,
   codec: LooseObjectSchema,
   valid: MonitorFixture,
@@ -95,10 +72,8 @@ const zodCase = (
   typeViolations: Array<[string, unknown]>
 ): FieldsCase => ({
   label,
-  flavor: 'zod',
   codec,
-  // Flat looseObject + .strip() matches shallow t.exact: top-level extras go,
-  // nested looseObject extras stay.
+  // Flat looseObject + .strip(): top-level extras go, nested looseObject extras stay.
   exactCodec: codec.strip(),
   valid,
   requiredKeys: [...COMMON_REQUIRED_KEYS, ...typeRequiredKeys].sort(),
@@ -185,151 +160,117 @@ const browserViolations: Array<[string, unknown]> = [
 ];
 
 const cases: FieldsCase[] = [
-  ioTsCase('HTTPFieldsCodec', HTTPFieldsCodec, fullHttpMonitor(), httpRequired, httpViolations),
-  zodCase(
+  fieldsCase(
     'HTTPFieldsCodec',
-    zodMonitor.HTTPFieldsCodec as LooseObjectSchema,
+    HTTPFieldsCodec as LooseObjectSchema,
     fullHttpMonitor(),
     httpRequired,
     httpViolations
   ),
-  ioTsCase('TCPFieldsCodec', TCPFieldsCodec, fullTcpMonitor(), tcpRequired, tcpViolations),
-  zodCase(
+  fieldsCase(
     'TCPFieldsCodec',
-    zodMonitor.TCPFieldsCodec as LooseObjectSchema,
+    TCPFieldsCodec as LooseObjectSchema,
     fullTcpMonitor(),
     tcpRequired,
     tcpViolations
   ),
-  ioTsCase('ICMPFieldsCodec', ICMPFieldsCodec, fullIcmpMonitor(), icmpRequired, icmpViolations),
-  zodCase(
+  fieldsCase(
     'ICMPFieldsCodec',
-    zodMonitor.ICMPFieldsCodec as LooseObjectSchema,
+    ICMPFieldsCodec as LooseObjectSchema,
     fullIcmpMonitor(),
     icmpRequired,
     icmpViolations
   ),
-  ioTsCase(
+  fieldsCase(
     'BrowserFieldsCodec',
-    BrowserFieldsCodec,
-    fullBrowserMonitor(),
-    browserRequired,
-    browserViolations
-  ),
-  zodCase(
-    'BrowserFieldsCodec',
-    zodMonitor.BrowserFieldsCodec as LooseObjectSchema,
+    BrowserFieldsCodec as LooseObjectSchema,
     fullBrowserMonitor(),
     browserRequired,
     browserViolations
   ),
 ];
 
-describe.each(cases)(
-  '$label ($flavor)',
-  ({ codec, exactCodec, valid, requiredKeys, violations }) => {
-    it('decodes a fully-populated monitor of its type', () => {
-      expect(decode(codec, valid).success).toBe(true);
-    });
+describe.each(cases)('$label', ({ codec, exactCodec, valid, requiredKeys, violations }) => {
+  it('decodes a fully-populated monitor of its type', () => {
+    expect(decode(codec, valid).success).toBe(true);
+  });
 
-    it('preserves every field value through decode', () => {
-      const result = decode(codec, valid);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).toEqual(valid);
-      }
-    });
+  it('preserves every field value through decode', () => {
+    const result = decode(codec, valid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).toEqual(valid);
+    }
+  });
 
-    it('retains every known field through the exact codec', () => {
-      const result = decode(exactCodec, valid);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).toEqual(valid);
-      }
-    });
+  it('retains every known field through the exact codec', () => {
+    const result = decode(exactCodec, valid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).toEqual(valid);
+    }
+  });
 
-    it('pins exactly which fields are required', () => {
-      const actual = Object.keys(valid)
-        .filter((key) => !decode(codec, omit(valid, key)).success)
-        .sort();
-      expect(actual).toEqual(requiredKeys);
-    });
+  it('pins exactly which fields are required', () => {
+    const actual = Object.keys(valid)
+      .filter((key) => !decode(codec, omit(valid, key)).success)
+      .sort();
+    expect(actual).toEqual(requiredKeys);
+  });
 
-    it('accepts a payload with every optional field removed', () => {
-      const minimal = Object.fromEntries(
-        Object.entries(valid).filter(([key]) => requiredKeys.includes(key))
-      );
-      expect(decode(codec, minimal).success).toBe(true);
-    });
+  it('accepts a payload with every optional field removed', () => {
+    const minimal = Object.fromEntries(
+      Object.entries(valid).filter(([key]) => requiredKeys.includes(key))
+    );
+    expect(decode(codec, minimal).success).toBe(true);
+  });
 
-    it.each(violations)('rejects %s = %p', (key, badValue) => {
-      expect(decode(codec, { ...valid, [key]: badValue }).success).toBe(false);
-    });
+  it.each(violations)('rejects %s = %p', (key, badValue) => {
+    expect(decode(codec, { ...valid, [key]: badValue }).success).toBe(false);
+  });
 
-    it('keeps unknown top-level keys on a plain decode', () => {
-      const result = decode(codec, { ...valid, someUnknownKey: 'kept' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).toHaveProperty('someUnknownKey');
-      }
-    });
+  it('keeps unknown top-level keys on a plain decode', () => {
+    const result = decode(codec, { ...valid, someUnknownKey: 'kept' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).toHaveProperty('someUnknownKey');
+    }
+  });
 
-    it('strips unknown top-level keys through the exact codec', () => {
-      const result = decode(exactCodec, { ...valid, someUnknownKey: 'stripped' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.value).not.toHaveProperty('someUnknownKey');
-      }
-    });
+  it('strips unknown top-level keys through the exact codec', () => {
+    const result = decode(exactCodec, { ...valid, someUnknownKey: 'stripped' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value).not.toHaveProperty('someUnknownKey');
+    }
+  });
 
-    it('keeps unknown nested keys even through the exact codec', () => {
-      const nested = {
-        ...valid,
-        [ConfigKey.SCHEDULE]: {
-          ...(valid[ConfigKey.SCHEDULE] as Record<string, unknown>),
-          unknownNested: 'kept',
-        },
-      };
-      const result = decode(exactCodec, nested);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        const schedule = (result.value as Record<string, unknown>)[ConfigKey.SCHEDULE];
-        expect(schedule).toHaveProperty('unknownNested');
-      }
-    });
-  }
-);
+  it('keeps unknown nested keys even through the exact codec', () => {
+    const nested = {
+      ...valid,
+      [ConfigKey.SCHEDULE]: {
+        ...(valid[ConfigKey.SCHEDULE] as Record<string, unknown>),
+        unknownNested: 'kept',
+      },
+    };
+    const result = decode(exactCodec, nested);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const schedule = (result.value as Record<string, unknown>)[ConfigKey.SCHEDULE];
+      expect(schedule).toHaveProperty('unknownNested');
+    }
+  });
+});
 
 /**
  * The `Encrypted*` codecs are the shape persisted on the saved object: running
- * a full monitor through `t.exact(...)` of one drops the secret-bearing fields.
- * A `z.intersection` port would not strip at all, so these lists pin exactly
- * which secrets must not survive into the encrypted form.
+ * a full monitor through `.strip()` of one drops the secret-bearing fields.
+ * These lists pin exactly which secrets must not survive into the encrypted form.
  */
 describe.each([
   {
     label: 'EncryptedHTTPFieldsCodec',
-    flavor: 'io-ts' as const,
-    exactCodec: t.exact(EncryptedHTTPFieldsCodec),
-    valid: fullHttpMonitor(),
-    strippedKeys: [
-      ConfigKey.PASSWORD,
-      ConfigKey.PROXY_HEADERS,
-      ConfigKey.REQUEST_BODY_CHECK,
-      ConfigKey.REQUEST_HEADERS_CHECK,
-      ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
-      ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
-      ConfigKey.RESPONSE_HEADERS_CHECK,
-      ConfigKey.RESPONSE_JSON_CHECK,
-      ConfigKey.TLS_KEY,
-      ConfigKey.TLS_KEY_PASSPHRASE,
-      ConfigKey.USERNAME,
-    ],
-  },
-  {
-    label: 'EncryptedHTTPFieldsCodec',
-    flavor: 'zod' as const,
-    exactCodec: (zodMonitor.EncryptedHTTPFieldsCodec as LooseObjectSchema).strip(),
+    exactCodec: (EncryptedHTTPFieldsCodec as LooseObjectSchema).strip(),
     valid: fullHttpMonitor(),
     strippedKeys: [
       ConfigKey.PASSWORD,
@@ -347,20 +288,7 @@ describe.each([
   },
   {
     label: 'EncryptedTCPFieldsCodec',
-    flavor: 'io-ts' as const,
-    exactCodec: t.exact(EncryptedTCPFieldsCodec),
-    valid: fullTcpMonitor(),
-    strippedKeys: [
-      ConfigKey.REQUEST_SEND_CHECK,
-      ConfigKey.RESPONSE_RECEIVE_CHECK,
-      ConfigKey.TLS_KEY,
-      ConfigKey.TLS_KEY_PASSPHRASE,
-    ],
-  },
-  {
-    label: 'EncryptedTCPFieldsCodec',
-    flavor: 'zod' as const,
-    exactCodec: (zodMonitor.EncryptedTCPFieldsCodec as LooseObjectSchema).strip(),
+    exactCodec: (EncryptedTCPFieldsCodec as LooseObjectSchema).strip(),
     valid: fullTcpMonitor(),
     strippedKeys: [
       ConfigKey.REQUEST_SEND_CHECK,
@@ -371,8 +299,7 @@ describe.each([
   },
   {
     label: 'EncryptedBrowserFieldsCodec',
-    flavor: 'io-ts' as const,
-    exactCodec: t.exact(EncryptedBrowserFieldsCodec),
+    exactCodec: (EncryptedBrowserFieldsCodec as LooseObjectSchema).strip(),
     valid: fullBrowserMonitor(),
     strippedKeys: [
       ConfigKey.PORT,
@@ -384,22 +311,7 @@ describe.each([
       ConfigKey.URLS,
     ],
   },
-  {
-    label: 'EncryptedBrowserFieldsCodec',
-    flavor: 'zod' as const,
-    exactCodec: (zodMonitor.EncryptedBrowserFieldsCodec as LooseObjectSchema).strip(),
-    valid: fullBrowserMonitor(),
-    strippedKeys: [
-      ConfigKey.PORT,
-      ConfigKey.SOURCE_INLINE,
-      ConfigKey.SOURCE_PROJECT_CONTENT,
-      ConfigKey.SYNTHETICS_ARGS,
-      ConfigKey.TLS_KEY,
-      ConfigKey.TLS_KEY_PASSPHRASE,
-      ConfigKey.URLS,
-    ],
-  },
-])('$label secret stripping ($flavor)', ({ exactCodec, valid, strippedKeys }) => {
+])('$label secret stripping', ({ exactCodec, valid, strippedKeys }) => {
   it('strips exactly the sensitive fields through the exact codec', () => {
     const result = decode(exactCodec, valid);
     expect(result.success).toBe(true);
@@ -413,10 +325,8 @@ describe.each([
   });
 });
 
-describe.each([
-  { flavor: 'io-ts' as const, codec: SyntheticsMonitorCodec },
-  { flavor: 'zod' as const, codec: zodMonitor.SyntheticsMonitorCodec },
-])('SyntheticsMonitorCodec union ($flavor)', ({ codec }) => {
+describe('SyntheticsMonitorCodec union', () => {
+  const codec = SyntheticsMonitorCodec;
   it.each([
     ['http', fullHttpMonitor()],
     ['tcp', fullTcpMonitor()],

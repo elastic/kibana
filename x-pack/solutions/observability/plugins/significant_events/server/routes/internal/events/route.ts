@@ -13,7 +13,6 @@ import {
   severitySchema,
   MAX_ID_LENGTH,
   MAX_ASSESSMENT_NOTE_LENGTH,
-  triggerFeedbackSchema,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -25,10 +24,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import {
-  attachInvestigationToEvent,
-  type SignificantEventTriggerFeedback,
-} from '../../../lib/significant_events/events/attach_investigation';
+import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import {
   cleanupStaleEvents,
@@ -115,6 +111,10 @@ const eventsSearchRoute = createServerRoute({
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+      // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
+      topology_feature_id: z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
+        .optional(),
     }),
   }),
   handler: async ({
@@ -123,7 +123,7 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEventResponse>> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -135,10 +135,11 @@ const eventsSearchRoute = createServerRoute({
       from,
       to,
       event_id: eventId,
+      topology_feature_id: topologyFeatureId,
       ...rest
     } = params.query ?? {};
 
-    const eventClient = await getEventClient();
+    const eventClient = await getEventSearchClient();
     return eventClient.findLatestByCurrentStatePaginated({
       ...rest,
       from,
@@ -146,6 +147,7 @@ const eventsSearchRoute = createServerRoute({
       status: toArray(status),
       stream: toArray(stream),
       severity: toArray(severity),
+      topologyFeatureIds: toArray(topologyFeatureId),
       search: search || undefined,
       ...(eventId ? { eventIds: [eventId] } : {}),
     });
@@ -176,18 +178,14 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDetectionClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, getDetectionClient, licensing } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const eventClient = await getEventClient();
-    const { hits: initialHits } = await eventClient.findByEventUuid(params.path.id);
-    if (initialHits.length === 0) {
-      return { detections: [], events: [] };
-    }
-
-    const { event_id: eventId } = initialHits[0];
-    const { hits: events } = await eventClient.findByEventId(eventId);
+    const eventClient = await getEventSearchClient();
+    const { hits: events } = await eventClient.findByEventId(params.path.id);
     if (events.length === 0) {
       return { detections: [], events: [] };
     }
@@ -236,8 +234,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description:
-      'Record a completed investigation against a significant event and apply any trigger feedback in the same append-only version.',
+    description: 'Record a completed investigation against a significant event.',
   },
   security: {
     authz: {
@@ -248,24 +245,20 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema
-      .extend({
-        trigger_feedback: z.array(triggerFeedbackSchema).max(3).optional(),
-      })
-      .required({ completed_at: true }),
+    body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventClient, getEventSearchClient, getAlertEventsClient, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
-
     return attachInvestigationToEvent({
       eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
-      investigation,
-      triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
+      investigation: params.body,
+      alertEventsClient: await getAlertEventsClient(),
       logger,
     });
   },
@@ -297,14 +290,14 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     logger,
     maintenanceService,
   }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const eventClient = await getEventClient();
-    const { hits } = await eventClient.findByEventUuid(params.path.id);
-    if (hits.length === 0) {
+    const eventClient = await getEventSearchClient();
+    const latest = await eventClient.findLatestByEventId(params.path.id);
+    if (!latest) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
 
@@ -312,7 +305,9 @@ const eventsTriggerInvestigationRoute = createServerRoute({
       nightshiftInvestigations: server.nightshiftInvestigations,
       request,
       logger,
-      event: hits[0],
+      // Latest version, not the first — a caller-supplied id must never pin the workflow to a
+      // stale revision.
+      event: latest,
     });
 
     if (!executionId) {
@@ -330,7 +325,7 @@ const eventsGetRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get a significant event',
-    description: 'Fetch the latest version of a single significant event by its event_uuid.',
+    description: 'Fetch the latest version of a single significant event by its event_id.',
   },
   security: {
     authz: {
@@ -348,23 +343,15 @@ const eventsGetRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventResponse> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const eventClient = await getEventClient();
-    const { hits: uuidHits } = await eventClient.findByEventUuid(params.path.id);
-    if (uuidHits.length === 0) {
+    const eventClient = await getEventSearchClient();
+    const event = await eventClient.findLatestByEventId(params.path.id);
+    if (!event) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
-
-    const { event_id: eventId } = uuidHits[0];
-    const { hits: versionHits } = await eventClient.findByEventId(eventId);
-    if (versionHits.length === 0) {
-      throw notFound(`Significant event "${params.path.id}" not found.`);
-    }
-
-    const event = versionHits.at(-1)!;
 
     return event;
   },
@@ -402,16 +389,18 @@ const eventsUpdateRoute = createServerRoute({
         }
       }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
       eventClient: await getEventClient(),
-      eventUuid: params.path.id,
+      eventId: params.path.id,
       status: params.body.status,
       assessmentNote: params.body.assessment_note,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });
@@ -440,17 +429,21 @@ const cleanupStaleEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventClient, licensing } = scopedClients;
+    const { getEventClient, getAlertEventsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+
     return cleanupStaleEvents({
       eventClient: await getEventClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });
@@ -486,6 +479,7 @@ const investigationStatusesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const statuses = await resolveInvestigationStatuses({
+      request,
       workflowsManagement: server.workflowsManagement,
       spaceId: await getSpaceId(request),
       workflowExecutionIds: params.body.workflow_execution_ids,

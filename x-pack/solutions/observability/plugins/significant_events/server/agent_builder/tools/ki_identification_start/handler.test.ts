@@ -26,7 +26,7 @@ describe('startKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
     });
     const maintenanceService = {
