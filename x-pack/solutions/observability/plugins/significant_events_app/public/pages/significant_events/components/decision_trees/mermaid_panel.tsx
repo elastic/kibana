@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCodeBlock, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButtonGroup, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DecisionEdgeView, DecisionNodeView } from '@kbn/nightshift-decision-trees';
+import { DecisionTreeGraph } from './decision_tree_graph';
 
 interface MermaidPanelProps {
   mermaid: string;
+  nodes: DecisionNodeView[];
+  edges: DecisionEdgeView[];
 }
 
+type MermaidView = 'diagram' | 'source';
+
 /**
- * Dumps the raw Mermaid source. There is no in-app Mermaid renderer, so the source is shown
- * verbatim for copy-paste into an external renderer.
+ * Renders the tree as a diagram, with a toggle to the raw Mermaid source. Falls back to the
+ * source alone when the Mermaid could not be parsed into nodes.
  */
-export function MermaidPanel({ mermaid }: MermaidPanelProps) {
+export function MermaidPanel({ mermaid, nodes, edges }: MermaidPanelProps) {
+  const [view, setView] = useState<MermaidView>('diagram');
+
   if (mermaid.length === 0) {
     return (
       <EuiText color="subdued" size="s" data-test-subj="nightshiftDecisionTreeMermaidEmpty">
@@ -28,7 +36,7 @@ export function MermaidPanel({ mermaid }: MermaidPanelProps) {
     );
   }
 
-  return (
+  const source = (
     <EuiCodeBlock
       language="text"
       fontSize="s"
@@ -39,5 +47,43 @@ export function MermaidPanel({ mermaid }: MermaidPanelProps) {
     >
       {mermaid}
     </EuiCodeBlock>
+  );
+
+  if (nodes.length === 0) {
+    return source;
+  }
+
+  return (
+    <>
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.significantEventsApp.decisionTrees.mermaid.viewLegend', {
+          defaultMessage: 'Decision tree view',
+        })}
+        buttonSize="compressed"
+        idSelected={view}
+        onChange={(id) => setView(id as MermaidView)}
+        options={[
+          {
+            id: 'diagram',
+            label: i18n.translate('xpack.significantEventsApp.decisionTrees.mermaid.diagram', {
+              defaultMessage: 'Diagram',
+            }),
+          },
+          {
+            id: 'source',
+            label: i18n.translate('xpack.significantEventsApp.decisionTrees.mermaid.source', {
+              defaultMessage: 'Source',
+            }),
+          },
+        ]}
+        data-test-subj="nightshiftDecisionTreeMermaidViewToggle"
+      />
+      <EuiSpacer size="s" />
+      {view === 'diagram' ? (
+        <DecisionTreeGraph key={mermaid} nodes={nodes} edges={edges} />
+      ) : (
+        source
+      )}
+    </>
   );
 }

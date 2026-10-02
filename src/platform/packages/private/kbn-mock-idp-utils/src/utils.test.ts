@@ -256,8 +256,17 @@ describe('mock-idp-utils', () => {
         expect(
           payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
         ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
+        // Organization membership is what grants organization actions such as creating a
+        // project-scoped service account. It must add no application roles of its own.
+        expect(payload.ras.organization).toEqual([
+          {
+            role_id: 'ess-default-organization',
+            organization_id: serverlessOptions.serverless.organizationId,
+            application_roles: [],
+          },
+        ]);
         for (const grant of payload.ras.project) {
-          expect(grant.role_id).toBe('cloud-role-id');
+          expect(grant.role_id).toBe(`${grant.project_type}-application-only`);
           expect(grant.organization_id).toBe(serverlessOptions.serverless.organizationId);
           expect(grant.application_roles).toEqual(serverlessOptions.roles);
           expect(grant.project_scope).toEqual({ scope: 'all' });

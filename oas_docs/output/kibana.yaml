@@ -1139,12 +1139,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available; added in 9.4.0
                   required:
                     - access_mode
                 avatar_color:
@@ -1201,14 +1202,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available; added in 9.6.0
                     tools:
                       items:
                         additionalProperties: false
@@ -1673,12 +1674,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available; added in 9.4.0
                   required:
                     - access_mode
                 avatar_color:
@@ -1735,14 +1737,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available; added in 9.6.0
                     tools:
                       items:
                         additionalProperties: false
@@ -1933,7 +1935,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/agents/{id}/access_control
-      x-state: Technical Preview; added in 9.5.0
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1994,7 +1996,7 @@ paths:
                         maxLength: 1024
                         minLength: 1
                         type: string
-                        x-state: Technical Preview; added in 9.6.0
+                        x-state: Generally available; added in 9.6.0
                       name:
                         description: Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.
                         maxLength: 1024
@@ -2094,7 +2096,7 @@ paths:
                 { "type": "user", "id": "u_bob_profile_uid", "role": "user" }
               ]
             }
-      x-state: Technical Preview; added in 9.5.0
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2647,7 +2649,7 @@ paths:
                 { "type": "text_note", "data": { "text": "A note on this conversation" } }
               ]
             }
-      x-state: Experimental; added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2821,7 +2823,7 @@ paths:
                 { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
               ]
             }
-      x-state: Technical Preview; added in 9.6.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3566,7 +3568,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview; added in 9.5.0
+                  x-state: Generally available; added in 9.5.0
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -4048,7 +4050,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview; added in 9.5.0
+                  x-state: Generally available; added in 9.5.0
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -8789,186 +8791,6 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/v2/action_policies:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get a paginated list of action policies with optional filtering and sorting.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
-      operationId: get-alerting-v2-action-policies
-      parameters:
-        - description: The page number to return. Defaults to 1.
-          in: query
-          name: page
-          required: false
-          schema:
-            maximum: 10000
-            minimum: 1
-            type: integer
-        - description: The number of action policies to return per page. Defaults to 20.
-          in: query
-          name: per_page
-          required: false
-          schema:
-            maximum: 100
-            minimum: 1
-            type: integer
-        - description: A text string to search across action policy fields.
-          in: query
-          name: search
-          required: false
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-        - description: Filter by enabled status. Accepts the strings true or false.
-          in: query
-          name: enabled
-          required: false
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-            type: string
-        - description: The field to sort action policies by.
-          in: query
-          name: sort_field
-          required: false
-          schema:
-            enum:
-              - name
-              - created_at
-              - updated_at
-            type: string
-        - description: The sort direction.
-          in: query
-          name: sort_order
-          required: false
-          schema:
-            enum:
-              - asc
-              - desc
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                listActionPoliciesResponse:
-                  summary: A page of action policies
-                  value:
-                    items:
-                      - created_at: '2026-01-15T12:00:00.000Z'
-                        created_by:
-                          profile_uid: u_elastic_0
-                        description: Sends notifications for alerts generated by rules with the production tag.
-                        destinations:
-                          - id: workflow-1
-                            type: workflow
-                        enabled: true
-                        group_by: null
-                        grouping_mode: per_episode
-                        id: action-policy-1
-                        matcher:
-                          tags:
-                            - production
-                        name: Notify on production alerts
-                        snoozed_until: null
-                        throttle:
-                          interval: null
-                          strategy: on_status_change
-                        updated_at: '2026-01-15T12:00:00.000Z'
-                        updated_by:
-                          profile_uid: u_elastic_0
-                        version: WzAsMV0=
-                    page: 1
-                    per_page: 20
-                    total: 1
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_list_response'
-          description: Returns a paginated list of action policies.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          page:
-                            errors:
-                              - 'Too small: expected number to be >=1'
-                    error: Bad Request
-                    message: 'page: Too small: expected number to be >=1'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting V2 is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: List action policies
-      tags:
-        - alerting-v2
-      x-state: Experimental; added in 9.5.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -9037,7 +8859,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the newly created action policy.
@@ -10055,7 +9876,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the requested action policy.
@@ -10189,7 +10009,6 @@ paths:
                 value:
                   description: Updated description.
                   name: Notify on production alerts (updated)
-                  version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy'
       responses:
@@ -10222,7 +10041,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the updated action policy.
@@ -10392,7 +10210,7 @@ paths:
                   throttle:
                     strategy: on_status_change
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_action_policy'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_put_action_policy'
       responses:
         '200':
           content:
@@ -10423,7 +10241,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the replaced action policy.
@@ -10456,7 +10273,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the newly created action policy.
@@ -10623,7 +10439,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the disabled action policy.
@@ -10794,7 +10609,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the enabled action policy.
@@ -10985,7 +10799,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the snoozed action policy.
@@ -11156,7 +10969,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the unsnoozed action policy.
@@ -11327,7 +11139,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the action policy whose API key was rotated.
@@ -11440,17 +11251,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_ack:
+  /api/alerting/v2/alerts/_bulk_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_ack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-ack
+      operationId: post-alerting-v2-alerts-bulk-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11467,8 +11278,8 @@ paths:
                 summary: Acknowledge two alert episodes
                 value:
                   items:
-                    - episode_id: episode-1
-                    - episode_id: episode-2
+                    - alert_id: episode-1
+                    - alert_id: episode-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request'
       responses:
@@ -11482,8 +11293,8 @@ paths:
                     affected_count: 1
                     errors:
                       - error:
-                          code: ALERT_EPISODE_NOT_FOUND
-                          message: Alert episode with episode_id [episode-2] not found
+                          code: ALERT_NOT_FOUND
+                          message: Alert with alert_id [episode-2] not found
                         id: episode-2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
@@ -11564,17 +11375,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_activate:
+  /api/alerting/v2/alerts/_bulk_activate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_activate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_activate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-activate
+      operationId: post-alerting-v2-alerts-bulk-activate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11591,7 +11402,7 @@ paths:
                 summary: Reopen an alert episode with a reason
                 value:
                   items:
-                    - episode_id: episode-1
+                    - alert_id: episode-1
                       reason: manual reopen
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request'
@@ -11684,17 +11495,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_assign:
+  /api/alerting/v2/alerts/_bulk_assign:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_assign</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_assign</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-assign
+      operationId: post-alerting-v2-alerts-bulk-assign
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11711,10 +11522,10 @@ paths:
                 summary: Assign one episode and clear the assignee of another
                 value:
                   items:
-                    - assignee_uid: u_abc123
-                      episode_id: episode-1
-                    - assignee_uid: null
-                      episode_id: episode-2
+                    - alert_id: episode-1
+                      assignee_uid: u_abc123
+                    - alert_id: episode-2
+                      assignee_uid: null
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request'
       responses:
@@ -11806,17 +11617,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_deactivate:
+  /api/alerting/v2/alerts/_bulk_deactivate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_deactivate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_deactivate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-deactivate
+      operationId: post-alerting-v2-alerts-bulk-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11833,7 +11644,7 @@ paths:
                 summary: Close an alert episode with a reason
                 value:
                   items:
-                    - episode_id: episode-1
+                    - alert_id: episode-1
                       reason: false positive
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request'
@@ -11926,17 +11737,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_tag:
+  /api/alerting/v2/alerts/_bulk_tag:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_tag</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_tag</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-tag
+      operationId: post-alerting-v2-alerts-bulk-tag
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11953,10 +11764,10 @@ paths:
                 summary: Tag two alert episodes with production
                 value:
                   items:
-                    - episode_id: episode-1
+                    - alert_id: episode-1
                       tags:
                         - production
-                    - episode_id: episode-2
+                    - alert_id: episode-2
                       tags:
                         - production
             schema:
@@ -12050,17 +11861,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_unack:
+  /api/alerting/v2/alerts/_bulk_unack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_unack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_unack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-unack
+      operationId: post-alerting-v2-alerts-bulk-unack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12077,8 +11888,8 @@ paths:
                 summary: Unacknowledge two alert episodes
                 value:
                   items:
-                    - episode_id: episode-1
-                    - episode_id: episode-2
+                    - alert_id: episode-1
+                    - alert_id: episode-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request'
       responses:
@@ -12170,17 +11981,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_ack:
+  /api/alerting/v2/alerts/{alert_id}/_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_ack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-ack
+      operationId: post-alerting-v2-alerts-alert-id-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12189,9 +12000,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12214,15 +12025,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12257,13 +12068,13 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotFound:
-                  summary: No alert episode exists for the given episode_id
+                  summary: No alert exists for the given alert_id
                   value:
-                    code: ALERT_EPISODE_NOT_FOUND
+                    code: ALERT_NOT_FOUND
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                     error: Not Found
-                    message: Alert episode with episode_id [episode-1] not found
+                    message: Alert with alert_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
@@ -12300,17 +12111,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_activate:
+  /api/alerting/v2/alerts/{alert_id}/_activate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_activate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_activate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-activate
+      operationId: post-alerting-v2-alerts-alert-id-activate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12319,9 +12130,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12345,15 +12156,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12388,13 +12199,13 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotFound:
-                  summary: No alert episode exists for the given episode_id
+                  summary: No alert exists for the given alert_id
                   value:
-                    code: ALERT_EPISODE_NOT_FOUND
+                    code: ALERT_NOT_FOUND
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                     error: Not Found
-                    message: Alert episode with episode_id [episode-1] not found
+                    message: Alert with alert_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
@@ -12403,14 +12214,14 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotLatest:
-                  summary: The alert episode has been superseded by a newer episode of its series
+                  summary: The alert has been superseded by a newer alert of its series
                   value:
-                    code: ALERT_EPISODE_NOT_LATEST
+                    code: ALERT_NOT_LATEST
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Episode [episode-1] is not the latest episode for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+                    message: Alert [episode-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
@@ -12447,17 +12258,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_assign:
+  /api/alerting/v2/alerts/{alert_id}/_assign:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_assign</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_assign</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-assign
+      operationId: post-alerting-v2-alerts-alert-id-assign
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12466,9 +12277,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12492,15 +12303,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12535,13 +12346,13 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotFound:
-                  summary: No alert episode exists for the given episode_id
+                  summary: No alert exists for the given alert_id
                   value:
-                    code: ALERT_EPISODE_NOT_FOUND
+                    code: ALERT_NOT_FOUND
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                     error: Not Found
-                    message: Alert episode with episode_id [episode-1] not found
+                    message: Alert with alert_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
@@ -12578,17 +12389,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_deactivate:
+  /api/alerting/v2/alerts/{alert_id}/_deactivate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_deactivate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_deactivate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-deactivate
+      operationId: post-alerting-v2-alerts-alert-id-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12597,9 +12408,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12623,15 +12434,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12666,13 +12477,13 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotFound:
-                  summary: No alert episode exists for the given episode_id
+                  summary: No alert exists for the given alert_id
                   value:
-                    code: ALERT_EPISODE_NOT_FOUND
+                    code: ALERT_NOT_FOUND
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                     error: Not Found
-                    message: Alert episode with episode_id [episode-1] not found
+                    message: Alert with alert_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
@@ -12681,14 +12492,14 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotLatest:
-                  summary: The alert episode has been superseded by a newer episode of its series
+                  summary: The alert has been superseded by a newer alert of its series
                   value:
-                    code: ALERT_EPISODE_NOT_LATEST
+                    code: ALERT_NOT_LATEST
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Episode [episode-1] is not the latest episode for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+                    message: Alert [episode-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
@@ -12725,17 +12536,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_tag:
+  /api/alerting/v2/alerts/{alert_id}/_tag:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_tag</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_tag</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-tag
+      operationId: post-alerting-v2-alerts-alert-id-tag
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12744,9 +12555,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12772,15 +12583,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12815,13 +12626,13 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotFound:
-                  summary: No alert episode exists for the given episode_id
+                  summary: No alert exists for the given alert_id
                   value:
-                    code: ALERT_EPISODE_NOT_FOUND
+                    code: ALERT_NOT_FOUND
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                     error: Not Found
-                    message: Alert episode with episode_id [episode-1] not found
+                    message: Alert with alert_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
@@ -12858,17 +12669,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_unack:
+  /api/alerting/v2/alerts/{alert_id}/_unack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_unack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_unack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-unack
+      operationId: post-alerting-v2-alerts-alert-id-unack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12877,9 +12688,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12902,15 +12713,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12945,13 +12756,13 @@ paths:
             application/json:
               examples:
                 alertEpisodeNotFound:
-                  summary: No alert episode exists for the given episode_id
+                  summary: No alert exists for the given alert_id
                   value:
-                    code: ALERT_EPISODE_NOT_FOUND
+                    code: ALERT_NOT_FOUND
                     details:
-                      episode_id: episode-1
+                      alert_id: episode-1
                     error: Not Found
-                    message: Alert episode with episode_id [episode-1] not found
+                    message: Alert with alert_id [episode-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
@@ -13018,7 +12829,7 @@ paths:
             maximum: 100
             minimum: 0
             type: integer
-        - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.
+        - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
           in: query
           name: from
           required: false
@@ -13034,9 +12845,9 @@ paths:
             format: date-time
             pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
-        - description: Episode filter. Narrows events to those referencing at least one of the provided episode ids.
+        - description: Alert filter. Narrows events to those referencing at least one of the provided alert ids.
           in: query
-          name: episode_ids
+          name: alert_ids
           required: false
           schema:
             items:
@@ -13109,10 +12920,10 @@ paths:
                   value:
                     items:
                       - action_group_count: 1
-                        dispatched_at: '2026-01-15T12:05:00.000Z'
-                        episode_count: 1
-                        episodes:
+                        alert_count: 1
+                        alerts:
                           - id: episode-1
+                        dispatched_at: '2026-01-15T12:05:00.000Z'
                         error: null
                         outcome: success
                         policy:
@@ -13489,7 +13300,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -13510,7 +13320,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
                     page: 1
                     per_page: 20
                     total: 1
@@ -13673,7 +13483,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -13694,7 +13503,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -13884,7 +13693,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -13905,7 +13713,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
                           profile_uid: u_elastic_0
@@ -13921,7 +13729,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -13942,7 +13749,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_response'
           description: Created rules are returned in `items`. Failures are returned in `errors`.
@@ -14437,7 +14244,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -14458,7 +14264,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
           description: Returns the requested rules.
@@ -15327,7 +15133,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15348,7 +15153,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the requested rule.
@@ -15483,7 +15288,6 @@ paths:
                   metadata:
                     description: Updated description.
                     name: Host CPU high (updated)
-                  version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_rule'
       responses:
@@ -15509,7 +15313,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15530,7 +15333,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the updated rule.
@@ -15726,7 +15529,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15747,7 +15549,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the replaced rule.
@@ -15773,7 +15575,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15794,7 +15595,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -15940,7 +15741,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15961,7 +15761,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the disabled rule.
@@ -16125,7 +15925,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -16146,7 +15945,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the enabled rule.
@@ -44020,6 +43819,78 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/agents/{agentId}/restart:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/restart</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-agentid-restart
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The agent ID to restart
+          in: path
+          name: agentId
+          required: true
+          schema:
+            maxLength: 512
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    actionId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_id_response'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_message_response'
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Restart an agent
+      tags:
+        - Elastic Agent actions
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/agents/{agentId}/rollback:
     post:
       description: |-
@@ -44526,6 +44397,7 @@ paths:
                             - PRIVILEGE_LEVEL_CHANGE
                             - ROLLBACK
                             - REMOVE_COLLECTOR
+                            - RESTART
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -45388,6 +45260,103 @@ paths:
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agents/bulk_restart:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_restart</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-bulk-restart
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkRestartAgentsRequest:
+                value:
+                  agents:
+                    - agent-1
+                    - agent-2
+                  batchSize: 100
+                  includeInactive: false
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agents:
+                  anyOf:
+                    - items:
+                        maxLength: 512
+                        type: string
+                      maxItems: 10000
+                      type: array
+                    - maxLength: 1000000
+                      type: string
+                batchSize:
+                  minimum: 1
+                  type: number
+                includeInactive:
+                  default: false
+                  type: boolean
+              required:
+                - agents
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    actionId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_id_response'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_message_response'
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Bulk restart agents
+      tags:
+        - Elastic Agent actions
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -49020,7 +48989,7 @@ paths:
         Check whether one or more data stream index patterns contain any documents indexed at or after the given start time.<br/><br/>[Required authorization] Route required privileges: fleet-read.
       operationId: get-fleet-data-streams-data
       parameters:
-        - description: A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-*` or `metrics-<dataset>-*`.
+        - description: A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>`, where `<namespace>` is `*` or a concrete namespace.
           in: query
           name: dataStreams
           required: true
@@ -71315,7 +71284,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the default. Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -71336,6 +71305,13 @@ paths:
                   logExtraction:
                     delay: null
                     frequency: null
+              updateHistorySnapshotExample:
+                description: Update the history snapshot interval and retention. Omit a field to leave it unchanged.
+                summary: Update history snapshot settings
+                value:
+                  historySnapshot:
+                    frequency: 12h
+                    retentionDays: 90
               updateLogExtractionExample:
                 description: Update the log extraction configuration with a new lookback period and frequency.
                 summary: Update log extraction settings
@@ -71348,6 +71324,18 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                historySnapshot:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    frequency:
+                      maxLength: 32
+                      pattern: '[smdh]$'
+                      type: string
+                    retentionDays:
+                      maximum: 3650
+                      minimum: 1
+                      type: integer
                 logExtraction:
                   additionalProperties: false
                   type: object
@@ -71412,8 +71400,6 @@ paths:
                       nullable: true
                       pattern: '[smdh]$'
                       type: string
-              required:
-                - logExtraction
       responses:
         '200':
           content:
@@ -71435,6 +71421,13 @@ paths:
                   value:
                     error: Bad Request
                     message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+                invalidHistorySnapshotFrequencyExample:
+                  description: The history snapshot interval must be at least 1 hour.
+                  summary: Invalid history snapshot interval
+                  value:
+                    error: Bad Request
+                    message: '[request body]: historySnapshot.frequency: must be a valid duration of at least 1 hour (e.g. 1h, 24h)'
                     statusCode: 400
           description: Bad request.
         '404':
@@ -71467,6 +71460,21 @@ paths:
                 "lookbackPeriod": "6h",
                 "frequency": "10m",
                 "fieldHistoryLength": 15
+              }
+            }
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"historySnapshot":{"frequency":"12h","retentionDays":90}}' \
+              "${KIBANA_URL}/api/security/entity_store"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store
+            {
+              "historySnapshot": {
+                "frequency": "12h",
+                "retentionDays": 90
               }
             }
       x-metaTags:
@@ -80066,12 +80074,10 @@ paths:
                   type: object
                   properties:
                     frequency:
-                      default: 24h
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     retentionDays:
-                      default: 60
                       maximum: 3650
                       minimum: 1
                       type: integer
@@ -81022,6 +81028,12 @@ paths:
       description: Retrieve all Kibana roles.
       operationId: get-security-role
       parameters:
+        - description: If true, include built-in roles on serverless. By default, serverless returns only custom roles. Other deployments always include built-in roles.
+          in: query
+          name: includeReservedRoles
+          required: false
+          schema:
+            type: boolean
         - description: If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.
           in: query
           name: replaceDeprecatedPrivileges
@@ -133024,7 +133036,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -150742,7 +150754,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_54___schema0:
+    Kibana_HTTP_APIs__zod_v4_53___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -150771,7 +150783,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                       - type: object
                         properties:
                           destination:
@@ -151323,30 +151335,6 @@ components:
             - per_field
           type: string
       description: 'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
-    Kibana_HTTP_APIs_alerting_action_policy_list_response:
-      additionalProperties: false
-      description: Paginated list of action policies.
-      type: object
-      properties:
-        items:
-          description: The list of action policies.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
-          type: array
-        page:
-          description: The current page number.
-          type: number
-        per_page:
-          description: The number of action policies per page.
-          type: number
-        total:
-          description: 'The number of action policies matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
-          type: number
-      required:
-        - items
-        - total
-        - page
-        - per_page
     Kibana_HTTP_APIs_alerting_action_policy_response:
       additionalProperties: false
       type: object
@@ -151455,9 +151443,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_actor'
           description: The actor who last updated the action policy.
           nullable: true
-        version:
-          description: The version, used for optimistic concurrency control.
-          type: string
       required:
         - id
         - name
@@ -151516,13 +151501,13 @@ components:
       additionalProperties: false
       type: object
       properties:
-        episode_id:
-          description: Identifier of the alert episode to apply the action to.
+        alert_id:
+          description: Identifier of the alert to apply the action to.
           maxLength: 150
           minLength: 1
           type: string
       required:
-        - episode_id
+        - alert_id
     Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request:
       additionalProperties: false
       type: object
@@ -151540,8 +151525,8 @@ components:
       additionalProperties: false
       type: object
       properties:
-        episode_id:
-          description: Identifier of the alert episode to apply the action to.
+        alert_id:
+          description: Identifier of the alert to apply the action to.
           maxLength: 150
           minLength: 1
           type: string
@@ -151552,7 +151537,7 @@ components:
           type: string
       required:
         - reason
-        - episode_id
+        - alert_id
     Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request:
       additionalProperties: false
       type: object
@@ -151570,19 +151555,19 @@ components:
       additionalProperties: false
       type: object
       properties:
+        alert_id:
+          description: Identifier of the alert to apply the action to.
+          maxLength: 150
+          minLength: 1
+          type: string
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
           maxLength: 256
           nullable: true
           type: string
-        episode_id:
-          description: Identifier of the alert episode to apply the action to.
-          maxLength: 150
-          minLength: 1
-          type: string
       required:
         - assignee_uid
-        - episode_id
+        - alert_id
     Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request:
       additionalProperties: false
       type: object
@@ -151750,8 +151735,8 @@ components:
       additionalProperties: false
       type: object
       properties:
-        episode_id:
-          description: Identifier of the alert episode to apply the action to.
+        alert_id:
+          description: Identifier of the alert to apply the action to.
           maxLength: 150
           minLength: 1
           type: string
@@ -151762,7 +151747,7 @@ components:
           type: string
       required:
         - reason
-        - episode_id
+        - alert_id
     Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request:
       additionalProperties: false
       type: object
@@ -151873,8 +151858,8 @@ components:
       additionalProperties: false
       type: object
       properties:
-        episode_id:
-          description: Identifier of the alert episode to apply the action to.
+        alert_id:
+          description: Identifier of the alert to apply the action to.
           maxLength: 150
           minLength: 1
           type: string
@@ -151888,7 +151873,7 @@ components:
           type: array
       required:
         - tags
-        - episode_id
+        - alert_id
     Kibana_HTTP_APIs_alerting_bulk_tag_episodes_request:
       additionalProperties: false
       type: object
@@ -151906,13 +151891,13 @@ components:
       additionalProperties: false
       type: object
       properties:
-        episode_id:
-          description: Identifier of the alert episode to apply the action to.
+        alert_id:
+          description: Identifier of the alert to apply the action to.
           maxLength: 150
           minLength: 1
           type: string
       required:
-        - episode_id
+        - alert_id
     Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request:
       additionalProperties: false
       type: object
@@ -152113,14 +152098,10 @@ components:
       properties:
         action_group_count:
           type: number
-        dispatched_at:
-          format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-          type: string
-        episode_count:
+        alert_count:
           type: number
-        episodes:
-          description: Episode ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `episode_count` for the true total.
+        alerts:
+          description: Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.
           items:
             type: object
             properties:
@@ -152130,6 +152111,10 @@ components:
               - id
           maxItems: 50
           type: array
+        dispatched_at:
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+          type: string
         error:
           additionalProperties: false
           nullable: true
@@ -152202,7 +152187,7 @@ components:
         - dispatched_at
         - policy
         - outcome
-        - episode_count
+        - alert_count
         - action_group_count
         - rules
         - total_rule_count
@@ -152254,6 +152239,66 @@ components:
         - per_page
         - total
         - search_matches
+    Kibana_HTTP_APIs_alerting_put_action_policy:
+      additionalProperties: false
+      type: object
+      properties:
+        description:
+          description: A description of the action policy.
+          maxLength: 1024
+          type: string
+        destinations:
+          description: The list of destinations. At least one is required.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
+          maxItems: 10
+          minItems: 1
+          type: array
+        enabled:
+          description: Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
+          type: boolean
+        group_by:
+          description: The fields used to group alerts.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          type: array
+        grouping_mode:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
+          description: The grouping mode for alert notifications.
+        matcher:
+          additionalProperties: false
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          type: object
+          properties:
+            expression:
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
+        name:
+          description: The name of the action policy.
+          maxLength: 256
+          minLength: 1
+          type: string
+        throttle:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
+          description: The throttle configuration for notifications.
+      required:
+        - name
+        - description
+        - destinations
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
@@ -152657,7 +152702,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -152685,53 +152730,22 @@ components:
           description: Actor who last updated the rule.
           nullable: true
         version:
-          description: The saved object version token of the rule, used for optimistic concurrency control.
-          type: string
+          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
       required:
         - kind
         - metadata
         - schedule
         - query
         - id
+        - version
         - enabled
         - created_by
         - created_at
         - updated_by
         - updated_at
-    Kibana_HTTP_APIs_alerting_rule_response_metadata:
-      additionalProperties: false
-      type: object
-      properties:
-        builder_type:
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          type: string
-        description:
-          description: Human-readable description of the rule.
-          maxLength: 1024
-          type: string
-        name:
-          description: Rule name (must be unique within the space).
-          maxLength: 256
-          minLength: 1
-          type: string
-        tags:
-          description: Tags for categorization, e.g. ["production", "infra"].
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          minItems: 1
-          type: array
-        version:
-          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-      required:
-        - name
-        - version
     Kibana_HTTP_APIs_alerting_rule_schedule:
       additionalProperties: false
       description: Execution schedule configuration.
@@ -152763,7 +152777,7 @@ components:
       type: object
       properties:
         count:
-          description: Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.
+          description: Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
           maximum: 1000
           minimum: 0
           type: integer
@@ -152782,7 +152796,7 @@ components:
       type: object
       properties:
         count:
-          description: Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.
+          description: Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
           maximum: 1000
           minimum: 0
           type: integer
@@ -152866,13 +152880,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
           nullable: true
-        version:
-          description: The current version of the action policy, used for optimistic concurrency control.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - version
     Kibana_HTTP_APIs_alerting_update_rule:
       additionalProperties: false
       type: object
@@ -152939,11 +152946,6 @@ components:
           nullable: true
         time_field:
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`. If omitted, the existing value is kept.
-          maxLength: 256
-          minLength: 1
-          type: string
-        version:
-          description: The current version of the rule, used for optimistic concurrency control.
           maxLength: 256
           minLength: 1
           type: string
