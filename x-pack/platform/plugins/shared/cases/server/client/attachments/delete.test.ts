@@ -32,6 +32,59 @@ describe('delete', () => {
       });
     });
 
+    describe('attachmentsDeleted event', () => {
+      it('emits the event with the alert references of the deleted alert attachment', async () => {
+        clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[3]);
+
+        await deleteComment({ caseID: 'mock-id-4', savedObjectId: 'mock-comment-4' }, clientArgs);
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+          clientArgs.request,
+          {
+            caseId: 'mock-id-4',
+            attachmentIds: ['mock-comment-4'],
+            attachmentType: 'alert',
+            owner: 'securitySolution',
+            alertIds: ['test-id'],
+            alertIndices: ['test-index'],
+          }
+        );
+      });
+
+      it('emits the event without alert references for a comment attachment', async () => {
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+          clientArgs.request,
+          {
+            caseId: 'mock-id-1',
+            attachmentIds: ['mock-comment-1'],
+            attachmentType: 'user',
+            owner: 'securitySolution',
+          }
+        );
+      });
+
+      it('does not emit the event when the deletion fails', async () => {
+        clientArgs.services.attachmentService.bulkDelete.mockRejectedValue(new Error('boom'));
+
+        await expect(
+          deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs)
+        ).rejects.toThrow();
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
+      });
+
+      it('does not emit the event when the attachment belongs to another case', async () => {
+        await expect(
+          deleteComment({ caseID: 'other-case', savedObjectId: 'mock-comment-1' }, clientArgs)
+        ).rejects.toThrow();
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
+      });
+    });
+
     describe('Alerts', () => {
       const commentSO = mockCaseComments[0];
       const alertsSO = mockCaseComments[3];
@@ -127,6 +180,43 @@ describe('delete', () => {
           'mock-comment-7',
         ],
         refresh: true,
+      });
+    });
+
+    describe('attachmentsDeleted event', () => {
+      it('emits one event per attachment type', async () => {
+        await deleteAll({ caseID: 'mock-id-1' }, clientArgs);
+
+        const { emitAttachmentsDeleted } = clientArgs.casesEventBus;
+        expect(emitAttachmentsDeleted).toHaveBeenCalledTimes(3);
+        expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
+          caseId: 'mock-id-1',
+          attachmentIds: ['mock-comment-1', 'mock-comment-2', 'mock-comment-3'],
+          attachmentType: 'user',
+          owner: 'securitySolution',
+        });
+        expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
+          caseId: 'mock-id-1',
+          attachmentIds: ['mock-comment-4', 'mock-comment-5', 'mock-comment-6'],
+          attachmentType: 'alert',
+          owner: 'securitySolution',
+          alertIds: ['test-id', 'test-id-2', 'test-id-3'],
+          alertIndices: ['test-index', 'test-index-2', 'test-index-3'],
+        });
+        expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
+          caseId: 'mock-id-1',
+          attachmentIds: ['mock-comment-7'],
+          attachmentType: 'persistableState',
+          owner: 'cases',
+        });
+      });
+
+      it('does not emit the event when the deletion fails', async () => {
+        clientArgs.services.attachmentService.bulkDelete.mockRejectedValue(new Error('boom'));
+
+        await expect(deleteAll({ caseID: 'mock-id-1' }, clientArgs)).rejects.toThrow();
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
       });
     });
 

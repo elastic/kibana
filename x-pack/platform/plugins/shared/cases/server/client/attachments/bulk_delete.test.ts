@@ -11,6 +11,7 @@ import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors'
 import { bulkDeleteFileAttachments, retrieveFilesIgnoringNotFound } from './bulk_delete';
 import { MAX_DELETE_FILES } from '../../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { commentFileExternalReference } from '../cases/mock';
 
 describe('bulk_delete', () => {
   describe('bulkDeleteFileAttachments', () => {
@@ -31,6 +32,55 @@ describe('bulk_delete', () => {
           'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
         );
       });
+    });
+  });
+
+  describe('attachmentsDeleted event', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+    const { id, version, ...attributes } = commentFileExternalReference;
+    const fileAttachment = {
+      id: 'file-attachment-1',
+      type: 'cases-comments',
+      attributes,
+      references: [],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+      ]);
+    });
+
+    it('emits the event for the deleted file attachments', async () => {
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['file-attachment-1'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('does not emit the event when no file attachments were found', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([]);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
     });
   });
 
