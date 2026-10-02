@@ -20,8 +20,8 @@ export type InferActionType<X> = X extends ActionCreator<infer T> ? T : never;
 /**
  * Helper to create a matcher that matches all passed in action creators.
  *
- * This is helpful to create a listener that matches multiple actions:
- * `predicate: matchesOne(actionCreator1, actionCreator2)`
+ * This is helpful to create a saga that takes multiple actions:
+ * `yield takeEvery(matchesOne(actionCreator1, actionCreator2), handler);`
  *
  * @param actionCreators The action creators to create a unified matcher for
  */

@@ -7,8 +7,9 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { select, takeLatest, call } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
-import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
+import type { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { setBreadcrumbs } from '../services/url';
 
@@ -37,17 +38,14 @@ export const metaDataReducer = reducerWithInitialState(initialMetaData)
 export const metaDataSelector = (state: GraphState) => state.metaData;
 
 /**
- * Listener updating the breadcrumb when the shown workspace changes.
+ * Saga updating the breadcrumb when the shown workspace changes.
  */
-export const registerMetaDataListeners = (
-  startListening: StartGraphListening,
-  { chrome, changeUrl }: GraphStoreDependencies,
-  initialState: GraphState
-) => {
-  const syncBreadcrumb = (state: GraphState) => {
+export const syncBreadcrumbSaga = ({ chrome, changeUrl }: GraphStoreDependencies) => {
+  function* syncBreadcrumb() {
+    const metaData = metaDataSelector(yield select());
     setBreadcrumbs({
       chrome,
-      metaData: metaDataSelector(state),
+      metaData,
       navigateTo: (path: string) => {
         // TODO this should be wrapped into canWipeWorkspace,
         // but the check is too simple right now. Change this
@@ -55,16 +53,10 @@ export const registerMetaDataListeners = (
         changeUrl(path);
       },
     });
+  }
+  return function* () {
+    // initial sync
+    yield call(syncBreadcrumb);
+    yield takeLatest(updateMetaData.match, syncBreadcrumb);
   };
-
-  startListening({
-    predicate: updateMetaData.match,
-    effect: (_action, listenerApi) => {
-      listenerApi.cancelActiveListeners();
-      syncBreadcrumb(listenerApi.getState());
-    },
-  });
-
-  // initial sync
-  syncBreadcrumb(initialState);
 };

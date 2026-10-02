@@ -7,12 +7,13 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
+import createSagaMiddleware from 'redux-saga';
 import type { Action } from 'redux';
-import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
-import type { GraphStoreDependencies, GraphStore, GraphState, StartGraphListening } from './store';
+import type { GraphStoreDependencies, GraphStore, GraphState } from './store';
 import { createRootReducer } from './store';
 import type { Workspace } from '../types';
 
@@ -21,26 +22,20 @@ export interface MockedGraphEnvironment {
   mockedDeps: jest.Mocked<GraphStoreDependencies>;
 }
 
-type GraphListenerRegistration = (
-  startListening: StartGraphListening,
-  deps: GraphStoreDependencies,
-  initialState: GraphState
-) => void;
-
 /**
  * Creates a graph store with original reducers registered but mocked out dependencies.
- * This can be used to test a component in a realistic stateful setting and to test listeners
- * in their natural habitat by passing them in via options in the `listeners` array.
+ * This can be used to test a component in a realistic stateful setting and to test sagas
+ * in their natural habitat by passing them in via options in the `sagas` array.
  *
  * The existing mocks are as barebone as possible, if you need specific values to be returned
  * from mocked dependencies, you can pass in `mockedDepsOverwrites` via options.
  */
 export function createMockGraphStore({
-  listeners = [],
+  sagas = [],
   mockedDepsOverwrites = {},
   initialStateOverwrites,
 }: {
-  listeners?: GraphListenerRegistration[];
+  sagas?: Array<(deps: GraphStoreDependencies) => () => Iterator<unknown>>;
   mockedDepsOverwrites?: Partial<jest.Mocked<GraphStoreDependencies>>;
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
@@ -62,7 +57,7 @@ export function createMockGraphStore({
     chrome: {
       setBreadcrumbs: jest.fn(),
     } as unknown as ChromeStart,
-    createWorkspace: jest.fn((_index: string, _advancedSettings) => workspaceMock),
+    createWorkspace: jest.fn((index, advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
     contentClient: {
       get: jest.fn(),
@@ -93,7 +88,8 @@ export function createMockGraphStore({
     handleSearchQueryError: jest.fn(),
     ...mockedDepsOverwrites,
   };
-  const listenerMiddleware = createListenerMiddleware<GraphState, GraphStore['dispatch']>();
+  const sagaMiddleware = createSagaMiddleware();
+
   const rootReducer = createRootReducer(mockedDeps.addBasePath);
   const initializedRootReducer = (state: GraphState | undefined, action: Action<string>) =>
     rootReducer(state || (initialStateOverwrites as GraphState), action);
@@ -102,14 +98,16 @@ export function createMockGraphStore({
     reducer: initializedRootReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
+        thunk: false,
         serializableCheck: false,
         immutableCheck: false,
-      }).prepend(listenerMiddleware.middleware),
+      }).concat(sagaMiddleware),
   });
 
-  store.dispatch = jest.fn(store.dispatch) as unknown as typeof store.dispatch;
-  listeners.forEach((registerListeners) => {
-    registerListeners(listenerMiddleware.startListening, mockedDeps, store.getState());
+  store.dispatch = jest.fn(store.dispatch);
+
+  sagas.forEach((sagaCreator) => {
+    sagaMiddleware.run(sagaCreator(mockedDeps));
   });
 
   return { store, mockedDeps };

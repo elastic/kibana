@@ -20,7 +20,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { openSourceModal } from '../services/source_modal';
 
 import type { GraphStore } from '../state_management';
-import { registerWorkspaceListeners, setDatasource } from '../state_management';
+import { setDatasource, submitSearchSaga } from '../state_management';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 
@@ -147,7 +147,7 @@ describe.skip('search_bar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     store = createMockGraphStore({
-      listeners: [registerWorkspaceListeners],
+      sagas: [submitSearchSaga],
     }).store;
 
     store.dispatch(

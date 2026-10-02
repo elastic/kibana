@@ -8,9 +8,10 @@
 import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
+import { takeLatest, select, call, put } from 'redux-saga/effects';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { createSelector } from './create_selector';
-import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
+import type { GraphStoreDependencies, GraphState } from '.';
 import { fillWorkspace } from '.';
 import { reset } from './global';
 import { datasourceSelector } from './datasource';
@@ -44,74 +45,75 @@ export const workspaceInitializedSelector = createSelector(
 );
 
 /**
- * Listener handling filling in top terms into workspace.
+ * Saga handling filling in top terms into workspace.
  *
  * It will load the top terms of the selected fields, add them to the workspace and fill in the connections.
  */
-export const registerWorkspaceListeners = (
-  startListening: StartGraphListening,
-  { getWorkspace, notifyReact, http, notifications, handleSearchQueryError }: GraphStoreDependencies
-) => {
-  startListening({
-    predicate: fillWorkspace.match,
-    effect: async (_action, listenerApi) => {
-      listenerApi.cancelActiveListeners();
+export const fillWorkspaceSaga = ({
+  getWorkspace,
+  notifyReact,
+  http,
+  notifications,
+}: GraphStoreDependencies) => {
+  function* fetchNodes(): Generator {
+    try {
       const workspace = getWorkspace();
       if (!workspace) {
         return;
       }
 
-      const fields = selectedFieldsSelector(listenerApi.getState());
-      const datasource = datasourceSelector(listenerApi.getState()).current;
+      const state = (yield select()) as GraphState;
+      const fields = selectedFieldsSelector(state);
+      const datasource = datasourceSelector(state).current;
       if (datasource.type === 'none') {
         return;
       }
 
+      const topTermNodes = (yield call(
+        fetchTopNodes,
+        http.post,
+        datasource.title,
+        fields
+      )) as ServerResultNode[];
+      workspace.mergeGraph({
+        nodes: topTermNodes,
+        edges: [],
+      });
+      yield put(initializeWorkspace());
+      notifyReact();
+      workspace.fillInGraph(fields.length * 10);
+    } catch (e) {
+      const message = 'body' in e ? e.body.message : e.message;
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.graph.fillWorkspaceError', {
+          defaultMessage: 'Fetching top terms failed: {message}',
+          values: { message },
+        }),
+      });
+    }
+  }
+
+  return function* () {
+    yield takeLatest(fillWorkspace.match, fetchNodes);
+  };
+};
+
+export const submitSearchSaga = ({
+  getWorkspace,
+  handleSearchQueryError,
+}: GraphStoreDependencies) => {
+  function* submit(action: Action<string>) {
+    const searchTerm = action.payload;
+    yield put(initializeWorkspace());
+
+    // type casting is safe, at this point workspace should be loaded
+    const workspace = getWorkspace() as Workspace;
+    const numHops = 2;
+    const liveResponseFields = liveResponseFieldsSelector(yield select());
+
+    if (searchTerm.startsWith('{')) {
       try {
-        const topTermNodes: ServerResultNode[] = await fetchTopNodes(
-          http.post,
-          datasource.title,
-          fields
-        );
-        listenerApi.throwIfCancelled();
-        workspace.mergeGraph({ nodes: topTermNodes, edges: [] });
-        listenerApi.dispatch(initializeWorkspace());
-        notifyReact();
-        workspace.fillInGraph(fields.length * 10);
-      } catch (error) {
-        if (listenerApi.signal.aborted) {
-          return;
-        }
-        const message = error instanceof Error ? error.message : String(error);
-        notifications.toasts.addDanger({
-          title: i18n.translate('xpack.graph.fillWorkspaceError', {
-            defaultMessage: 'Fetching top terms failed: {message}',
-            values: { message },
-          }),
-        });
-      }
-    },
-  });
-
-  startListening({
-    predicate: submitSearch.match,
-    effect: (unknownAction, listenerApi) => {
-      listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<string>;
-      listenerApi.dispatch(initializeWorkspace());
-
-      // type casting is safe, at this point workspace should be loaded
-      const workspace = getWorkspace() as Workspace;
-      const liveResponseFields = liveResponseFieldsSelector(listenerApi.getState());
-      const numHops = 2;
-
-      if (!action.payload.startsWith('{')) {
-        workspace.simpleSearch(action.payload, liveResponseFields, numHops);
-        return;
-      }
-
-      try {
-        const query = JSON.parse(action.payload);
+        const query = JSON.parse(searchTerm);
         if (query.vertices) {
           // Is a graph explore request
           workspace.callElasticsearch(query);
@@ -119,9 +121,15 @@ export const registerWorkspaceListeners = (
           // Is a regular query DSL query
           workspace.search(query, liveResponseFields, numHops);
         }
-      } catch (error) {
-        handleSearchQueryError(error as Error);
+      } catch (err) {
+        handleSearchQueryError(err);
       }
-    },
-  });
+      return;
+    }
+    workspace.simpleSearch(searchTerm, liveResponseFields, numHops);
+  }
+
+  return function* () {
+    yield takeLatest(submitSearch.match, submit);
+  };
 };
