@@ -24,7 +24,7 @@ export class ResponseConsolePage {
   readonly dateQuickMenu: Locator;
   private readonly last7DaysOption: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(page: ScoutPage) {
     this.overlay = page.testSubj.locator('consolePageOverlay');
     this.respondAction = page.testSubj.locator('endpointResponseActions-action-item');
     this.userMenu = page.testSubj.locator('userMenuButton');
