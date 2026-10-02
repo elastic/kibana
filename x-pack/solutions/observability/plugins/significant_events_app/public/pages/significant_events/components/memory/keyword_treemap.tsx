@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
+import { CrossIcon } from './cross_icon';
 import {
   toKeywordCells,
   toKeywordDisplayNames,
@@ -229,7 +230,20 @@ export function MemoryKeywordTreemap({
                 // `clipText` keeps a long keyword inside its own cell. The label is
                 // vertically top-aligned because the chart has no centering control
                 // for a treemap's fill labels; a separate upstream change adds one.
-                fillLabel: { clipText: true, fontWeight: 500, minFontSize: 10, maxFontSize: 14 },
+                //
+                // A one-cell chart cannot ask for it. The chart builds the label's
+                // clip out of whatever canvas path its previous draw left behind,
+                // and with a single cell that path is the cell itself, so the two
+                // wind against each other and the clip comes out empty: the label
+                // is laid out and then painted nowhere (elastic-charts 73.2.2).
+                // One cell is the whole panel and the chart only places words that
+                // fit inside it, so there is nothing to clip against anyway.
+                fillLabel: {
+                  clipText: cells.length > 1,
+                  fontWeight: 500,
+                  minFontSize: 10,
+                  maxFontSize: 14,
+                },
                 nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.display ?? '',
               },
             ]}
@@ -278,7 +292,10 @@ function KeywordFilterRow({
         <EuiFlexItem grow={false} key={keyword}>
           <EuiBadge
             color="hollow"
-            iconType="cross"
+            // The component, not the `"cross"` string: `EuiIcon` imports a string
+            // type on demand, and a chip whose only affordance appears a tick
+            // after the chip is a chip that cannot be removed.
+            iconType={CrossIcon}
             iconOnClick={() => onToggleKeyword(keyword)}
             onClick={() => onToggleKeyword(keyword)}
             onClickAriaLabel={`${keyword} filter`}

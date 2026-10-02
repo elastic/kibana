@@ -81,6 +81,7 @@ interface PartitionSpec {
     groupByRollup: (cell: KeywordCell) => string;
     nodeLabel: (key: string) => string;
     shape: { fillColor: unknown };
+    fillLabel?: { clipText?: boolean };
   }>;
 }
 
@@ -236,6 +237,46 @@ describe('MemoryKeywordTreemap', () => {
     renderTreemap({ pages: [summary({ tags: ['memory'] })], selectedKeywords: ['kafka'] });
 
     expect(screen.getByTestId('nightshiftMemoryTreemapEmpty')).toBeInTheDocument();
+  });
+
+  /**
+   * `clipText` cannot be left on for a single cell.
+   *
+   * The chart builds the fill label's clip out of the canvas path its previous
+   * draw left behind (the cell rectangles, which a save/restore does not cover),
+   * and one cell's own rectangle winds against the clip rectangle: the label is
+   * laid out, painted, and then clipped away entirely. Dropping `clipText` takes
+   * the chart out of that path, and with one cell the label is laid out inside
+   * the whole panel either way.
+   */
+  it('asks the chart not to clip when a single keyword is left', () => {
+    renderTreemap({ pages: [summary({ tags: ['memory', 'agent-builder'] })] });
+
+    expect(partition().data).toHaveLength(1);
+    expect(layer().fillLabel!.clipText).toBe(false);
+  });
+
+  it('still clips a multi-cell chart, where a long keyword would overrun its cell', () => {
+    renderTreemap();
+
+    expect(partition().data.length).toBeGreaterThan(1);
+    expect(layer().fillLabel!.clipText).toBe(true);
+  });
+
+  /**
+   * The chip's remove icon is the one thing standing between a filter and the
+   * person who wants it gone, so it cannot wait on `EuiIcon`'s on-demand import
+   * of a string icon type — that is a render with no visible affordance.
+   */
+  it('draws the chip remove icon without waiting on an icon chunk', () => {
+    renderTreemap({ selectedKeywords: ['cart-cache'] });
+
+    // `EuiIcon` renders a string type only once it has imported that icon's
+    // asset, so the badge is handed the component instead. Kibana's Jest maps
+    // `@elastic/eui` to `test-env`, where an icon is a span named after the type
+    // it was given: a component here, the string `cross` there.
+    const remove = screen.getByRole('button', { name: 'Remove the cart-cache filter' });
+    expect(remove).toContainHTML('data-euiicon-type="CrossIcon"');
   });
 
   it('takes no room at all when the store has no live memories', () => {
