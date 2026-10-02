@@ -502,4 +502,60 @@ export const FIELD_SYNC_NOT_APPLICABLE = i18n.translate(
   }
 );
 
+export const EXTERNAL_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.configureCases.externalFieldsTitle',
+  {
+    defaultMessage: 'External fields',
+  }
+);
+
+export const EXTERNAL_FIELDS_DESC = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalFieldsDesc', {
+    values: { connectorName },
+    defaultMessage:
+      'Carry other {connectorName} fields onto cases. Pick a global case field for each external field you want to sync.',
+  });
+
+export const EXTERNAL_FIELDS_SEARCH = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalFieldsSearch', {
+    values: { connectorName },
+    defaultMessage: 'Search {connectorName} fields',
+  });
+
+export const EXTERNAL_FIELDS_CREATE_FIELD = i18n.translate(
+  'xpack.cases.configureCases.externalFieldsCreateField',
+  {
+    defaultMessage: 'Create global field',
+  }
+);
+
+export const EXTERNAL_FIELDS_NOT_SYNCED = i18n.translate(
+  'xpack.cases.configureCases.externalFieldsNotSynced',
+  {
+    defaultMessage: 'Not synced',
+  }
+);
+
+export const EXTERNAL_FIELDS_CAP = i18n.translate('xpack.cases.configureCases.externalFieldsCap', {
+  defaultMessage: 'You can map up to 20 fields per connector.',
+});
+
+export const EXTERNAL_FIELDS_EMPTY = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalFieldsEmpty', {
+    values: { connectorName },
+    defaultMessage: '{connectorName} exposes no additional fields.',
+  });
+
+export const EXTERNAL_FIELDS_CAPTION = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalFieldsCaption', {
+    values: { connectorName },
+    defaultMessage: 'External fields of {connectorName}',
+  });
+
+export const EXTERNAL_FIELDS_CASE_FIELD_ARIA = (fieldLabel: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalFieldsCaseFieldAria', {
+    values: { fieldLabel },
+    defaultMessage: 'Case field for {fieldLabel}',
+  });
+
 export { CONFLICT_KEEP_EXTERNAL, CONFLICT_KEEP_KIBANA } from '../edit_connector/translations';

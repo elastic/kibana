@@ -49,6 +49,21 @@ describe('getConnectorSyncSettings', () => {
     });
   });
 
+  it('returns every saved sync setting, including the field mappings', async () => {
+    const externalSync = { autoPush: true, conflictStrategy: 'kibana' };
+    const externalSyncFieldMappings = [
+      { externalField: 'priority', caseField: 'severity_tier_as_keyword', direction: 'both' },
+    ];
+    connectorMappingsService.find.mockResolvedValue(
+      found({ mappings: [], owner: 'cases', externalSync, externalSyncFieldMappings })
+    );
+
+    expect(await getConnectorSyncSettings({ connectorId: 'jira-1' }, clientArgs)).toEqual({
+      externalSync,
+      externalSyncFieldMappings,
+    });
+  });
+
   it('returns an empty object when the connector was never configured', async () => {
     connectorMappingsService.find.mockResolvedValue(found());
 

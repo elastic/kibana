@@ -54,9 +54,29 @@ export const ExternalSyncFieldRuleRt = rt.intersection([
 
 export const ExternalSyncFieldRulesRt = rt.array(ExternalSyncFieldRuleRt);
 
+/**
+ * Carries one external field onto a global case field (stored under `extended_fields`).
+ */
+export const ExternalSyncFieldMappingRt = rt.intersection([
+  rt.strict({
+    externalField: rt.string,
+    caseField: rt.string,
+    direction: ExternalSyncDirectionRt,
+  }),
+  rt.exact(
+    rt.partial({
+      conflictStrategy: ExternalSyncConflictStrategyRt,
+    })
+  ),
+]);
+
+export const ExternalSyncFieldMappingsRt = rt.array(ExternalSyncFieldMappingRt);
+
 export type ExternalSyncConflictStrategy = rt.TypeOf<typeof ExternalSyncConflictStrategyRt>;
 export type ExternalSyncSettings = rt.TypeOf<typeof ExternalSyncSettingsRt>;
 export type ExternalSyncField = rt.TypeOf<typeof ExternalSyncFieldRt>;
 export type ExternalSyncDirection = rt.TypeOf<typeof ExternalSyncDirectionRt>;
 export type ExternalSyncFieldRule = rt.TypeOf<typeof ExternalSyncFieldRuleRt>;
 export type ExternalSyncFieldRules = rt.TypeOf<typeof ExternalSyncFieldRulesRt>;
+export type ExternalSyncFieldMapping = rt.TypeOf<typeof ExternalSyncFieldMappingRt>;
+export type ExternalSyncFieldMappings = rt.TypeOf<typeof ExternalSyncFieldMappingsRt>;

@@ -8,6 +8,7 @@
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
+  validateExternalSyncFieldMappingsInRequest,
   validateExternalSyncFieldsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
@@ -448,6 +449,47 @@ describe('validators', () => {
         validateExternalSyncFieldsInRequest([{ field: 'status', direction: 'both' }])
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid externalSyncFields: \\"status\\" cannot sync with direction \\"both\\" (allowed: pull, off)"`
+      );
+    });
+  });
+
+  describe('validateExternalSyncFieldMappingsInRequest', () => {
+    it('accepts an empty or missing list and valid mappings', () => {
+      expect(() => validateExternalSyncFieldMappingsInRequest(undefined)).not.toThrow();
+      expect(() => validateExternalSyncFieldMappingsInRequest([])).not.toThrow();
+      expect(() =>
+        validateExternalSyncFieldMappingsInRequest([
+          { externalField: 'priority', caseField: 'severity_tier_as_keyword', direction: 'both' },
+        ])
+      ).not.toThrow();
+    });
+
+    it('throws when an external field is mapped twice', () => {
+      expect(() =>
+        validateExternalSyncFieldMappingsInRequest([
+          { externalField: 'priority', caseField: 'a_as_keyword', direction: 'both' },
+          { externalField: 'priority', caseField: 'b_as_keyword', direction: 'pull' },
+        ])
+      ).toThrow('an external field may be mapped only once');
+    });
+
+    it('throws when the case field key is not a safe extended field key', () => {
+      expect(() =>
+        validateExternalSyncFieldMappingsInRequest([
+          { externalField: 'priority', caseField: 'Bad Key!', direction: 'both' },
+        ])
+      ).toThrow('does not name a valid case field');
+    });
+
+    it('throws when more fields than the connector limit are mapped', () => {
+      const mappings = Array.from({ length: 21 }, (_, index) => ({
+        externalField: `field_${index}`,
+        caseField: `field_${index}_as_keyword`,
+        direction: 'both' as const,
+      }));
+
+      expect(() => validateExternalSyncFieldMappingsInRequest(mappings)).toThrow(
+        'at most 20 fields can be mapped per connector'
       );
     });
   });

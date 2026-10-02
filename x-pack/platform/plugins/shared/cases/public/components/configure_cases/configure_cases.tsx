@@ -30,6 +30,8 @@ import { CasesPageBody } from '../app/cases_page_body';
 import { Connectors } from './connectors';
 import { SyncSettings } from '../edit_connector/sync_settings';
 import { FieldSyncTable } from './field_sync_table';
+import { ExternalFieldMappingTable } from './external_field_mapping_table';
+import { EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES } from '../../../common/utils/external_sync_fields';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as configureCasesI18n from './translations';
 import { useConfigureCasesController } from './use_configure_cases_controller';
@@ -63,7 +65,7 @@ type LegacyFlyoutType = 'customField' | 'template';
 export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();
-  const { permissions } = useCasesContext();
+  const { permissions, owner } = useCasesContext();
   const { docLinks } = useKibana().services;
 
   const {
@@ -83,6 +85,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     extractObservables,
     externalSync,
     externalSyncFields,
+    externalSyncFieldMappings,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration,
@@ -103,6 +106,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onChangeExtractObservables,
     onChangeExternalSync,
     onChangeExternalSyncFields,
+    onChangeExternalSyncFieldMappings,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -209,6 +213,19 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                               disabled={syncControlsDisabled}
                               onChange={onChangeExternalSyncFields}
                             />
+                            {EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES.has(connector.type) && (
+                              <>
+                                <EuiSpacer size="l" />
+                                <ExternalFieldMappingTable
+                                  connector={connector}
+                                  owner={owner[0]}
+                                  mappings={mappings}
+                                  value={externalSyncFieldMappings}
+                                  disabled={syncControlsDisabled}
+                                  onChange={onChangeExternalSyncFieldMappings}
+                                />
+                              </>
+                            )}
                           </>
                         ) : (
                           <EuiText

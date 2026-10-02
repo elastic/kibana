@@ -21,6 +21,7 @@ import {
 
 import {
   createIncident,
+  mergeFreeFormFields,
   dedupAssignees,
   getClosedInfoForUpdate,
   getCloseReasonIfValid,
@@ -407,6 +408,76 @@ describe('utils', () => {
       expect(res.incident.description).toEqual(
         'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.'
       );
+    });
+
+    it('pushes mapped global fields through Jira otherFields and keeps the typed ones', async () => {
+      const caseWithFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+              extended_fields: { severity_tier_as_keyword: 'High', region_as_keyword: 'EMEA' },
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldMappings: [
+          {
+            externalField: 'priority_label',
+            caseField: 'severity_tier_as_keyword',
+            direction: 'both',
+          },
+          { externalField: 'customfield_777', caseField: 'region_as_keyword', direction: 'pull' },
+          { externalField: 'customfield_888', caseField: 'missing_as_keyword', direction: 'push' },
+        ],
+      });
+
+      expect(JSON.parse(res.incident.otherFields as string)).toEqual({
+        customfield_123456: 'Blue team',
+        priority_label: 'High',
+      });
+    });
+
+    it('does not add free-form fields for connectors without that channel', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          extended_fields: { severity_tier_as_keyword: 'High' },
+        },
+        userActions: [],
+        connector: { ...connector, actionTypeId: '.resilient' },
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldMappings: [
+          {
+            externalField: 'severity_code',
+            caseField: 'severity_tier_as_keyword',
+            direction: 'both',
+          },
+        ],
+      });
+
+      expect(res.incident).not.toHaveProperty('otherFields');
+      expect(res.incident).not.toHaveProperty('additional_fields');
     });
 
     it('sends no comments when the comments direction is off', async () => {
@@ -821,6 +892,22 @@ describe('utils', () => {
           },
         ])
       ).toEqual({});
+    });
+  });
+
+  describe('mergeFreeFormFields', () => {
+    it('merges onto a JSON string and keeps the result a string', () => {
+      expect(JSON.parse(mergeFreeFormFields('{"a":"1"}', { b: '2' }))).toEqual({ a: '1', b: '2' });
+    });
+
+    it('starts from an empty object for null, invalid JSON or arrays', () => {
+      expect(mergeFreeFormFields(null, { b: '2' })).toBe('{"b":"2"}');
+      expect(mergeFreeFormFields('not json', { b: '2' })).toBe('{"b":"2"}');
+      expect(mergeFreeFormFields('[1,2]', { b: '2' })).toBe('{"b":"2"}');
+    });
+
+    it('lets the mapped value win over the typed one', () => {
+      expect(JSON.parse(mergeFreeFormFields({ a: '1' }, { a: '9' }))).toEqual({ a: '9' });
     });
   });
 

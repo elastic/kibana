@@ -7,6 +7,7 @@
 
 import type { ExternalSyncDirection } from '../types/domain';
 import {
+  coerceExternalFieldValue,
   pullsFromExternal,
   pushesToExternal,
   resolveExternalSyncFieldRules,
@@ -54,6 +55,25 @@ describe('external_sync_fields', () => {
       ]);
       expect(resolved.tags).toEqual({ direction: 'both' });
       expect(resolved.comments).toEqual({ direction: 'pull' });
+    });
+  });
+
+  describe('coerceExternalFieldValue', () => {
+    it('keeps strings, stringifies scalars, names options and joins arrays', () => {
+      expect(coerceExternalFieldValue('High')).toBe('High');
+      expect(coerceExternalFieldValue(3)).toBe('3');
+      expect(coerceExternalFieldValue(true)).toBe('true');
+      expect(coerceExternalFieldValue({ name: 'Highest', id: '1' })).toBe('Highest');
+      expect(coerceExternalFieldValue({ displayName: 'Jane' })).toBe('Jane');
+      expect(coerceExternalFieldValue(['a', { value: 'b' }, null])).toBe('a, b');
+    });
+
+    it('drops empty values', () => {
+      expect(coerceExternalFieldValue(undefined)).toBeUndefined();
+      expect(coerceExternalFieldValue(null)).toBeUndefined();
+      expect(coerceExternalFieldValue('   ')).toBeUndefined();
+      expect(coerceExternalFieldValue([])).toBeUndefined();
+      expect(coerceExternalFieldValue({ foo: 'bar' })).toBeUndefined();
     });
   });
 

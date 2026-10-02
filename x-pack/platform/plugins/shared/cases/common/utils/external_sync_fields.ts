@@ -12,6 +12,59 @@ import type {
   ExternalSyncFieldRule,
   ExternalSyncFieldRules,
 } from '../types/domain';
+import { ConnectorTypes } from '../types/domain/connector/v1';
+import { FieldType } from '../types/domain/template/fields';
+
+/** Lower of the Jira `otherFields` and ServiceNow `additional_fields` limits. */
+export const MAX_EXTERNAL_SYNC_FIELD_MAPPINGS = 20;
+
+/** Connector types with a free-form outbound channel for mapped fields. */
+export const EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES: ReadonlySet<string> = new Set([
+  ConnectorTypes.jira,
+  ConnectorTypes.serviceNowITSM,
+  ConnectorTypes.serviceNowSIR,
+]);
+
+/** Global field controls that store a plain string value a mapped external field can fill. */
+export const EXTERNAL_SYNC_MAPPABLE_CONTROLS: ReadonlySet<string> = new Set([
+  FieldType.INPUT_TEXT,
+  FieldType.TEXTAREA,
+  FieldType.INPUT_NUMBER,
+  FieldType.SELECT_BASIC,
+  FieldType.DATE_PICKER,
+]);
+
+/**
+ * Turns an external field value into the string `extended_fields` stores. Option objects
+ * contribute their name, arrays are comma-joined, empty values are dropped.
+ */
+export const coerceExternalFieldValue = (value: unknown): string | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+  if (typeof value === 'string') {
+    return value.trim().length > 0 ? value : undefined;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((entry) => coerceExternalFieldValue(entry))
+      .filter((entry): entry is string => entry != null);
+    return parts.length > 0 ? parts.join(', ') : undefined;
+  }
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    for (const key of ['name', 'value', 'displayName', 'key', 'id']) {
+      const candidate = record[key];
+      if (typeof candidate === 'string' && candidate.trim().length > 0) {
+        return candidate;
+      }
+    }
+  }
+  return undefined;
+};
 
 export const EXTERNAL_SYNC_FIELDS: readonly ExternalSyncField[] = [
   'title',

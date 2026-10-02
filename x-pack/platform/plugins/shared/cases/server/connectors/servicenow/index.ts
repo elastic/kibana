@@ -17,10 +17,12 @@ export const getServiceNowITSMCaseConnector = (): ServiceNowITSMCasesConnector =
   getMapping: getServiceNowITSMMapping,
   format: formatServiceNowITSM,
   parseIncident: parseItsmIncident,
+  freeFormFieldsKey: 'additional_fields',
 });
 
 export const getServiceNowSIRCaseConnector = (): ServiceNowSIRCasesConnector => ({
   getMapping: getServiceNowSIRMapping,
   format: formatServiceNowSIR,
   parseIncident: parseSirIncident,
+  freeFormFieldsKey: 'additional_fields',
 });

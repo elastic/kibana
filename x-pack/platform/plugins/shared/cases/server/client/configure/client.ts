@@ -57,6 +57,7 @@ import {
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
+  validateExternalSyncFieldMappingsInRequest,
   validateExternalSyncFieldsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
@@ -324,11 +325,22 @@ export async function update(
     });
 
     validateExternalSyncFieldsInRequest(request.externalSyncFields);
+    validateExternalSyncFieldMappingsInRequest(request.externalSyncFieldMappings);
 
-    const { version, templates, externalSync, externalSyncFields, ...queryWithoutVersion } =
-      request;
+    const {
+      version,
+      templates,
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
+      ...queryWithoutVersion
+    } = request;
     // Sync settings belong to the connector, not the configuration document.
-    const syncPatch = pickConnectorSyncSettings({ externalSync, externalSyncFields });
+    const syncPatch = pickConnectorSyncSettings({
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
+    });
     const hasSyncPatch = Object.keys(syncPatch).length > 0;
 
     const configuration = await caseConfigureService.get({
@@ -495,6 +507,9 @@ export async function create(
     });
 
     validateExternalSyncFieldsInRequest(validatedConfigurationRequest.externalSyncFields);
+    validateExternalSyncFieldMappingsInRequest(
+      validatedConfigurationRequest.externalSyncFieldMappings
+    );
 
     let error = null;
 
@@ -565,15 +580,23 @@ export async function create(
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
     let connectorSync: ConnectorSyncSettings = {};
-    const { externalSync, externalSyncFields, ...configurationAttributes } =
-      validatedConfigurationRequest;
+    const {
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
+      ...configurationAttributes
+    } = validatedConfigurationRequest;
 
     try {
       const created = await casesClientInternal.configuration.createMappings({
         connector: validatedConfigurationRequest.connector,
         owner: validatedConfigurationRequest.owner,
         refresh: false,
-        sync: pickConnectorSyncSettings({ externalSync, externalSyncFields }),
+        sync: pickConnectorSyncSettings({
+          externalSync,
+          externalSyncFields,
+          externalSyncFieldMappings,
+        }),
       });
       mappings = created.mappings;
       connectorSync = pickConnectorSyncSettings(created);

@@ -9,7 +9,11 @@ import * as rt from 'io-ts';
 
 import type { ActionType as ConnectorActionType } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
-import { ExternalSyncFieldRulesRt, ExternalSyncSettingsRt } from '../external_sync/v1';
+import {
+  ExternalSyncFieldMappingsRt,
+  ExternalSyncFieldRulesRt,
+  ExternalSyncSettingsRt,
+} from '../external_sync/v1';
 
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ConnectorActionType;
@@ -247,6 +251,7 @@ const ConnectorMappingsBasicProps = {
 const ConnectorSyncSettingsProps = {
   externalSync: ExternalSyncSettingsRt,
   externalSyncFields: ExternalSyncFieldRulesRt,
+  externalSyncFieldMappings: ExternalSyncFieldMappingsRt,
 };
 
 export const ConnectorSyncSettingsRt = rt.exact(rt.partial(ConnectorSyncSettingsProps));

@@ -202,6 +202,7 @@ export const push = async (
       spaceId,
       publicBaseUrl,
       fieldRules,
+      fieldMappings: connectorSync.externalSyncFieldMappings,
     });
 
     const pushRes = await actionsClient.execute({

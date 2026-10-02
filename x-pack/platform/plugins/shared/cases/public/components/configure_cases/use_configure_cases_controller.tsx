@@ -11,6 +11,7 @@ import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/p
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
   ActionConnector,
+  ExternalSyncFieldMappings,
   ExternalSyncFieldRules,
   ExternalSyncSettings,
   ObservableTypeConfiguration,
@@ -82,6 +83,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     extractObservables,
     externalSync,
     externalSyncFields,
+    externalSyncFieldMappings,
   } = currentConfiguration;
 
   const {
@@ -284,6 +286,29 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ]
   );
 
+  const onChangeExternalSyncFieldMappings = useCallback(
+    (value: ExternalSyncFieldMappings) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        externalSyncFieldMappings: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
   useEffect(() => {
     if (
       !isLoadingConnectors &&
@@ -448,6 +473,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     extractObservables,
     externalSync,
     externalSyncFields,
+    externalSyncFieldMappings,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration: isFetchingCaseConfigure,
@@ -468,6 +494,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onChangeExtractObservables,
     onChangeExternalSync,
     onChangeExternalSyncFields,
+    onChangeExternalSyncFieldMappings,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,

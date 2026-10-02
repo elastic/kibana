@@ -477,6 +477,78 @@ describe('sync from Jira (tags and comments)', () => {
   });
 });
 
+describe('sync mapped external fields', () => {
+  const casesClient = createCasesClientMock();
+  const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');
+  const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
+  const { actionsClient, authorization } = clientArgs;
+  const { licensingService, connectorMappingsService, fieldDefinitionsService } =
+    clientArgs.services;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    casesClient.cases.get.mockResolvedValue(theCase);
+    casesClient.userActions.getAll.mockResolvedValue(userActionsResponse([]));
+    authorization.ensureAuthorized.mockResolvedValue(undefined);
+    licensingService.isAtLeastEnterprise.mockResolvedValue(true);
+    connectorMappingsService.find.mockResolvedValue(
+      connectorMappingsFound({
+        externalSyncFieldMappings: [
+          { externalField: 'u_region', caseField: 'sync_region_as_keyword', direction: 'both' },
+        ],
+      })
+    );
+    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+      fieldDefinitions: [
+        {
+          fieldDefinitionId: 'fd-1',
+          name: 'sync_region',
+          owner: theCase.owner,
+          isGlobal: true,
+          definition: 'name: sync_region\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        },
+      ],
+      total: 1,
+    } as never);
+    actionsClient.execute.mockResolvedValue({
+      status: 'ok',
+      data: {
+        ...incident,
+        short_description: theCase.title,
+        state: theCase.status,
+        u_region: 'EMEA',
+      },
+      actionId: 'sn-1',
+    });
+  });
+
+  it('writes the mapped incident field onto the case extended fields', async () => {
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.cases.bulkUpdate).toHaveBeenCalledWith(
+      {
+        cases: [
+          {
+            id: theCase.id,
+            version: theCase.version,
+            extended_fields: { sync_region_as_keyword: 'EMEA' },
+          },
+        ],
+      },
+      { origin: 'external_sync' }
+    );
+    expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userAction: expect.objectContaining({
+          payload: {
+            sync: expect.objectContaining({ updated_fields: ['sync_region_as_keyword'] }),
+          },
+        }),
+      })
+    );
+  });
+});
+
 describe('selectCommentsToImport', () => {
   it('returns nothing when the incident carries no comments', () => {
     expect(selectCommentsToImport(theCase, undefined)).toEqual([]);

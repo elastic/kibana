@@ -38,6 +38,7 @@ export const usePersistConfiguration = () => {
       extractObservables,
       externalSync,
       externalSyncFields,
+      externalSyncFieldMappings,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -50,6 +51,7 @@ export const usePersistConfiguration = () => {
           extractObservables,
           externalSync,
           externalSyncFields,
+          externalSyncFieldMappings,
         });
       }
 
@@ -63,6 +65,7 @@ export const usePersistConfiguration = () => {
         extractObservables,
         externalSync,
         externalSyncFields,
+        externalSyncFieldMappings,
       });
     },
     {

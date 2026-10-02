@@ -51,6 +51,11 @@ export interface ICasesConnector<TExternalServiceParams = {}> {
   getMapping: () => ConnectorMappings;
   /** Maps a `getIncident` response to case fields. Absent when the type cannot be synced from. */
   parseIncident?: ParseIncident;
+  /**
+   * Push payload key that accepts arbitrary external fields as a JSON string. Mapped case
+   * fields are written through it; absent when the connector has no such channel.
+   */
+  freeFormFieldsKey?: string;
 }
 
 export interface CasesConnectorsMap {

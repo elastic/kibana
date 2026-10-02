@@ -9,10 +9,15 @@ import Boom from '@hapi/boom';
 import type {
   CustomFieldsConfiguration,
   CustomFieldTypes,
+  ExternalSyncFieldMappings,
   ExternalSyncFieldRules,
   TemplatesConfiguration,
 } from '../../../common/types/domain';
-import { EXTERNAL_SYNC_FIELD_DIRECTIONS } from '../../../common/utils/external_sync_fields';
+import {
+  EXTERNAL_SYNC_FIELD_DIRECTIONS,
+  MAX_EXTERNAL_SYNC_FIELD_MAPPINGS,
+} from '../../../common/utils/external_sync_fields';
+import { isSafeExtendedFieldKey } from '../../../common/utils/template_fields';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import {
   validateCustomFieldKeysAgainstConfiguration,
@@ -127,5 +132,52 @@ export const validateExternalSyncFieldsInRequest = (rules?: ExternalSyncFieldRul
 
   if (unsupported.length > 0) {
     throw Boom.badRequest(`Invalid externalSyncFields: ${unsupported.join('; ')}`);
+  }
+};
+
+/**
+ * Throws when an external field is mapped twice, targets an unsafe case field key, or the
+ * connector's free-form field limit is exceeded.
+ */
+export const validateExternalSyncFieldMappingsInRequest = (
+  mappings?: ExternalSyncFieldMappings
+) => {
+  if (!Array.isArray(mappings) || mappings.length === 0) {
+    return;
+  }
+
+  if (mappings.length > MAX_EXTERNAL_SYNC_FIELD_MAPPINGS) {
+    throw Boom.badRequest(
+      `Invalid externalSyncFieldMappings: at most ${MAX_EXTERNAL_SYNC_FIELD_MAPPINGS} fields can be mapped per connector`
+    );
+  }
+
+  const seen = new Set<string>();
+  const duplicated: string[] = [];
+  const unsafe: string[] = [];
+
+  for (const mapping of mappings) {
+    if (seen.has(mapping.externalField)) {
+      duplicated.push(mapping.externalField);
+    }
+    seen.add(mapping.externalField);
+
+    if (mapping.externalField.trim().length === 0 || !isSafeExtendedFieldKey(mapping.caseField)) {
+      unsafe.push(`${mapping.externalField} -> ${mapping.caseField}`);
+    }
+  }
+
+  if (duplicated.length > 0) {
+    throw Boom.badRequest(
+      `Invalid value "${duplicated.join(
+        ','
+      )}" supplied to "externalSyncFieldMappings": an external field may be mapped only once`
+    );
+  }
+
+  if (unsafe.length > 0) {
+    throw Boom.badRequest(
+      `Invalid externalSyncFieldMappings: ${unsafe.join('; ')} does not name a valid case field`
+    );
   }
 };

@@ -14,7 +14,11 @@ import {
   CustomFieldNumberTypeRt,
 } from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
-import { ExternalSyncFieldRulesRt, ExternalSyncSettingsRt } from '../external_sync/v1';
+import {
+  ExternalSyncFieldMappingsRt,
+  ExternalSyncFieldRulesRt,
+  ExternalSyncSettingsRt,
+} from '../external_sync/v1';
 import { CaseObservableTypeRt } from '../observable/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -143,6 +147,7 @@ export const ConfigurationOptionalFieldsRt = rt.exact(
   rt.partial({
     externalSync: ExternalSyncSettingsRt,
     externalSyncFields: ExternalSyncFieldRulesRt,
+    externalSyncFieldMappings: ExternalSyncFieldMappingsRt,
   })
 );
 

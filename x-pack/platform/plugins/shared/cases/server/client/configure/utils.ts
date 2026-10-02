@@ -16,4 +16,7 @@ export const pickConnectorSyncSettings = (
 ): ConnectorSyncSettings => ({
   ...(source?.externalSync != null ? { externalSync: source.externalSync } : {}),
   ...(source?.externalSyncFields != null ? { externalSyncFields: source.externalSyncFields } : {}),
+  ...(source?.externalSyncFieldMappings != null
+    ? { externalSyncFieldMappings: source.externalSyncFieldMappings }
+    : {}),
 });

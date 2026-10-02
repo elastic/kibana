@@ -33,6 +33,7 @@ import {
 } from '../usage_counters';
 import { getLatestPushInfo } from './utils';
 import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
+import { buildMappedFieldsPatch, mappingsKeepKibanaValue } from './sync_mapped_fields';
 import * as i18n from './translations';
 
 export interface SyncParams {
@@ -163,7 +164,7 @@ const getFieldsChangedSinceLastPush = async (
   // reconciled values, not Kibana edits, so the baseline is the last push or sync.
   const latestSyncIndex = userActions.map(({ type }) => type).lastIndexOf(UserActionTypes.sync);
   const baselineIndex = Math.max(latestPush.index, latestSyncIndex);
-  const syncedFieldTypes: readonly string[] = SYNCED_FIELDS;
+  const syncedFieldTypes: readonly string[] = [...SYNCED_FIELDS, UserActionTypes.extended_fields];
 
   return new Set(
     userActions
@@ -244,19 +245,44 @@ export const sync = async (
     );
     const fieldRules = resolveExternalSyncFieldRules(connectorSync.externalSyncFields);
     const defaultStrategy = theCase.settings.externalSync?.conflictStrategy ?? 'external';
-    const changedInKibana = keepsKibanaValueForAnyField(fieldRules, defaultStrategy)
-      ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
-      : new Set<string>();
+    const changedInKibana =
+      keepsKibanaValueForAnyField(fieldRules, defaultStrategy) ||
+      mappingsKeepKibanaValue(connectorSync.externalSyncFieldMappings, defaultStrategy)
+        ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
+        : new Set<string>();
 
-    const { patch, updatedFields, conflictedFields } = buildSyncPatch(theCase, snapshot, {
+    const builtIn = buildSyncPatch(theCase, snapshot, {
       changedInKibana,
       fieldRules,
       defaultStrategy,
     });
+    const mapped = await buildMappedFieldsPatch({
+      theCase,
+      incident: res.data as Record<string, unknown>,
+      mappings: connectorSync.externalSyncFieldMappings,
+      defaultStrategy,
+      changedInKibana,
+      clientArgs,
+    });
+
+    const patch = builtIn.patch;
+    const updatedFields = [...builtIn.updatedFields, ...mapped.updatedFields];
+    const conflictedFields = [...builtIn.conflictedFields, ...mapped.conflictedFields];
 
     if (updatedFields.length > 0) {
       await casesClient.cases.bulkUpdate(
-        { cases: [{ id: caseId, version: theCase.version, ...patch }] },
+        {
+          cases: [
+            {
+              id: caseId,
+              version: theCase.version,
+              ...patch,
+              ...(mapped.updatedFields.length > 0
+                ? { extended_fields: mapped.extendedFields }
+                : {}),
+            },
+          ],
+        },
         { origin: 'external_sync' }
       );
     }

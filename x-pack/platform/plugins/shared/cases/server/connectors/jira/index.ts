@@ -14,4 +14,5 @@ export const getCaseConnector = (): JiraCaseConnector => ({
   getMapping,
   format,
   parseIncident,
+  freeFormFieldsKey: 'otherFields',
 });

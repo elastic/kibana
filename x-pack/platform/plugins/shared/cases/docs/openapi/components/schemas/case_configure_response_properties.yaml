@@ -71,6 +71,11 @@ externalSyncFields:
   description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
   items:
     $ref: 'external_sync_field_rule.yaml'
+externalSyncFieldMappings:
+  type: array
+  description: Technical preview. External fields of the configuration's connector carried onto global case fields.
+  items:
+    $ref: 'external_sync_field_mapping.yaml'
 owner:
   $ref: 'owner.yaml'
 templates:

@@ -1120,6 +1120,20 @@ export const ExternalSyncFieldRule = lazySchema(() =>
 export type ExternalSyncFieldRule = z.infer<typeof ExternalSyncFieldRule>;
 
 /**
+  * Technical preview. Carries one external field of the configuration's connector onto a global case field. `externalField` is the field key as the external system reports it; `caseField` is the storage key of a global field definition. `direction` and `conflictStrategy` behave as for the built-in field rules. Supported for Jira and ServiceNow connectors, up to 20 mappings per connector.
+
+  */
+export const ExternalSyncFieldMapping = lazySchema(() =>
+  z.object({
+    externalField: z.string(),
+    caseField: z.string(),
+    direction: z.enum(['both', 'push', 'pull', 'off']),
+    conflictStrategy: z.enum(['external', 'kibana']).optional(),
+  })
+);
+export type ExternalSyncFieldMapping = z.infer<typeof ExternalSyncFieldMapping>;
+
+/**
   * The words and phrases that help categorize templates. It can be an empty array.
 
   */
@@ -1340,6 +1354,15 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .describe(
         "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
       ),
+    /**
+     * Technical preview. External fields of the configuration's connector carried onto global case fields.
+     */
+    externalSyncFieldMappings: z
+      .array(ExternalSyncFieldMapping)
+      .optional()
+      .describe(
+        "Technical preview. External fields of the configuration's connector carried onto global case fields."
+      ),
     owner: Owner,
     templates: Templates.optional(),
   })
@@ -1458,6 +1481,15 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe(
         "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
+    /**
+     * Technical preview. External fields of the configuration's connector carried onto global case fields.
+     */
+    externalSyncFieldMappings: z
+      .array(ExternalSyncFieldMapping)
+      .optional()
+      .describe(
+        "Technical preview. External fields of the configuration's connector carried onto global case fields."
       ),
     templates: Templates.optional(),
     /**

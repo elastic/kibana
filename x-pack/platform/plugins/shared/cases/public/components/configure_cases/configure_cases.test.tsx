@@ -43,6 +43,9 @@ jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
 jest.mock('../../common/use_license');
+jest.mock('./external_field_mapping_table', () => ({
+  ExternalFieldMappingTable: () => <div data-test-subj="external-field-mapping-table" />,
+}));
 jest.mock('./use_get_external_field_catalog', () => ({
   ...jest.requireActual('./use_get_external_field_catalog'),
   useGetExternalFieldCatalog: jest
@@ -664,6 +667,32 @@ describe('ConfigureCasesRedesign', () => {
       expect(screen.getByTestId('external-sync-direction-title')).toHaveValue('pull');
       expect(screen.getByTestId('external-sync-conflict-title')).toHaveValue('kibana');
       expect(screen.queryByTestId('field-mapping-text')).not.toBeInTheDocument();
+    });
+
+    it('renders the external field mapping table for a connector with a free-form channel', async () => {
+      enableExternalSync();
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('external-field-mapping-table')).toBeInTheDocument();
+    });
+
+    it('does not render the external field mapping table for other connector types', async () => {
+      enableExternalSync();
+      withConnector({
+        connector: {
+          id: 'resilient-2',
+          name: 'My Resilient connector',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
+      });
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('external-sync-field-table')).toBeInTheDocument();
+      expect(screen.queryByTestId('external-field-mapping-table')).not.toBeInTheDocument();
     });
 
     it('persists the field sync rules when a direction changes', async () => {

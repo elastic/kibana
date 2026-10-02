@@ -152,6 +152,38 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
+    it('persists external field mappings on the configuration and rejects unsafe case fields', async () => {
+      const externalSyncFieldMappings = [
+        {
+          externalField: 'priority',
+          caseField: 'severity_tier_as_keyword',
+          direction: 'both' as const,
+          conflictStrategy: 'kibana' as const,
+        },
+      ];
+      const configuration = await createConfiguration(
+        supertestWithoutAuth,
+        getConfigurationRequest({ overrides: { externalSyncFieldMappings } }),
+        200,
+        authSpace1
+      );
+
+      expect(configuration.externalSyncFieldMappings).to.eql(externalSyncFieldMappings);
+
+      await createConfiguration(
+        supertestWithoutAuth,
+        getConfigurationRequest({
+          overrides: {
+            externalSyncFieldMappings: [
+              { externalField: 'priority', caseField: 'Bad Key!', direction: 'both' },
+            ],
+          },
+        }),
+        400,
+        authSpace1
+      );
+    });
+
     it('does not mark comments as pushed when the comments direction is off', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest: supertestWithoutAuth,

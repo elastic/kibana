@@ -29,6 +29,8 @@ Cases can keep a pushed case and its external incident in step in both direction
 
 Per-connector defaults and field rules live on **Stack Management → Cases → Settings**, under the selected incident management system. They apply to new cases that use that connector; each case can override them in its Connectors panel.
 
+For Jira and ServiceNow, the **External fields** table in the same block carries additional external fields onto global case fields from the Field Library, in the direction you choose. Values travel through the connector's free-form fields (`otherFields` for Jira, `additional_fields` for ServiceNow) on push and are read from the incident on sync.
+
 ### Apply changes from Jira automatically
 
 Kibana does not poll Jira. To apply Jira edits without pressing **Sync from Jira**, let Jira call Kibana and run the sync step from a workflow. No change is needed on the Jira side beyond a webhook.

@@ -27,6 +27,7 @@ import type {
   ExternalService,
   Observable,
   User,
+  ExternalSyncFieldMappings,
 } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
@@ -75,6 +76,8 @@ interface CreateIncidentArgs {
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   /** Space-level field directions; defaults push every mapped field. */
   fieldRules?: ResolvedExternalSyncFieldRules;
+  /** Global case fields carried onto external fields through the connector's free-form channel. */
+  fieldMappings?: ExternalSyncFieldMappings;
 }
 
 export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
@@ -219,6 +222,7 @@ export const createIncident = async ({
   spaceId,
   publicBaseUrl,
   fieldRules = resolveExternalSyncFieldRules(),
+  fieldMappings = [],
 }: CreateIncidentArgs): Promise<ExternalServiceIncident> => {
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
@@ -272,7 +276,48 @@ export const createIncident = async ({
     delete incident[tagsTarget];
   }
 
+  const freeFormFieldsKey = casesConnectors.get(connector.actionTypeId)?.freeFormFieldsKey;
+  const mappedFields = collectMappedFieldsToPush(theCase, fieldMappings);
+  if (freeFormFieldsKey != null && Object.keys(mappedFields).length > 0) {
+    incident[freeFormFieldsKey] = mergeFreeFormFields(incident[freeFormFieldsKey], mappedFields);
+  }
+
   return { incident, comments };
+};
+
+const collectMappedFieldsToPush = (
+  theCase: Case,
+  fieldMappings: ExternalSyncFieldMappings
+): Record<string, string> => {
+  const values: Record<string, string> = {};
+  for (const mapping of fieldMappings) {
+    const value = theCase.extended_fields?.[mapping.caseField];
+    if (pushesToExternal(mapping.direction) && value != null && value !== '') {
+      values[mapping.externalField] = value;
+    }
+  }
+  return values;
+};
+
+/**
+ * The connector fields hold the free-form channel as a JSON string typed by the user; mapped
+ * values are merged on top and the result is kept as a string for the connector schema.
+ */
+export const mergeFreeFormFields = (existing: unknown, extra: Record<string, string>): string => {
+  let base: Record<string, unknown> = {};
+  if (typeof existing === 'string' && existing.trim().length > 0) {
+    try {
+      const parsed: unknown = JSON.parse(existing);
+      if (parsed != null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        base = parsed as Record<string, unknown>;
+      }
+    } catch {
+      base = {};
+    }
+  } else if (existing != null && typeof existing === 'object' && !Array.isArray(existing)) {
+    base = existing as Record<string, unknown>;
+  }
+  return JSON.stringify({ ...base, ...extra });
 };
 
 export const mapCaseFieldsToExternalSystemFields = (

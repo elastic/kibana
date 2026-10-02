@@ -176,6 +176,7 @@ export type CasesConfigurationUI = Pick<
   | 'extractObservables'
   | 'externalSync'
   | 'externalSyncFields'
+  | 'externalSyncFieldMappings'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
