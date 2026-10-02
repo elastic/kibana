@@ -32,6 +32,7 @@ import {
   type CatalogSignalType,
   type CatalogSort,
 } from '../common/catalog_filters';
+import type { CatalogPageContext } from './agent_builder/page_context';
 import type { CatalogItem, CatalogResponse, Repository } from './api';
 import { getCatalog } from './api';
 import { CatalogEntryFlyout } from './catalog_entry_flyout';
@@ -47,6 +48,8 @@ interface Props {
   reloadRepositories: () => void;
   initialRepositories?: string[];
   initialSeverities?: CatalogSeverity[];
+  /** Reports the filters, total, and open entry, for the AI Agent page context. */
+  onContextChange?: (context: CatalogPageContext) => void;
 }
 
 const CatalogRow = ({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) => (
@@ -100,6 +103,7 @@ export const CatalogView = ({
   reloadRepositories,
   initialRepositories = [],
   initialSeverities = [],
+  onContextChange,
 }: Props) => {
   const [selectedRepositories, setSelectedRepositories] = useState<string[]>(initialRepositories);
   const [kinds, setKinds] = useState<CatalogSignalType[]>([]);
@@ -158,6 +162,30 @@ export const CatalogView = ({
     severities,
     sort,
   ]);
+
+  const total = response?.total;
+  useEffect(() => {
+    onContextChange?.({
+      tab: 'catalog',
+      repositories: selectedRepositories,
+      signalTypes: kinds,
+      severities,
+      search: query,
+      sort,
+      ...(total === undefined ? {} : { total }),
+      ...(selected === undefined
+        ? {}
+        : {
+            selectedEntry: {
+              id: selected.id,
+              repository: selected.repository,
+              title: selected.title,
+              signal_type: selected.signal_type,
+              query: selected.query,
+            },
+          }),
+    });
+  }, [kinds, onContextChange, query, selected, selectedRepositories, severities, sort, total]);
 
   if (!repositoriesLoading && repositoriesError !== undefined) {
     return (

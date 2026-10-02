@@ -32,6 +32,7 @@ import type {
   Repository,
   RepositoryExtractionStatus,
 } from './api';
+import type { RepositoriesPageContext } from './agent_builder/page_context';
 import { deleteRepository, getBatch, getCatalogSummary, startBatch } from './api';
 import { describeStartError, type StartErrorDescription } from './describe_start_error';
 import { RepositoryFlyout } from './repository_flyout';
@@ -44,6 +45,8 @@ interface Props {
   error?: string;
   reload: () => void;
   onViewCatalog: (repository: string, severity?: CatalogSeverity) => void;
+  /** Reports the repository count and open flyout, for the AI Agent page context. */
+  onContextChange?: (context: RepositoriesPageContext) => void;
 }
 
 /** Longer than the catalog index refresh interval (1 second by default). */
@@ -121,6 +124,7 @@ export const RepositoriesView = ({
   error,
   reload,
   onViewCatalog,
+  onContextChange,
 }: Props) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batch, setBatch] = useState<ExtractionBatchStatus>();
@@ -138,6 +142,15 @@ export const RepositoriesView = ({
   const deleteTitleId = useGeneratedHtmlId({ prefix: 'codeIntelligenceDeleteTitle' });
 
   const runningBatchId = batch?.status === 'running' ? batch.id : undefined;
+
+  const editingRepository = flyout?.editing?.repository;
+  useEffect(() => {
+    onContextChange?.({
+      tab: 'repositories',
+      total: repositories.length,
+      ...(editingRepository === undefined ? {} : { editingRepository }),
+    });
+  }, [editingRepository, onContextChange, repositories.length]);
 
   useEffect(() => {
     if (runningBatchId === undefined) return;
