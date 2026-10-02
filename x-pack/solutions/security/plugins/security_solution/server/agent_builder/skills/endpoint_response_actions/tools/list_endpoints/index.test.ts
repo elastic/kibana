@@ -209,81 +209,47 @@ describe('listEndpointsTool', () => {
       }
     );
 
-    it('filters by hostname when hostNameFilter is provided', async () => {
-      const mockMetadataService = {
-        getHostMetadataList: jest.fn().mockResolvedValue({
-          data: [
-            {
-              metadata: {
-                host: { hostname: 'prod-web-01', os: { name: 'Ubuntu', version: '22.04' } },
-                agent: { id: 'agent-1' },
-                Endpoint: { state: { isolation: false } },
-              },
-              last_checkin: '2024-06-01T12:00:00Z',
-              host_status: 'healthy',
-            },
-          ],
-          total: 1,
-        }),
+    describe('hostNameFilter kuery', () => {
+      const queryFor = async (hostNameFilter: string) => {
+        const mockMetadataService = {
+          getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+        };
+        jest
+          .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+          .mockImplementation(
+            (() =>
+              mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+          );
+
+        await tool.handler({ hostNameFilter }, mockContext);
+
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          expect.any(Object),
+          // Scoped services must be threaded through, otherwise the read is
+          // origin-only under CPS and linked-project hosts disappear.
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
+        );
+        const [[calledArgs]] = mockMetadataService.getHostMetadataList.mock.calls;
+        return calledArgs as { kuery: string };
       };
 
-      jest
-        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
-        .mockImplementation(
-          (() =>
-            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+      it('wraps the filter in a wildcard on the hostname keyword field', async () => {
+        expect((await queryFor('prod-web')).kuery).toBe(
+          'united.endpoint.host.hostname: *prod-web*'
         );
+      });
 
-      await tool.handler({ hostNameFilter: 'prod-web' }, mockContext);
-
-      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-        expect.objectContaining({
-          kuery: expect.stringContaining('prod-web'),
-        }),
-        // Scoped services must be threaded through, otherwise the read is
-        // origin-only under CPS and linked-project hosts disappear.
-        expect.objectContaining({ isCpsRead: expect.any(Function) })
-      );
-    });
-
-    it('lowercases hostNameFilter before building the kuery so a capitalized filter still matches lowercase hostnames', async () => {
-      // `united.endpoint.host.hostname` is analyzed text: an unmodified
-      // wildcard is case-sensitive and 'Prod' would silently miss the real
-      // hostname 'web-prod-01'.
-      const mockMetadataService = {
-        getHostMetadataList: jest.fn().mockResolvedValue({
-          data: [
-            {
-              metadata: {
-                host: { hostname: 'web-prod-01', os: { name: 'Ubuntu', version: '22.04' } },
-                agent: { id: 'agent-1' },
-                Endpoint: { state: { isolation: false } },
-              },
-              last_checkin: '2024-06-01T12:00:00Z',
-              host_status: 'healthy',
-            },
-          ],
-          total: 1,
-        }),
-      };
-
-      jest
-        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
-        .mockImplementation(
-          (() =>
-            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+      it('escapes KQL special characters in the filter', async () => {
+        expect((await queryFor('prod-web(1)"*')).kuery).toBe(
+          String.raw`united.endpoint.host.hostname: *prod-web\(1\)\"\**`
         );
+      });
 
-      await tool.handler({ hostNameFilter: 'Prod' }, mockContext);
-
-      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
-        expect.objectContaining({
-          kuery: expect.stringContaining('prod'),
-        }),
-        expect.objectContaining({ isCpsRead: expect.any(Function) })
-      );
-      const [[calledArgs]] = mockMetadataService.getHostMetadataList.mock.calls;
-      expect((calledArgs as { kuery: string }).kuery).not.toContain('Prod');
+      it('passes the filter through case-sensitively so stored names with capitals stay matchable', async () => {
+        // `united.endpoint.host.hostname` is a `keyword` with no normalizer,
+        // so lowercasing would make `WIN-ABC123` unmatchable.
+        expect((await queryFor('WIN-ABC')).kuery).toBe('united.endpoint.host.hostname: *WIN-ABC*');
+      });
     });
 
     it('reports status "unknown", not a fabricated "offline", when an entry has no host_status', async () => {
@@ -446,6 +412,23 @@ describe('listEndpointsTool', () => {
       expect(data.page).toBe(0);
       expect(data.pageSize).toBe(50);
       expect(data.hasMore).toBe(true);
+    });
+
+    it('rejects a page beyond the cap with invalid_argument before querying', async () => {
+      const mockMetadataService = { getHostMetadataList: jest.fn() };
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
+
+      const result = await tool.handler({ page: MAX_LIST_ENDPOINTS_PAGE + 1 }, mockContext);
+      const results = assertStandardReturn(result);
+
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect((results[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+      expect(mockMetadataService.getHostMetadataList).not.toHaveBeenCalled();
     });
 
     it('reports hasMore false at the page cap even when the fleet is larger', async () => {

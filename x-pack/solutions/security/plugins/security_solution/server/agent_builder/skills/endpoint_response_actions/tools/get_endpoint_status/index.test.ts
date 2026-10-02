@@ -286,13 +286,11 @@ describe('getEndpointStatusTool', () => {
         {
           page: 0,
           pageSize: 1,
-          // Constrained by the hostname as well as the ID, so a mismatched
-          // pair cannot return another host's status. The id matches both
-          // identities: the Fleet agent id (`united.agent.agent.id`) and the
-          // endpoint's own id (top-level `agent.id`), which diverge on
-          // current agents.
-          kuery:
-            '(united.agent.agent.id: "agent-123" OR agent.id: "agent-123") AND united.endpoint.host.hostname: "my-host"',
+          // The id came from the hostname lookup, which already matched the
+          // hostname, so the read is by id alone. It matches both identities:
+          // the Fleet agent id (`united.agent.agent.id`) and the endpoint's
+          // own id (top-level `agent.id`), which diverge on current agents.
+          kuery: '(united.agent.agent.id: "agent-123" OR agent.id: "agent-123")',
         },
         // Scoped services are required for this read to fan out under CPS.
         expect.objectContaining({ isCpsRead: expect.any(Function) })
@@ -449,10 +447,11 @@ describe('getEndpointStatusTool', () => {
       expect(data.found).toBe(false);
       expect(data.reason).toBe('ambiguous_hostname');
       expect(data.candidates).toEqual([
-        { agentId: 'live-a', status: 'online' },
-        { agentId: 'live-b', status: 'online' },
+        { agentId: 'live-a', status: 'healthy' },
+        { agentId: 'live-b', status: 'healthy' },
       ]);
       expect(data.message).toContain('duplicated-host');
+      expect(data.message).not.toContain('online');
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
@@ -550,10 +549,97 @@ describe('getEndpointStatusTool', () => {
           page: 0,
           pageSize: 1,
           kuery:
-            '(united.agent.agent.id: "live-b" OR agent.id: "live-b") AND united.endpoint.host.hostname: "duplicated-host"',
+            '(united.agent.agent.id: "live-b" OR agent.id: "live-b") AND (united.endpoint.host.hostname: "duplicated-host" OR united.agent.local_metadata.host.name.keyword: "duplicated-host")',
         },
         expect.objectContaining({ isCpsRead: expect.any(Function) })
       );
+    });
+
+    describe('FQDN hostname format', () => {
+      // Fleet's `local_metadata.host.name` holds the FQDN while Defend writes
+      // the short OS name to `united.endpoint.host.hostname`.
+      const FQDN = 'web-01.example.com';
+
+      const setup = () => {
+        const mockAgentService = {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'fleet-web01', status: 'online', packages: ['endpoint'] }],
+          }),
+        };
+        const mockMetadataService = {
+          getHostMetadataList: jest.fn().mockImplementation(async ({ kuery }: { kuery: string }) =>
+            // Only a query that can match the short-name document returns it,
+            // like Elasticsearch would.
+            kuery.includes('united.endpoint.host.hostname: "web-01.example.com"') &&
+            !kuery.includes(' OR united.agent.local_metadata.host.name.keyword')
+              ? { data: [], total: 0 }
+              : {
+                  data: [
+                    {
+                      metadata: {
+                        host: { hostname: 'web-01' },
+                        Endpoint: { state: { isolation: false } },
+                      },
+                      last_checkin: '2024-05-05T00:00:00Z',
+                      host_status: 'healthy',
+                    },
+                  ],
+                  total: 1,
+                }
+          ),
+        };
+
+        jest
+          .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+          .mockImplementation((() => ({
+            agent: mockAgentService,
+            ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+          })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+        jest
+          .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+          .mockImplementation(
+            (() =>
+              mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+          );
+
+        return mockMetadataService;
+      };
+
+      it('reads status by id alone when the agent id came from resolving an FQDN hostname', async () => {
+        const mockMetadataService = setup();
+
+        const result = await tool.handler({ hostName: FQDN }, mockContext);
+
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        expect(data.agentId).toBe('fleet-web01');
+        expect(data.status).toBe('healthy');
+        // The last metadata read is the status read: id only, no hostname AND.
+        const kueries = mockMetadataService.getHostMetadataList.mock.calls.map(
+          ([query]: [{ kuery: string }]) => query.kuery
+        );
+        expect(kueries[kueries.length - 1]).toBe(
+          '(united.agent.agent.id: "fleet-web01" OR agent.id: "fleet-web01")'
+        );
+      });
+
+      it('accepts the Fleet FQDN as the hostname constraint when the caller supplies the agent id', async () => {
+        const mockMetadataService = setup();
+
+        const result = await tool.handler({ hostName: FQDN, agentId: 'fleet-web01' }, mockContext);
+
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        expect(data.agentId).toBe('fleet-web01');
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          {
+            page: 0,
+            pageSize: 1,
+            kuery: `(united.agent.agent.id: "fleet-web01" OR agent.id: "fleet-web01") AND (united.endpoint.host.hostname: "${FQDN}" OR united.agent.local_metadata.host.name.keyword: "${FQDN}")`,
+          },
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
+        );
+      });
     });
 
     it('does not report status for an agent ID that belongs to a different hostname', async () => {

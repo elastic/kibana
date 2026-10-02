@@ -92,6 +92,17 @@ export const MAX_ACTION_ERRORS = 20;
 export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
 
 /**
+ * Tool-result token budget for `get_response_action_status`. The default
+ * guardrail (20k tokens) swaps an over-size payload for a truncated preview,
+ * which would hide the structured truncation counters the model relies on.
+ * The summary is already bounded by `MAX_OUTPUT_TOTAL_CHARS` (outputs) and
+ * `MAX_AGENT_STATE_TOTAL_CHARS` (agentState) plus the hosts, parameters and
+ * errors caps, and a single retained over-budget agent can push it past 20k
+ * tokens, so the budget is raised to fit the bounded worst case.
+ */
+export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -286,6 +297,17 @@ function boundOutputValue(value: unknown, path: string, depth = 0): BoundedOutpu
 }
 
 /**
+ * Arrays nested under `ActionResponseOutput.content` that are capped per item
+ * and reported with their own total/dropped counters.
+ * `GetProcessesActionOutputContent.entries` holds one record per process,
+ * `ResponseActionGetFileOutputContent.contents` one per file in the archive.
+ */
+const OUTPUT_LIST_FIELDS = [
+  { key: 'entries', total: 'totalEntries', truncated: 'entriesTruncated' },
+  { key: 'contents', total: 'totalContents', truncated: 'contentsTruncated' },
+] as const;
+
+/**
  * Bounds an action's raw `outputs` payload into a model-safe summary.
  *
  * The raw payload is unbounded (`execute`/`runscript` stdout/stderr, one
@@ -308,59 +330,82 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
   // caps still allow the dimensions to sum to far more than one summary
   // should weigh, so agents are dropped once the serialized total exceeds
   // `MAX_OUTPUT_TOTAL_CHARS`.
-  let runningSize = 0;
+  let retainedSize = 0;
   let summaryTruncated = false;
 
   const agents: ActionOutputAgentSummary[] = [];
   for (const agentId of includedAgentIds) {
-    const raw = byAgent[agentId];
-    const record = (raw ?? {}) as Record<string, unknown>;
-    const entries = Array.isArray(record.entries) ? (record.entries as unknown[]) : undefined;
-
+    const record = (byAgent[agentId] ?? {}) as Record<string, unknown>;
     const truncatedFields: string[] = [];
     const bounded: Record<string, unknown> = {};
+    const lists: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(record)) {
-      if (key !== 'entries') {
+      if (key === 'content' && value && typeof value === 'object' && !Array.isArray(value)) {
+        // The stored shape is `{ type, content: { ...TOutputContent } }`: the
+        // per-process `entries` (get-processes) and `contents` (get-file) live
+        // under `content`, so they are lifted out and capped per item below
+        // instead of going through `boundOutputValue`, which would append a
+        // marker string into the list.
+        const rest: Record<string, unknown> = {};
+        for (const [contentKey, contentValue] of Object.entries(value)) {
+          if (OUTPUT_LIST_FIELDS.some((field) => field.key === contentKey)) {
+            lists[contentKey] = contentValue;
+          } else {
+            rest[contentKey] = contentValue;
+          }
+        }
+        const boundedContent = boundOutputValue(rest, key);
+        bounded[key] = boundedContent.value;
+        truncatedFields.push(...boundedContent.truncatedPaths);
+      } else {
         const boundedValue = boundOutputValue(value, key);
         bounded[key] = boundedValue.value;
         truncatedFields.push(...boundedValue.truncatedPaths);
       }
     }
 
-    // Each kept entry is bounded individually rather than by bounding the
+    // Each kept item is bounded individually rather than by bounding the
     // array: a marker element would change the shape callers already read,
-    // and the drop count is reported separately by `entriesTruncated`.
-    const keptEntries = entries?.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT).map((entry, index) => {
-      const boundedEntry = boundOutputValue(entry, `entries[${index}]`);
-      truncatedFields.push(...boundedEntry.truncatedPaths);
+    // and the drop count is reported separately (`entriesTruncated`,
+    // `contentsTruncated`).
+    const listSummary: Record<string, unknown> = {};
+    for (const { key, total, truncated } of OUTPUT_LIST_FIELDS) {
+      const list = lists[key];
+      if (Array.isArray(list)) {
+        const kept = list.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT).map((item, index) => {
+          const boundedItem = boundOutputValue(item, `content.${key}[${index}]`);
+          truncatedFields.push(...boundedItem.truncatedPaths);
 
-      return boundedEntry.value;
-    });
-
-    const totalEntries = entries?.length ?? 0;
+          return boundedItem.value;
+        });
+        listSummary[key] = kept;
+        listSummary[total] = list.length;
+        if (list.length > kept.length) {
+          listSummary[truncated] = list.length - kept.length;
+        }
+      } else if (key in lists) {
+        // Not an array: keep the value rather than silently dropping it.
+        const boundedValue = boundOutputValue(lists[key], `content.${key}`);
+        listSummary[key] = boundedValue.value;
+        truncatedFields.push(...boundedValue.truncatedPaths);
+      }
+    }
 
     const summary: ActionOutputAgentSummary = {
       agentId,
       ...bounded,
-      ...(keptEntries
-        ? {
-            entries: keptEntries,
-            totalEntries,
-            ...(totalEntries > keptEntries.length
-              ? { entriesTruncated: totalEntries - keptEntries.length }
-              : {}),
-          }
-        : {}),
+      ...listSummary,
       ...(truncatedFields.length ? { truncatedFields } : {}),
     };
 
-    runningSize += JSON.stringify(summary).length;
-    if (runningSize > MAX_OUTPUT_TOTAL_CHARS && agents.length > 0) {
+    const summarySize = JSON.stringify(summary).length;
+    if (retainedSize + summarySize > MAX_OUTPUT_TOTAL_CHARS && agents.length > 0) {
       summaryTruncated = true;
       break;
     }
 
+    retainedSize += summarySize;
     agents.push(summary);
   }
 
@@ -369,6 +414,7 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
   return {
     agents,
     totalAgents: agentIds.length,
+    ...(retainedSize > MAX_OUTPUT_TOTAL_CHARS ? { retainedOverBudget: true as const } : {}),
     ...(summaryTruncated ? { summaryTruncated: true as const } : {}),
     ...(agentsTruncated > 0 ? { agentsTruncated } : {}),
   };
@@ -427,12 +473,12 @@ export function summarizeAgentState(agentState: unknown): AgentStateSummary | un
 
   return {
     agentState: retained,
-    ...(retainedOverBudget ? { retainedOverBudget: true as const } : {}),
-    totalAgents: byAgentId.length,
+    ...(retainedOverBudget ? { agentStateRetainedOverBudget: true as const } : {}),
+    agentStateTotal: byAgentId.length,
     ...(totalDropped > 0
       ? {
-          agentsTruncated: totalDropped,
-          ...(cumulativeDropped > 0 ? { agentsTruncatedByBudget: cumulativeDropped } : {}),
+          agentStateTruncated: totalDropped,
+          ...(cumulativeDropped > 0 ? { agentStateTruncatedByBudget: cumulativeDropped } : {}),
         }
       : {}),
   };
@@ -471,16 +517,21 @@ export interface ActionHostsSummary {
 
 export interface AgentStateSummary {
   agentState: Record<string, unknown>;
-  totalAgents: number;
-  agentsTruncated?: number;
-  /** How many agents were dropped specifically by the cumulative budget (subset of `agentsTruncated`). */
-  agentsTruncatedByBudget?: number;
+  /**
+   * The `agentState` counters carry the `agentState` prefix because the
+   * summary is spread next to `hosts` and `outputs`, which report their own
+   * (different) agent counts.
+   */
+  agentStateTotal: number;
+  agentStateTruncated?: number;
+  /** How many agents were dropped specifically by the cumulative budget (subset of `agentStateTruncated`). */
+  agentStateTruncatedByBudget?: number;
   /**
    * Set when the single retained entry still exceeds `MAX_AGENT_STATE_TOTAL_CHARS`.
    * Kept deliberately (a too-big sample beats none) — consumers should not
-   * read `agentsTruncatedByBudget: 0` as "within budget".
+   * read an absent `agentStateTruncatedByBudget` as "within budget".
    */
-  retainedOverBudget?: true;
+  agentStateRetainedOverBudget?: true;
 }
 
 export interface ActionErrorsSummary {
@@ -537,9 +588,14 @@ export interface ActionParametersSummary {
 
 export interface ActionOutputAgentSummary {
   agentId: string;
+  /** `content.entries` (get-processes), capped at `MAX_OUTPUT_ENTRIES_PER_AGENT`. */
   entries?: unknown[];
   totalEntries?: number;
   entriesTruncated?: number;
+  /** `content.contents` (get-file), capped at `MAX_OUTPUT_ENTRIES_PER_AGENT`. */
+  contents?: unknown[];
+  totalContents?: number;
+  contentsTruncated?: number;
   truncatedFields?: string[];
   [key: string]: unknown;
 }
@@ -548,8 +604,14 @@ export interface ActionOutputsSummary {
   agents: ActionOutputAgentSummary[];
   totalAgents: number;
   agentsTruncated?: number;
-  /** Set when the cumulative `MAX_OUTPUT_TOTAL_CHARS` budget was exceeded. */
+  /** Set when further agents were dropped because the cumulative `MAX_OUTPUT_TOTAL_CHARS` budget was exceeded. */
   summaryTruncated?: true;
+  /**
+   * Set when the retained agents alone exceed `MAX_OUTPUT_TOTAL_CHARS`. The
+   * first agent is always kept (a too-big sample beats none), so with one
+   * agent `summaryTruncated` can never fire.
+   */
+  retainedOverBudget?: true;
 }
 
 /**

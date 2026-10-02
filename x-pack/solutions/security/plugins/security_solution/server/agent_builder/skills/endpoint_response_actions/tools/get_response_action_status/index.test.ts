@@ -20,7 +20,12 @@ import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import { getResponseActionStatusTool } from '.';
-import { MAX_ACTION_ERRORS, MAX_ACTION_HOSTS, MAX_AGENT_STATE_ENTRIES } from '../types';
+import {
+  GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
+  MAX_ACTION_ERRORS,
+  MAX_ACTION_HOSTS,
+  MAX_AGENT_STATE_ENTRIES,
+} from '../types';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -297,7 +302,19 @@ describe('getResponseActionStatusTool', () => {
     expect(data.totalHosts).toBe(120);
     expect(data.hostsTruncated).toBe(120 - MAX_ACTION_HOSTS);
     expect(Object.keys(data.agentState as object)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
-    expect(data.agentsTruncated).toBe(120 - MAX_AGENT_STATE_ENTRIES);
+    // Counters are scoped to the field they describe: `agentState*` for
+    // agentState, never a bare `totalAgents`/`agentsTruncated` next to `hosts`.
+    expect(data.agentStateTotal).toBe(120);
+    expect(data.agentStateTruncated).toBe(120 - MAX_AGENT_STATE_ENTRIES);
+    expect(data).not.toHaveProperty('totalAgents');
+    expect(data).not.toHaveProperty('agentsTruncated');
+  });
+
+  it('raises the tool result token budget above the default guardrail', () => {
+    const tool = getResponseActionStatusTool(service);
+
+    expect(tool.maxResultTokens).toBe(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS);
+    expect(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS).toBeGreaterThan(20_000);
   });
 
   it('returns ToolResultType.error for unexpected lookup failures', async () => {

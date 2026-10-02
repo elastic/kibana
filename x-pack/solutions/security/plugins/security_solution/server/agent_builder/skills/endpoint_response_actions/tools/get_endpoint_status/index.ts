@@ -162,7 +162,7 @@ export const getEndpointStatusTool = (
                       : {}),
                     message: resolved.truncated
                       ? `More endpoints match the hostname "${hostName}" than could be examined, so it cannot be resolved to a single host. Ask the analyst which agent ID they mean, then call this tool again with that agentId.`
-                      : `Multiple online endpoints share the hostname "${hostName}". Ask the analyst which agent ID they mean, then call this tool again with that agentId.`,
+                      : `Multiple endpoints share the hostname "${hostName}". Ask the analyst which agent ID they mean, then call this tool again with that agentId.`,
                   } satisfies AmbiguousHostnameResult,
                 },
               ],
@@ -176,39 +176,37 @@ export const getEndpointStatusTool = (
         // above for the lookup) is threaded through so this read also fans out
         // to linked projects under CPS.
         //
-        // The caller-supplied `agentId` path is constrained by the hostname as
-        // well, not just the id. A model pairing a candidate id with the wrong
-        // hostname would otherwise be told that other machine's isolation and
-        // status under the hostname it asked about — reporting the wrong host
-        // is exactly the failure the ambiguity branch exists to prevent, so the
-        // id is a disambiguator within this hostname, not a bypass of it. The
-        // query is still filtered to the policies visible in this space, so an
-        // agent from another space stays invisible here as in `list_endpoints`.
-        // The id matches on EITHER identity: `united.agent.agent.id` is the
-        // Fleet agent id (what the lookup resolves and what `list_endpoints`-
-        // style Fleet flows hand over), while the united doc's top-level
-        // `agent.id` is the endpoint's own id (what metadata-backed surfaces
-        // and older callers carry). The two diverge on current agents, so
-        // filtering on only one silently reports the host as not-found when
-        // the caller holds the other.
-        // hostName is optional when the caller supplies agentId: without it
-        // the id alone selects the host and the hostname is derived from the
-        // matched metadata below; with it the hostname constraint is retained
-        // so a mismatched id+name pair reports not-found rather than the
-        // wrong host.
+        // A caller-supplied `agentId` is constrained by the hostname as well,
+        // so a model pairing a candidate id with the wrong hostname is not told
+        // another machine's isolation and status under the name it asked about.
+        // When the id came from `resolveByHostName` the hostname was already
+        // matched, and re-applying it would miss: Fleet's
+        // `local_metadata.host.name` holds the FQDN under the FQDN policy
+        // hostname format while Defend writes the short name to
+        // `united.endpoint.host.hostname`. The constraint therefore accepts
+        // either spelling. The query is filtered to the policies visible in
+        // this space.
+        //
+        // The id matches EITHER identity: `united.agent.agent.id` is the Fleet
+        // agent id, the top-level `agent.id` is the endpoint's own id, and the
+        // two diverge on current agents.
+        //
         // Quoted: `escapeKuery` leaves plain spaces unescaped, so an unquoted
         // ID with a space would parse as separate terms and, with pageSize 1,
         // could return another endpoint's status as a successful lookup.
         const quotedAgentId = `"${escapeQuotes(agentId)}"`;
         const idKuery = `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`;
+        const quotedHostName = hostName ? `"${escapeQuotes(hostName)}"` : undefined;
+        const kuery =
+          requestedAgentId && quotedHostName
+            ? `${idKuery} AND (united.endpoint.host.hostname: ${quotedHostName} OR united.agent.local_metadata.host.name.keyword: ${quotedHostName})`
+            : idKuery;
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
         const hostInfo = await metadataService.getHostMetadataList(
           {
             page: 0,
             pageSize: 1,
-            kuery: hostName
-              ? `${idKuery} AND united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`
-              : idKuery,
+            kuery,
           },
           scoped
         );

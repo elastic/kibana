@@ -6,6 +6,7 @@
  */
 
 import { escapeQuotes } from '@kbn/es-query';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { HostStatus } from '../../../../../../common/endpoint/types';
@@ -14,6 +15,7 @@ import type {
   ScopedEndpointServices,
 } from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
+import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils/fleet_agent_status_to_endpoint_host_status';
 import { resolveAgentTypeFromPackages } from '../types';
 
 /**
@@ -328,7 +330,13 @@ export function createEndpointLookupService(
         isLive: !['offline', 'inactive', 'unenrolled', 'uninstalled', 'decommissioned'].includes(
           candidate.status ?? ''
         ),
-        status: candidate.status ?? 'unknown',
+        // Reported in the `HostStatus` vocabulary every other status the tool
+        // returns uses (metadata candidates, the found result); `isLive`
+        // above stays on the raw Fleet status, where the active/gone
+        // distinction is defined.
+        status: candidate.status
+          ? fleetAgentStatusToEndpointHostStatus(candidate.status as AgentStatus)
+          : 'unknown',
         packages: candidate.packages,
         sortKey: candidate.enrolled_at,
       }));

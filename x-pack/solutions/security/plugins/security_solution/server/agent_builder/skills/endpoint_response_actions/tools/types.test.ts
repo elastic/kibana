@@ -20,6 +20,7 @@ import {
   MAX_OUTPUT_DEPTH,
   MAX_OUTPUT_ENTRIES_PER_AGENT,
   MAX_OUTPUT_STRING_LENGTH,
+  MAX_OUTPUT_TOTAL_CHARS,
 } from './types';
 import { ToolResultType } from '@kbn/agent-builder-common';
 
@@ -123,6 +124,38 @@ describe('summarizeActionOutputs', () => {
     expect(result.agents[0].agentId).toBe('agent-1');
   });
 
+  it('flags a single retained agent summary that exceeds the total budget', () => {
+    const oversized = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+
+    const result = summarizeActionOutputs({ 'agent-1': oversized })!;
+
+    expect(JSON.stringify(result.agents[0]).length).toBeGreaterThan(MAX_OUTPUT_TOTAL_CHARS);
+    expect(result.retainedOverBudget).toBe(true);
+    expect(result.summaryTruncated).toBeUndefined();
+  });
+
+  it('does not flag retainedOverBudget when the retained summaries fit the budget', () => {
+    const result = summarizeActionOutputs({ 'agent-1': { stdout: 'ok' } })!;
+
+    expect(result.retainedOverBudget).toBeUndefined();
+  });
+
+  it('drops trailing agents once the cumulative budget is exceeded and reports summaryTruncated', () => {
+    const big = Object.fromEntries(
+      Array.from({ length: 20 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+
+    const result = summarizeActionOutputs({ 'agent-1': big, 'agent-2': big, 'agent-3': big })!;
+
+    expect(result.agents.map((agent) => agent.agentId)).toEqual(['agent-1']);
+    expect(result.summaryTruncated).toBe(true);
+    expect(result.totalAgents).toBe(3);
+    expect(result.agentsTruncated).toBe(2);
+    expect(result.retainedOverBudget).toBeUndefined();
+  });
+
   it('returns undefined when there are no outputs', () => {
     expect(summarizeActionOutputs(undefined)).toBeUndefined();
     expect(summarizeActionOutputs(null)).toBeUndefined();
@@ -130,11 +163,19 @@ describe('summarizeActionOutputs', () => {
 
   it('passes small outputs through unchanged', () => {
     const result = summarizeActionOutputs({
-      'agent-1': { entries: [{ stdout: 'ok' }] },
+      'agent-1': { type: 'json', content: { entries: [{ stdout: 'ok' }] } },
     });
 
     expect(result).toEqual({
-      agents: [{ agentId: 'agent-1', entries: [{ stdout: 'ok' }], totalEntries: 1 }],
+      agents: [
+        {
+          agentId: 'agent-1',
+          type: 'json',
+          content: {},
+          entries: [{ stdout: 'ok' }],
+          totalEntries: 1,
+        },
+      ],
       totalAgents: 1,
     });
   });
@@ -142,7 +183,7 @@ describe('summarizeActionOutputs', () => {
   it('caps the number of agents and reports how many were dropped', () => {
     const outputs: Record<string, unknown> = {};
     for (let i = 0; i < MAX_OUTPUT_AGENTS + 3; i++) {
-      outputs[`agent-${i}`] = { entries: [] };
+      outputs[`agent-${i}`] = { content: { entries: [] } };
     }
 
     const result = summarizeActionOutputs(outputs)!;
@@ -155,11 +196,26 @@ describe('summarizeActionOutputs', () => {
   it('caps entries per agent and reports the dropped count', () => {
     const entries = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT + 5 }, (_, i) => ({ i }));
 
-    const result = summarizeActionOutputs({ 'agent-1': { entries } })!;
+    const result = summarizeActionOutputs({ 'agent-1': { content: { entries } } })!;
 
     expect(result.agents[0].entries).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].entries).toEqual(entries.slice(0, MAX_OUTPUT_ENTRIES_PER_AGENT));
     expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 5);
     expect(result.agents[0].entriesTruncated).toBe(5);
+    expect(result.agents[0].truncatedFields).toBeUndefined();
+  });
+
+  it('caps get-file contents per agent and reports the dropped count', () => {
+    const contents = Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT + 3 }, (_, i) => ({
+      path: `/tmp/file-${i}`,
+    }));
+
+    const result = summarizeActionOutputs({ 'agent-1': { content: { code: 'ok', contents } } })!;
+
+    expect(result.agents[0].contents).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+    expect(result.agents[0].totalContents).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 3);
+    expect(result.agents[0].contentsTruncated).toBe(3);
+    expect(result.agents[0].content).toEqual({ code: 'ok' });
   });
 
   it('truncates oversized string fields and names them', () => {
@@ -204,22 +260,76 @@ describe('summarizeActionOutputs', () => {
 
       const result = summarizeActionOutputs({ 'agent-1': { content: { entries } } })!;
 
-      const content = result.agents[0].content as { entries: unknown[] };
-      expect(content.entries).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT + 1);
-      expect(String(content.entries[MAX_OUTPUT_ENTRIES_PER_AGENT])).toContain('5 more items');
-      expect(result.agents[0].truncatedFields).toEqual(['content.entries']);
+      // No marker string is appended into the process list.
+      expect(result.agents[0].entries).toHaveLength(MAX_OUTPUT_ENTRIES_PER_AGENT);
+      expect(result.agents[0].entries!.every((entry) => typeof entry === 'object')).toBe(true);
+      expect(result.agents[0].totalEntries).toBe(MAX_OUTPUT_ENTRIES_PER_AGENT + 5);
+      expect(result.agents[0].entriesTruncated).toBe(5);
     });
 
-    it('bounds payloads nested deeper than the depth limit', () => {
+    it('bounds oversized strings inside kept entries and names the path', () => {
+      const result = summarizeActionOutputs({
+        'agent-1': {
+          content: {
+            entries: [{ pid: 1 }, { command: 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 10) }],
+          },
+        },
+      })!;
+
+      expect(result.agents[0].truncatedFields).toEqual(['content.entries[1].command']);
+      expect(result.agents[0].totalEntries).toBe(2);
+    });
+
+    it('serializes values nested deeper than the depth limit instead of walking them', () => {
+      // Short leaf: neither the string bound nor the overall size can trigger,
+      // so only the depth limit explains the serialized value.
+      let nested: unknown = { leaf: 'ok' };
+      for (let level = 0; level < MAX_OUTPUT_DEPTH; level++) {
+        nested = { [`level${level}`]: nested };
+      }
+
+      const result = summarizeActionOutputs({ 'agent-1': { content: nested } })!;
+
+      const content = result.agents[0].content as Record<string, unknown>;
+      let cursor: unknown = content;
+      for (let level = MAX_OUTPUT_DEPTH - 1; level >= 1; level--) {
+        cursor = (cursor as Record<string, unknown>)[`level${level}`];
+      }
+      expect(typeof (cursor as Record<string, unknown>).level0).toBe('string');
+      expect((cursor as Record<string, unknown>).level0).toBe('{"leaf":"ok"}');
+      expect(result.agents[0].truncatedFields).toBeUndefined();
+    });
+
+    it('serializes an array nested deeper than the depth limit', () => {
+      let nested: unknown = [1, 2, 3];
+      for (let level = 0; level < MAX_OUTPUT_DEPTH; level++) {
+        nested = { [`level${level}`]: nested };
+      }
+
+      const result = summarizeActionOutputs({ 'agent-1': { content: nested } })!;
+
+      let cursor = result.agents[0].content as Record<string, unknown>;
+      for (let level = MAX_OUTPUT_DEPTH - 1; level >= 1; level--) {
+        cursor = cursor[`level${level}`] as Record<string, unknown>;
+      }
+      expect(cursor.level0).toBe('[1,2,3]');
+    });
+
+    it('reports the path of an oversized value found beyond the depth limit', () => {
       let nested: unknown = { stdout: 'x'.repeat(MAX_OUTPUT_STRING_LENGTH + 500) };
-      for (let level = 0; level <= MAX_OUTPUT_DEPTH; level++) {
+      for (let level = 0; level < MAX_OUTPUT_DEPTH; level++) {
         nested = { [`level${level}`]: nested };
       }
 
       const result = summarizeActionOutputs({ 'agent-1': { content: nested } })!;
 
       expect(JSON.stringify(result).length).toBeLessThan(MAX_OUTPUT_STRING_LENGTH * 3);
-      expect(result.agents[0].truncatedFields?.length).toBeGreaterThan(0);
+      expect(result.agents[0].truncatedFields).toEqual([
+        `content.${Array.from(
+          { length: MAX_OUTPUT_DEPTH },
+          (_, i) => `level${MAX_OUTPUT_DEPTH - 1 - i}`
+        ).join('.')}`,
+      ]);
     });
 
     it('leaves small nested payloads unchanged', () => {
@@ -227,7 +337,8 @@ describe('summarizeActionOutputs', () => {
         'agent-1': { type: 'json', content: { code: 'success', entries: [{ pid: 1 }] } },
       })!;
 
-      expect(result.agents[0].content).toEqual({ code: 'success', entries: [{ pid: 1 }] });
+      expect(result.agents[0].content).toEqual({ code: 'success' });
+      expect(result.agents[0].entries).toEqual([{ pid: 1 }]);
       expect(result.agents[0].truncatedFields).toBeUndefined();
     });
   });
@@ -276,7 +387,7 @@ describe('summarizeAgentState', () => {
     );
     const result = summarizeAgentState({ 'agent-1': oversized })!;
     expect(Object.keys(result.agentState)).toEqual(['agent-1']);
-    expect(result.retainedOverBudget).toBe(true);
+    expect(result.agentStateRetainedOverBudget).toBe(true);
   });
 
   it('returns undefined when there is no agent state', () => {
@@ -290,7 +401,7 @@ describe('summarizeAgentState', () => {
       })
     ).toEqual({
       agentState: { 'agent-1': { isCompleted: true, wasSuccessful: true, wasCanceled: false } },
-      totalAgents: 1,
+      agentStateTotal: 1,
     });
   });
 
@@ -303,8 +414,8 @@ describe('summarizeAgentState', () => {
     const result = summarizeAgentState(agentState)!;
 
     expect(Object.keys(result.agentState)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
-    expect(result.totalAgents).toBe(MAX_AGENT_STATE_ENTRIES + 2);
-    expect(result.agentsTruncated).toBe(2);
+    expect(result.agentStateTotal).toBe(MAX_AGENT_STATE_ENTRIES + 2);
+    expect(result.agentStateTruncated).toBe(2);
   });
 
   it('enforces the cumulative serialized budget across retained agent states', () => {
@@ -330,9 +441,9 @@ describe('summarizeAgentState', () => {
         JSON.stringify(result.agentState['agent-0']).length + oneAgentOverhead
       )
     );
-    expect(result.totalAgents).toBe(MAX_AGENT_STATE_ENTRIES);
-    expect(result.agentsTruncatedByBudget).toBeGreaterThan(0);
-    expect(result.agentsTruncated).toBe(
+    expect(result.agentStateTotal).toBe(MAX_AGENT_STATE_ENTRIES);
+    expect(result.agentStateTruncatedByBudget).toBeGreaterThan(0);
+    expect(result.agentStateTruncated).toBe(
       MAX_AGENT_STATE_ENTRIES - Object.keys(result.agentState).length
     );
   });

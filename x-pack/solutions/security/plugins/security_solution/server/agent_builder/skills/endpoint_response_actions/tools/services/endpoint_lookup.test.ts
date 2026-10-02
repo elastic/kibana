@@ -224,8 +224,42 @@ describe('createEndpointLookupService', () => {
       kind: 'ambiguous',
       // Newest enrolled first, matching the single-match tiebreak.
       candidates: [
-        { agentId: 'live-b', status: 'online' },
-        { agentId: 'live-a', status: 'online' },
+        { agentId: 'live-b', status: HostStatus.HEALTHY },
+        { agentId: 'live-a', status: HostStatus.HEALTHY },
+      ],
+    });
+  });
+
+  it('reports Fleet candidate status in the HostStatus vocabulary while isLive follows the raw Fleet status', async () => {
+    // `updating` and `degraded` are active machines (isLive), but the
+    // reported status must be the `HostStatus` value the UI shows, never the
+    // raw Fleet `AgentStatus`.
+    const { lookup } = buildService({
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          {
+            id: 'updating-a',
+            status: 'updating',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'degraded-b',
+            status: 'degraded',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:00:00.000Z',
+          },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('duplicated-host');
+
+    expect(result).toEqual({
+      kind: 'ambiguous',
+      candidates: [
+        { agentId: 'degraded-b', status: HostStatus.UNHEALTHY },
+        { agentId: 'updating-a', status: HostStatus.UPDATING },
       ],
     });
   });
@@ -723,7 +757,7 @@ describe('createEndpointLookupService', () => {
       expect(result).toEqual({
         kind: 'ambiguous',
         candidates: [
-          { agentId: 'origin-live', status: 'online' },
+          { agentId: 'origin-live', status: HostStatus.HEALTHY },
           { agentId: 'linked-live', status: HostStatus.HEALTHY },
         ],
       });
