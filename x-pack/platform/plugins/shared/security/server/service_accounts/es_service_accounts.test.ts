@@ -136,6 +136,17 @@ describe('EsServiceAccounts', () => {
   });
 
   describe('#create', () => {
+    it('rejects platform assumers, which this backend cannot grant', async () => {
+      await expect(
+        serviceAccounts.create(request, {
+          ...createParams,
+          trustedPlatformAssumers: ['relay'],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('persists the description in Elasticsearch and returns it to callers', async () => {
       mockHappyPath();
       const description = 'Reads events for investigation workflows.';
@@ -713,6 +724,50 @@ describe('EsServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Could not determine whether the failed create')
       );
+    });
+  });
+
+  describe('#delete', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+
+    it('deletes the token, the account, and the stored credential', async () => {
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toBeUndefined();
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+        1,
+        { method: 'DELETE', path: TOKEN_PATH },
+        { ignore: [404] }
+      );
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+        2,
+        {
+          method: 'DELETE',
+          path: ACCOUNT_PATH,
+          querystring: { force: 'true' },
+        },
+        { ignore: [404] }
+      );
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+    });
+
+    it('rejects when the caller lacks `manage_security` and does not call Elasticsearch', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
+    it('rejects an id outside the kibana namespace', async () => {
+      await expect(serviceAccounts.delete(request, 'elastic/fleet-server')).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
   });
 

@@ -16,7 +16,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -167,7 +167,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     try {
       const account = await this.createAccount(request, params);
@@ -185,9 +185,58 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
+  async delete(request: KibanaRequest, id: string): Promise<void> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot delete a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'delete a service account',
+    });
+
+    const principal = parseEsServiceAccountId(id);
+    if (
+      !principal ||
+      principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
+      principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
+      !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
+    ) {
+      throw Boom.badRequest('Invalid Elasticsearch service account ID.');
+    }
+
+    const { namespace, name } = principal;
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+
+    await esClient.transport.request(
+      {
+        method: 'DELETE',
+        path:
+          `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
+          `/credential/token/${encodeURIComponent(ES_SERVICE_ACCOUNT_TOKEN_NAME)}`,
+      },
+      { ignore: [404] }
+    );
+    // Elasticsearch refuses an unforced delete while any token remains.
+    await esClient.transport.request(
+      {
+        method: 'DELETE',
+        path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
+        querystring: { force: 'true' },
+      },
+      { ignore: [404] }
+    );
+    await this.credentialStore.delete(id);
+  }
+
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -216,6 +265,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
+    if (params.trustedPlatformAssumers?.length) {
+      throw Boom.badRequest(
+        'Cannot create a service account: platform assumers are not supported on this deployment.'
+      );
+    }
+
+    // The schema refuses an empty `roles` rather than letting it fall through to the derivation
+    // below, which would answer an explicit "no roles" with the widest possible grant.
     const { name, roles, description } = parseCreateServiceAccountParams(
       params,
       ES_SERVICE_ACCOUNT_ROLE_LIMITS
@@ -752,13 +809,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    // While the account may still be alive, this credential is Kibana's one record of the token
-    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
-    // so the credential outlives a rollback that could not finish.
     if (!accountDeleted) {
       return;
     }
 
+    // While the account may still be alive, this credential is Kibana's one record of the token
+    // it holds. Dropping that record is the one outcome worse than the failure that got us here,
+    // so the credential outlives a rollback that could not finish.
     // The delete is idempotent, so the paths that never reached `set` cost nothing here.
     try {
       await this.credentialStore.delete(principal);

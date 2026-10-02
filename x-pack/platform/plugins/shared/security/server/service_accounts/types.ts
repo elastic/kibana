@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
-  CreateServiceAccountParams,
+  CreateServiceAccountServerParams,
   ServiceAccount,
   UiamProjectType,
 } from '@kbn/core-security-server';
@@ -36,7 +36,9 @@ export interface ListServiceAccountsParams {
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  delete(request: KibanaRequest, id: string): Promise<void>;
 
   /**
    * Lists the service accounts this Kibana can see, one page at a time.

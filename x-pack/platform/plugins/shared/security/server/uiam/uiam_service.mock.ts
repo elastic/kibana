@@ -54,6 +54,7 @@ export const uiamServiceMock = {
       assumable_by: [],
     }),
     listServiceAccounts: jest.fn().mockResolvedValue({ service_accounts: [] }),
+    revokeServiceAccount: jest.fn().mockResolvedValue(undefined),
     getServiceAccount: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',
       type: 'organization' as const,

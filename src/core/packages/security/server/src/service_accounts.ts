@@ -19,6 +19,27 @@ import type {
 } from '@kbn/core-security-common';
 
 /**
+ * Platform assumers Kibana may place on a service account. The security plugin
+ * resolves each name to an id; callers cannot supply a raw principal.
+ *
+ * @public
+ */
+export const TRUSTED_PLATFORM_SERVICE_ACCOUNTS = ['relay'] as const;
+
+/** @public */
+export type TrustedPlatformServiceAccountName = (typeof TRUSTED_PLATFORM_SERVICE_ACCOUNTS)[number];
+
+/**
+ * Server-side create parameters. `trustedPlatformAssumers` is not part of the
+ * HTTP body: that schema stays `{ name }` and rejects anything else.
+ *
+ * @public
+ */
+export interface CreateServiceAccountServerParams extends CreateServiceAccountParams {
+  trustedPlatformAssumers?: readonly TrustedPlatformServiceAccountName[];
+}
+
+/**
  * Core's service accounts service.
  *
  * The workload methods are scoped to the calling plugin: Core supplies the plugin's id from its
@@ -35,13 +56,19 @@ export interface CoreServiceAccountsService {
   isEnabled(): boolean;
 
   /**
-   * Create a service account with the given roles, bounded by the privileges of the user bound to
-   * the provided request. Requires the `manage_security` cluster privilege.
+   * Create a service account whose privileges are bounded by those of the user
+   * bound to the provided request.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name and roles for the new service account.
+   * @param params The name, plus any named platform assumers. Assumer ids are resolved
+   * in the security plugin and are not accepted from an HTTP body.
    */
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  /**
+   * Revokes a service account. Requires `manage_security`.
+   */
+  delete(request: KibanaRequest, id: string): Promise<void>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is

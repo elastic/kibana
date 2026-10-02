@@ -11,7 +11,7 @@ import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { Logger } from '@kbn/logging';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import type {
   CheckPrivileges,
   CheckPrivilegesResponse,
@@ -41,7 +41,7 @@ describe('UiamServiceAccounts', () => {
   let mockUiam: jest.Mocked<UiamServicePublic>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
-  let logger: Logger;
+  let logger: MockedLogger;
   let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
@@ -99,7 +99,7 @@ describe('UiamServiceAccounts', () => {
   beforeEach(() => {
     mockLicense = licenseMock.create();
     mockLicense.isEnabled.mockReturnValue(true);
-    logger = loggingSystemMock.create().get('service-accounts');
+    logger = loggingSystemMock.create().get('service-accounts') as MockedLogger;
     mockUiam = uiamServiceMock.create();
     getCurrentUser = jest.fn().mockReturnValue(null);
     mockCheckPrivileges = {
@@ -319,6 +319,58 @@ describe('UiamServiceAccounts', () => {
       });
     });
 
+    it('resolves the Relay assumer server-side and drops a caller-supplied principal', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        assumable_by: [
+          ...validResponse.assumable_by,
+          { type: 'platform-service-account', service_account_id: 'relay-service' },
+        ],
+      });
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        name: 'nightshift-relay',
+        roles: ['editor'],
+        trustedPlatformAssumers: ['relay'],
+        assumable_by: [{ type: 'platform-service-account', service_account_id: 'attacker' }],
+      } as never);
+
+      const [, body] = mockUiam.createServiceAccount.mock.calls[0];
+      expect(body.assumable_by).toEqual([
+        {
+          type: 'project-service-account',
+          organization_id: 'organization-id',
+          project_type: 'security',
+          project_id: 'project-id',
+        },
+        { type: 'platform-service-account', service_account_id: 'relay-service' },
+      ]);
+      expect(JSON.stringify(body)).not.toContain('attacker');
+    });
+
+    it('refuses an account UIAM created without the Relay assumer and does not return it', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        assumable_by: [
+          ...validResponse.assumable_by,
+          { type: 'platform-service-account', service_account_id: 'attacker-principal' },
+        ],
+      });
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          name: 'nightshift-relay',
+          roles: ['editor'],
+          trustedPlatformAssumers: ['relay'],
+        })
+      ).rejects.toThrow(/not registered/);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Refusing service account [nightshift-relay] UIAM created without the required platform assumer. It may need to be removed manually.'
+      );
+      expect(JSON.stringify(logger.error.mock.calls)).not.toContain('attacker-principal');
+    });
+
     it.each(['Bearer essu_my_token', 'ApiKey essu_key'])(
       'rejects %s when the caller lacks the `manage_security` cluster privilege',
       async (authorization) => {
@@ -521,6 +573,41 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).rejects.toBe(error);
+    });
+  });
+
+  describe('#delete', () => {
+    it('requires `manage_security` and revokes the account as Kibana', async () => {
+      const request = createMockRequest('Bearer essu_my_token');
+
+      await expect(serviceAccounts.delete(request, 'service-account-id')).resolves.toBeUndefined();
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(mockUiam.revokeServiceAccount).toHaveBeenCalledTimes(1);
+      expect(mockUiam.revokeServiceAccount).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('rejects when the caller lacks `manage_security` and does not call UIAM', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refused to delete a service account: missing `manage_security` cluster privilege'
+      );
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('propagates a UIAM refusal', async () => {
+      mockUiam.revokeServiceAccount.mockRejectedValue(Boom.forbidden('not assumable'));
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
     });
   });
 

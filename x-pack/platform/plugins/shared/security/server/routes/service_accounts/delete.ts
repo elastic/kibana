@@ -11,18 +11,18 @@ import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineGetServiceAccountRoute({
+export function defineDeleteServiceAccountRoute({
   router,
   getServiceAccountsService,
 }: RouteDefinitionParams) {
-  router.get(
+  router.delete(
     {
       path: '/internal/security/service_account/{id}',
       security: {
         authz: {
           enabled: false,
           reason:
-            'This route delegates authorization to the service accounts backend, which requires the `read_security` cluster privilege',
+            'This route delegates authorization to the service accounts backend, which requires the `manage_security` cluster privilege',
         },
       },
       validate: { params: serviceAccountIdParamsSchema },
@@ -37,9 +37,8 @@ export function defineGetServiceAccountRoute({
           return response.notFound(serviceAccountsUnavailable('the feature is disabled'));
         }
 
-        return response.ok({
-          body: await serviceAccounts.backend.get(request, request.params.id),
-        });
+        await serviceAccounts.backend.delete(request, request.params.id);
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }

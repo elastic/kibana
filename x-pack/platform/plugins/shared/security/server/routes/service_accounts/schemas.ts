@@ -71,6 +71,6 @@ export const listServiceAccountsQuerySchema = z.object({
   after: z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
 
-export const getServiceAccountParamsSchema = z.object({
+export const serviceAccountIdParamsSchema = z.object({
   id: serviceAccountIdSchema.min(1),
 });
