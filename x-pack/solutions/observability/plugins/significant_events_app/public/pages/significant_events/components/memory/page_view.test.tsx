@@ -32,6 +32,9 @@ const givenCapabilities = (nightshift: Record<string, boolean>) => {
   mockUseKibana.mockReturnValue({
     core: {
       application: { capabilities: { nightshift } },
+      // The source-task link builds its href through basePath, so the shape has to
+      // be here even though the other tests do not assert on the link.
+      http: { basePath: { prepend: (path: string) => path } },
     },
   } as unknown as ReturnType<typeof useKibana>);
 };
@@ -207,5 +210,24 @@ describe('MemoryPageView', () => {
         'version conflict'
       );
     });
+  });
+
+  it('links to the conversation that produced the memory', () => {
+    mockUseMemoryPage.mockReturnValue(
+      asDetail({ conversation_id: 'conv-1', agent_id: 'nightshift.investigation' })
+    );
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemorySourceTaskLink')).toHaveAttribute(
+      'href',
+      '/app/agent_builder/agents/nightshift.investigation/conversations/conv-1'
+    );
+  });
+
+  it('omits the source-task link for a memory with no recorded conversation', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.queryByTestId('nightshiftMemorySourceTaskLink')).not.toBeInTheDocument();
   });
 });

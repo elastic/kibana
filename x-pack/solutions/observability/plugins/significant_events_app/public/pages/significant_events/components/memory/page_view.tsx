@@ -26,6 +26,7 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { MemoryLineage } from './lineage';
+import { MemorySourceTaskLink } from './source_task_link';
 import { MemoryTelemetryPanel } from './telemetry_panel';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
 
@@ -181,6 +182,9 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
 
       <EuiSpacer size="s" />
       <MemoryTelemetryPanel page={page} usefulness={data.usefulness} confidence={data.confidence} />
+
+      <EuiSpacer size="xs" />
+      <MemorySourceTaskLink page={page} />
 
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
