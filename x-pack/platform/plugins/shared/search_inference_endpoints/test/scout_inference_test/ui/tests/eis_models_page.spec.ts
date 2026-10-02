@@ -88,7 +88,9 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
 
     await test.step('deprecated model card renders the end-of-life date without a status badge', async () => {
       await expect(eisModels.modelCard('OpenAI GPT-3.5')).toBeVisible();
-      await expect(eisModels.modelCardMeta('OpenAI GPT-3.5')).toBeVisible();
+      await expect(eisModels.modelCardMeta('OpenAI GPT-3.5')).toHaveText(
+        'Nearing end-of-life: 2099-01-01'
+      );
       await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'deprecated')).toBeHidden();
       await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'eol')).toBeHidden();
     });
@@ -96,7 +98,7 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await test.step('EOL model card renders the end-of-life date once those models are shown', async () => {
       await eisModels.showEndOfLifeModels();
       await expect(eisModels.modelCard('OpenAI Davinci')).toBeVisible();
-      await expect(eisModels.modelCardMeta('OpenAI Davinci')).toBeVisible();
+      await expect(eisModels.modelCardMeta('OpenAI Davinci')).toHaveText('End-of-life: 2020-01-01');
       await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'eol')).toBeHidden();
       await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'deprecated')).toBeHidden();
     });
