@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InvestigationSeverity } from '../../../common';
+import type { InvestigationSeverity } from '../../../../common';
 
 export const INVESTIGATION_SEVERITY_LABELS: Record<InvestigationSeverity, string> = {
   low: i18n.translate('xpack.agenticInvestigations.investigations.severity.low', {

@@ -24,7 +24,9 @@ import type {
 } from './types';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
-  const { InvestigationCard } = await import('./investigations/components/investigation_card');
+  const { InvestigationCard } = await import(
+    './conversation_templates/templates/investigation/card'
+  );
   return { default: InvestigationCard };
 });
 
