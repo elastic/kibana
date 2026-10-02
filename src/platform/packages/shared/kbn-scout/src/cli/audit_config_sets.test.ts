@@ -10,10 +10,14 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import { testConfigs } from '@kbn/scout-reporting';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
+import { getScoutCiExcludedConfigs } from '../tests_discovery/search_configs';
 import { auditConfigSets, findSetsRunInCi, KEEP_SEPARATE } from './audit_config_sets';
 
 jest.mock('@kbn/repo-packages', () => ({ getPackages: () => [] }));
+jest.mock('@kbn/scout-reporting', () => ({ testConfigs: { all: [] as unknown[] } }));
+jest.mock('../tests_discovery/search_configs', () => ({ getScoutCiExcludedConfigs: jest.fn() }));
 jest.mock('../servers/configs/loader/read_config_file', () => ({
   loadRawServerConfig: jest.fn(),
 }));
@@ -31,11 +35,9 @@ describe('config sets audit', () => {
 
   beforeEach(() => {
     repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'scout-audit-'));
-    Fs.mkdirSync(Path.join(repoRoot, '.buildkite'), { recursive: true });
-    Fs.writeFileSync(
-      Path.join(repoRoot, '.buildkite', 'scout_ci_config.yml'),
-      'excluded_configs:\n  - plugins/b/test/scout_local_only/api/playwright.config.ts\n'
-    );
+    (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([
+      'plugins/b/test/scout_local_only/api/playwright.config.ts',
+    ]);
   });
 
   afterEach(() => {
@@ -43,17 +45,26 @@ describe('config sets audit', () => {
     jest.resetAllMocks();
   });
 
+  const setConfigs = (...configs: Array<{ path: string; configSet: string }>) => {
+    (testConfigs as { all: unknown[] }).all = configs.map(({ path, configSet }) => ({
+      path,
+      server: { configSet },
+    }));
+  };
+
   describe('findSetsRunInCi', () => {
     it('keeps sets with a test config CI runs and drops the excluded ones', () => {
-      const sets = findSetsRunInCi(repoRoot, () => [
-        'plugins/a/test/scout_runs/api/playwright.config.ts',
-        'plugins/b/test/scout_local_only/api/playwright.config.ts',
-        'plugins/b/test/scout_mixed/api/playwright.config.ts',
-        'plugins/c/test/scout_mixed/ui/playwright.config.ts',
-        'plugins/d/test/scout/api/playwright.config.ts',
-      ]);
+      setConfigs(
+        { path: 'plugins/a/test/scout_runs/api/playwright.config.ts', configSet: 'runs' },
+        {
+          path: 'plugins/b/test/scout_local_only/api/playwright.config.ts',
+          configSet: 'local_only',
+        },
+        { path: 'plugins/b/test/scout_mixed/api/playwright.config.ts', configSet: 'mixed' },
+        { path: 'plugins/c/test/scout_mixed/ui/playwright.config.ts', configSet: 'mixed' }
+      );
 
-      expect([...sets].sort()).toEqual(['mixed', 'runs']);
+      expect([...findSetsRunInCi()].sort()).toEqual(['mixed', 'runs']);
     });
   });
 
@@ -65,10 +76,15 @@ describe('config sets audit', () => {
     });
 
     it('only compares sets that CI runs', async () => {
-      const { sameAsDefault } = await auditConfigSets(repoRoot, () => [
-        'plugins/a/test/scout_runs/api/playwright.config.ts',
-        'plugins/b/test/scout_local_only/api/playwright.config.ts',
-      ]);
+      setConfigs(
+        { path: 'plugins/a/test/scout_runs/api/playwright.config.ts', configSet: 'runs' },
+        {
+          path: 'plugins/b/test/scout_local_only/api/playwright.config.ts',
+          configSet: 'local_only',
+        }
+      );
+
+      const { sameAsDefault } = await auditConfigSets(repoRoot);
 
       expect(sameAsDefault).toEqual(['`runs` (stateful)']);
     });
@@ -77,10 +93,12 @@ describe('config sets audit', () => {
       const [kept] = Object.keys(KEEP_SEPARATE);
       writeSet(repoRoot, kept);
 
-      const { sameAsDefault } = await auditConfigSets(repoRoot, () => [
-        'plugins/a/test/scout_runs/api/playwright.config.ts',
-        `plugins/a/test/scout_${kept}/api/playwright.config.ts`,
-      ]);
+      setConfigs(
+        { path: 'plugins/a/test/scout_runs/api/playwright.config.ts', configSet: 'runs' },
+        { path: `plugins/a/test/scout_${kept}/api/playwright.config.ts`, configSet: kept }
+      );
+
+      const { sameAsDefault } = await auditConfigSets(repoRoot);
 
       expect(loadRawServerConfig).not.toHaveBeenCalledWith(expect.stringContaining(`/${kept}/`));
       expect(sameAsDefault).toEqual(['`runs` (stateful)']);
