@@ -40844,7 +40844,6 @@
     "xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle": "Nome da Entidade Ausente",
     "xpack.securitySolution.assetInventory.permissionDenied.illustrationAlt": "Permissão negada",
     "xpack.securitySolution.assetInventory.searchBar.searchPlaceholder": "Filtre seus dados usando a sintaxe KQL",
-    "xpack.securitySolution.assetInventory.technicalPreviewLabel": "Prévia técnica",
     "xpack.securitySolution.assetInventory.technicalPreviewTooltip": "Essa funcionalidade é experimental e não é suportada. Ela pode ser alterada ou removida a qualquer momento.",
     "xpack.securitySolution.assetInventory.title": "Inventário",
     "xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle": "Os 10 principais tipos de ativos",

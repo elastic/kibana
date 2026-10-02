@@ -9,15 +9,11 @@ import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { DOCS_URL } from '../constants';
+import { TECHNICAL_PREVIEW } from '../../common/translations';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.assetInventory.title', {
   defaultMessage: 'Inventory',
 });
-
-const TECHNICAL_PREVIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.assetInventory.technicalPreviewLabel',
-  { defaultMessage: 'Technical Preview' }
-);
 
 const TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
   'xpack.securitySolution.assetInventory.technicalPreviewTooltip',
@@ -29,7 +25,7 @@ const TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
 
 const BADGES: AppHeaderBadge[] = [
   {
-    label: TECHNICAL_PREVIEW_LABEL.toUpperCase(),
+    label: TECHNICAL_PREVIEW.toUpperCase(),
     tooltip: TECHNICAL_PREVIEW_TOOLTIP,
     color: 'hollow',
   },

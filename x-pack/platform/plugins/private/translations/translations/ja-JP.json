@@ -40858,7 +40858,6 @@
     "xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle": "エンティティ名がありません",
     "xpack.securitySolution.assetInventory.permissionDenied.illustrationAlt": "権限が拒否されました",
     "xpack.securitySolution.assetInventory.searchBar.searchPlaceholder": "KQL構文を使用してデータをフィルタリング",
-    "xpack.securitySolution.assetInventory.technicalPreviewLabel": "テクニカルプレビュー",
     "xpack.securitySolution.assetInventory.technicalPreviewTooltip": "この機能は実験的であり、サポートされていません。どこかの時点で変更または削除される場合があります。",
     "xpack.securitySolution.assetInventory.title": "インベントリ",
     "xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle": "上位10のアセットタイプ",

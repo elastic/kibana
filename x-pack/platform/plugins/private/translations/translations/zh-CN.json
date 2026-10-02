@@ -40871,7 +40871,6 @@
     "xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle": "实体名称缺失",
     "xpack.securitySolution.assetInventory.permissionDenied.illustrationAlt": "权限被拒绝",
     "xpack.securitySolution.assetInventory.searchBar.searchPlaceholder": "使用 KQL 语法筛选数据",
-    "xpack.securitySolution.assetInventory.technicalPreviewLabel": "技术预览",
     "xpack.securitySolution.assetInventory.technicalPreviewTooltip": "此功能为实验性功能，尚不受支持。它可能会随时更改或被移除。",
     "xpack.securitySolution.assetInventory.title": "清单",
     "xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle": "排名前 10 的资产类型",

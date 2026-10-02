@@ -40626,7 +40626,6 @@
     "xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle": "Nom d'entité manquant",
     "xpack.securitySolution.assetInventory.permissionDenied.illustrationAlt": "Autorisation refusée",
     "xpack.securitySolution.assetInventory.searchBar.searchPlaceholder": "Filtrez vos données en utilisant la syntaxe KQL",
-    "xpack.securitySolution.assetInventory.technicalPreviewLabel": "Version d'évaluation technique",
     "xpack.securitySolution.assetInventory.technicalPreviewTooltip": "Cette fonctionnalité est expérimentale et n'est pas prise en charge. Elle peut changer ou être supprimée à tout moment.",
     "xpack.securitySolution.assetInventory.title": "Inventaire",
     "xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle": "Les 10 principaux types de ressources",

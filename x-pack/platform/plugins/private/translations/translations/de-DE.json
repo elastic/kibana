@@ -40742,7 +40742,6 @@
     "xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle": "Fehlender Entitätsname",
     "xpack.securitySolution.assetInventory.permissionDenied.illustrationAlt": "Zugriff verweigert",
     "xpack.securitySolution.assetInventory.searchBar.searchPlaceholder": "Filtern Sie Ihre Daten mit der KQL-Syntax.",
-    "xpack.securitySolution.assetInventory.technicalPreviewLabel": "Technische Vorschau",
     "xpack.securitySolution.assetInventory.technicalPreviewTooltip": "Diese Funktionalität ist experimentell und wird nicht unterstützt. Es kann sich jederzeit ändern oder entfernt werden.",
     "xpack.securitySolution.assetInventory.title": "Inventar",
     "xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle": "Top 10 Asset-Typen",
