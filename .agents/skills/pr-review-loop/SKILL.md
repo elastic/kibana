@@ -108,9 +108,11 @@ If every reviewer was `clean` or had no review, `threads` printed nothing for an
 
 If `pr.sh signals <pr>` reports `mergeable=CONFLICTING`, merge the base branch before triaging, so findings are judged and fixed against the merged code. `UNKNOWN` means GitHub is still computing; run `signals` again after a few seconds.
 
+Fetch the base from `elastic/kibana` by URL. In a fork checkout `origin` is usually the fork, whose copy of the base branch can be stale:
+
 ```bash
-git fetch origin <baseRefName>
-git merge origin/<baseRefName>
+git fetch https://github.com/elastic/kibana.git <baseRefName>
+git merge FETCH_HEAD
 ```
 
 Never rebase or force-push the PR branch; a merge commit keeps the pushed history intact. Resolve a conflict only when the right result is clear from both sides, such as two independent additions to the same list, or an import moved on one side and added to on the other. For generated files, regenerate them with the tool that produced them instead of editing the conflict markers. If any conflict needs a judgment about which behavior to keep, run `git merge --abort`, stop, and ask the user.

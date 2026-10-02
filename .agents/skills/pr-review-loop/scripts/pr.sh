@@ -18,8 +18,9 @@
 #            ci=<passed|failed|none|timeout|pending> sha=<sha> detail="…" [url=<build-url>]
 #          --sha defaults to the newest PR commit not pushed by kibanamachine. It applies to libra and
 #          claude; ci always follows the PR head, because kibanamachine fix-up commits restart CI.
-#          none means no result appeared within the signal's startup window. --timeout 0 polls once and
-#          reports pending for every signal that has no result yet.
+#          none means no result appeared within the signal's startup window. --timeout <s> caps the wait for
+#          every signal, including one that hasn't started; --timeout 0 polls once and reports pending for
+#          every signal that has no result yet.
 # threads  Prints one JSON object per unresolved thread opened by the reviewer whose latest comment is
 #          the reviewer's. followUp is true when the reviewer is answering a reply; otherReplies counts
 #          the other comments in the thread, and latestCommentId/latestBody hold the reviewer's answer.
@@ -99,6 +100,11 @@ poll_claude() {
 
   local id status conclusion url failed="" skipped=""
   while IFS=$'\t' read -r id status conclusion url; do
+    # Without the reviewer:claude label the workflow's `if` skips the whole run; that isn't a failure.
+    if [[ "$conclusion" == "skipped" ]]; then
+      skipped="run skipped: $url"
+      continue
+    fi
     if [[ "$conclusion" != "success" ]]; then
       failed="run $conclusion: $url"
       continue
@@ -204,46 +210,52 @@ cmd_wait() {
   while [[ -z "$libra_done" || -z "$claude_done" || -z "$ci_done" ]]; do
     local elapsed=$((SECONDS - start)) result state detail extra
 
+    # A signal that hasn't started yet is still bound by its timeout, so a short --timeout is honored in every state.
     if [[ -z "$libra_done" ]]; then
       result=$(poll_libra "$sha")
-      if [[ "$result" == "missing" ]]; then
-        ((elapsed < libra_startup)) || libra_done=$(report libra none "$sha" "no Libra status after ${libra_startup}s")
-      elif [[ -n "$result" ]]; then
+      if [[ "$result" == "missing" ]] && ((elapsed >= libra_startup)); then
+        libra_done=$(report libra none "$sha" "no Libra status after ${libra_startup}s")
+      elif [[ -n "$result" && "$result" != "missing" ]]; then
         IFS=$'\t' read -r state detail extra <<<"$result"
         libra_done=$(report libra "$state" "$sha" "$detail" "$extra")
       elif ((elapsed >= libra_timeout)); then
-        libra_done=$(report libra timeout "$sha" "Libra still reviewing after ${libra_timeout}s")
+        libra_done=$(report libra timeout "$sha" "no Libra result after ${libra_timeout}s")
       fi
     fi
 
     if [[ -z "$claude_done" ]]; then
       result=$(poll_claude "$pr" "$sha")
-      if [[ "$result" == "missing" ]]; then
-        ((elapsed < claude_startup)) || claude_done=$(report claude none "$sha" "no Claude Reviewer run after ${claude_startup}s")
-      elif [[ -n "$result" ]]; then
+      if [[ "$result" == "missing" ]] && ((elapsed >= claude_startup)); then
+        claude_done=$(report claude none "$sha" "no Claude Reviewer run after ${claude_startup}s")
+      elif [[ -n "$result" && "$result" != "missing" ]]; then
         IFS=$'\t' read -r state detail extra <<<"$result"
         claude_done=$(report claude "$state" "$sha" "$detail" "$extra")
       elif ((elapsed >= claude_timeout)); then
-        claude_done=$(report claude timeout "$sha" "Claude Reviewer still running after ${claude_timeout}s")
+        claude_done=$(report claude timeout "$sha" "no Claude Reviewer result after ${claude_timeout}s")
       fi
     fi
 
-    if [[ -z "$ci_done" ]]; then
+    if $want_ci; then
+      # Keep following the head while any signal is pending: a kibanamachine push after CI finished makes the
+      # stored result describe a commit that is no longer the head.
       local head
       head=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.sha')
       if [[ "$head" != "$ci_head" ]]; then
         ci_head="$head"
         ci_head_since=$SECONDS
+        ci_done=""
       fi
+    fi
+
+    if [[ -z "$ci_done" ]]; then
       result=$(poll_ci "$ci_head")
-      if [[ "$result" == "missing" ]]; then
-        ((SECONDS - ci_head_since < ci_startup)) ||
-          ci_done=$(report ci none "$ci_head" "no kibana-ci status after ${ci_startup}s")
-      elif [[ -n "$result" ]]; then
+      if [[ "$result" == "missing" ]] && ((SECONDS - ci_head_since >= ci_startup)); then
+        ci_done=$(report ci none "$ci_head" "no kibana-ci status after ${ci_startup}s")
+      elif [[ -n "$result" && "$result" != "missing" ]]; then
         IFS=$'\t' read -r state detail extra <<<"$result"
         ci_done=$(report ci "$state" "$ci_head" "$detail" "$extra")
       elif ((elapsed >= ci_timeout)); then
-        ci_done=$(report ci timeout "$ci_head" "CI still running after ${ci_timeout}s")
+        ci_done=$(report ci timeout "$ci_head" "no CI result after ${ci_timeout}s")
       fi
     fi
 
