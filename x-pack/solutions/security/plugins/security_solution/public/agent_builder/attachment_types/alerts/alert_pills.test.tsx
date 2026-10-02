@@ -179,7 +179,12 @@ describe('AlertsPill', () => {
       field_name: string;
       selected_options: string[];
     }>;
-    expect(pageFilter[0].selected_options).toEqual(['open', 'acknowledged', 'in-progress', 'closed']);
+    expect(pageFilter[0].selected_options).toEqual([
+      'open',
+      'acknowledged',
+      'in-progress',
+      'closed',
+    ]);
   });
 
   it('multi-alert href timerange upper bound is about 1 hour from now', () => {

@@ -25,10 +25,7 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { createImpactAttachmentDefinition } from './impact';
-import {
-  renderAlertConversationDetails,
-  renderAlertsConversationDetails,
-} from './alerts';
+import { renderAlertConversationDetails, renderAlertsConversationDetails } from './alerts';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property

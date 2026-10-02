@@ -31,13 +31,11 @@ interface RulePillProps {
 export const RulePill = memo(
   ({ attachment, application, resolveSecurityCanvasContext }: RulePillProps) => {
     const ruleAttachment = attachment as unknown as RuleAttachment;
-    const ruleId = parseRuleFromAttachment(ruleAttachment)?.id ?? getRuleIdFromAttachment(ruleAttachment);
+    const ruleId =
+      parseRuleFromAttachment(ruleAttachment)?.id ?? getRuleIdFromAttachment(ruleAttachment);
 
     const resolveDescriptor = useCallback(
-      () =>
-        Promise.resolve(
-          ruleId ? { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId } : null
-        ),
+      () => Promise.resolve(ruleId ? { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId } : null),
       [ruleId]
     );
 

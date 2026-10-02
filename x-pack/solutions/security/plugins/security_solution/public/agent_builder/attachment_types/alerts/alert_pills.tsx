@@ -177,7 +177,9 @@ export const AlertsPill = memo(
 
     const href = application.getUrlForApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
-      path: `?${URL_PARAM_KEY.filters}=${encode([buildIdsFilter(alertIds)])}&${URL_PARAM_KEY.timerange}=${buildTimerange(createdAt)}&${URL_PARAM_KEY.pageFilter}=${ALL_STATUSES_PAGE_FILTER}`,
+      path: `?${URL_PARAM_KEY.filters}=${encode([buildIdsFilter(alertIds)])}&${
+        URL_PARAM_KEY.timerange
+      }=${buildTimerange(createdAt)}&${URL_PARAM_KEY.pageFilter}=${ALL_STATUSES_PAGE_FILTER}`,
     });
     return <LinkPill label={label} href={href} />;
   }
