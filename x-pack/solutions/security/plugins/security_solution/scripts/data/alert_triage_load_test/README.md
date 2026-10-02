@@ -81,6 +81,35 @@ Suggested scenarios:
 | Sustained | `run --mode sustained --alerts-per-hour 1000 --rules 300 --duration 2h` |
 | Step-up | repeat sustained with `--alerts-per-hour 2000`, `4000` until something gives |
 | Skewed rules | sustained with `--rule-skew 1` (a few noisy rules) |
+| Production-shaped, average day | see [Production-shaped load](#production-shaped-load) |
+| Production-shaped, peak day | see [Production-shaped load](#production-shaped-load) |
+
+### Production-shaped load
+
+These parameters come from 30 days of data of one production deployment: about 73.6k alerts/day on average (peak 123k), 2,293 enabled rules (most on a 5 minute interval), and about 437 rule executions an hour that produced alerts. Those executions handed over 7.2 alerts on average (median 2, p95 31), and about 27% of the alerts were closed by automated triage, which is the closest match to the false positives of this tool. Alert counts are already after suppression.
+
+`--rule-skew 1.7` reproduces that batch size distribution (about 440 batches an hour, mean ~7, p95 ~35) over 2,293 rules. Without skew almost every batch holds a single alert. Re-check it with `--dry-run` if you change `--rules` or `--alerts-per-hour`.
+
+```bash
+# Quarter of an average day, as a baseline
+pnpm data:triage-load-test run --mode sustained --alerts-per-hour 770 --duration 30m \
+  --rules 2293 --rule-skew 1.7 --rule-interval 5m --fp-rate 0.27 --settle-timeout 45m
+
+# Average day: ~73.6k alerts/day
+pnpm data:triage-load-test run --mode sustained --alerts-per-hour 3067 --duration 1h \
+  --rules 2293 --rule-skew 1.7 --rule-interval 5m --fp-rate 0.27 --settle-timeout 90m
+
+# Peak day: ~123k alerts/day
+pnpm data:triage-load-test run --mode sustained --alerts-per-hour 5125 --duration 1h \
+  --rules 2293 --rule-skew 1.7 --rule-interval 5m --fp-rate 0.27 --settle-timeout 90m
+
+# Tail risk, from a second terminal while a sustained run is going: one rule at max_signals 1000
+pnpm data:triage-load-test run --mode burst --batches 1 --batch-size 1000 --fp-rate 0.27
+```
+
+An hour at the average rate indexes about 3,000 alerts and sends every one of them to the model, and the peak run about 5,000, so check the token budget first. Step up through the runs and watch Task Manager drift and overdue tasks, peak Worker executions in flight and the dispatch-to-start delay; the first run where they grow faster than the load is the limit.
+
+What these runs do not cover: real rule executions (the tool creates no rules, so the many executions that produce no alerts are not part of the load), and real rules cluster on schedule boundaries while the synthetic ones get a random phase, so real peaks may be somewhat spikier. Task Manager capacity scales with the number of Kibana nodes (10 workers each by default), so note the node count of the target next to the results.
 
 Change the model on the target between runs, not in the tool; it is recorded in `manifest.json` only as far as the Worker and Alert Analysis settings expose it.
 
