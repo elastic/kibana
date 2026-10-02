@@ -1748,6 +1748,70 @@ describe('setConcreteWriteIndex', () => {
     );
   });
 
+  it(`should adopt a write index set concurrently by another node instead of throwing`, async () => {
+    // Simulate a concurrent Kibana node promoting the write index between enumeration
+    // and this update: the updateAliases call conflicts, but a re-read finds a healthy alias.
+    clusterClient.indices.updateAliases.mockRejectedValueOnce(
+      new Error('no write index is defined for alias') as EsError
+    );
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: true, is_write_index: true } },
+      },
+    });
+
+    const result = await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: true,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(result).toEqual({
+      index: '.internal.alerts-test.alerts-default-000001',
+      alias: '.alerts-test.alerts-default',
+      isWriteIndex: true,
+      isHidden: true,
+    });
+    expect(logger.info).toHaveBeenCalledWith(
+      'Write index for alias: .alerts-test.alerts-default was already set to .internal.alerts-test.alerts-default-000001 by another process; adopting it.'
+    );
+  });
+
+  it(`should still throw when the write index is still missing after a failed update`, async () => {
+    clusterClient.indices.updateAliases.mockRejectedValueOnce(new Error('fail') as EsError);
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: true, is_write_index: false } },
+      },
+    });
+
+    await expect(() =>
+      updateAliasesAndSetConcreteWriteIndex({
+        logger,
+        esClient: clusterClient,
+        concreteIndices: [
+          {
+            index: '.internal.alerts-test.alerts-default-000001',
+            alias: '.alerts-test.alerts-default',
+            isWriteIndex: false,
+            isHidden: true,
+          },
+        ],
+        alias: '.alerts-test.alerts-default',
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to set write index for alias: .alerts-test.alerts-default. Error: fail"`
+    );
+  });
+
   it(`should include external indices when migrating aliases to hidden`, async () => {
     clusterClient.indices.getAlias.mockResolvedValueOnce({
       '.internal.alerts-test.alerts-default-000001': {

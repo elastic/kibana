@@ -359,7 +359,61 @@ async function setConcreteWriteIndex({
     logger.info(`Successfully set write index for alias: ${alias}.`);
     return { ...latestIndex, isWriteIndex: true };
   } catch (error) {
+    // On a multi-node deployment several Kibana instances install these resources in
+    // parallel on startup, so another node may have promoted a write index for this
+    // alias in between the concrete-index enumeration above and this update. When that
+    // happens the update conflicts and throws, even though the alias is now healthy.
+    // Re-read the alias and, if a write index now exists, adopt it instead of surfacing
+    // a catastrophic installation failure.
+    const concurrentWriteIndex = await findConcurrentlySetWriteIndex({ logger, esClient, alias });
+    if (concurrentWriteIndex) {
+      return concurrentWriteIndex;
+    }
     throw new Error(`Failed to set write index for alias: ${alias}. Error: ${error.message}`);
+  }
+}
+
+/**
+ * Re-reads the alias and returns the concrete write index if one now exists, used to
+ * recover from a concurrent write-index promotion by another Kibana node.
+ */
+async function findConcurrentlySetWriteIndex({
+  logger,
+  esClient,
+  alias,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  alias: string;
+}): Promise<ConcreteIndexInfo | undefined> {
+  try {
+    const aliasInfo = await retryTransientEsErrors(
+      () => esClient.indices.getAlias({ name: alias, expand_wildcards: ['open', 'hidden'] }),
+      { logger }
+    );
+
+    const writeIndexEntry = Object.entries(aliasInfo ?? {}).find(
+      ([, indexInfo]) => indexInfo.aliases[alias]?.is_write_index
+    );
+    if (!writeIndexEntry) {
+      return undefined;
+    }
+
+    const [index, indexInfo] = writeIndexEntry;
+    logger.info(
+      `Write index for alias: ${alias} was already set to ${index} by another process; adopting it.`
+    );
+    return {
+      index,
+      alias,
+      isWriteIndex: true,
+      isHidden: indexInfo.aliases[alias]?.is_hidden ?? undefined,
+    };
+  } catch (error) {
+    logger.debug(
+      `Could not re-read alias ${alias} after a failed write-index update: ${error.message}`
+    );
+    return undefined;
   }
 }
 
