@@ -250,7 +250,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
       throttle: null,
-      grouping_mode: 'per_episode',
+      grouping_mode: 'per_alert',
     });
 
     await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_ID);
@@ -379,7 +379,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // Each dispatch produces one fire per episode and one notified per
-      // action group; with `per_episode` grouping (the default for np-1) the
+      // action group; with `per_alert` grouping (the default for np-1) the
       // notified action carries both `action_group_id` and `episode_status`.
       const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
@@ -1188,7 +1188,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'throttle strategies / per_episode + on_status_change throttles on a second dispatch when status is unchanged',
+    'throttle strategies / per_alert + on_status_change throttles on a second dispatch when status is unchanged',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
         throttle: { strategy: 'on_status_change' },
@@ -1232,7 +1232,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'throttle strategies / per_episode + per_status_interval throttles within the interval when status is unchanged',
+    'throttle strategies / per_alert + per_status_interval throttles within the interval when status is unchanged',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
         throttle: { strategy: 'per_status_interval', interval: '1h' },
@@ -1284,7 +1284,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'throttle strategies / per_episode + every_time dispatches a new event even when the episode status is unchanged',
+    'throttle strategies / per_alert + every_time dispatches a new event even when the episode status is unchanged',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
         throttle: { strategy: 'every_time' },
@@ -1655,7 +1655,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // Two notified records (one per action group / policy), under the
-      // default per_episode grouping mode.
+      // default per_alert grouping mode.
       const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],

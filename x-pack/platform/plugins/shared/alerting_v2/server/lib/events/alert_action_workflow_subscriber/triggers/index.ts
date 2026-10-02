@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { episodeAssignedTrigger } from './episode_assigned';
-import { episodeUnassignedTrigger } from './episode_unassigned';
-import { episodeAckedTrigger } from './episode_acked';
-import { episodeUnackedTrigger } from './episode_unacked';
-import { episodeTaggedTrigger } from './episode_tagged';
-import { episodeSnoozedTrigger } from './episode_snoozed';
-import { episodeUnsnoozedTrigger } from './episode_unsnoozed';
-import { episodeActivatedTrigger } from './episode_activated';
-import { episodeDeactivatedTrigger } from './episode_deactivated';
+import { alertAssignedTrigger } from './alert_assigned';
+import { alertUnassignedTrigger } from './alert_unassigned';
+import { alertAckedTrigger } from './alert_acked';
+import { alertUnackedTrigger } from './alert_unacked';
+import { alertTaggedTrigger } from './alert_tagged';
+import { alertSnoozedTrigger } from './alert_snoozed';
+import { alertUnsnoozedTrigger } from './alert_unsnoozed';
+import { alertActivatedTrigger } from './alert_activated';
+import { alertDeactivatedTrigger } from './alert_deactivated';
 import type { AlertActionWorkflowTriggerBinding } from './types';
 
 export type { AlertActionWorkflowTriggerBinding } from './types';
-export { EPISODE_ASSIGNED_TRIGGER_ID, episodeAssignedTrigger } from './episode_assigned';
-export { EPISODE_UNASSIGNED_TRIGGER_ID, episodeUnassignedTrigger } from './episode_unassigned';
-export { EPISODE_ACKED_TRIGGER_ID, episodeAckedTrigger } from './episode_acked';
-export { EPISODE_UNACKED_TRIGGER_ID, episodeUnackedTrigger } from './episode_unacked';
-export { EPISODE_TAGGED_TRIGGER_ID, episodeTaggedTrigger } from './episode_tagged';
-export { EPISODE_SNOOZED_TRIGGER_ID, episodeSnoozedTrigger } from './episode_snoozed';
-export { EPISODE_UNSNOOZED_TRIGGER_ID, episodeUnsnoozedTrigger } from './episode_unsnoozed';
-export { EPISODE_ACTIVATED_TRIGGER_ID, episodeActivatedTrigger } from './episode_activated';
-export { EPISODE_DEACTIVATED_TRIGGER_ID, episodeDeactivatedTrigger } from './episode_deactivated';
+export { ALERT_ASSIGNED_TRIGGER_ID, alertAssignedTrigger } from './alert_assigned';
+export { ALERT_UNASSIGNED_TRIGGER_ID, alertUnassignedTrigger } from './alert_unassigned';
+export { ALERT_ACKED_TRIGGER_ID, alertAckedTrigger } from './alert_acked';
+export { ALERT_UNACKED_TRIGGER_ID, alertUnackedTrigger } from './alert_unacked';
+export { ALERT_TAGGED_TRIGGER_ID, alertTaggedTrigger } from './alert_tagged';
+export { ALERT_SNOOZED_TRIGGER_ID, alertSnoozedTrigger } from './alert_snoozed';
+export { ALERT_UNSNOOZED_TRIGGER_ID, alertUnsnoozedTrigger } from './alert_unsnoozed';
+export { ALERT_ACTIVATED_TRIGGER_ID, alertActivatedTrigger } from './alert_activated';
+export { ALERT_DEACTIVATED_TRIGGER_ID, alertDeactivatedTrigger } from './alert_deactivated';
 
 /**
  * Catalog of every alert-action → workflow-trigger mapping owned by `alerting_v2`.
@@ -41,20 +41,20 @@ export { EPISODE_DEACTIVATED_TRIGGER_ID, episodeDeactivatedTrigger } from './epi
  *  1. Add the event type + discriminator constant to
  *     `alert_action_event_publisher/events.ts` and extend the
  *     `AlertActionEvent` union there.
- *  2. Create a binding file in this folder (mirror `episode_assigned.ts`).
+ *  2. Create a binding file in this folder (mirror `alert_assigned.ts`).
  *  3. Append the binding to {@link ALERT_ACTION_WORKFLOW_TRIGGERS}.
  *
  * No other files need to change for the new trigger to be both registered
  * with workflows-extensions and dispatched by the subscriber.
  */
 export const ALERT_ACTION_WORKFLOW_TRIGGERS: ReadonlyArray<AlertActionWorkflowTriggerBinding> = [
-  episodeAssignedTrigger,
-  episodeUnassignedTrigger,
-  episodeAckedTrigger,
-  episodeUnackedTrigger,
-  episodeTaggedTrigger,
-  episodeSnoozedTrigger,
-  episodeUnsnoozedTrigger,
-  episodeActivatedTrigger,
-  episodeDeactivatedTrigger,
+  alertAssignedTrigger,
+  alertUnassignedTrigger,
+  alertAckedTrigger,
+  alertUnackedTrigger,
+  alertTaggedTrigger,
+  alertSnoozedTrigger,
+  alertUnsnoozedTrigger,
+  alertActivatedTrigger,
+  alertDeactivatedTrigger,
 ];

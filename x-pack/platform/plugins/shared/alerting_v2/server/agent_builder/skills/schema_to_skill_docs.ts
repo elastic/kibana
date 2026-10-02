@@ -20,7 +20,7 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
   MATCHER_CONTEXT_FIELDS,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
   POLICY_MATCHER_TAGS_MAX,
@@ -613,7 +613,7 @@ const formatStrategySet = (strategies: Set<string>): string =>
 
 /**
  * Generates standalone markdown for throttle / grouping compatibility from
- * `groupingModeSchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `groupingModeSchema`, `PER_ALERT_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
  * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
@@ -621,23 +621,21 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
     getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')
   );
 
-  const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
+  const perAlertOnlyStrategies = [...PER_ALERT_STRATEGIES].filter(
     (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
   );
-  const notPerEpisodeStrategies = [...AGGREGATE_STRATEGIES].filter(
-    (strategy) => !PER_EPISODE_STRATEGIES.has(strategy)
+  const notPerAlertStrategies = [...AGGREGATE_STRATEGIES].filter(
+    (strategy) => !PER_ALERT_STRATEGIES.has(strategy)
   );
 
   const caveats: string[] = [];
-  if (perEpisodeOnlyStrategies.length > 0) {
+  if (perAlertOnlyStrategies.length > 0) {
     caveats.push(
-      `- Only valid with \`per_episode\`: ${formatEnumValuesList(perEpisodeOnlyStrategies)}.`
+      `- Only valid with \`per_alert\`: ${formatEnumValuesList(perAlertOnlyStrategies)}.`
     );
   }
-  if (notPerEpisodeStrategies.length > 0) {
-    caveats.push(
-      `- Not valid with \`per_episode\`: ${formatEnumValuesList(notPerEpisodeStrategies)}.`
-    );
+  if (notPerAlertStrategies.length > 0) {
+    caveats.push(`- Not valid with \`per_alert\`: ${formatEnumValuesList(notPerAlertStrategies)}.`);
   }
   caveats.push(
     `- Require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`): ${formatStrategySet(
@@ -1047,7 +1045,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '   - Use the `workflowId` passed to `generate_workflow`, **not** the workflow `attachmentId`.',
     '3. `set_matcher`: `{ tags: ["notify-<rule-slug>"] }` — **do not omit**.',
     '   An omitted or empty matcher is a space-wide catch-all, not "this rule".',
-    '4. `set_grouping`: `per_episode`',
+    '4. `set_grouping`: `per_alert`',
     '5. `set_throttle`: `{ strategy: "on_status_change" }`',
     '6. `validate`',
     '',
@@ -1083,13 +1081,13 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '- **Route by severity across rules**: `matcher: { expression: "severity: \\"critical\\"" }` (or combine with tags).',
     '  Useful for a PagerDuty policy vs an email policy.',
     '- **Reuse destinations**: one workflow can serve many rules. Keep Liquid generic —',
-    '  `inputs.payload.rules[ep.rule_id].name`, `ep.episode_status`, and guarded',
-    '  `ep.data.*` — because query columns often differ across rules. If two rules need',
+    '  `inputs.payload.rules[alert.rule_id].name`, `alert.alert_status`, and guarded',
+    '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
     '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
     '  another catch-all or overlapping tag matcher.',
-    '- **Grouping**: `per_episode` is still a safe default. `all` batches mixed-rule',
+    '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
     '',
@@ -1120,7 +1118,7 @@ export const generateActionPolicyOperationsDoc = (): string =>
 /**
  * Generates concise markdown documentation for the action-policy → workflow dispatch payload.
  * Sourced from the `alertingV2NotificationGroup` built-in workflow input definition, which
- * mirrors `ActionPolicyWorkflowPayload` / `AlertEpisode` in `server/lib/dispatcher/types.ts`.
+ * mirrors `ActionPolicyWorkflowPayload` / `ActionPolicyWorkflowPayloadAlert` in `server/lib/dispatcher/types.ts`.
  *
  * At workflow render time the dispatcher schedules with `{ payload }`, so Liquid templates
  * access these fields as `{{ inputs.payload.<field> }}`.
@@ -1138,25 +1136,25 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
   const topLevelTable = formatFieldTable(topLevelFields);
 
   const properties = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
-  const episodesProp = properties?.episodes as JsonSchemaNode | undefined;
-  const episodeItems = episodesProp?.items as JsonSchemaNode | undefined;
-  const episodeFields = episodeItems ? jsonSchemaToFieldTable(episodeItems) : [];
-  const episodeTable = formatFieldTable(episodeFields);
+  const alertsProp = properties?.alerts as JsonSchemaNode | undefined;
+  const alertItems = alertsProp?.items as JsonSchemaNode | undefined;
+  const alertFields = alertItems ? jsonSchemaToFieldTable(alertItems) : [];
+  const alertTable = formatFieldTable(alertFields);
 
   const sections = [
     '# Action Policy Workflow Dispatch Payload',
     '',
     'Catalog of fields the dispatcher passes as `inputs.payload`. In Liquid:',
     '`{{ inputs.payload.<field> }}`, and inside',
-    '`{% for ep in inputs.payload.episodes %}` use `{{ ep.<field> }}`.',
+    '`{% for alert in inputs.payload.alerts %}` use `{{ alert.<field> }}`.',
     '',
     '## Top-Level Fields (`inputs.payload`)',
     '',
     topLevelTable,
   ];
 
-  if (episodeTable) {
-    sections.push('', '## Alert Fields (`inputs.payload.episodes[]`)', '', episodeTable);
+  if (alertTable) {
+    sections.push('', '## Alert Fields (`inputs.payload.alerts[]`)', '', alertTable);
   }
 
   sections.push(
@@ -1166,9 +1164,9 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     "`data` is the rule's ES|QL result row (each query row is written as `data: rowDoc`",
     'on the alert event). Columns depend on the rule query, so they are not listed above.',
     '',
-    '- Nested dotted names: `ep.data.host.name`, not `ep.data["host.name"]`.',
+    '- Nested dotted names: `alert.data.host.name`, not `alert.data["host.name"]`.',
     '- Discover columns with `| LIMIT 0` if they are unclear.',
-    '- Guard empty `data` on recovering/inactive: `| default` or `{% if ep.data %}`.',
+    '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
     '',
     '## Example',
     '',
@@ -1187,13 +1185,13 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '    with:',
     '      to:',
     '        - <user-provided-email>',
-    '      subject: "Alert: {{ inputs.payload.episodes | size }} alert(s)"',
+    '      subject: "Alert: {{ inputs.payload.alerts | size }} alert(s)"',
     '      message: >',
-    '        {% for ep in inputs.payload.episodes %}',
-    '        - Rule: {{ inputs.payload.rules[ep.rule_id].name | default: "unknown" }}',
-    '          Host: {{ ep.data.host.name | default: "unknown" }}',
-    '          Errors: {{ ep.data.error_count | default: "n/a" }}',
-    '          Status: {{ ep.episode_status }}',
+    '        {% for alert in inputs.payload.alerts %}',
+    '        - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: "unknown" }}',
+    '          Host: {{ alert.data.host.name | default: "unknown" }}',
+    '          Errors: {{ alert.data.error_count | default: "n/a" }}',
+    '          Status: {{ alert.alert_status }}',
     '        {% endfor %}',
     '',
     '        View execution: {{ execution.url }}',

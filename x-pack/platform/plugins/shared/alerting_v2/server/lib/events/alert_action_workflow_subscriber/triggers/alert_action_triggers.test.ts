@@ -17,14 +17,14 @@ import {
   type AlertActionEvent,
 } from '../../alert_action_event_publisher/events';
 import type { AlertActionWorkflowTriggerBinding } from './types';
-import { episodeAckedTrigger } from './episode_acked';
-import { episodeActivatedTrigger } from './episode_activated';
-import { episodeDeactivatedTrigger } from './episode_deactivated';
-import { episodeSnoozedTrigger } from './episode_snoozed';
-import { episodeTaggedTrigger } from './episode_tagged';
-import { episodeUnackedTrigger } from './episode_unacked';
-import { episodeUnassignedTrigger } from './episode_unassigned';
-import { episodeUnsnoozedTrigger } from './episode_unsnoozed';
+import { alertAckedTrigger } from './alert_acked';
+import { alertActivatedTrigger } from './alert_activated';
+import { alertDeactivatedTrigger } from './alert_deactivated';
+import { alertSnoozedTrigger } from './alert_snoozed';
+import { alertTaggedTrigger } from './alert_tagged';
+import { alertUnackedTrigger } from './alert_unacked';
+import { alertUnassignedTrigger } from './alert_unassigned';
+import { alertUnsnoozedTrigger } from './alert_unsnoozed';
 
 const envelope = {
   occurredAt: '2025-02-02T12:34:56.000Z',
@@ -35,6 +35,9 @@ const envelope = {
   actorUid: 'actor-uid-1',
 } as const;
 
+const { episodeId: alertId, ...sharedEnvelopeFields } = envelope;
+const expectedEnvelopePayload = { ...sharedEnvelopeFields, alertId };
+
 interface Case {
   name: string;
   trigger: AlertActionWorkflowTriggerBinding;
@@ -44,38 +47,38 @@ interface Case {
 
 const cases: Case[] = [
   {
-    name: 'episodeUnassignedTrigger',
-    trigger: episodeUnassignedTrigger,
+    name: 'alertUnassignedTrigger',
+    trigger: alertUnassignedTrigger,
     event: { type: EPISODE_UNASSIGNED_EVENT_TYPE, ...envelope, payload: {} },
     expectedExtra: {},
   },
   {
-    name: 'episodeAckedTrigger',
-    trigger: episodeAckedTrigger,
+    name: 'alertAckedTrigger',
+    trigger: alertAckedTrigger,
     event: { type: EPISODE_ACKED_EVENT_TYPE, ...envelope, payload: {} },
     expectedExtra: {},
   },
   {
-    name: 'episodeUnackedTrigger',
-    trigger: episodeUnackedTrigger,
+    name: 'alertUnackedTrigger',
+    trigger: alertUnackedTrigger,
     event: { type: EPISODE_UNACKED_EVENT_TYPE, ...envelope, payload: {} },
     expectedExtra: {},
   },
   {
-    name: 'episodeUnsnoozedTrigger',
-    trigger: episodeUnsnoozedTrigger,
+    name: 'alertUnsnoozedTrigger',
+    trigger: alertUnsnoozedTrigger,
     event: { type: EPISODE_UNSNOOZED_EVENT_TYPE, ...envelope, payload: {} },
     expectedExtra: {},
   },
   {
-    name: 'episodeTaggedTrigger',
-    trigger: episodeTaggedTrigger,
+    name: 'alertTaggedTrigger',
+    trigger: alertTaggedTrigger,
     event: { type: EPISODE_TAGGED_EVENT_TYPE, ...envelope, payload: { tags: ['a', 'b'] } },
     expectedExtra: { tags: ['a', 'b'] },
   },
   {
-    name: 'episodeSnoozedTrigger (with expiry)',
-    trigger: episodeSnoozedTrigger,
+    name: 'alertSnoozedTrigger (with expiry)',
+    trigger: alertSnoozedTrigger,
     event: {
       type: EPISODE_SNOOZED_EVENT_TYPE,
       ...envelope,
@@ -84,20 +87,20 @@ const cases: Case[] = [
     expectedExtra: { expiry: '2025-03-03T00:00:00.000Z' },
   },
   {
-    name: 'episodeSnoozedTrigger (null expiry)',
-    trigger: episodeSnoozedTrigger,
+    name: 'alertSnoozedTrigger (null expiry)',
+    trigger: alertSnoozedTrigger,
     event: { type: EPISODE_SNOOZED_EVENT_TYPE, ...envelope, payload: { expiry: null } },
     expectedExtra: { expiry: null },
   },
   {
-    name: 'episodeActivatedTrigger',
-    trigger: episodeActivatedTrigger,
+    name: 'alertActivatedTrigger',
+    trigger: alertActivatedTrigger,
     event: { type: EPISODE_ACTIVATED_EVENT_TYPE, ...envelope, payload: { reason: 'flapping' } },
     expectedExtra: { reason: 'flapping' },
   },
   {
-    name: 'episodeDeactivatedTrigger',
-    trigger: episodeDeactivatedTrigger,
+    name: 'alertDeactivatedTrigger',
+    trigger: alertDeactivatedTrigger,
     event: {
       type: EPISODE_DEACTIVATED_EVENT_TYPE,
       ...envelope,
@@ -110,7 +113,7 @@ const cases: Case[] = [
 describe('alert-action workflow trigger bindings', () => {
   describe.each(cases)('$name', ({ trigger, event, expectedExtra }) => {
     it('flattens the envelope (and any action-specific fields) into the payload', () => {
-      expect(trigger.toPayload(event)).toEqual({ ...envelope, ...expectedExtra });
+      expect(trigger.toPayload(event)).toEqual({ ...expectedEnvelopePayload, ...expectedExtra });
     });
 
     it('preserves a null actorUid (system-initiated action)', () => {

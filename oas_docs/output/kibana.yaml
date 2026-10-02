@@ -8820,7 +8820,7 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_episode
+                  grouping_mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -8846,7 +8846,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -9863,7 +9863,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10028,7 +10028,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10202,7 +10202,7 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_episode
+                  grouping_mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -10228,7 +10228,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10260,7 +10260,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10426,7 +10426,7 @@ paths:
                         type: workflow
                     enabled: false
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10596,7 +10596,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10786,7 +10786,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10956,7 +10956,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -11126,7 +11126,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -151322,11 +151322,11 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
     Kibana_HTTP_APIs_alerting_action_policy_grouping_mode:
       anyOf:
-        - description: one notification per alert episode lifecycle (default).
+        - description: one notification per alert lifecycle (default).
           enum:
-            - per_episode
+            - per_alert
           type: string
-        - description: a single notification for all matching episodes.
+        - description: a single notification for all matching alerts.
           enum:
             - all
           type: string
@@ -151334,7 +151334,7 @@ components:
           enum:
             - per_field
           type: string
-      description: 'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+      description: 'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
     Kibana_HTTP_APIs_alerting_action_policy_response:
       additionalProperties: false
       type: object
@@ -151414,7 +151414,7 @@ components:
               type: string
             strategy:
               anyOf:
-                - description: notify only on episode status transitions (default for `per_episode`).
+                - description: notify only on alert status transitions (default for `per_alert`).
                   enum:
                     - on_status_change
                   type: string
@@ -151469,7 +151469,7 @@ components:
           type: string
         strategy:
           anyOf:
-            - description: notify only on episode status transitions (default for `per_episode`).
+            - description: notify only on alert status transitions (default for `per_alert`).
               enum:
                 - on_status_change
               type: string

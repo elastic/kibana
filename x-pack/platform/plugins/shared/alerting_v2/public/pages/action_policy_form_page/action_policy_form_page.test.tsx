@@ -315,7 +315,7 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'on_status_change', interval: null },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })
