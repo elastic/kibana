@@ -64,7 +64,9 @@ Every AlertZero HTTP route uses `withAlertZeroEnabled` to check the per-space se
 
 Both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
 
-None of this gates the investigation and escalation details flyout. The `agenticInvestigations` plugin registers that flyout regardless of the subscription, the AlertZero privileges and the setting; its write actions follow the Agentic Investigations privileges and its proposed actions the Proposed Actions privileges. AlertZero's own queue and escalations pages still require AlertZero **All** on top of the Agentic Investigations privileges for assign, status, close and escalate actions.
+None of this gates the investigation and escalation details flyout. The `agenticInvestigations` plugin registers that flyout regardless of the subscription, the setting and `AccessBoundary`; its write actions follow the Agentic Investigations UI capabilities or API privileges, and its proposed actions the Proposed Actions privileges. The AlertZero feature grants those API privileges: **All** grants `read_investigations`, `manage_investigations`, `read_escalations` and `manage_escalations`, and **Read** grants `read_investigations` and `read_escalations`. So an AlertZero All user can assign, change status, close and escalate in the flyout without the Agentic Investigations feature.
+
+AlertZero's own queue and escalations pages gate those actions on the Agentic Investigations UI capabilities and AlertZero **All** (`useAlertZeroInvestigationsCapabilities`).
 
 These availability checks gate **UI and API access only**. They do not stop, disable, or unschedule background work when a subscription changes.
 

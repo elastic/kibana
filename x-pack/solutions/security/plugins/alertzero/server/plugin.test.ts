@@ -201,7 +201,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
               ui: expect.arrayContaining(['write']),
             }),
             read: expect.objectContaining({
-              api: [ALERTZERO_API_PRIVILEGE_READ],
+              api: expect.arrayContaining([ALERTZERO_API_PRIVILEGE_READ]),
             }),
           }),
         })
@@ -209,6 +209,37 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(features.registerKibanaFeature.mock.calls[0][0].subFeatures).toBeUndefined();
       expect(registerRoutes).toHaveBeenCalled();
       expect(registerAgentType).toHaveBeenCalled();
+    });
+
+    it('grants the agentic investigations and escalations API privileges with the feature', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const features = { registerKibanaFeature: jest.fn() };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features,
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: { management: {} },
+        } as never
+      );
+
+      const { privileges } = features.registerKibanaFeature.mock.calls[0][0];
+      // String literals, as the agenticInvestigations feature declares them, so a rename there
+      // fails here rather than silently leaving AlertZero users without the shared routes.
+      expect(privileges.all.api).toEqual([
+        ALERTZERO_API_PRIVILEGE_READ,
+        ALERTZERO_API_PRIVILEGE_WRITE,
+        'read_investigations',
+        'manage_investigations',
+        'read_escalations',
+        'manage_escalations',
+      ]);
+      expect(privileges.read.api).toEqual([
+        ALERTZERO_API_PRIVILEGE_READ,
+        'read_investigations',
+        'read_escalations',
+      ]);
     });
 
     it('registers the per-space enablement advanced setting', () => {
