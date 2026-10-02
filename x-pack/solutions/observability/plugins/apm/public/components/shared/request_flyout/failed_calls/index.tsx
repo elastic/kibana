@@ -229,7 +229,7 @@ export function RequestFlyoutFailedCalls() {
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '80px',
+      width: '60px',
       actions: [
         {
           name: i18n.translate('xpack.apm.requestFlyout.failedCalls.action.viewInDiscover', {
