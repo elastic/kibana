@@ -8818,6 +8818,13 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
+        - description: 'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+          in: query
+          name: filter
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
         - description: A text string to search across action policy fields.
           in: query
           name: search
@@ -8825,15 +8832,6 @@ paths:
           schema:
             maxLength: 256
             minLength: 1
-            type: string
-        - description: Filter by enabled status. Accepts the strings true or false.
-          in: query
-          name: enabled
-          required: false
-          schema:
-            enum:
-              - 'true'
-              - 'false'
             type: string
         - description: The field to sort action policies by.
           in: query
