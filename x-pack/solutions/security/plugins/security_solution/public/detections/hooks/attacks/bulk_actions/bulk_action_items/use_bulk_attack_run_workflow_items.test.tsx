@@ -13,7 +13,6 @@ import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useBulkAttackRunWorkflowItems } from './use_bulk_attack_run_workflow_items';
 
 const createCapabilities = (
@@ -25,7 +24,6 @@ const createCapabilities = (
 
 jest.mock('@kbn/workflows-ui');
 jest.mock('../use_attacks_privileges');
-jest.mock('../../../../../common/lib/kibana');
 jest.mock(
   '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
   () => ({
@@ -45,15 +43,6 @@ const mockUseWorkflowsUIEnabledSetting = useWorkflowsUIEnabledSetting as jest.Mo
 const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
   typeof useAttacksPrivileges
 >;
-
-const reportEventMock = jest.fn();
-(useKibana as jest.Mock).mockReturnValue({
-  services: {
-    telemetry: {
-      reportEvent: reportEventMock,
-    },
-  },
-});
 
 const defaultAlertItems = [
   {
@@ -153,6 +142,31 @@ describe('useBulkAttackRunWorkflowItems', () => {
       }) as ReactElement;
       panelContent.props.onClose();
       expect(closePopoverMenu).toHaveBeenCalledTimes(1);
+    });
+
+    it('should report a single attack run for one attack', () => {
+      const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
+
+      const panelContent = result.current.panels[0].renderContent({
+        alertItems: defaultAlertItems,
+        closePopoverMenu: jest.fn(),
+        setIsBulkActionsLoading: jest.fn(),
+      }) as ReactElement;
+      expect(panelContent.props.telemetryOrigin).toBe('attack');
+    });
+
+    it('should report a bulk attack run for several attacks', () => {
+      const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
+
+      const panelContent = result.current.panels[0].renderContent({
+        alertItems: [
+          ...defaultAlertItems,
+          { _id: 'attack-2', data: [], ecs: { _id: 'attack-2', _index: '.alerts-attacks' } },
+        ],
+        closePopoverMenu: jest.fn(),
+        setIsBulkActionsLoading: jest.fn(),
+      }) as ReactElement;
+      expect(panelContent.props.telemetryOrigin).toBe('attack_bulk');
     });
   });
 

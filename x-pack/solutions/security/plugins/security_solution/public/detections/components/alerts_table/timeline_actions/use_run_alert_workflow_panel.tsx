@@ -26,6 +26,11 @@ import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
+import {
+  getRunWorkflowTelemetry,
+  RUN_WORKFLOW_TELEMETRY_ORIGIN,
+  type RunWorkflowTelemetryOrigin,
+} from './run_workflow_telemetry';
 
 // Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
 // analysis workflow). Module-scoped so the object reference is stable across renders.
@@ -58,6 +63,11 @@ export interface AlertWorkflowsPanelProps {
    * Inside a case where Cases runs are unavailable, the menu hooks do not render this panel.
    */
   originAlertId?: string;
+  /**
+   * Surface reported with the run telemetry. Defaults to `alert` for a row action and
+   * `alert_bulk` otherwise; attack surfaces pass their own.
+   */
+  telemetryOrigin?: RunWorkflowTelemetryOrigin;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
@@ -66,6 +76,7 @@ export const AlertWorkflowsPanel = ({
   onClose,
   onExecute,
   originAlertId,
+  telemetryOrigin,
 }: AlertWorkflowsPanelProps) => {
   // When rendered inside a case's attachment surface, route through the Cases API so the run
   // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
@@ -77,10 +88,26 @@ export const AlertWorkflowsPanel = ({
         : { attachmentIds: alertIds.map(({ _id }) => _id) },
     [alertIds, originAlertId]
   );
-  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
+  const {
+    runWorkflow,
+    showSuccessToast,
+    telemetry: caseTelemetry,
+  } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
     target,
   });
+  const telemetry = useMemo(
+    () =>
+      getRunWorkflowTelemetry(
+        caseTelemetry,
+        telemetryOrigin ??
+          (originAlertId !== undefined
+            ? RUN_WORKFLOW_TELEMETRY_ORIGIN.alert
+            : RUN_WORKFLOW_TELEMETRY_ORIGIN.alertBulk),
+        alertIds.length
+      ),
+    [alertIds.length, caseTelemetry, originAlertId, telemetryOrigin]
+  );
 
   const inputs = useMemo(
     () => ({

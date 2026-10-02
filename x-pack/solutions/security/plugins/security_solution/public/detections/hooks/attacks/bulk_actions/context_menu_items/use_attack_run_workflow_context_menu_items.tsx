@@ -15,7 +15,8 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-export interface UseAttackRunWorkflowContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
+export interface UseAttackRunWorkflowContextMenuItemsProps
+  extends Omit<BaseAttackContextMenuItemsProps, 'telemetrySource'> {
   /** Attacks to run the workflow against. Each must have an index to be eligible. */
   attacksForWorkflowRun: Omit<BaseAttackProps, 'relatedAlertIds'>[];
 }
@@ -23,9 +24,8 @@ export interface UseAttackRunWorkflowContextMenuItemsProps extends BaseAttackCon
 export const useAttackRunWorkflowContextMenuItems = ({
   attacksForWorkflowRun,
   closePopover,
-  telemetrySource,
 }: UseAttackRunWorkflowContextMenuItemsProps): BulkAttackContextMenuItems => {
-  const bulkActionItems = useBulkAttackRunWorkflowItems({ telemetrySource });
+  const bulkActionItems = useBulkAttackRunWorkflowItems();
   const attacksWithIndex = useMemo(
     () => attacksForWorkflowRun.filter((attack) => Boolean(attack.attackIndex)),
     [attacksForWorkflowRun]
