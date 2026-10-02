@@ -180,7 +180,7 @@ reference is `workflow-authoring`, and it is worth loading for a validation erro
 — but not for authoring, for the reason given at the top.
 
 **An `if` condition is KQL, not Liquid.** `condition:` is the one place in a workflow where `{{ }}`
-does not apply. The templates gate their write on `condition: "steps.verify_ki.output.passed :
+does not apply. A gate on a `verifyKi` step reads `condition: "steps.verify_ki.output.passed :
 true"` — a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
 filters, so anything computed goes through a `data.set` first and the condition reads that step's
 output:

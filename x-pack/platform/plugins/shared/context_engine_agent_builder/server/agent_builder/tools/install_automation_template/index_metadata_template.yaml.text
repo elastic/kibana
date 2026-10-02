@@ -8,8 +8,8 @@ version: "1"
 # Installed by platform.context_engine.install_automation_template. The tool fills the consts.
 # Do not save this YAML yourself.
 #
-# Leave the shape alone: the ai.prompt schema, the assemble/verify/gate sequence and the
-# `attributes.esql` wiring are what make the KI retrievable and verified.
+# Leave the shape alone: the ai.prompt schema, the assemble step, the verifiers on create_ki and
+# the `attributes.esql` wiring are what make the KI retrievable and verified.
 name: Index metadata KI automation
 description: >
   Profiles each source index (mapping + random sample + grounding aggregations) into its own
@@ -35,13 +35,17 @@ triggers:
   - type: manual
 
 steps:
-  # One profile per source, one source at a time. Not `parallel`: a parallel branch cannot hold the
-  # verification `if` or the model call's retry below. A failed source does not stop the rest.
+  # One profile per source. Profiling a source costs a model call, and no source's profile depends
+  # on another's, so five run at a time. A parallel branch cannot hold an `if` or an `on-failure`,
+  # so verification runs inside `create_ki` rather than as a gate. `sources` is capped at 100, the
+  # engine's fan-out limit.
   - name: loop_sources
-    type: foreach
+    type: parallel
     foreach: "{{ consts.sources | json }}"
-    iteration-on-failure:
-      continue: true
+    concurrency: 5
+    # One source that fails to profile should not cost the rest: `settled` runs every branch to a
+    # terminal state, where the default `fail-fast` stops scheduling on the first failure.
+    mode: settled
     steps:
       - name: source_context
         type: data.set
@@ -83,12 +87,6 @@ steps:
       - name: generate_index_profile
         type: ai.prompt
         connector-id-by-feature: context_engine_prompt
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: "5s"
-            strategy: exponential
-            jitter: true
         with:
           prompt: |
             You are documenting an Elasticsearch index for an AI Context Engine knowledge base.
@@ -207,7 +205,7 @@ steps:
               - answers_questions
               - access_patterns
 
-      # Built once so verify_ki and create_ki see exactly the same document.
+      # The KI document, built in one place; create_ki verifies exactly what it stores.
       - name: assemble_ki
         type: data.set
         with:
@@ -271,30 +269,15 @@ steps:
               key_fields: "{{ steps.generate_index_profile.output.content.key_fields | json }}"
               when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
 
-      - name: verify_ki
-        type: context-engine.verifyKi
+      # `ki_id` is the automation name and the index, so a re-run replaces this profile in place,
+      # and two installations on the same source index produce distinct, non-colliding KIs.
+      # A profile whose ES|QL fails the verifiers is not written; the results are in the step output.
+      - name: create_ki
+        type: context-engine.createKi
         with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "{{ consts.automation_name }}/{{ steps.source_context.output.index }}"
+          ki: "${{ steps.assemble_ki.output.ki }}"
           verifiers:
             - esql-valid-syntax
             - esql-valid-runtime
-          ki: "${{ steps.assemble_ki.output.ki }}"
-
-      - name: check_verification
-        type: if
-        condition: "steps.verify_ki.output.passed : true"
-        steps:
-          # `ki_id` is the automation name and the index, so a re-run replaces this profile in place,
-          # and two installations on the same source index produce distinct, non-colliding KIs.
-          - name: create_ki
-            type: context-engine.createKi
-            with:
-              ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.automation_name }}/{{ steps.source_context.output.index }}"
-              ki: "${{ steps.assemble_ki.output.ki }}"
-        else:
-          - name: log_verification_failure
-            type: console
-            with:
-              message: |
-                KI verification failed for {{ steps.source_context.output.index }}.
-                Results: {{ steps.verify_ki.output.results | json }}

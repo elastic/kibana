@@ -34,9 +34,17 @@ const unitValues = {
 
 interface TemplateStep {
   name: string;
-  with?: { query?: string };
+  type?: string;
+  concurrency?: number;
+  mode?: string;
+  'on-failure'?: object;
+  with?: { query?: string; verifiers?: string[] };
   steps?: TemplateStep[];
+  else?: TemplateStep[];
 }
+
+const allSteps = (steps: readonly TemplateStep[]): TemplateStep[] =>
+  steps.flatMap((step) => [step, ...allSteps(step.steps ?? []), ...allSteps(step.else ?? [])]);
 
 const findStep = (steps: TemplateStep[], name: string): TemplateStep | undefined => {
   for (const step of steps) {
@@ -143,6 +151,31 @@ describe('automation template rendering', () => {
       expect(yaml).toContain('foreach: "{{ consts.sources | json }}"');
       expect(yaml).not.toMatch(/consts\.source_index|consts\.category_field/);
       expect(yaml).toContain('path: /{{ steps.source_context.output.index }}/_mapping');
+    });
+
+    it('profiles five sources at a time, and one failed source does not stop the rest', () => {
+      const [loop] = parse(renderIndexMetadataTemplate(twoSources)).steps as TemplateStep[];
+
+      expect(loop).toEqual(
+        expect.objectContaining({
+          name: 'loop_sources',
+          type: 'parallel',
+          concurrency: 5,
+          mode: 'settled',
+        })
+      );
+    });
+
+    it('verifies on the KI write itself, with no flow control a parallel branch rejects', () => {
+      const [loop] = parse(renderIndexMetadataTemplate(twoSources)).steps as TemplateStep[];
+      const branch = allSteps(loop.steps ?? []);
+
+      expect(branch.filter((step) => step.type === 'if')).toEqual([]);
+      expect(branch.filter((step) => step['on-failure'] !== undefined)).toEqual([]);
+      expect(branch.find((step) => step.name === 'create_ki')?.with?.verifiers).toEqual([
+        'esql-valid-syntax',
+        'esql-valid-runtime',
+      ]);
     });
 
     it('writes one KI per source, keyed by the automation name and the index', () => {
