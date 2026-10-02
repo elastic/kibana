@@ -7,7 +7,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
-import { AddPrebuiltRulesHeaderButtons } from './add_prebuilt_rules_header_buttons';
 import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table_context';
 
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
@@ -111,82 +110,6 @@ describe('AddPrebuiltRulesTable', () => {
     (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
       [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: false, result: { status: 'ready' } },
     });
-  });
-
-  it('disables `Install all` button if user has no write permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      ...initialUserPrivilegesState(),
-      rulesPrivileges: {
-        ...initialUserPrivilegesState().rulesPrivileges,
-        rules: { read: true, edit: false },
-      },
-    });
-
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <AddPrebuiltRulesTableContextProvider>
-          <AddPrebuiltRulesHeaderButtons />
-          <AddPrebuiltRulesTable />
-        </AddPrebuiltRulesTableContextProvider>
-      </QueryClientProvider>
-    );
-
-    const installAllButton = screen.getByTestId('installAllRulesButton');
-
-    expect(installAllButton).toHaveTextContent('Install all');
-    expect(installAllButton).toBeDisabled();
-  });
-
-  it('disables `Install all` button if prebuilt package is being installed', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      ...initialUserPrivilegesState(),
-      rulesPrivileges: {
-        ...initialUserPrivilegesState().rulesPrivileges,
-        rules: { read: true, edit: true },
-      },
-    });
-
-    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
-      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: true },
-    });
-
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <AddPrebuiltRulesTableContextProvider>
-          <AddPrebuiltRulesHeaderButtons />
-          <AddPrebuiltRulesTable />
-        </AddPrebuiltRulesTableContextProvider>
-      </QueryClientProvider>
-    );
-
-    const installAllButton = screen.getByTestId('installAllRulesButton');
-
-    expect(installAllButton).toHaveTextContent('Install all');
-    expect(installAllButton).toBeDisabled();
-  });
-
-  it('enables Install all` button when user has permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      ...initialUserPrivilegesState(),
-      rulesPrivileges: {
-        ...initialUserPrivilegesState().rulesPrivileges,
-        rules: { read: true, edit: true },
-      },
-    });
-
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <AddPrebuiltRulesTableContextProvider>
-          <AddPrebuiltRulesHeaderButtons />
-          <AddPrebuiltRulesTable />
-        </AddPrebuiltRulesTableContextProvider>
-      </QueryClientProvider>
-    );
-
-    const installAllButton = screen.getByTestId('installAllRulesButton');
-
-    expect(installAllButton).toHaveTextContent('Install all');
-    expect(installAllButton).toBeEnabled();
   });
 
   it.each([

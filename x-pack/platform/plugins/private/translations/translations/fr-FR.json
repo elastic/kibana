@@ -43230,7 +43230,6 @@
     "xpack.securitySolution.detectionEngine.rules.addElasticRulesButtonTitle": "Ajouter des règles Elastic",
     "xpack.securitySolution.detectionEngine.rules.addNewRuleTitle": "Créer une nouvelle règle",
     "xpack.securitySolution.detectionEngine.rules.addPageTitle": "Créer",
-    "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonAriaLabel": "Installer les règles Elastic",
     "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonTitle": "Tout installer",
     "xpack.securitySolution.detectionEngine.rules.addRules.installSelectedRules": "Installer {numberOfSelectedRules} règle(s) sélectionnée(s)",
     "xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle": "Il n'y a pas de règles de détection prédéfinies disponibles pour l'installation",

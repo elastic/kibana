@@ -43524,7 +43524,6 @@
     "xpack.securitySolution.detectionEngine.rules.addElasticRulesButtonTitle": "Elasticルールを追加",
     "xpack.securitySolution.detectionEngine.rules.addNewRuleTitle": "新規ルールを作成",
     "xpack.securitySolution.detectionEngine.rules.addPageTitle": "作成",
-    "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonAriaLabel": "すべてのElasticルールをインストール",
     "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonTitle": "すべてインストール",
     "xpack.securitySolution.detectionEngine.rules.addRules.installSelectedRules": "{numberOfSelectedRules}個の選択したルールをインストール",
     "xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle": "インストール用にあらかじめ構築された検出ルールはありません",

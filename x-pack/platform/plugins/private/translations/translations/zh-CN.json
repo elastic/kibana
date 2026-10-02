@@ -43535,7 +43535,6 @@
     "xpack.securitySolution.detectionEngine.rules.addElasticRulesButtonTitle": "添加 Elastic 规则",
     "xpack.securitySolution.detectionEngine.rules.addNewRuleTitle": "创建新规则",
     "xpack.securitySolution.detectionEngine.rules.addPageTitle": "创建",
-    "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonAriaLabel": "安装所有 Elastic 规则",
     "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonTitle": "全部安装",
     "xpack.securitySolution.detectionEngine.rules.addRules.installSelectedRules": "安装 {numberOfSelectedRules} 个选定规则",
     "xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle": "没有可供安装的预构建检测规则",
