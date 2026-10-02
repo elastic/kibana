@@ -179,6 +179,39 @@ describe('PackForm', () => {
       expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).toBeDisabled();
     });
 
+    // `isDisabled` must reach EuiFormRow (not EuiFieldText, which forwards it to the
+    // DOM). The row-level disabled label is the observable proof: when the prop only
+    // reached the input, the label stayed enabled. (React's unknown-prop warning is
+    // logged once per process, so it can't be asserted reliably here.)
+    // Scoped to the input's own row: EUI ids are all "generated-id" under Jest.
+    const labelFor = (container: HTMLElement, inputName: string) =>
+      container
+        .querySelector(`input[name="${inputName}"]`)
+        ?.closest('.euiFormRow')
+        ?.querySelector('label.euiFormLabel');
+
+    it('disables the Name and Description rows, label and input, for a read-only user', () => {
+      const { container } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={true} defaultValue={readOnlyDefaultValue} />
+      );
+
+      for (const fieldName of ['name', 'description']) {
+        expect(container.querySelector(`input[name="${fieldName}"]`)).toBeDisabled();
+        expect(labelFor(container, fieldName)).toHaveClass('euiFormLabel-isDisabled');
+      }
+    });
+
+    it('keeps the Name and Description rows enabled when writable', () => {
+      const { container } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={false} defaultValue={readOnlyDefaultValue} />
+      );
+
+      for (const fieldName of ['name', 'description']) {
+        expect(container.querySelector(`input[name="${fieldName}"]`)).not.toBeDisabled();
+        expect(labelFor(container, fieldName)).not.toHaveClass('euiFormLabel-isDisabled');
+      }
+    });
+
     it('keeps the pack Type selectable cards enabled when writable', () => {
       const { getByTestId } = renderWithContext(
         <PackForm editMode={true} isReadOnly={false} defaultValue={readOnlyDefaultValue} />

@@ -31,6 +31,9 @@ const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldPr
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
+  // See NameField: EuiFieldText takes `disabled`, so `isDisabled` goes on the row.
+  const { isDisabled, ...fieldProps } = euiFieldProps ?? {};
+
   return (
     <EuiFormRow
       // Own id: `xpack.osquery.pack.form.descriptionFieldLabel` is shared with the
@@ -41,6 +44,7 @@ const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldPr
       labelAppend={DESCRIPTION_LABEL_APPEND}
       error={error?.message}
       isInvalid={hasError}
+      isDisabled={Boolean(isDisabled)}
       fullWidth
     >
       <EuiFieldText
@@ -50,7 +54,7 @@ const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldPr
         name={fieldName}
         fullWidth
         data-test-subj="input"
-        {...euiFieldProps}
+        {...fieldProps}
       />
     </EuiFormRow>
   );
