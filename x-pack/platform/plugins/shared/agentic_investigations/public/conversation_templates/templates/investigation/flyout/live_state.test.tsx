@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useInvestigation } from '../hooks/use_investigation';
-import { InvestigationLiveState } from './investigation_live_state';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { InvestigationLiveState } from './live_state';
 
-jest.mock('../hooks/use_investigation');
+jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
 const renderLiveState = (severity?: string) =>

@@ -13,11 +13,11 @@ import {
   type OverviewSections,
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
-import type { Investigation } from '../../../common';
-import { HypothesesList } from '../../hypotheses/attachments/hypotheses_view';
-import { ImpactContent } from '../../impact/attachments/impact_view';
-import { SubjectRow } from '../../subjects/attachments/subject_view';
-import { useInvestigation } from '../hooks/use_investigation';
+import type { Investigation } from '../../../../../common';
+import { HypothesesList } from '../../../../hypotheses/attachments/hypotheses_view';
+import { ImpactContent } from '../../../../impact/attachments/impact_view';
+import { SubjectRow } from '../../../../subjects/attachments/subject_view';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
