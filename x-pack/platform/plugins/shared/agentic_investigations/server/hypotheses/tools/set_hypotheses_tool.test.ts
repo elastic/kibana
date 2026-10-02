@@ -131,7 +131,15 @@ describe('investigations.set_hypotheses', () => {
       origin: HYPOTHESES_ID,
       readonly: true,
       active: true,
+      hidden: true,
     });
+    expect(attachments.drainChanges()).toEqual([]);
+  });
+
+  it('does not ask the agent to render the hypotheses inline', async () => {
+    const { definition } = setup();
+
+    expect(await definition.getAgentDescription?.()).not.toContain('render_attachment');
   });
 
   it('replaces the whole list on every call and versions the attachment', async () => {
