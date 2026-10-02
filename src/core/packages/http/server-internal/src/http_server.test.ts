@@ -1881,7 +1881,7 @@ describe('setup contract', () => {
           port: 12345,
           name: 'custom-name',
           host: 'localhost',
-          maxPayloadInBytes: new ByteSizeValue(5 * 1024 * 1024),
+          maxPayload: new ByteSizeValue(5 * 1024 * 1024),
         }),
       }));
 
