@@ -12,7 +12,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 31,
         "column": 31
       }
@@ -25,7 +25,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 66,
         "column": 16
       }
@@ -38,7 +38,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 87,
         "column": 37
       }
@@ -51,7 +51,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 89,
         "column": 38
       }
@@ -64,7 +64,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 105,
         "column": 31
       }
@@ -77,7 +77,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 116,
         "column": 9
       }
@@ -90,7 +90,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 126,
         "column": 9
       }
@@ -103,7 +103,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_threat_intel/api/tests/revisions.spec.ts",
         "line": 135,
         "column": 7
       }
