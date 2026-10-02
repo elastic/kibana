@@ -152,7 +152,9 @@ describe('useBulkAttackRunWorkflowItems', () => {
         closePopoverMenu: jest.fn(),
         setIsBulkActionsLoading: jest.fn(),
       }) as ReactElement;
-      expect(panelContent.props.telemetryOrigin).toBe('attack');
+      expect(panelContent.props).toEqual(
+        expect.objectContaining({ telemetrySurface: 'attack', isBulk: false })
+      );
     });
 
     it('should report a bulk attack run for several attacks', () => {
@@ -166,7 +168,9 @@ describe('useBulkAttackRunWorkflowItems', () => {
         closePopoverMenu: jest.fn(),
         setIsBulkActionsLoading: jest.fn(),
       }) as ReactElement;
-      expect(panelContent.props.telemetryOrigin).toBe('attack_bulk');
+      expect(panelContent.props).toEqual(
+        expect.objectContaining({ telemetrySurface: 'attack', isBulk: true })
+      );
     });
   });
 
