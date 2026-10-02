@@ -422,9 +422,37 @@ describe('createMemoryPageStore', () => {
         },
       },
       {
-        bool: { should: [{ term: { tags: 'cart cache' } }], minimum_should_match: 1 },
+        // `cart cache` is a legacy spelling of `cart-cache`, which is what a new
+        // write stores, so the canonical key is matched alongside it.
+        bool: {
+          should: [{ term: { tags: 'cart-cache' } }, { term: { tags: 'cart cache' } }],
+          minimum_should_match: 1,
+        },
       },
     ]);
+  });
+
+  it('matches the canonical tag of a keyword the client only saw spelled the old way', async () => {
+    const search = jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    // A client whose loaded pages only carry the legacy spelling sends only that.
+    await store.list({ tags: ['invoke_agent'] });
+
+    const filter = (search.mock.calls[0][0] as { query: { bool: { filter: unknown[] } } }).query
+      .bool.filter;
+    expect(filter[2]).toEqual({
+      bool: {
+        // The canonical term leads, so it is never the one the spelling bound drops.
+        should: [{ term: { tags: 'invoke-agent' } }, { term: { tags: 'invoke_agent' } }],
+        minimum_should_match: 1,
+      },
+    });
   });
 
   it('counts the filtered set in the stats, so the header cannot drift from the rows', async () => {

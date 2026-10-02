@@ -444,19 +444,28 @@ export const createMemoryPageStore = ({
    * so spelling terms alone would miss documents. Grouping by the canonical key
    * keeps one keyword's spellings together; the clauses are ANDed by
    * `filterClause`, so selecting two keywords means both.
+   *
+   * Each group is seeded with the canonical key itself, which is never dropped:
+   * new writes store the canonical tag, so a client that has only ever seen a
+   * legacy spelling of a keyword would otherwise match every old document and
+   * none of the new ones.
    */
   const tagFilterClauses = (tags: readonly string[] | undefined): object[] => {
     const byKeyword = new Map<string, string[]>();
     for (const tag of tags ?? []) {
       const keyword = canonicalizeTag(tag);
       if (keyword === null) continue;
-      const spellings = byKeyword.get(keyword);
+      let spellings = byKeyword.get(keyword);
       if (spellings === undefined) {
         if (byKeyword.size >= MAX_TAG_FILTER_KEYWORDS) continue;
-        byKeyword.set(keyword, [tag]);
-        continue;
+        spellings = [keyword];
+        byKeyword.set(keyword, spellings);
       }
-      if (spellings.length < MAX_TAG_SPELLINGS_PER_KEYWORD && !spellings.includes(tag)) {
+      if (
+        tag !== spellings[0] &&
+        spellings.length < MAX_TAG_SPELLINGS_PER_KEYWORD &&
+        !spellings.includes(tag)
+      ) {
         spellings.push(tag);
       }
     }
