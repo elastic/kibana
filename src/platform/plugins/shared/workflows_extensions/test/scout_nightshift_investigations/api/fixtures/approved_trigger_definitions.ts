@@ -11,15 +11,15 @@
  * APPROVED TRIGGER DEFINITIONS
  *
  * This list is the full catalog of registered trigger definitions. The Scout
- * suite under `test/scout_workflows_extensions` boots the
- * `workflows_extensions` config set so gated plugins are enabled and every
+ * suite under `test/scout_nightshift_investigations` boots the
+ * `nightshift_investigations` config set so gated plugins are enabled and every
  * registered trigger is present.
  *
  * When a new trigger is registered, developers must:
  * 1. Add the trigger ID and schema hash to this list (alphabetically sorted)
  * 2. Get approval from the workflows-eng team
  * 3. If registration is gated by a plugin `enabled` config that is not already
- *    on in the `workflows_extensions` Scout config set
+ *    on in the `nightshift_investigations` Scout config set
  *    (`classic.stateful.config.ts`), add that flag there. Do not add flags
  *    that already default to `true` on stateful (for example
  *    `xpack.alerting_v2.enabled` and `xpack.significantEvents.enabled`).
