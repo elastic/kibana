@@ -7,11 +7,18 @@
 
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import type { IsomerRuntime, IsomerRuntimeOptions } from '@elastic/isomer-runtime';
+import type { StyledRenderContext } from '@elastic/isomer-sdk';
 import { i18n } from '@kbn/i18n';
 
 export type KibanaIsomerRuntimeOptions<THostContext = unknown> = Omit<
-  IsomerRuntimeOptions<THostContext>,
+  IsomerRuntimeOptions<THostContext, StyledRenderContext>,
   'defaultAriaLabel'
+>;
+
+/** An Isomer runtime whose renderers resolve style handles through `resolveClassName`. */
+export type KibanaIsomerRuntime<THostContext = unknown> = IsomerRuntime<
+  THostContext,
+  StyledRenderContext
 >;
 
 /**
@@ -20,8 +27,8 @@ export type KibanaIsomerRuntimeOptions<THostContext = unknown> = Omit<
  */
 export const createKibanaIsomerRuntime = <THostContext = unknown>(
   options: KibanaIsomerRuntimeOptions<THostContext>
-): IsomerRuntime<THostContext> =>
-  createIsomerRuntime<THostContext>({
+): KibanaIsomerRuntime<THostContext> =>
+  createIsomerRuntime<THostContext, StyledRenderContext>({
     ...options,
     defaultAriaLabel: i18n.translate('xpack.isomer.defaultAriaLabel', {
       defaultMessage: 'Content',

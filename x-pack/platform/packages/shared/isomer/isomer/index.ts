@@ -7,6 +7,8 @@
 
 export type { Composition, PrimitivePack, ValidationError } from '@elastic/isomer-sdk';
 export { CompositionValidationError } from '@elastic/isomer-sdk';
-export type { IsomerRuntime } from '@elastic/isomer-runtime';
 export { createKibanaIsomerRuntime } from './src/create_kibana_isomer_runtime';
-export type { KibanaIsomerRuntimeOptions } from './src/create_kibana_isomer_runtime';
+export type {
+  KibanaIsomerRuntime,
+  KibanaIsomerRuntimeOptions,
+} from './src/create_kibana_isomer_runtime';
