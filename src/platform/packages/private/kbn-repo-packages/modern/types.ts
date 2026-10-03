@@ -112,6 +112,11 @@ export interface PackageManifestBaseFields {
   visibility?: ModuleVisibility;
 }
 
+export interface PluginRemoteService {
+  name: string;
+  url: string;
+}
+
 export interface PluginPackageManifest extends PackageManifestBaseFields {
   type: 'plugin';
   /**
@@ -129,6 +134,8 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     enabledOnAnonymousPages?: boolean;
     type?: 'preboot';
     extraPublicDirs?: string[];
+    service?: string;
+    remoteServices?: PluginRemoteService[];
     [PLUGIN_CATEGORY]?: PluginCategoryInfo;
   };
 }
