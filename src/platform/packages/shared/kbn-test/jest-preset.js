@@ -55,6 +55,7 @@ module.exports = {
         color: true,
       },
     ],
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/agent_metrics_reporter.js',
     [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
