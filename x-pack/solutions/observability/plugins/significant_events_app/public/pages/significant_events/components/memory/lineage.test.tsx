@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryLineage, groupByLevel } from './lineage';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MemoryPage } from './types';
@@ -52,12 +53,18 @@ const respondWith = (ancestors: Array<{ id: string; title: string; level?: numbe
   });
 };
 
-const renderLineage = (target: MemoryPage) =>
-  render(
-    <I18nProvider>
-      <MemoryLineage page={target} onSelectPage={jest.fn()} />
-    </I18nProvider>
+/** Retries are off so a rejected lineage request fails the assertion, not the run. */
+const createWrapper = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>{children}</I18nProvider>
+    </QueryClientProvider>
   );
+};
+
+const renderLineage = (target: MemoryPage) =>
+  render(<MemoryLineage page={target} onSelectPage={jest.fn()} />, { wrapper: createWrapper() });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -107,9 +114,8 @@ describe('MemoryLineage', () => {
     respondWith([{ id: 'memory_a', title: 'Kafka lag spikes' }]);
     const onSelectPage = jest.fn();
     render(
-      <I18nProvider>
-        <MemoryLineage page={page({ merged_from: ['memory_a'] })} onSelectPage={onSelectPage} />
-      </I18nProvider>
+      <MemoryLineage page={page({ merged_from: ['memory_a'] })} onSelectPage={onSelectPage} />,
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(screen.getByText('Kafka lag spikes')).toBeInTheDocument());
@@ -169,20 +175,15 @@ describe('MemoryLineage', () => {
     const onSelectPage = jest.fn();
     respondWith([{ id: 'memory_root', title: 'Root' }]);
     const { rerender } = render(
-      <I18nProvider>
-        <MemoryLineage
-          page={page({ id: 'memory_a', merged_from: ['memory_root'] })}
-          onSelectPage={onSelectPage}
-        />
-      </I18nProvider>
+      <MemoryLineage
+        page={page({ id: 'memory_a', merged_from: ['memory_root'] })}
+        onSelectPage={onSelectPage}
+      />,
+      { wrapper: createWrapper() }
     );
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 
-    rerender(
-      <I18nProvider>
-        <MemoryLineage page={page({ id: 'memory_b' })} onSelectPage={onSelectPage} />
-      </I18nProvider>
-    );
+    rerender(<MemoryLineage page={page({ id: 'memory_b' })} onSelectPage={onSelectPage} />);
 
     await waitFor(() =>
       expect(screen.queryByTestId('nightshiftMemoryLineage')).not.toBeInTheDocument()
@@ -219,12 +220,11 @@ describe('MemoryLineage', () => {
     ]);
     const onSelectPage = jest.fn();
     render(
-      <I18nProvider>
-        <MemoryLineage
-          page={page({ merged_from: ['memory_a', 'memory_b'] })}
-          onSelectPage={onSelectPage}
-        />
-      </I18nProvider>
+      <MemoryLineage
+        page={page({ merged_from: ['memory_a', 'memory_b'] })}
+        onSelectPage={onSelectPage}
+      />,
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(screen.getByText('B')).toBeInTheDocument());

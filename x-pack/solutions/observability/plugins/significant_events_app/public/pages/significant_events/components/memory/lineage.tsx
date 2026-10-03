@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiBadge, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { useQuery } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useMemoryClient } from './use_memory';
 import type { MemoryPage } from './types';
 
 interface LineageCrumb {
@@ -29,54 +30,24 @@ interface LineageCrumb {
  * server cap is authoritative — the client cannot ask for an unbounded walk.
  */
 const useLineage = (page: MemoryPage | undefined) => {
-  const {
-    dependencies: {
-      start: { nightshiftInvestigations },
-    },
-  } = useKibana();
-  const client = nightshiftInvestigations?.investigationsClient;
-  const [crumbs, setCrumbs] = useState<LineageCrumb[]>([]);
-
-  const rootId = page?.id;
+  const client = useMemoryClient();
+  const id = page?.id;
   const hasParents = (page?.merged_from?.length ?? 0) > 0;
 
-  // Hold the client in a ref rather than listing it as a dependency. The
-  // services object is rebuilt on every render, so depending on it directly
-  // re-runs this effect forever — a maximum-update-depth loop.
-  const clientRef = useRef(client);
-  clientRef.current = client;
+  const { data } = useQuery({
+    queryKey: ['nightshift', 'memory', 'lineage', id],
+    queryFn: ({ signal }) =>
+      client!.fetch('GET /internal/nightshift/memory/pages/{id}/lineage', {
+        signal: signal ?? null,
+        params: { path: { id: id! } },
+      }) as Promise<{ ancestors?: LineageCrumb[] }>,
+    enabled: client !== undefined && id !== undefined && hasParents,
+    // Lineage is supplementary: a failure must not break the page, and nothing
+    // on it is worth retrying.
+    retry: false,
+  });
 
-  useEffect(() => {
-    if (!rootId || !hasParents) {
-      setCrumbs([]);
-      return;
-    }
-
-    let cancelled = false;
-    const activeClient = clientRef.current;
-    if (!activeClient) {
-      return;
-    }
-
-    activeClient
-      .fetch('GET /internal/nightshift/memory/pages/{id}/lineage', {
-        signal: null,
-        params: { path: { id: rootId } },
-      })
-      .then((result) => {
-        if (!cancelled) setCrumbs(result.ancestors ?? []);
-      })
-      .catch(() => {
-        // Lineage is supplementary; a failure must not break the page.
-        if (!cancelled) setCrumbs([]);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [rootId, hasParents]);
-
-  return crumbs;
+  return data?.ancestors ?? [];
 };
 
 interface MemoryLineageProps {
