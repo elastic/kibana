@@ -24,35 +24,43 @@ import {
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
-import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
-// Mock the YamlEditor component to avoid Monaco complexity in tests
-jest.mock('../../../shared/ui/yaml_editor', () => ({
-  YamlEditor: ({ value, onChange, editorDidMount, options }: YamlEditorProps) => (
-    <div data-testid="yaml-editor">
-      <textarea
-        ref={(el) => {
-          const editorMock = {
-            getModel: jest.fn(),
-            dispose: jest.fn(),
-            onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
-            onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
-            getPosition: jest.fn(),
-            revealLineInCenter: jest.fn(),
-          } as unknown as monaco.editor.IStandaloneCodeEditor;
-          if (el) {
-            editorDidMount?.(editorMock);
-          }
-        }}
-        value={value || ''}
-        onChange={(e: any) => onChange?.(e.target.value)}
-        readOnly={Boolean(options?.readOnly)}
-        data-testid="yaml-textarea"
-      />
-    </div>
-  ),
-}));
+// Mock the YamlEditor component to avoid Monaco complexity in tests.
+// Uses createMockMonacoEditor (which includes getVisibleRanges, onDid* listeners,
+// revealLineInCenter, etc.) instead of a hand-rolled inline mock, so the minimap's
+// viewport-tracking code path is exercised without needing the real Monaco environment.
+jest.mock('../../../shared/ui/yaml_editor', () => {
+  // require() is mandatory here: jest.mock factories run before ES-import transforms.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createElement } = require('react');
+  return {
+    YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
+      return createElement(
+        'div',
+        { 'data-testid': 'yaml-editor' },
+        createElement('textarea', {
+          ref: (el: HTMLTextAreaElement | null): void => {
+            if (el) {
+              // getModel returns undefined so handleEditorDidMount skips provider
+              // registration (the `if (!model) return` guard). This keeps the
+              // YamlEditor mock minimal — provider registration is separately mocked.
+              editorDidMount?.(
+                createMockMonacoEditor(value ?? '', { getModel: jest.fn() } as any).editor
+              );
+            }
+          },
+          value: value || '',
+          onChange: (e: any) => onChange?.(e.target.value),
+          readOnly: Boolean(options?.readOnly),
+          'data-testid': 'yaml-textarea',
+        })
+      );
+    },
+  };
+});
 
 // Mock the validation hook
 jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({

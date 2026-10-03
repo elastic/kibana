@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -17,7 +17,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
@@ -39,6 +38,7 @@ import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integratio
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
+import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -108,6 +108,7 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
+import { MINIMAP_RESERVE_PX } from '../styles/constants';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import {
@@ -181,6 +182,8 @@ export const WorkflowYAMLEditor = ({
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
     false
   );
+  // The step minimap ships under the same Workflows experimental-features
+  // Advanced Setting as the graph visualization — use isVisualEditorEnabled directly.
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
 
@@ -222,6 +225,7 @@ export const WorkflowYAMLEditor = ({
   // Refs
   // EuiFlexGroup forwards this ref to its outer div for ActionsMenuPopover anchoring.
   const containerRef = useRef<React.ElementRef<typeof EuiFlexGroup>>(null);
+  const minimapContainerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const stepExecutions = useSelector(selectStepExecutions);
@@ -275,11 +279,14 @@ export const WorkflowYAMLEditor = ({
   useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
 
-  // Only show debug features in development
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-
   // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  // Mounted editor instance exposed to the minimap as state (null until handleEditorDidMount).
+  // Using state (rather than editorRef + isEditorMounted) gives the minimap a single prop with
+  // well-defined null/non-null semantics and avoids the ref-then-boolean timing pattern.
+  const [mountedEditor, setMountedEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(
+    null
+  );
 
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
@@ -340,7 +347,7 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
@@ -355,6 +362,19 @@ export const WorkflowYAMLEditor = ({
     navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
   }, []);
 
+  const updateContainerPosition = useCallback(
+    (stepInfo: StepInfo, _editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (!_editor || !stepInfo) {
+        return;
+      }
+
+      setPositionStyles({
+        top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
+        right: isExecutionYaml || !isVisualEditorEnabled ? '0px' : `${MINIMAP_RESERVE_PX}px`,
+      });
+    },
+    [isExecutionYaml, isVisualEditorEnabled]
+  );
   useEffect(() => {
     if (!isEditorMounted) {
       return;
@@ -370,7 +390,7 @@ export const WorkflowYAMLEditor = ({
       }, 50)
     );
     return () => disposeListener?.dispose();
-  }, [isEditorMounted]);
+  }, [isEditorMounted, updateContainerPosition]);
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
   const { registerHoverCommands, unregisterHoverCommands } = useRegisterHoverCommands();
@@ -419,6 +439,7 @@ export const WorkflowYAMLEditor = ({
       // Mark editor as mounted (deferred so consumers see the ref set on the same tick)
       setTimeout(() => {
         setIsEditorMounted(true);
+        setMountedEditor(editor);
       }, 0);
 
       const model = editor.getModel();
@@ -550,26 +571,12 @@ export const WorkflowYAMLEditor = ({
     isEditorMounted,
   });
 
-  const updateContainerPosition = (
-    stepInfo: StepInfo,
-    _editor: monaco.editor.IStandaloneCodeEditor
-  ) => {
-    if (!_editor || !stepInfo) {
-      return;
-    }
-
-    setPositionStyles({
-      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-      right: '0px',
-    });
-  };
-
   useEffect(() => {
     if (!focusedStepInfo || !editorRef.current) {
       return;
     }
     updateContainerPosition(focusedStepInfo, editorRef.current);
-  }, [isEditorMounted, focusedStepInfo]);
+  }, [isEditorMounted, focusedStepInfo, updateContainerPosition]);
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -755,8 +762,20 @@ export const WorkflowYAMLEditor = ({
   );
 
   const options = useMemo(() => {
-    return { ...editorOptions, readOnly: isReadOnlyYaml };
-  }, [isReadOnlyYaml]);
+    return {
+      ...editorOptions,
+      readOnly: isReadOnlyYaml,
+      // The step minimap is the primary scroll indicator — hide Monaco's scrollbar so it
+      // doesn't visually compete. Programmatic scrolling (revealLineInCenter, etc.) is
+      // unaffected; only the draggable track is removed.
+      ...(isVisualEditorEnabled && {
+        scrollbar: {
+          vertical: 'hidden' as const,
+          verticalScrollbarSize: 0,
+        },
+      }),
+    };
+  }, [isReadOnlyYaml, isVisualEditorEnabled]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
@@ -778,28 +797,6 @@ export const WorkflowYAMLEditor = ({
       monaco.editor.setModelMarkers = setModelMarkers;
     };
   }, []);
-
-  // Debug
-  const downloadSchema = useCallback(() => {
-    try {
-      const blob = new Blob([JSON.stringify(workflowJsonSchemaStrict, null, 2)], {
-        type: 'application/json',
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'workflow-schema.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      // to download schema:', error);
-      notifications?.toasts.addError(error as Error, {
-        title: 'Failed to download schema',
-      });
-    }
-  }, [workflowJsonSchemaStrict, notifications]);
 
   const extraActions = useMemo<ExtraAction[]>(
     () => [
@@ -877,31 +874,36 @@ export const WorkflowYAMLEditor = ({
           <StepActions onStepRun={onStepRun} />
         </div>
       )}
-      {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
-        <div css={styles.agentBuilderSectionCss} style={isActive ? undefined : { display: 'none' }}>
-          <WorkflowYamlEditorAssistActions
-            workflowJsonSchema={
-              (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
-            }
-            onDownloadSchema={downloadSchema}
+      <div css={styles.editorAreaWrapper}>
+        {/* Step minimap — experimental; hidden with the editor body in graph view. */}
+        {isVisualEditorEnabled && isActive ? (
+          <div css={styles.minimapContainer} ref={minimapContainerRef}>
+            <WorkflowStepMinimap
+              editor={mountedEditor}
+              validationErrors={validationErrors}
+              scrollContainerRef={minimapContainerRef}
+            />
+          </div>
+        ) : null}
+        <div
+          css={[
+            styles.editorContainer,
+            isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX }),
+          ]}
+          className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+        >
+          <YamlEditor
+            editorDidMount={handleEditorDidMount}
+            editorWillUnmount={handleEditorWillUnmount}
+            onChange={onChange}
+            onSyncStateChange={onSyncStateChange}
+            options={options}
+            schemas={schemas}
+            value={workflowYaml}
+            enableFindAction={true}
+            dataTestSubj="workflowYamlEditor"
           />
         </div>
-      ) : null}
-      <div
-        css={[styles.editorContainer, css({ flex: '1 1 0', minHeight: 0 })]}
-        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
-      >
-        <YamlEditor
-          editorDidMount={handleEditorDidMount}
-          editorWillUnmount={handleEditorWillUnmount}
-          onChange={onChange}
-          onSyncStateChange={onSyncStateChange}
-          options={options}
-          schemas={schemas}
-          value={workflowYaml}
-          enableFindAction={true}
-          dataTestSubj="workflowYamlEditor"
-        />
       </div>
       {isActive && (
         <div css={styles.validationErrorsContainer}>
@@ -918,38 +920,3 @@ export const WorkflowYAMLEditor = ({
     </EuiFlexGroup>
   );
 };
-
-const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAssistActions({
-  workflowJsonSchema,
-  onDownloadSchema,
-}: {
-  workflowJsonSchema: SchemasSettings['schema'] | null;
-  onDownloadSchema: () => void;
-}) {
-  const styles = useWorkflowEditorStyles();
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          css={styles.downloadSchemaButton}
-          iconType={workflowJsonSchema === null ? 'warning' : 'download'}
-          size="xs"
-          aria-label="Download JSON schema for debugging"
-          onClick={onDownloadSchema}
-          tabIndex={0}
-          disabled={workflowJsonSchema === null}
-          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.currentTarget.click();
-            }
-          }}
-        >
-          <FormattedMessage
-            id="workflows.yamlEditor.downloadSchemaButtonLabel"
-            defaultMessage="JSON Schema"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
