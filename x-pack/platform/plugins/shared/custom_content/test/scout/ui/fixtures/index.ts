@@ -11,7 +11,9 @@ import type {
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
-import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { test as baseTest, spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { CustomContentPanelPage } from './page_objects';
 
 export interface CustomContentTestFixtures extends ScoutParallelTestFixtures {
@@ -40,3 +42,57 @@ export const spaceTest = spaceBaseTest.extend<
     });
   },
 });
+
+interface CustomContentChatWorkerFixtures extends ScoutWorkerFixtures {
+  llmProxy: LlmProxy;
+}
+
+interface CustomContentChatTestFixtures extends ScoutTestFixtures {
+  pageObjects: PageObjects & {
+    customContentPanel: CustomContentPanelPage;
+  };
+}
+
+/**
+ * Non-parallel test with an LLM proxy standing in for the model. The connector is global to the
+ * cluster, so do not call `cleanStandardList`: it would delete it. The fixture deletes only the
+ * connector it created.
+ */
+export const test = baseTest.extend<CustomContentChatTestFixtures, CustomContentChatWorkerFixtures>(
+  {
+    llmProxy: [
+      async ({ apiServices, log }, use) => {
+        const proxy = await createLlmProxy(log);
+        const { id: connectorId } = await apiServices.alerting.connectors.create({
+          name: 'llm-proxy',
+          connectorTypeId: '.gen-ai',
+          config: {
+            apiProvider: 'OpenAI',
+            apiUrl: `http://localhost:${proxy.getPort()}`,
+            defaultModel: 'gpt-4',
+          },
+          secrets: { apiKey: 'myApiKey' },
+        });
+        await use(proxy);
+        proxy.close();
+        await apiServices.alerting.connectors.delete(connectorId);
+      },
+      { scope: 'worker', auto: true },
+    ],
+    pageObjects: async (
+      {
+        pageObjects,
+        page,
+      }: {
+        pageObjects: CustomContentChatTestFixtures['pageObjects'];
+        page: ScoutPage;
+      },
+      use: (pageObjects: CustomContentChatTestFixtures['pageObjects']) => Promise<void>
+    ) => {
+      await use({
+        ...pageObjects,
+        customContentPanel: createLazyPageObject(CustomContentPanelPage, page),
+      });
+    },
+  }
+);

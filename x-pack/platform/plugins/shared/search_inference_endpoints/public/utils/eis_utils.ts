@@ -38,6 +38,7 @@ export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCateg
   completion: 'LLM',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
+  embedding: 'Embedding',
   rerank: 'Rerank',
 };
 
@@ -321,6 +322,11 @@ export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata |
   const eolDate = getModelEOLDate(metadata);
   if (!eolDate) return false;
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
+}
+
+export function isModelNearingEndOfLife(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!isModelDeprecated(metadata)) return false;
+  return !isModelEndOfLifeReached(metadata);
 }
 
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
