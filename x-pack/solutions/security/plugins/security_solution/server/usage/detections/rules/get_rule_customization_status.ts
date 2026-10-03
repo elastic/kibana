@@ -11,6 +11,7 @@ import type { RuleCustomizationCounts } from './types';
 export interface ExternalRuleSourceInfo {
   is_customized: boolean;
   customized_fields: Array<{ fieldName: string }>;
+  has_base_version: boolean;
 }
 
 // we only publish a subset of most important fields that we know can be customized
@@ -42,11 +43,21 @@ const ALLOWED_FIELDS: Set<keyof RuleCustomizationCounts> = new Set([
 
 export const getRuleCustomizationStatus = (
   ruleSources: ReadonlyArray<ExternalRuleSourceInfo>
-): RuleCustomizationCounts => {
+): RuleCustomizationCounts => countCustomizedFields(ruleSources, () => true);
+
+export const getRuleCustomizationMissingBaseVersionStatus = (
+  ruleSources: ReadonlyArray<ExternalRuleSourceInfo>
+): RuleCustomizationCounts =>
+  countCustomizedFields(ruleSources, (ruleSource) => !ruleSource.has_base_version);
+
+function countCustomizedFields(
+  ruleSources: ReadonlyArray<ExternalRuleSourceInfo>,
+  predicate: (ruleSource: ExternalRuleSourceInfo) => boolean
+): RuleCustomizationCounts {
   const counts = getInitialRuleCustomizationStatus();
 
   ruleSources.forEach((ruleSource) => {
-    if (!ruleSource.is_customized) {
+    if (!ruleSource.is_customized || !predicate(ruleSource)) {
       return;
     }
 
@@ -59,4 +70,4 @@ export const getRuleCustomizationStatus = (
   });
 
   return counts;
-};
+}

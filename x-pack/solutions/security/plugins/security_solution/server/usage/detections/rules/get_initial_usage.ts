@@ -19,6 +19,7 @@ import type {
   UpgradeableRulesSummary,
   ThreatMatchFeatureTypeUsage,
   RuleCustomizationCounts,
+  RuleBaseVersionCounts,
   DeprecatedRulesSummary,
   ChangesHistoryUsage,
 } from './types';
@@ -214,4 +215,11 @@ export const getInitialRuleCustomizationStatus = (): RuleCustomizationCounts => 
   threat_query: 0,
   threshold: 0,
   timeline_id: 0,
+});
+
+export const getInitialRuleBaseVersionStatus = (): RuleBaseVersionCounts => ({
+  customized_with_base_version: 0,
+  customized_without_base_version: 0,
+  noncustomized_with_base_version: 0,
+  noncustomized_without_base_version: 0,
 });
