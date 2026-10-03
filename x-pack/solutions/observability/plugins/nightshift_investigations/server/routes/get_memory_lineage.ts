@@ -24,8 +24,9 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
     summary: 'Get the merge lineage of a Semantic Memory page',
     description:
       'Walks `merged_from` breadth-first and returns the ancestors of a memory, ' +
-      'nearest first. The walk is bounded and refuses to revisit an id, so a ' +
-      'cyclic `merged_from` cannot loop it.',
+      'nearest first. The walk is bounded and skips any id it has already ' +
+      'visited, so a cyclic or self-referencing `merged_from` cannot loop it ' +
+      'and still reports the real ancestors.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
@@ -50,6 +51,14 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
     // marking the frontier up front would make every fetched page look already
     // seen and silently drop the whole chain.
     const seen = new Set<string>([root.id]);
+    /**
+     * Skips an id the walk has already visited — the root itself, or a page that
+     * is an ancestor twice over — and keeps going. A memory written by an in-place
+     * rewrite lists its own id in `merged_from`, and one merged into an existing
+     * page lists that page alongside its real ancestors; skipping those ids is what
+     * lets the real ones be reported instead of ending the walk on the first one.
+     */
+    const isVisited = (id: string) => seen.has(id);
     const ancestors: Array<{
       id: string;
       title: string;
@@ -67,7 +76,7 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
       level: number;
     }> = [];
 
-    let frontier = (root.merged_from ?? []).filter((id) => !seen.has(id));
+    let frontier = (root.merged_from ?? []).filter((id) => !isVisited(id));
 
     // How deep the walk actually got, which is not always MAX_LINEAGE_DEPTH: a
     // chain of one reports 1. Truncated by the cap, this also reports that the
@@ -80,7 +89,7 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
       reachedDepth = depth + 1;
       const next: string[] = [];
       for (const page of pages) {
-        if (seen.has(page.id)) continue;
+        if (isVisited(page.id)) continue;
         seen.add(page.id);
         ancestors.push({
           id: page.id,
@@ -91,7 +100,7 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
         });
         next.push(...(page.merged_from ?? []));
       }
-      frontier = [...new Set(next)].filter((id) => !seen.has(id));
+      frontier = [...new Set(next)].filter((id) => !isVisited(id));
     }
 
     return { ancestors, depth: reachedDepth };

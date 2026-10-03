@@ -25,7 +25,7 @@ import {
   optimizeMemory,
   unwrapUserTask,
 } from './optimize';
-import type { MemoryPageStore } from './page_store';
+import type { MemoryPageStore, MemoryPageWrite } from './page_store';
 import type { TranscriptStep } from './transcript';
 import type { MemoryPage } from '../../common/memory';
 import { MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
@@ -1171,7 +1171,7 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('merges an old exact slug in place with OCC and preserves its id and title', async () => {
+  it('rewrites an exact slug in place with OCC, keeping id and title and no merge fields', async () => {
     const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
     const store = createStore({
       get: jest
@@ -1185,7 +1185,7 @@ describe('applyMemoryEdits', () => {
     });
     const synthesizeMemoryGroup = jest.fn().mockResolvedValue({ content: 'Old and new facts.' });
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: [],
       labels: { useful: [], harmful: [] },
@@ -1198,26 +1198,36 @@ describe('applyMemoryEdits', () => {
         },
       ],
       synthesizeMemoryGroup,
+      now: () => Date.parse('2026-01-01T00:00:00.000Z') / 1000,
       logger: loggerMock.create(),
     });
 
     expect(synthesizeMemoryGroup).toHaveBeenCalledWith(
       expect.objectContaining({ sources: [existing] })
     );
+    // Nothing was merged in, so the page must not name itself as a source of itself.
+    const written = (store.update as jest.Mock).mock.calls[0][1] as MemoryPageWrite;
+    expect(written.slug).toBe('checkout-redis');
+    expect(written.title).toBe('Checkout Redis');
+    expect(written.merged_from).toBeUndefined();
+    expect(written.source).toBeUndefined();
+    // The page's own counters carry over, as they do for any write over it.
+    expect(written.telemetry).toEqual(expect.objectContaining({ impressions: 1, conversions: 0 }));
     expect(store.update).toHaveBeenCalledWith(
       'memory_checkout-redis',
-      expect.objectContaining({
-        slug: 'checkout-redis',
-        title: 'Checkout Redis',
-        merged_from: ['memory_checkout-redis'],
-      }),
+      expect.anything(),
       expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
     );
     expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(store.create).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ standaloneUpsertCount: 1, mergeSuccessCount: 0 })
+    );
   });
 
-  it('merges a create-conflict winner through the same in-place flow', async () => {
+  it('counts a create-conflict winner as an in-place write, not a merge', async () => {
+    // The create lost a race to a page that already exists, so the retry writes
+    // over that page with no other memory folded in: an upsert, like any rewrite.
     const winner = page('memory_checkout-redis', 'Concurrent winner', 'Winner fact.');
     const get = jest
       .fn()
@@ -1258,7 +1268,11 @@ describe('applyMemoryEdits', () => {
       expect.objectContaining({ seqNo: 4 })
     );
     expect(summary).toEqual(
-      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 1 })
+      expect.objectContaining({
+        standaloneUpsertCount: 1,
+        mergeSuccessCount: 0,
+        mergeAttemptCount: 0,
+      })
     );
   });
 
@@ -1334,6 +1348,39 @@ describe('applyMemoryEdits', () => {
       expect.objectContaining({ page: archived })
     );
     expect(summary).toEqual(expect.objectContaining({ standaloneUpsertCount: 1 }));
+  });
+
+  it("drops an archived page's own id from the merge history it hands over", async () => {
+    // An archived page written by an in-place rewrite lists itself as its only
+    // source; carrying that over would re-create the self-reference.
+    const archived = {
+      ...page('memory_checkout-redis', 'Checkout Redis', 'Old wrong fact.'),
+      archived: true,
+      merged_from: ['memory_checkout-redis', 'memory_older-redis'],
+    };
+    const store = createStore({ get: jest.fn().mockResolvedValue(archived) });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          tags: [],
+          replaces: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'New fact.' }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledWith(
+      archived.id,
+      expect.objectContaining({ merged_from: ['memory_older-redis'] }),
+      expect.objectContaining({ page: archived })
+    );
   });
 
   it('merges into an archived id instead of adding a -merged suffix', async () => {
@@ -1685,6 +1732,37 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     expect(store.archiveVersioned).toHaveBeenCalledWith(
       expect.objectContaining({ page: expect.objectContaining({ id: named.id }) }),
       'merged'
+    );
+  });
+
+  it('keeps the real ancestors of a merge into an existing page, minus the page itself', async () => {
+    // The entry's slug resolves to a page that is both the write target and a
+    // source, so naming the target in `merged_from` would make the page its own
+    // ancestor — and the lineage walk skips an id it has already visited, which
+    // would hide the memories that really were merged into it.
+    const target = page('memory_host-clock-lag', 'Host clock lag', 'The host clock drifts.');
+    target.merged_from = ['memory_older-clock-lag'];
+    const named = page('memory_x509-errors', 'x509 errors', 'x509 not yet valid errors on TLS.');
+    const store = storeWith([target, named]);
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [named.id],
+      recalledMemories: [named],
+      labels: { useful: [], harmful: [] },
+      extractions: [entry({ replaces: [named.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Merged.' }),
+      logger: loggerMock.create(),
+    });
+
+    const written = (store.update as jest.Mock).mock.calls[0][1] as MemoryPageWrite;
+    // The entry's proposed id is the target's own id here, so it goes too; what is
+    // left is the named source and the target's own earlier lineage.
+    expect(written.merged_from).toEqual(['memory_x509-errors', 'memory_older-clock-lag']);
+    expect(written.source).toBe('Merged from memories: memory_x509-errors, memory_older-clock-lag');
+    expect(summary).toEqual(
+      expect.objectContaining({ standaloneUpsertCount: 0, mergeSuccessCount: 1 })
     );
   });
 

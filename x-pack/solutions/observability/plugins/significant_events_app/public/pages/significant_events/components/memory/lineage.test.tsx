@@ -93,6 +93,22 @@ describe('MemoryLineage', () => {
     expect(screen.getByText('Kafka lag spikes')).toBeInTheDocument();
   });
 
+  it('renders the real ancestors of a memory whose merge list names the page itself', async () => {
+    // Memories written before the write path dropped the target from `merged_from`
+    // carry their own id in that list. The self-reference is skipped by the
+    // server's walk, not by the panel, so the ancestors behind it still draw.
+    respondWith([{ id: 'memory_redis-evictions', title: 'Redis evictions' }]);
+    renderLineage(
+      page({ id: 'memory_canonical', merged_from: ['memory_canonical', 'memory_redis-evictions'] })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('nightshiftMemoryLineage')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Redis evictions')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('asks the server once for the whole chain', async () => {
     respondWith([
       { id: 'memory_a', title: 'A' },

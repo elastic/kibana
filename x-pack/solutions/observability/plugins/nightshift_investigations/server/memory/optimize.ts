@@ -569,7 +569,8 @@ const unionStrings = (...groups: Array<readonly string[] | undefined>): string[]
 
 /**
  * Writes a fresh memory over an archived one that holds the same id. The archived version's
- * counters are not inherited; its merge history is.
+ * counters are not inherited; its merge history is, minus its own id — a self-reference is
+ * not an ancestor of the page being written.
  */
 const writeOverArchived = async (
   store: MemoryPageStore,
@@ -577,7 +578,9 @@ const writeOverArchived = async (
   write: MemoryPageWrite,
   nowSec: number
 ): Promise<void> => {
-  const mergedFrom = unionStrings(write.merged_from, archived.page.merged_from);
+  const mergedFrom = unionStrings(write.merged_from, archived.page.merged_from).filter(
+    (id) => id !== archived.page.id
+  );
   await store.update(
     archived.page.id,
     {
@@ -762,7 +765,9 @@ export const applyMemoryEdits = async ({
       now,
       logger,
     });
-    if (result.writtenId && result.sourceCount === 0) {
+    // Rewriting a page in place folds in no other memory, so it counts as an upsert
+    // of that page rather than as a merge — the same counter a new page lands in.
+    if (result.writtenId && result.mergedFromCount === 0) {
       summary.standaloneUpsertCount += 1;
     } else if (result.writtenId) {
       // A new entry whose create lost a race was merged into the page that won it.
@@ -785,8 +790,8 @@ export const applyMemoryEdits = async ({
 interface MergeMemoryGroupResult {
   /** The page the entry was written to; unset when nothing was written. */
   writtenId?: string;
-  /** Stored memories the written entry incorporates, the canonical page included. */
-  sourceCount: number;
+  /** Stored memories the write folded in, the written page itself excluded. */
+  mergedFromCount: number;
   archivedSourceCount: number;
   writeFailureCount: number;
 }
@@ -838,7 +843,7 @@ const mergeMemoryGroup = async ({
       logger.debug(
         `Memory merge aborted — required source ${requiredSourceIds[unavailableIndex]} is missing or archived`
       );
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const versionedSources = sourceSnapshots as VersionedMemoryPage[];
     const currentSources = versionedSources.map(({ page }) => page);
@@ -860,7 +865,7 @@ const mergeMemoryGroup = async ({
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
       logger.debug(`Memory merge synthesis error: ${(err as Error).message}`);
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const content = capMergedContent(synthesis.content);
@@ -869,11 +874,11 @@ const mergeMemoryGroup = async ({
     const title = versionedCanonical?.page.title ?? extract.title;
     if (title.length === 0 || content.trim().length === 0) {
       logger.info(`Memory write skipped for "${extract.slug}" — the writer returned no content`);
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     if (looksLikeSecret([title, content, extract.tags.join('\n')].join('\n'))) {
       logger.warn('Memory merge aborted — synthesised content looks like a secret');
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
 
     let slug = versionedCanonical?.page.slug;
@@ -903,7 +908,7 @@ const mergeMemoryGroup = async ({
       }
       if (!slug || !canonicalId) {
         logger.warn('Memory merge aborted — no free canonical slug found');
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
       }
     }
 
@@ -914,13 +919,16 @@ const mergeMemoryGroup = async ({
       impressions += display.impressions;
       conversions += display.conversions;
     }
-    const mergedFrom =
-      currentSources.length > 0
-        ? unionStrings(
-            currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
-            [toMemoryKiId(extract.slug)]
-          )
-        : [];
+    // The extract's proposed id names the entry being written, so it rides along with
+    // the merge even when the content landed on another page. The target's own id is
+    // not an ancestor of itself: naming it would make the page its own source, and the
+    // lineage walk skips an id it has already visited, which would hide the real
+    // ancestors behind it. What survives that filter is also what decides whether
+    // this write merged anything at all.
+    const mergedFrom = unionStrings(
+      currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
+      [toMemoryKiId(extract.slug)]
+    ).filter((id) => id !== canonicalId);
     const write: MemoryPageWrite = {
       slug,
       title,
@@ -940,8 +948,15 @@ const mergeMemoryGroup = async ({
       user: 'nightshift-optimizer',
       ...(currentSources.length > 0
         ? {
-            source: `Merged from memories: ${mergedFrom.join(', ')}`,
-            merged_from: mergedFrom,
+            // An in-place rewrite folds in nothing, so it carries no merge lineage
+            // and no "Merged from" provenance; its counters still ride along from
+            // the page it overwrites.
+            ...(mergedFrom.length > 0
+              ? {
+                  source: `Merged from memories: ${mergedFrom.join(', ')}`,
+                  merged_from: mergedFrom,
+                }
+              : {}),
             telemetry: {
               impressions,
               conversions,
@@ -952,7 +967,7 @@ const mergeMemoryGroup = async ({
     };
     const targetCanonicalId = canonicalId;
     if (!targetCanonicalId) {
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const validatedSources = await Promise.all(
@@ -965,7 +980,7 @@ const mergeMemoryGroup = async ({
       logger.debug(
         `Memory merge aborted after synthesis — required source ${requiredSourceIds[unavailableAfterSynthesisIndex]} is missing or archived`
       );
-      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const revalidatedSources = validatedSources as VersionedMemoryPage[];
     const sourceChanged = versionedSources.some((source, index) => {
@@ -975,7 +990,7 @@ const mergeMemoryGroup = async ({
     if (sourceChanged) {
       if (attempt === 2) {
         logger.warn('Memory merge exhausted source changes; sources preserved');
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       continue;
     }
@@ -995,19 +1010,19 @@ const mergeMemoryGroup = async ({
       if (!isElasticsearchWriteConflict(err)) {
         logger.warn('Memory merge failed to write its canonical page');
         logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       if (attempt === 2) {
         logger.warn('Memory merge exhausted version conflicts; sources preserved');
         logger.debug(`Memory merge conflict exhaustion canonical=${targetCanonicalId}`);
-        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       canonicalIsSource = true;
     }
   }
 
   if (!writtenCanonicalId) {
-    return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
+    return { mergedFromCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
   let archivedSourceCount = 0;
@@ -1028,13 +1043,20 @@ const mergeMemoryGroup = async ({
       logger.debug(`Memory merge archive failed source=${page.id}: ${String(err)}`);
     }
   }
+  // The canonical page is a source of itself whenever the write landed on a page
+  // that already existed, so it is counted apart from what was really folded in.
+  const mergedFromCount = committedSources.filter(
+    ({ page }) => page.id !== writtenCanonicalId
+  ).length;
   logger.debug(
-    `Merged ${committedSources.map(({ page }) => page.id).join(', ')} into ${writtenCanonicalId}` +
-      ` (entry ${extract.slug})`
+    mergedFromCount > 0
+      ? `Merged ${committedSources.map(({ page }) => page.id).join(', ')} into ` +
+          `${writtenCanonicalId} (entry ${extract.slug})`
+      : `Rewrote ${writtenCanonicalId} in place (entry ${extract.slug})`
   );
   return {
     writtenId: writtenCanonicalId,
-    sourceCount: committedSources.length,
+    mergedFromCount,
     archivedSourceCount,
     writeFailureCount,
   };

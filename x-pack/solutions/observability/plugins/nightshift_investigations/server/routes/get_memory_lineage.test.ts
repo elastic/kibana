@@ -150,6 +150,37 @@ describe('getMemoryLineageRoute', () => {
     expect(store.getMany).not.toHaveBeenCalled();
   });
 
+  it('reports the real ancestors of a memory that lists itself among them', async () => {
+    // Documents written before the write path stopped naming the target carry the
+    // target's own id alongside the memories it really merged from. Skipping that
+    // id must not cost the walk the ancestors behind it.
+    const { store, result } = run(memory('memory_root', ['memory_root', 'memory_a']), {
+      memory_a: [],
+    });
+
+    const lineage = await result;
+
+    expect(lineage.ancestors.map((a: { id: string }) => a.id)).toEqual(['memory_a']);
+    expect(lineage.depth).toBe(1);
+    // The self id is dropped before the fetch, so the level is read in one mget.
+    expect(store.getMany).toHaveBeenCalledTimes(1);
+    expect(store.getMany).toHaveBeenCalledWith(['memory_a']);
+  });
+
+  it('follows the ancestors behind a self-reference deeper in the chain', async () => {
+    const { result } = run(memory('memory_root', ['memory_a']), {
+      memory_a: ['memory_a', 'memory_b'],
+      memory_b: [],
+    });
+
+    const lineage = await result;
+
+    expect(lineage.ancestors.map((a: { id: string; level: number }) => [a.id, a.level])).toEqual([
+      ['memory_a', 1],
+      ['memory_b', 2],
+    ]);
+  });
+
   it('stops at the cap even when a cycle would otherwise keep the walk going', async () => {
     // A cycle with a long tail: the cap, not cycle detection, is the backstop.
     const deep: Record<string, string[]> = {};
