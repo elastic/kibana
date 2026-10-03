@@ -24,12 +24,10 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-router'
   - '@kbn/inference-common'
-  - '@kbn/management-settings-types'
-  - '@kbn/management-settings-utilities'
-  - '@kbn/management-settings-field-definition'
-  - '@kbn/management-settings-components-field-row'
   - '@kbn/react-kibana-context-render'
   - '@kbn/app-header'
+  - '@kbn/code-editor'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -40,6 +38,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
