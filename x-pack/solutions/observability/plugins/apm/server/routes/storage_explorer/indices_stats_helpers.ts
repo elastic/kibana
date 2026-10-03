@@ -21,6 +21,7 @@ export async function getTotalIndicesStats({
   const totalStats = await esClient.asCurrentUser.indices.stats({
     index,
     expand_wildcards: 'all',
+    ignore_unavailable: true,
   });
   return totalStats;
 }
@@ -69,12 +70,20 @@ export async function getIndicesLifecycleStatus({
 }) {
   const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
-  const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({
-    index,
-    filter_path: 'indices.*.phase',
-  });
+  try {
+    const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({
+      index,
+      filter_path: 'indices.*.phase',
+    });
 
-  return indices || {};
+    return indices || {};
+  } catch (error) {
+    // Unlike the indices APIs above, ILM explain does not accept ignore_unavailable.
+    if (isIndexNotFoundError(error)) {
+      return {};
+    }
+    throw error;
+  }
 }
 
 export async function getIndicesInfo({
@@ -95,6 +104,7 @@ export async function getIndicesInfo({
     ],
     features: ['settings'],
     expand_wildcards: 'all',
+    ignore_unavailable: true,
   });
 
   return indicesInfo;
@@ -106,4 +116,20 @@ export function getApmIndicesCombined(apmEventClient: APMEventClient) {
   } = apmEventClient;
 
   return uniq([transaction, span, metric, error]).join();
+}
+
+function isIndexNotFoundError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const esError = error as {
+    message?: string;
+    meta?: { body?: { error?: { type?: string } } };
+  };
+  return (
+    esError.meta?.body?.error?.type === 'index_not_found_exception' ||
+    (typeof esError.message === 'string' &&
+      esError.message.startsWith('index_not_found_exception:'))
+  );
 }
