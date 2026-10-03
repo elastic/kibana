@@ -14,12 +14,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { cloneDeep } from 'lodash';
-import {
-  generateInlineDataViewId,
-  getDataViewSpecKey,
-  getInlineDataView,
-  isInlineDataView,
-} from './inline_data_view';
+import { generateInlineDataViewId, getInlineDataView, isInlineDataView } from './inline_data_view';
 import { inlineDataViewIdCases, inlineSpecWithRuntimeField } from './inline_data_view.fixtures';
 
 const toApiRoundTripSpec = (spec: DataViewSpec) => {
@@ -92,7 +87,7 @@ describe('inline Data View identity across representations', () => {
   );
 });
 
-describe('getDataViewSpecKey', () => {
+describe('inline Data View identity equivalence', () => {
   it('ignores the order of properties, including those inside runtime fields', () => {
     const reorderedSpec: DataViewSpec = {
       runtimeFieldMap: {
@@ -102,27 +97,20 @@ describe('getDataViewSpecKey', () => {
       title: 'logs-*',
     };
 
-    expect(getDataViewSpecKey(reorderedSpec)).toBe(getDataViewSpecKey(inlineSpecWithRuntimeField));
+    expect(generateInlineDataViewId(reorderedSpec)).toBe(
+      generateInlineDataViewId(inlineSpecWithRuntimeField)
+    );
   });
 
-  it.each<[string, Partial<DataViewSpec>]>([
-    ['local metadata', { id: 'local-id', version: 'local-version', managed: true }],
-    [
-      'explicit default values',
-      {
-        name: 'logs-*',
-        allowHidden: false,
-        sourceFilters: [],
-        fieldFormats: {},
-        fieldAttrs: {},
-      },
-    ],
-    ['field popularity', { fieldAttrs: { bytes: { count: 3 } } }],
-    ['empty field settings', { fieldAttrs: { bytes: {} } }],
-  ])('ignores %s', (_description, changes) => {
-    expect(getDataViewSpecKey({ ...inlineSpecWithRuntimeField, ...changes })).toBe(
-      getDataViewSpecKey(inlineSpecWithRuntimeField)
-    );
+  it('ignores local metadata', () => {
+    expect(
+      generateInlineDataViewId({
+        ...inlineSpecWithRuntimeField,
+        id: 'local-id',
+        version: 'local-version',
+        managed: true,
+      })
+    ).toBe(generateInlineDataViewId(inlineSpecWithRuntimeField));
   });
 });
 

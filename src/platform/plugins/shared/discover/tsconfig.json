@@ -151,7 +151,6 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/presentation-util-plugin",
     "@kbn/core-saved-objects-common",
-    "@kbn/core-saved-objects-server",
     "@kbn/as-code-filters-constants",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",

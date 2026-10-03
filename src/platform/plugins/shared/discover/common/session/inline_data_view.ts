@@ -67,14 +67,10 @@ const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
   };
 };
 
-/** Compares definitions using the same canonical representation that owns deterministic IDs. */
-export const getDataViewSpecKey = (dataView: DataViewSpec): string =>
-  stableStringify(getCanonicalInlineDataViewSpec(dataView));
-
 /** Generates a stable inline ID from the definition without changing the spec. */
 export const generateInlineDataViewId = (dataView: DataViewSpec): string => {
   // Changing the ID for an unchanged spec can break saved dashboard filters.
-  const specKey = getDataViewSpecKey(dataView);
+  const specKey = stableStringify(getCanonicalInlineDataViewSpec(dataView));
 
   return `discover-inline-${new Sha256().update(specKey).digest('hex')}`;
 };

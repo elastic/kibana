@@ -9,7 +9,6 @@
 
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-  AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
@@ -26,7 +25,6 @@ import {
   type DiscoverSessionApiMetricsTab,
 } from '@kbn/as-code-discover-schema';
 import { discoverSessionApiResponseSchema } from './schema';
-import { discoverSessionInternalDataSchema } from './internal_schema';
 
 // Keep these values independent from the schema constants so contract changes require an explicit
 // test update.
@@ -903,101 +901,6 @@ describe('discoverSessionApiDataSchema', () => {
 
       expect(validated.tabs[0].vis_context?.attributes).toHaveProperty(key);
     });
-  });
-});
-
-describe('discoverSessionInternalDataSchema', () => {
-  const inlineTab = {
-    ...classicTab,
-    data_source: {
-      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-      index_pattern: 'logs-*',
-    },
-  };
-
-  it('preserves an inline ID without allowing it in the public schema', () => {
-    const dataSource = { ...inlineTab.data_source, id: 'Legacy:Inline-ID' };
-    const data = { title: 'Inline session', tabs: [{ ...inlineTab, data_source: dataSource }] };
-
-    expect(discoverSessionInternalDataSchema.parse(data).tabs[0].data_source).toStrictEqual(
-      dataSource
-    );
-    expect(discoverSessionApiDataSchema.safeParse(data).success).toBe(false);
-  });
-
-  it.each([
-    ['classic', classicTab],
-    ['inline without an ID', inlineTab],
-    ['ES|QL', esqlTab],
-    ['Metrics', metricsTab],
-  ])('keeps public defaults for %s tabs', (_name, tab) => {
-    const data = { title: 'Session', tabs: [tab] };
-
-    expect(discoverSessionInternalDataSchema.parse(data)).toStrictEqual(
-      discoverSessionApiDataSchema.parse(data)
-    );
-  });
-
-  it.each([classicTab, esqlTab, metricsTab])(
-    'rejects an inline ID on other data sources: $data_source.type ($#)',
-    (tab) => {
-      expect(
-        discoverSessionInternalDataSchema.safeParse({
-          title: 'Session',
-          tabs: [{ ...tab, data_source: { ...tab.data_source, id: 'inline-id' } }],
-        }).success
-      ).toBe(false);
-    }
-  );
-
-  it.each(['', 'a'.repeat(513)])('rejects an empty or oversized inline ID (%#)', (id) => {
-    expect(
-      discoverSessionInternalDataSchema.safeParse({
-        title: 'Session',
-        tabs: [{ ...inlineTab, data_source: { ...inlineTab.data_source, id } }],
-      }).success
-    ).toBe(false);
-  });
-
-  it.each([
-    ['no tabs', []],
-    ['duplicate tab IDs', [inlineTab, inlineTab]],
-    [
-      'too many tabs',
-      Array.from({ length: CURRENT_API_LIMITS.tabs + 1 }, (_, index) => ({
-        ...inlineTab,
-        id: `tab-${index}`,
-      })),
-    ],
-  ])('rejects %s', (_name, tabs) => {
-    expect(discoverSessionInternalDataSchema.safeParse({ title: 'Session', tabs }).success).toBe(
-      false
-    );
-  });
-
-  it('keeps control validation on inline tabs', () => {
-    expect(
-      discoverSessionInternalDataSchema.safeParse({
-        title: 'Session',
-        tabs: [{ ...inlineTab, control_panels: [{ id: 'invalid-control' }] }],
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects unknown session and tab properties', () => {
-    expect(
-      discoverSessionInternalDataSchema.safeParse({
-        title: 'Session',
-        tabs: [inlineTab],
-        unexpected: true,
-      }).success
-    ).toBe(false);
-    expect(
-      discoverSessionInternalDataSchema.safeParse({
-        title: 'Session',
-        tabs: [{ ...inlineTab, unexpected: true }],
-      }).success
-    ).toBe(false);
   });
 });
 
