@@ -26,6 +26,7 @@ import {
   getTimeslice,
   getMapCenter,
   getMapZoom,
+  isMapLoading,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import {
@@ -41,13 +42,13 @@ import type { MapExtentState } from '../../reducers/map/types';
 function mapStateToProps(state: MapStoreState) {
   const mapApi = getMapApi(state);
   return {
-    mapApi: getMapApi(state),
     initialMapCenter: mapApi ? null : getMapCenter(state),
     initialMapZoom: mapApi ? null : getMapZoom(state),
     zoom: getMapZoom(state),
     settings: getMapSettings(state),
     customIcons: getCustomIcons(state),
     layerList: getLayerList(state),
+    isMapLoading: isMapLoading(state),
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     inspectorAdapters: getInspectorAdapters(state),
     isFullScreen: getIsFullScreen(state),

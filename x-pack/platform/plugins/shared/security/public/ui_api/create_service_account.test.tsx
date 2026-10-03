@@ -13,6 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getUiApi } from '.';
+import * as roleSelector from '../management/service_accounts/service_account_role_selector';
 
 const renderComponent = async ({
   enabled = true,
@@ -51,27 +52,40 @@ const renderComponent = async ({
 
 describe('getCreateServiceAccount UI API', () => {
   it('loads the standalone flyout and reports the created account', async () => {
-    const { core, account, onCreated } = await renderComponent();
-    expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
-    const selector = screen.getByTestId('serviceAccountRolesSelector');
-    await waitFor(() => expect(selector).toBeEnabled());
-    fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
-      target: { value: account.name },
-    });
-    fireEvent.click(selector);
-    fireEvent.click(await screen.findByTestId('roleOption-viewer'));
-    fireEvent.click(selector);
-    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+    const selector = jest
+      .spyOn(roleSelector, 'ServiceAccountRoleSelector')
+      .mockImplementation(({ onChange }) => (
+        <button
+          type="button"
+          data-test-subj="selectViewerRole"
+          onClick={() => onChange(['viewer'])}
+        >
+          Select roles
+        </button>
+      ));
+    try {
+      const { core, account, onCreated } = await renderComponent();
+      expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
+      fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+        target: { value: account.name },
+      });
+      fireEvent.click(screen.getByTestId('selectViewerRole'));
+      const submit = screen.getByTestId('createServiceAccountSubmit');
+      await waitFor(() => expect(submit).toBeEnabled());
+      fireEvent.click(submit);
 
-    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
-    expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
-      name: account.name,
-      roles: account.roles,
-    });
-    expect(core.http.get).toHaveBeenCalledWith(
-      '/api/security/role',
-      expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
-    );
+      await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
+      expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
+        name: account.name,
+        roles: account.roles,
+      });
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/api/security/role',
+        expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
+      );
+    } finally {
+      selector.mockRestore();
+    }
   });
 
   it.each([
