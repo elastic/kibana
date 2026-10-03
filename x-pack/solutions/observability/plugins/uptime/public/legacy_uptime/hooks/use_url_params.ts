@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { UptimeUrlParams } from '../lib/helper';
@@ -61,7 +61,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
         ...updatedParams,
       };
 
-      const updatedSearch = stringify(
+      const updatedSearch = queryString.stringify(
         // drop any parameters that have no value
         Object.keys(mergedParams).reduce((params, key) => {
           const value = mergedParams[key];
