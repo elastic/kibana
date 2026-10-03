@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 import { MemoryActivity } from './activity';
 import { MemoryHome } from './home';
 import { MemoryPageView } from './page_view';
@@ -27,11 +28,27 @@ export function MemoryTab() {
   const { euiTheme } = useEuiTheme();
   const [filter, setFilter] = useState<MemoryFilter>('active');
   const [selection, setSelection] = useState<MemorySidebarSelection>({ kind: 'home' });
+  // The keyword selection lives here rather than in Home, because a memory's own
+  // tags select one too: a tag on the detail view filters Home by that keyword.
+  const [keywords, setKeywords] = useState<string[]>([]);
 
   // One query serves the sidebar, Home and Activity, matching the Cortex tab.
   const { rows, stats, isError, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useMemoryPages(filter);
   const livePages = useMemo(() => rows.filter((page) => !page.archived), [rows]);
+  const onToggleKeyword = useCallback((keyword: string) => {
+    setKeywords((selected) =>
+      selected.includes(keyword) ? selected.filter((k) => k !== keyword) : [...selected, keyword]
+    );
+  }, []);
+  const onClearKeywords = useCallback(() => setKeywords([]), []);
+  // Tags are stored verbatim and spelled inconsistently, so a tag clicked on a
+  // memory is answered by the same canonical key the chart selects.
+  const onSelectKeyword = useCallback((keyword: string) => {
+    const canonical = canonicalizeTag(keyword);
+    setKeywords(canonical === null ? [] : [canonical]);
+    setSelection({ kind: 'home' });
+  }, []);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" data-test-subj="nightshiftMemoryLoading" />;
@@ -123,7 +140,14 @@ export function MemoryTab() {
             `}
           >
             {selection.kind === 'home' && (
-              <MemoryHome pages={livePages} stats={stats} onSelectPage={onSelectPage} />
+              <MemoryHome
+                pages={livePages}
+                stats={stats}
+                onSelectPage={onSelectPage}
+                selectedKeywords={keywords}
+                onToggleKeyword={onToggleKeyword}
+                onClearKeywords={onClearKeywords}
+              />
             )}
             {selection.kind === 'activity' && (
               <MemoryActivity pages={rows} onSelectPage={onSelectPage} />
@@ -132,6 +156,7 @@ export function MemoryTab() {
               <MemoryPageView
                 pageId={selection.id}
                 onSelectPage={onSelectPage}
+                onSelectKeyword={onSelectKeyword}
                 onDeleted={() => setSelection({ kind: 'home' })}
               />
             )}

@@ -19,11 +19,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
+  EuiStat,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -53,10 +55,17 @@ const singleLine = css`
 interface MemoryPageViewProps {
   pageId: string;
   onSelectPage: (id: string) => void;
+  /** Filter Memory home by one of this memory's tags. */
+  onSelectKeyword: (keyword: string) => void;
   onDeleted: () => void;
 }
 
-export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageViewProps) {
+export function MemoryPageView({
+  pageId,
+  onSelectPage,
+  onSelectKeyword,
+  onDeleted,
+}: MemoryPageViewProps) {
   const {
     core: {
       application: {
@@ -122,6 +131,10 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
           defaultMessage: 'Agent Builder conversation',
         })
       : undefined;
+  const archiveReason = page.archived ? page.archive_reason : undefined;
+  // The merged-from row fetches its sources, so the section is only opened when
+  // the page claims it has any.
+  const hasProvenance = sourceTask !== undefined || (page.merged_from?.length ?? 0) > 0;
 
   return (
     <div data-test-subj="nightshiftMemoryPageView">
@@ -222,113 +235,168 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
 
       {/* The page's own bookkeeping, rather than part of what the memory says: it
           sits under the content so a reader gets the memory first and the
-          provenance after it. A row with nothing to say is left out. */}
+          provenance after it. What is worth trusting comes first, then where it
+          came from, then what it is related to. A row with nothing to say is
+          left out. */}
       <EuiSpacer size="l" />
-      <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
-        <EuiDescriptionList
-          type="column"
-          compressed
-          columnWidths={['auto', 'minmax(0, 1fr)']}
-          data-test-subj="nightshiftMemoryMetadata"
-        >
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.significantEventsApp.memory.telemetry.usefulnessLabel"
-              defaultMessage="Usefulness"
-            />
-          </EuiDescriptionListTitle>
-          {/* No colour: 0% usefulness means "never surfaced", which is the normal
-              state for a new memory, so painting it as a warning would cry wolf on
-              every cold start. The data-test-subj is what a test asserts against. */}
-          <EuiDescriptionListDescription data-test-subj="nightshiftMemoryUsefulnessValue">
-            <FormattedNumber value={asPercent(data.usefulness)} />%
-          </EuiDescriptionListDescription>
-
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.significantEventsApp.memory.telemetry.confidenceLabel"
-              defaultMessage="Confidence"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription data-test-subj="nightshiftMemoryConfidenceValue">
-            <FormattedNumber value={asPercent(data.confidence)} />%
-          </EuiDescriptionListDescription>
-
-          {page.archived && page.archive_reason !== undefined && (
-            <>
-              <EuiDescriptionListTitle>
+      <EuiPanel
+        color="subdued"
+        hasShadow={false}
+        paddingSize="m"
+        data-test-subj="nightshiftMemoryMetadata"
+      >
+        <EuiFlexGroup gutterSize="l" wrap responsive={false}>
+          {/* No colour on the rates: 0% usefulness means "never surfaced", which is
+              the normal state for a new memory, so painting it as a warning would
+              cry wolf on every cold start. The data-test-subj is what a test
+              asserts against. */}
+          <EuiStat
+            titleSize="s"
+            reverse
+            textAlign="left"
+            isLoading={false}
+            title={
+              <span data-test-subj="nightshiftMemoryUsefulnessValue">
+                <FormattedNumber value={asPercent(data.usefulness)} />%
+              </span>
+            }
+            description={
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.telemetry.usefulnessLabel"
+                defaultMessage="Usefulness"
+              />
+            }
+          />
+          <EuiStat
+            titleSize="s"
+            reverse
+            textAlign="left"
+            isLoading={false}
+            title={
+              <span data-test-subj="nightshiftMemoryConfidenceValue">
+                <FormattedNumber value={asPercent(data.confidence)} />%
+              </span>
+            }
+            description={
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.telemetry.confidenceLabel"
+                defaultMessage="Confidence"
+              />
+            }
+          />
+          <EuiStat
+            titleSize="s"
+            reverse
+            textAlign="left"
+            isLoading={false}
+            title={<FormattedRelative value={page.updated_at} />}
+            description={
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.metadata.updatedLabel"
+                defaultMessage="Updated"
+              />
+            }
+          />
+          {/* An archived memory is out of recall, so the reason it was retired
+              reads beside the two rates it is trusted on. A pre-`archive_reason`
+              document is archived with nothing to say why. */}
+          {archiveReason !== undefined && (
+            <EuiStat
+              titleSize="s"
+              reverse
+              textAlign="left"
+              isLoading={false}
+              title={
+                <EuiBadge color="hollow" data-test-subj="nightshiftMemoryArchivedBadge">
+                  {getMemoryArchiveReasonLabel(archiveReason)}
+                </EuiBadge>
+              }
+              description={
                 <FormattedMessage
                   id="xpack.significantEventsApp.memory.metadata.archivedLabel"
                   defaultMessage="Archived"
                 />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <EuiBadge color="hollow" data-test-subj="nightshiftMemoryArchivedBadge">
-                  {getMemoryArchiveReasonLabel(page.archive_reason)}
-                </EuiBadge>
-              </EuiDescriptionListDescription>
-            </>
+              }
+            />
           )}
+        </EuiFlexGroup>
 
-          {tags.length > 0 && (
-            <>
-              <EuiDescriptionListTitle>
+        {hasProvenance && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiDescriptionList
+              type="column"
+              compressed
+              columnWidths={['auto', 'minmax(0, 1fr)']}
+              data-test-subj="nightshiftMemoryProvenance"
+            >
+              {sourceTask !== undefined && (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.significantEventsApp.memory.metadata.sourceTaskLabel"
+                      defaultMessage="Source task"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="nightshiftMemorySourceTask">
+                    {/* One line, with the full text on hover: a provenance row that
+                        wraps over three lines is louder than it is useful. */}
+                    <span className={singleLine} title={sourceTask}>
+                      {conversationId ? (
+                        <EuiLink
+                          href={http.basePath.prepend(
+                            getSourceTaskPath(conversationId, page.agent_id)
+                          )}
+                          data-test-subj="nightshiftMemorySourceTaskLink"
+                        >
+                          {sourceTask}
+                        </EuiLink>
+                      ) : (
+                        sourceTask
+                      )}
+                    </span>
+                  </EuiDescriptionListDescription>
+                </>
+              )}
+
+              <MemoryMergedFromRow page={page} onSelectPage={onSelectPage} />
+            </EuiDescriptionList>
+          </>
+        )}
+
+        {tags.length > 0 && (
+          <>
+            {hasProvenance && <EuiHorizontalRule margin="m" />}
+            <EuiTitle size="xxs">
+              <h3>
                 <FormattedMessage
                   id="xpack.significantEventsApp.memory.metadata.tagsLabel"
                   defaultMessage="Tags"
                 />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <EuiBadgeGroup gutterSize="xs">
-                  {tags.map((tag) => (
-                    <EuiBadge key={tag} color="hollow">
-                      {tag}
-                    </EuiBadge>
-                  ))}
-                </EuiBadgeGroup>
-              </EuiDescriptionListDescription>
-            </>
-          )}
-
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.significantEventsApp.memory.metadata.updatedLabel"
-              defaultMessage="Updated"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <FormattedRelative value={page.updated_at} />
-          </EuiDescriptionListDescription>
-
-          {sourceTask !== undefined && (
-            <>
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.significantEventsApp.memory.metadata.sourceTaskLabel"
-                  defaultMessage="Source task"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="nightshiftMemorySourceTask">
-                {/* One line, with the full text on hover: a provenance row that
-                    wraps over three lines is louder than it is useful. */}
-                <span className={singleLine} title={sourceTask}>
-                  {conversationId ? (
-                    <EuiLink
-                      href={http.basePath.prepend(getSourceTaskPath(conversationId, page.agent_id))}
-                      data-test-subj="nightshiftMemorySourceTaskLink"
-                    >
-                      {sourceTask}
-                    </EuiLink>
-                  ) : (
-                    sourceTask
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiBadgeGroup gutterSize="xs">
+              {/* Each tag is a keyword the store already ranks, so clicking one
+                  answers "what else is about this?" rather than describing the
+                  tag back at the reader. */}
+              {tags.map((tag) => (
+                <EuiBadge
+                  key={tag}
+                  color="hollow"
+                  onClick={() => onSelectKeyword(tag)}
+                  onClickAriaLabel={i18n.translate(
+                    'xpack.significantEventsApp.memory.metadata.tagFilterLabel',
+                    { defaultMessage: 'Filter memories by {tag}', values: { tag } }
                   )}
-                </span>
-              </EuiDescriptionListDescription>
-            </>
-          )}
-
-          <MemoryMergedFromRow page={page} onSelectPage={onSelectPage} />
-        </EuiDescriptionList>
+                  data-test-subj={`nightshiftMemoryTag-${tag}`}
+                >
+                  {tag}
+                </EuiBadge>
+              ))}
+            </EuiBadgeGroup>
+          </>
+        )}
       </EuiPanel>
 
       {confirmingDelete && (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,17 +25,24 @@ interface MemoryHomeProps {
   pages: MemorySummary[];
   stats: MemoryStats | undefined;
   onSelectPage: (id: string) => void;
+  /** Canonical keywords the view is filtered by, in click order. Two is an AND. */
+  selectedKeywords: string[];
+  onToggleKeyword: (keyword: string) => void;
+  onClearKeywords: () => void;
 }
 
 /** A fixed, readable subset — enough to spot the standouts without a long scroll. */
 const RECENT_COUNT = 8;
 const MOST_USEFUL_COUNT = 3;
 
-export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
-  // Canonical keywords the view is filtered by, in click order. Selecting two is
-  // AND, so the chip row is the only statement of what is being filtered.
-  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
-
+export function MemoryHome({
+  pages,
+  stats,
+  onSelectPage,
+  selectedKeywords,
+  onToggleKeyword,
+  onClearKeywords,
+}: MemoryHomeProps) {
   // The tab's own list is one page of the store, so the chart asks for its own
   // wider slice rather than describing whichever 25 rows happen to be loaded.
   // The unfiltered slice is also what resolves a keyword's spellings: tags are
@@ -53,13 +60,6 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
     () => (selectedKeywords.length === 0 ? allKeywordPages : keywordResult?.pages ?? []),
     [selectedKeywords, allKeywordPages, keywordResult]
   );
-
-  const onToggleKeyword = useCallback((keyword: string) => {
-    setSelectedKeywords((selected) =>
-      selected.includes(keyword) ? selected.filter((k) => k !== keyword) : [...selected, keyword]
-    );
-  }, []);
-  const onClearKeywords = useCallback(() => setSelectedKeywords([]), []);
 
   // The lists below describe the whole store, so they honour the selection too.
   // They filter the tab's own rows rather than the chart's wider slice: a list of

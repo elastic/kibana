@@ -81,16 +81,25 @@ const asDetail = (
     data: { page: page(overrides), ...data },
   } as unknown as ReturnType<typeof useMemoryPage>);
 
-const renderView = (onDeleted = jest.fn(), onSelectPage = jest.fn()) => {
+const renderView = (
+  onDeleted = jest.fn(),
+  onSelectPage = jest.fn(),
+  onSelectKeyword = jest.fn()
+) => {
   // A fresh element per call: React bails out of a re-render that is handed the
   // very same element, and these tests rerender to model a refetch.
   const ui = () => (
     <I18nProvider>
-      <MemoryPageView pageId="memory_kafka-lag" onSelectPage={onSelectPage} onDeleted={onDeleted} />
+      <MemoryPageView
+        pageId="memory_kafka-lag"
+        onSelectPage={onSelectPage}
+        onSelectKeyword={onSelectKeyword}
+        onDeleted={onDeleted}
+      />
     </I18nProvider>
   );
   const { rerender } = render(ui());
-  return { rerenderView: () => rerender(ui()), onDeleted, onSelectPage };
+  return { rerenderView: () => rerender(ui()), onDeleted, onSelectPage, onSelectKeyword };
 };
 
 beforeEach(() => {
@@ -110,6 +119,51 @@ describe('MemoryPageView', () => {
     // server-side so the UI and the model see the same values.
     expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('75%');
     expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('60%');
+  });
+
+  it('reads usefulness, confidence and age as a stat strip above the provenance', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 0.75, confidence: 0.6 }));
+    renderView();
+
+    // The three numbers a reader checks before trusting a memory are labelled
+    // stats rather than another row of the same list as the provenance.
+    const strip = within(screen.getByTestId('nightshiftMemoryMetadata'));
+    expect(strip.getByText('Usefulness')).toBeInTheDocument();
+    expect(strip.getByText('Confidence')).toBeInTheDocument();
+    expect(strip.getByText('Updated')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('75%');
+    expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('60%');
+  });
+
+  it('badges the archive reason as a stat rather than a row', () => {
+    mockUseMemoryPage.mockReturnValue(
+      asDetail({ archived: true, archive_reason: 'merged' as const })
+    );
+    renderView();
+
+    // The reason sits with the rates: whether a memory can be trusted includes
+    // whether it is out of recall, and why.
+    const badge = screen.getByTestId('nightshiftMemoryArchivedBadge');
+    expect(badge).toHaveTextContent('merged into another memory');
+    expect(badge.closest('[class*="euiStat"]')).not.toBeNull();
+  });
+
+  it('filters Memory home by a tag when the tag is clicked', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({ tags: ['memory', 'checkout'] }));
+    const { onSelectKeyword } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryTag-checkout'));
+
+    // The tag is handed over verbatim: canonicalizing it is the tab's job,
+    // because it is the component that knows about spellings.
+    expect(onSelectKeyword).toHaveBeenCalledWith('checkout');
+  });
+
+  it('names what clicking a tag does, so the badge is not an undiscoverable filter', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({ tags: ['memory', 'checkout'] }));
+    renderView();
+
+    expect(screen.getByRole('button', { name: 'Filter memories by checkout' })).toBeInTheDocument();
   });
 
   it('clamps a rate outside [0, 1] rather than rendering 4000%', () => {

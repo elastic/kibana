@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryTab } from './tab';
 import {
@@ -14,12 +15,23 @@ import {
   useMemoryKeywordPages,
   useMemoryPage,
   useMemoryPages,
+  useSetMemoryArchived,
+  useDeleteMemoryPage,
 } from './use_memory';
 import type { MemoryListResult, MemoryPageSummary } from './types';
 
 jest.mock('./use_memory');
+// The detail view's merged-from row issues its own fetch; stub it so this suite
+// stays about how the tab wires its views together.
+jest.mock('./lineage', () => ({
+  MemoryMergedFromRow: () => null,
+}));
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: {
+      application: { capabilities: { nightshift: {} } },
+      http: { basePath: { prepend: (path: string) => path } },
+    },
     dependencies: {
       start: { nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } },
     },
@@ -34,6 +46,16 @@ const mockUseMemoryKeywordPages = useMemoryKeywordPages as jest.MockedFunction<
 >;
 
 mockUseMemoryEnabled.mockReturnValue({ isEnabled: true, isLoading: false });
+// The detail view offers archive and delete; this suite never writes, so the
+// mutation hooks only have to answer with their loading state.
+(useSetMemoryArchived as jest.MockedFunction<typeof useSetMemoryArchived>).mockReturnValue({
+  mutate: jest.fn(),
+  isLoading: false,
+} as never);
+(useDeleteMemoryPage as jest.MockedFunction<typeof useDeleteMemoryPage>).mockReturnValue({
+  mutate: jest.fn(),
+  isLoading: false,
+} as never);
 
 const summary = (overrides: Partial<MemoryPageSummary> = {}): MemoryPageSummary =>
   ({
@@ -159,5 +181,29 @@ describe('MemoryTab', () => {
     } as unknown as ReturnType<typeof useMemoryPage>);
     renderTab();
     expect(screen.getByTestId('nightshiftMemoryHome')).toBeInTheDocument();
+  });
+
+  it('answers a tag clicked on a memory by filtering home, and returns there', async () => {
+    // Tags are stored verbatim and spelled inconsistently, so the tag itself is
+    // not a keyword: `Invoke_Agent` has to select the same key the chart uses.
+    const tagged = summary({ tags: ['memory', 'Invoke_Agent'] });
+    mockUseMemoryPages.mockReturnValue(
+      asQueryResult({ rows: [tagged], stats: listResult([tagged]).stats })
+    );
+    mockUseMemoryPage.mockReturnValue({
+      data: { page: tagged, usefulness: 0.5, confidence: 0.8 },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useMemoryPage>);
+    renderTab();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag'));
+    await userEvent.click(screen.getByTestId('nightshiftMemoryTag-Invoke_Agent'));
+
+    // Home, not the detail view: the tag answers a question about other
+    // memories, so it leaves the one being read.
+    expect(screen.getByTestId('nightshiftMemoryHome')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryKeywordFilters')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryKeywordChip-invoke-agent')).toBeInTheDocument();
   });
 });

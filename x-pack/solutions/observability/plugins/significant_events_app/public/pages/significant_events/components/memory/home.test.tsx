@@ -10,11 +10,11 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { useState } from 'react';
 import { canonicalizeTag } from '@kbn/nightshift-investigations-plugin/common';
 import { MemoryHome } from './home';
 import { useMemoryKeywordPages } from './use_memory';
-import type { MemorySummary } from './types';
+import type { MemoryStats, MemorySummary } from './types';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -90,6 +90,31 @@ const serverFilter = (pages: MemorySummary[], tags: readonly string[]): MemorySu
 
 const stats = { total: PAGES.length, archived: 0 };
 
+/**
+ * The tab owns the keyword selection — a memory's tags select one too — so Home
+ * is handed it rather than keeping its own. This is that wiring, without the
+ * rest of the tab around it.
+ */
+const HomeHarness = ({ stats: given }: { stats?: MemoryStats }) => {
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  return (
+    <MemoryHome
+      pages={PAGES}
+      stats={given ?? stats}
+      onSelectPage={jest.fn()}
+      selectedKeywords={selectedKeywords}
+      onToggleKeyword={(keyword) =>
+        setSelectedKeywords((selected) =>
+          selected.includes(keyword)
+            ? selected.filter((k) => k !== keyword)
+            : [...selected, keyword]
+        )
+      }
+      onClearKeywords={() => setSelectedKeywords([])}
+    />
+  );
+};
+
 /** Every memory title the "Recently updated" list is showing. */
 /** Every memory title the home lists, deduplicated across its two lists. */
 const listedTitles = () => [
@@ -111,7 +136,7 @@ const renderHome = () =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <MemoryHome pages={PAGES} stats={stats} onSelectPage={jest.fn()} />
+        <HomeHarness />
       </I18nProvider>
     </EuiProvider>
   );
@@ -194,11 +219,7 @@ describe('MemoryHome keyword filtering', () => {
     render(
       <EuiProvider>
         <I18nProvider>
-          <MemoryHome
-            pages={PAGES}
-            stats={{ total: PAGES.length, archived }}
-            onSelectPage={jest.fn()}
-          />
+          <HomeHarness stats={{ total: PAGES.length, archived }} />
         </I18nProvider>
       </EuiProvider>
     );

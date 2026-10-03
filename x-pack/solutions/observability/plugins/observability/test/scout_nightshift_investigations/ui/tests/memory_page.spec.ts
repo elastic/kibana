@@ -336,6 +336,17 @@ test.describe(
         'Investigate why checkout latency spiked'
       );
       await attachScreenshot(page, testInfo, 'memory-e2-detail');
+
+      // A tag is a keyword the store already ranks, so clicking one is a
+      // question about other memories: it leaves the one being read and filters
+      // home by the canonical form of that tag.
+      await page.testSubj.locator('nightshiftMemoryTag-checkout').click();
+      await expect(page.testSubj.locator('nightshiftMemoryHome')).toBeVisible();
+      await expect(page.testSubj.locator('nightshiftMemoryKeywordFilters')).toBeVisible();
+      await expect(
+        page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`)
+      ).toBeVisible();
+      await attachScreenshot(page, testInfo, 'memory-e2-tag-filtered');
     });
 
     test('E3 reports the seeded usefulness, decayed, and separates it from confidence', async ({
