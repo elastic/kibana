@@ -132,6 +132,25 @@ describe('listMemoryPagesRoute', () => {
       tags: ['invoke-agent', 'invoke_agent', 'cart cache'],
     });
   });
+
+  it('accepts one tag term, which a query string carries as a scalar', async () => {
+    // A keyword written one way is one param, so the parsed query holds a string
+    // rather than an array. Rejecting it would break the commonest filter there
+    // is: exactly one keyword.
+    const listPaginated = jest.fn().mockResolvedValue({ pages: [] });
+    const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
+
+    const parsed = params.safeParse({ query: { filter: 'active', tags: 'otel' } });
+
+    expect(parsed.success).toBe(true);
+    await handler(context({ listPaginated }, true, parsed.success ? parsed.data : undefined));
+    expect(listPaginated).toHaveBeenCalledWith({
+      filter: 'active',
+      cursor: undefined,
+      size: undefined,
+      tags: ['otel'],
+    });
+  });
 });
 
 describe('memory route request bounds', () => {
