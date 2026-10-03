@@ -837,7 +837,7 @@ describe('start - lazy plugins on a node without the ui role', () => {
     await localPluginsSystem.startPlugins(startDeps);
 
     expect(engine.ensureInitialized).toHaveBeenCalledTimes(1);
-    expect(engine.ensureInitialized).toHaveBeenCalledWith('lazyPlugin');
+    expect(engine.ensureInitialized).toHaveBeenCalledWith('lazyPlugin', { type: 'explicit' });
   });
 
   it('leaves lazy plugins idle on a node with the ui role', async () => {

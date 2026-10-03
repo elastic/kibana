@@ -52,7 +52,10 @@ export function registerDeferredInitStatusRoute(router: IRouter, engine: Deferre
     },
     (context, request, response) => {
       const { pluginId } = request.params;
-      const status = engine.ensureInitialized(pluginId);
+      const status = engine.ensureInitialized(pluginId, {
+        type: 'http_route',
+        path: request.route.path,
+      });
       const failure = status === 'failed' ? engine.getFailureDetails(pluginId) : undefined;
       const body: DeferredInitStatusResponse = {
         pluginId,

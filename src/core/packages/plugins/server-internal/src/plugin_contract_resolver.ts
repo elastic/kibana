@@ -195,7 +195,10 @@ export class RuntimePluginContractResolver {
     // run, and the runner publishes it (via `notifyStartContractAvailable`) before the engine
     // reports `available`.
     if (this.lazyPluginNames.has(dependencyName) && this.deferredInitEngine) {
-      await this.deferredInitEngine.waitUntilAvailable(dependencyName);
+      await this.deferredInitEngine.waitUntilAvailable(dependencyName, {
+        type: 'contract',
+        callerPlugin: pluginName,
+      });
     }
 
     const response = await this.requestStartContracts<Record<PluginName, T>>([dependencyName]);
@@ -226,7 +229,7 @@ export class RuntimePluginContractResolver {
     if (!this.deferredInitEngine) {
       return Promise.reject(new Error('trigger cannot be called before setDeferredInitEngine'));
     }
-    return this.deferredInitEngine.waitUntilAvailable(pluginName);
+    return this.deferredInitEngine.waitUntilAvailable(pluginName, { type: 'explicit' });
   };
 
   /** Backs `core.plugins.lazyInit.getStatus()`: synchronous, never triggers. */

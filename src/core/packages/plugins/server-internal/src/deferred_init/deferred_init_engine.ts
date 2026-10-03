@@ -9,10 +9,12 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import { withTimeout } from '@kbn/std';
+import { metrics, ValueType, type Counter, type Histogram } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
 import { DeferredInitializationError } from '@kbn/core-deferred-init-common';
 import type { DeferredInitPhase } from '@kbn/core-deferred-init-common';
 import type { InitState } from '@kbn/core-plugins-server';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import {
   DEFERRED_INIT_BACKOFF_BASE_MS,
   DEFERRED_INIT_BACKOFF_FACTOR,
@@ -44,6 +46,20 @@ export interface DeferredInitFailureDetails {
   phase: DeferredInitPhase;
 }
 
+/**
+ * What caused a plugin's deferred init to be kicked for the first time on this process.
+ * Recorded as span attributes and metric dimensions so teams can answer "which route/plugin
+ * first woke up our plugin in production".
+ *
+ * @internal
+ */
+export type InitTrigger =
+  | { readonly type: 'http_route'; readonly path: string }
+  | { readonly type: 'contract'; readonly callerPlugin: string }
+  | { readonly type: 'explicit' };
+
+type PluginSource = 'oss' | 'x-pack' | 'external';
+
 interface DeferredInitRecord {
   readonly state$: BehaviorSubject<InitState>;
   runner?: DeferredInitRunner;
@@ -64,7 +80,78 @@ interface DeferredInitRecord {
    * immediately so callers honor the backoff.
    */
   cooldownPromise?: Promise<void>;
+  /** Set on the first kick; not updated on subsequent retries. */
+  firstTrigger?: InitTrigger;
+  /** process.hrtime.bigint() captured when the plugin first transitions to 'initializing'. */
+  initStartedAtNs?: bigint;
+  /** Where the plugin lives in the repo; attached at {@link DeferredInitEngine.register}. */
+  source?: PluginSource;
 }
+
+const METER_NAME = 'kibana.plugins';
+
+/** Lazily-initialized OTel instruments — created on first use so the global meter is ready. */
+interface DeferredInitInstruments {
+  readonly durationHistogram: Histogram;
+  readonly attemptsCounter: Counter;
+  readonly timeToAvailableHistogram: Histogram;
+}
+
+let instruments: DeferredInitInstruments | undefined;
+
+const getInstruments = (): DeferredInitInstruments => {
+  if (!instruments) {
+    const meter = metrics.getMeter(METER_NAME);
+    instruments = {
+      durationHistogram: meter.createHistogram('kibana.plugin.deferred_init.duration_ms', {
+        description:
+          'Wall-clock duration of a single deferred-init attempt (lazyInitialize + start).',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+      }),
+      attemptsCounter: meter.createCounter('kibana.plugin.deferred_init.attempts_total', {
+        description: 'Cumulative count of deferred-init run attempts, broken down by outcome.',
+        unit: '1',
+        valueType: ValueType.INT,
+      }),
+      timeToAvailableHistogram: meter.createHistogram(
+        'kibana.plugin.deferred_init.time_to_available_ms',
+        {
+          description:
+            'Elapsed time from process start until a plugin first reaches the available state. ' +
+            'A low value means the plugin is used immediately after boot (effectively eager); a ' +
+            'high value confirms the lazy-init benefit is real in production.',
+          unit: 'ms',
+          valueType: ValueType.DOUBLE,
+        }
+      ),
+    };
+  }
+  return instruments;
+};
+
+const triggerAttributes = (trigger: InitTrigger | undefined): Record<string, string> => {
+  if (!trigger) {
+    return { 'trigger.type': 'unknown', 'trigger.detail': '—' };
+  }
+  switch (trigger.type) {
+    case 'http_route':
+      return { 'trigger.type': 'http_route', 'trigger.detail': trigger.path };
+    case 'contract':
+      return { 'trigger.type': 'contract', 'trigger.detail': trigger.callerPlugin };
+    case 'explicit':
+      return { 'trigger.type': 'explicit', 'trigger.detail': '—' };
+  }
+};
+
+const metricAttributes = (
+  pluginId: string,
+  record: DeferredInitRecord
+): Record<string, string> => ({
+  'plugin.id': pluginId,
+  'plugin.source': record.source ?? 'external',
+  ...triggerAttributes(record.firstTrigger),
+});
 
 /**
  * Per-instance engine that tracks each lazy plugin's state and runs its deferred phases on
@@ -101,6 +188,8 @@ export class DeferredInitEngine {
    * of deferring the work.
    */
   private startCycleActive = false;
+  /** Captured at construction (early in server boot) for time-to-available measurements. */
+  private readonly engineStartedAtNs = process.hrtime.bigint();
 
   constructor(private readonly log: Logger) {}
 
@@ -123,8 +212,11 @@ export class DeferredInitEngine {
    * Reserve a slot for a plugin id and set its state to `idle`. Called during setup so
    * the state endpoint and `/status` can reflect the plugin before its runner is attached.
    */
-  public register(pluginId: string): void {
-    this.ensureRecord(pluginId);
+  public register(pluginId: string, source?: PluginSource): void {
+    const record = this.ensureRecord(pluginId);
+    if (source) {
+      record.source = source;
+    }
   }
 
   /**
@@ -190,7 +282,7 @@ export class DeferredInitEngine {
    * next incoming gated request, so any API hit or UI poll can trigger a fresh attempt without
    * requiring a Kibana restart.
    */
-  public ensureInitialized(pluginId: string): InitState {
+  public ensureInitialized(pluginId: string, trigger?: InitTrigger): InitState {
     const record = this.records.get(pluginId);
     if (!record) {
       return 'idle';
@@ -200,7 +292,7 @@ export class DeferredInitEngine {
       state === 'idle' ||
       (state === 'failed' && record.failedAttempts >= DEFERRED_INIT_MAX_BACKGROUND_ATTEMPTS)
     ) {
-      this.kick(pluginId, record);
+      this.kick(pluginId, record, trigger);
     }
     return record.state$.value;
   }
@@ -212,7 +304,7 @@ export class DeferredInitEngine {
    * for the plugin itself. Everything else (`getStartServices`, `status$`, `onLazyStartService`)
    * only waits.
    */
-  public async waitUntilAvailable(pluginId: string): Promise<void> {
+  public async waitUntilAvailable(pluginId: string, trigger?: InitTrigger): Promise<void> {
     // Guard against being awaited during the plugin `start()` loop. Blocking here would hold the
     // boot loop until this plugin's (deliberately expensive) deferred phases finished, tripping
     // the per-plugin start watchdog and defeating lazy initialization. This is the enforcement
@@ -251,7 +343,7 @@ export class DeferredInitEngine {
         await record.inFlight;
       }
     } else if (state === 'idle' || state === 'failed') {
-      this.kick(pluginId, record);
+      this.kick(pluginId, record, trigger);
       await (record.inFlight ?? Promise.resolve());
     }
 
@@ -267,7 +359,7 @@ export class DeferredInitEngine {
     });
   }
 
-  private kick(pluginId: string, record: DeferredInitRecord): void {
+  private kick(pluginId: string, record: DeferredInitRecord, trigger?: InitTrigger): void {
     if (record.inFlight) {
       return;
     }
@@ -279,7 +371,12 @@ export class DeferredInitEngine {
       return;
     }
 
+    if (!record.firstTrigger && trigger) {
+      record.firstTrigger = trigger;
+    }
+
     record.state$.next('initializing');
+    record.initStartedAtNs = process.hrtime.bigint();
     this.log.info(
       record.initialized
         ? `Lazy plugin "${pluginId}": re-running start() after a failed attempt.`
@@ -295,6 +392,11 @@ export class DeferredInitEngine {
         record.failedAttempts = 0;
         record.lastFailedPhase = undefined;
         record.state$.next('available');
+        const inst = getInstruments();
+        inst.timeToAvailableHistogram.record(
+          Number(process.hrtime.bigint() - this.engineStartedAtNs) / 1e6,
+          { ...metricAttributes(pluginId, record), outcome: 'available' }
+        );
         this.log.info(`Lazy plugin "${pluginId}" is available; routes are now served.`);
       },
       (error: unknown) => {
@@ -321,24 +423,50 @@ export class DeferredInitEngine {
     runner: DeferredInitRunner,
     onPhase: (phase: DeferredInitPhase) => void
   ): Promise<void> {
-    if (!record.initialized) {
-      onPhase('lazyInitialize');
-      await runner.lazyInitialize();
-      record.initialized = true;
-    }
+    const inst = getInstruments();
+    const commonAttrs = metricAttributes(pluginId, record);
+    const startedAtNs = process.hrtime.bigint();
+    let outcome: 'available' | 'failed' = 'failed';
 
-    onPhase('start');
-    // `withTimeout` is Promise.race: it does not cancel `runner.start()`. A timeout only
-    // fails this engine attempt; the plugin's start() keeps running until it settles.
-    const result = await withTimeout({
-      promise: runner.start(),
-      timeoutMs: DEFERRED_START_TIMEOUT_MS,
-    });
-    if (result.timedout) {
-      throw new Error(
-        `Start lifecycle of lazy plugin "${pluginId}" wasn't completed in ` +
-          `${DEFERRED_START_TIMEOUT_MS / 1000}sec.`
+    try {
+      await withActiveSpan(
+        'kibana.plugin.deferred_init',
+        { attributes: commonAttrs },
+        async (span) => {
+          try {
+            if (!record.initialized) {
+              onPhase('lazyInitialize');
+              await runner.lazyInitialize();
+              record.initialized = true;
+            }
+
+            onPhase('start');
+            // `withTimeout` is Promise.race: it does not cancel `runner.start()`. A timeout only
+            // fails this engine attempt; the plugin's start() keeps running until it settles.
+            const result = await withTimeout({
+              promise: runner.start(),
+              timeoutMs: DEFERRED_START_TIMEOUT_MS,
+            });
+            if (result.timedout) {
+              throw new Error(
+                `Start lifecycle of lazy plugin "${pluginId}" wasn't completed in ` +
+                  `${DEFERRED_START_TIMEOUT_MS / 1000}sec.`
+              );
+            }
+            span?.setAttribute('outcome', 'available');
+          } catch (error) {
+            span?.setAttribute('outcome', 'failed');
+            throw error;
+          }
+        }
       );
+      outcome = 'available';
+    } finally {
+      inst.durationHistogram.record(Number(process.hrtime.bigint() - startedAtNs) / 1e6, {
+        ...commonAttrs,
+        outcome,
+      });
+      inst.attemptsCounter.add(1, { ...commonAttrs, outcome });
     }
   }
 
