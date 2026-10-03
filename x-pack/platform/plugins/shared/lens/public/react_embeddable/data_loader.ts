@@ -430,6 +430,7 @@ export function loadEmbeddableData(
 
   return {
     cleanup: () => {
+      internalApi.expressionAbortController$.getValue()?.abort();
       for (const subscription of subscriptions) {
         subscription.unsubscribe();
       }
