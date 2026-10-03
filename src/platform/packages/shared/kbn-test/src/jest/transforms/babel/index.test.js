@@ -9,6 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import vm from 'vm';
 import transformer from '.';
 import { spawnSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -49,6 +50,51 @@ describe('transformer cache key', () => {
     // Same inputs produce the same key
     const k1b = transformer.getCacheKey('console.log("a")', __filename, opts);
     expect(k1b).toBe(k1);
+  });
+});
+
+describe('sole default exports', () => {
+  const rootDir = process.cwd();
+
+  function evaluate(source, modules = {}) {
+    const filename = path.join(rootDir, 'some', 'virtual', 'sole_default_export.js');
+    const { code } = transformer.process(source, filename, {
+      ...makeTransformOptions(rootDir),
+      cacheFS: new Map(),
+      configString: '{}',
+      instrument: false,
+      supportsDynamicImport: false,
+      supportsExportNamespaceFrom: false,
+      supportsStaticESM: false,
+      supportsTopLevelAwait: false,
+    });
+
+    const module = { exports: {} };
+    const run = vm.runInThisContext(`(function (exports, require, module) {\n${code}\n})`, {
+      filename,
+    });
+    run(module.exports, (request) => modules[request], module);
+    return module.exports;
+  }
+
+  it('replaces module.exports with a sole default export value', () => {
+    const exports = evaluate(`export default function main() { return 'main'; }`);
+
+    expect(exports()).toBe('main');
+  });
+
+  it('keeps the exports object when the sole default export is a module namespace', () => {
+    const namespace = { __esModule: true, parse: () => 'parsed' };
+    const exports = evaluate(
+      `
+        import * as namespace from './namespace';
+        export default namespace;
+      `,
+      { './namespace': namespace }
+    );
+
+    expect(exports.__esModule).toBe(true);
+    expect(exports.default.parse()).toBe('parsed');
   });
 });
 

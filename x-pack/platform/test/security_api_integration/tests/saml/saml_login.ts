@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
@@ -392,7 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
+          .get(`/api/security/logout?${queryString.stringify(logoutRequest, { sort: false })}`)
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -421,7 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
+          .get(`/api/security/logout?${queryString.stringify(logoutRequest, { sort: false })}`)
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
