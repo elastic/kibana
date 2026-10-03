@@ -54,6 +54,8 @@ Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time s
 FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
 \`\`\`
 
+\`TBUCKET\` has no field argument; it always buckets \`@timestamp\`. Never write \`TBUCKET(@timestamp, …)\`.
+
 Any other date field:
 
 \`\`\`esql
@@ -64,15 +66,7 @@ Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time fie
 
 ### TS
 
-Use \`TS\` only when the resource is marked \`is-tsds="true"\`; otherwise use \`FROM\`.
-
-The visualization framework automatically adds the \`@timestamp\` range for \`TS\` time series, so do not add \`TRANGE\`. Size the buckets with the time-picker bounds:
-
-\`\`\`esql
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
-\`\`\`
-
-Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
+Use \`TS\` only when the resource is marked \`is-tsds="true"\`; otherwise use \`FROM\`. With \`TS\`, bucket \`@timestamp\` exactly as with \`FROM\` and do not add \`TRANGE\`: the visualization framework adds the \`@timestamp\` range.
 
 ${seriesStatisticsEsqlGuidance}
 

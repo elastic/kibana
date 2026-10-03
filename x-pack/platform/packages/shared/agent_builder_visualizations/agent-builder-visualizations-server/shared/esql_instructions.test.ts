@@ -14,9 +14,8 @@ describe('buildEsqlAdditionalInstructions', () => {
     expect(instructions).toContain(
       'FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)'
     );
-    expect(instructions).toContain(
-      'TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)'
-    );
+    expect(instructions).not.toContain('TS logs-tsds');
+    expect(instructions).toContain('Never write `TBUCKET(@timestamp, …)`');
     expect(instructions).toContain('No timestamp `WHERE`');
     expect(instructions).toContain('do not add `TRANGE`');
     expect(instructions).toContain('is-tsds="true"');
