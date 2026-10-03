@@ -55,4 +55,20 @@ describe('retryOnConflict', () => {
     await expect(retryOnConflict(fn, { ...fastRetries, retries: 2 })).rejects.toThrow('conflict');
     expect(fn).toHaveBeenCalledTimes(3);
   });
+
+  it('bounds retries without options so a contended write cannot stall its caller', async () => {
+    jest.useFakeTimers();
+    try {
+      const fn = jest.fn().mockRejectedValue(soConflictError());
+
+      const result = retryOnConflict(fn);
+      const assertion = expect(result).rejects.toThrow('conflict');
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      await assertion;
+      expect(fn).toHaveBeenCalledTimes(6);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
