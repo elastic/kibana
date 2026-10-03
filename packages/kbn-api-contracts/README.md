@@ -162,7 +162,7 @@ CI posts (or updates) a PR comment whenever there is anything to report, **regar
 
 ### Release note suggestions
 
-Gating changes (stable and Technical Preview) get release note guidance in the comment. Step 3 of "What to do" asks the author to add the `release_note:breaking` label to the PR. The "Release note" section after it asks for a release note in the PR description, describing the impact of the change on callers and what action to take to mitigate it. The docs workflow builds the changelog entry from the label and the description. CI doesn't write a file.
+Gating changes (stable and Technical Preview) get release note guidance in the comment. Step 3 of "What to do" asks the author, if the break is intentional, to add the `release_note:breaking` label to the PR in place of any other `release_note:*` label. The "Release note" section after it asks for a release note in the PR description, describing the impact of the change on callers and what action to take to mitigate it. The docs workflow builds the changelog entry from the label and the description. This check doesn't write a changelog file.
 
 Report-only and experimental changes get the prompt "Consider adding a release note if the change is noteworthy." because they don't gate, and a release note is the author's call. They don't get the label guidance.
 
@@ -212,6 +212,7 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
 1. **Review the report** - identifies which endpoints, what changed, and their stability tier
 2. **If unintentional:** fix the code to maintain compatibility.
 3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
+4. **If intentional, add a release note:** add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label), and a release note to the PR description that describes the impact of the change on callers and what action to take to mitigate it. See [Release note suggestions](#release-note-suggestions).
 
 **Important:** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes committee. Every stable and Technical Preview API has to follow the formal breaking change process for approval.
 

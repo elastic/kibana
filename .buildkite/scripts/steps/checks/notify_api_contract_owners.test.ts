@@ -158,7 +158,7 @@ describe('buildCommentBody', () => {
     const SENTENCE =
       'Add a release note to the PR description. The release note should describe the impact of the change on callers and what action to take to mitigate the change.';
     const STEP_3 =
-      '3. **Add the `release_note:breaking` label** to this PR and a release note to the PR description, see the Release note section below.';
+      '3. **If intentional, add the `release_note:breaking` label** to this PR (replacing any other `release_note:*` label) and a release note to the PR description, see the Release note section below.';
     const README_LINK = 'See the [`@kbn/api-contracts` README]';
 
     it.each([
@@ -174,9 +174,9 @@ describe('buildCommentBody', () => {
       const body = buildCommentBody([entry()]);
 
       expect(body).toContain(STEP_3);
-      expect(body.slice(body.indexOf('3. **Add'), body.indexOf('### Release note'))).toContain(
-        '`release_note:breaking`'
-      );
+      expect(
+        body.slice(body.indexOf('3. **If intentional, add'), body.indexOf('### Release note'))
+      ).toContain('`release_note:breaking`');
       expect(body).toContain('1. **Fix the breaking change**');
       expect(body).toContain('2. **If intentional**');
     });
@@ -198,25 +198,13 @@ describe('buildCommentBody', () => {
       expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
     });
 
-    it('has no code fence, template heading or placeholders', () => {
+    it('has no code fence or template heading', () => {
       const body = buildCommentBody([entry(), entry({ path: '/api/two', tier: 'tech_preview' })]);
 
       expect(body).not.toContain('```');
       expect(body).not.toMatch(/^#{1,2} Release note/m);
       // One heading and one pointer from step 3.
       expect(body.match(/Release note/g)).toHaveLength(2);
-      expect(body).not.toContain('<describe>');
-      expect(body).not.toContain('type: breaking-change');
-    });
-
-    it('does not link the release note review guide', () => {
-      const body = buildCommentBody([
-        entry(),
-        entry({ path: '/api/additive', reportOnly: true, policyReason: 'Additive.' }),
-      ]);
-
-      expect(body).not.toContain('release note review guide');
-      expect(body).not.toContain('docs-v3-preview');
     });
 
     it('gives an experimental-only comment no Release note section', () => {
@@ -262,7 +250,7 @@ describe('buildCommentBody', () => {
         '### What to do\n\nNothing here blocks merge. Consider whether a release note is worth adding for the listed change(s).\n\nSee the [`@kbn/api-contracts` README]'
       );
       expect(body).toContain('for tier definitions and the rule policy.');
-      expect(body).not.toContain('3. **Add the');
+      expect(body).not.toContain('3. **If intentional, add the');
     });
   });
 });

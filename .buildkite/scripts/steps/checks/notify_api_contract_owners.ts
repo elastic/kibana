@@ -158,7 +158,7 @@ ${sections}
 
 1. **Fix the breaking change** if it was unintentional.
 2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
-3. **Add the \`${RELEASE_NOTE_LABEL}\` label** to this PR and a release note to the PR description, see the Release note section below.
+3. **If intentional, add the \`${RELEASE_NOTE_LABEL}\` label** to this PR (replacing any other \`release_note:*\` label) and a release note to the PR description, see the Release note section below.
 
 ### Release note
 
