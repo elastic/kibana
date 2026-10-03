@@ -42,6 +42,7 @@ export {
   CANDIDATES_URL,
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
+  WRITE_HUNT_EVIDENCE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   SYSTEM_SECURITY_WATCH_CATALOG,
@@ -152,6 +153,8 @@ export {
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
 } from './impl/schemas';
 
 export {
