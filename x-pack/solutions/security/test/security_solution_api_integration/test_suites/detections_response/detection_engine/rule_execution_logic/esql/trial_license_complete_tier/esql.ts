@@ -764,8 +764,10 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
+            const dateRestart = new Date();
+
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -774,7 +776,7 @@ export default ({ getService }: FtrProviderContext) => {
               createdRule,
               RuleExecutionStatusEnum.succeeded,
               300,
-              new Date()
+              dateRestart
             );
 
             expect(alertsResponse.hits.hits).toHaveLength(120);
@@ -1008,8 +1010,10 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
+            const dateRestart = new Date();
+
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1019,7 +1023,7 @@ export default ({ getService }: FtrProviderContext) => {
               // rule has warning, alerts were truncated, thus "partial failure" status
               RuleExecutionStatusEnum['partial failure'],
               300,
-              new Date()
+              dateRestart
             );
 
             expect(alertsResponse.hits.hits).toHaveLength(200);
@@ -1087,8 +1091,10 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
+            const dateRestart = new Date();
+
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1097,7 +1103,7 @@ export default ({ getService }: FtrProviderContext) => {
               createdRule,
               RuleExecutionStatusEnum.succeeded,
               300,
-              new Date()
+              dateRestart
             );
 
             expect(alertsResponse.hits.hits).toHaveLength(120);
@@ -1149,8 +1155,10 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
+            const dateRestart = new Date();
+
             // re-trigger rule execution
-            await runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, log, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1159,7 +1167,7 @@ export default ({ getService }: FtrProviderContext) => {
               createdRule,
               RuleExecutionStatusEnum.succeeded,
               300,
-              new Date()
+              dateRestart
             );
             // 60 from doc1 and 75 from doc2
             expect(alertsResponse.hits.hits).toHaveLength(135);
@@ -1770,7 +1778,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const dateRestart = new Date();
 
-          await runSoonRule(supertest, createdRule.id);
+          await runSoonRule(supertest, log, createdRule.id);
 
           const alertsResponse = await getAlerts(
             supertest,
@@ -1831,7 +1839,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const dateRestart = new Date();
 
-          await runSoonRule(supertest, createdRule.id);
+          await runSoonRule(supertest, log, createdRule.id);
 
           const alertsResponse = await getAlerts(
             supertest,
