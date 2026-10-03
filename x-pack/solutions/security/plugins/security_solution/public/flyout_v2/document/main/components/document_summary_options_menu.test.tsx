@@ -6,17 +6,16 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import {
   DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID,
   DOCUMENT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID,
   DocumentSummaryOptionsMenu,
 } from './document_summary_options_menu';
 import { DOCUMENT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID } from '../../../shared/components/anonymization_switch';
-import userEvent from '@testing-library/user-event';
 
 describe('DocumentSummaryOptionsMenu', () => {
-  it('renders button with the anonymize option', async () => {
+  it('renders button with the anonymize option', () => {
     const { getByTestId } = render(
       <DocumentSummaryOptionsMenu
         hasSummary={true}
@@ -28,7 +27,7 @@ describe('DocumentSummaryOptionsMenu', () => {
     const button = getByTestId(DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID);
 
     expect(button).toBeInTheDocument();
-    await userEvent.click(button);
+    fireEvent.click(button);
 
     expect(getByTestId(DOCUMENT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DOCUMENT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID)).toHaveTextContent('Options');
