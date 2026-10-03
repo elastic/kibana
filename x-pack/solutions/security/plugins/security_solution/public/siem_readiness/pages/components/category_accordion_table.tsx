@@ -371,6 +371,7 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
       )}
 
       <div
+        data-test-subj="categoryAccordionTable"
         style={{
           border: euiTheme.border.thin,
           padding: `${euiTheme.size.base} 0`,
