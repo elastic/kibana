@@ -12,6 +12,7 @@ import { getCoverageTool } from './get_coverage_tool';
 import { getQualityTool } from './get_quality_tool';
 import { getContinuityTool } from './get_continuity_tool';
 import { getRetentionTool } from './get_retention_tool';
+import { getPlatformReadinessTool } from './get_platform_readiness_tool';
 
 export const registerSiemReadinessTools = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -23,4 +24,5 @@ export const registerSiemReadinessTools = (
   agentBuilder.tools.register(getQualityTool(core, logger));
   agentBuilder.tools.register(getContinuityTool(core, logger, isServerless));
   agentBuilder.tools.register(getRetentionTool(core, logger, isServerless));
+  agentBuilder.tools.register(getPlatformReadinessTool(core, logger, isServerless));
 };

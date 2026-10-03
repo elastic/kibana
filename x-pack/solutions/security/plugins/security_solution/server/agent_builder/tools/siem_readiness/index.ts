@@ -10,5 +10,6 @@ export {
   SIEM_READINESS_QUALITY_TOOL_ID,
   SIEM_READINESS_CONTINUITY_TOOL_ID,
   SIEM_READINESS_RETENTION_TOOL_ID,
+  SIEM_READINESS_PLATFORM_TOOL_ID,
 } from './tool_ids';
 export { registerSiemReadinessTools } from './register_siem_readiness_tools';
