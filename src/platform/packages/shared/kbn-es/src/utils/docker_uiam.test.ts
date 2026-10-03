@@ -8,7 +8,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import { getUiamContainers, initializeUiamContainers, runUiamContainer } from './docker_uiam';
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -43,16 +43,27 @@ const mockUndiciAgent = jest.mocked(undici.Agent);
 jest.mock('../paths', () => ({
   SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
+  SERVERLESS_IDP_METADATA_PATH: '/some_path/mock-idp-metadata.xml',
 }));
+
+// `tryExportLogs` archives the container logs on a startup failure; keep that off the real disk.
+jest.mock('fs/promises', () => ({
+  mkdir: jest.fn(),
+  open: jest.fn(),
+}));
+const Fsp = jest.requireMock('fs/promises');
 
 beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
   jest.resetAllMocks();
+
+  Fsp.mkdir.mockResolvedValue(undefined);
+  Fsp.open.mockResolvedValue({ fd: 1, close: jest.fn() });
 });
 
 describe(`#runUiamContainer()`, () => {
   test('should be able to run UIAM containers', async () => {
-    const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
+    const [cosmosDbContainer, uiamContainer] = getUiamContainers();
 
     // 1. Check Cosmos DB container.
     execa
@@ -202,6 +213,8 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
             "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientSansExtractor\\".level=INFO",
+            "--env",
             "quarkus.log.console.json.enabled=false",
             "--env",
             "quarkus.log.level=INFO",
@@ -267,8 +280,154 @@ describe(`#runUiamContainer()`, () => {
     `);
   });
 
+  test('should be able to run the UIAM OAuth container', async () => {
+    const [, , oauthContainer] = getUiamContainers({ includeOAuth: true });
+
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${oauthContainer.name}` })
+      .mockResolvedValueOnce({ stdout: ` healthy ` });
+
+    await expect(runUiamContainer(new ToolingLog(), oauthContainer)).resolves.toEqual(
+      oauthContainer.name
+    );
+
+    expect(execa.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "run",
+            "--detach",
+            "--interactive",
+            "--tty",
+            "--health-interval",
+            "5s",
+            "--health-timeout",
+            "2s",
+            "--health-retries",
+            "30",
+            "--health-start-period",
+            "3s",
+            "--net",
+            "elastic",
+            "--memory",
+            "2g",
+            "--memory-swap",
+            "2g",
+            "--volume",
+            "/some_path/run_java_with_custom_ca.sh:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z",
+            "--volume",
+            "/some_path/uiam_cosmosdb.pfx:/tmp/uiam_cosmosdb.pfx:z",
+            "--volume",
+            "/some/path/ca.crt:/tmp/ca.crt:z",
+            "--volume",
+            "/some/path/kibana.key:/tmp/server.key:z",
+            "--volume",
+            "/some/path/kibana.crt:/tmp/server.crt:z",
+            "-p",
+            "127.0.0.1:8444:8443",
+            "--entrypoint",
+            "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
+            "--env",
+            "JAVA_OPTS_APPEND=-Xms256m -Xmx1g",
+            "--env",
+            "uiam.apikey.convert.validation.endpoint.enabled=false",
+            "--env",
+            "quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt",
+            "--env",
+            "quarkus.tls.https.key-store.pem.0.key=/tmp/server.key",
+            "--env",
+            "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt",
+            "--env",
+            "quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt",
+            "--env",
+            "quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key",
+            "--env",
+            "quarkus.http.ssl.certificate.key-store-provider=JKS",
+            "--env",
+            "quarkus.http.ssl.certificate.trust-store-provider=SUN",
+            "--env",
+            "quarkus.log.category.\\"co\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"io\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"org\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
+            "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientSansExtractor\\".level=INFO",
+            "--env",
+            "quarkus.log.console.json.enabled=false",
+            "--env",
+            "quarkus.log.level=INFO",
+            "--env",
+            "quarkus.otel.sdk.disabled=true",
+            "--env",
+            "quarkus.profile=dev",
+            "--env",
+            "uiam.api_keys.decoder.prefixes=essu_dev",
+            "--env",
+            "uiam.api_keys.encoder.prefix=essu_dev",
+            "--env",
+            "uiam.cosmos.account.access_key=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+            "--env",
+            "uiam.cosmos.account.endpoint=https://uiam-cosmosdb:8081",
+            "--env",
+            "uiam.cosmos.container.apikey=api-keys",
+            "--env",
+            "uiam.cosmos.container.token_invalidation=token-invalidation",
+            "--env",
+            "uiam.cosmos.container.users=users",
+            "--env",
+            "uiam.cosmos.database=uiam-db",
+            "--env",
+            "uiam.cosmos.gateway_connection_mode=true",
+            "--env",
+            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=,3KyUueOHfXAbZbcxM/sL7nfyUFOgX7u8ONBKHbz2AqI=",
+            "--env",
+            "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
+            "--env",
+            "uiam.tokens.jwt.signing.secret=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
+            "--env",
+            "uiam.tokens.jwt.verify.clock.skew=PT2S",
+            "--env",
+            "UIAM_SERVICE_BOUNDARY=external",
+            "--env",
+            "uiam.oauth.base_url=https://localhost:8444",
+            "--env",
+            "UIAM_OAUTH_BASE_URL=https://localhost:8444",
+            "--env",
+            "uiam.tokens.refresh.grace_period=PT3S",
+            "--volume",
+            "/some_path/mock-idp-metadata.xml:/tmp/mock-idp-metadata.xml:z",
+            "--env",
+            "uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml",
+            "--env",
+            "uiam.saml.acs.url=https://localhost:8444/saml/consume",
+            "--health-cmd",
+            "timeout 1 bash -c \\"</dev/tcp/localhost/8443\\"",
+            "--name",
+            "uiam-oauth",
+            "docker.elastic.co/kibana-ci/uiam:latest-verified",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam-oauth",
+          ],
+        ],
+      ]
+    `);
+  });
+
   test('wait for the container to become healthy', async () => {
-    const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
+    const [cosmosDbContainer, uiamContainer] = getUiamContainers();
 
     // 1. Check Cosmos DB container.
     execa
@@ -362,7 +521,7 @@ describe(`#runUiamContainer()`, () => {
   });
 
   test('fails if container never becomes healthy', async () => {
-    const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
+    const [cosmosDbContainer, uiamContainer] = getUiamContainers();
 
     // 1. Check Cosmos DB container.
     execa
