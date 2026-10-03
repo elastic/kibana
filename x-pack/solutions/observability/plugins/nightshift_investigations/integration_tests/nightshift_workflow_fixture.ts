@@ -108,7 +108,7 @@ export {
 };
 
 /** The managed YAML as installed, so a test cannot drift from what ships. */
-const managedYaml = (id: string): string => {
+export const managedYaml = (id: string): string => {
   const definition = getManagedWorkflowDefinition(id);
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
     throw new Error(`Managed definition ${id} has no yaml`);

@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import { parse } from 'yaml';
 import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
@@ -153,19 +144,16 @@ describe('nightshift sandbox materialize workspace workflow', () => {
         with: {
           writers: [
             {
-              name: 'cortex',
               directory: '/workspace/cortex',
               notification: '{{ steps.hydrate_cortex.output.notification }}',
               completed: '${{ steps.hydrate_cortex.output != null }}',
             },
             {
-              name: 'memory',
               directory: '/workspace/memories',
               notification: '{{ steps.memory_materialize_to_sandbox.output.notification }}',
               completed: '${{ steps.memory_materialize_to_sandbox.output != null }}',
             },
             {
-              name: 'decision_trees',
               directory: '/workspace/decision-trees',
               notification: '{{ steps.hydrate_decision_trees.output.notification }}',
               completed: '${{ steps.hydrate_decision_trees.output != null }}',
@@ -197,10 +185,10 @@ describe('nightshift sandbox materialize workspace workflow', () => {
 
   it('gives compose_prompt every writer, including the decision-tree one', () => {
     const compose = workflow.steps.find((step) => step.name === 'compose_prompt');
-    const writers = compose?.with?.writers as Array<{ name: string; directory: string }>;
+    const writers = compose?.with?.writers as Array<{ directory: string }>;
 
-    expect(writers.map((writer) => writer.name)).toEqual(['cortex', 'memory', 'decision_trees']);
-    // Directories must be the real sandbox roots the handlers write to.
+    // Directories must be the real sandbox roots the handlers write to; the plugin's own
+    // integration test compares them against the handler constants themselves.
     expect(writers.map((writer) => writer.directory)).toEqual([
       '/workspace/cortex',
       '/workspace/memories',
@@ -211,25 +199,9 @@ describe('nightshift sandbox materialize workspace workflow', () => {
   // A parallel branch body must compile to leaf nodes only. A step-level `if`, `on-failure`,
   // or `timeout` wraps the step in enter-*/exit-* nodes, which the graph builder rejects with
   // GraphBuildError before the workflow can ever run. The tree branch therefore cannot gate
-  // itself in YAML — the step handler no-ops on the feature flag instead. This test is the
-  // guard that stops someone "restoring" the swallowed tree failure and breaking every install.
-  it('keeps every parallel branch body a straight line of atomic steps', () => {
-    const parallel = workflow.steps.find((step) => step.type === 'parallel');
-    if (!parallel?.branches) throw new Error('Missing parallel branches');
-
-    for (const branch of parallel.branches) {
-      for (const step of branch.steps) {
-        expect({ branch: branch.name, step: step.name, if: step.if }).toEqual({
-          branch: branch.name,
-          step: step.name,
-          if: undefined,
-        });
-        expect(step.timeout).toBeUndefined();
-        expect(step['on-failure']).toBeUndefined();
-      }
-    }
-  });
-
+  // itself in YAML — the step handler no-ops on the feature flag instead. The graph build below
+  // is the guard that stops someone "restoring" the swallowed tree failure and breaking every
+  // install.
   // The shape assertions above describe the rule; this proves the rule actually holds by
   // running the real YAML through the graph builder. If a branch ever grows an `if`,
   // `on-failure`, or `timeout`, this throws GraphBuildError here rather than at install

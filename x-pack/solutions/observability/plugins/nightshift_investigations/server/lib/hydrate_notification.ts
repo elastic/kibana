@@ -32,8 +32,6 @@ export const formatIncompleteMaterializationNotice = (directory: string): string
 
 /** One workspace writer, as reported to {@link composeHydrateNotificationContext}. */
 export interface HydrateWriter {
-  /** Display name, for logging only. */
-  name: string;
   /** Absolute sandbox directory this writer materializes into. */
   directory: string;
   /** The writer's own markdown fragment, empty when it wrote nothing. */

@@ -16,14 +16,28 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { parse } from 'yaml';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../server/agents/investigation';
+import { CORTEX_WORKSPACE_ROOT } from '../server/cortex/materialize';
+import { DECISION_TREE_WORKSPACE_ROOT } from '../server/decision_trees/materialize';
+import { MEMORY_WORKSPACE_ROOT } from '../server/memory/materialize';
 import {
   createNightshiftWorkflowFixture,
   hydrateCortexWorkspace,
   hydrateDecisionTreeWorkspace,
   hydrateMemoryWorkspace,
+  managedYaml,
   type NightshiftWorkflowFixture,
+  type NightshiftWorkflowFixtureOptions,
 } from './nightshift_workflow_fixture';
+
+/** The managed YAML as installed, so this test cannot drift from what ships. */
+const workflowSteps = (
+  parse(managedYaml(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID)) as {
+    steps: Array<{ name: string; with?: unknown }>;
+  }
+).steps;
 
 interface ComposeOutput {
   model_context?: string;
@@ -141,51 +155,44 @@ const expectOnlyTheseWritersRan = (expected: WriterName[]): void => {
 };
 
 describe('sandbox materialize workspace workflow, feature matrix', () => {
-  it('materializes only Cortex when Memory and trees are off', async () => {
-    const fixture = createNightshiftWorkflowFixture({
-      cortexEnabled: true,
-      memoryEnabled: false,
-      decisionTreesEnabled: false,
-    });
+  it.each<[string, NightshiftWorkflowFixtureOptions, WriterName[]]>([
+    [
+      'Cortex when Memory and trees are off',
+      { cortexEnabled: true, memoryEnabled: false, decisionTreesEnabled: false },
+      ['cortex'],
+    ],
+    [
+      'Semantic Memory when Cortex and trees are off',
+      { cortexEnabled: false, memoryEnabled: true, decisionTreesEnabled: false },
+      ['memory'],
+    ],
+    [
+      'the trees alone when Cortex and Memory are off',
+      { cortexEnabled: false, memoryEnabled: false, decisionTreesEnabled: true },
+      ['decision_trees'],
+    ],
+    ['all three writers when every feature is on', {}, ['cortex', 'memory', 'decision_trees']],
+  ])('materializes %s', async (_case, options, expected) => {
+    const fixture = createNightshiftWorkflowFixture(options);
 
     await fixture.runMaterialize(FIRST_EXECUTION_INPUTS);
 
     expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
-    expectOnlyTheseWritersRan(['cortex']);
+    expectOnlyTheseWritersRan(expected);
   });
 
-  it('materializes only Semantic Memory when Cortex and trees are off', async () => {
-    const fixture = createNightshiftWorkflowFixture({
-      cortexEnabled: false,
-      memoryEnabled: true,
-      decisionTreesEnabled: false,
-    });
+  // The YAML hard-codes the directory each writer reports on, and the handlers write to the
+  // root constants. Nothing at runtime connects the two, so a renamed root would have compose
+  // report an incomplete directory nobody ever wrote to.
+  it('reports the directories the writers actually write to', () => {
+    const compose = workflowSteps.find((step) => step.name === 'compose_prompt');
+    const writers = (compose?.with as { writers: Array<{ directory: string }> }).writers;
 
-    await fixture.runMaterialize(FIRST_EXECUTION_INPUTS);
-
-    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
-    expectOnlyTheseWritersRan(['memory']);
-  });
-
-  it('materializes the trees alone when Cortex and Memory are off', async () => {
-    const fixture = createNightshiftWorkflowFixture({
-      cortexEnabled: false,
-      memoryEnabled: false,
-      decisionTreesEnabled: true,
-    });
-
-    await fixture.runMaterialize(FIRST_EXECUTION_INPUTS);
-
-    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
-    expectOnlyTheseWritersRan(['decision_trees']);
-  });
-
-  it('materializes all three writers when every feature is on', async () => {
-    const fixture = createNightshiftWorkflowFixture();
-
-    await fixture.runMaterialize(FIRST_EXECUTION_INPUTS);
-
-    expectOnlyTheseWritersRan(['cortex', 'memory', 'decision_trees']);
+    expect(writers.map((writer) => writer.directory)).toEqual([
+      CORTEX_WORKSPACE_ROOT,
+      MEMORY_WORKSPACE_ROOT,
+      DECISION_TREE_WORKSPACE_ROOT,
+    ]);
   });
 
   // A disabled writer returns `skipped` rather than nothing, so compose sees it as completed

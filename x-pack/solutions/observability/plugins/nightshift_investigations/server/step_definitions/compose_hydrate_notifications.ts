@@ -23,7 +23,6 @@ export const composeHydrateNotificationsStepDefinition = () =>
       writers: z
         .array(
           z.object({
-            name: z.string().max(64).describe('Writer name, e.g. cortex.'),
             directory: z
               .string()
               .max(1024)

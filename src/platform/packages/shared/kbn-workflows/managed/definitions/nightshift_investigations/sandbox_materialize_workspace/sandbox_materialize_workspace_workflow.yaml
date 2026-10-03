@@ -94,16 +94,13 @@ steps:
       # is false in exactly that case; a writer that ran reports its own failure in
       # `notification` instead.
       writers:
-        - name: cortex
-          directory: /workspace/cortex
+        - directory: /workspace/cortex
           notification: '{{ steps.hydrate_cortex.output.notification }}'
           completed: '${{ steps.hydrate_cortex.output != null }}'
-        - name: memory
-          directory: /workspace/memories
+        - directory: /workspace/memories
           notification: '{{ steps.memory_materialize_to_sandbox.output.notification }}'
           completed: '${{ steps.memory_materialize_to_sandbox.output != null }}'
-        - name: decision_trees
-          directory: /workspace/decision-trees
+        - directory: /workspace/decision-trees
           notification: '{{ steps.hydrate_decision_trees.output.notification }}'
           completed: '${{ steps.hydrate_decision_trees.output != null }}'
       # ${{ }} preserves the array; Liquid `{{ }}` stringifies a one-item array.
