@@ -10,6 +10,7 @@ import { deleteAllAlerts, deleteAllRules, waitFor } from '@kbn/detections-respon
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
+  readRiskScores,
   riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
 } from '../../utils';
@@ -28,6 +29,17 @@ export default ({ getService }: FtrProviderContext) => {
     await deleteAllRules(supertest, log);
     await riskEngineRoutes.cleanUp();
   };
+
+  const scheduleRiskEngineRun = () =>
+    waitFor(
+      async () => {
+        // don't throw an error if the status is 409 (conflict), just retry
+        const { status } = await riskEngineRoutes.scheduleNow([200, 409]);
+        return status === 200;
+      },
+      'waitForScheduleNow',
+      log
+    );
 
   describe('@ess @serverless @serverlessQA @skipInServerlessMKI Risk Engine schedule_now', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -60,21 +72,21 @@ export default ({ getService }: FtrProviderContext) => {
       await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, firstDocumentId)]);
       await createAndSyncRuleAndAlerts({ query: `id: ${firstDocumentId}` });
 
-      // first risk engine run
+      // `init()` only ensures the scoring task exists, so drive the first run explicitly too
       await riskEngineRoutes.init();
+      await scheduleRiskEngineRun();
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
 
+      const scoresBeforeScheduleNow = await readRiskScores(es);
+
       // second risk engine run
-      await waitFor(
-        async () => {
-          // don't throw an error if the status is 409 (conflict), just retry
-          const { status } = await riskEngineRoutes.scheduleNow([200, 409]);
-          return status === 200;
-        },
-        'waitForScheduleNow',
-        log
-      );
-      await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 }); // Should calculate risk score again for the same document
+      await scheduleRiskEngineRun();
+      // Should calculate risk score again for the same document
+      await waitForRiskScoresToBePresent({
+        es,
+        log,
+        scoreCount: scoresBeforeScheduleNow.length + 1,
+      });
     });
   });
 };
