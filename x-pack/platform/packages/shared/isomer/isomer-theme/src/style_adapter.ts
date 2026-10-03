@@ -8,17 +8,11 @@
 import type { StyleHandle, StylesCollector } from '@elastic/distillate';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import type { HTMLStyleAdapter } from '@elastic/isomer-sdk/html';
-import { ISOMER_ROOT_CLASS, isomerDistillery } from './distillery';
+import { isomerDistillery } from './distillery';
+import { rootStyles } from './root_styles';
 
 /** The `styleCollector` tag of packs whose styles are collected by {@link isomerStyleAdapter}. */
 export const ISOMER_STYLE_COLLECTOR = 'distillate';
-
-/** Lets `light-dark()` follow the wrapper's `data-theme`, and the page's color scheme without one. */
-const COLOR_SCHEME_CSS = [
-  `.${ISOMER_ROOT_CLASS}{color-scheme:light dark}`,
-  `.${ISOMER_ROOT_CLASS}[data-theme='light']{color-scheme:light}`,
-  `.${ISOMER_ROOT_CLASS}[data-theme='dark']{color-scheme:dark}`,
-].join('');
 
 const { artifactCollector, environment, registry, renderStyles } = isomerDistillery;
 
@@ -26,7 +20,12 @@ const { artifactCollector, environment, registry, renderStyles } = isomerDistill
 export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector> = {
   styleCollector: ISOMER_STYLE_COLLECTOR,
   // Compact names depend on the complete collected set, which doesn't exist until the markup is written.
-  createCollector: () => artifactCollector('readable'),
+  createCollector: () => {
+    const collector = artifactCollector('readable');
+    const { root, light, dark } = rootStyles.handles;
+    collector.use([root, light, dark]);
+    return collector;
+  },
   createRenderContext: (collector) => ({
     resolveClassName: (...handles) => {
       // Primitives pass Distillate handles, which the SDK types as its narrower `StyleHandle`.
@@ -36,7 +35,7 @@ export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector
   }),
   renderStyles: (collector, { scheme }) => {
     if (!scheme) {
-      return COLOR_SCHEME_CSS + renderStyles(collector);
+      return renderStyles(collector);
     }
 
     // Image backends evaluate no `light-dark()`, so a requested scheme resolves to literal values.
