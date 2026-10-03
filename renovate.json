@@ -1430,10 +1430,8 @@
     {
       "groupName": "reporting dependencies",
       "matchDepNames": [
-        "@types/extract-zip",
         "@types/opn",
         "@types/pdfmake",
-        "extract-zip",
         "opn",
         "pdfjs-dist",
         "pdfmake",
