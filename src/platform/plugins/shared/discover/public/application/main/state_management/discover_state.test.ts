@@ -593,6 +593,34 @@ describe('Discover state', () => {
       expectLoadedFilters(services, apiDataViewId);
     });
 
+    it('keeps a CM session clean when stored filters omit their boolean defaults', async () => {
+      const services = createServices();
+      const storedSession = cloneDeep(legacySession);
+      storedSession.tabs[0].serializedSearchSource.filter = [
+        {
+          ...storedFilters[0],
+          meta: omit(storedFilters[0].meta, 'disabled', 'negate'),
+        },
+        cloneDeep(storedFilters[1]),
+      ];
+      const beforeLoad = cloneDeep(storedSession);
+      jest.spyOn(services.savedSearch, 'getDiscoverSession').mockResolvedValue(storedSession);
+      const sessionService = createDiscoverSessionService({
+        legacyClient: services.savedSearch,
+        apiClient: { get: jest.fn(), create: jest.fn(), upsert: jest.fn() },
+        useHttpApi: false,
+      });
+
+      const { session } = await sessionService.get(storedSession.id);
+      const state = createState(services);
+      await state.initializeTabs({ persistedDiscoverSession: session });
+      await state.initializeSingleTab({ tabId: state.getCurrentTab().id });
+
+      expectLoadedFilters(services, apiDataViewId);
+      expect(hasUnsavedChanges(state, services)).toBe(false);
+      expect(storedSession).toStrictEqual(beforeLoad);
+    });
+
     it.each([
       { source: 'legacy', loadSession: () => cloneDeep(legacySession) },
       { source: 'HTTP', loadSession: () => fromDiscoverSessionApiResponse(cloneDeep(response)) },
