@@ -46,16 +46,13 @@ const yamlRule = ({
   return lines.join('\n');
 };
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327)',
   { tag: '@local-stateful-classic' },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -68,7 +65,6 @@ test.describe(
         },
         { ignore: [400] }
       );
-      await apiServices.alertingV2.rules.cleanUp();
     });
 
     test.beforeEach(async ({ browserAuth }) => {
@@ -86,7 +82,9 @@ test.describe(
     };
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
     });
 
@@ -100,6 +98,7 @@ test.describe(
           metadata: { name },
         })
       );
+      createdRuleIds.push(rule.id);
       return rule.id;
     };
 
@@ -218,6 +217,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('open the edit flyout, switch to YAML, and select the recovery tab', async () => {

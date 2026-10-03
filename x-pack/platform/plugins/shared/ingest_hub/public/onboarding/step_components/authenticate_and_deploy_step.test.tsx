@@ -189,13 +189,15 @@ describe('AuthenticateAndDeployStep', () => {
       awsServicesMap: awsServicesMapWithMI,
       deploymentMethod: 'managed_integration',
       setDeploymentMethod: jest.fn(),
+      authenticateAndDeployStep: { authMethod: 'identity_federation', connectorId: null },
+      agentBasedDeployment: { selectedAgentPolicyIds: [] },
       detectAndReviewStep: {
         serviceStatuses: {},
         policyIdsByInstance: {},
         onboardingDeploymentId: undefined,
       },
       updateDetectAndReviewStep: jest.fn(),
-      refetchAwsServiceMatrix: jest.fn(),
+      removeDeployInstances: jest.fn(),
     });
     mockUseOnboardingSO.mockReturnValue({
       createDeployment: jest.fn().mockResolvedValue(null),
@@ -302,12 +304,14 @@ describe('AuthenticateAndDeployStep', () => {
           instanceIds: ['guardduty'],
           members: [original],
           isDuplicateGroup: false,
+          namespace: '',
         },
         {
           groupId: 'guardduty__dup-1',
           instanceIds: ['guardduty__dup-1'],
           members: [duplicate],
           isDuplicateGroup: true,
+          namespace: '',
         },
       ];
       const serviceVars = {
@@ -439,7 +443,14 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['vpcflow', agentService]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: {
+          selectedAgentPolicyIds: [],
+          agentHostsMode: 'new',
+          agentCredentialMethod: 'assume_role',
+        },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       MockAgentBasedSection.mockImplementation(({ hasFailed }: { hasFailed: boolean }) =>
         hasFailed ? <span data-test-subj="mock-agent-failed">Failed</span> : null
@@ -454,6 +465,7 @@ describe('AuthenticateAndDeployStep', () => {
             instanceIds: ['vpcflow'],
             members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
             isDuplicateGroup: false,
+            namespace: '',
           },
         ],
         isDeploying: false,
@@ -474,6 +486,7 @@ describe('AuthenticateAndDeployStep', () => {
             instanceIds: ['vpcflow'],
             members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
             isDuplicateGroup: false,
+            namespace: '',
           },
         ],
         isDeploying: false,
@@ -516,6 +529,7 @@ describe('AuthenticateAndDeployStep', () => {
           instanceIds: ['vpcflow'],
           members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
           isDuplicateGroup: false,
+          namespace: '',
         },
       ];
 
@@ -618,7 +632,12 @@ describe('AuthenticateAndDeployStep', () => {
           deploymentMethod: 'agent_based',
           setDeploymentMethod: jest.fn(),
           // agentBasedDeployment has agentPolicyId already set (flyout created it).
-          agentBasedDeployment: { agentPolicyId: 'existing-policy-id', agentHostsMode: 'new' },
+          agentBasedDeployment: {
+            agentPolicyId: 'existing-policy-id',
+            agentHostsMode: 'new',
+            selectedAgentPolicyIds: [],
+            agentCredentialMethod: 'assume_role',
+          },
           detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
           updateDetectAndReviewStep: jest.fn(),
         });
@@ -737,7 +756,10 @@ describe('AuthenticateAndDeployStep', () => {
         ]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
     });
@@ -821,7 +843,10 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['awsfargate', agentService]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
     });
@@ -866,7 +891,10 @@ describe('AuthenticateAndDeployStep', () => {
         ]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: mockSetDeploymentMethod,
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       rerender(
         <I18nProvider>

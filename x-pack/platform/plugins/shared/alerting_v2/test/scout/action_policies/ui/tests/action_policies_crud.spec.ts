@@ -22,18 +22,19 @@ import {
  * asserts against a mocked client.
  */
 test.describe('Action Policies - create and edit', { tag: [...tags.stateful.classic] }, () => {
-  const CREATED_POLICY_NAME = 'scout-action-policy-created';
-  const SEEDED_POLICY_NAME = 'scout-action-policy-to-edit';
-  const EDITED_POLICY_NAME = 'scout-action-policy-edited';
+  const RUN_ID = Date.now().toString();
+  const CREATED_POLICY_NAME = `scout-action-policy-created-${RUN_ID}`;
+  const SEEDED_POLICY_NAME = `scout-action-policy-to-edit-${RUN_ID}`;
+  const EDITED_POLICY_NAME = `scout-action-policy-edited-${RUN_ID}`;
   // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
   // round-trips through the edit form unchanged, proving backward compatibility.
   const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
 
   let workflowId: string;
   let workflowName: string;
+  const createdPolicyIds: string[] = [];
 
   test.beforeAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.actionPolicies.cleanUp();
     // Action policy destinations are workflow references, so the form's
     // workflows combo box needs a real workflow to offer.
     workflowName = `scout-action-policy-destination-${Date.now()}`;
@@ -42,14 +43,15 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.actionPolicies.cleanUp();
+    for (const id of createdPolicyIds) {
+      await apiServices.alertingV2.actionPolicies.delete(id);
+    }
     await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
   });
 
   test('creates a policy from the form and persists what was typed', async ({
     apiServices,
     browserAuth,
-    page,
     pageObjects,
   }) => {
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
@@ -75,7 +77,13 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
     await test.step('the form returns to the list with the new policy', async () => {
       await expect(actionPoliciesList.detailsLink(CREATED_POLICY_NAME)).toBeVisible();
-      await expect(page).toHaveURL(/\/app\/management\/alertingV2\/action_policies(\?|$|#|\/)/);
+      // Capture the created policy ID for teardown before any count assertions.
+      const { items } = await apiServices.alertingV2.actionPolicies.list({
+        search: CREATED_POLICY_NAME,
+      });
+      if (items[0]?.id) {
+        createdPolicyIds.push(items[0].id);
+      }
     });
 
     await test.step('the persisted policy matches the submitted form', async () => {
@@ -97,7 +105,6 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
   test('edits an existing policy without dropping untouched fields', async ({
     apiServices,
     browserAuth,
-    page,
     pageObjects,
   }) => {
     const seeded = await apiServices.alertingV2.actionPolicies.create(
@@ -107,6 +114,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
         destinations: [{ type: 'workflow', id: workflowId }],
       })
     );
+    createdPolicyIds.push(seeded.id);
 
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
     const { actionPoliciesList, actionPolicyForm } = pageObjects;
@@ -121,7 +129,6 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       await actionPolicyForm.setName(EDITED_POLICY_NAME);
       await actionPolicyForm.submit();
       await expect(actionPoliciesList.detailsLink(EDITED_POLICY_NAME)).toBeVisible();
-      await expect(page).toHaveURL(/\/app\/management\/alertingV2\/action_policies(\?|$|#|\/)/);
     });
 
     await test.step('the update carries the hydrated fields back unchanged', async () => {

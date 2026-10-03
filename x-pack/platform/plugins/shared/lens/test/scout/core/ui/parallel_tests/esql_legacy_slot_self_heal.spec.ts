@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
@@ -142,8 +141,7 @@ spaceTest.describe(
     spaceTest(
       'renders the layer query, self-heals the stale slot on save, and survives re-open',
       async ({ pageObjects, page, kbnClient, scoutSpace }) => {
-        const { dashboard, lens } = pageObjects;
-        const codeEditor = new KibanaCodeEditorWrapper(page);
+        const { dashboard, lens, esqlEditor } = pageObjects;
 
         await spaceTest.step('open the dashboard: legacy by-value panel renders', async () => {
           await dashboard.openDashboardWithIdInEditMode(DASHBOARD_ID);
@@ -154,16 +152,14 @@ spaceTest.describe(
           'inline flyout seeds from the layer query, not the stale slot',
           async () => {
             await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-            await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-            await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(LAYER_QUERY);
+            await esqlEditor.waitReady();
+            await expect.poll(() => esqlEditor.getQuery()).toBe(LAYER_QUERY);
           }
         );
 
         await spaceTest.step('edit the query, apply, and save the dashboard', async () => {
-          await codeEditor.setCodeEditorValue(UPDATED_QUERY);
-          const runButton = page.testSubj.locator('ESQLEditor-run-query-button');
-          await expect(runButton).toBeEnabled();
-          await runButton.click();
+          await esqlEditor.setQuery(UPDATED_QUERY);
+          await esqlEditor.runQuery();
           await dashboard.waitForRenderComplete();
           await applyLensInlineEditorAndWaitClosed({ lens });
           // the applied edit reaches the dashboard's unsaved-changes state
@@ -191,8 +187,8 @@ spaceTest.describe(
             // reloads in view mode, so re-enter edit mode for the panel action
             await dashboard.ensureEditMode();
             await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-            await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-            await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(UPDATED_QUERY);
+            await esqlEditor.waitReady();
+            await expect.poll(() => esqlEditor.getQuery()).toBe(UPDATED_QUERY);
           }
         );
 

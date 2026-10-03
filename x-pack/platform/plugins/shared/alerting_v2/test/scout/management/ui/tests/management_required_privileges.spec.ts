@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, type AlertingApp, type AlertingPageObjects } from '../fixtures';
 import {
@@ -45,29 +45,26 @@ const accessTestBody =
       await test.step(`${app} is accessible`, async () => {
         await nav.goto(app);
         await expect(nav.pageHeading(app)).toBeVisible();
-        await expect(nav.managementLanding).toBeHidden();
+        await expect(nav.requiredPrivilegesPrompt).toBeHidden();
       });
     }
 
     for (const app of complement(ALL_APPS, allowedApps)) {
-      await test.step(`${app} falls through to the management landing page`, async () => {
+      await test.step(`${app} shows the required privileges prompt`, async () => {
         await nav.goto(app);
-        await expect(nav.managementLanding).toBeVisible();
+        await expect(nav.requiredPrivilegesPrompt).toBeVisible();
         await expect(nav.pageHeading(app)).toBeHidden();
       });
     }
   };
 
-test.describe('Management pages - required privileges', { tag: tags.deploymentAgnostic }, () => {
-  test('user with full access can view every management page', accessTestBody(ALL_ROLE, ALL_APPS));
+test.describe('Alerting pages - required privileges', { tag: tags.deploymentAgnostic }, () => {
+  test('user with full access can view every page', accessTestBody(ALL_ROLE, ALL_APPS));
+
+  test('user with read-only access can view every page', accessTestBody(READ_ROLE, ALL_APPS));
 
   test(
-    'user with read-only access can view every management page',
-    accessTestBody(READ_ROLE, ALL_APPS)
-  );
-
-  test(
-    'user without alerting_v2 access is redirected to the management landing on every page',
+    'user without alerting_v2 access sees the required privileges prompt on every page',
     accessTestBody(NO_ACCESS_ROLE, [])
   );
 

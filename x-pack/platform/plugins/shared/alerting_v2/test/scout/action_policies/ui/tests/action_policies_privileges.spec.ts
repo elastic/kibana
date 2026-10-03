@@ -19,32 +19,29 @@ import {
  * every write affordance (create, row edit/actions, snooze toggle, details
  * flyout Take action button) is hidden and the `/edit/:id` route is gated by
  * the required-privileges interstitial.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
 test.describe('Action Policies - read/write privileges', { tag: '@local-stateful-classic' }, () => {
+  const RUN_ID = Date.now().toString();
   let policyId: string;
   let policyName: string;
 
   test.beforeAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.actionPolicies.cleanUp();
+    policyName = `scout-action-policy-privileges-${RUN_ID}`;
     const policy = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'scout-action-policy-privileges' })
+      buildCreateActionPolicyData({ name: policyName })
     );
     policyId = policy.id;
-    policyName = policy.name;
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.actionPolicies.cleanUp();
+    await apiServices.alertingV2.actionPolicies.delete(policyId);
   });
 
   test('editor sees every write affordance', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_ROLE);
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
+    await actionPoliciesList.search(policyName);
     await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
     await test.step('create button and the row name link are visible', async () => {
@@ -63,6 +60,7 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
+    await actionPoliciesList.search(policyName);
     await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
     await test.step('create button is hidden but the row name link remains', async () => {
