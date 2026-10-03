@@ -701,8 +701,8 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('mlJobOpenCustomUrlFormButton', { timeout: 5000 });
     }
 
-    public async closeEditJobFlyout() {
-      if (await testSubjects.exists('mlEditJobFlyoutCloseButton')) {
+    async closeEditJobFlyout() {
+      if (await testSubjects.waitForExists('mlEditJobFlyoutCloseButton', { timeout: 1000 })) {
         await testSubjects.click('mlEditJobFlyoutCloseButton');
         await testSubjects.missingOrFail('mlJobEditFlyout');
       }

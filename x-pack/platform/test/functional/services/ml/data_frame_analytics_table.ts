@@ -218,6 +218,16 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       shouldBeDisplayed: boolean,
       refreshButtonTestSubj = 'mlDatePickerRefreshPageButton'
     ) {
+      const shouldNotBeDisplayed = shouldBeDisplayed === false;
+      if (shouldNotBeDisplayed) {
+        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound')) {
+          // no jobs at all, no other assertion needed
+          return;
+        }
+        await this.filterWithSearchString(analyticsId, 0);
+        return;
+      }
+
       await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
       await testSubjects.click(`~${refreshButtonTestSubj}`);
       await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
@@ -226,7 +236,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       if (shouldBeDisplayed) {
         await this.filterWithSearchString(analyticsId, 1);
       } else {
-        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+        if (await testSubjects.waitForExists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
           // no jobs at all, no other assertion needed
           return;
         }

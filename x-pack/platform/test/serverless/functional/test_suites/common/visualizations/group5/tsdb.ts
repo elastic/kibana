@@ -206,9 +206,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // now check if the provided function has no incompatibility tooltip
             for (const supportedOp of supportedOperations) {
               expect(
-                testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
-                  timeout: 500,
-                })
+                await testSubjects.exists(
+                  `lns-indexPatternDimension-${supportedOp.name} incompatible`
+                )
               ).to.eql(supportedOp[fieldType]);
             }
 
@@ -248,11 +248,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // now check if the provided function has the incompatibility tooltip
             for (const unsupportedOp of unsupportedOperatons) {
               expect(
-                testSubjects.exists(
-                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
-                  {
-                    timeout: 500,
-                  }
+                await testSubjects.exists(
+                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`
                 )
               ).to.eql(!unsupportedOp[fieldType]);
             }
@@ -415,9 +412,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
+              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
             ).to.eql(false);
             await lens.closeDimensionEditor();
           });
@@ -517,9 +512,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
+              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
             ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
             await lens.closeDimensionEditor();
           });
