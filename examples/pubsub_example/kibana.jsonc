@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/pubsub-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Example of publishing and subscribing with the in-process pub/sub service.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "pubsubExample",
+    "server": true,
+    "browser": false
+  }
+}
