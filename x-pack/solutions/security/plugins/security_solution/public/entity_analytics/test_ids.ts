@@ -39,3 +39,4 @@ export const ENGINE_STATUS_PANEL_TEST_ID = 'engine-status-panel';
 // RiskScoreTab - Form inputs
 export const RISK_SCORE_RETAIN_CHECKBOX_TEST_ID = 'riskScoreRetainCheckbox';
 export const RISK_SCORE_DISCARD_BUTTON_TEST_ID = 'riskScoreDiscardButton';
+export const RISK_SCORE_SETTINGS_ERROR_TEST_ID = 'riskScoreSettingsError';

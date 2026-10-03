@@ -73,7 +73,6 @@ export const EntityAnalyticsManagementPage = () => {
 
   const riskEngineSettings = useConfigurableRiskEngineSettings();
   const {
-    savedRiskEngineSettings,
     selectedRiskEngineSettings,
     selectedSettingsMatchSavedSettings,
     resetSelectedSettings,
@@ -81,6 +80,7 @@ export const EntityAnalyticsManagementPage = () => {
     setSelectedDateSetting,
     toggleSelectedClosedAlertsSetting,
     isLoadingRiskEngineSettings,
+    isErrorLoadingRiskEngineSettings,
     toggleScoreRetainment,
     setAlertFilters,
     getUIAlertFilters,
@@ -320,7 +320,6 @@ export const EntityAnalyticsManagementPage = () => {
         <RiskScoreTab
           hasReadPermissions={hasReadPermissions}
           isPrivilegesLoading={riskEnginePrivileges.isLoading}
-          savedRiskEngineSettings={savedRiskEngineSettings}
           selectedRiskEngineSettings={selectedRiskEngineSettings}
           selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
           resetSelectedSettings={resetSelectedSettings}
@@ -329,6 +328,7 @@ export const EntityAnalyticsManagementPage = () => {
           setSelectedDateSetting={setSelectedDateSetting}
           toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
           isLoadingRiskEngineSettings={isLoadingRiskEngineSettings}
+          isErrorLoadingRiskEngineSettings={isErrorLoadingRiskEngineSettings}
           toggleScoreRetainment={toggleScoreRetainment}
           setAlertFilters={setAlertFilters}
           getUIAlertFilters={getUIAlertFilters}

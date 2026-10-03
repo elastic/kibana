@@ -28,6 +28,21 @@ export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
   }
 );
 
+export const ERROR_LOADING_RISK_ENGINE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.errorLoadingRiskEngineSettingsTitle',
+  {
+    defaultMessage: 'Unable to load risk score maintainer settings',
+  }
+);
+
+export const ERROR_LOADING_RISK_ENGINE_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.errorLoadingRiskEngineSettingsDescription',
+  {
+    defaultMessage:
+      'The settings below show default values instead of your saved settings. Reload the page to try again, or save to apply the settings shown.',
+  }
+);
+
 export const ENTITY_ANALYTICS_STATUS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.status',
   {
