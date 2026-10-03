@@ -7,13 +7,18 @@
 
 import DateMath from '@kbn/datemath';
 import userEvent from '@testing-library/user-event';
-import { render } from '../utils/testing';
-import React, { useState, Fragment } from 'react';
+import { render as rtlRender } from '@testing-library/react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
+import React, { useState, Fragment, type ReactElement } from 'react';
 import type { SyntheticsUrlParamsHook } from './use_url_params';
 import { useUrlParams } from './use_url_params';
-import { SyntheticsRefreshContext } from '../contexts';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
-const { AUTOREFRESH_INTERVAL_SECONDS } = CLIENT_DEFAULTS_SYNTHETICS;
+
+// The hook only needs a router, so a bare Router avoids mounting the full Synthetics app shell the shared `render` helper sets up per test.
+const render = (ui: ReactElement) => {
+  const history = createMemoryHistory();
+  return { ...rtlRender(<Router history={history}>{ui}</Router>), history };
+};
 
 interface MockUrlParamsComponentProps {
   hook: SyntheticsUrlParamsHook;
@@ -55,19 +60,7 @@ describe('useUrlParams', () => {
   });
 
   it('accepts router props, updates URL params, and returns the current params', async () => {
-    const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider
-        value={
-          {
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
-          } as any
-        }
-      >
-        <UseUrlParamsTestComponent hook={useUrlParams} />
-      </SyntheticsRefreshContext.Provider>
-    );
+    const { findByText, history } = render(<UseUrlParamsTestComponent hook={useUrlParams} />);
 
     const pushSpy = jest.spyOn(history, 'push');
 
@@ -82,17 +75,7 @@ describe('useUrlParams', () => {
 
   it('clears search when null is passed to params', async () => {
     const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider
-        value={
-          {
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
-          } as any
-        }
-      >
-        <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
-      </SyntheticsRefreshContext.Provider>
+      <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
     );
 
     const pushSpy = jest.spyOn(history, 'push');
