@@ -62,6 +62,7 @@ import {
   type ExpandedDocCascadePath,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useDataViewFieldEditor } from '../../../../hooks/use_data_view_field_editor';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import {
@@ -118,6 +119,7 @@ function DiscoverDocumentsComponent({
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
+  const fieldEditor = useDataViewFieldEditor({ dataView, onFieldEdited });
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const persistedDiscoverSession = useInternalStateSelector(
@@ -638,6 +640,7 @@ function DiscoverDocumentsComponent({
             sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
             onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
             onFieldEdited={onFieldEdited}
+            onEditField={onFieldEdited ? fieldEditor.editField : undefined}
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}

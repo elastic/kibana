@@ -39,6 +39,7 @@ import {
 import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
+import { isInlineDataView } from '../../../../../../common/session/inline_data_view';
 import { fetchData } from './tab_state';
 
 /**
@@ -230,22 +231,23 @@ export const onDataViewEdited: InternalStateThunkActionCreator<
       const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
       dispatch(assignNextDataView({ tabId, dataView: newDataView }));
     } else {
-      await dispatch(updateAdHocDataViewId({ tabId, editedDataView }));
+      await dispatch(applyAdHocDataViewEdit({ tabId, editedDataView }));
     }
     void dispatch(internalStateActions.loadDataViewList());
     addLog('onDataViewEdited triggers data fetching');
     dispatch(fetchData({ tabId }));
   };
 
-/**
- * When editing an ad hoc data view, a new id needs to be generated for the data view
- * This is to prevent duplicate ids messing with our system
- */
-export const updateAdHocDataViewId: InternalStateThunkActionCreator<
-  [TabActionPayload<{ editedDataView: DataView }>],
+/** Applies a confirmed inline edit and updates references only when its identity changes. */
+export const applyAdHocDataViewEdit: InternalStateThunkActionCreator<
+  [
+    TabActionPayload<{
+      editedDataView: DataView;
+    }>
+  ],
   Promise<DataView | undefined>
 > = ({ tabId, editedDataView }) =>
-  async function updateAdHocDataViewIdThunkFn(
+  async function applyAdHocDataViewEditThunkFn(
     dispatch,
     getState,
     { runtimeStateManager, services }
@@ -259,12 +261,23 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
       prevDataView.id!
     );
 
-    const nextDataView = await services.dataViews.create({
-      ...editedDataView.toSpec(),
-      id: uuidv4(),
-    });
+    const isInlineEdit = isInlineDataView(editedDataView);
+    let nextDataView = editedDataView;
 
-    if (!isUsedInMultipleTabs) {
+    if (!isInlineEdit) {
+      nextDataView = await services.dataViews.create({
+        ...editedDataView.toSpec(),
+        id: uuidv4(),
+      });
+    }
+
+    if (nextDataView.id === prevDataView.id) {
+      return nextDataView;
+    }
+
+    // A deterministic instance still represents the old definition for other copies and links.
+    const keepsPreviousInstance = isInlineEdit || isUsedInMultipleTabs;
+    if (!keepsPreviousInstance) {
       services.dataViews.clearInstanceCache(prevDataView.id);
     }
 

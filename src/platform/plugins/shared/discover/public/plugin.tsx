@@ -68,6 +68,7 @@ import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_r
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 import { getDiscoverRecentlyAccessedService } from './services/discover_recently_accessed_service';
 import type { InlineDataViewService } from './services/inline_data_view_service';
+import type { InlineDataViewEditPhase } from './utils/inline_data_view_editor_controller';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -448,6 +449,9 @@ export class DiscoverPlugin
       dataViewEditor: plugins.dataViewEditor,
       dataViews: plugins.data.dataViews,
       inlineDataViews,
+      onEditError: (error, phase) => {
+        core.notifications.toasts.addError(error, { title: getDataViewEditorErrorTitle(phase) });
+      },
     }));
 
     return buildServices({
@@ -563,3 +567,15 @@ const getProfileStateRegistry = once(async () => {
   const { createProfileStateRegistry } = await getSharedServices();
   return createProfileStateRegistry();
 });
+
+const getDataViewEditorErrorTitle = (phase: InlineDataViewEditPhase) => {
+  if (phase === 'open') {
+    return i18n.translate('discover.dataViewEditor.openErrorTitle', {
+      defaultMessage: 'Unable to open data view editor',
+    });
+  }
+
+  return i18n.translate('discover.dataViewEditor.commitErrorTitle', {
+    defaultMessage: 'Unable to apply data view changes',
+  });
+};

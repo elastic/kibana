@@ -76,6 +76,23 @@ export interface TabsToPrepare {
   defaultTabState: Omit<TabState, keyof TabItem>;
 }
 
+interface LoadTabsOptions {
+  userId: string;
+  spaceId: string;
+  persistedDiscoverSession?: DiscoverSession;
+  shouldClearAllTabs?: boolean;
+  defaultTabState: Omit<TabState, keyof TabItem>;
+}
+
+interface LoadedTabs extends TabsInternalStatePayload {
+  updatedDiscoverSession: DiscoverSession | undefined;
+}
+
+// Only open tabs stored for the same session belong to it; closed tabs keep no session.
+type PrepareTabs<TPrepared extends TabsToPrepare> = (
+  tabs: TabsToPrepare & { openTabsFromSession: boolean }
+) => TPrepared;
+
 export interface TabsStorageManager {
   /**
    * Supports two-way sync of the selected tab id with the URL.
@@ -94,20 +111,11 @@ export interface TabsStorageManager {
       'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState'
     >
   ) => void;
-  loadLocally: (props: {
-    userId: string;
-    spaceId: string;
-    persistedDiscoverSession?: DiscoverSession;
-    shouldClearAllTabs?: boolean;
-    defaultTabState: Omit<TabState, keyof TabItem>;
-    /**
-     * Prepares the session, restored tabs and fallback. Only open tabs stored for the same session
-     * belong to it; recently closed tabs keep no session.
-     */
-    prepareTabs?: (tabs: TabsToPrepare & { openTabsFromSession: boolean }) => TabsToPrepare;
-  }) => TabsInternalStatePayload & {
-    updatedDiscoverSession: DiscoverSession | undefined;
-  };
+  /** Prepares restored state once and returns its result alongside the selected tabs. */
+  loadLocally<TPrepared extends TabsToPrepare>(
+    props: LoadTabsOptions & { prepareTabs: PrepareTabs<TPrepared> }
+  ): LoadedTabs & { preparation: TPrepared };
+  loadLocally(props: LoadTabsOptions): LoadedTabs;
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
     previousRecentlyClosedTabs: RecentlyClosedTabState[];
@@ -426,14 +434,20 @@ export const createTabsStorageManager = ({
     }
   };
 
-  const loadLocally: TabsStorageManager['loadLocally'] = ({
+  function loadLocally<TPrepared extends TabsToPrepare>(
+    props: LoadTabsOptions & { prepareTabs: PrepareTabs<TPrepared> }
+  ): LoadedTabs & { preparation: TPrepared };
+  function loadLocally(props: LoadTabsOptions): LoadedTabs;
+  function loadLocally({
     userId,
     spaceId,
     persistedDiscoverSession,
     shouldClearAllTabs,
     defaultTabState,
     prepareTabs,
-  }) => {
+  }: LoadTabsOptions & { prepareTabs?: PrepareTabs<TabsToPrepare> }): LoadedTabs & {
+    preparation?: TabsToPrepare;
+  } {
     const tabsStateFromURL = getTabsStateFromURL();
     const selectedTabId = enabled
       ? shouldClearAllTabs
@@ -460,8 +474,7 @@ export const createTabsStorageManager = ({
     const storedClosedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
-    // Prepare before mapping tabs so the document and every restored tab share one identity.
-    // Return the prepared session below so restored tabs and the unsaved-changes baseline agree.
+    // Prepare before selecting tabs so restored state and the saved-session baseline agree.
     const prepared = prepareTabs?.({
       session: persistedDiscoverSession,
       openTabs: storedOpenTabs,
@@ -498,6 +511,7 @@ export const createTabsStorageManager = ({
           allTabs: openTabs,
           selectedTabId,
           updatedDiscoverSession,
+          preparation: prepared,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -526,6 +540,7 @@ export const createTabsStorageManager = ({
           allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
+          preparation: prepared,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -547,6 +562,7 @@ export const createTabsStorageManager = ({
             allTabs: restoredTabs,
             selectedTabId,
             updatedDiscoverSession,
+            preparation: prepared,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -579,13 +595,14 @@ export const createTabsStorageManager = ({
       allTabs,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
+      preparation: prepared,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,
         nextOpenTabs: allTabs,
       }),
     };
-  };
+  }
 
   return {
     startUrlSync,

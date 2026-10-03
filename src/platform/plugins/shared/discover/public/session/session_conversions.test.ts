@@ -61,6 +61,7 @@ const prepareSessionForUi = (session: DiscoverSession): DiscoverSession => ({
     closedTabs: [],
     openTabsFromSession: false,
     navigationDataViewSpec: undefined,
+    savedDataViewIds: [],
   }).sessionTabs,
 });
 

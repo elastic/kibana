@@ -234,11 +234,8 @@ export function DiscoverLayout() {
     [dispatch, updateAppState]
   );
 
-  const updateAdHocDataViewId = useCurrentTabAction(internalStateActions.updateAdHocDataViewId);
-  const onFieldEdited: (options: {
-    editedDataView: DataView;
-    removedFieldName?: string;
-  }) => Promise<void> = useCallback(
+  const applyAdHocDataViewEdit = useCurrentTabAction(internalStateActions.applyAdHocDataViewEdit);
+  const onFieldEdited: DiscoverTopNavProps['onFieldEdited'] = useCallback(
     async (options) => {
       const { editedDataView, removedFieldName } = options || {
         editedDataView: dataView,
@@ -246,26 +243,24 @@ export function DiscoverLayout() {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
         onRemoveColumn(removedFieldName);
       }
+
+      let dataViewId = editedDataView.id;
       if (!editedDataView.isPersisted()) {
-        await dispatch(
-          updateAdHocDataViewId({
-            editedDataView,
-          })
-        );
+        // An inline edit can change the view's identity, so reset the view the tab now uses.
+        const nextDataView = await dispatch(applyAdHocDataViewEdit({ editedDataView }));
+        dataViewId = nextDataView?.id;
       }
-      if (editedDataView?.id) {
-        // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
-        // otherwise the edited field would be shown under "Empty" section in the sidebar
-        // when switching to a tab with the same data view id.
+
+      // Reset affected tabs so edited fields do not appear under "Empty" in their sidebars.
+      if (dataViewId) {
         dispatch(
-          internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({
-            dataViewId: editedDataView.id,
-          })
+          internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({ dataViewId })
         );
       }
+
       dataStateContainer.refetch$.next('reset');
     },
-    [dataView, dataStateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
+    [dataView, dataStateContainer, currentColumns, onRemoveColumn, dispatch, applyAdHocDataViewEdit]
   );
 
   const onDisableFilters = useCallback(() => {

@@ -16,7 +16,7 @@ import {
   bindUnreferencedAppFilters,
   getInlineDataViewIdentity,
   normalizeInlineSearchSource,
-  translateFilterDataViewIds,
+  remapFilterDataViewIds,
   type DataViewIdMap,
   type InlineDataViewIdentity,
 } from '../../../../../common/session/inline_data_view_references';
@@ -60,18 +60,23 @@ export const translateAppStateDataViewIds = (
   idMap: DataViewIdMap
 ): DiscoverAppState => {
   const { dataSource, filters } = appState;
-  const dataViewId = isDataViewSource(dataSource) ? idMap.get(dataSource.dataViewId) : undefined;
-  const translatedFilters = filters && translateFilterDataViewIds(filters, idMap);
+  const translatedState = { ...appState };
 
-  if (dataViewId === undefined && translatedFilters === filters) {
-    return appState;
+  if (isDataViewSource(dataSource)) {
+    const dataViewId = idMap.get(dataSource.dataViewId);
+    if (dataViewId !== undefined) {
+      translatedState.dataSource = createDataViewDataSource({ dataViewId });
+    }
   }
 
-  return {
-    ...appState,
-    ...(dataViewId !== undefined && { dataSource: createDataViewDataSource({ dataViewId }) }),
-    ...(translatedFilters !== filters && { filters: translatedFilters }),
-  };
+  if (filters) {
+    translatedState.filters = remapFilterDataViewIds(filters, idMap);
+  }
+
+  const isUnchanged =
+    translatedState.dataSource === dataSource && translatedState.filters === filters;
+
+  return isUnchanged ? appState : translatedState;
 };
 
 const translateGlobalStateDataViewIds = (
@@ -79,11 +84,16 @@ const translateGlobalStateDataViewIds = (
   idMap: DataViewIdMap
 ): TabStateGlobalState => {
   const { filters } = globalState;
-  const translatedFilters = filters && translateFilterDataViewIds(filters, idMap);
+  if (!filters) {
+    return globalState;
+  }
 
-  return translatedFilters === filters
-    ? globalState
-    : { ...globalState, filters: translatedFilters };
+  const translatedFilters = remapFilterDataViewIds(filters, idMap);
+  if (translatedFilters === filters) {
+    return globalState;
+  }
+
+  return { ...globalState, filters: translatedFilters };
 };
 
 // Without a data source, Discover uses the view of the saved tab.
@@ -92,7 +102,11 @@ const getAppStateViewId = (dataSource: DiscoverDataSource | undefined, documentI
     return documentId;
   }
 
-  return isDataViewSource(dataSource) ? dataSource.dataViewId : undefined;
+  if (!isDataViewSource(dataSource)) {
+    return undefined;
+  }
+
+  return dataSource.dataViewId;
 };
 
 const bindConventionalAppFilters = (
@@ -110,6 +124,35 @@ const bindConventionalAppFilters = (
   return boundFilters === filters ? appState : { ...appState, filters: boundFilters };
 };
 
+// The convention applies when the local spec or the document spec of the same tab has no ID.
+const followsApiConvention = (
+  identity: InlineDataViewIdentity | undefined,
+  conventionalTab: ConventionalTab | undefined
+) => {
+  if (!identity) {
+    return false;
+  }
+
+  return !identity.dataView.id || conventionalTab !== undefined;
+};
+
+const normalizeInitialInternalState = (
+  initialInternalState: TabState['initialInternalState'],
+  options: Omit<Parameters<typeof normalizeInlineSearchSource>[0], 'searchSource'>
+) => {
+  const searchSource = initialInternalState?.serializedSearchSource;
+  if (!initialInternalState || !searchSource) {
+    return initialInternalState;
+  }
+
+  const serializedSearchSource = normalizeInlineSearchSource({ ...options, searchSource });
+  if (serializedSearchSource === searchSource) {
+    return initialInternalState;
+  }
+
+  return { ...initialInternalState, serializedSearchSource };
+};
+
 const normalizeTabState = <T extends Omit<TabState, keyof TabItem>>({
   tab,
   identity,
@@ -123,18 +166,13 @@ const normalizeTabState = <T extends Omit<TabState, keyof TabItem>>({
 }): T => {
   const idMap = withOwnInlineDataViewId(identity, dataViewIdMap);
   const { initialInternalState, appState, previousAppState, globalState } = tab;
-  // The convention applies when the local spec or the document spec of the same tab has no ID.
-  const followsConvention = Boolean(identity && (!identity.dataView.id || conventionalTab));
-  const searchSource = initialInternalState?.serializedSearchSource;
-  const normalizedSearchSource =
-    searchSource &&
-    normalizeInlineSearchSource({
-      searchSource,
-      identity,
-      ownDataViewIdMap: idMap,
-      dataViewIdMap,
-      bindUnreferencedFilters: followsConvention,
-    });
+  const followsConvention = followsApiConvention(identity, conventionalTab);
+  const normalizedInternalState = normalizeInitialInternalState(initialInternalState, {
+    identity,
+    ownDataViewIdMap: idMap,
+    dataViewIdMap,
+    bindUnreferencedFilters: followsConvention,
+  });
 
   const normalizeAppState = (state: DiscoverAppState) => {
     const translatedState = translateAppStateDataViewIds(state, idMap);
@@ -156,7 +194,7 @@ const normalizeTabState = <T extends Omit<TabState, keyof TabItem>>({
   const normalizedGlobalState = translateGlobalStateDataViewIds(globalState, dataViewIdMap);
 
   if (
-    normalizedSearchSource === searchSource &&
+    normalizedInternalState === initialInternalState &&
     normalizedAppState === appState &&
     normalizedPreviousAppState === previousAppState &&
     normalizedGlobalState === globalState
@@ -166,17 +204,35 @@ const normalizeTabState = <T extends Omit<TabState, keyof TabItem>>({
 
   return {
     ...tab,
-    ...(initialInternalState &&
-      normalizedSearchSource !== searchSource && {
-        initialInternalState: {
-          ...initialInternalState,
-          serializedSearchSource: normalizedSearchSource,
-        },
-      }),
+    initialInternalState: normalizedInternalState,
     appState: normalizedAppState,
     previousAppState: normalizedPreviousAppState,
     globalState: normalizedGlobalState,
   };
+};
+
+// Navigation can carry a saved view's full spec, which must still be loaded by its stored ID.
+const getNavigationDataViewIdentity = (
+  spec: DataViewSpec | undefined,
+  savedDataViewIds: readonly string[]
+): InlineDataViewIdentity | undefined => {
+  if (spec?.id && savedDataViewIds.includes(spec.id)) {
+    return undefined;
+  }
+
+  return getInlineDataViewIdentity({ index: spec });
+};
+
+// An inline navigation view takes the ID derived from its spec; other views keep their own.
+const normalizeNavigationDataViewSpec = (
+  spec: DataViewSpec | undefined,
+  identity: InlineDataViewIdentity | undefined
+) => {
+  if (!identity) {
+    return spec;
+  }
+
+  return { ...identity.dataView, id: identity.id };
 };
 
 /**
@@ -190,6 +246,7 @@ export const normalizeInlineDataViewIds = ({
   defaultTabState = DEFAULT_TAB_STATE,
   openTabsFromSession,
   navigationDataViewSpec,
+  savedDataViewIds,
 }: {
   sessionTabs: DiscoverSessionTab[];
   openTabs: TabState[];
@@ -199,6 +256,8 @@ export const normalizeInlineDataViewIds = ({
   /** Whether the open tabs were stored for the session, the only tabs its convention applies to. */
   openTabsFromSession: boolean;
   navigationDataViewSpec: DataViewSpec | undefined;
+  /** Saved views already known to the loader, including navigation specs without a version. */
+  savedDataViewIds: readonly string[];
 }): NormalizedInlineDataViewIds => {
   const getLocalIdentity = (tab: Omit<TabState, keyof TabItem>) =>
     getInlineDataViewIdentity(tab.initialInternalState?.serializedSearchSource);
@@ -208,7 +267,10 @@ export const normalizeInlineDataViewIds = ({
   const openIdentities = openTabs.map(getLocalIdentity);
   const closedIdentities = closedTabs.map(getLocalIdentity);
   const defaultIdentity = getLocalIdentity(defaultTabState);
-  const navigationIdentity = getInlineDataViewIdentity({ index: navigationDataViewSpec });
+  const navigationIdentity = getNavigationDataViewIdentity(
+    navigationDataViewSpec,
+    savedDataViewIds
+  );
   // Compatibility: translate previous IDs only from definitions visible during this load.
   const dataViewIdMap = createInlineDataViewIdMap([
     ...sessionIdentities,
@@ -228,13 +290,23 @@ export const normalizeInlineDataViewIds = ({
       return;
     }
 
+    const viewIds = new Set([identity.id]);
+    const localIdentity = openIdentitiesByTabId.get(tab.id);
     // Closed tabs keep no session, and tabs of another session may reuse the same tab IDs.
-    const localIdentity = openTabsFromSession ? openIdentitiesByTabId.get(tab.id) : undefined;
-    conventionalTabs.set(tab.id, {
-      documentId: identity.id,
-      viewIds: new Set(localIdentity ? [identity.id, localIdentity.id] : [identity.id]),
-    });
+    if (openTabsFromSession && localIdentity) {
+      viewIds.add(localIdentity.id);
+    }
+
+    conventionalTabs.set(tab.id, { documentId: identity.id, viewIds });
   });
+
+  const getOpenTabConvention = (tabId: string) => {
+    if (!openTabsFromSession) {
+      return undefined;
+    }
+
+    return conventionalTabs.get(tabId);
+  };
 
   const normalizedSessionTabs = sessionTabs.map((tab, index) => {
     const identity = sessionIdentities[index];
@@ -254,18 +326,17 @@ export const normalizeInlineDataViewIds = ({
     normalizeTabState({
       tab,
       identity: openIdentities[index],
-      conventionalTab: openTabsFromSession ? conventionalTabs.get(tab.id) : undefined,
+      conventionalTab: getOpenTabConvention(tab.id),
       dataViewIdMap,
     })
   );
   const normalizedClosedTabs = closedTabs.map((tab, index) =>
     normalizeTabState({ tab, identity: closedIdentities[index], dataViewIdMap })
   );
+  const sessionTabsChanged = normalizedSessionTabs.some((tab, index) => tab !== sessionTabs[index]);
 
   return {
-    sessionTabs: normalizedSessionTabs.every((tab, index) => tab === sessionTabs[index])
-      ? sessionTabs
-      : normalizedSessionTabs,
+    sessionTabs: sessionTabsChanged ? normalizedSessionTabs : sessionTabs,
     openTabs: normalizedOpenTabs,
     closedTabs: normalizedClosedTabs,
     defaultTabState: normalizeTabState({
@@ -273,14 +344,36 @@ export const normalizeInlineDataViewIds = ({
       identity: defaultIdentity,
       dataViewIdMap,
     }),
-    navigationDataViewSpec: navigationIdentity
-      ? { ...navigationIdentity.dataView, id: navigationIdentity.id }
-      : navigationDataViewSpec,
+    navigationDataViewSpec: normalizeNavigationDataViewSpec(
+      navigationDataViewSpec,
+      navigationIdentity
+    ),
     navigationInlineId: navigationIdentity?.id,
     navigationIdMap: withOwnInlineDataViewId(navigationIdentity, dataViewIdMap),
     dataViewIdMap,
     conventionalTabs,
   };
+};
+
+// Discover prefers the navigation view, then the URL or restored data source, then the saved one.
+const getUrlTargetViewId = ({
+  navigationDataViewSpec,
+  urlAppState,
+  selectedTab,
+  conventionalTab,
+}: {
+  navigationDataViewSpec: DataViewSpec | undefined;
+  urlAppState: DiscoverAppState;
+  selectedTab: TabState;
+  conventionalTab: ConventionalTab;
+}) => {
+  if (navigationDataViewSpec) {
+    return navigationDataViewSpec.id;
+  }
+
+  const dataSource = urlAppState.dataSource ?? selectedTab.appState.dataSource;
+
+  return getAppStateViewId(dataSource, conventionalTab.documentId);
 };
 
 /**
@@ -299,21 +392,25 @@ export const normalizeUrlAppState = ({
   const { dataViewIdMap, conventionalTabs, navigationDataViewSpec, navigationInlineId } =
     normalized;
   const translatedAppState = translateAppStateDataViewIds(appState, dataViewIdMap);
-  const conventionalTab = selectedTab ? conventionalTabs.get(selectedTab.id) : undefined;
-  if (!selectedTab || !conventionalTab) {
+  if (!selectedTab) {
     return translatedAppState;
   }
 
-  // Discover prefers the navigation view, then the URL or restored data source, then the saved one.
-  const targetId = navigationDataViewSpec
-    ? navigationDataViewSpec.id
-    : getAppStateViewId(
-        translatedAppState.dataSource ?? selectedTab.appState.dataSource,
-        conventionalTab.documentId
-      );
-  const viewIds = navigationInlineId
-    ? new Set([...conventionalTab.viewIds, navigationInlineId])
-    : conventionalTab.viewIds;
+  const conventionalTab = conventionalTabs.get(selectedTab.id);
+  if (!conventionalTab) {
+    return translatedAppState;
+  }
+
+  const targetId = getUrlTargetViewId({
+    navigationDataViewSpec,
+    urlAppState: translatedAppState,
+    selectedTab,
+    conventionalTab,
+  });
+  const viewIds = new Set(conventionalTab.viewIds);
+  if (navigationInlineId) {
+    viewIds.add(navigationInlineId);
+  }
 
   return bindConventionalAppFilters(translatedAppState, targetId, viewIds);
 };

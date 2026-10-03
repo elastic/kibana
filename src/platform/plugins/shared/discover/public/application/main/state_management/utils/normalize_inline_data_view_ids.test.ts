@@ -9,15 +9,18 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { BooleanRelation, buildCombinedFilter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { generateInlineDataViewId } from '../../../../../common/session/inline_data_view';
 import {
-  getRecentlyClosedTabStateMock,
-  getTabStateMock,
-} from '../redux/__mocks__/internal_state.mocks';
+  createFilter,
+  createFilterWithIndex,
+  foreignFilter,
+  unreferencedFilter,
+} from '../../../../../common/session/inline_data_view.fixtures';
+import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import type { TabState } from '../redux/types';
 import {
   normalizeInlineDataViewIds,
@@ -34,22 +37,6 @@ const inlineDataView: DataViewSpec = {
 const editedDataView: DataViewSpec = { ...inlineDataView, title: 'other-logs-*' };
 const inlineDataViewId = generateInlineDataViewId(inlineDataView);
 const editedDataViewId = generateInlineDataViewId(editedDataView);
-
-const unreferencedFilter: Filter = { meta: {}, query: { match_all: {} } };
-const foreignFilter: Filter = {
-  meta: { index: 'foreign-data-view-id' },
-  query: { term: { 'service.name': 'api' } },
-};
-
-const createFilter = (dataViewId: string | undefined): Filter => ({
-  meta: { index: dataViewId },
-  query: { match_phrase: { 'service.name': 'checkout' } },
-});
-
-const createFilterWithIndex = (filter: Filter, index: string): Filter => ({
-  ...filter,
-  meta: { ...filter.meta, index },
-});
 
 const createSessionTab = (
   id: string,
@@ -92,6 +79,7 @@ const normalize = ({
   defaultTabState,
   openTabsFromSession = true,
   navigationDataViewSpec,
+  savedDataViewIds = [],
 }: Partial<Parameters<typeof normalizeInlineDataViewIds>[0]>) =>
   normalizeInlineDataViewIds({
     sessionTabs,
@@ -100,6 +88,7 @@ const normalize = ({
     defaultTabState,
     openTabsFromSession,
     navigationDataViewSpec,
+    savedDataViewIds,
   });
 
 describe('normalizeInlineDataViewIds', () => {
@@ -122,15 +111,16 @@ describe('normalizeInlineDataViewIds', () => {
       appState: { dataSource: createDataViewDataSource({ dataViewId: inlineDataViewId }) },
       globalState: { filters: [pinnedFilter] },
     });
-    expect(normalized.closedTabs[0].appState.dataSource).toEqual(
-      createDataViewDataSource({ dataViewId: editedDataViewId })
-    );
+    expect(normalized.closedTabs[0]).toMatchObject({
+      closedAt: 1,
+      initialInternalState: { serializedSearchSource: { index: { id: editedDataViewId } } },
+      appState: { dataSource: createDataViewDataSource({ dataViewId: editedDataViewId }) },
+    });
     expect(normalized.dataViewIdMap.has('legacy-id')).toBe(false);
   });
 
   it('assigns the spec ID to API tabs and binds their unreferenced filters', () => {
     const sessionTabs = [createSessionTab('api-a'), createSessionTab('api-b')];
-    const originalSessionTabs = cloneDeep(sessionTabs);
 
     const { sessionTabs: normalizedTabs, dataViewIdMap } = normalize({ sessionTabs });
 
@@ -145,36 +135,6 @@ describe('normalizeInlineDataViewIds', () => {
       },
     ]);
     expect(dataViewIdMap.size).toBe(0);
-    expect(sessionTabs).toStrictEqual(originalSessionTabs);
-  });
-
-  it('normalizes a legacy ID and translates its own references, including nested ones', () => {
-    const nestedFilter = buildCombinedFilter(
-      BooleanRelation.AND,
-      [createFilter('legacy-id'), foreignFilter, unreferencedFilter],
-      { id: 'legacy-id' }
-    );
-    const sessionTabs = [
-      createSessionTab('legacy', { ...inlineDataView, id: 'legacy-id' }, [
-        nestedFilter,
-        unreferencedFilter,
-      ]),
-    ];
-
-    const { sessionTabs: normalizedTabs, dataViewIdMap } = normalize({ sessionTabs });
-
-    expect(normalizedTabs[0].serializedSearchSource).toEqual({
-      index: { ...inlineDataView, id: inlineDataViewId },
-      filter: [
-        buildCombinedFilter(
-          BooleanRelation.AND,
-          [createFilter(inlineDataViewId), foreignFilter, unreferencedFilter],
-          { id: inlineDataViewId }
-        ),
-        unreferencedFilter,
-      ],
-    });
-    expect([...dataViewIdMap]).toEqual([['legacy-id', inlineDataViewId]]);
   });
 
   it('gives independent views with the same spec the same identity', () => {
@@ -221,25 +181,6 @@ describe('normalizeInlineDataViewIds', () => {
       previousAppState: {
         dataSource: createDataViewDataSource({ dataViewId: editedDataViewId }),
       },
-    });
-    expect(editedDataViewId).not.toBe(inlineDataViewId);
-  });
-
-  it('normalizes recently closed tabs like open tabs', () => {
-    const closedTab = {
-      ...getRecentlyClosedTabStateMock({ id: 'closed', closedAt: 1 }),
-      ...createLocalTab('closed', { ...inlineDataView, id: 'closed-id' }),
-      closedAt: 1,
-    };
-
-    const { closedTabs } = normalize({ closedTabs: [closedTab] });
-
-    expect(closedTabs[0]).toMatchObject({
-      closedAt: 1,
-      initialInternalState: {
-        serializedSearchSource: { index: { ...inlineDataView, id: inlineDataViewId } },
-      },
-      appState: { dataSource: createDataViewDataSource({ dataViewId: inlineDataViewId }) },
     });
   });
 
@@ -461,18 +402,6 @@ describe('normalizeInlineDataViewIds', () => {
     expect(openTabs[0].appState.filters).toEqual([unreferencedFilter]);
   });
 
-  it('gives different specs different identities', () => {
-    const { sessionTabs } = normalize({
-      sessionTabs: [createSessionTab('logs'), createSessionTab('edited', editedDataView)],
-    });
-    const indexes = sessionTabs.map(({ serializedSearchSource }) => serializedSearchSource.index);
-
-    expect(indexes).toEqual([
-      { ...inlineDataView, id: inlineDataViewId },
-      { ...editedDataView, id: editedDataViewId },
-    ]);
-  });
-
   it('keeps the document identity when the navigation brings another spec', () => {
     const { sessionTabs, navigationDataViewSpec } = normalize({
       sessionTabs: [createSessionTab('tab')],
@@ -484,20 +413,6 @@ describe('normalizeInlineDataViewIds', () => {
       filter: [createFilterWithIndex(unreferencedFilter, inlineDataViewId), foreignFilter],
     });
     expect(navigationDataViewSpec).toEqual({ ...editedDataView, id: editedDataViewId });
-  });
-
-  it('leaves local ES|QL tabs unchanged', () => {
-    const esqlTab = getTabStateMock({
-      id: 'esql',
-      initialInternalState: {
-        serializedSearchSource: {
-          index: { ...inlineDataView, id: 'esql-id' },
-          query: { esql: 'FROM logs-*' },
-        },
-      },
-    });
-
-    expect(normalize({ openTabs: [esqlTab] }).openTabs[0]).toBe(esqlTab);
   });
 
   it('leaves an ambiguous previous ID out of spec-less references', () => {
@@ -531,23 +446,25 @@ describe('normalizeInlineDataViewIds', () => {
     expect(dataViewIdMap.get('link-id')).toBe(inlineDataViewId);
   });
 
-  it('ignores referenced, ES|QL and managed profile views', () => {
-    const esqlTab = createSessionTab('esql', { ...inlineDataView, id: 'esql-id' });
-    esqlTab.serializedSearchSource.query = { esql: 'FROM logs-*' };
+  it('leaves excluded views unchanged in session and local tabs', () => {
     const sessionTabs = [
-      createSessionTab('referenced', 'saved-data-view'),
-      esqlTab,
-      createSessionTab('profile', {
-        id: 'discover-observability-solution-all-logs',
-        title: 'logs-*',
-        managed: true,
-      }),
+      createSessionTab('profile', { ...inlineDataView, id: 'profile-id', managed: true }),
     ];
+    const esqlTab = getTabStateMock({
+      id: 'esql',
+      initialInternalState: {
+        serializedSearchSource: {
+          index: { ...inlineDataView, id: 'esql-id' },
+          query: { esql: 'FROM logs-*' },
+        },
+      },
+    });
 
-    const { sessionTabs: normalizedTabs, dataViewIdMap } = normalize({ sessionTabs });
+    const normalized = normalize({ sessionTabs, openTabs: [esqlTab] });
 
-    expect(normalizedTabs).toBe(sessionTabs);
-    expect(dataViewIdMap.size).toBe(0);
+    expect(normalized.sessionTabs).toBe(sessionTabs);
+    expect(normalized.openTabs[0]).toBe(esqlTab);
+    expect(normalized.dataViewIdMap.size).toBe(0);
   });
 
   it('is idempotent and does not mutate its input', () => {

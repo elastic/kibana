@@ -12,6 +12,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { generateInlineDataViewId } from '../../../../../common/session/inline_data_view';
+import { createDataViewsCacheMock } from '../../../../__mocks__/data_views';
 import {
   createDiscoverServicesMock,
   discoverServiceMock as services,
@@ -52,29 +53,11 @@ describe('loadDataView with inline specs', () => {
   // Creates isolated services with the ID-based cache behavior used by DataViewsService.
   const setup = () => {
     const mockServices = createDiscoverServicesMock();
-    const cache = new Map<string, DataView>();
-    const create = jest
-      .spyOn(mockServices.dataViews, 'create')
-      .mockImplementation(async (input) => {
-        const cached = input.id ? cache.get(input.id) : undefined;
-        if (cached) {
-          return cached;
-        }
-        const dataView = new DataView({ spec: input, fieldFormats: fieldFormatsMock });
-        if (dataView.id) {
-          cache.set(dataView.id, dataView);
-        }
-        return dataView;
-      });
+    const { cache, create: createWithCache, clearInstanceCache } = createDataViewsCacheMock();
+    const create = jest.spyOn(mockServices.dataViews, 'create').mockImplementation(createWithCache);
+    jest.spyOn(mockServices.dataViews, 'clearInstanceCache').mockImplementation(clearInstanceCache);
     const resolve = jest.spyOn(mockServices.inlineDataViews, 'resolve');
     const get = jest.spyOn(mockServices.dataViews, 'get');
-    jest.spyOn(mockServices.dataViews, 'clearInstanceCache').mockImplementation((id) => {
-      if (id) {
-        cache.delete(id);
-      } else {
-        cache.clear();
-      }
-    });
 
     return { mockServices, cache, create, resolve, get };
   };
@@ -108,14 +91,19 @@ describe('loadDataView with inline specs', () => {
     expect(get).not.toHaveBeenCalled();
   });
 
-  it('rebuilds a navigation view if an editor changed its cached instance in place', async () => {
+  it('reuses the unchanged navigation view and its popularity after editing a separate draft', async () => {
     const { mockServices, cache, resolve, create } = setup();
     const cached = new DataView({
       spec: { ...spec, id: derivedId },
       fieldFormats: fieldFormatsMock,
     });
     cache.set(derivedId, cached);
-    cached.setIndexPattern('other-*');
+    cached.setFieldCount('@timestamp', 5);
+    const draft = new DataView({
+      spec: { ...cached.toSpec(), id: 'draft' },
+      fieldFormats: fieldFormatsMock,
+    });
+    draft.setIndexPattern('other-*');
     const locationDataViewSpec = { ...spec, id: derivedId };
 
     const result = await loadDataView({
@@ -125,13 +113,30 @@ describe('loadDataView with inline specs', () => {
       adHocDataViews: [],
     });
 
-    expect(mockServices.dataViews.clearInstanceCache).toHaveBeenCalledWith(derivedId);
+    expect(mockServices.dataViews.clearInstanceCache).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalledWith(locationDataViewSpec);
-    expect(resolve).not.toHaveBeenCalled();
-    expect(result.loadedDataView).not.toBe(cached);
+    expect(resolve).toHaveBeenCalledWith(locationDataViewSpec);
+    expect(result.loadedDataView).toBe(cached);
     expect(result.loadedDataView.id).toBe(derivedId);
     expect(result.loadedDataView.getIndexPattern()).toBe(spec.title);
+    expect(result.loadedDataView.getFieldAttrs().get('@timestamp')?.count).toBe(5);
     expect(cache.get(derivedId)).toBe(result.loadedDataView);
+  });
+
+  it('still replaces an excluded navigation view', async () => {
+    const { mockServices, resolve, create } = setup();
+    const locationDataViewSpec = { ...spec, id: 'profile-id', managed: true };
+
+    await loadDataView({
+      locationDataViewSpec,
+      services: mockServices,
+      savedDataViews: [],
+      adHocDataViews: [],
+    });
+
+    expect(mockServices.dataViews.clearInstanceCache).toHaveBeenCalledWith('profile-id');
+    expect(resolve).toHaveBeenCalledWith(locationDataViewSpec);
+    expect(create).toHaveBeenCalledWith(locationDataViewSpec);
   });
 
   it('does not resolve a local spec for a different requested view', async () => {

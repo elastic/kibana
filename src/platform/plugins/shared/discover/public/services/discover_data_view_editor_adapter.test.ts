@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { waitFor } from '@testing-library/react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewEditorProps } from '@kbn/data-view-editor-plugin/public';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { createDiscoverDataViewEditorAdapter } from './discover_data_view_editor_adapter';
+import { createInlineDataViewEditSession } from './inline_data_view_edit_session';
 
 // Builds a view without fetching fields; identity calculation is covered by the service tests.
 const createDataView = (spec: DataViewSpec): DataView =>
@@ -22,57 +27,69 @@ const setup = () => {
   const dataViewEditor = indexPatternEditorPluginMock.createStartContract();
   const close = jest.fn();
   dataViewEditor.openEditor.mockReturnValue(close);
-  const dataViews = { clearInstanceCache: jest.fn() };
-  const inlineDataViews = { resolve: jest.fn(), finalize: jest.fn() };
+  const dataViews = dataViewPluginMocks.createStartContract();
+  dataViews.create.mockImplementation(async (spec) => createDataView(spec));
+  const finalize = jest.fn();
+  const inlineDataViews = {
+    resolve: jest.fn(),
+    finalize,
+    beginEdit: (source: DataView) =>
+      createInlineDataViewEditSession({ source, dataViews, finalize }),
+  };
+  const onEditError = jest.fn();
   const editor = createDiscoverDataViewEditorAdapter({
     dataViewEditor,
     dataViews,
     inlineDataViews,
+    onEditError,
   });
 
-  return { editor, dataViewEditor, dataViews, inlineDataViews, close };
+  return { editor, dataViewEditor, dataViews, inlineDataViews, close, onEditError };
 };
 
 describe('createDiscoverDataViewEditorAdapter', () => {
-  it.each(['create', 'duplicate', 'managed copy'])(
-    'finalizes %s and releases the returned draft before notifying Discover',
-    async (mode) => {
+  it.each<[string, Partial<DataViewEditorProps>]>([
+    ['create', {}],
+    [
+      'duplicate',
+      { editData: createDataView({ id: 'picker-copy', title: 'logs-*' }), isDuplicating: true },
+    ],
+    [
+      'managed copy',
+      { editData: createDataView({ id: 'picker-copy', title: 'logs-*', managed: true }) },
+    ],
+  ])(
+    'finalizes a %s and releases the created view before notifying Discover',
+    async (_mode, modeOptions) => {
       const { editor, dataViewEditor, dataViews, inlineDataViews, close } = setup();
-      const draft = createDataView({ id: 'draft', title: 'logs-*' });
+      const created = createDataView({ id: 'created', title: 'logs-*' });
       const finalized = createDataView({ id: 'derived-id', title: 'logs-*' });
       inlineDataViews.finalize.mockResolvedValue(finalized);
       const onSave = jest.fn();
-      const onCancel = jest.fn();
-      const editData =
-        mode === 'create'
-          ? undefined
-          : createDataView({
-              id: 'picker-copy',
-              title: 'logs-*',
-              managed: mode === 'managed copy',
-            });
-      const options = { onSave, onCancel, editData, isDuplicating: mode === 'duplicate' };
+      const options = { ...modeOptions, onSave, onCancel: jest.fn() };
 
       expect(editor.openEditor(options)).toBe(close);
       const [forwarded] = dataViewEditor.openEditor.mock.calls[0];
       expect(forwarded).toEqual({ ...options, onSave: expect.any(Function) });
-      const saving = forwarded.onSave(draft);
-      expect(onSave).not.toHaveBeenCalled();
-      await saving;
+      await forwarded.onSave(created);
 
-      expect(inlineDataViews.finalize).toHaveBeenCalledWith(draft);
+      expect(inlineDataViews.finalize).toHaveBeenCalledWith(created);
       expect(onSave).toHaveBeenCalledWith(finalized);
-      expect(dataViews.clearInstanceCache.mock.calls).toEqual([['draft']]);
+      expect(dataViews.clearInstanceCache.mock.calls).toEqual([['created']]);
       expect(dataViews.clearInstanceCache.mock.invocationCallOrder[0]).toBeLessThan(
         onSave.mock.invocationCallOrder[0]
       );
     }
   );
 
-  it('delegates existing-view editing and other editor capabilities unchanged', () => {
+  it.each<DataViewSpec>([
+    { id: 'saved', title: 'logs-*', version: '1' },
+    { id: 'esql', title: 'logs-*', type: ESQL_TYPE },
+    { id: 'untitled' },
+  ])('delegates persisted or excluded editing unchanged ($id)', (spec) => {
     const { editor, dataViewEditor, close } = setup();
     const options = {
-      editData: createDataView({ id: 'shared', title: 'logs-*' }),
+      editData: createDataView(spec),
       onSave: jest.fn(),
     };
 
@@ -82,21 +99,87 @@ describe('createDiscoverDataViewEditorAdapter', () => {
     expect(editor.IndexPatternEditorComponent).toBe(dataViewEditor.IndexPatternEditorComponent);
   });
 
-  it.each([true, false])('keeps an unchanged view cached (persisted: %s)', async (persisted) => {
-    const { editor, dataViewEditor, dataViews, inlineDataViews } = setup();
-    const view = createDataView({
-      id: 'unchanged',
-      title: 'logs-*',
-      version: persisted ? '1' : undefined,
+  describe('editing an inline view', () => {
+    // Opens the editor on an inline view and returns the options it received for the draft.
+    const openInlineEdit = async () => {
+      const context = setup();
+      const original = createDataView({ id: 'original', title: 'logs-*' });
+      const onSave = jest.fn();
+      const onCancel = jest.fn();
+      context.editor.openEditor({ editData: original, onSave, onCancel });
+      await waitFor(() => expect(context.dataViewEditor.openEditor).toHaveBeenCalled());
+      const [options] = context.dataViewEditor.openEditor.mock.calls[0];
+      const { editData: draft } = options;
+      if (!draft) {
+        throw new Error('The editor opened without a draft');
+      }
+
+      return { ...context, original, onSave, onCancel, options, draft };
+    };
+
+    it('forwards draft preparation failures to the UI without opening the editor', async () => {
+      const { editor, dataViewEditor, dataViews, onEditError } = setup();
+      const error = new Error('Draft preparation failed');
+      dataViews.create.mockRejectedValueOnce(error);
+
+      editor.openEditor({
+        editData: createDataView({ id: 'original', title: 'logs-*' }),
+        onSave: jest.fn(),
+      });
+
+      await waitFor(() => expect(onEditError).toHaveBeenCalledWith(error, 'open'));
+      expect(dataViewEditor.openEditor).not.toHaveBeenCalled();
     });
-    inlineDataViews.finalize.mockResolvedValue(view);
+
+    it('edits a draft and hands back the final identity', async () => {
+      const { inlineDataViews, original, onSave, options, draft } = await openInlineEdit();
+      const finalized = createDataView({ id: 'edited', title: 'other-*' });
+      inlineDataViews.finalize.mockResolvedValue(finalized);
+
+      draft.setIndexPattern('other-*');
+      await options.onSave(draft);
+
+      expect(draft).not.toBe(original);
+      expect(inlineDataViews.finalize).toHaveBeenCalledWith(draft);
+      expect(onSave).toHaveBeenCalledWith(finalized);
+    });
+
+    it('releases the draft when the edit is cancelled', async () => {
+      const { dataViews, inlineDataViews, onSave, onCancel, options, draft } =
+        await openInlineEdit();
+
+      options.onCancel?.();
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(dataViews.clearInstanceCache.mock.calls).toEqual([[draft.id]]);
+      expect(inlineDataViews.finalize).not.toHaveBeenCalled();
+      expect(onSave).not.toHaveBeenCalled();
+    });
+  });
+
+  it('passes a saved view to Discover as created', () => {
+    const { editor, dataViewEditor, dataViews, inlineDataViews } = setup();
+    const saved = createDataView({ id: 'saved', title: 'logs-*', version: '1' });
     const onSave = jest.fn();
     editor.openEditor({ onSave });
 
-    await dataViewEditor.openEditor.mock.calls[0][0].onSave(view);
+    dataViewEditor.openEditor.mock.calls[0][0].onSave(saved);
 
-    expect(inlineDataViews.finalize).toHaveBeenCalledTimes(persisted ? 0 : 1);
-    expect(onSave).toHaveBeenCalledWith(view);
+    expect(inlineDataViews.finalize).not.toHaveBeenCalled();
+    expect(onSave).toHaveBeenCalledWith(saved);
+    expect(dataViews.clearInstanceCache).not.toHaveBeenCalled();
+  });
+
+  it('keeps a created view cached when its identity is already final', async () => {
+    const { editor, dataViewEditor, dataViews, inlineDataViews } = setup();
+    const created = createDataView({ id: 'derived-id', title: 'logs-*' });
+    inlineDataViews.finalize.mockResolvedValue(created);
+    const onSave = jest.fn();
+    editor.openEditor({ onSave });
+
+    await dataViewEditor.openEditor.mock.calls[0][0].onSave(created);
+
+    expect(onSave).toHaveBeenCalledWith(created);
     expect(dataViews.clearInstanceCache).not.toHaveBeenCalled();
   });
 });

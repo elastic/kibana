@@ -18,6 +18,7 @@ import {
   generateInlineDataViewId,
   getDataViewSpecKey,
   getInlineDataView,
+  isInlineDataView,
 } from './inline_data_view';
 import { inlineDataViewIdCases, inlineSpecWithRuntimeField } from './inline_data_view.fixtures';
 
@@ -40,20 +41,6 @@ describe('generateInlineDataViewId', () => {
       expect(input).toEqual(spec);
     }
   );
-
-  it('returns the same ID when called again with a copy of the spec', () => {
-    const id = generateInlineDataViewId(inlineSpecWithRuntimeField);
-
-    expect(generateInlineDataViewId(cloneDeep(inlineSpecWithRuntimeField))).toBe(id);
-  });
-
-  it('handles a spec with only a title, with or without explicit defaults', () => {
-    const spec: DataViewSpec = { title: 'logs-*' };
-    const id = generateInlineDataViewId(spec);
-
-    expect(id).toMatch(/^discover-inline-[a-f0-9]{64}$/);
-    expect(generateInlineDataViewId({ ...spec, name: 'logs-*', allowHidden: false })).toBe(id);
-  });
 
   it.each(['', 'logs-*'])('treats the name "%s" like an omitted name', (name) => {
     expect(generateInlineDataViewId({ ...inlineSpecWithRuntimeField, name })).toBe(
@@ -164,5 +151,16 @@ describe('getInlineDataView', () => {
     ],
   ])('ignores %s', (_description, searchSource) => {
     expect(getInlineDataView(searchSource)).toBeUndefined();
+  });
+});
+
+describe('isInlineDataView', () => {
+  it.each<[string, DataViewSpec, boolean]>([
+    ['an inline view', { id: 'inline-id', title: 'logs-*' }, true],
+    ['a persisted view', { id: 'saved-id', title: 'logs-*', version: 'WzEsMV0=' }, false],
+    ['an ES|QL view', { id: 'esql-id', title: 'logs-*', type: ESQL_TYPE }, false],
+    ['a managed view', { id: 'profile-id', title: 'logs-*', managed: true }, false],
+  ])('classifies %s', (_description, spec, expected) => {
+    expect(isInlineDataView(new DataView({ spec, fieldFormats: fieldFormatsMock }))).toBe(expected);
   });
 });

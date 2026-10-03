@@ -142,6 +142,7 @@ describe('TabsStorageManager', () => {
       openTabs: openTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
       closedTabs: closedTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
       defaultTabState,
+      preparedTabIds: openTabs.map(({ id }) => id),
     }));
 
   it('should push tab state to URL', async () => {
@@ -387,6 +388,7 @@ describe('TabsStorageManager', () => {
       prepareTabs,
     });
 
+    expect(prepareTabs).toHaveBeenCalledTimes(1);
     expect(prepareTabs).toHaveBeenCalledWith({
       session: persistedDiscoverSession,
       openTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
@@ -394,6 +396,8 @@ describe('TabsStorageManager', () => {
       defaultTabState: DEFAULT_TAB_STATE,
       openTabsFromSession: true,
     });
+    expect(loadedProps.preparation).toBe(prepareTabs.mock.results[0].value);
+    expect(loadedProps.preparation.preparedTabIds).toEqual([mockTab1.id, mockTab2.id]);
     expect(loadedProps.updatedDiscoverSession).toEqual(preparedDiscoverSession);
     expect(loadedProps.allTabs.map(({ label }) => label)).toEqual([
       'Prepared Tab 1',
@@ -430,9 +434,11 @@ describe('TabsStorageManager', () => {
       prepareTabs,
     });
 
+    expect(prepareTabs).toHaveBeenCalledTimes(1);
     expect(prepareTabs).toHaveBeenCalledWith(
       expect.objectContaining({ openTabsFromSession: false })
     );
+    expect(loadedProps.preparation).toBe(prepareTabs.mock.results[0].value);
     expect(loadedProps.recentlyClosedTabs.map(({ label }) => label)).toEqual([
       'Prepared Tab 1',
       'Prepared Tab 2',
@@ -463,9 +469,11 @@ describe('TabsStorageManager', () => {
       prepareTabs,
     });
 
+    expect(prepareTabs).toHaveBeenCalledTimes(1);
     expect(prepareTabs).toHaveBeenCalledWith(
       expect.objectContaining({ session: undefined, openTabsFromSession: false })
     );
+    expect(loadedProps.preparation).toBe(prepareTabs.mock.results[0].value);
     expect(loadedProps.allTabs).toEqual([
       toRestoredTab({
         ...omit(mockRecentlyClosedTab, 'closedAt'),
@@ -477,6 +485,30 @@ describe('TabsStorageManager', () => {
       }),
     ]);
     expect(loadedProps.recentlyClosedTabs[0].label).toBe('Prepared Tab 1');
+  });
+
+  it('should return the preparation result when opening a new tab from the URL', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [],
+      closedTabs: [],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID });
+    const prepareTabs = createPrepareTabs();
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+      prepareTabs,
+    });
+
+    expect(prepareTabs).toHaveBeenCalledTimes(1);
+    expect(loadedProps.preparation).toBe(prepareTabs.mock.results[0].value);
+    expect(loadedProps.allTabs).toHaveLength(1);
+    expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
   });
 
   it('should restore persistent and url profile state from local storage stripped of defaults', () => {

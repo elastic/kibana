@@ -9,7 +9,6 @@
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
-import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -52,15 +51,8 @@ import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { setAdHocDataViews } from './data_views';
-import {
-  normalizeInlineDataViewIds,
-  normalizeUrlAppState,
-  translateAppStateDataViewIds,
-  type NormalizedInlineDataViewIds,
-} from '../../utils/normalize_inline_data_view_ids';
-import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
-import { translateFilterDataViewIds } from '../../../../../../common/session/inline_data_view_references';
+import { normalizeInlineDataViewIds } from '../../utils/normalize_inline_data_view_ids';
+import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
 import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -399,17 +391,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       discoverSessionId,
       shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
-    {
-      dispatch,
-      getState,
-      extra: {
-        services,
-        tabsStorageManager,
-        customizationContext,
-        runtimeStateManager,
-        urlStateStorage,
-      },
-    }
+    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) {
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
@@ -471,8 +453,8 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    let normalized: NormalizedInlineDataViewIds | undefined;
-    const initialTabsState = tabsStorageManager.loadLocally({
+    const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
+    const { preparation, ...initialTabsState } = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
@@ -480,13 +462,14 @@ export const initializeTabs = createInternalStateAsyncThunk(
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
       // Give each inline view the ID of its own spec before the document or local tabs are used.
       prepareTabs: ({ session, openTabs, closedTabs, defaultTabState, openTabsFromSession }) => {
-        normalized = normalizeInlineDataViewIds({
+        const normalized = normalizeInlineDataViewIds({
           sessionTabs: session?.tabs ?? [],
           openTabs,
           closedTabs,
           defaultTabState,
           openTabsFromSession,
           navigationDataViewSpec: initialTabState?.dataViewSpec,
+          savedDataViewIds,
         });
 
         return {
@@ -497,66 +480,19 @@ export const initializeTabs = createInternalStateAsyncThunk(
           openTabs: normalized.openTabs,
           closedTabs: normalized.closedTabs,
           defaultTabState: normalized.defaultTabState,
+          inlineDataViewIds: normalized,
         };
       },
     });
-    const normalizedIds =
-      normalized ??
-      normalizeInlineDataViewIds({
-        sessionTabs: [],
-        openTabs: [],
-        closedTabs: [],
-        openTabsFromSession: false,
-        navigationDataViewSpec: initialTabState?.dataViewSpec,
-      });
-    const { navigationDataViewSpec, navigationIdMap, dataViewIdMap } = normalizedIds;
     const selectedTab = initialTabsState.allTabs.find(
       ({ id }) => id === initialTabsState.selectedTabId
     );
-    // Migrate legacy keys such as index as the tab initialization does, so the view is translated.
-    const urlAppState = cleanupUrlState(
-      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
-      services.uiSettings
-    );
-    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-    const normalizedUrlAppState =
-      urlAppState &&
-      normalizeUrlAppState({ appState: urlAppState, selectedTab, normalized: normalizedIds });
-    const translatedGlobalFilters =
-      urlGlobalState?.filters && translateFilterDataViewIds(urlGlobalState.filters, dataViewIdMap);
-
-    await Promise.all([
-      normalizedUrlAppState !== urlAppState &&
-        urlStateStorage.set(APP_STATE_URL_KEY, normalizedUrlAppState, { replace: true }),
-      urlGlobalState &&
-        translatedGlobalFilters !== urlGlobalState.filters &&
-        urlStateStorage.set(
-          GLOBAL_STATE_URL_KEY,
-          { ...urlGlobalState, filters: translatedGlobalFilters },
-          { replace: true }
-        ),
-    ]);
-
-    if (dataViewIdMap.size) {
-      const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
-      const remainingAdHocDataViews = adHocDataViews.filter(
-        ({ id }) => id === undefined || !dataViewIdMap.has(id)
-      );
-      if (remainingAdHocDataViews.length !== adHocDataViews.length) {
-        dispatch(setAdHocDataViews(remainingAdHocDataViews));
-      }
-    }
-
-    // Hand the location state over to the tab initialization before updating the URL below, which
-    // discards it, so initial state such as ad hoc data view specs is passed on
-    services.initialTabStateService.capture(
-      initialTabState && {
-        ...initialTabState,
-        dataViewSpec: navigationDataViewSpec,
-        ...(initialTabState.defaultState && {
-          defaultState: translateAppStateDataViewIds(initialTabState.defaultState, navigationIdMap),
-        }),
-      }
+    await dispatch(
+      applyInlineDataViewLoadState({
+        normalized: preparation.inlineDataViewIds,
+        selectedTab,
+        initialTabState,
+      })
     );
 
     // Replace instead of push the tab ID to the URL on initialization in order to

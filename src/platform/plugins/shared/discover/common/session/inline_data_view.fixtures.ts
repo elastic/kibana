@@ -8,6 +8,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 
 export const inlineSpecWithRuntimeField: DataViewSpec = {
   title: 'logs-*',
@@ -204,3 +205,20 @@ export const inlineDataViewIdCases: Array<
     'discover-inline-0dce78d4709b8fcf21b18ce428e91baf38b79c92c2f95ffc93383070fa5f47e3',
   ],
 ];
+
+export const unreferencedFilter: Filter = { meta: {}, query: { match_all: {} } };
+
+export const foreignFilter: Filter = {
+  meta: { index: 'foreign-data-view-id' },
+  query: { term: { 'service.name': 'api' } },
+};
+
+export const createFilter = (dataViewId: string | undefined): Filter => ({
+  meta: { index: dataViewId },
+  query: { match_phrase: { 'service.name': 'checkout' } },
+});
+
+export const createFilterWithIndex = (filter: Filter, index: string): Filter => ({
+  ...filter,
+  meta: { ...filter.meta, index },
+});

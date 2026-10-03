@@ -8,11 +8,13 @@
  */
 
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { waitFor } from '@testing-library/react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { generateInlineDataViewId } from '../../common/session/inline_data_view';
 import { inlineDataViewIdCases } from '../../common/session/inline_data_view.fixtures';
+import { createDataViewsCacheMock } from '../__mocks__/data_views';
 import { createInlineDataViewService } from './inline_data_view_service';
 
 const inlineSpec: DataViewSpec = { title: 'logs-*', timeFieldName: '@timestamp' };
@@ -23,23 +25,15 @@ const editedDataViewId = generateInlineDataViewId(editedSpec);
 const createDataView = (spec: DataViewSpec) =>
   new DataView({ spec, fieldFormats: fieldFormatsMock });
 
-// Mirrors DataViewsService.create: a cached ID returns the cached instance and ignores the spec.
 const setup = () => {
-  const cache = new Map<string, DataView>();
-  const create = jest.fn(async (spec: DataViewSpec) => {
-    const cachedDataView = spec.id ? cache.get(spec.id) : undefined;
-    if (cachedDataView) {
-      return cachedDataView;
-    }
+  const { cache, create, clearInstanceCache } = createDataViewsCacheMock();
 
-    const id = spec.id ?? 'generated-id';
-    const dataView = createDataView({ ...spec, id });
-    cache.set(id, dataView);
-
-    return dataView;
-  });
-
-  return { cache, create, service: createInlineDataViewService({ dataViews: { create } }) };
+  return {
+    cache,
+    create,
+    clearInstanceCache,
+    service: createInlineDataViewService({ dataViews: { create, clearInstanceCache } }),
+  };
 };
 
 describe('createInlineDataViewService', () => {
@@ -113,6 +107,174 @@ describe('createInlineDataViewService', () => {
 
       await expect(service.finalize(dataView)).resolves.toBe(dataView);
       expect(create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('beginEdit', () => {
+    it('isolates concurrent edits and releases only their own drafts', async () => {
+      const { service, cache, clearInstanceCache } = setup();
+      const original = await service.resolve(inlineSpec);
+      const first = service.beginEdit(original);
+      const second = service.beginEdit(original);
+      const [firstDraft, secondDraft] = await Promise.all([first.draft, second.draft]);
+      firstDraft.setIndexPattern('other-*');
+
+      first.dispose();
+      first.dispose();
+
+      expect(firstDraft.id).not.toBe(secondDraft.id);
+      expect(original.getIndexPattern()).toBe(inlineSpec.title);
+      expect(secondDraft.getIndexPattern()).toBe(inlineSpec.title);
+      expect([...cache.values()]).toContain(original);
+      expect([...cache.values()]).toContain(secondDraft);
+      expect(clearInstanceCache.mock.calls).toEqual([[firstDraft.id]]);
+      second.dispose();
+    });
+
+    it.each([7, 0, undefined])(
+      'copies only saved popularity (%s) to the shared instance',
+      async (count) => {
+        const { service, cache } = setup();
+        const original = await service.resolve(inlineSpec);
+        original.setFieldCount('edited', 3);
+        original.setFieldCount('untouched', 2);
+        const session = service.beginEdit(original);
+        const draft = await session.draft;
+        draft.setFieldCount('edited', count);
+        original.setFieldCount('untouched', 9);
+
+        const confirmed = await session.commit({ updatedFieldNames: ['edited'] });
+
+        expect(confirmed).toBe(original);
+        expect(confirmed.getFieldAttrs().get('edited')?.count).toBe(count);
+        expect(confirmed.getFieldAttrs().get('untouched')?.count).toBe(9);
+        expect([...cache.values()]).not.toContain(draft);
+      }
+    );
+
+    it('does not merge stale popularity when no fields were saved', async () => {
+      const { service } = setup();
+      const original = await service.resolve(inlineSpec);
+      original.setFieldCount('field', 2);
+      const session = service.beginEdit(original);
+      await session.draft;
+      original.setFieldCount('field', 7);
+
+      expect(await session.commit()).toBe(original);
+      expect(original.getFieldAttrs().get('field')?.count).toBe(7);
+    });
+
+    it('commits composite subfields into a cached definition without changing other counts', async () => {
+      const { service, cache } = setup();
+      const original = await service.resolve(inlineSpec);
+      const session = service.beginEdit(original);
+      const draft = await session.draft;
+      const fields = draft.addRuntimeField('composite', {
+        type: 'composite',
+        fields: {
+          value: { type: 'long', popularity: 5 },
+          label: { type: 'keyword', popularity: 2 },
+        },
+      });
+      const target = await service.resolve(draft.toSpec());
+      target.setFieldCount('composite.value', 50);
+      target.setFieldCount('untouched', 9);
+
+      const confirmed = await session.commit({ updatedFieldNames: fields.map(({ name }) => name) });
+
+      expect(confirmed).toBe(target);
+      expect(confirmed.id).not.toBe(original.id);
+      expect(confirmed.getFieldAttrs().get('composite.value')?.count).toBe(5);
+      expect(confirmed.getFieldAttrs().get('composite.label')?.count).toBe(2);
+      expect(confirmed.getFieldAttrs().get('untouched')?.count).toBe(9);
+      expect(original.getRuntimeField('composite')).toBeNull();
+      expect([...cache.values()]).toContain(original);
+      expect([...cache.values()]).not.toContain(draft);
+    });
+
+    it('evicts a pending draft promise on cancellation without caching its eventual result', async () => {
+      const { service, create, cache, clearInstanceCache } = setup();
+      const original = await service.resolve(inlineSpec);
+      const preparation = Promise.withResolvers<void>();
+      create.mockImplementationOnce((spec) => {
+        const draft = createDataView(spec);
+        const pendingDraft = preparation.promise.then(() => draft);
+        cache.set(String(spec.id), pendingDraft);
+
+        return pendingDraft;
+      });
+      const session = service.beginEdit(original);
+      expect(cache.size).toBe(2);
+
+      session.dispose();
+      expect(clearInstanceCache).toHaveBeenCalledTimes(1);
+      expect(cache.size).toBe(1);
+      preparation.resolve();
+      const draft = await session.draft;
+
+      expect(cache.has(String(draft.id))).toBe(false);
+      expect(cache.get(inlineDataViewId)).toBe(original);
+      expect(clearInstanceCache.mock.calls).toEqual([[draft.id]]);
+      await expect(session.commit()).rejects.toThrow('Cannot commit a disposed data view edit');
+    });
+
+    it('finishes an in-flight commit before disposing, and commits only once', async () => {
+      const { service, create, cache, clearInstanceCache } = setup();
+      const original = await service.resolve(inlineSpec);
+      const session = service.beginEdit(original);
+      const draft = await session.draft;
+      draft.setIndexPattern('other-logs-*');
+      const target = createDataView({ ...editedSpec, id: editedDataViewId });
+      const finalization = Promise.withResolvers<DataView>();
+      create.mockImplementationOnce(() => finalization.promise);
+
+      const commit = session.commit();
+      await waitFor(() =>
+        expect(create).toHaveBeenLastCalledWith({ ...draft.toSpec(), id: editedDataViewId }, true)
+      );
+      session.dispose();
+      expect(session.commit()).toBe(commit);
+      expect([...cache.values()]).toContain(draft);
+      finalization.resolve(target);
+
+      expect(await commit).toBe(target);
+      expect(clearInstanceCache.mock.calls).toEqual([[draft.id]]);
+    });
+
+    it('releases its draft on a finalization failure without evicting the source', async () => {
+      const { service, create, cache } = setup();
+      const original = await service.resolve(inlineSpec);
+      const session = service.beginEdit(original);
+      const draft = await session.draft;
+      create.mockRejectedValueOnce(new Error('Finalization failed'));
+
+      await expect(session.commit()).rejects.toThrow('Finalization failed');
+
+      expect([...cache.values()]).not.toContain(draft);
+      expect([...cache.values()]).toContain(original);
+    });
+
+    it('removes failed draft creations from the cache and preserves the error', async () => {
+      const { service, create, clearInstanceCache } = setup();
+      const original = createDataView({ ...inlineSpec, id: inlineDataViewId });
+      create.mockRejectedValueOnce(new Error('Preparation failed'));
+      const session = service.beginEdit(original);
+
+      await expect(session.draft).rejects.toThrow('Preparation failed');
+      session.dispose();
+      expect(clearInstanceCache.mock.calls).toEqual([[create.mock.calls[0][0].id]]);
+    });
+
+    it.each<DataViewSpec>([
+      { ...inlineSpec, id: 'saved', version: '1' },
+      { ...inlineSpec, id: 'managed', managed: true },
+    ])('never evicts the view retained by an excluded edit ($id)', async (spec) => {
+      const { service, clearInstanceCache } = setup();
+      const session = service.beginEdit(createDataView(spec));
+      const draft = await session.draft;
+      expect(await session.commit()).toBe(draft);
+      session.dispose();
+      expect(clearInstanceCache).not.toHaveBeenCalled();
     });
   });
 

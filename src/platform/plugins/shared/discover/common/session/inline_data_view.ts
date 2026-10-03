@@ -12,7 +12,7 @@ import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { Sha256 } from '@kbn/crypto-browser';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { stableStringify } from '@kbn/std';
 import { every, isEmpty, isUndefined, omitBy, pick } from 'lodash';
@@ -38,6 +38,14 @@ export const getInlineDataView = (
 
   return index;
 };
+
+/** Whether the spec of a view that is not persisted is identified by value. */
+export const isInlineDataViewSpec = (spec: DataViewSpec): boolean =>
+  getInlineDataView({ index: spec }) !== undefined;
+
+/** Whether a view is an inline view identified by its spec rather than a stored ID. */
+export const isInlineDataView = (dataView: DataView): boolean =>
+  !dataView.isPersisted() && isInlineDataViewSpec(dataView.toMinimalSpec());
 
 const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
   const spec = fromStoredDataView(dataView) as AsCodeDataViewSpec;

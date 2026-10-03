@@ -25,42 +25,43 @@ export const getInlineDataViewIdentity = (
   searchSource: SerializedSearchSourceFields | undefined
 ): InlineDataViewIdentity | undefined => {
   const dataView = getInlineDataView(searchSource);
+  if (!dataView) {
+    return undefined;
+  }
 
-  return dataView ? { dataView, id: generateInlineDataViewId(dataView) } : undefined;
+  return { dataView, id: generateInlineDataViewId(dataView) };
 };
 
 /**
  * Replaces exact Data View references, including those nested in combined filters. Pinned filters,
  * shared by every view, use their own map.
  */
-export const translateFilterDataViewIds = (
+export const remapFilterDataViewIds = (
   filters: Filter[],
   idMap: DataViewIdMap,
   pinnedIdMap: DataViewIdMap = idMap
 ): Filter[] => {
   const translatedFilters = filters.map((filter) => {
     const filterIdMap = isFilterPinned(filter) ? pinnedIdMap : idMap;
-    let translatedFilter = filter;
+    const meta = { ...filter.meta };
 
+    // Nested filters are translated with the map of their group.
     if (isCombinedFilter(filter)) {
-      const params = translateFilterDataViewIds(filter.meta.params, filterIdMap);
-      if (params !== filter.meta.params) {
-        translatedFilter = { ...filter, meta: { ...filter.meta, params } };
-      }
+      meta.params = remapFilterDataViewIds(filter.meta.params, filterIdMap);
     }
 
-    const { index } = translatedFilter.meta;
-    const translatedIndex = index === undefined ? undefined : filterIdMap.get(index);
-    if (translatedIndex === undefined) {
-      return translatedFilter;
+    if (meta.index !== undefined && filterIdMap.has(meta.index)) {
+      meta.index = filterIdMap.get(meta.index);
     }
 
-    return { ...translatedFilter, meta: { ...translatedFilter.meta, index: translatedIndex } };
+    const isUnchanged = meta.params === filter.meta.params && meta.index === filter.meta.index;
+
+    return isUnchanged ? filter : { ...filter, meta };
   });
 
-  return translatedFilters.every((filter, index) => filter === filters[index])
-    ? filters
-    : translatedFilters;
+  const isUnchanged = translatedFilters.every((filter, index) => filter === filters[index]);
+
+  return isUnchanged ? filters : translatedFilters;
 };
 
 /** Binds unreferenced app filters recursively, inheriting group references and skipping pinned trees. */
@@ -70,21 +71,20 @@ export const bindUnreferencedAppFilters = (filters: Filter[], dataViewId: string
       return filter;
     }
 
-    const index = filter.meta.index ?? dataViewId;
-    let boundFilter = filter;
+    // Nested filters inherit the reference of their group.
+    const meta = { ...filter.meta, index: filter.meta.index ?? dataViewId };
     if (isCombinedFilter(filter)) {
-      const params = bindUnreferencedAppFilters(filter.meta.params, index);
-      if (params !== filter.meta.params) {
-        boundFilter = { ...filter, meta: { ...filter.meta, params } };
-      }
+      meta.params = bindUnreferencedAppFilters(filter.meta.params, meta.index);
     }
 
-    return filter.meta.index === undefined
-      ? { ...boundFilter, meta: { ...boundFilter.meta, index } }
-      : boundFilter;
+    const isUnchanged = meta.params === filter.meta.params && meta.index === filter.meta.index;
+
+    return isUnchanged ? filter : { ...filter, meta };
   });
 
-  return boundFilters.every((filter, index) => filter === filters[index]) ? filters : boundFilters;
+  const isUnchanged = boundFilters.every((filter, index) => filter === filters[index]);
+
+  return isUnchanged ? filters : boundFilters;
 };
 
 /** Normalizes an inline view and its filters using supplied maps, optionally binding unreferenced app filters. */
@@ -101,21 +101,22 @@ export const normalizeInlineSearchSource = ({
   dataViewIdMap: DataViewIdMap;
   bindUnreferencedFilters: boolean;
 }): SerializedSearchSourceFields => {
-  const { filter } = searchSource;
-  let normalizedFilter =
-    filter && translateFilterDataViewIds(filter, ownDataViewIdMap, dataViewIdMap);
+  const normalized = { ...searchSource };
 
-  if (identity && bindUnreferencedFilters && normalizedFilter) {
-    normalizedFilter = bindUnreferencedAppFilters(normalizedFilter, identity.id);
+  if (normalized.filter) {
+    normalized.filter = remapFilterDataViewIds(normalized.filter, ownDataViewIdMap, dataViewIdMap);
   }
 
-  if ((!identity || identity.dataView.id === identity.id) && normalizedFilter === filter) {
-    return searchSource;
+  if (identity && bindUnreferencedFilters && normalized.filter) {
+    normalized.filter = bindUnreferencedAppFilters(normalized.filter, identity.id);
   }
 
-  return {
-    ...searchSource,
-    ...(identity && { index: { ...identity.dataView, id: identity.id } }),
-    ...(normalizedFilter !== filter && { filter: normalizedFilter }),
-  };
+  if (identity) {
+    normalized.index = { ...identity.dataView, id: identity.id };
+  }
+
+  const hasDerivedId = !identity || identity.dataView.id === identity.id;
+  const isUnchanged = hasDerivedId && normalized.filter === searchSource.filter;
+
+  return isUnchanged ? searchSource : normalized;
 };

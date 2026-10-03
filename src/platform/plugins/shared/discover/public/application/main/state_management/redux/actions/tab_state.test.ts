@@ -17,6 +17,7 @@ import {
   selectTab,
 } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import { generateInlineDataViewId } from '../../../../../../common/session/inline_data_view';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import {
   GLOBAL_STATE_URL_KEY,
@@ -35,6 +36,7 @@ import {
 } from '@kbn/discover-utils/src/__mocks__';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
@@ -840,12 +842,14 @@ describe('tab_state actions', () => {
         query: '',
       });
       expect(tab.appState.columns).toEqual([]);
-      // Ad-hoc DataView for FROM test-index: no persisted match. Time field comes from EsqlSource
-      // when present; this setup's source has none, so sort is empty.
+      // The created view mock has no fields, so its time field cannot be used for sorting.
       expect(tab.appState.sort).toEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
-        dataViewId: 'test-index-id',
+        dataViewId: generateInlineDataViewId({
+          title: 'test-index',
+          timeFieldName: '@timestamp',
+        }),
       });
       expect(getCurrentTab().appState.expandedDoc).toBeUndefined();
 
@@ -868,8 +872,27 @@ describe('tab_state actions', () => {
       });
     });
 
-    it('creates an ad-hoc DataView with the ES|QL time field so Classic histogram is time-based', async () => {
+    it('resolves an inline Classic view with its deterministic ID and time-based sorting', async () => {
       const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
+      const resolve = jest.spyOn(services.inlineDataViews, 'resolve');
+      const spec = { title: 'logs-*', timeFieldName: '@timestamp' };
+      const dataViewId = generateInlineDataViewId(spec);
+      const dataView = new DataView({
+        spec: {
+          ...spec,
+          id: dataViewId,
+          fields: {
+            '@timestamp': {
+              name: '@timestamp',
+              type: 'date',
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+        },
+        fieldFormats: fieldFormatsMock,
+      });
+      jest.spyOn(services.dataViews, 'create').mockResolvedValueOnce(dataView);
       const esqlSource = await EsqlSource.create({
         query: 'FROM logs-*',
         timeFieldName: '@timestamp',
@@ -883,13 +906,37 @@ describe('tab_state actions', () => {
         })
       );
 
-      expect(services.dataViews.create).toHaveBeenCalledWith({
-        title: 'logs-*',
-        timeFieldName: '@timestamp',
-      });
+      expect(resolve).toHaveBeenCalledWith(spec);
+      expect(services.dataViews.create).toHaveBeenCalledWith({ ...spec, id: dataViewId });
+      expect(services.dataViews.refreshFields).toHaveBeenCalledWith(dataView);
+      expect(runtimeStateManager.adHocDataViews$.getValue()).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: dataViewId, ...spec })])
+      );
       expect(getCurrentTab().appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
-        dataViewId: 'logs-*-id',
+        dataViewId,
+      });
+      expect(getCurrentTab().appState.sort).toEqual([['@timestamp', 'desc']]);
+    });
+
+    it('keeps a matching persisted view without resolving an inline spec', async () => {
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
+      const resolve = jest.spyOn(services.inlineDataViews, 'resolve');
+      const dataView = dataViewMockWithTimeField;
+      const esqlSource = await EsqlSource.create({
+        query: `FROM ${dataView.getIndexPattern()}`,
+      });
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
+
+      await internalState.dispatch(
+        internalStateActions.transitionFromESQLToDataView({ tabId, dataView })
+      );
+
+      expect(services.dataViews.get).toHaveBeenLastCalledWith(dataView.id);
+      expect(resolve).not.toHaveBeenCalled();
+      expect(getCurrentTab().appState.dataSource).toStrictEqual({
+        type: DataSourceType.DataView,
+        dataViewId: dataView.id,
       });
     });
   });

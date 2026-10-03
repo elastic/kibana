@@ -33,7 +33,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -654,14 +654,29 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
-  it('should render "Edit field" button', async () => {
+  it('delegates field editing to Discover while preserving the original field name', async () => {
     const services = createMockServices();
+    const beginEdit = jest.spyOn(services.inlineDataViews, 'beginEdit');
     const { user } = await renderComponent(props, {}, services);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
     await user.click(within(availableFields).getByTestId('field-bytes'));
     const editFieldButton = await screen.findByTestId('discoverFieldListPanelEdit-bytes');
     await user.click(editFieldButton);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
+    expect(beginEdit).toHaveBeenCalledTimes(1);
+
+    const [options] = jest.mocked(services.dataViewFieldEditor.openEditor).mock.calls[0];
+    const editedDataView = new DataView({
+      spec: { title: 'logs-*' },
+      fieldFormats: services.fieldFormats,
+    });
+    const updatedFields = editedDataView.addRuntimeField('renamed_field', { type: 'keyword' });
+    await options.onSave?.(updatedFields);
+
+    expect(props.onFieldEdited).toHaveBeenCalledWith({
+      editedDataView: options.ctx.dataView,
+      editedFieldName: 'bytes',
+    });
   });
 
   it('should not render Add/Edit field buttons in viewer mode', async () => {

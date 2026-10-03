@@ -426,7 +426,7 @@ describe('tab_state_data_view actions', () => {
     });
 
     test('onDataViewEdited - ad-hoc data view', async () => {
-      const { internalState, tabId, runtimeStateManager } = await setup();
+      const { internalState, tabId, runtimeStateManager, services } = await setup();
       const fetchDataSpy = jest.spyOn(tabStateActions, 'fetchData');
 
       await internalState.dispatch(
@@ -436,11 +436,9 @@ describe('tab_state_data_view actions', () => {
         })
       );
       const previousId = dataViewAdHoc.id;
+      const editedDataView = await services.inlineDataViews.finalize(dataViewAdHoc);
       await internalState.dispatch(
-        internalStateActions.onDataViewEdited({
-          tabId,
-          editedDataView: dataViewAdHoc,
-        })
+        internalStateActions.onDataViewEdited({ tabId, editedDataView })
       );
       expect(
         selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()?.id
@@ -459,55 +457,45 @@ describe('tab_state_data_view actions', () => {
 
     afterEach(() => jest.restoreAllMocks());
 
-    it.each(['date', 'string', undefined])(
-      'finalizes after inferring the time field when @timestamp has type %s',
-      async (timestampType) => {
-        const { internalState, tabId, runtimeStateManager, services } = await setup();
-        const spec = { id: 'existing-view', title: 'ad-hoc' };
-        jest.spyOn(services.dataViews, 'create').mockImplementation(async (input) =>
-          createExploreView({
-            ...input,
-            fields: timestampType
-              ? {
-                  '@timestamp': {
-                    name: '@timestamp',
-                    type: timestampType,
-                    searchable: true,
-                    aggregatable: true,
-                  },
-                }
-              : {},
-          })
-        );
-        const finalize = jest.spyOn(services.inlineDataViews, 'finalize');
-        const expectedTimeField = timestampType === 'date' ? '@timestamp' : undefined;
-        const expectedId = generateInlineDataViewId({ ...spec, timeFieldName: expectedTimeField });
+    it('finalizes after inferring a date @timestamp as the time field', async () => {
+      const { internalState, tabId, runtimeStateManager, services } = await setup();
+      const spec = { id: 'existing-view', title: 'ad-hoc' };
+      const fields = {
+        '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+      };
+      jest
+        .spyOn(services.dataViews, 'create')
+        .mockImplementation(async (input) => createExploreView({ ...input, fields }));
+      const finalize = jest.spyOn(services.inlineDataViews, 'finalize');
+      const expectedId = generateInlineDataViewId({ ...spec, timeFieldName: '@timestamp' });
 
-        const result = await internalState.dispatch(
-          internalStateActions.createAndAppendAdHocDataView({ tabId, dataViewSpec: spec })
-        );
+      const result = await internalState.dispatch(
+        internalStateActions.createAndAppendAdHocDataView({ tabId, dataViewSpec: spec })
+      );
 
-        expect(services.dataViews.create).toHaveBeenCalledWith({ ...spec, id: undefined });
-        expect(finalize).toHaveBeenCalledWith(
-          expect.objectContaining({ id: 'explore-draft', timeFieldName: expectedTimeField })
-        );
-        expect(result.id).toBe(expectedId);
-        expect(result.timeFieldName).toBe(expectedTimeField);
-        expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
-          createDataViewDataSource({ dataViewId: expectedId })
-        );
-        const currentSource = selectTabRuntimeState(
-          runtimeStateManager,
-          tabId
-        ).currentDataSource$.getValue();
-        expect(currentSource).toMatchObject({ kind: 'index-pattern', id: expectedId });
-        expect(currentSource?.kind === 'index-pattern' && currentSource.getDataView()).toBe(result);
-        expect(runtimeStateManager.adHocDataViews$.getValue()).toEqual([result]);
-        expect(services.dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
-        expect(services.dataViews.clearInstanceCache).toHaveBeenCalledWith('explore-draft');
-        expect(spec.id).toBe('existing-view');
-      }
-    );
+      expect(services.dataViews.create).toHaveBeenCalledWith({ ...spec, id: undefined });
+      expect(finalize).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore-draft', timeFieldName: '@timestamp' })
+      );
+      expect(result.id).toBe(expectedId);
+      expect(result.timeFieldName).toBe('@timestamp');
+      expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
+        createDataViewDataSource({ dataViewId: expectedId })
+      );
+      const { currentDataSource$, currentDataView$ } = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      );
+      expect(currentDataSource$.getValue()).toMatchObject({
+        kind: 'index-pattern',
+        id: expectedId,
+      });
+      expect(currentDataView$.getValue()).toBe(result);
+      expect(runtimeStateManager.adHocDataViews$.getValue()).toEqual([result]);
+      expect(services.dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+      expect(services.dataViews.clearInstanceCache).toHaveBeenCalledWith('explore-draft');
+      expect(spec.id).toBe('existing-view');
+    });
 
     it('keeps the draft cached when finalization returns it unchanged', async () => {
       const { internalState, tabId, services } = await setup();
@@ -526,22 +514,120 @@ describe('tab_state_data_view actions', () => {
     });
   });
 
-  describe('updateAdHocDataViewId', () => {
-    it('should generate new ID and create new data view', async () => {
+  describe('applyAdHocDataViewEdit', () => {
+    // Builds an inline view with real serialization, by default under its derived ID.
+    const createInlineView = (spec: DataViewSpec, id = generateInlineDataViewId(spec)) =>
+      new DataView({ spec: { ...spec, id }, fieldFormats: fieldFormatsMock });
+
+    it('applies an already finalized inline view without creating it again', async () => {
       const { internalState, tabId, services } = await setup({ dataView: dataViewAdHoc });
 
       const createSpy = jest.mocked(services.dataViews.create);
       createSpy.mockClear();
 
       const result = await internalState.dispatch(
-        internalStateActions.updateAdHocDataViewId({
+        internalStateActions.applyAdHocDataViewEdit({
           tabId,
-          editedDataView: dataViewAdHoc,
+          editedDataView: createInlineView(dataViewAdHoc.toSpec()),
         })
       );
 
-      expect(createSpy).toHaveBeenCalled();
-      expect(result?.id).not.toBe(dataViewAdHoc.id);
+      expect(createSpy).not.toHaveBeenCalled();
+      expect(result?.id).toBe(generateInlineDataViewId(dataViewAdHoc.toMinimalSpec()));
+      expect(services.dataViews.clearInstanceCache).not.toHaveBeenCalled();
+    });
+
+    it('keeps state and filters unchanged when the confirmed identity is unchanged', async () => {
+      const original = createInlineView(dataViewAdHoc.toSpec());
+      const { internalState, tabId, services, runtimeStateManager } = await setup({
+        dataView: original,
+      });
+      const stateBefore = selectTab(internalState.getState(), tabId).appState;
+      const source = selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$;
+      const sourceBefore = source.getValue();
+      jest.mocked(services.uiActions.getAction).mockClear();
+
+      const result = await internalState.dispatch(
+        internalStateActions.applyAdHocDataViewEdit({ tabId, editedDataView: original })
+      );
+
+      expect(result).toBe(original);
+      expect(selectTab(internalState.getState(), tabId).appState).toBe(stateBefore);
+      expect(source.getValue()).toBe(sourceBefore);
+      expect(services.uiActions.getAction).not.toHaveBeenCalled();
+      expect(services.dataViews.clearInstanceCache).not.toHaveBeenCalled();
+    });
+
+    describe('when the edited definition already has an instance', () => {
+      const setupEditToExistingView = async () => {
+        const original = createInlineView(dataViewAdHoc.toSpec());
+        const toolkit = await setup({ dataView: original });
+        const { internalState, tabId } = toolkit;
+        const draft = createInlineView({ ...original.toSpec(), title: 'other-*' }, 'draft');
+        const targetId = generateInlineDataViewId(draft.toMinimalSpec());
+        const target = createInlineView(draft.toSpec(), targetId);
+
+        const editToExistingView = () => {
+          internalState.dispatch(internalStateActions.appendAdHocDataViews(target));
+
+          return internalState.dispatch(
+            internalStateActions.applyAdHocDataViewEdit({ tabId, editedDataView: target })
+          );
+        };
+
+        return { ...toolkit, original, target, targetId, editToExistingView };
+      };
+
+      it('selects the existing instance without changing or evicting the original', async () => {
+        const {
+          internalState,
+          tabId,
+          services,
+          runtimeStateManager,
+          original,
+          target,
+          targetId,
+          editToExistingView,
+        } = await setupEditToExistingView();
+        const originalSpec = original.toSpec();
+
+        const result = await editToExistingView();
+
+        expect(result).toBe(target);
+        expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
+          createDataViewDataSource({ dataViewId: targetId })
+        );
+        expect(runtimeStateManager.adHocDataViews$.getValue()).toEqual([target]);
+        expect(original.toSpec()).toEqual(originalSpec);
+        expect(services.dataViews.clearInstanceCache).not.toHaveBeenCalled();
+      });
+
+      it('keeps another tab on the original view', async () => {
+        const {
+          internalState,
+          tabId,
+          runtimeStateManager,
+          addNewTab,
+          initializeSingleTab,
+          switchToTab,
+          original,
+          target,
+          editToExistingView,
+        } = await setupEditToExistingView();
+        await addNewTab({ tab: getTabStateMock({ id: 'second-tab' }) });
+        await initializeSingleTab({ tabId: 'second-tab' });
+        internalState.dispatch(
+          internalStateActions.assignNextDataView({ tabId: 'second-tab', dataView: original })
+        );
+        await switchToTab({ tabId });
+
+        await editToExistingView();
+
+        expect(runtimeStateManager.adHocDataViews$.getValue()).toEqual([original, target]);
+        expect(
+          selectTabRuntimeState(runtimeStateManager, 'second-tab').currentDataView$.getValue()
+        ).toBe(original);
+      });
     });
 
     it('should update filter references to new data view ID', async () => {
@@ -553,9 +639,9 @@ describe('tab_state_data_view actions', () => {
         .mockResolvedValue({ execute: mockExecute } as unknown as Action<object, object>);
 
       const result = await internalState.dispatch(
-        internalStateActions.updateAdHocDataViewId({
+        internalStateActions.applyAdHocDataViewEdit({
           tabId,
-          editedDataView: dataViewAdHoc,
+          editedDataView: createInlineView(dataViewAdHoc.toSpec()),
         })
       );
 
@@ -577,9 +663,9 @@ describe('tab_state_data_view actions', () => {
       const previousId = dataViewAdHoc.id;
 
       await internalState.dispatch(
-        internalStateActions.updateAdHocDataViewId({
+        internalStateActions.applyAdHocDataViewEdit({
           tabId,
-          editedDataView: dataViewAdHoc,
+          editedDataView: createInlineView(dataViewAdHoc.toSpec()),
         })
       );
 
@@ -603,9 +689,9 @@ describe('tab_state_data_view actions', () => {
       expect(adHocDataViewsBefore).toHaveLength(1);
 
       await internalState.dispatch(
-        internalStateActions.updateAdHocDataViewId({
+        internalStateActions.applyAdHocDataViewEdit({
           tabId,
-          editedDataView: dataViewAdHoc,
+          editedDataView: createInlineView(dataViewAdHoc.toSpec()),
         })
       );
 
@@ -624,7 +710,7 @@ describe('tab_state_data_view actions', () => {
       createSpy.mockClear();
 
       const result = await internalState.dispatch(
-        internalStateActions.updateAdHocDataViewId({
+        internalStateActions.applyAdHocDataViewEdit({
           tabId,
           editedDataView: dataViewMockWithTimeField,
         })

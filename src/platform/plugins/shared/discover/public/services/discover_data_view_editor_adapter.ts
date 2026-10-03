@@ -7,27 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorProps, DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { isInlineDataView } from '../../common/session/inline_data_view';
+import {
+  createInlineDataViewEditorController,
+  type InlineDataViewEditPhase,
+} from '../utils/inline_data_view_editor_controller';
 import type { InlineDataViewService } from './inline_data_view_service';
 
-/** Gives views created or copied in the shared editor their inline identity for Discover. */
+/** Isolates inline edits and finalizes views before handing them back to Discover. */
 export const createDiscoverDataViewEditorAdapter = ({
   dataViewEditor,
   dataViews,
   inlineDataViews,
+  onEditError,
 }: {
   dataViewEditor: DataViewEditorStart;
-  dataViews: Pick<DataViewsContract, 'clearInstanceCache'>;
+  dataViews: DataViewsContract;
   inlineDataViews: InlineDataViewService;
-}): DataViewEditorStart => ({
-  ...dataViewEditor,
-  openEditor: (options) => {
-    // The editor changes existing views in place; managed views can only be copied.
-    if (options.editData && !options.isDuplicating && !options.editData.managed) {
-      return dataViewEditor.openEditor(options);
-    }
+  onEditError: (error: Error, phase: InlineDataViewEditPhase) => void;
+}): DataViewEditorStart => {
+  const controller = createInlineDataViewEditorController();
 
+  // The editor changes the view in place, so it edits a draft instead of the shared instance.
+  const openInlineEdit = (options: DataViewEditorProps, editData: DataView) =>
+    controller.open({
+      session: inlineDataViews.beginEdit(editData),
+      onError: onEditError,
+      openEditor: (draft, { commit, cancel }) => {
+        const onSave = () => commit(options.onSave);
+        const onCancel = () => {
+          cancel();
+          options.onCancel?.();
+        };
+
+        return dataViewEditor.openEditor({
+          ...options,
+          editData: draft,
+          onSave,
+          onCancel,
+        });
+      },
+    });
+
+  // Created and copied views get the identity of their final spec.
+  const openCreation = (options: DataViewEditorProps) => {
     const onSaveInlineDataView = async (createdDataView: DataView) => {
       const finalizedDataView = await inlineDataViews.finalize(createdDataView);
 
@@ -40,12 +65,34 @@ export const createDiscoverDataViewEditorAdapter = ({
       return options.onSave(finalizedDataView);
     };
 
-    return dataViewEditor.openEditor({
-      ...options,
-      onSave: (createdDataView) =>
-        createdDataView.isPersisted()
-          ? options.onSave(createdDataView)
-          : onSaveInlineDataView(createdDataView),
-    });
-  },
-});
+    // Saved views keep the synchronous callback, so the editor still reports their errors.
+    const onSave = (createdDataView: DataView) => {
+      if (createdDataView.isPersisted()) {
+        return options.onSave(createdDataView);
+      }
+
+      return onSaveInlineDataView(createdDataView);
+    };
+
+    return dataViewEditor.openEditor({ ...options, onSave });
+  };
+
+  return {
+    ...dataViewEditor,
+    openEditor: (options) => {
+      const { editData, isDuplicating } = options;
+
+      if (editData && !isDuplicating && isInlineDataView(editData)) {
+        return openInlineEdit(options, editData);
+      }
+
+      controller.dispose();
+      // Managed views can only be copied.
+      if (!editData || isDuplicating || editData.managed) {
+        return openCreation(options);
+      }
+
+      return dataViewEditor.openEditor(options);
+    },
+  };
+};

@@ -12,6 +12,7 @@ import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-p
 import type { ToastsStart } from '@kbn/core/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from '../redux';
+import { isInlineDataViewSpec } from '../../../../../common/session/inline_data_view';
 
 interface DataViewData {
   /**
@@ -56,11 +57,13 @@ export async function loadDataView({
       // If passed a spec for a persisted data view, reassign the fetchId
       fetchId = locationDataViewSpec.id!;
     } else {
-      // Keep eviction until inline editors no longer mutate shared cached instances in place.
-      if (locationDataViewSpec.id) {
+      // Excluded views retain their historical replacement behavior.
+      if (!isInlineDataViewSpec(locationDataViewSpec) && locationDataViewSpec.id) {
         dataViews.clearInstanceCache(locationDataViewSpec.id);
       }
-      const createdAdHocDataView = await dataViews.create(locationDataViewSpec);
+
+      const createdAdHocDataView = await inlineDataViews.resolve(locationDataViewSpec);
+
       return {
         loadedDataView: createdAdHocDataView,
         requestedDataViewId: createdAdHocDataView.id,

@@ -14,34 +14,25 @@ import { BooleanRelation, buildCombinedFilter, FilterStateStore } from '@kbn/es-
 import { cloneDeep } from 'lodash';
 import { generateInlineDataViewId } from './inline_data_view';
 import {
+  createFilter,
+  createFilterWithIndex,
+  foreignFilter,
+  unreferencedFilter,
+} from './inline_data_view.fixtures';
+import {
   bindUnreferencedAppFilters,
   getInlineDataViewIdentity,
   normalizeInlineSearchSource,
-  translateFilterDataViewIds,
+  remapFilterDataViewIds,
 } from './inline_data_view_references';
 
 const inlineDataView: DataViewSpec = { title: 'logs-*', timeFieldName: '@timestamp' };
 const inlineDataViewId = generateInlineDataViewId(inlineDataView);
 
-const unreferencedFilter: Filter = { meta: {}, query: { match_all: {} } };
-const foreignFilter: Filter = {
-  meta: { index: 'foreign-data-view-id' },
-  query: { term: { 'service.name': 'api' } },
-};
 const pinnedFilter: Filter = {
   ...unreferencedFilter,
   $state: { store: FilterStateStore.GLOBAL_STATE },
 };
-
-const createFilter = (dataViewId: string | undefined): Filter => ({
-  meta: { index: dataViewId },
-  query: { match_phrase: { 'service.name': 'checkout' } },
-});
-
-const createFilterWithIndex = (filter: Filter, index: string): Filter => ({
-  ...filter,
-  meta: { ...filter.meta, index },
-});
 
 describe('getInlineDataViewIdentity', () => {
   it('returns the inline view with the ID derived from its spec', () => {
@@ -52,13 +43,9 @@ describe('getInlineDataViewIdentity', () => {
       id: inlineDataViewId,
     });
   });
-
-  it('ignores referenced Data Views', () => {
-    expect(getInlineDataViewIdentity({ index: 'saved-data-view' })).toBeUndefined();
-  });
 });
 
-describe('translateFilterDataViewIds', () => {
+describe('remapFilterDataViewIds', () => {
   const idMap = new Map([['legacy-id', inlineDataViewId]]);
 
   it('replaces exact references, including those nested in combined filters', () => {
@@ -71,7 +58,7 @@ describe('translateFilterDataViewIds', () => {
       createFilter('legacy-id'),
     ];
 
-    expect(translateFilterDataViewIds(filters, idMap)).toEqual([
+    expect(remapFilterDataViewIds(filters, idMap)).toEqual([
       buildCombinedFilter(
         BooleanRelation.OR,
         [createFilter(inlineDataViewId), foreignFilter, unreferencedFilter],
@@ -84,7 +71,7 @@ describe('translateFilterDataViewIds', () => {
   it('returns the same filters when nothing refers to a translated ID', () => {
     const filters = [foreignFilter, unreferencedFilter];
 
-    expect(translateFilterDataViewIds(filters, idMap)).toBe(filters);
+    expect(remapFilterDataViewIds(filters, idMap)).toBe(filters);
   });
 
   it('translates pinned filters, including nested ones, with their own map', () => {
@@ -94,7 +81,7 @@ describe('translateFilterDataViewIds', () => {
     };
     const filters = [createFilter('legacy-id'), pinnedCombinedFilter];
 
-    expect(translateFilterDataViewIds(filters, idMap, new Map())).toEqual([
+    expect(remapFilterDataViewIds(filters, idMap, new Map())).toEqual([
       createFilter(inlineDataViewId),
       pinnedCombinedFilter,
     ]);

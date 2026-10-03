@@ -278,6 +278,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     dataViewFieldEditor: {
       openEditor: jest.fn(),
+      openDeleteModal: jest.fn(),
       userPermissions: {
         editIndexPattern: jest.fn(() => true),
       },
