@@ -15,6 +15,7 @@ export {
   splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
+  hasAggregatingCommand,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
