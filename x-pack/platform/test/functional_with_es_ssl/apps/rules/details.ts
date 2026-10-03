@@ -880,16 +880,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Saved Objects Management Navigation', function () {
       const testRunUuid = uuidv4();
-      const getRuleObjectDisplayName = (title: string) => `Rule: [${title}]`;
       const spacesService = getService('spaces');
       const spaceId = 'test-space-' + testRunUuid;
       const testRuleName = `so-nav-test-rule-${testRunUuid}`;
       const testSpaceRuleName = `so-nav-test-rule-space-${testRunUuid}`;
+      let testRuleId: string;
+      let testSpaceRuleId: string;
 
       before(async () => {
-        await createAlwaysFiringRule({
+        const testRule = await createAlwaysFiringRule({
           name: testRuleName,
         });
+        testRuleId = testRule.id;
 
         await spacesService.create({
           id: spaceId,
@@ -897,12 +899,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           description: 'Test space for saved objects navigation',
         });
 
-        await createAlwaysFiringRule(
+        const testSpaceRule = await createAlwaysFiringRule(
           {
             name: testSpaceRuleName,
           },
           spaceId
         );
+        testSpaceRuleId = testSpaceRule.id;
       });
 
       after(async () => {
@@ -918,9 +921,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.savedObjects.waitTableIsLoaded();
 
-        await pageObjects.savedObjects.clickObjectLinkByTitle(
-          getRuleObjectDisplayName(testRuleName)
-        );
+        await testSubjects.click(`~row-${testRuleId} > savedObjectsTableRowTitle`);
 
         // Assert we've navigated to the rule details page
         await retry.tryForTime(10000, async () => {
@@ -943,9 +944,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for the saved objects table to load
         await pageObjects.savedObjects.waitTableIsLoaded();
 
-        await pageObjects.savedObjects.clickObjectLinkByTitle(
-          getRuleObjectDisplayName(testSpaceRuleName)
-        );
+        await testSubjects.click(`~row-${testSpaceRuleId} > savedObjectsTableRowTitle`);
 
         // Assert we've navigated to the rule details page
         await retry.tryForTime(10000, async () => {
