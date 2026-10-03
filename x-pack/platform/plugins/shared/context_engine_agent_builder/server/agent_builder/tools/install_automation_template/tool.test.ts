@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { installAutomationTemplateHandler } from './handler';
 import { createInstallAutomationTemplateTool } from './tool';
+
+jest.mock('./handler', () => ({
+  installAutomationTemplateHandler: jest
+    .fn()
+    .mockResolvedValue({ workflowId: 'wf-saved', replaced: false }),
+}));
+
+const installHandlerMock = installAutomationTemplateHandler as jest.MockedFunction<
+  typeof installAutomationTemplateHandler
+>;
 
 const createTool = () =>
   createInstallAutomationTemplateTool({
@@ -246,5 +259,212 @@ describe('install_automation_template schema', () => {
     });
 
     expect(parsed.success).toBe(false);
+  });
+
+  describe('index metadata sources', () => {
+    const base = { template: 'index_metadata', name: 'loyalty-index-metadata' };
+    const sources = [
+      { index: 'loyalty-docs', categoryField: 'tier' },
+      { index: 'flight-activity', categoryField: 'Loyalty Card' },
+    ];
+
+    it('takes every source of the AI index in one install', () => {
+      expect(schema.safeParse({ ...base, sources }).success).toBe(true);
+    });
+
+    it('still takes a single sourceIndex and categoryField', () => {
+      expect(
+        schema.safeParse({ ...base, sourceIndex: 'loyalty-docs', categoryField: 'tier' }).success
+      ).toBe(true);
+    });
+
+    it('takes one form or the other, never both and never neither', () => {
+      expect(
+        schema.safeParse({ ...base, sources, sourceIndex: 'loyalty-docs', categoryField: 'tier' })
+          .success
+      ).toBe(false);
+      expect(schema.safeParse({ ...base, sources, categoryField: 'tier' }).success).toBe(false);
+      expect(schema.safeParse(base).success).toBe(false);
+    });
+
+    it('names both forms in one issue when neither is given', () => {
+      const result = schema.safeParse(base);
+
+      expect(result.error?.issues.map(({ message }) => message)).toEqual([
+        'index_metadata needs sources, or both sourceIndex and categoryField.',
+      ]);
+    });
+
+    it('rejects the same index twice, naming it', () => {
+      const result = schema.safeParse({
+        ...base,
+        sources: [...sources, { index: 'loyalty-docs', categoryField: 'status' }],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toMatch(/loyalty-docs/);
+    });
+
+    it('bounds the list: at least one source, at most the KI budget', () => {
+      expect(schema.safeParse({ ...base, sources: [] }).success).toBe(false);
+      const tooMany = Array.from({ length: 101 }, (_, i) => ({
+        index: `index-${i}`,
+        categoryField: 'tier',
+      }));
+      expect(schema.safeParse({ ...base, sources: tooMany }).success).toBe(false);
+    });
+
+    it('rejects sources on another template', () => {
+      expect(
+        schema.safeParse({
+          template: 'unit_profile',
+          name: 'loyalty-province-profile',
+          sourceIndex: 'loyalty-history',
+          unitKey: 'Province',
+          activityField: 'Enrollment Date',
+          breakdownField: 'Loyalty Card',
+          sources,
+        }).success
+      ).toBe(false);
+    });
+  });
+});
+
+describe('install_automation_template unit profile arguments', () => {
+  const schema = createTool().schema;
+  const base = {
+    template: 'unit_profile',
+    name: 'loyalty-province-profile',
+    sourceIndex: 'loyalty-history',
+    unitKey: 'Province',
+    activityField: 'Enrollment Date',
+    breakdownField: 'Loyalty Card',
+  };
+
+  it('takes a corpus filter and metric fields', () => {
+    expect(
+      schema.safeParse({
+        ...base,
+        corpusFilter: 'WHERE Country == "Canada"',
+        metricFields: ['Points Accumulated'],
+      }).success
+    ).toBe(true);
+  });
+
+  it('bounds the metric fields', () => {
+    const eleven = Array.from({ length: 11 }, (_, i) => `metric_${i}`);
+    expect(schema.safeParse({ ...base, metricFields: eleven }).success).toBe(false);
+    expect(schema.safeParse({ ...base, metricFields: ['x'.repeat(257)] }).success).toBe(false);
+  });
+
+  it('rejects a metric field listed twice, which would produce two identical columns', () => {
+    const result = schema.safeParse({
+      ...base,
+      metricFields: ['Points Accumulated', 'Points Accumulated'],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toMatch(/Points Accumulated/);
+  });
+
+  it('rejects metric fields on another template', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: 'flight-activity-docs',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+        metricFields: ['Points Accumulated'],
+      }).success
+    ).toBe(false);
+  });
+});
+
+describe('install_automation_template handler arguments', () => {
+  const runTool = (params: Record<string, unknown>) =>
+    createTool().handler(
+      params as never,
+      {
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'default',
+        attachments: {} as never,
+        logger: loggingSystemMock.createLogger(),
+      } as never
+    );
+
+  beforeEach(() => {
+    installHandlerMock.mockClear();
+  });
+
+  it('passes the sources list through for index metadata', async () => {
+    await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sources: [
+        { index: 'loyalty-docs', categoryField: 'tier' },
+        { index: 'flight-activity', categoryField: 'Loyalty Card' },
+      ],
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sources: [
+        { index: 'loyalty-docs', categoryField: 'tier' },
+        { index: 'flight-activity', categoryField: 'Loyalty Card' },
+      ],
+    });
+  });
+
+  it('passes the corpus filter and metric fields through for unit profile', async () => {
+    await runTool({
+      template: 'unit_profile',
+      name: 'loyalty-province-profile',
+      sourceIndex: 'loyalty-history',
+      unitKey: 'Province',
+      activityField: 'Enrollment Date',
+      breakdownField: 'Loyalty Card',
+      corpusFilter: 'WHERE Country == "Canada"',
+      metricFields: ['Points Accumulated'],
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual(
+      expect.objectContaining({
+        template: 'unit_profile',
+        corpusFilter: 'WHERE Country == "Canada"',
+        metricFields: ['Points Accumulated'],
+      })
+    );
+  });
+
+  it('defaults unit profile to no filter and no metric fields', async () => {
+    await runTool({
+      template: 'unit_profile',
+      name: 'loyalty-province-profile',
+      sourceIndex: 'loyalty-history',
+      unitKey: 'Province',
+      activityField: 'Enrollment Date',
+      breakdownField: 'Loyalty Card',
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual(
+      expect.objectContaining({ corpusFilter: '', metricFields: [] })
+    );
+  });
+
+  it('turns a single sourceIndex and categoryField into a one-source list', async () => {
+    await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sourceIndex: 'loyalty-docs',
+      categoryField: 'tier',
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sources: [{ index: 'loyalty-docs', categoryField: 'tier' }],
+    });
   });
 });
