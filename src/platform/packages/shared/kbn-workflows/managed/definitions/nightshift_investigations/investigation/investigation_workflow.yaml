@@ -277,7 +277,7 @@ steps:
               lists. Actionable steps belong in recommendations, not here.
           severity:
             type: string
-            enum: ['80-critical', '60-high', '40-medium', '20-low']
+            enum: ['critical', 'high', 'medium', 'low']
             description: >
               How severe the investigated situation is, rated from what this investigation confirmed:
               whether the affected operation fails, degrades, or still completes, and how broad the
