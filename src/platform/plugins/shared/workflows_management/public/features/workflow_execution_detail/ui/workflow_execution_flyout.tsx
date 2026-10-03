@@ -199,12 +199,14 @@ const StepDataSection = ({
   data,
   fieldPathPrefix,
   isFieldPathCopyable,
+  'data-test-subj': dataTestSubj,
 }: {
   label: string;
   data: unknown;
   fieldPathPrefix?: string;
   /** Hides copy on rows whose field is not a real template path. Copy is on for all rows if omitted. */
   isFieldPathCopyable?: (field: string) => boolean;
+  'data-test-subj'?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
@@ -339,6 +341,7 @@ const StepDataSection = ({
   return (
     <StepDetailAccordionSection
       title={label}
+      data-test-subj={dataTestSubj}
       toggleAriaLabel={i18n.translate('workflows.executionFlyout.stepDetail.toggleNamedSection', {
         defaultMessage: '{label} section',
         values: { label },
@@ -358,6 +361,7 @@ const StepDataSection = ({
                 size="xs"
                 iconType="chevronSingleDown"
                 iconSide="right"
+                data-test-subj="workflowStepDataViewToggle"
                 onClick={() => setIsViewPopoverOpen((v) => !v)}
               >
                 {effectiveView === 'table'
@@ -387,6 +391,7 @@ const StepDataSection = ({
                 <EuiContextMenuItem
                   key="code"
                   icon={effectiveView === 'code' ? 'check' : 'empty'}
+                  data-test-subj="workflowViewMode_json"
                   onClick={() => {
                     setView('code');
                     setIsViewPopoverOpen(false);
@@ -409,6 +414,7 @@ const StepDataSection = ({
           paddingSize="m"
           overflowHeight={300}
           isCopyable
+          data-test-subj="workflowStepResultJsonCode"
           css={`
             & .euiCodeBlock__controls {
               background: transparent;
@@ -1001,6 +1007,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 ) : activeStepExecution?.stepType === 'enter-case-branch' ? (
                   <StepDataSection
                     key={`status-${selectedStepExecutionId}`}
+                    data-test-subj="workflowStepDataSection_status"
                     label={i18n.translate('workflows.executionFlyout.caseBranch.statusLabel', {
                       defaultMessage: 'Status',
                     })}
@@ -1050,6 +1057,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
+                      data-test-subj="workflowStepDataSection_input"
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
                         defaultMessage: 'Input',
                       })}
@@ -1062,6 +1070,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {executionMetadata && (
                       <StepDataSection
                         key={`metadata-${selectedStepExecutionId}`}
+                        data-test-subj="workflowStepDataSection_metadata"
                         label={i18n.translate('workflows.executionFlyout.stepDetail.metadata', {
                           defaultMessage: 'Metadata',
                         })}
@@ -1100,6 +1109,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
+                      data-test-subj="workflowStepDataSection_input"
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
                         defaultMessage: 'Input',
                       })}
@@ -1122,6 +1132,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       (hasStepError ? (
                         <StepDataSection
                           key={`error-${selectedStepExecutionId}`}
+                          data-test-subj="workflowStepDataSection_error"
                           label={i18n.translate('workflows.executionFlyout.stepDetail.error', {
                             defaultMessage: 'Error',
                           })}
@@ -1130,6 +1141,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       ) : stepOutputData != null ? (
                         <StepDataSection
                           key={`output-${selectedStepExecutionId}`}
+                          data-test-subj="workflowStepDataSection_output"
                           label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
                             defaultMessage: 'Output',
                           })}
@@ -1174,6 +1186,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   color="text"
                   flush="left"
                   onClick={onClose}
+                  data-test-subj="workflowBackToExecutionsLink"
                 >
                   {i18nTexts.back}
                 </EuiButtonEmpty>
@@ -1270,6 +1283,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
                 {workflowExecution ? (
                   <div
+                    data-execution-status={workflowExecution.status}
                     css={{
                       border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
                       borderRadius: '10px',
@@ -1342,7 +1356,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                                     })}
                               </EuiLink>
                             ) : (
-                              <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
+                              <EuiText
+                                size="s"
+                                css={{ fontWeight: 600, fontSize: '12px' }}
+                                data-test-subj="workflowExecutionStatus"
+                              >
                                 {getStatusLabel(workflowExecution.status)}
                               </EuiText>
                             )}
