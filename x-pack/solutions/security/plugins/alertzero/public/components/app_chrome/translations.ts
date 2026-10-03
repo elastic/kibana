@@ -13,22 +13,6 @@ export const BRAND_TITLE = i18n.translate('xpack.alertzero.chrome.brand', {
   defaultMessage: 'AlertZero',
 });
 
-export const NAV_ALERTS = i18n.translate('xpack.alertzero.chrome.nav.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-export const NAV_ATTACKS = i18n.translate('xpack.alertzero.chrome.nav.attacks', {
-  defaultMessage: 'Attacks',
-});
-
-export const NAV_THREAT_HUNT = i18n.translate('xpack.alertzero.chrome.nav.threatHunt', {
-  defaultMessage: 'Threat hunt',
-});
-
-export const NAV_STREAMS = i18n.translate('xpack.alertzero.chrome.nav.streams', {
-  defaultMessage: 'Streams',
-});
-
 export const NAV_ESCALATIONS = i18n.translate('xpack.alertzero.chrome.nav.escalations', {
   defaultMessage: 'Escalations',
 });

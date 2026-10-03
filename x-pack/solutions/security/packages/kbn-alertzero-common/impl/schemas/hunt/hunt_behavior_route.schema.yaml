@@ -68,8 +68,8 @@ paths:
                         - technique_name
                         - reference
                         - tactic_ids
-                        - proposed_esql_rule
-                        - rule_name
+                        - validated_esql
+                        - title
                         - severity
                         - risk_score
                       properties:
@@ -91,10 +91,14 @@ paths:
                             type: string
                         parent_technique_id:
                           type: string
-                        proposed_esql_rule:
+                        validated_esql:
                           type: string
-                        rule_name:
+                          description: >-
+                            The query Tier 2 generated and validated (and, when grounded,
+                            executed) to hunt this technique.
+                        title:
                           type: string
+                          description: Display title for this hunted finding.
                         severity:
                           type: string
                           enum: [critical, high, medium, low]

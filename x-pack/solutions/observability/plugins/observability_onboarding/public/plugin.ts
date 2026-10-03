@@ -45,6 +45,7 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT,
 } from '../common/telemetry_events';
 import {
   registerAddDataExperienceContext,
@@ -143,6 +144,7 @@ export class ObservabilityOnboardingPlugin
     core.analytics.registerEventType(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
     );
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT);
     registerAddDataExperienceContext(core.analytics, this.addDataExperience$);
 
     return {

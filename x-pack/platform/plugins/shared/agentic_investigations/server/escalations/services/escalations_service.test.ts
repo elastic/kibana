@@ -115,9 +115,15 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     }),
   };
 
+  const attachmentsClient = {
+    bulkCreate: jest.fn().mockResolvedValue({ created: [], errors: [] }),
+  };
+  const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
+
   const service = new EscalationsService({
     logger,
     getConversationClient,
+    getAttachmentsClient,
     conversationTemplates,
     getInvestigationStatusService: () => investigationStatusService as never,
   });
@@ -126,6 +132,8 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     service,
     client,
     getConversationClient,
+    getAttachmentsClient,
+    attachmentsClient,
     conversationTemplates,
     investigationStatusService,
   };
@@ -369,7 +377,7 @@ describe('EscalationsService.create', () => {
   });
 });
 
-describe('EscalationsService.update', () => {
+describe('EscalationsService.link', () => {
   it('throws NotAnEscalationError when target is not an escalation', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -379,11 +387,11 @@ describe('EscalationsService.update', () => {
     });
 
     await expect(
-      service.update(request, 'not-an-escalation', { title: 'New title' })
+      service.link(request, 'not-an-escalation', { linked_investigations: ['inv-1'] })
     ).rejects.toBeInstanceOf(NotAnEscalationError);
   });
 
-  it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {
+  it('calls patchMetadata with appended linked_investigations (not replace)', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -392,7 +400,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2'],
     });
 
@@ -414,7 +422,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2', 'inv-3'],
     });
 
@@ -423,35 +431,7 @@ describe('EscalationsService.update', () => {
     expect(updated).toEqual(['inv-1', 'inv-2', 'inv-3']);
   });
 
-  it('calls client.update when title is provided', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.update).toHaveBeenCalledWith({ id: 'escalation-1', title: 'Renamed' });
-  });
-
-  it('does not call patchMetadata for a title-only update', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('does not call client.update for a links-only update', async () => {
+  it('does not call client.update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -460,7 +440,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-1'],
     });
 
@@ -1090,5 +1070,73 @@ describe('EscalationsService.listLinkedInvestigations', () => {
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
 
     expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
+});
+
+describe('EscalationsService.addAttachments', () => {
+  const MOCK_INVESTIGATION_WITH_ATTACHMENTS = {
+    ...MOCK_INVESTIGATION,
+    attachments: [
+      {
+        id: 'att-1',
+        type: 'text',
+        active: true,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: { text: 'hello' },
+            created_at: '2026-01-01T00:00:00.000Z',
+            content_hash: 'h1',
+            estimated_tokens: 2,
+          },
+        ],
+      },
+    ],
+  };
+
+  it('copies attachments from a linked investigation into the escalation', async () => {
+    const { service, attachmentsClient } = makeService({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_ESCALATION)
+        .mockResolvedValueOnce(MOCK_INVESTIGATION_WITH_ATTACHMENTS),
+    });
+    (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({
+      created: [MOCK_INVESTIGATION_WITH_ATTACHMENTS.attachments[0]],
+      errors: [],
+    });
+
+    const result = await service.addAttachments(request, 'escalation-1', ['inv-1']);
+
+    expect(result).toEqual({ copied: 1, failed: 0 });
+    expect(attachmentsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'escalation-1' })
+    );
+  });
+
+  it('throws NotAnEscalationError when the target is not an escalation', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
+    });
+
+    await expect(service.addAttachments(request, 'not-an-escalation', ['inv-1'])).rejects.toThrow(
+      NotAnEscalationError
+    );
+  });
+
+  it('skips non-investigation conversations and warns', async () => {
+    const { service, attachmentsClient } = makeService({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_ESCALATION)
+        .mockResolvedValueOnce({ ...MOCK_ESCALATION, id: 'other-conv' }),
+    });
+
+    const result = await service.addAttachments(request, 'escalation-1', ['other-conv']);
+
+    expect(result).toEqual({ copied: 0, failed: 0 });
+    expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-investigation'));
   });
 });
