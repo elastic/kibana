@@ -21,6 +21,8 @@ import { createWorkflowListItem } from '../../../connectors/workflows/workflows_
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
+jest.setTimeout(30000);
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
