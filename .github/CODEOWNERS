@@ -1614,7 +1614,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
 /src/platform/test/functional/apps/management/ccs_compatibility @elastic/kibana-discover
 /src/platform/test/functional/apps/management/group1 @elastic/kibana-discover
-/src/platform/test/functional/apps/management/group2 @elastic/kibana-discover
 /src/platform/test/functional/apps/management/group3 @elastic/kibana-discover
 /src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-discover
 /x-pack/platform/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-discover
@@ -2771,7 +2770,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_sou
 x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_automations @elastic/context-eng
 
 # Management Experience - Deployment Management
-/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-core @elastic/kibana-discover # Assigned per test/functional/apps/management/group2/_scripted_fields_filter.ts && Scout saved_objects_management import suites
+/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-core @elastic/kibana-discover # Assigned per Scout saved_objects_management import suites
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-management

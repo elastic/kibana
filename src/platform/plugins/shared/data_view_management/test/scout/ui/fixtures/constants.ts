@@ -10,6 +10,9 @@
 export const ES_ARCHIVE_LOGSTASH_FUNCTIONAL =
   'x-pack/platform/test/fixtures/es_archives/logstash_functional';
 
+/** Holds the logs of 2015-09-17 and 2015-09-18, which the scripted field assertions depend on. */
+export const ES_ARCHIVE_MAKELOGS = 'src/platform/test/functional/fixtures/es_archiver/makelogs';
+
 export const DATA_VIEWS_MANAGEMENT_PATH = '/app/management/kibana/dataViews';
 
 export const FEATURE_CONTROLS_CUSTOM_SPACE = {
