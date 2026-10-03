@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
-import { updatePrivateLocationMonitors } from './helpers';
+import { redeployPrivateLocationMonitors, updatePrivateLocationMonitors } from './helpers';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
@@ -23,6 +23,7 @@ jest.mock('./helpers', () => {
   return {
     ...actual,
     updatePrivateLocationMonitors: jest.fn().mockResolvedValue(undefined),
+    redeployPrivateLocationMonitors: jest.fn().mockResolvedValue({ failedCount: 0 }),
   };
 });
 
@@ -43,6 +44,7 @@ const makeRouteContext = (body: Record<string, unknown>) => {
   const routeContext = {
     request: { params: { locationId: 'loc-1' }, body },
     response,
+    spaceId: 'default',
     savedObjectsClient: {},
     monitorConfigRepository: {
       findDecryptedMonitors: jest.fn().mockResolvedValue([]),
@@ -50,6 +52,11 @@ const makeRouteContext = (body: Record<string, unknown>) => {
     server: {
       coreStart: {
         savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
+      },
+      fleet: {
+        agentPolicyService: {
+          get: jest.fn().mockResolvedValue({ id: 'ap-2', space_ids: ['default'] }),
+        },
       },
     },
   } as any;
@@ -208,6 +215,124 @@ describe('editPrivateLocationRoute', () => {
   });
 });
 
+describe('editPrivateLocationRoute agent policy change', () => {
+  const monitors = [{ id: 'm-1', namespaces: ['default'] }];
+
+  const setup = (body: Record<string, unknown> = { agentPolicyId: 'ap-2' }) => {
+    jest
+      .spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation')
+      .mockResolvedValue(existingLocation as any);
+    const edit = jest
+      .spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation')
+      .mockResolvedValue({
+        ...existingLocation,
+        attributes: { ...existingLocation.attributes, agentPolicyId: 'ap-2' },
+      } as any);
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
+    ]);
+    const { routeContext, response } = makeRouteContext(body);
+    routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue(monitors);
+    routeContext.server.security = {
+      authz: {
+        checkSavedObjectsPrivilegesWithRequest: jest
+          .fn()
+          .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: true })),
+      },
+    };
+    response.badRequest.mockImplementation((options: any) => ({ status: 400, ...options }));
+    response.customError.mockImplementation((options: any) => options);
+    return { edit, routeContext, response };
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
+  it('redeploys monitors onto the new agent policy before persisting it', async () => {
+    const { edit, routeContext } = setup();
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(redeployPrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationId: 'loc-1',
+        monitorsInLocation: monitors,
+        allPrivateLocations: [expect.objectContaining({ id: 'loc-1', agentPolicyId: 'ap-2' })],
+      })
+    );
+    expect(edit).toHaveBeenCalledWith('loc-1', {
+      label: 'Loc',
+      tags: ['t'],
+      agentPolicyId: 'ap-2',
+    });
+    expect((redeployPrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      edit.mock.invocationCallOrder[0]
+    );
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+  });
+
+  it('rejects an agent policy that is not available in the current space', async () => {
+    const { edit, routeContext } = setup();
+    routeContext.server.fleet.agentPolicyService.get.mockRejectedValue(new Error('not found'));
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(result).toEqual(expect.objectContaining({ status: 400 }));
+    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an agent policy that does not cover the location spaces', async () => {
+    const { edit, routeContext } = setup();
+    routeContext.server.fleet.agentPolicyService.get.mockResolvedValue({
+      id: 'ap-2',
+      space_ids: ['other-space'],
+    });
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(result).toEqual(expect.objectContaining({ status: 400 }));
+    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an agent policy already used by another private location', async () => {
+    const { edit, routeContext } = setup();
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
+      { id: 'loc-2', label: 'Other', agentPolicyId: 'ap-2', isServiceManaged: false },
+    ]);
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(result).toEqual(expect.objectContaining({ status: 400 }));
+    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('persists the new agent policy and reports monitors that failed to redeploy', async () => {
+    const { edit, routeContext } = setup();
+    (redeployPrivateLocationMonitors as jest.Mock).mockResolvedValueOnce({ failedCount: 2 });
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ agentPolicyId: 'ap-2' }));
+    expect(result).toEqual(expect.objectContaining({ statusCode: 500 }));
+  });
+
+  it('skips the redeploy when no monitors use the location', async () => {
+    const { edit, routeContext } = setup();
+    routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([]);
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(redeployPrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ agentPolicyId: 'ap-2' }));
+  });
+});
+
 describe('EditPrivateLocationSchema', () => {
   it('rejects unknown keys so a typo-only update cannot succeed as a no-op', () => {
     expect(EditPrivateLocationSchema.safeParse({ lable: 'x' }).success).toBe(false);
@@ -219,5 +344,10 @@ describe('EditPrivateLocationSchema', () => {
 
   it('accepts a known partial update', () => {
     expect(EditPrivateLocationSchema.parse({ label: 'x' })).toEqual({ label: 'x' });
+  });
+
+  it('accepts an agent policy change and rejects an empty agent policy id', () => {
+    expect(EditPrivateLocationSchema.safeParse({ agentPolicyId: 'ap-2' }).success).toBe(true);
+    expect(EditPrivateLocationSchema.safeParse({ agentPolicyId: '' }).success).toBe(false);
   });
 });

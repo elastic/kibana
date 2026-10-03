@@ -311,4 +311,49 @@ describe('SyntheticsMonitorClient', () => {
       maintenanceWindows
     );
   });
+
+  it('redeploys only the given private location, deleting before recreating', async () => {
+    const spaceId = 'test-space';
+    const maintenanceWindows = [{ id: 'mw-1' }];
+    syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+    jest.spyOn(syntheticsService, 'getSyntheticsParams').mockResolvedValue({ [spaceId]: {} });
+
+    const monitorWithPrivateLocations = {
+      ...monitor,
+      locations: [
+        locations[0],
+        { id: 'loc-0', label: 'Test private location', isServiceManaged: false },
+        { id: 'other-private', label: 'Other', isServiceManaged: false },
+      ],
+    } as unknown as MonitorFields;
+
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    client.privateLocationAPI.deleteMonitors = jest.fn().mockResolvedValue(undefined);
+    client.privateLocationAPI.createPackagePolicies = jest
+      .fn()
+      .mockResolvedValue({ created: [], failed: [] });
+
+    await client.redeployPrivateLocation({
+      monitors: [{ monitor: monitorWithPrivateLocations, id: 'test-id-1' }],
+      locationId: 'loc-0',
+      allPrivateLocations: privateLocations,
+      spaceId,
+    });
+
+    const scopedConfig = expect.objectContaining({
+      locations: [expect.objectContaining({ id: 'loc-0', isServiceManaged: false })],
+    });
+    expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledWith([scopedConfig], spaceId);
+    expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledWith(
+      [expect.objectContaining({ config: scopedConfig })],
+      privateLocations,
+      spaceId,
+      maintenanceWindows
+    );
+    expect(
+      (client.privateLocationAPI.deleteMonitors as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan(
+      (client.privateLocationAPI.createPackagePolicies as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
 });

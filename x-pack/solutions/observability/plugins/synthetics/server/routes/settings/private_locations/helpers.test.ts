@@ -7,6 +7,7 @@
 
 import {
   allLocationsToClientContract,
+  redeployPrivateLocationMonitors,
   toClientContract,
   updatePrivateLocationMonitors,
 } from './helpers';
@@ -255,6 +256,50 @@ describe('updatePrivateLocationMonitors', () => {
         monitorsInLocation: [mockMonitors[0]] as any,
       })
     ).rejects.toThrow(/failed to update monitors/i);
+  });
+});
+
+describe('redeployPrivateLocationMonitors', () => {
+  const monitorsInLocation = [
+    { id: 'monitor-1', attributes: { type: 'http', locations: [] }, namespaces: ['space-a'] },
+    { id: 'monitor-2', attributes: { type: 'http', locations: [] }, namespaces: ['space-b'] },
+    { id: 'monitor-3', attributes: { type: 'http', locations: [] }, namespaces: ['space-a'] },
+  ];
+
+  it('redeploys per monitor space and sums the failed creates', async () => {
+    const redeployPrivateLocation = jest
+      .fn()
+      .mockResolvedValueOnce({ created: [], failed: [{}] })
+      .mockResolvedValueOnce({ created: [], failed: [{}, {}] });
+    const routeContext = {
+      syntheticsMonitorClient: { redeployPrivateLocation },
+    } as unknown as RouteContext;
+    const allPrivateLocations = [{ id: 'loc-1', agentPolicyId: 'ap-2' }] as any;
+
+    const result = await redeployPrivateLocationMonitors({
+      locationId: 'loc-1',
+      allPrivateLocations,
+      routeContext,
+      monitorsInLocation: monitorsInLocation as any,
+    });
+
+    expect(redeployPrivateLocation).toHaveBeenCalledTimes(2);
+    expect(redeployPrivateLocation).toHaveBeenCalledWith({
+      locationId: 'loc-1',
+      allPrivateLocations,
+      spaceId: 'space-a',
+      monitors: [
+        expect.objectContaining({ id: 'monitor-1' }),
+        expect.objectContaining({ id: 'monitor-3' }),
+      ],
+    });
+    expect(redeployPrivateLocation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'space-b',
+        monitors: [expect.objectContaining({ id: 'monitor-2' })],
+      })
+    );
+    expect(result).toEqual({ failedCount: 3 });
   });
 });
 
