@@ -281,6 +281,7 @@ export {
 export {
   canonicalizeTag,
   canonicalizeTags,
+  countDistinctTags,
   MAX_MEMORY_TAG_LENGTH,
   MAX_MEMORY_TAGS_PER_PAGE,
 } from './memory_tags';

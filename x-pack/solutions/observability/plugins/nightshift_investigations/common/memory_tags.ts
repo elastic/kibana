@@ -54,6 +54,21 @@ export const canonicalizeTag = (tag: string): string | null => {
 };
 
 /**
+ * How many distinct keywords a list of tags names.
+ *
+ * A tag filter is bounded by keywords as well as by terms, and the two counts are
+ * different numbers: one request's spellings are terms of one keyword.
+ */
+export const countDistinctTags = (tags: readonly string[]): number => {
+  const canonical = new Set<string>();
+  for (const tag of tags) {
+    const key = canonicalizeTag(tag);
+    if (key !== null) canonical.add(key);
+  }
+  return canonical.size;
+};
+
+/**
  * Canonicalizes a list of tags, dropping empties and duplicates in first-seen
  * order. Does not cap the length: the cap belongs to the write layer, and a read
  * must still report every tag a stored document carries.

@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
@@ -83,12 +84,11 @@ export const MAX_TAG_FILTER_KEYWORDS = MAX_MEMORY_TAGS_PER_PAGE;
 export const MAX_TAG_SPELLINGS_PER_KEYWORD = MAX_MEMORY_TAGS_PER_PAGE;
 
 /**
- * Terms the tag query may carry. The client sends each selected keyword's
- * canonical key plus every original spelling it was seen spelled, so this bounds
- * keywords × spellings rather than keywords alone. The request is a query
- * string, so it is bounded more tightly than one page's full tag list.
+ * Terms the tag query may carry: the client sends each selected keyword's
+ * canonical key plus every original spelling it was seen spelled, so the bound is
+ * the keyword cap times the spelling cap rather than either alone.
  */
-export const MAX_TAG_FILTER_TERMS = MAX_TAG_FILTER_KEYWORDS * 8;
+export const MAX_TAG_FILTER_TERMS = MAX_TAG_FILTER_KEYWORDS * MAX_TAG_SPELLINGS_PER_KEYWORD;
 
 /**
  * Longest single tag term. Canonical tags are capped far lower; the bound is only
@@ -457,7 +457,14 @@ export const createMemoryPageStore = ({
       if (keyword === null) continue;
       let spellings = byKeyword.get(keyword);
       if (spellings === undefined) {
-        if (byKeyword.size >= MAX_TAG_FILTER_KEYWORDS) continue;
+        // Dropping the surplus would answer a different question than the one
+        // asked: an AND filter silently narrowed to its first N keywords looks
+        // authoritative and is wrong, and nothing downstream can tell.
+        if (byKeyword.size >= MAX_TAG_FILTER_KEYWORDS) {
+          throw badRequest(
+            `A Semantic Memory tag filter may name at most ${MAX_TAG_FILTER_KEYWORDS} keywords`
+          );
+        }
         spellings = [keyword];
         byKeyword.set(keyword, spellings);
       }

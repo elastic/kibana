@@ -9,7 +9,9 @@ import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { MemoryPage } from '../../common/memory';
 import {
   MAX_PAGE_SIZE,
+  MAX_TAG_FILTER_KEYWORDS,
   MAX_TAG_FILTER_TERMS,
+  MAX_TAG_SPELLINGS_PER_KEYWORD,
   MAX_TAG_TERM_LENGTH,
   MemoryVersionConflictError,
 } from '../memory/page_store';
@@ -206,6 +208,12 @@ describe('memory route request bounds', () => {
       'more terms than the tag bound',
       Array.from({ length: MAX_TAG_FILTER_TERMS + 1 }, (_, i) => `t${i}`),
     ],
+    [
+      // The term bound is keywords × spellings, so a request can sit well inside
+      // it and still name more keywords than the store will filter by.
+      'more distinct keywords than the store will filter by',
+      Array.from({ length: MAX_TAG_FILTER_KEYWORDS + 1 }, (_, i) => `keyword ${i}`),
+    ],
   ])('rejects %s on the list route', (_label, tags) => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
     expect(params.safeParse({ query: { tags } }).success).toBe(false);
@@ -213,7 +221,14 @@ describe('memory route request bounds', () => {
 
   it('accepts the full set of tag terms the client can send', () => {
     const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
-    const tags = Array.from({ length: MAX_TAG_FILTER_TERMS }, (_, i) => `t${i}`);
+    // Every keyword the cap allows, each spelled as many ways as it may be: the
+    // two bounds are independent, so the largest legal request fills both.
+    const tags = Array.from({ length: MAX_TAG_FILTER_KEYWORDS }, (_, keyword) =>
+      Array.from({ length: MAX_TAG_SPELLINGS_PER_KEYWORD }, (_unused, spelling) =>
+        spelling === 0 ? `keyword${keyword}` : `keyword${keyword}${' '.repeat(spelling)}`
+      )
+    ).flat();
+    expect(tags).toHaveLength(MAX_TAG_FILTER_TERMS);
     expect(params.safeParse({ query: { tags } }).success).toBe(true);
   });
 

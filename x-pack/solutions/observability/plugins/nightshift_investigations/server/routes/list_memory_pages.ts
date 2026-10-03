@@ -7,8 +7,13 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { MEMORY_FILTERS } from '../../common/memory';
-import { MAX_PAGE_SIZE, MAX_TAG_FILTER_TERMS, MAX_TAG_TERM_LENGTH } from '../memory/page_store';
+import { countDistinctTags, MEMORY_FILTERS } from '../../common';
+import {
+  MAX_PAGE_SIZE,
+  MAX_TAG_FILTER_KEYWORDS,
+  MAX_TAG_FILTER_TERMS,
+  MAX_TAG_TERM_LENGTH,
+} from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
@@ -38,6 +43,13 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
         tags: z
           .array(z.string().min(1).max(MAX_TAG_TERM_LENGTH))
           .max(MAX_TAG_FILTER_TERMS)
+          // The store refuses a filter naming more keywords than one memory could
+          // carry, because it cannot narrow an AND filter without answering a
+          // different question than the one asked. Reject it here, where the
+          // caller learns which request was wrong.
+          .refine((tags) => countDistinctTags(tags) <= MAX_TAG_FILTER_KEYWORDS, {
+            message: `at most ${MAX_TAG_FILTER_KEYWORDS} distinct keywords`,
+          })
           .optional(),
       })
       .optional()

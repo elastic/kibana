@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { badRequest } from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { MEMORY_INDEX } from '../../common/memory';
 import { HALF_LIFE_SEC } from './ranking';
@@ -605,17 +606,6 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    // More keywords than the cap: the extra ones are dropped rather than making
-    // the boolean clause arbitrarily large.
-    const tooManyKeywords = Array.from(
-      { length: MAX_TAG_FILTER_KEYWORDS + 5 },
-      (_, i) => `keyword ${i}`
-    );
-    await store.list({ tags: tooManyKeywords });
-    const many = (search.mock.calls[0][0] as { query: { bool: { filter: unknown[] } } }).query.bool
-      .filter;
-    expect(many).toHaveLength(MAX_TAG_FILTER_KEYWORDS + 2);
-
     // Too many spellings of one keyword: the surplus is dropped, not kept. Each
     // spelling differs only in its internal spacing, so they all canonicalize to
     // the same keyword — which is exactly the group the cap applies to.
@@ -625,9 +615,29 @@ describe('createMemoryPageStore', () => {
     );
     await store.list({ tags: ['invoke-agent', ...tooManySpellings] });
     const spellings = (
-      search.mock.calls[1][0] as { query: { bool: { filter: Array<{ bool?: unknown }> } } }
+      search.mock.calls[0][0] as { query: { bool: { filter: Array<{ bool?: unknown }> } } }
     ).query.bool.filter[2].bool as { should: unknown[] };
     expect(spellings.should).toHaveLength(MAX_TAG_SPELLINGS_PER_KEYWORD);
+
+    // More keywords than the cap is refused rather than answered for the first
+    // `MAX_TAG_FILTER_KEYWORDS` of them: a silently narrowed AND filter returns
+    // rows and a total that describe a question the caller never asked.
+    const tooManyKeywords = Array.from(
+      { length: MAX_TAG_FILTER_KEYWORDS + 5 },
+      (_, i) => `keyword ${i}`
+    );
+    await expect(store.list({ tags: tooManyKeywords })).rejects.toThrow(
+      badRequest(
+        `A Semantic Memory tag filter may name at most ${MAX_TAG_FILTER_KEYWORDS} keywords`
+      )
+    );
+    // The cap counts keywords, not terms: every spelling of the keywords a
+    // request is allowed to name still passes.
+    await expect(
+      store.list({
+        tags: Array.from({ length: MAX_TAG_FILTER_KEYWORDS }, (_, i) => `keyword ${i} ${i}`),
+      })
+    ).resolves.toBeDefined();
   });
 
   it('reports empty stats rather than failing when the index does not exist yet', async () => {
