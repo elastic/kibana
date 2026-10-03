@@ -8,3 +8,4 @@
 export { classNames } from './src/class_names';
 export { ISOMER_ROOT_CLASS, isomerDistillery } from './src/distillery';
 export { ISOMER_STYLE_COLLECTOR, isomerStyleAdapter } from './src/style_adapter';
+export { createIsomerStyleContext } from './src/style_context';

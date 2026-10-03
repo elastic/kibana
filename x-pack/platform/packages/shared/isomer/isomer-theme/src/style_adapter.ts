@@ -9,7 +9,7 @@ import type { StyleHandle, StylesCollector } from '@elastic/distillate';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import type { HTMLStyleAdapter } from '@elastic/isomer-sdk/html';
 import { isomerDistillery } from './distillery';
-import { rootStyles } from './root_styles';
+import { collectRootStyles } from './root_styles';
 
 /** The `styleCollector` tag of packs whose styles are collected by {@link isomerStyleAdapter}. */
 export const ISOMER_STYLE_COLLECTOR = 'distillate';
@@ -22,8 +22,7 @@ export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector
   // Compact names depend on the complete collected set, which doesn't exist until the markup is written.
   createCollector: () => {
     const collector = artifactCollector('readable');
-    const { root, light, dark } = rootStyles.handles;
-    collector.use([root, light, dark]);
+    collectRootStyles(collector);
     return collector;
   },
   createRenderContext: (collector) => ({

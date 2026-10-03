@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import type { StylesCollector } from '@elastic/distillate';
 import { rule } from '@elastic/distillate';
 import { ISOMER_ROOT_CLASS, isomerDistillery } from './distillery';
 
-const root = `.${ISOMER_ROOT_CLASS}`;
+const ROOT_SELECTOR = `.${ISOMER_ROOT_CLASS}`;
 
 /** EUI's base text style and color scheme for the `section` every Isomer surface wraps content in. */
 export const rootStyles = isomerDistillery.createStyleModule(
   'isomerRoot',
   ({ decls, tokens: { color, font } }) => ({
     root: rule(
-      () => root,
+      () => ROOT_SELECTOR,
       decls`
         color: ${color.text.paragraph};
         font-family: ${font.family.sans};
@@ -25,7 +26,17 @@ export const rootStyles = isomerDistillery.createStyleModule(
       `,
       { auto: false }
     ),
-    light: rule(() => `${root}[data-theme='light']`, decls`color-scheme: light;`, { auto: false }),
-    dark: rule(() => `${root}[data-theme='dark']`, decls`color-scheme: dark;`, { auto: false }),
+    light: rule(() => `${ROOT_SELECTOR}[data-theme='light']`, decls`color-scheme: light;`, {
+      auto: false,
+    }),
+    dark: rule(() => `${ROOT_SELECTOR}[data-theme='dark']`, decls`color-scheme: dark;`, {
+      auto: false,
+    }),
   })
 );
+
+/** Collects the root styles, which no primitive resolves on its own. */
+export const collectRootStyles = (collector: StylesCollector): void => {
+  const { root, light, dark } = rootStyles.handles;
+  collector.use([root, light, dark]);
+};
