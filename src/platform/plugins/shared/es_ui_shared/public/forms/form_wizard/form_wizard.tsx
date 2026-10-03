@@ -19,8 +19,6 @@ import { FormWizardNav } from './form_wizard_nav';
 interface Props<T extends object, S extends string> extends ProviderProps<T> {
   isSaving?: boolean;
   apiError: JSX.Element | null;
-  /** Where `apiError` renders: above the step content (default) or just above the nav buttons. */
-  apiErrorPosition?: 'top' | 'bottom';
   texts?: Partial<NavTexts>;
   rightContentNav?: JSX.Element | null | ((stepId: S) => JSX.Element | null);
 }
@@ -30,7 +28,6 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
   defaultActiveStep,
   defaultValue,
   apiError,
-  apiErrorPosition = 'top',
   isEditing,
   isSaving,
   onSave,
@@ -127,14 +124,12 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
               <EuiSpacer size="l" />
 
               {/* Any possible API error when saving/updating */}
-              {apiErrorPosition === 'top' ? apiError : null}
+              {apiError}
 
               {/* Active step content */}
               {children}
 
               <EuiSpacer size="l" />
-
-              {apiErrorPosition === 'bottom' ? apiError : null}
 
               {/* Button navigation */}
               <FormWizardNav

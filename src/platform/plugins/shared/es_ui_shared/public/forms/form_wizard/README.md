@@ -15,7 +15,6 @@ const MyForm = () => {
       isEditing={isEditing} // A boolean that will indicate if all steps are already "completed" and thus valid or if we need to complete them in order
       isSaving={isSaving} // A boolean to show a "Saving..." text on the button on the last step
       apiError={apiError} // Any API error to display on top of wizard
-      apiErrorPosition="top" // Where to display the API error: "top" (default) above the step content, or "bottom" just above the nav buttons
       texts={i18nTexts} // i18n translations for the nav button.
     >
       <FormWizarStep id="contentOne" lable="Label for the step">

@@ -613,7 +613,10 @@ export class NightshiftInvestigationsPlugin
         includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
       })
       .asScopedToNamespace(spaceId);
-    return new SavedObjectInvestigationRepository({ savedObjectsClient });
+    return new SavedObjectInvestigationRepository({
+      savedObjectsClient,
+      logger: this.logger.get('investigation_repository'),
+    });
   };
 
   /**
