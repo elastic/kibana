@@ -17,12 +17,24 @@ export { buildAlertingApiServices } from '../../alerting_api_services';
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log, config },
+      { apiServices, esClient, kbnClient, log, config, requestAuth },
       use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
+      let adminApiKeyHeader: Promise<Record<string, string>> | undefined;
+      const getActionPolicyAuthHeaders = () =>
+        (adminApiKeyHeader ??= requestAuth
+          .getApiKeyForAdmin()
+          .then(({ apiKeyHeader }) => apiKeyHeader));
+
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
+        alertingV2: buildAlertingApiServices({
+          esClient,
+          kbnClient,
+          log,
+          config,
+          getActionPolicyAuthHeaders,
+        }),
       };
       await use(extendedApiServices);
     },

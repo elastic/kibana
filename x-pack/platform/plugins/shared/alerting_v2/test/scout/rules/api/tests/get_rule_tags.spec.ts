@@ -34,7 +34,7 @@ apiTest.describe('Get rule tags API', { tag: testData.API_ENGINE_TAG }, () => {
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
-    readerHeaders = { ...readerCredentials.apiKeyHeader };
+    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -309,7 +309,7 @@ apiTest.describe('Get rule tags API', { tag: testData.API_ENGINE_TAG }, () => {
       );
 
       const response = await apiClient.get(TAGS_URL, {
-        headers: writerCredentials.apiKeyHeader,
+        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -326,7 +326,7 @@ apiTest.describe('Get rule tags API', { tag: testData.API_ENGINE_TAG }, () => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
       const response = await apiClient.get(TAGS_URL, {
-        headers: noAccessCredentials.apiKeyHeader,
+        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 
       expect(response).toHaveStatusCode(403);

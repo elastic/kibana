@@ -11,11 +11,11 @@ Each config has a global setup hook that turns on the `alerting:v2:enabled` adva
 | `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | API: `API_ENGINE_TAG`, except the custom-role-auth suites (`find_rules`, `match_rules`, `matcher_value_suggestions`), which stay `@local-stateful-classic` until ECH supports custom roles. |
 | `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | API: `API_ENGINE_TAG` |
 | `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | API: `API_ENGINE_TAG`, except the custom-role-auth suites (`create_ack_episode_action`, `create_tag_episode_action`, `rule_event_fields_suggestions`, `user_profiles_suggestions`), which stay `@local-stateful-classic` until ECH supports custom roles. |
-| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, rule history | — | `API_ENGINE_TAG`. API-only. |
+| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, rule history | — | `API_ENGINE_TAG`, except `implicit_index_privileges`, which is `tags.stateful.classic` because it creates native ES users. API-only. |
 | `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `API_ENGINE_TAG`. API-only. |
 | `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `API_ENGINE_TAG`. API-only. |
 | `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `API_ENGINE_TAG`. API-only. |
-| `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
+| `management` | — | `management_required_privileges` | Stateful classic and serverless Observability complete, the only solution that mounts the alerting v2 pages. UI-only. |
 | `agent_builder_skills` | Agent Builder alerting v2 skill gating | — | No global setup, so `alerting:v2:enabled` starts unset. API-only. |
 
 `API_ENGINE_TAG` (`common/constants.ts`) is the shared tag for API and engine suites, currently `tags.deploymentAgnostic`.
@@ -43,6 +43,11 @@ Rules are created with `SCHEDULE_INTERVAL` (`1m`), the default `xpack.alerting_v
 - `rules.run` resolves with the HTTP status; 409 (a run is already in flight) is expected while polling.
 
 Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatcher and execution-history suites, do not need `_run`.
+
+## Serverless
+
+- Action policy writes grant an API key for the caller, and on serverless that grant goes through UIAM, which rejects kbnClient's basic credentials. The API fixture therefore sends `apiServices.alertingV2.actionPolicies` requests with an admin API key from `requestAuth`.
+- Internal routes (`/internal/...`) are restricted on serverless; requests through `apiClient` must send `testData.COMMON_HEADERS` (it carries `x-elastic-internal-origin`).
 
 ## Layout
 

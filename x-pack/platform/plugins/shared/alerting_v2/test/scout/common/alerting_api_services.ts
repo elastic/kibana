@@ -28,6 +28,7 @@ import {
   getWorkflowsApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
+  type AuthHeadersProvider,
   type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
@@ -77,11 +78,13 @@ export const buildAlertingApiServices = ({
   kbnClient,
   log,
   config,
+  getActionPolicyAuthHeaders,
 }: {
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
   config: ScoutTestConfig;
+  getActionPolicyAuthHeaders?: AuthHeadersProvider;
 }): AlertingApiServices => {
   const taskManager = getTaskManagerService({ kbnClient, log });
   const rules = getRulesApiService({ kbnClient, log });
@@ -93,7 +96,11 @@ export const buildAlertingApiServices = ({
     ruleEvents: getRuleEventsApiService({ esClient, log, runRule: rules.run }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
-    actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    actionPolicies: getActionPoliciesApiService({
+      kbnClient,
+      log,
+      getAuthHeaders: getActionPolicyAuthHeaders,
+    }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
     ruleExecutions: getRuleExecutionsApiService({ esClient, log, runRule: rules.run }),

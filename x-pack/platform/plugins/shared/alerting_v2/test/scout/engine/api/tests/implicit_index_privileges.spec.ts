@@ -21,9 +21,10 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { EsClient, KibanaRole } from '@kbn/scout';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { apiTest, buildAlertEvent, testData } from '../fixtures';
+import { apiTest, buildAlertEvent } from '../fixtures';
 
 // The two index patterns the provider grants read on; also what a search must target so an
 // unauthorized identity resolves to "no index" (empty) rather than a 403.
@@ -225,9 +226,10 @@ const seenSpaceIds = async (
   return [...new Set(spaceIds)].sort();
 };
 
+// Stateful only: the personas are native ES users, which serverless does not support.
 apiTest.describe(
   'Alerting v2 alerts implicit index privileges',
-  { tag: testData.API_ENGINE_TAG },
+  { tag: tags.stateful.classic },
   () => {
     apiTest.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
       // Pre-create spaces.

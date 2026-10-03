@@ -15,7 +15,7 @@ import {
 
 test.describe(
   'Rules list - heading tabs privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
       browserAuth,
