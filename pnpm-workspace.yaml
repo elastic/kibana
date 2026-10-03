@@ -816,6 +816,7 @@ packages:
   - 'src/platform/packages/shared/kbn-ftr-llm-proxy'
   - 'src/platform/packages/shared/kbn-grok-ui'
   - 'src/platform/packages/shared/kbn-grouping'
+  - 'src/platform/packages/shared/kbn-http-swr-cache'
   - 'src/platform/packages/shared/kbn-human-readable-id'
   - 'src/platform/packages/shared/kbn-i18n'
   - 'src/platform/packages/shared/kbn-i18n-react'

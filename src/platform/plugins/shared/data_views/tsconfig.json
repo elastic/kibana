@@ -13,6 +13,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/http-swr-cache",
     "@kbn/core",
     "@kbn/data-views-types",
     "@kbn/data-view-validation",

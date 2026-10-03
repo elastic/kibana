@@ -809,6 +809,7 @@
     "@kbn/home-sample-data-card": "workspace:*",
     "@kbn/home-sample-data-tab": "workspace:*",
     "@kbn/home-sample-data-types": "workspace:*",
+    "@kbn/http-swr-cache": "workspace:*",
     "@kbn/human-readable-id": "workspace:*",
     "@kbn/i18n": "workspace:*",
     "@kbn/i18n-react": "workspace:*",

@@ -1,0 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export { respondWithSwrCache, SWR_CACHE_MAX_AGE_SETTING } from './src/respond_with_swr_cache';
+export type { RespondWithSwrCacheOptions } from './src/respond_with_swr_cache';

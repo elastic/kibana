@@ -2347,6 +2347,9 @@ importers:
       '@kbn/home-sample-data-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/home/sample_data_types
+      '@kbn/http-swr-cache':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-http-swr-cache
       '@kbn/human-readable-id':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-human-readable-id
@@ -8089,6 +8092,8 @@ importers:
   src/platform/packages/shared/kbn-grok-ui: {}
 
   src/platform/packages/shared/kbn-grouping: {}
+
+  src/platform/packages/shared/kbn-http-swr-cache: {}
 
   src/platform/packages/shared/kbn-human-readable-id: {}
 

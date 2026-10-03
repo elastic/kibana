@@ -6,15 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { createHash } from 'crypto';
 import { schema } from '@kbn/config-schema';
 import type {
   ElasticsearchClient,
   IRouter,
   PluginInitializerContext,
   RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
 } from '@kbn/core/server';
 import type { EsqlQueryResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, LoggerFactory } from '@kbn/logging';
@@ -26,27 +23,8 @@ import {
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE, TIMEFIELD_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { respondWithSwrCache } from '@kbn/http-swr-cache';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
-
-// Same default/"advanced setting" split `data_views`'s `fields` endpoint uses for
-// its own stale-while-revalidate caching (`DEFAULT_FIELD_CACHE_FRESHNESS`) - the
-// timefield is just as mapping-derived as field-caps data, so it reuses the same
-// `data_views:cache_max_age` setting rather than introducing a near-identical one.
-// `esql`'s kibana.jsonc lists `dataViews` as a requiredPlugin, so this setting is
-// always registered.
-const DEFAULT_TIMEFIELD_CACHE_FRESHNESS = 5;
-
-function calculateEtag(bodyAsString: string): string {
-  return createHash('sha256').update(bodyAsString).digest('hex');
-}
-
-function unwrapEtag(ifNoneMatch: string): string {
-  let requestHash = ifNoneMatch.replace(/^"(.+)"$/, '$1');
-  if (requestHash.indexOf('-') > -1) {
-    requestHash = requestHash.split('-')[0];
-  }
-  return requestHash;
-}
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
@@ -367,52 +345,14 @@ export const registerGetTimeFieldRoute = (
         throw result.error;
       }
 
-      return respondWithCacheHeaders(requestHandlerContext, request, response, result.body);
+      // A missing time field may be added by a mapping change soon, so don't cache it.
+      return respondWithSwrCache({
+        context: requestHandlerContext,
+        request,
+        response,
+        body: result.body,
+        cacheable: Boolean(result.body.timeField),
+      });
     }
   );
-};
-
-const respondWithCacheHeaders = async (
-  requestHandlerContext: RequestHandlerContext,
-  request: KibanaRequest,
-  response: KibanaResponseFactory,
-  body: { timeField: string | undefined }
-) => {
-  const core = await requestHandlerContext.core;
-  const uiSettings = core.uiSettings.client;
-
-  const bodyAsString = JSON.stringify(body);
-  const etag = calculateEtag(bodyAsString);
-
-  const headers: Record<string, string> = {
-    'content-type': 'application/json',
-    etag,
-  };
-
-  // Cache freshness is configurable in classic environments but not on serverless -
-  // same setting `data_views`'s `fields` endpoint already exposes for this exact
-  // category of data (mapping-derived, not document-data-derived).
-  let cacheMaxAge = DEFAULT_TIMEFIELD_CACHE_FRESHNESS;
-  const cacheMaxAgeSetting = await uiSettings.get<number | undefined>('data_views:cache_max_age');
-  if (cacheMaxAgeSetting !== undefined) {
-    cacheMaxAge = cacheMaxAgeSetting;
-  }
-
-  if (cacheMaxAge && body.timeField) {
-    const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
-    headers['cache-control'] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
-  } else {
-    headers['cache-control'] = 'private, no-cache';
-  }
-
-  const ifNoneMatch = request.headers['if-none-match'];
-  const ifNoneMatchString = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
-  if (ifNoneMatchString) {
-    const requestHash = unwrapEtag(ifNoneMatchString);
-    if (etag === requestHash) {
-      return response.notModified({ headers });
-    }
-  }
-
-  return response.ok({ body: bodyAsString, headers });
 };

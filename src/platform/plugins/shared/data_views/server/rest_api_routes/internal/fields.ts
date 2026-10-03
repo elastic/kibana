@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash } from 'crypto';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
-import { unwrapEtag } from '../../../common/utils';
+import { respondWithSwrCache } from '@kbn/http-swr-cache';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
 import type { IBody, IQuery } from './fields_for';
 import { parseFields, querySchema, validate } from './fields_for';
-import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
-
-export function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha256');
-  hash.update(srcBuffer);
-  return hash.digest('hex');
-}
 
 export const createHandler: (
   isRollupsEnabled: () => boolean
@@ -77,47 +69,12 @@ export const createHandler: (
         indices,
       };
 
-      const bodyAsString = JSON.stringify(body);
-
-      const etag = calculateHash(Buffer.from(bodyAsString));
-
-      const headers: Record<string, string> = {
-        'content-type': 'application/json',
-        etag,
-        vary: 'accept-encoding, user-hash',
-      };
-
-      // field cache is configurable in classic environment but not on serverless
-      let cacheMaxAge = DEFAULT_FIELD_CACHE_FRESHNESS;
-      const cacheMaxAgeSetting = await uiSettings.get<number | undefined>(
-        'data_views:cache_max_age'
-      );
-      if (cacheMaxAgeSetting !== undefined) {
-        cacheMaxAge = cacheMaxAgeSetting;
-      }
-
-      if (cacheMaxAge && fields.length) {
-        const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
-        headers[
-          'cache-control'
-        ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
-      } else {
-        headers['cache-control'] = 'private, no-cache';
-      }
-
-      const ifNoneMatch = request.headers['if-none-match'];
-      const ifNoneMatchString = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
-
-      if (ifNoneMatchString) {
-        const requestHash = unwrapEtag(ifNoneMatchString);
-        if (etag === requestHash) {
-          return response.notModified({ headers });
-        }
-      }
-
-      return response.ok({
-        body: bodyAsString,
-        headers,
+      return respondWithSwrCache({
+        context,
+        request,
+        response,
+        body,
+        cacheable: fields.length > 0,
       });
     } catch (error) {
       if (

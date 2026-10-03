@@ -628,6 +628,7 @@ src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appe
 src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/workchat-eng
 src/platform/packages/shared/kbn-grok-ui @elastic/streams-ui
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
+src/platform/packages/shared/kbn-http-swr-cache @elastic/kibana-discover
 src/platform/packages/shared/kbn-human-readable-id @elastic/workflows-eng
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
