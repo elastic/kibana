@@ -363,6 +363,15 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   // attachment for a report the hunt was legitimately asked to run, and truncating to fit
   // would store an id that resolves to nothing.
   report_id: z.string().trim().min(1).max(512),
+  /**
+   * Set only when this entry is scoped to a technique this run corroborated (the
+   * `techniqueId` the mapper built the entry for). Absent on the report-scoped fallback
+   * entry, whose `security_knowledge_indicators` can list every proposed technique
+   * without any of them having been individually confirmed. Packaging reads this to
+   * tell "confirmed for this technique" apart from "report-wide context that happens
+   * to mention this technique".
+   */
+  corroborated_technique_id: z.string().min(1).max(32).optional(),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
   entities: z.array(entityRefSchema).max(50),
   alerts: z.array(alertRefSchema).max(50).optional(),
