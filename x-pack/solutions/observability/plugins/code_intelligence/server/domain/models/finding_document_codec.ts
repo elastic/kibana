@@ -14,8 +14,8 @@ import { operationErrorRt } from './operation_result';
 import { signalTypeRt } from './query_codec';
 import { commitShaRt } from './repository_codec';
 
-/** Review states a finding can hold; the plugin only ever writes `open`. */
-export const findingStatusRt = t.keyof({ dismissed: null, open: null, reviewed: null });
+/** Review states a finding can hold; extraction only ever writes `open`. */
+export const findingStatusRt = t.keyof({ invalid: null, open: null, verified: null });
 export type FindingStatus = t.TypeOf<typeof findingStatusRt>;
 
 /** The review state every new finding starts in. */

@@ -16,15 +16,20 @@ import ReactDOM from 'react-dom';
 import type { CatalogSeverity } from '../common/catalog_filters';
 import { AddQueryToAgentContext, useAddQueryToAgent } from './agent_builder/add_query_context';
 import { useAgentBuilderStager } from './agent_builder/agent_builder_stager';
+import {
+  InvestigateFindingContext,
+  useInvestigateFinding,
+} from './agent_builder/investigate_finding_context';
 import type { PageContext } from './agent_builder/page_context';
 import { useAgentBuilderPageContext } from './agent_builder/use_agent_builder_page_context';
 import type { Repository } from './api';
 import { getRepositories } from './api';
 import { CatalogView } from './catalog_view';
+import { FindingsView } from './findings_view';
 import type { CodeIntelligenceStartDependencies } from './plugin';
 import { RepositoriesView } from './repositories_view';
 
-type Tab = 'repositories' | 'catalog';
+type Tab = 'repositories' | 'catalog' | 'findings';
 
 const Application = ({
   core,
@@ -53,6 +58,11 @@ const Application = ({
   const stager = useAgentBuilderStager(agentBuilder, sidebar);
   useAgentBuilderPageContext({ stager, context: pageContext });
   const addQuery = useAddQueryToAgent({
+    agentBuilder,
+    stager,
+    toasts: core.notifications.toasts,
+  });
+  const investigateFinding = useInvestigateFinding({
     agentBuilder,
     stager,
     toasts: core.notifications.toasts,
@@ -117,41 +127,59 @@ const Application = ({
               defaultMessage: 'Catalog',
             }),
           },
+          {
+            isSelected: tab === 'findings',
+            onClick: () => setTab('findings'),
+            label: i18n.translate('xpack.codeIntelligence.findingsTab', {
+              defaultMessage: 'Findings',
+            }),
+          },
         ]}
       />
       <EuiPageTemplate.Section>
         <AddQueryToAgentContext.Provider value={addQuery}>
-          {tab === 'repositories' ? (
-            <RepositoriesView
-              http={core.http}
-              repositories={repositories}
-              loading={loading}
-              error={error}
-              reload={reload}
-              onViewCatalog={viewCatalog}
-              onContextChange={setPageContext}
-            />
-          ) : (
-            <CatalogView
-              key={
-                catalogPreset === undefined
-                  ? 'all'
-                  : `${catalogPreset.repository}:${catalogPreset.severity ?? ''}`
-              }
-              http={core.http}
-              repositories={repositories}
-              repositoriesLoading={loading}
-              repositoriesError={error}
-              reloadRepositories={reload}
-              initialRepositories={
-                catalogPreset === undefined ? undefined : [catalogPreset.repository]
-              }
-              initialSeverities={
-                catalogPreset?.severity === undefined ? undefined : [catalogPreset.severity]
-              }
-              onContextChange={setPageContext}
-            />
-          )}
+          <InvestigateFindingContext.Provider value={investigateFinding}>
+            {tab === 'repositories' ? (
+              <RepositoriesView
+                http={core.http}
+                repositories={repositories}
+                loading={loading}
+                error={error}
+                reload={reload}
+                onViewCatalog={viewCatalog}
+                onContextChange={setPageContext}
+              />
+            ) : tab === 'findings' ? (
+              <FindingsView
+                http={core.http}
+                repositories={repositories}
+                repositoriesLoading={loading}
+                repositoriesError={error}
+                reloadRepositories={reload}
+                onContextChange={setPageContext}
+              />
+            ) : (
+              <CatalogView
+                key={
+                  catalogPreset === undefined
+                    ? 'all'
+                    : `${catalogPreset.repository}:${catalogPreset.severity ?? ''}`
+                }
+                http={core.http}
+                repositories={repositories}
+                repositoriesLoading={loading}
+                repositoriesError={error}
+                reloadRepositories={reload}
+                initialRepositories={
+                  catalogPreset === undefined ? undefined : [catalogPreset.repository]
+                }
+                initialSeverities={
+                  catalogPreset?.severity === undefined ? undefined : [catalogPreset.severity]
+                }
+                onContextChange={setPageContext}
+              />
+            )}
+          </InvestigateFindingContext.Provider>
         </AddQueryToAgentContext.Provider>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

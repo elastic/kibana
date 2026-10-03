@@ -59,6 +59,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.code_intelligence.start_extraction`,
   `${internalNamespaces.observability}.code_intelligence.get_extraction_status`,
   `${internalNamespaces.observability}.code_intelligence.search_catalog`,
+  `${internalNamespaces.observability}.code_intelligence.get_finding`,
+  `${internalNamespaces.observability}.code_intelligence.search_findings`,
+  `${internalNamespaces.observability}.code_intelligence.update_finding_status`,
 
   // ML anomaly detection (Agent Builder skill tools)
   `${internalNamespaces.ml}.ad_get_job_info`,

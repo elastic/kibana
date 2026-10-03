@@ -18,6 +18,12 @@ import {
 } from '../common/catalog_filters';
 import { MAX_BATCH_REPOSITORIES } from '../common/extraction_batch';
 import {
+  FINDING_STATUSES,
+  MAX_FINDING_REPOSITORY_FILTERS,
+  MAX_FINDING_REVIEW_NOTE_LENGTH,
+  type FindingStatus,
+} from '../common/finding_filters';
+import {
   MAX_CONNECTOR_ID_LENGTH,
   MAX_REMOTE_URL_LENGTH,
   MAX_REPOSITORY_IDENTITY_LENGTH,
@@ -33,6 +39,7 @@ import { ElasticsearchFindingsWriter } from './adapters/elasticsearch_findings';
 import { ElasticsearchRepositorySettingsStore } from './adapters/elasticsearch_settings';
 import { getCatalogEntry, searchCatalog, summarizeCatalog } from './catalog_service';
 import type { ExtractionService } from './extraction_service';
+import { getFinding, searchFindings, updateFindingStatus } from './findings_service';
 import {
   describeStartFailure,
   listExtractableRepositories,
@@ -71,6 +78,12 @@ const catalogSort: Type<CatalogSort> = schema.oneOf([
   schema.literal('default'),
   schema.literal('severity_desc'),
   schema.literal('severity_asc'),
+]);
+
+const findingStatus: Type<FindingStatus> = schema.oneOf([
+  schema.literal('open'),
+  schema.literal('verified'),
+  schema.literal('invalid'),
 ]);
 
 const asArray = <T>(value: T | readonly T[] | undefined): readonly T[] =>
@@ -368,6 +381,96 @@ export const registerRoutes = ({
       return entry === undefined
         ? response.notFound({ body: { message: 'Catalog document was not found.' } })
         : response.ok({ body: entry });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/code_intelligence/findings',
+      options: {
+        access: 'internal',
+        description:
+          'Lists classifier findings, newest first; any selected value of a filter matches.',
+      },
+      security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
+      validate: {
+        query: schema.object({
+          repository: schema.maybe(oneOrMany(repositoryIdentity, MAX_FINDING_REPOSITORY_FILTERS)),
+          status: schema.maybe(oneOrMany(findingStatus, FINDING_STATUSES.length)),
+          kind: schema.maybe(oneOrMany(signalType, CATALOG_SIGNAL_TYPES.length)),
+          q: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
+          page: schema.number({ defaultValue: 1, min: 1, max: 100 }),
+          perPage: schema.number({ defaultValue: 25, min: 1, max: 100 }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { elasticsearch } = await context.core;
+      const { query } = request;
+      return response.ok({
+        body: await searchFindings(elasticsearch.client.asCurrentUser, findingsIndex, {
+          repositories: asArray(query.repository),
+          statuses: asArray(query.status),
+          signalTypes: asArray(query.kind),
+          ...(query.q === undefined ? {} : { q: query.q }),
+          page: query.page,
+          perPage: query.perPage,
+        }),
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/code_intelligence/findings/{id}',
+      options: { access: 'internal' },
+      security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
+      validate: {
+        params: schema.object({ id: schema.string({ minLength: 1, maxLength: 512 }) }),
+      },
+    },
+    async (context, request, response) => {
+      const { elasticsearch } = await context.core;
+      const finding = await getFinding(
+        elasticsearch.client.asCurrentUser,
+        findingsIndex,
+        request.params.id
+      );
+      return finding === undefined
+        ? response.notFound({ body: { message: 'Finding was not found.' } })
+        : response.ok({ body: finding });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/code_intelligence/findings/{id}/status',
+      options: {
+        access: 'internal',
+        description:
+          'Sets the review state of 1 finding to `open`, `verified`, or `invalid`, with an optional note. Re-extraction keeps the state.',
+      },
+      security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
+      validate: {
+        params: schema.object({ id: schema.string({ minLength: 1, maxLength: 512 }) }),
+        body: schema.object({
+          status: findingStatus,
+          note: schema.maybe(
+            schema.string({ minLength: 1, maxLength: MAX_FINDING_REVIEW_NOTE_LENGTH })
+          ),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { elasticsearch } = await context.core;
+      const finding = await updateFindingStatus(elasticsearch.client.asCurrentUser, findingsIndex, {
+        id: request.params.id,
+        status: request.body.status,
+        ...(request.body.note === undefined ? {} : { note: request.body.note }),
+      });
+      return finding === undefined
+        ? response.notFound({ body: { message: 'Finding was not found.' } })
+        : response.ok({ body: finding });
     }
   );
 };

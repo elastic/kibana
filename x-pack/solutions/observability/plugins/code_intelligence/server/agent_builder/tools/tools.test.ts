@@ -19,9 +19,12 @@ import type { ExtractionService } from '../../extraction_service';
 import type { RouteServices } from '../../routes';
 import { SourceUnavailableError } from '../../source_session';
 import { createGetExtractionStatusTool } from './get_extraction_status';
+import { createGetFindingTool } from './get_finding';
 import { createListRepositoriesTool } from './list_repositories';
 import { MAX_SEARCH_CATALOG_PER_PAGE, createSearchCatalogTool } from './search_catalog';
+import { createSearchFindingsTool } from './search_findings';
 import { createStartExtractionTool } from './start_extraction';
+import { createUpdateFindingStatusTool } from './update_finding_status';
 import type { CodeIntelligenceToolDependencies } from './types';
 import { createUpsertRepositoryTool } from './upsert_repository';
 
@@ -69,6 +72,7 @@ const fakeClient = ({
     return { hits: { total: { value: hits.length }, hits } };
   }),
   get: jest.fn(async () => ({ found: false })),
+  update: jest.fn(async () => ({})),
   index: jest.fn(async () => ({})),
 });
 
@@ -365,6 +369,210 @@ describe('get_extraction_status', () => {
     const [result] = await run(tool, { id: 'missing' });
 
     expect(result.type).toBe('error');
+  });
+});
+
+const findingSource = {
+  repository: 'grafana/loki',
+  finding_type: 'sensitive-data',
+  signal_type: 'log',
+  status: 'open',
+  title: 'Token logged',
+  summary: 'The log writes a credential field.',
+  revision: 'main',
+  cataloged: true,
+  catalog_document_ids: ['entry-1'],
+  review_note: 'Needs review.',
+  reviewed_at: '2026-10-01T00:00:00.000Z',
+  evidence: [{ path: 'pkg/auth.go', line: 42, excerpt: 'logger.Info(token)' }],
+};
+
+const findingNotFound = {
+  message: 'Finding was not found.',
+  metadata: { code: 'finding_not_found', id: 'missing' },
+};
+
+describe('get_finding', () => {
+  it('returns the full finding, including excerpts and review metadata', async () => {
+    const client = fakeClient();
+    client.get.mockResolvedValueOnce({
+      found: true,
+      _id: 'finding-1',
+      _source: findingSource,
+    } as never);
+    const tool = createGetFindingTool(dependencies());
+
+    const [result] = await run(tool, { id: 'finding-1' }, client);
+
+    expect(tool.confirmation).toBeUndefined();
+    expect(tool.annotations).toEqual(
+      expect.objectContaining({ readOnlyHint: true, idempotentHint: true })
+    );
+    expect(client.get).toHaveBeenCalledWith(
+      { index: 'findings', id: 'finding-1' },
+      { ignore: [404] }
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'other',
+        data: { finding: { id: 'finding-1', ...findingSource } },
+      })
+    );
+  });
+
+  it('maps a missing finding to finding_not_found', async () => {
+    const [result] = await run(createGetFindingTool(dependencies()), { id: 'missing' });
+    expect(result).toEqual(expect.objectContaining({ type: 'error', data: findingNotFound }));
+  });
+});
+
+describe('search_findings', () => {
+  it('defaults to open findings and returns summaries without excerpts', async () => {
+    const client = fakeClient({ hits: [{ _id: 'finding-1', _source: findingSource }] });
+
+    const [result] = await run(createSearchFindingsTool(dependencies()), {}, client);
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'findings',
+        size: 10,
+        from: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { finding_type: ['sensitive-data'] } },
+              { terms: { status: ['open'] } },
+            ],
+          },
+        },
+      })
+    );
+    expect(result.data).toEqual({
+      total: 1,
+      page: 1,
+      perPage: 10,
+      items: [
+        {
+          id: 'finding-1',
+          repository: 'grafana/loki',
+          finding_type: 'sensitive-data',
+          signal_type: 'log',
+          status: 'open',
+          title: 'Token logged',
+          summary: 'The log writes a credential field.',
+          revision: 'main',
+          cataloged: true,
+          evidence: [{ path: 'pkg/auth.go', line: 42 }],
+        },
+      ],
+    });
+  });
+
+  it('passes filters and caps perPage at 20', async () => {
+    const client = fakeClient();
+    const [result] = await run(
+      createSearchFindingsTool(dependencies()),
+      {
+        repositories: ['grafana/loki'],
+        statuses: ['verified'],
+        signalTypes: ['trace'],
+        q: 'token',
+        page: 2,
+        perPage: 500,
+      },
+      client
+    );
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: 20,
+        from: 20,
+        query: {
+          bool: expect.objectContaining({
+            filter: [
+              { terms: { finding_type: ['sensitive-data'] } },
+              { terms: { repository: ['grafana/loki'] } },
+              { terms: { status: ['verified'] } },
+              { terms: { signal_type: ['trace'] } },
+            ],
+            should: expect.any(Array),
+          }),
+        },
+      })
+    );
+    expect(result.data).toEqual({ total: 0, page: 2, perPage: 20, items: [] });
+  });
+
+  it('rejects unknown statuses and unbounded repository filters', () => {
+    const { schema } = createSearchFindingsTool(dependencies());
+    expect(schema.safeParse({ statuses: ['closed'] }).success).toBe(false);
+    expect(schema.safeParse({ repositories: Array(101).fill('owner/repo') }).success).toBe(false);
+  });
+});
+
+describe('update_finding_status', () => {
+  it('always asks for confirmation and updates the finding with the required note', async () => {
+    const client = fakeClient();
+    const source = { ...findingSource, status: 'verified', review_note: 'The log writes a token.' };
+    client.update.mockResolvedValueOnce({ get: { _source: source } });
+    const tool = createUpdateFindingStatusTool(dependencies());
+
+    const [result] = await run(
+      tool,
+      {
+        id: 'finding-1',
+        status: 'verified',
+        note: 'The log writes a token.',
+      },
+      client
+    );
+
+    expect(tool.confirmation?.askUser).toBe('always');
+    expect(tool.annotations).toEqual(
+      expect.objectContaining({
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      })
+    );
+    expect(client.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'findings',
+        id: 'finding-1',
+        refresh: 'wait_for',
+        doc: {
+          status: 'verified',
+          review_note: 'The log writes a token.',
+          reviewed_at: expect.any(String),
+        },
+      }),
+      { ignore: [404] }
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'other',
+        data: { finding: { id: 'finding-1', ...source } },
+      })
+    );
+  });
+
+  it('maps a missing finding to finding_not_found', async () => {
+    const [result] = await run(createUpdateFindingStatusTool(dependencies()), {
+      id: 'missing',
+      status: 'invalid',
+      note: 'The value is not sensitive.',
+    });
+    expect(result).toEqual(expect.objectContaining({ type: 'error', data: findingNotFound }));
+  });
+
+  it('requires a bounded, nonempty note and id', () => {
+    const { schema } = createUpdateFindingStatusTool(dependencies());
+    expect(schema.safeParse({ id: 'a', status: 'open' }).success).toBe(false);
+    expect(schema.safeParse({ id: 'a', status: 'open', note: '' }).success).toBe(false);
+    expect(schema.safeParse({ id: 'a', status: 'open', note: 'a'.repeat(1001) }).success).toBe(
+      false
+    );
+    expect(schema.safeParse({ id: '', status: 'open', note: 'Reopen.' }).success).toBe(false);
   });
 });
 

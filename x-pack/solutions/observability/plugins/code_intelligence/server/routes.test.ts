@@ -7,6 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 
+import { FINDING_TYPES } from '../common/finding_filters';
 import type { RepositorySettings } from '../common/repository_settings';
 import { settingsMappings } from './adapters/elasticsearch_settings';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
@@ -45,6 +46,13 @@ const fakeElasticsearch = (documents = new Map<string, Record<string, unknown>>(
     ),
     index: jest.fn(async ({ id, document }: { id: string; document: Record<string, unknown> }) => {
       documents.set(id, document);
+    }),
+    update: jest.fn(async ({ id, doc }: { id: string; doc: Record<string, unknown> }) => {
+      const source = documents.get(id);
+      if (source === undefined) return {};
+      const updated = { ...source, ...doc };
+      documents.set(id, updated);
+      return { get: { _source: updated } };
     }),
     delete: jest.fn(async ({ id }: { id: string }) => ({
       result: documents.delete(id) ? 'deleted' : 'not_found',
@@ -516,6 +524,128 @@ describe('GET /internal/code_intelligence/catalog', () => {
       },
     });
     expect(es.client.search).toHaveBeenCalledWith(expect.objectContaining({ sort: expected }));
+  });
+});
+
+describe('findings routes', () => {
+  const listRoute = 'GET /internal/code_intelligence/findings';
+
+  it('always filters list results to supported finding types', async () => {
+    const { call, es } = setup();
+    const response = await call(listRoute, { query: { page: 1, perPage: 25 } });
+    expect(es.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'findings',
+        ignore_unavailable: true,
+        query: { bool: { filter: [{ terms: { finding_type: [...FINDING_TYPES] } }] } },
+      })
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { page: 1, perPage: 25, total: 0, items: [] },
+    });
+  });
+
+  it('adds repository, status, signal, and text filters', async () => {
+    const { call, es } = setup();
+    await call(listRoute, {
+      query: {
+        repository: ['elastic/a', 'elastic/b'],
+        status: ['open', 'verified'],
+        kind: 'log',
+        q: 'token',
+        page: 2,
+        perPage: 10,
+      },
+    });
+    expect(es.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'findings',
+        from: 10,
+        size: 10,
+        query: {
+          bool: {
+            filter: [
+              { terms: { finding_type: [...FINDING_TYPES] } },
+              { terms: { repository: ['elastic/a', 'elastic/b'] } },
+              { terms: { status: ['open', 'verified'] } },
+              { terms: { signal_type: ['log'] } },
+            ],
+            should: [
+              { multi_match: { query: 'token', fields: ['title^2', 'summary'] } },
+              { match_phrase_prefix: { 'evidence.path': 'token' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        sort: ['_score', { updated_at: 'desc' }, '_doc'],
+      })
+    );
+  });
+
+  it('accepts single and repeated status filters but rejects unknown statuses', () => {
+    const validate = setup().configs.get(listRoute)?.validate;
+    if (validate === undefined || validate === false || validate.query === undefined) {
+      throw new Error('The findings route has no query validation.');
+    }
+    expect(validate.query.validate({ status: 'open' })).toEqual(
+      expect.objectContaining({ status: 'open' })
+    );
+    expect(validate.query.validate({ status: ['verified', 'invalid'] })).toEqual(
+      expect.objectContaining({ status: ['verified', 'invalid'] })
+    );
+    expect(() => validate.query?.validate({ status: 'closed' })).toThrow();
+  });
+
+  it('returns 404 for a missing finding', async () => {
+    const { call, es } = setup();
+    const response = await call('GET /internal/code_intelligence/findings/{id}', {
+      params: { id: 'missing' },
+    });
+    expect(es.client.get).toHaveBeenCalledWith(
+      { index: 'findings', id: 'missing' },
+      { ignore: [404] }
+    );
+    expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Finding was not found.' } });
+  });
+
+  it('updates the finding and returns 200 with review metadata', async () => {
+    const { call, es } = setup();
+    es.documents.set('finding-1', { title: 'Token logged', status: 'open' });
+    const response = await call('POST /internal/code_intelligence/findings/{id}/status', {
+      params: { id: 'finding-1' },
+      body: { status: 'verified', note: 'A token is logged.' },
+    });
+    expect(es.client.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'findings',
+        id: 'finding-1',
+        refresh: 'wait_for',
+        doc: {
+          status: 'verified',
+          review_note: 'A token is logged.',
+          reviewed_at: expect.any(String),
+        },
+      }),
+      { ignore: [404] }
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        id: 'finding-1',
+        title: 'Token logged',
+        status: 'verified',
+        review_note: 'A token is logged.',
+        reviewed_at: expect.any(String),
+      },
+    });
+  });
+
+  it('returns 404 when updating a missing finding', async () => {
+    const { call } = setup();
+    const response = await call('POST /internal/code_intelligence/findings/{id}/status', {
+      params: { id: 'missing' },
+      body: { status: 'invalid', note: 'Not sensitive.' },
+    });
+    expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Finding was not found.' } });
   });
 });
 
