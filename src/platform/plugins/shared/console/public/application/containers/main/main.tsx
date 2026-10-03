@@ -84,7 +84,8 @@ const useStyles = (isEmbeddable: boolean) => {
       // Make sure the editor actions don't create scrollbars on this container
       // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
       overflow: hidden;
-      padding: ${euiTheme.size.m};
+      padding: ${euiTheme.size.m} 0;
+      borderradius: none;
       gap: 0;
       ${isEmbeddable &&
       css`
@@ -252,7 +253,12 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
-      <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
+      <EuiSplitPanel.Outer
+        grow={true}
+        borderRadius={isEmbeddable ? 'none' : 'm'}
+        hasShadow={false}
+        hasBorder={false}
+      >
         <EuiSplitPanel.Inner grow={false} css={styles.consoleTabs}>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
