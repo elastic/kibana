@@ -80,7 +80,7 @@ interface PartitionSpec {
   layers: Array<{
     groupByRollup: (cell: KeywordCell) => string;
     nodeLabel: (key: string) => string;
-    shape: { fillColor: unknown };
+    shape: { fillColor: (key: string, sortIndex: number) => string };
     fillLabel?: {
       clipText?: boolean;
       verticalAlignment?: string;
@@ -94,9 +94,12 @@ const layer = () => partition().layers[0];
 const settings = () => settingsProps.mock.calls[0][0] as SettingsProps;
 const tooltip = () =>
   tooltipProps.mock.calls[0][0] as { customTooltip: (info: unknown) => React.ReactNode };
-/** The colour the layer would fill the cell named `keyword` with. */
-const fillColor = (keyword: string) =>
-  (layer().shape.fillColor as (key: string) => string)(keyword);
+/** The colour the layer would fill the cell at `sortIndex` with. */
+const fillColor = (sortIndex: number) =>
+  (layer().shape.fillColor as (key: string, sortIndex: number) => string)('keyword', sortIndex);
+
+/** The fill of every cell, in the order the cells were handed to the chart. */
+const fills = () => partition().data.map((_cell, sortIndex) => fillColor(sortIndex));
 
 const renderTreemap = (
   props: Partial<React.ComponentProps<typeof MemoryKeywordTreemap>> = {},
@@ -160,9 +163,11 @@ describe('MemoryKeywordTreemap', () => {
   it('fills the cells from the colour-blind palette in rank order', () => {
     renderTreemap();
 
-    const fills = partition().data.map((cell) => fillColor(cell.keyword));
-    expect(new Set(fills).size).toBe(fills.length);
-    expect(fills.every((fill) => /^#|rgb/.test(fill))).toBe(true);
+    // The chart hands `fillColor` the cell's index in its own value-sorted order,
+    // so each rank takes the next palette colour and no two cells share one.
+    const cellFills = fills();
+    expect(new Set(cellFills).size).toBe(cellFills.length);
+    expect(cellFills.every((fill) => /^#|rgb/.test(fill))).toBe(true);
   });
 
   it('reports the keyword, its score, and how many memories carry it', () => {
@@ -284,19 +289,16 @@ describe('MemoryKeywordTreemap', () => {
   });
 
   /**
-   * The chip's remove icon is the one thing standing between a filter and the
-   * person who wants it gone, so it cannot wait on `EuiIcon`'s on-demand import
-   * of a string icon type — that is a render with no visible affordance.
+   * The chip's remove affordance is the one thing standing between a filter and
+   * the person who wants it gone, so it has to be a button of its own rather than
+   * part of the chip's click target.
    */
-  it('draws the chip remove icon without waiting on an icon chunk', () => {
-    renderTreemap({ selectedKeywords: ['cart-cache'] });
+  it('lets a selected keyword be removed from its chip', async () => {
+    const { onToggleKeyword } = renderTreemap({ selectedKeywords: ['cart-cache'] });
 
-    // `EuiIcon` renders a string type only once it has imported that icon's
-    // asset, so the badge is handed the component instead. Kibana's Jest maps
-    // `@elastic/eui` to `test-env`, where an icon is a span named after the type
-    // it was given: a component here, the string `cross` there.
-    const remove = screen.getByRole('button', { name: 'Remove the cart-cache filter' });
-    expect(remove).toContainHTML('data-euiicon-type="CrossIcon"');
+    await userEvent.click(screen.getByRole('button', { name: 'Remove the cart-cache filter' }));
+
+    expect(onToggleKeyword).toHaveBeenCalledWith('cart-cache');
   });
 
   it('takes no room at all when the store has no live memories', () => {
@@ -316,9 +318,9 @@ describe('MemoryKeywordTreemap', () => {
     'has a readable label colour on every palette colour in %s mode',
     (colorMode) => {
       renderTreemap({}, colorMode);
-      const fills = new Set(partition().data.map((cell) => fillColor(cell.keyword)));
+      const cellFills = new Set(fills());
 
-      fills.forEach((fill) => {
+      cellFills.forEach((fill) => {
         const onBlack = calculateContrast(hexToRgb(fill) as never, [0, 0, 0]);
         const onWhite = calculateContrast(hexToRgb(fill) as never, [255, 255, 255]);
         // Whichever `Adaptive` picks has to clear WCAG AA for the 10-14px labels.
@@ -332,8 +334,8 @@ describe('MemoryKeywordTreemap', () => {
       summary({ id: `memory_${index}`, tags: ['memory', `topic-${index}`, `agent-${index}`] })
     );
     renderTreemap({ pages: wide });
-    const fills = partition().data.map((cell) => fillColor(cell.keyword));
+    const cellFills = fills();
 
-    expect(new Set(fills).size).toBeLessThanOrEqual(10);
+    expect(new Set(cellFills).size).toBeLessThanOrEqual(10);
   });
 });

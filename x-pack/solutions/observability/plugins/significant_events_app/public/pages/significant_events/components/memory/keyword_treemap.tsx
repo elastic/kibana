@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { CrossIcon } from './cross_icon';
 import {
   toKeywordCells,
   toKeywordDisplayNames,
@@ -78,15 +77,12 @@ interface FillLabelAlignment {
 /** The layer's own fill label type, widened with the alignment keys above. */
 type LayerFillLabel = NonNullable<PartitionLayer['fillLabel']> & FillLabelAlignment;
 
-/**
- * Delete `FillLabelAlignment` once this stops compiling: it resolves to `never`
- * as soon as `@elastic/charts` declares the alignment keys on the fill label
- * itself (elastic/elastic-charts#2912), and a label type that has them needs no
- * shim.
- */
-type AlignmentShimNeeded = 'verticalAlignment' extends keyof PartitionFillLabel ? never : true;
-const ALIGNMENT_SHIM_NEEDED: AlignmentShimNeeded = true;
-void ALIGNMENT_SHIM_NEEDED;
+/** Delete this alias once `@elastic/charts` carries elastic-charts#2912. */
+type ChartsStillLacksFillLabelAlignment = 'verticalAlignment' extends keyof PartitionFillLabel
+  ? never
+  : true;
+const SHIM_NEEDED: ChartsStillLacksFillLabelAlignment = true;
+void SHIM_NEEDED;
 
 /**
  * The tooltip reports the numbers the cell label leaves out: the keyword's share
@@ -135,10 +131,6 @@ export function MemoryKeywordTreemap({
   // The chips label a keyword that the chart has dropped, so the spellings come
   // from every loaded memory rather than from the cells.
   const displayNames = useMemo(() => toKeywordDisplayNames(entries), [entries]);
-  const orderByKeyword = useMemo(
-    () => new Map(cells.map((cell, index) => [cell.keyword, index])),
-    [cells]
-  );
   // Colour-blind safe, and derived through the hook rather than read once at
   // mount, so a theme change re-derives it instead of freezing light-mode
   // colours into dark mode. Ten colours over forty cells means the palette
@@ -264,8 +256,11 @@ export function MemoryKeywordTreemap({
                 // selection stores canonical keys, and the click reports one back.
                 groupByRollup: (cell: KeywordCell) => cell.keyword,
                 shape: {
-                  fillColor: (key: string) =>
-                    palette[(orderByKeyword.get(`${key}`) ?? 0) % palette.length],
+                  // `sortIndex` is the cell's place in the value-sorted order the
+                  // chart built from these cells, which is the rank order `cells`
+                  // already sorted into, so the palette needs no lookup of its own.
+                  fillColor: (_key: string, sortIndex: number) =>
+                    palette[sortIndex % palette.length],
                 },
                 // `clipText` keeps a long keyword inside its own cell. The label is
                 // asked to sit in the middle of its cell, which the pinned chart
@@ -328,10 +323,7 @@ function KeywordFilterRow({
         <EuiFlexItem grow={false} key={keyword}>
           <EuiBadge
             color="hollow"
-            // The component, not the `"cross"` string: `EuiIcon` imports a string
-            // type on demand, and a chip whose only affordance appears a tick
-            // after the chip is a chip that cannot be removed.
-            iconType={CrossIcon}
+            iconType="cross"
             iconOnClick={() => onToggleKeyword(keyword)}
             onClick={() => onToggleKeyword(keyword)}
             onClickAriaLabel={`${keyword} filter`}
