@@ -76,7 +76,7 @@ export abstract class SearchCursor {
         _scroll_id: newScrollId ? `${this.formatCursorId(newScrollId)}` : undefined,
       },
     };
-    this.logger.debug(`Result details: ${JSON.stringify(logInfo)}`);
+    this.logger.debug(() => `Result details: ${JSON.stringify(logInfo)}`);
   }
 
   /**
