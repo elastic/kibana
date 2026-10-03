@@ -2349,7 +2349,7 @@ describe('Discover state', () => {
         timeFieldName: 'mock-time-field-name',
       };
       const dataViewsCreateMock = testServices.dataViews.create as jest.Mock;
-      dataViewsCreateMock.mockResolvedValueOnce({
+      dataViewsCreateMock.mockResolvedValue({
         ...dataViewMock,
         ...dataViewSpecMock,
         isPersisted: () => false,
@@ -2378,7 +2378,7 @@ describe('Discover state', () => {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
       });
-      expect(currentSavedSearch.searchSource.getField('index')).toEqual(dataViewSpecMock);
+      expect(currentSavedSearch.searchSource.getField('index')).toBe(currentDataView$.getValue());
       const { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,

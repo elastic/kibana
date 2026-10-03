@@ -15,7 +15,10 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { generateInlineDataViewId } from '../../common/session/inline_data_view';
 import { inlineDataViewIdCases } from '../../common/session/inline_data_view.fixtures';
 import { createDataViewsCacheMock } from '../__mocks__/data_views';
-import { createInlineDataViewService } from './inline_data_view_service';
+import {
+  createInlineDataViewService,
+  type InlineDataViewService,
+} from './inline_data_view_service';
 
 const inlineSpec: DataViewSpec = { title: 'logs-*', timeFieldName: '@timestamp' };
 const editedSpec: DataViewSpec = { ...inlineSpec, title: 'other-logs-*' };
@@ -35,7 +38,10 @@ const setup = () => {
     cache,
     create,
     clearInstanceCache,
-    service: createInlineDataViewService({ dataViews: { create, clearInstanceCache } }),
+    service: createInlineDataViewService({
+      dataViews: { create, clearInstanceCache },
+      searchSource: { create: jest.fn() },
+    }),
   };
 };
 
@@ -373,6 +379,23 @@ describe('createInlineDataViewService', () => {
       session.dispose();
       expect(clearInstanceCache).not.toHaveBeenCalled();
     });
+  });
+
+  it.each<[string, (service: InlineDataViewService) => Promise<DataView>]>([
+    ['resolve', (service) => service.resolve(inlineSpec)],
+    ['finalize', (service) => service.finalize(createDataView({ ...inlineSpec, id: 'draft-id' }))],
+  ])('%s replaces a cached instance that another app changed in place', async (_name, getView) => {
+    const { service, cache, clearInstanceCache } = setup();
+    const changed = await service.resolve(inlineSpec);
+    changed.setIndexPattern('changed-logs-*');
+
+    const dataView = await getView(service);
+
+    expect(dataView).not.toBe(changed);
+    expect(dataView.id).toBe(inlineDataViewId);
+    expect(dataView.getIndexPattern()).toBe(inlineSpec.title);
+    expect(cache.get(inlineDataViewId)).toBe(dataView);
+    expect(clearInstanceCache.mock.calls).toStrictEqual([[inlineDataViewId]]);
   });
 
   it.each(inlineDataViewIdCases)(

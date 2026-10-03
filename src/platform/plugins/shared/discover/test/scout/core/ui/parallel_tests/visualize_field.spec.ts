@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../common/ui/fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -96,6 +96,57 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
       await expect(
         page.testSubj.locator('lns-dataView-switch-link').getByTestId('fullText')
       ).toHaveText('logst*');
+    }
+  );
+
+  spaceTest(
+    'keeps the saved inline view unchanged after editing it in Lens',
+    async ({ apiServices, page, pageObjects, scoutSpace }) => {
+      const { collapsibleNav, discover, lens, lensEditing, unifiedFieldList } = pageObjects;
+      const originalName = 'Discover inline view';
+      const editedName = 'Lens edited view';
+      const sessionId = await apiServices.discover.create(
+        {
+          title: 'Inline view isolation',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Inline view',
+              data_source: {
+                type: 'data_view_spec',
+                name: originalName,
+                index_pattern: testData.DEFAULT_DATA_VIEW,
+                time_field: '@timestamp',
+              },
+            },
+          ],
+        },
+        scoutSpace.id
+      );
+      await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getSelectedDataViewName()).toBe(originalName);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+      const originalId = await discover.getCurrentDataViewId();
+      const pageTimeOrigin = await page.evaluate(() => performance.timeOrigin);
+
+      await unifiedFieldList.clickFieldListItemVisualize('bytes');
+      await lens.waitForLensApp();
+      await lensEditing.editCurrentDataViewName(editedName);
+      await expect(
+        page.testSubj.locator('lns-dataView-switch-link').getByTestId('fullText')
+      ).toHaveText(editedName);
+
+      await collapsibleNav.clickItem('Discover');
+      await lensEditing.confirmLeaveWithoutSaving();
+      await discover.waitUntilTabIsLoaded();
+
+      // A full reload would clear the shared cache and hide this regression.
+      expect(await page.evaluate(() => performance.timeOrigin)).toBe(pageTimeOrigin);
+      await expect(page).toHaveURL(new RegExp(`/view/${sessionId}`));
+      await expect.poll(() => discover.getSelectedDataViewName()).toBe(originalName);
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
 });

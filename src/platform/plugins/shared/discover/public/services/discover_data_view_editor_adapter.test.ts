@@ -37,6 +37,7 @@ const setup = () => {
     finalize,
     beginEdit: (source: DataView) =>
       createInlineDataViewEditSession({ source, dataViews, finalize }),
+    resolveSearchSource: jest.fn(),
   };
   const onEditError = jest.fn();
   const editor = createDiscoverDataViewEditorAdapter({

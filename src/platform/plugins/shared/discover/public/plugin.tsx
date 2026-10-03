@@ -444,6 +444,7 @@ export class DiscoverPlugin
 
     const inlineDataViews = (this.inlineDataViewService ??= createInlineDataViewService({
       dataViews: plugins.data.dataViews,
+      searchSource: plugins.data.search.searchSource,
     }));
     const dataViewEditor = (this.dataViewEditorAdapter ??= createDiscoverDataViewEditorAdapter({
       dataViewEditor: plugins.dataViewEditor,

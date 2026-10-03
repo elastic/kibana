@@ -51,6 +51,7 @@ const build = (getBooleanValue$: CoreStart['featureFlags']['getBooleanValue$']) 
       resolve: jest.fn(),
       finalize: jest.fn(),
       beginEdit: jest.fn(),
+      resolveSearchSource: jest.fn(),
     },
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
   });

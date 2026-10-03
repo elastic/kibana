@@ -24,7 +24,7 @@ import {
 import { UnifiedFieldList } from '@kbn/unified-field-list/test/scout/ui/fixtures/page_objects';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { SavedQueryManagementMenu } from '@kbn/unified-search-plugin/test/scout/ui/fixtures/page_objects';
-import { InsightsAndAlerting, LookupIndexEditor } from './page_objects';
+import { InsightsAndAlerting, LensEditing, LookupIndexEditor } from './page_objects';
 import * as testData from './constants';
 
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
@@ -46,6 +46,7 @@ export type DiscoverPageObjects = PageObjects & {
   docViewer: DocViewer;
   savedQueryManagementMenu: SavedQueryManagementMenu;
   insightsAndAlerting: InsightsAndAlerting;
+  lensEditing: LensEditing;
 };
 
 export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
@@ -62,6 +63,7 @@ const extendWithDiscoverPageObjects = (
   docViewer: createLazyPageObject(DocViewer, page),
   savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, page),
   insightsAndAlerting: createLazyPageObject(InsightsAndAlerting, page),
+  lensEditing: createLazyPageObject(LensEditing, page),
 });
 
 export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({

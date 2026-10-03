@@ -8,4 +8,5 @@
  */
 
 export { InsightsAndAlerting } from './insights_and_alerting';
+export { LensEditing } from './lens_editing';
 export { LookupIndexEditor } from './lookup_index_editor';

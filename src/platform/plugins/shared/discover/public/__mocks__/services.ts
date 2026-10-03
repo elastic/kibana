@@ -313,7 +313,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     savedSearch,
     discoverSessionService,
     dataViews: dataPlugin.dataViews,
-    inlineDataViews: createInlineDataViewService({ dataViews: dataPlugin.dataViews }),
+    inlineDataViews: createInlineDataViewService({
+      dataViews: dataPlugin.dataViews,
+      searchSource: dataPlugin.search.searchSource,
+    }),
     dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {

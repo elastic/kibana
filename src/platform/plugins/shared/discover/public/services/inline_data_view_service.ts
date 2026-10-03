@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ISearchSource,
+  ISearchStartSearchSource,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
 import type { DataView, DataViewSpec, DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   generateInlineDataViewId,
+  getInlineDataView,
   isInlineDataView,
   isInlineDataViewSpec,
 } from '../../common/session/inline_data_view';
@@ -33,23 +39,45 @@ export interface InlineDataViewService {
   beginEdit: (source: DataView) => InlineDataViewEditSession;
   /**
    * Returns the instance for the spec of a view that is not persisted. Inline specs get their
-   * derived ID and reuse the cached instance; ES|QL, managed and untitled specs are created as given.
+   * derived ID and reuse the cached instance unless it no longer matches that ID; ES|QL, managed
+   * and untitled specs are created as given.
    */
   resolve: (spec: DataViewSpec) => Promise<DataView>;
   /**
    * Returns the instance with the derived ID of the final spec of a view, such as after an editor
-   * or inferred defaults. Persisted and excluded views are returned unchanged; nothing is evicted.
+   * or inferred defaults. Persisted and excluded views are returned unchanged. Only a cached
+   * instance that no longer matches the derived ID is evicted and replaced.
    * Expects a valid DataView and reuses its existing fields without fetching them.
    */
   finalize: (dataView: DataView) => Promise<DataView>;
+  /**
+   * Creates a SearchSource from serialized fields and assigns it the resolved instance of an inline
+   * view. Other views are created by the SearchSource service as given.
+   */
+  resolveSearchSource: (fields: SerializedSearchSourceFields) => Promise<ISearchSource>;
 }
 
 /** Creates Discover's shared identity service and independent edit sessions. */
 export const createInlineDataViewService = ({
   dataViews,
+  searchSource,
 }: {
   dataViews: Pick<DataViewsContract, 'create' | 'clearInstanceCache'>;
+  searchSource: Pick<ISearchStartSearchSource, 'create'>;
 }): InlineDataViewService => {
+  // Other apps, such as Lens, can edit a cached instance in place, so reuse it only while it
+  // still matches its ID.
+  const getConsistentDataView = async (id: string, createDataView: () => Promise<DataView>) => {
+    const cachedDataView = await createDataView();
+    if (generateInlineDataViewId(cachedDataView.toMinimalSpec()) === id) {
+      return cachedDataView;
+    }
+
+    dataViews.clearInstanceCache(id);
+
+    return createDataView();
+  };
+
   const finalize = async (dataView: DataView) => {
     if (!isInlineDataView(dataView)) {
       return dataView;
@@ -60,7 +88,7 @@ export const createInlineDataViewService = ({
       return dataView;
     }
 
-    return dataViews.create({ ...dataView.toSpec(), id }, true);
+    return getConsistentDataView(id, () => dataViews.create({ ...dataView.toSpec(), id }, true));
   };
 
   const completeCreation = async (createdDataView: DataView) => {
@@ -70,6 +98,16 @@ export const createInlineDataViewService = ({
     }
 
     return finalizedDataView;
+  };
+
+  const resolve = (spec: DataViewSpec) => {
+    if (!isInlineDataViewSpec(spec)) {
+      return dataViews.create(spec);
+    }
+
+    const id = generateInlineDataViewId(spec);
+
+    return getConsistentDataView(id, () => dataViews.create({ ...spec, id }));
   };
 
   return {
@@ -85,12 +123,18 @@ export const createInlineDataViewService = ({
     completeCreation,
     beginEdit: (source) => createInlineDataViewEditSession({ source, dataViews, finalize }),
     finalize,
-    resolve: (spec) => {
-      if (!isInlineDataViewSpec(spec)) {
-        return dataViews.create(spec);
+    resolve,
+    resolveSearchSource: async (fields) => {
+      const inlineDataView = getInlineDataView(fields);
+      if (!inlineDataView) {
+        return searchSource.create(fields);
       }
 
-      return dataViews.create({ ...spec, id: generateInlineDataViewId(spec) });
+      const createdSearchSource = await searchSource.create({ ...fields, index: undefined });
+      const dataView = await resolve(inlineDataView);
+      createdSearchSource.setField('index', dataView);
+
+      return createdSearchSource;
     },
   };
 };

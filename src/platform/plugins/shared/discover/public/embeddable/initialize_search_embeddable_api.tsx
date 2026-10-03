@@ -64,7 +64,7 @@ const initializeSearchSource = async (
 
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(normalizedSearchSource),
+      discoverServices.inlineDataViews.resolveSearchSource(normalizedSearchSource),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {

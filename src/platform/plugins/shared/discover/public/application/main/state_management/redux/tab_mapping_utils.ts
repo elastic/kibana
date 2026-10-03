@@ -112,7 +112,7 @@ export const fromSavedObjectTabToSearchSource = async ({
   tab: DiscoverSessionTab;
   services: DiscoverServices;
 }): Promise<ISearchSource> => {
-  return services.data.search.searchSource.create(tab.serializedSearchSource);
+  return services.inlineDataViews.resolveSearchSource(tab.serializedSearchSource);
 };
 
 /**
