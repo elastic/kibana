@@ -17,6 +17,11 @@ import { SavedObjectSaveModal } from './saved_object_save_modal';
 // Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
+// Saving with "return to origin" keeps the save modal mounted until the saved object is
+// created *and* the Maps -> originating app navigation completes, which does not fit
+// Scout's 10s expect budget. Matches Discover's DEFAULT_SAVE_MODAL_TIMEOUT.
+const SAVE_AND_RETURN_MODAL_TIMEOUT = 30_000;
+
 export class MapsPage {
   public readonly mapsPlugin;
   public readonly mapRenderComplete;
@@ -110,7 +115,9 @@ export class MapsPage {
         await this.returnToOriginSwitch.click();
       }
     }
-    await this.saveModal.confirm();
+    await this.saveModal.confirm(
+      redirectToOrigin ? { timeout: SAVE_AND_RETURN_MODAL_TIMEOUT } : undefined
+    );
   }
 
   getLayerToggleButton(displayName: string) {
