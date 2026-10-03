@@ -51,6 +51,7 @@
       "kibanaUtils",
       "usageCollection"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "enableLazyInitialize": true
   }
 }
