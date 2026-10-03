@@ -2535,6 +2535,15 @@
       "enabled": true
     },
     {
+      "groupName": "mssql",
+      "matchDepNames": ["mssql", "@types/mssql"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "react-day-picker",
       "matchDepNames": ["react-day-picker"],
       "reviewers": ["team:eui-team"],
