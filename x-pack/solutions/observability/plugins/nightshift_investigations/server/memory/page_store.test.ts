@@ -220,15 +220,16 @@ describe('createMemoryPageStore', () => {
 
     const calls = search.mock.calls as unknown as Array<[Record<string, never>]>;
     const serialized = calls.map(([request]) => JSON.stringify(request));
-    // 0: active listing. 1: archived listing page. 2: its stats aggregation. 3: recall.
+    // 0: active listing. 1: archived listing, with the archived count hung off it.
+    // 2: recall.
     expect(serialized[0]).toContain('"attributes.status":"archived"');
     expect(serialized[1]).toContain('"attributes.status":"archived"');
-    expect(serialized[3]).toContain('"attributes.status":"archived"');
+    expect(serialized[2]).toContain('"attributes.status":"archived"');
     // The archived count is a filter aggregation over the whole index, so it has
     // to use the same clause or the header reports a legacy archived page as
     // active — and it cannot hang off the listing query, which matches no
     // archived document at all under `active`.
-    const statsQuery = calls[2][0] as unknown as {
+    const statsQuery = calls[1][0] as unknown as {
       aggs: { archived: { global: unknown; aggs: { inScope: { filter: unknown } } } };
     };
     expect(statsQuery.aggs.archived.global).toEqual({});
@@ -255,16 +256,10 @@ describe('createMemoryPageStore', () => {
     // The header's "N archived" describes the Archived list, which the
     // Active/Archived/All choice does not narrow. Counting inside the active
     // listing reported 0 for every Space that had any archived memory at all.
-    const search = jest.fn(({ size }: { size?: number }) =>
-      Promise.resolve(
-        size === 0
-          ? {
-              hits: { total: { value: 9 } },
-              aggregations: { archived: { inScope: { doc_count: 4 } } },
-            }
-          : { hits: { total: { value: 9 }, hits: [] } }
-      )
-    );
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 9 }, hits: [] },
+      aggregations: { archived: { inScope: { doc_count: 4 } } },
+    });
     const store = createMemoryPageStore({
       esClient: { search } as never,
       logger,
@@ -278,12 +273,17 @@ describe('createMemoryPageStore', () => {
       // `total` follows the listing; `archived` is the Space's own count.
       expect(result.stats).toEqual({ total: 9, archived: 4 });
 
-      // `listPaginated` searches for the page, then aggregates the stats.
-      expect(search.mock.calls).toHaveLength(2);
+      // One search carries both the page and the counts.
+      expect(search.mock.calls).toHaveLength(1);
 
-      const statsQuery = search.mock.calls[1][0] as unknown as {
+      const statsQuery = search.mock.calls[0][0] as unknown as {
         query: { bool: { filter: object[] } };
-        aggs: { archived: { aggs: { inScope: { filter: { bool: { filter: object[] } } } } } };
+        aggs: {
+          archived: {
+            global: unknown;
+            aggs: { inScope: { filter: { bool: { filter: object[] } } } };
+          };
+        };
       };
       // The listing query carries the active/archived choice...
       const listingFilter = JSON.stringify(statsQuery.query.bool.filter);
@@ -300,16 +300,10 @@ describe('createMemoryPageStore', () => {
   });
 
   it('leaves the archived count at the Space, whatever the keywords select', async () => {
-    const search = jest.fn(({ size }: { size?: number }) =>
-      Promise.resolve(
-        size === 0
-          ? {
-              hits: { total: { value: 2 } },
-              aggregations: { archived: { inScope: { doc_count: 1 } } },
-            }
-          : { hits: { total: { value: 2 }, hits: [] } }
-      )
-    );
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 2 }, hits: [] },
+      aggregations: { archived: { inScope: { doc_count: 1 } } },
+    });
     const store = createMemoryPageStore({
       esClient: { search } as never,
       logger,
@@ -320,8 +314,8 @@ describe('createMemoryPageStore', () => {
     const result = await store.listPaginated({ tags: ['invoke-agent'] });
 
     expect(result.stats).toEqual({ total: 2, archived: 1 });
-    expect(search.mock.calls).toHaveLength(2);
-    const statsQuery = search.mock.calls[1][0] as unknown as {
+    expect(search.mock.calls).toHaveLength(1);
+    const statsQuery = search.mock.calls[0][0] as unknown as {
       query: unknown;
       aggs: { archived: { aggs: { inScope: { filter: unknown } } } };
     };
@@ -359,24 +353,17 @@ describe('createMemoryPageStore', () => {
         }),
       },
     });
-    // `listPaginated` issues a page query and a separate stats aggregation, so
-    // the mock answers by shape rather than by call order: a query carrying
-    // `size: 0` is the aggregation and returns no hits.
+    // `listPaginated` answers the page and the counts from one request, so the
+    // mock answers by whether the request resumes from a cursor.
     interface PageRequest {
-      size?: number;
       search_after?: unknown[];
     }
     const search = jest.fn((request: PageRequest) => {
-      if (request.size === 0) {
-        return Promise.resolve({
-          hits: { total: { value: 3, relation: 'eq' }, hits: [] },
-          aggregations: {
-            archived: { inScope: { doc_count: 1 } },
-          },
-        });
-      }
       if (!request.search_after) {
-        return Promise.resolve(page(['memory_a', 'memory_b']));
+        return Promise.resolve({
+          ...page(['memory_a', 'memory_b']),
+          aggregations: { archived: { inScope: { doc_count: 1 } } },
+        });
       }
       return Promise.resolve(page(['memory_c']));
     });
@@ -456,26 +443,16 @@ describe('createMemoryPageStore', () => {
   });
 
   it('takes total and stats from the whole filtered set, not from the page slice', async () => {
-    // The page query returns one row out of many, and the aggregation runs
-    // separately with no paging. If the header numbers came from the page slice
-    // they would shrink as the operator scrolls.
-    const search = jest.fn(({ size }: { size?: number }) =>
-      Promise.resolve(
-        size === 0
-          ? {
-              hits: { total: { value: 137, relation: 'eq' }, hits: [] },
-              aggregations: {
-                archived: { inScope: { doc_count: 12 } },
-              },
-            }
-          : {
-              hits: {
-                total: { value: 137, relation: 'eq' },
-                hits: [{ _id: 'space-a:memory_a', _source: source }],
-              },
-            }
-      )
-    );
+    // The request returns one row out of many and carries the counts alongside,
+    // so if the header numbers came from the page slice they would shrink as the
+    // operator scrolls.
+    const search = jest.fn().mockResolvedValue({
+      hits: {
+        total: { value: 137, relation: 'eq' },
+        hits: [{ _id: 'space-a:memory_a', _source: source }],
+      },
+      aggregations: { archived: { inScope: { doc_count: 12 } } },
+    });
     const store = createMemoryPageStore({
       esClient: { search } as never,
       logger,
@@ -552,16 +529,10 @@ describe('createMemoryPageStore', () => {
   });
 
   it('counts the filtered set in the stats, so the header cannot drift from the rows', async () => {
-    const search = jest.fn((request: { size?: number }) =>
-      Promise.resolve(
-        request.size === 0
-          ? {
-              hits: { total: { value: 2 } },
-              aggregations: { archived: { inScope: { doc_count: 0 } } },
-            }
-          : { hits: { total: { value: 2 }, hits: [] } }
-      )
-    );
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 2 }, hits: [] },
+      aggregations: { archived: { inScope: { doc_count: 0 } } },
+    });
     const store = createMemoryPageStore({
       esClient: { search } as never,
       logger,
@@ -573,10 +544,10 @@ describe('createMemoryPageStore', () => {
 
     expect(result.total).toBe(2);
     expect(result.stats).toEqual({ total: 2, archived: 0 });
-    // Both the page query and the stats aggregation carry the tag clause.
+    // The page query carries the tag clause, and the archived count on it does not.
     const serialized = search.mock.calls.map(([request]) => JSON.stringify(request));
-    expect(serialized).toHaveLength(2);
-    serialized.forEach((request) => expect(request).toContain('"tags":"kafka"'));
+    expect(serialized).toHaveLength(1);
+    expect(serialized[0]).toContain('"tags":"kafka"');
   });
 
   it('leaves the query untagged when no keyword was selected', async () => {

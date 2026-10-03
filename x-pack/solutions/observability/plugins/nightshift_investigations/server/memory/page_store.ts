@@ -395,8 +395,8 @@ export const createMemoryPageStore = ({
 
   /**
    * The write-side projection of a page. Both writes that carry a read page
-   * forward — archive and restore — go through this, so a provenance field added to
-   * one cannot be left off the other.
+   * forward — archive and restore — go through this, so a provenance field added
+   * to one cannot be left off the other.
    */
   const toWrite = (page: MemoryPage): MemoryPageWrite => ({
     slug: page.slug,
@@ -528,62 +528,25 @@ export const createMemoryPageStore = ({
   const emptyStats = (): MemoryStats => ({ total: 0, archived: 0 });
 
   /**
-   * Counts over the whole filtered set, independent of the page slice.
+   * The archived count for the header, hung off the listing's own search.
    *
-   * `total` is the listing's own scope, so the header cannot drift from the rows.
-   * `archived` is the Space's own count: neither the listing filter nor the
-   * selected keywords narrow it. The header's "N archived" describes the
-   * sidebar's Archived list, which the client does not filter by keyword and
-   * would not narrow by the Active/Archived/All choice, so a count that followed
-   * either would describe a list nobody is looking at. Counting inside the active
-   * listing (which excludes archived pages by definition) reported zero for every
-   * Space that had any.
-   *
-   * An aggregation only ever sees the documents its own query matched, so the
-   * archived count hangs off a `global` aggregation and filters the Space
-   * itself: nested under the listing query it would be filtered twice, and the
-   * active listing matches no archived document at all.
+   * An aggregation only ever sees the documents its own query matched, so a
+   * `global` sub-aggregation — which ignores the query and re-filters — is the
+   * only way to count archived pages from inside a query that excludes them.
+   * Nested under the listing it costs no round trip and counts exactly what a
+   * separate search would: the Space's own archived total, narrowed by neither
+   * the Active/Archived/All choice nor the selected keywords, because the header's
+   * "N archived" describes the sidebar's Archived list.
    */
-  const aggregateStats = async (
-    filter: MemoryFilter,
-    tags?: readonly string[]
-  ): Promise<MemoryStats> => {
-    try {
-      const response = await esClient.search<StoredMemoryPage>(
-        {
-          index: MEMORY_INDEX,
-          query: { bool: { filter: filterClause(filter, tags) } },
-          size: 0,
-          track_total_hits: true,
-          aggs: {
-            archived: {
-              global: {},
-              aggs: {
-                inScope: {
-                  filter: { bool: { filter: [...spaceAndTagFilter, ARCHIVED_CLAUSE] } },
-                },
-              },
-            },
-          },
+  const archivedAgg = {
+    archived: {
+      global: {},
+      aggs: {
+        inScope: {
+          filter: { bool: { filter: [...spaceAndTagFilter, ARCHIVED_CLAUSE] } },
         },
-        { signal }
-      );
-      const aggs = response.aggregations as
-        | {
-            archived?: { inScope?: { doc_count?: number } };
-          }
-        | undefined;
-      return {
-        total:
-          typeof response.hits.total === 'number'
-            ? response.hits.total
-            : response.hits.total?.value ?? 0,
-        archived: aggs?.archived?.inScope?.doc_count ?? 0,
-      };
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return emptyStats();
-      throw err;
-    }
+      },
+    },
   };
 
   /**
@@ -650,6 +613,7 @@ export const createMemoryPageStore = ({
             size: pageSize,
             track_total_hits: true,
             sort: PAGINATION_SORT,
+            aggs: archivedAgg,
             ...(searchAfter ? { search_after: searchAfter } : {}),
           },
           { signal }
@@ -667,10 +631,13 @@ export const createMemoryPageStore = ({
           typeof response.hits.total === 'number'
             ? response.hits.total
             : response.hits.total?.value ?? 0;
+        const aggs = response.aggregations as
+          | { archived?: { inScope?: { doc_count?: number } } }
+          | undefined;
 
         return {
           pages: pages.map(toSummary),
-          stats: await aggregateStats(filter, tags),
+          stats: { total, archived: aggs?.archived?.inScope?.doc_count ?? 0 },
           total,
           ...(nextCursor ? { cursor: nextCursor } : {}),
         };
@@ -1068,7 +1035,8 @@ export const createMemoryPageStore = ({
           return versioned.page;
         }
         // The reason is the only archived marker, so dropping it is the whole
-        // operation. Everything else is carried through unchanged.
+        // operation. Everything else is carried through unchanged, and a stored
+        // document always names an updater.
         const restored: MemoryPageWrite = {
           ...toWrite(versioned.page),
           user: versioned.page.updated_by || 'nightshift',
