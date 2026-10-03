@@ -32,11 +32,17 @@ function ObservabilityCompleteLandingPage() {
   const { share, logsDataAccess } = useKibana().services;
 
   useEffect(() => {
+    let cancelled = false;
+
     async function redirectToLanding() {
       if (isAllRequestsComplete) {
         const hasLogsData = await getHasLogsData(logsDataAccess);
         const hasApmData = hasDataMap.apm?.hasData;
         const locators = getLocators(share);
+
+        if (cancelled) {
+          return;
+        }
 
         if (hasLogsData && locators.logs) {
           locators.logs.navigate({});
@@ -49,6 +55,10 @@ function ObservabilityCompleteLandingPage() {
     }
 
     redirectToLanding();
+
+    return () => {
+      cancelled = true;
+    };
   }, [hasDataMap, isAllRequestsComplete, logsDataAccess, share]);
 
   return <></>;
@@ -58,9 +68,15 @@ function ObservabilityLogsEssentialsLandingPage() {
   const { share, logsDataAccess } = useKibana().services;
 
   useEffect(() => {
+    let cancelled = false;
+
     async function redirectToLanding() {
       const hasLogsData = await getHasLogsData(logsDataAccess);
       const locators = getLocators(share);
+
+      if (cancelled) {
+        return;
+      }
 
       if (hasLogsData && locators.logs) {
         locators.logs.navigate({});
@@ -70,6 +86,10 @@ function ObservabilityLogsEssentialsLandingPage() {
     }
 
     redirectToLanding();
+
+    return () => {
+      cancelled = true;
+    };
   }, [logsDataAccess, share]);
 
   return <></>;
