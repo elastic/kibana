@@ -77,12 +77,11 @@ import {
   ProfileStateType,
   type ProfileStateDefinition,
 } from '../../../../common/context_awareness';
-import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../../../server';
 import {
-  discoverSessionInternalDataSchema,
-  type DiscoverSessionInternalResponse,
-} from '../../../../server/api/internal_schema';
+  discoverSessionApiDataSchema,
+  type DiscoverSessionApiClassicTab,
+} from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../../../server';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
 import { createDiscoverSessionService } from '../../../session/session_service';
 import type {
@@ -762,17 +761,15 @@ describe('Discover state', () => {
         copyOnSave: false,
         savedId: response.id,
         method: 'upsert' as const,
-        expectedFilterDataViewId: apiDataViewId,
       },
       {
         action: 'Save As',
         copyOnSave: true,
         savedId: 'copied-session',
         method: 'create' as const,
-        expectedFilterDataViewId: expect.any(String),
       },
     ])('keeps the spec ID after $action and refresh', async (testCase) => {
-      const { copyOnSave, savedId, method, expectedFilterDataViewId } = testCase;
+      const { copyOnSave, savedId, method } = testCase;
       const services = createDiscoverServicesMock();
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory();
@@ -781,7 +778,7 @@ describe('Discover state', () => {
       const tabId = firstLoad.getCurrentTab().id;
       await firstLoad.initializeSingleTab({ tabId });
 
-      const savedResponse: DiscoverSessionInternalResponse = cloneDeep(response);
+      const savedResponse = cloneDeep(response);
       savedResponse.id = savedId;
       const respondToSave = async (data: DiscoverSessionClientRequestData) => {
         expect(data.tabs).toHaveLength(1);
@@ -789,11 +786,20 @@ describe('Discover state', () => {
           data_source: {
             type: 'data_view_spec',
             index_pattern: 'logs-*',
-            id: expect.any(String),
           },
-          filters: [{ ...apiFilters[0], data_view_id: expect.any(String) }, apiFilters[1]],
+          filters: [{ ...apiFilters[0], data_view_id: apiDataViewId }, apiFilters[1]],
         });
-        savedResponse.data = discoverSessionInternalDataSchema.parse(data);
+        // Public responses omit both the inline ID and references to it in the tab's filters.
+        savedResponse.data = discoverSessionApiDataSchema.parse({
+          ...data,
+          tabs: [
+            {
+              ...data.tabs[0],
+              data_source: response.data.tabs[0].data_source,
+              filters: apiFilters,
+            },
+          ],
+        });
         return cloneDeep(savedResponse);
       };
       const apiClient: jest.Mocked<DiscoverSessionClient> = {
@@ -820,7 +826,7 @@ describe('Discover state', () => {
       const savedTab = savedSession?.tabs[0];
       const savedDataViewId = savedTab?.serializedSearchSource.filter?.[0].meta.index;
       expect(savedSession?.id).toBe(savedId);
-      expect(savedDataViewId).toEqual(expectedFilterDataViewId);
+      expect(savedDataViewId).toBe(apiDataViewId);
       expect(savedTab?.serializedSearchSource.index).toEqual(
         expect.objectContaining({ id: savedDataViewId })
       );

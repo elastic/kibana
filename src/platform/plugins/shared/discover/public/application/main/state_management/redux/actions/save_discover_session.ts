@@ -13,11 +13,12 @@ import type {
   SaveDiscoverSessionOptions,
   SaveDiscoverSessionParams,
 } from '@kbn/saved-search-plugin/public';
-import { updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { isInlineDataViewSpec } from '../../../../../../common/session/inline_data_view';
+import { remapFilterDataViewIds } from '../../../../../../common/session/inline_data_view_references';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState, selectTabTypeForPersistence } from '../runtime_state';
@@ -112,11 +113,10 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
 
           if (state.defaultProfileAdHocDataViewIds.includes(dataViewSpec.id)) {
             // If the Discover session is using a default profile ad hoc data view,
-            // we copy it with a new ID to avoid conflicts with the profile defaults
+            // we save an editable copy without changing the profile defaults
             action = 'copy';
-          } else if (newCopyOnSave) {
-            // Otherwise, if we're copying a session with a custom ad hoc data view,
-            // we replace it with a cloned one to avoid ID conflicts across sessions
+          } else if (newCopyOnSave && !isInlineDataViewSpec(dataViewSpec)) {
+            // Inline views keep their identity; excluded views retain the existing copy behavior.
             action = 'replace';
           }
 
@@ -146,9 +146,10 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       let newDataViewSpec: DataViewSpec & Required<Pick<DataViewSpec, 'id'>>;
 
       if (action === 'copy') {
-        newDataViewSpec = {
+        const copySpec: DataViewSpec = {
           ...dataViewSpec,
-          id: uuidv4(),
+          // Excluded specs need a fresh ID; resolve derives D for inline copies regardless of this ID.
+          id: undefined,
           name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
             defaultMessage: '{dataViewName} ({discoverSessionTitle})',
             values: {
@@ -159,7 +160,9 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           managed: false,
         };
 
-        const dataView = await services.dataViews.create(newDataViewSpec);
+        const dataView = await services.inlineDataViews.resolve(copySpec);
+        // resolve creates or reuses an instance with an ID, including for excluded specs.
+        newDataViewSpec = { ...copySpec, id: dataView.id! };
 
         // Make sure our state is aware of the copy so it appears in the UI
         dispatch(appendAdHocDataViews(dataView));
@@ -185,10 +188,9 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
 
         // We also need to update the filter references
         if (Array.isArray(tab.serializedSearchSource.filter)) {
-          tab.serializedSearchSource.filter = updateFilterReferences(
+          tab.serializedSearchSource.filter = remapFilterDataViewIds(
             tab.serializedSearchSource.filter,
-            dataViewSpec.id,
-            newDataViewSpec.id
+            new Map([[dataViewSpec.id, newDataViewSpec.id]])
           );
         }
       }

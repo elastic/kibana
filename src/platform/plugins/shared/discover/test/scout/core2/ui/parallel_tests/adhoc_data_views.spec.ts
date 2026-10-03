@@ -159,9 +159,9 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
   );
 
   spaceTest(
-    'saving and reloading preserve the runtime data view ID but saving as copy generates a new ID',
+    'saving a copy preserves the inline view until edited, without changing the original',
     async ({ apiServices, discoverScoutSpace, kbnClient, page, pageObjects }) => {
-      const { discover } = pageObjects;
+      const { discover, filterBar } = pageObjects;
 
       const sessionId = await apiServices.discover.create(
         {
@@ -181,6 +181,12 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
                   },
                 },
               },
+              filters: [
+                {
+                  type: 'condition',
+                  condition: { field: 'extension.raw', operator: 'is', value: 'css' },
+                },
+              ],
               column_order: ['_bytes-runtimefield'],
             },
           ],
@@ -218,10 +224,29 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
       await expect.poll(() => discover.getCurrentDataViewId()).toBe(idBeforeSave);
       await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
-      const idBeforeCopy = await discover.getCurrentDataViewId();
       await discover.saveSearchAsNew('logstash*-ss-new');
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getCurrentDataViewId()).not.toBe(idBeforeCopy);
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(idBeforeSave);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(idBeforeSave);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+      await filterBar.clickEditFilter('extension.raw', 'css');
+      await expect.poll(() => filterBar.getFilterEditorSelectedPhrases()).toStrictEqual(['css']);
+      await filterBar.closeFieldEditorModal();
+
+      await discover.editCurrentDataViewName('Copied logs');
+      await expect.poll(() => discover.getCurrentDataViewId()).not.toBe(idBeforeSave);
+      await discover.saveUnsavedChanges();
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await discover.loadSavedSearch('logstash*-ss');
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(idBeforeSave);
+      await expect.poll(() => discover.getSelectedDataViewName()).toBe('logstash*');
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
 

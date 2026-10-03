@@ -97,7 +97,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'forks the profile data view into an unmanaged copy when saving the session',
+      'saves and reloads an editable copy of the profile data view without unsaved changes',
       async ({ page, pageObjects }) => {
         const { dataGrid, discover, unifiedFieldList } = pageObjects;
 
@@ -107,7 +107,20 @@ spaceTest.describe(
         await discover.saveSearch(SESSION_NAME);
         await discover.waitUntilSearchingHasFinished();
 
-        expect(await discover.getSelectedDataViewName()).toBe(SESSION_DATA_VIEW);
+        await expect.poll(() => discover.getSelectedDataViewName()).toBe(SESSION_DATA_VIEW);
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
+        const copiedDataViewId = await discover.getCurrentDataViewId();
+
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+
+        await expect.poll(() => discover.getSelectedDataViewName()).toBe(SESSION_DATA_VIEW);
+        await expect.poll(() => discover.getCurrentDataViewId()).toBe(copiedDataViewId);
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+        await discover.editCurrentDataViewName(SESSION_DATA_VIEW);
+        await expect.poll(() => discover.getCurrentDataViewId()).toBe(copiedDataViewId);
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
         await discover.getSelectedDataView().click();
         await expect(page.testSubj.locator(managedBadge(SESSION_DATA_VIEW))).toBeHidden();
