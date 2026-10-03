@@ -9,7 +9,11 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createDataViewDataSource, createEsqlDataSource } from '../data_sources';
-import { getInitialDataViewId, getNavigationDataView, getRequestedDataView } from './initial_data_view';
+import {
+  getInitialDataViewId,
+  getNavigationDataView,
+  getRequestedDataView,
+} from './initial_data_view';
 
 describe('getInitialDataViewId', () => {
   it.each<[Parameters<typeof getInitialDataViewId>[0], string | undefined]>([
@@ -37,11 +41,7 @@ describe('getRequestedDataView', () => {
   const local = { id: 'local-id', title: 'local-*' };
   const navigation = { id: 'navigation-id', title: 'navigation-*' };
 
-  it.each<[
-    string,
-    Parameters<typeof getRequestedDataView>[0],
-    DataViewSpec | string | undefined
-  ]>([
+  it.each<[string, Parameters<typeof getRequestedDataView>[0], DataViewSpec | string | undefined]>([
     [
       'an unsaved navigation definition before a local definition',
       {

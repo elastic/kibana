@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep, omit, pick } from 'lodash';
 import { map } from 'rxjs';
 import type {
   DiscoverStateMockParams,
@@ -810,24 +810,18 @@ describe('Discover state', () => {
       savedResponse.id = savedId;
       const respondToSave = async (data: DiscoverSessionClientRequestData) => {
         expect(data.tabs).toHaveLength(1);
-        expect(data.tabs[0]).toMatchObject({
+        expect(pick(data.tabs[0], ['data_source', 'filters'])).toStrictEqual({
           data_source: {
             type: 'data_view_spec',
             index_pattern: 'logs-*',
+            time_field: undefined,
+            allow_hidden_indices: false,
           },
-          filters: [{ ...apiFilters[0], data_view_id: apiDataViewId }, apiFilters[1]],
+          filters: [apiFilters[0], { ...apiFilters[1], negate: true }],
         });
-        // Public responses omit both the inline ID and references to it in the tab's filters.
-        savedResponse.data = discoverSessionApiDataSchema.parse({
-          ...data,
-          tabs: [
-            {
-              ...data.tabs[0],
-              data_source: response.data.tabs[0].data_source,
-              filters: apiFilters,
-            },
-          ],
-        });
+        // Echo the public request so reload verifies the spec and references actually sent.
+        savedResponse.data = discoverSessionApiDataSchema.parse(data);
+
         return cloneDeep(savedResponse);
       };
       const apiClient: jest.Mocked<DiscoverSessionClient> = {

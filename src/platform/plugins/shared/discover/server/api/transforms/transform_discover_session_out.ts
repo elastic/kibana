@@ -8,6 +8,7 @@
  */
 
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import type {
   DiscoverSessionApiData,
   DiscoverSessionApiTab,
@@ -86,7 +87,12 @@ export const transformInternalDiscoverSessionOut = (
 
     return {
       ...converted,
-      tab: { ...tab, data_source: { ...tab.data_source, id: inlineDataViewId } },
+      tab: {
+        ...tab,
+        // Until this transport is removed, keep filter references alongside the explicit spec ID.
+        filters: fromStoredFilters(searchSource.filter) ?? [],
+        data_source: { ...tab.data_source, id: inlineDataViewId },
+      },
     };
   });
 

@@ -44,6 +44,7 @@ import { unregisterFromDataViewsCache, type EsqlSource } from '@kbn/data-source'
 import type { DiscoverServices } from '../build_services';
 import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
+import { normalizeInlineSearchSource } from '../../common/session/inline_data_view_references';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableSerializedAttributes,
@@ -58,9 +59,12 @@ const initializeSearchSource = async (
   let searchSource: ISearchSource;
   let parentSearchSource: ISearchSource;
 
+  // Normalize before creating the Data View; Dashboard's shared filters belong to the parent.
+  const normalizedSearchSource = normalizeInlineSearchSource(serializedSearchSource ?? {});
+
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(normalizedSearchSource),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {

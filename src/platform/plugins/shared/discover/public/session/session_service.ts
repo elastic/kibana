@@ -14,7 +14,7 @@ import type {
   SavedSearchPublicPluginStart,
 } from '@kbn/saved-search-plugin/public';
 import type { DiscoverSessionWarning } from '../../server';
-import type { DiscoverSessionInternalResponse } from '../../server/api/internal_schema';
+import type { DiscoverSessionApiResponse } from '../../server/api/schema';
 import type { DiscoverSessionClient } from './api_client';
 import { normalizeSessionFilters } from './normalize_session_filters';
 import {
@@ -25,7 +25,7 @@ import {
 
 // Coordinates session loading and saving through HTTP or the legacy client, selected by the flag.
 // HTTP loads convert the API response and return its warnings without showing UI.
-// Internal routes preserve inline Data View IDs; tab restoration normalizes eligible inline views.
+// Tab restoration derives inline Data View IDs from the definitions returned by the public API.
 // HTTP saves convert the session into a create or upsert request, then keep the submitted tabs
 // and update only the session ID, metadata, and references from the response.
 
@@ -73,7 +73,7 @@ export const createDiscoverSessionService = ({
     },
     save: async (session, options) => {
       const data = toDiscoverSessionApiData(session);
-      let response: DiscoverSessionInternalResponse;
+      let response: DiscoverSessionApiResponse;
 
       if (options.copyOnSave || session.id === undefined) {
         response = await apiClient.create(data);

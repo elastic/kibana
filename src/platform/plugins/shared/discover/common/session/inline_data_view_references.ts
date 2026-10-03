@@ -188,10 +188,13 @@ export const normalizeInlineAppState = <T extends DataViewReferenceState>(
   return filters === normalized.filters ? normalized : { ...normalized, filters };
 };
 
-/** Normalizes an inline definition and its filters, including a restored copy's document convention. */
+/** Normalizes an inline definition and its own filters, using shared reference context when supplied. */
 export const normalizeInlineSearchSource = (
   searchSource: SerializedSearchSourceFields,
-  { sharedIdMap, documentSearchSource }: InlineDataViewReferenceContext
+  // Without shared context, remap this source's own filters and leave shared references alone.
+  { sharedIdMap, documentSearchSource }: InlineDataViewReferenceContext = {
+    sharedIdMap: new Map(),
+  }
 ): SerializedSearchSourceFields => {
   const identity = getInlineDataViewIdentity(searchSource);
   const documentIdentity = getImplicitDocumentIdentity(documentSearchSource);

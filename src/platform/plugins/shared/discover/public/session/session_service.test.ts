@@ -19,10 +19,8 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type {
-  DiscoverSessionInternalData,
-  DiscoverSessionInternalResponse,
-} from '../../server/api/internal_schema';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiResponse } from '../../server/api/schema';
 import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
 import { createDiscoverSessionService } from './session_service';
 
@@ -39,7 +37,7 @@ const runtimeTab: DiscoverSessionTab = {
   serializedSearchSource: { index: 'logs-data-view' },
 };
 
-const apiData: DiscoverSessionInternalData = {
+const apiData: DiscoverSessionApiData = {
   title: 'Session',
   description: '',
   tabs: [
@@ -58,7 +56,7 @@ const apiData: DiscoverSessionInternalData = {
   ],
 };
 
-const apiResponse: DiscoverSessionInternalResponse = {
+const apiResponse: DiscoverSessionApiResponse = {
   id: 'session-id',
   data: apiData,
   meta: { managed: false },
@@ -147,7 +145,7 @@ describe('Discover session service', () => {
       const legacyClient = savedSearchPluginMock.createStartContract();
       // The API omits pin markers, the live fingerprint, and control order numbers.
       // Saving must keep those local values without rebuilding the tabs from this response.
-      const saveResponse: DiscoverSessionInternalResponse = {
+      const saveResponse: DiscoverSessionApiResponse = {
         id: savedId,
         data,
         meta: { managed: true },
@@ -170,19 +168,7 @@ describe('Discover session service', () => {
         ...beforeSave,
         id: savedId,
         managed: true,
-        references: [
-          { id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' },
-          {
-            id: 'runtime-inline-a',
-            type: 'index-pattern',
-            name: 'tab_inline-a.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-          },
-          {
-            id: 'runtime-inline-b',
-            type: 'index-pattern',
-            name: 'tab_inline-b.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-          },
-        ],
+        references: [{ id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' }],
       });
       expect(submittedSession).toStrictEqual(beforeSave);
       expect(apiClient.get).not.toHaveBeenCalled();
@@ -261,7 +247,7 @@ const createSaveFixture = () => {
     ...session,
     tags: ['tag-1'],
     tabs: [
-      // Identical specs may have different IDs after editing. Saving must keep both IDs.
+      // Saving must keep the submitted runtime state even when the API response has no inline IDs.
       ...['inline-a', 'inline-b'].map(
         (id): DiscoverSessionTab => ({
           ...runtimeTab,
@@ -329,11 +315,11 @@ const createSaveFixture = () => {
     ],
   };
 
-  const data: DiscoverSessionInternalData = {
+  const data: DiscoverSessionApiData = {
     ...apiData,
     tags: ['tag-1'],
     tabs: [
-      ...['inline-a', 'inline-b'].map((id): DiscoverSessionInternalData['tabs'][number] => ({
+      ...['inline-a', 'inline-b'].map((id): DiscoverSessionApiData['tabs'][number] => ({
         id,
         label: id,
         type: DiscoverTabType.Default,
@@ -343,12 +329,10 @@ const createSaveFixture = () => {
           {
             type: 'dsl',
             dsl: { query: { match_all: {} } },
-            data_view_id: `runtime-${id}`,
           },
         ],
         data_source: {
           type: 'data_view_spec',
-          id: `runtime-${id}`,
           index_pattern: 'logs-*',
           time_field: '@timestamp',
           allow_hidden_indices: false,

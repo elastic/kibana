@@ -418,13 +418,11 @@ describe('discover session API transforms', () => {
 
       expect(selfFilter).not.toHaveProperty('data_view_id');
       expect(foreignFilter).toHaveProperty('data_view_id', 'foreign-data-view-id');
-      // By-value panels do not apply the session policies, so they keep the inline ID.
+      // Sessions and by-value panels use the same implicit reference to their own inline view.
       const [panelTab] = fromStoredSearchEmbeddableByValue(
         toByValuePanelState(storedTabAttributes)
       ).tabs;
-      expect(panelTab).toMatchObject({
-        filters: [{ data_view_id: inlineDataViewId }, { data_view_id: 'foreign-data-view-id' }],
-      });
+      expect('filters' in panelTab && panelTab.filters).toStrictEqual([selfFilter, foreignFilter]);
 
       const { attributes, references } = transformDiscoverSessionIn(sessionState);
       const roundTrippedSearchSource = injectReferences(

@@ -14,7 +14,8 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import {
   fromStoredSearchEmbeddable,
@@ -930,6 +931,70 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('stored tab conversion in by-value panels', () => {
+    it('round-trips own inline filters implicitly, keeping foreign references and excluding pinned filters', () => {
+      const inlineSpec = { id: 'legacy-inline-view', title: 'logs-*', timeFieldName: '@timestamp' };
+      const ownFilter = {
+        meta: { index: inlineSpec.id, type: FILTERS.PHRASE, key: 'service.name' },
+        query: { match_phrase: { 'service.name': 'api' } },
+      };
+      const storedPanel = toByValuePanelState({
+        sort: [],
+        columns: ['service.name'],
+        grid: {},
+        hideChart: false,
+        hideTable: false,
+        isTextBasedQuery: false,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            index: inlineSpec,
+            filter: [
+              ownFilter,
+              { ...ownFilter, meta: { ...ownFilter.meta, index: 'foreign-view' } },
+              { ...ownFilter, $state: { store: FilterStateStore.GLOBAL_STATE } },
+            ],
+          }),
+        },
+      });
+      const originalPanel = cloneDeep(storedPanel);
+
+      const apiPanel = fromStoredSearchEmbeddableByValue(storedPanel);
+      const [apiTab] = apiPanel.tabs;
+      const condition = {
+        type: ASCODE_FILTER_TYPE.CONDITION,
+        condition: { field: 'service.name', operator: ASCODE_FILTER_OPERATOR.IS, value: 'api' },
+      };
+
+      expect(apiTab.data_source).toStrictEqual({
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'logs-*',
+        time_field: '@timestamp',
+      });
+      expect('filters' in apiTab && apiTab.filters).toStrictEqual([
+        condition,
+        { ...condition, data_view_id: 'foreign-view' },
+      ]);
+
+      const { state, references } = toStoredSearchEmbeddableByValue(apiPanel);
+      const restoredSearchSource = injectReferences(
+        parseSearchSourceJSON(
+          state.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ),
+        references
+      );
+
+      expect(restoredSearchSource.index).toStrictEqual({
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+      });
+      expect(restoredSearchSource.filter?.map((filter) => filter.meta.index)).toStrictEqual([
+        undefined,
+        'foreign-view',
+      ]);
+      expect(references.map(({ id }) => id)).toStrictEqual(['foreign-view']);
+      expect(fromStoredSearchEmbeddableByValue(state, references)).toStrictEqual(apiPanel);
+      expect(storedPanel).toStrictEqual(originalPanel);
+    });
+
     it('converts stored tab with dataView id to API tab', () => {
       const storedTab: DiscoverSessionTabAttributes = {
         sort: [['@timestamp', 'desc']],

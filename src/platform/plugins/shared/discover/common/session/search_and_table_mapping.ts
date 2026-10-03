@@ -105,7 +105,26 @@ export const toStoredSearchSource = (
   };
 };
 
-/** Converts search and table state to API fields without applying session-specific policies. */
+// The serialized inline spec has no ID, so its own filters use an implicit reference; foreign IDs stay explicit.
+const fromStoredTabFilters = ({ index, filter }: SerializedSearchSourceFields) => {
+  const filters = fromStoredFilters(filter) ?? [];
+  const inlineDataViewId = typeof index === 'object' ? index.id : undefined;
+  if (inlineDataViewId === undefined) {
+    return filters;
+  }
+
+  return filters.map((convertedFilter) => {
+    if (convertedFilter.data_view_id !== inlineDataViewId) {
+      return convertedFilter;
+    }
+
+    const { data_view_id: _inlineDataViewId, ...filterWithoutDataViewId } = convertedFilter;
+
+    return filterWithoutDataViewId;
+  });
+};
+
+/** Converts search and table state, making filter references to its own inline view implicit. */
 export const fromStoredSearchAndTable = (
   tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
   searchSource: SerializedSearchSourceFields
@@ -115,7 +134,7 @@ export const fromStoredSearchAndTable = (
     ...fromStoredTableSettings(tab),
     sort: fromStoredSort(sort),
   };
-  const { index, query, filter } = searchSource;
+  const { index, query } = searchSource;
   return isOfAggregateQueryType(query)
     ? {
         ...apiTab,
@@ -129,7 +148,7 @@ export const fromStoredSearchAndTable = (
         ...(sampleSize && { sample_size: sampleSize }),
         ...(rowsPerPage && { rows_per_page: rowsPerPage }),
         ...(query && { query: toAsCodeQuery(query) }),
-        filters: fromStoredFilters(filter) ?? [],
+        filters: fromStoredTabFilters(searchSource),
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
       };

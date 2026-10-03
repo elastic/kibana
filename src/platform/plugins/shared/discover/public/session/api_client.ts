@@ -9,35 +9,33 @@
 
 import { buildPath, isHttpFetchError, type IHttpFetchError } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType, type DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
-  DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
 import type {
-  DiscoverSessionInternalDataInput,
-  DiscoverSessionInternalResponse,
-  DiscoverSessionInternalGetResponse,
-} from '../../server/api/internal_schema';
+  DiscoverSessionApiResponse,
+  DiscoverSessionGetResponse,
+} from '../../server/api/schema';
 import type { deserializeEsqlControls } from '../../common/session/control_panels';
 
 export interface DiscoverSessionClient {
-  create: (data: DiscoverSessionClientRequestData) => Promise<DiscoverSessionInternalResponse>;
+  create: (data: DiscoverSessionClientRequestData) => Promise<DiscoverSessionApiResponse>;
   get: (id: string) => Promise<DiscoverSessionClientGetResult>;
   upsert: (
     id: string,
     data: DiscoverSessionClientRequestData
-  ) => Promise<DiscoverSessionInternalResponse>;
+  ) => Promise<DiscoverSessionApiResponse>;
 }
 
-export type DiscoverSessionClientRequestData = Omit<DiscoverSessionInternalDataInput, 'tabs'> & {
+export type DiscoverSessionClientRequestData = Omit<DiscoverSessionApiDataInput, 'tabs'> & {
   tabs: DiscoverSessionClientRequestTab[];
 };
 
-export type DiscoverSessionClientRequestTab<
-  Tab = DiscoverSessionInternalDataInput['tabs'][number]
-> = {
+export type DiscoverSessionClientRequestTab<Tab = DiscoverSessionApiDataInput['tabs'][number]> = {
   [Key in keyof Tab]: Key extends 'control_panels'
     ? ReturnType<typeof deserializeEsqlControls>
     : Tab[Key];
@@ -48,15 +46,15 @@ export type DiscoverSessionResolveMetadata = Pick<
   'outcome' | 'aliasTargetId' | 'aliasPurpose'
 >;
 
-export type DiscoverSessionClientGetResult = DiscoverSessionInternalGetResponse & {
+export type DiscoverSessionClientGetResult = DiscoverSessionGetResponse & {
   resolve: DiscoverSessionResolveMetadata;
 };
 
-/** Uses the internal session routes so Discover keeps inline Data View IDs. */
+/** Loads and saves sessions through the public API, where inline views are defined without IDs. */
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
     requestWithReadableError(() =>
-      http.post<DiscoverSessionInternalResponse>(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
+      http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
         version: DISCOVER_SESSION_API_VERSION,
         body: JSON.stringify(data),
       })
@@ -65,7 +63,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
   get: (id) =>
     requestWithReadableError(
       async () => {
-        const { body, response } = await http.get<DiscoverSessionInternalGetResponse>(
+        const { body, response } = await http.get<DiscoverSessionGetResponse>(
           buildDiscoverSessionPath(id),
           {
             version: DISCOVER_SESSION_API_VERSION,
@@ -87,7 +85,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 
   upsert: (id, data) =>
     requestWithReadableError(() =>
-      http.put<DiscoverSessionInternalResponse>(buildDiscoverSessionPath(id), {
+      http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
         version: DISCOVER_SESSION_API_VERSION,
         body: JSON.stringify(data),
       })
@@ -97,7 +95,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 
 /** Builds the path for one Discover session. */
 const buildDiscoverSessionPath = (id: string) =>
-  buildPath(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/{id}`, { id });
+  buildPath(`${DISCOVER_SESSION_API_BASE_PATH}/{id}`, { id });
 
 /** Preserves the server message through Redux and handles missing sessions separately. */
 const requestWithReadableError = async <T>(
