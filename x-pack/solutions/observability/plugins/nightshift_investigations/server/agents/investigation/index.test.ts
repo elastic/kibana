@@ -114,8 +114,6 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  
-
   it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
     const base = staticBase(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })

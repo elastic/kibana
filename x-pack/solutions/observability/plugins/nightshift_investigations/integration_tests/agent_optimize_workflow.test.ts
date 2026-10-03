@@ -145,9 +145,9 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   // its own connector the way the two optimizer branches do, so the agent gets the round's
   // model rather than a hard-coded feature default.
   it('runs the reinforcement agent on the model the round used', async () => {
-    const fixture = createNightshiftWorkflowFixture();
+    const roundFixture = createNightshiftWorkflowFixture();
 
-    await fixture.runOptimize({
+    await roundFixture.runOptimize({
       ...ELIGIBLE_ROUND_INPUTS,
       round_connector_id: 'round-connector',
     });
@@ -155,7 +155,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(resolveNightshiftModelForRequest).toHaveBeenCalledWith(
       expect.objectContaining({ step: 'investigation', roundConnectorId: 'round-connector' })
     );
-    expect(fixture.agentRuns[0].config).toMatchObject({ 'connector-id': 'round-connector' });
+    expect(roundFixture.agentRuns[0].config).toMatchObject({ 'connector-id': 'round-connector' });
   });
 
   // `${{ }}` keeps an array; Liquid `{{ }}` would stringify it to "[object Object]" and the

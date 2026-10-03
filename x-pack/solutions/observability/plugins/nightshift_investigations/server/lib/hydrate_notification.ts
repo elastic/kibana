@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-
 /** Markdown fragment for one hydrate node. Empty when this turn wrote no new files. */
 export const formatHydrateNotification = (
   heading: string,
@@ -45,7 +43,7 @@ export const degradeOnWriterFailure = ({
   directory,
   error,
 }: {
-  logger: Logger;
+  logger: { error: (message: string) => void };
   /** What the log line calls this writer, e.g. `'Cortex hydrate'`. */
   label: string;
   sandboxId: string;

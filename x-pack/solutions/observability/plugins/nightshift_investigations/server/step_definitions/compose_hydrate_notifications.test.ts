@@ -23,9 +23,8 @@ describe('composeHydrateNotificationContext', () => {
     expect(
       composeHydrateNotificationContext({
         writers: [
-          { name: 'cortex', directory: '/workspace/cortex', notification: cortex, completed: true },
+          { directory: '/workspace/cortex', notification: cortex, completed: true },
           {
-            name: 'memory',
             directory: '/workspace/memories',
             notification: memory,
             completed: true,
@@ -39,10 +38,9 @@ describe('composeHydrateNotificationContext', () => {
     expect(
       composeHydrateNotificationContext({
         writers: [
-          { name: 'cortex', directory: '/workspace/cortex', notification: '', completed: true },
-          { name: 'memory', directory: '/workspace/memories', notification: null, completed: true },
+          { directory: '/workspace/cortex', notification: '', completed: true },
+          { directory: '/workspace/memories', notification: null, completed: true },
           {
-            name: 'decision_trees',
             directory: '/workspace/decision-trees',
             notification: '   ',
             completed: true,
@@ -55,8 +53,8 @@ describe('composeHydrateNotificationContext', () => {
   it('keeps a single non-empty fragment', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
-        { name: 'cortex', directory: '/workspace/cortex', notification: '', completed: true },
-        { name: 'memory', directory: '/workspace/memories', notification: memory, completed: true },
+        { directory: '/workspace/cortex', notification: '', completed: true },
+        { directory: '/workspace/memories', notification: memory, completed: true },
       ],
     });
     expect(modelContext).toContain('<system_update>');
@@ -71,8 +69,8 @@ describe('composeHydrateNotificationContext', () => {
   it('reports an incomplete directory for a writer that produced no output', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
-        { name: 'cortex', directory: '/workspace/cortex', notification: '', completed: true },
-        { name: 'memory', directory: '/workspace/memories', completed: false },
+        { directory: '/workspace/cortex', notification: '', completed: true },
+        { directory: '/workspace/memories', completed: false },
       ],
     });
     expect(modelContext).toContain(formatIncompleteMaterializationNotice('/workspace/memories'));
@@ -86,7 +84,6 @@ describe('composeHydrateNotificationContext', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
         {
-          name: 'decision_trees',
           directory: '/workspace/decision-trees',
           notification: notice,
           completed: true,
@@ -99,10 +96,9 @@ describe('composeHydrateNotificationContext', () => {
   it('reports every failed writer once, in workflow order', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
-        { name: 'cortex', directory: '/workspace/cortex', notification: cortex, completed: true },
-        { name: 'memory', directory: '/workspace/memories', completed: false },
+        { directory: '/workspace/cortex', notification: cortex, completed: true },
+        { directory: '/workspace/memories', completed: false },
         {
-          name: 'decision_trees',
           directory: '/workspace/decision-trees',
           notification: formatIncompleteMaterializationNotice('/workspace/decision-trees'),
           completed: true,
@@ -177,7 +173,6 @@ describe('composeHydrateNotificationsStepDefinition', () => {
     } as never);
 
   const writer = (over: Record<string, unknown> = {}) => ({
-    name: 'cortex',
     directory: '/workspace/cortex',
     notification: '',
     completed: true,
@@ -186,7 +181,7 @@ describe('composeHydrateNotificationsStepDefinition', () => {
 
   it('always returns round workflow context and adds model context only when there is news', async () => {
     await expect(
-      run([writer(), writer({ name: 'memory', directory: '/workspace/memories' })], ['memory_a'])
+      run([writer(), writer({ directory: '/workspace/memories' })], ['memory_a'])
     ).resolves.toEqual({
       output: {
         workflow_context: {
@@ -208,9 +203,7 @@ describe('composeHydrateNotificationsStepDefinition', () => {
   // The round's recall context must survive the failure path unchanged: the agent still
   // needs to know what was (not) recalled so it does not re-derive the same pages.
   it('returns an empty recall context when memory failed to materialize', async () => {
-    const result = await run([
-      writer({ name: 'memory', directory: '/workspace/memories', completed: false }),
-    ]);
+    const result = await run([writer({ directory: '/workspace/memories', completed: false })]);
 
     expect(result.output?.workflow_context).toEqual({
       'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: [] } },
@@ -222,7 +215,7 @@ describe('composeHydrateNotificationsStepDefinition', () => {
 
   it('accepts a writer with no notification at all (branch-timeout shape)', async () => {
     const parsed = definition.inputSchema.safeParse({
-      writers: [{ name: 'memory', directory: '/workspace/memories', completed: false }],
+      writers: [{ directory: '/workspace/memories', completed: false }],
       recalled_ids: [],
     });
     expect(parsed.success).toBe(true);
