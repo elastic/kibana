@@ -9,6 +9,16 @@ import { buildCoverageKiId } from './coverage_ki_id';
 import type { CoverageSubject, CurrentRunState } from './types';
 
 /**
+ * The slice of `CurrentRunState` this needs. Narrowed (rather than the full state) so a run
+ * with no current-run SSE at all -- a real clean run -- can still derive a report-scoped
+ * subject without fabricating fields it has no data for.
+ */
+export type CoverageSubjectState = Pick<
+  CurrentRunState,
+  'reportId' | 'techniques' | 'hasConfirmedHit'
+>;
+
+/**
  * One coverage subject per technique on the current run; report-scoped when the
  * run named no techniques. Written for every swept report (hit or clean).
  */
@@ -18,7 +28,7 @@ export const deriveCoverageSubjects = ({
   investigationConversationId,
 }: {
   spaceId: string;
-  state: CurrentRunState;
+  state: CoverageSubjectState;
   investigationConversationId: string;
 }): CoverageSubject[] => {
   const techniqueIds = state.techniques.length > 0 ? [...new Set(state.techniques)] : [undefined];

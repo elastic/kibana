@@ -22,6 +22,7 @@ import {
   HUNT_INDEX_SCOPE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
+  WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
 
 interface NestedStep {
@@ -127,37 +128,14 @@ describe('system-security-hunt-execute', () => {
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
-  // The sole consumer of this field, `HUNT_STATUS_LABELS` in the threat attachment, is keyed on
-  // these three literals, and it was previously keyed on raw Tier 1 statuses this step never
-  // emits -- so every value production wrote rendered as an unlabelled string. Nothing
-  // type-checks a Liquid template against a React constant, so pin the producer's vocabulary
-  // here and let the attachment's own test cover the labels.
-  it('collapses the hunt outcome to exactly the three statuses the UI labels', () => {
-    const collapse = stepNamed(workflow, 'resolve_evidence_values').with
-      ?.last_hunt_status as string;
-
-    const emitted = collapse
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0 && !line.startsWith('{%'));
-
-    expect(emitted).toEqual(['hit', 'clean', 'incomplete']);
-  });
-
-  it('writes the evidence fields the candidate selection gate filters on', () => {
-    const script = stepNamed(workflow, 'set_evidence_script').with?.evidence_script as string;
-    expect(script).toEqual(expect.stringContaining('last_hunted_at'));
-  });
-
-  it('keys the evidence element by space, matching the gate', () => {
-    const script = stepNamed(workflow, 'set_evidence_script').with?.evidence_script as string;
-    expect(script).toEqual(expect.stringContaining('space_id'));
-  });
-
-  it('writes evidence only when the coordinator reports a completed run', () => {
-    expect(stepNamed(workflow, 'write_evidence').if).toEqual(
-      expect.stringContaining('completed_successfully == true')
-    );
+  // The hunt-once evidence write (last_hunted_at, last_hunt_status and siblings) is a dedicated
+  // step calling its own route -- see write_hunt_evidence.test.ts for the `deriveLastHuntStatus` /
+  // script-shape coverage this test used to provide at the YAML level when it was still an
+  // `elasticsearch.update` step.
+  it('only stamps the hunt-once gate once the coordinator confirms success', () => {
+    const step = stepNamed(workflow, 'write_evidence');
+    expect(step.if).toBe('${{ steps.run_hunt_coordinator.output.completed_successfully == true }}');
+    expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
   });
 
   it('writes the coordinator narrative as the hunt results message', () => {
@@ -330,6 +308,7 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       CANDIDATES_URL,
       HUNT_COORDINATOR_URL,
       FIND_OR_CREATE_INVESTIGATION_URL,
+      WRITE_HUNT_EVIDENCE_URL,
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
