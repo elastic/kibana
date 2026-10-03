@@ -14,7 +14,7 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
 } from '../../../common/fixtures/constants';
-import { forceLogExtraction } from '../../../common/fixtures/helpers';
+import { forceLogExtraction, uninstallAllEntityTypes } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
@@ -69,6 +69,10 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
   const assertTaskGone = async (kbnClient: ApiWorkerFixtures['kbnClient'], taskId: string) => {
     await expect(kbnClient.savedObjects.get({ type: 'task', id: taskId })).rejects.toThrow('404');
   };
+
+  apiTest.afterEach(async ({ apiClient }) => {
+    await uninstallAllEntityTypes(apiClient, defaultHeaders);
+  });
 
   apiTest('stops the history snapshot task on uninstall', async ({ apiClient, kbnClient }) => {
     await install(apiClient, { historySnapshot: { frequency: '24h' } });
