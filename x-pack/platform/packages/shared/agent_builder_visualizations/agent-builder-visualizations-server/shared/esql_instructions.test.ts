@@ -19,5 +19,6 @@ describe('buildEsqlAdditionalInstructions', () => {
     );
     expect(instructions).toContain('No timestamp `WHERE`');
     expect(instructions).toContain('do not add `TRANGE`');
+    expect(instructions).toContain('is-tsds="true"');
   });
 });
