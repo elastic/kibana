@@ -86,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       beforeEach(async () => {
-        if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+        if (await testSubjects.waitForExists('closeDetailsButton', { timeout: 1000 })) {
           await testSubjects.click('closeDetailsButton');
         }
         await testSubjects.click('createTemplateButton');
@@ -163,7 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // intercept the templateDetailsLink click in the beforeEach hook
       this.tags('skipFIPS');
       beforeEach(async () => {
-        if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+        if (await testSubjects.waitForExists('closeDetailsButton', { timeout: 1000 })) {
           await testSubjects.click('closeDetailsButton');
         }
         await es.indices.putIndexTemplate({
@@ -185,7 +185,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           if (btn) btn.click();
         });
         await retry.try(async () => {
-          if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+          if (await testSubjects.waitForExists('closeDetailsButton', { timeout: 1000 })) {
             await testSubjects.click('closeDetailsButton');
           }
           await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
@@ -237,10 +237,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // retrying until the clear button is gone (i.e. no selected options remain) so a
         // mid-interaction re-render can't leave the defaults in place before `basic_date` is added.
         await retry.try(async () => {
-          if (await testSubjects.exists('comboBoxClearButton', { timeout: 2000 })) {
+          if (await testSubjects.waitForExists('comboBoxClearButton', { timeout: 2000 })) {
             await testSubjects.click('comboBoxClearButton');
           }
-          expect(await testSubjects.exists('comboBoxClearButton', { timeout: 2000 })).to.be(false);
+          expect(await testSubjects.exists('comboBoxClearButton')).to.be(false);
         });
         await testSubjects.setValue('comboBoxInput', 'basic_date');
         await testSubjects.pressEnter('comboBoxInput');
