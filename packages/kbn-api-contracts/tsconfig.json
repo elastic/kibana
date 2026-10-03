@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
     "@kbn/router-to-openapispec",
   ]
 }

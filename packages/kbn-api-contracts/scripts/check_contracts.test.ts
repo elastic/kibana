@@ -54,6 +54,7 @@ jest.mock('../src/report/format_failure', () => ({
   formatFailure: jest.fn(),
 }));
 
+import { isFailError } from '@kbn/dev-cli-errors';
 import { execSync } from 'child_process';
 import { writeFileSync, rmSync } from 'fs';
 import { runOasdiff, runOasdiffStructural, parseOasdiff, applyAllowlist } from '../src/diff';
@@ -466,6 +467,14 @@ describe('check_contracts', () => {
         'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
       );
       expect(mockLog.error).toHaveBeenCalledWith('FAILURE REPORT');
+    });
+
+    it('fails with a FailError so the runner prints no stack trace', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      const error = await runCallback({ flags: defaultFlags, log: mockLog }).catch((e) => e);
+      expect(isFailError(error)).toBe(true);
     });
 
     it('catches a tech_preview breaking change and throws', async () => {

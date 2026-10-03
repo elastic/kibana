@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import {
   runOasdiff,
   runOasdiffStructural,
@@ -295,7 +296,7 @@ run(
       const techPreviewCount = gatingEntries.length - stableCount;
 
       log.error(formatFailure(entries));
-      throw new Error(
+      throw createFailError(
         `Detected ${gatingEntries.length} breaking change(s) in stable/tech_preview APIs: ` +
           `${stableCount} stable, ${techPreviewCount} tech_preview`
       );

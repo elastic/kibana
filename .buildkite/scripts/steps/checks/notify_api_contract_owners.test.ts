@@ -156,10 +156,13 @@ describe('buildCommentBody', () => {
 
   describe('release note guidance', () => {
     const SENTENCE =
-      'Add a release note to the PR description. The release note should describe the impact of the change on callers and what action to take to mitigate the change.';
-    const STEP_3 =
-      '3. **If intentional, add the `release_note:breaking` label** to this PR (replacing any other `release_note:*` label) and a release note to the PR description, see the Release note section below.';
+      "Add a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.";
+    const LABEL_BULLET =
+      '   - add the `release_note:breaking` PR label (replacing any other `release_note:*` label).';
+    const RELEASE_NOTE_BULLET =
+      '   - add release note text to the PR description, see the Release note section below.';
     const README_LINK = 'See the [`@kbn/api-contracts` README]';
+    const OPTIONAL_PROMPT = 'Optional: release note describing the change in the PR description';
 
     it.each([
       ['stable', entry()],
@@ -170,15 +173,22 @@ describe('buildCommentBody', () => {
       expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
     });
 
-    it('adds step 3 to the what-to-do list', () => {
+    it('groups the allowlist, label and release note under one If intentional step', () => {
       const body = buildCommentBody([entry()]);
+      const step2 = body.slice(
+        body.indexOf('2. **If intentional**:'),
+        body.indexOf('### Release note')
+      );
 
-      expect(body).toContain(STEP_3);
-      expect(
-        body.slice(body.indexOf('3. **If intentional, add'), body.indexOf('### Release note'))
-      ).toContain('`release_note:breaking`');
       expect(body).toContain('1. **Fix the breaking change**');
-      expect(body).toContain('2. **If intentional**');
+      expect(step2).toContain(
+        '   - add an approved entry to [`packages/kbn-api-contracts/allowlist.json`]'
+      );
+      expect(step2).toContain(LABEL_BULLET);
+      expect(step2).toContain(RELEASE_NOTE_BULLET);
+      expect(step2.indexOf('allowlist.json')).toBeLessThan(step2.indexOf(LABEL_BULLET));
+      expect(step2.indexOf(LABEL_BULLET)).toBeLessThan(step2.indexOf(RELEASE_NOTE_BULLET));
+      expect(body).not.toMatch(/^3\. /m);
     });
 
     it('keeps the label out of the Release note section', () => {
@@ -203,8 +213,8 @@ describe('buildCommentBody', () => {
 
       expect(body).not.toContain('```');
       expect(body).not.toMatch(/^#{1,2} Release note/m);
-      // One heading and one pointer from step 3.
-      expect(body.match(/Release note/g)).toHaveLength(2);
+      // The heading, the pointer from the If intentional step, and the `## Release note` in the guidance.
+      expect(body.match(/Release note/g)).toHaveLength(3);
     });
 
     it('gives an experimental-only comment no Release note section', () => {
@@ -214,43 +224,39 @@ describe('buildCommentBody', () => {
       expect(body).not.toContain('release_note:breaking');
     });
 
-    it('gives experimental changes the same prompt as report-only changes', () => {
-      const mixed = buildCommentBody([entry(), entry({ path: '/api/exp', tier: 'experimental' })]);
-      const experimentalSection = mixed.slice(mixed.indexOf('### Experimental'));
+    it.each([
+      ['experimental', entry({ path: '/api/exp', tier: 'experimental' })],
+      ['report-only', entry({ reportOnly: true, policyReason: 'Additive response variant.' })],
+    ])('gives a %s-only comment the optional prompt once, under What to do', (_kind, change) => {
+      const body = buildCommentBody([change]);
 
-      expect(experimentalSection).toContain(
-        'Consider adding a release note if the change is noteworthy.'
-      );
-
-      const experimentalOnly = buildCommentBody([
-        entry({ path: '/api/exp', tier: 'experimental' }),
-      ]);
-      expect(experimentalOnly).toContain(
-        'do not fail this check. Consider adding a release note if the change is noteworthy.'
-      );
-    });
-
-    it('gives a report-only comment the prompt but no Release note section', () => {
-      const body = buildCommentBody([
-        entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
-      ]);
-
-      expect(body).toContain('Consider adding a release note if the change is noteworthy.');
+      expect(body).toContain(`### What to do\n\nNothing here blocks merge. ${OPTIONAL_PROMPT}\n`);
+      expect(body.match(/release note/gi)).toHaveLength(1);
       expect(body).not.toContain('### Release note');
       expect(body).not.toContain('release_note:breaking');
     });
 
-    it('keeps the no-gating variant unchanged', () => {
+    it('leaves the optional prompt out of a gating comment', () => {
+      const body = buildCommentBody([
+        entry(),
+        entry({ path: '/api/exp', tier: 'experimental' }),
+        entry({ path: '/api/add', reportOnly: true, policyReason: 'Additive response variant.' }),
+      ]);
+
+      expect(body).not.toContain(OPTIONAL_PROMPT);
+    });
+
+    it('keeps the rest of the no-gating variant unchanged', () => {
       const body = buildCommentBody([
         entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
         entry({ path: '/api/exp', tier: 'experimental' }),
       ]);
 
       expect(body).toContain(
-        '### What to do\n\nNothing here blocks merge. Consider whether a release note is worth adding for the listed change(s).\n\nSee the [`@kbn/api-contracts` README]'
+        `### What to do\n\nNothing here blocks merge. ${OPTIONAL_PROMPT}\n\nSee the [\`@kbn/api-contracts\` README]`
       );
       expect(body).toContain('for tier definitions and the rule policy.');
-      expect(body).not.toContain('3. **If intentional, add the');
+      expect(body).not.toContain('**If intentional**');
     });
   });
 });

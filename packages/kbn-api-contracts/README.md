@@ -32,7 +32,7 @@ By default the check is a soft gate: a BC detected in stable/tech_preview fails 
 
    - `format_failure.ts` - Generates the tier-grouped CI-log summary (gating tiers first, then an informational experimental section)
    - `write_impact_report.ts` - Writes the JSON impact report consumed by the PR notifier
-   - `links.ts` - Documentation and support links
+   - `links.ts` - Documentation links
 
 4. **`src/allowlist/`** - Escape hatch for approved breaking changes
 
@@ -162,9 +162,9 @@ CI posts (or updates) a PR comment whenever there is anything to report, **regar
 
 ### Release note suggestions
 
-Gating changes (stable and Technical Preview) get release note guidance in the comment. Step 3 of "What to do" asks the author, if the break is intentional, to add the `release_note:breaking` label to the PR in place of any other `release_note:*` label. The "Release note" section after it asks for a release note in the PR description, describing the impact of the change on callers and what action to take to mitigate it. The docs workflow builds the changelog entry from the label and the description. This check doesn't write a changelog file.
+Gating changes (stable and Technical Preview) get release note guidance in the PR comment and the CI log. The "If intentional" step of "What to do" asks the author to add an allowlist entry, the `release_note:breaking` label (in place of any other `release_note:*` label), and release note text in the PR description. The "Release note" section after it asks for a `## Release note` section in the PR description. Per the [release notes guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes), the release notes script publishes that text as the change's entry in the Breaking changes section, so it should tell API users what changed, how it affects them, and what they need to do. This check doesn't write release notes itself.
 
-Report-only and experimental changes get the prompt "Consider adding a release note if the change is noteworthy." because they don't gate, and a release note is the author's call. They don't get the label guidance.
+When nothing gates (only report-only or experimental changes), "What to do" ends with "Optional: release note describing the change in the PR description", because a release note is the author's call. There is no label guidance.
 
 ## Usage
 
@@ -211,8 +211,10 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
 
 1. **Review the report** - identifies which endpoints, what changed, and their stability tier
 2. **If unintentional:** fix the code to maintain compatibility.
-3. **If intentional:** add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
-4. **If intentional, add a release note:** add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label), and a release note to the PR description that describes the impact of the change on callers and what action to take to mitigate it. See [Release note suggestions](#release-note-suggestions).
+3. **If intentional:**
+   - add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
+   - add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label).
+   - add a `## Release note` section to the PR description. See [Release note suggestions](#release-note-suggestions).
 
 **Important:** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes committee. Every stable and Technical Preview API has to follow the formal breaking change process for approval.
 

@@ -71,8 +71,8 @@ ${renderTable(entries)}
 `;
 };
 
-// Shown for experimental and report-only changes, which don't gate. Edit the wording here.
-const RELEASE_NOTE_PROMPT = 'Consider adding a release note if the change is noteworthy.';
+// Shown when nothing gates. Edit the wording here.
+const RELEASE_NOTE_PROMPT = 'Optional: release note describing the change in the PR description';
 
 const renderExperimentalSection = (entries: ImpactEntry[]): string => {
   if (entries.length === 0) {
@@ -80,7 +80,7 @@ const renderExperimentalSection = (entries: ImpactEntry[]): string => {
   }
   return `### Experimental — informational, not blocking merge (${entries.length})
 
-Experimental APIs are allowed to introduce breaking changes. These are listed for visibility only and do not fail this check. ${RELEASE_NOTE_PROMPT}
+Experimental APIs are allowed to introduce breaking changes. These are listed for visibility only and do not fail this check.
 
 ${renderTable(entries)}
 `;
@@ -90,7 +90,7 @@ const RELEASE_NOTE_LABEL = 'release_note:breaking';
 
 // Shown only when a stable or Technical Preview change gates. Edit the wording here.
 const RELEASE_NOTE_GUIDANCE =
-  'Add a release note to the PR description. The release note should describe the impact of the change on callers and what action to take to mitigate the change.';
+  "Add a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.";
 
 const renderReportOnlySection = (entries: ImpactEntry[]): string => {
   if (entries.length === 0) {
@@ -102,7 +102,7 @@ const renderReportOnlySection = (entries: ImpactEntry[]): string => {
 
   return `### Reported only — not blocking merge (${entries.length})
 
-These match oasdiff rules Kibana treats as additive, so they do not fail this check. ${RELEASE_NOTE_PROMPT}
+These match oasdiff rules Kibana treats as additive, so they do not fail this check.
 
 ${reasons ? `${reasons}\n\n` : ''}${renderTable(entries)}
 `;
@@ -144,7 +144,7 @@ No stable or Technical Preview breaking changes were detected. The change(s) bel
 ${sections}
 ### What to do
 
-Nothing here blocks merge. Consider whether a release note is worth adding for the listed change(s).
+Nothing here blocks merge. ${RELEASE_NOTE_PROMPT}
 
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the rule policy.`;
   }
@@ -157,8 +157,10 @@ ${sections}
 ### What to do
 
 1. **Fix the breaking change** if it was unintentional.
-2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
-3. **If intentional, add the \`${RELEASE_NOTE_LABEL}\` label** to this PR (replacing any other \`release_note:*\` label) and a release note to the PR description, see the Release note section below.
+2. **If intentional**:
+   - add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
+   - add the \`${RELEASE_NOTE_LABEL}\` PR label (replacing any other \`release_note:*\` label).
+   - add release note text to the PR description, see the Release note section below.
 
 ### Release note
 

@@ -9,7 +9,7 @@
 
 import type { StabilityTier } from '../stability';
 import type { ImpactReportEntry } from './write_impact_report';
-import { ESCALATION_LINK } from './links';
+import { README_LINK } from './links';
 
 const HEADER = `
 ╔════════════════════════════════════════════════════════════════════════════╗
@@ -25,9 +25,16 @@ What to do next:
 
 1. Review the breaking changes above
 2. If unintentional, revert the change
-3. If intentional, add an approved allowlist entry and coordinate with the owning team
+3. If intentional:
+   - add an approved allowlist entry and coordinate with the owning team
+   - add the \`release_note:breaking\` PR label (replacing any other \`release_note:*\` label)
+   - add release note text to the PR description, see Release note below
 
-Need help? ${ESCALATION_LINK}
+Release note:
+
+Add a \`## Release note\` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.
+
+See the @kbn/api-contracts README for tier definitions and the allowlist workflow: ${README_LINK}
 
 `.split('\n');
 
@@ -41,10 +48,9 @@ const INFORMATIONAL_HEADER = `
 const INFORMATIONAL_FOOTER = `
 ────────────────────────────────────────────────────────────────────────────
 
-Nothing here blocks merge. Consider whether a release note is worth adding for
-the listed change(s).
+Nothing here blocks merge. Optional: release note describing the change in the PR description
 
-Need help? ${ESCALATION_LINK}
+See the @kbn/api-contracts README for tier definitions and the rule policy: ${README_LINK}
 
 `.split('\n');
 
@@ -77,8 +83,7 @@ const EXPERIMENTAL_HEADING = `
 
 Informational — not blocking merge:
 
-The following breaking change(s) are in experimental APIs, which are allowed to
-break. They are listed for visibility only and do not fail this check.
+The following breaking change(s) are in experimental APIs, which are allowed to break. They are listed for visibility only and do not fail this check.
 
 `.split('\n');
 
@@ -87,9 +92,7 @@ const REPORT_ONLY_HEADING = `
 
 Informational — not blocking merge:
 
-The following change(s) match oasdiff rules Kibana treats as additive, so they
-do not fail this check. They are listed so the owning team can decide whether a
-release note is still worth adding.
+The following change(s) match oasdiff rules Kibana treats as additive, so they do not fail this check.
 
 `.split('\n');
 
