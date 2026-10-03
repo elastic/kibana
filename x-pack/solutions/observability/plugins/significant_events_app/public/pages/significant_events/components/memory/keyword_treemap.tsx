@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
+import { CrossIcon } from './cross_icon';
 import {
   toKeywordCells,
   toKeywordDisplayNames,
@@ -323,7 +324,9 @@ function KeywordFilterRow({
         <EuiFlexItem grow={false} key={keyword}>
           <EuiBadge
             color="hollow"
-            iconType="cross"
+            // A string `iconType` makes `EuiIcon` fetch that icon's asset, so the
+            // chip's only remove affordance is missing on first paint.
+            iconType={CrossIcon}
             iconOnClick={() => onToggleKeyword(keyword)}
             onClick={() => onToggleKeyword(keyword)}
             onClickAriaLabel={`${keyword} filter`}

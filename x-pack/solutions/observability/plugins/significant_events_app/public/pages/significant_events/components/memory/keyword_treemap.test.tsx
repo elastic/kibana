@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { CrossIcon } from './cross_icon';
 import { MemoryKeywordTreemap } from './keyword_treemap';
 import type { KeywordCell } from './keyword_page_rank';
 import type { MemorySummary } from './types';
@@ -299,6 +300,24 @@ describe('MemoryKeywordTreemap', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Remove the cart-cache filter' }));
 
     expect(onToggleKeyword).toHaveBeenCalledWith('cart-cache');
+  });
+
+  /**
+   * The chip's only remove affordance cannot wait on `EuiIcon`'s on-demand
+   * import of a string icon type: asserted here without `waitFor`, so a
+   * regression to `iconType="cross"` fails on the first render rather than
+   * shipping a chip that cannot be removed.
+   */
+  it('draws the chip remove icon on the first render', () => {
+    renderTreemap({ selectedKeywords: ['cart-cache'] });
+
+    // Kibana's Jest maps `@elastic/eui` to `test-env`, whose `EuiIcon` is a
+    // stand-in `span` that never emits an `svg`: it names the type it was given,
+    // which is `cross` for the string form and the component's own name for the
+    // synchronous branch the badge has to take.
+    const remove = screen.getByRole('button', { name: 'Remove the cart-cache filter' });
+    expect(remove).toContainHTML('data-euiicon-type="CrossIcon"');
+    expect(render(<CrossIcon />).container.querySelector('svg > path')).toBeInTheDocument();
   });
 
   it('takes no room at all when the store has no live memories', () => {
