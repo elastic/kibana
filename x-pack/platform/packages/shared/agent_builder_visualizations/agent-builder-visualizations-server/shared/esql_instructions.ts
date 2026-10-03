@@ -64,6 +64,8 @@ Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time fie
 
 ### TS
 
+Use \`TS\` only when the resource is marked \`is-tsds="true"\`; otherwise use \`FROM\`.
+
 The visualization framework automatically adds the \`@timestamp\` range for \`TS\` time series, so do not add \`TRANGE\`. Size the buckets with the time-picker bounds:
 
 \`\`\`esql
