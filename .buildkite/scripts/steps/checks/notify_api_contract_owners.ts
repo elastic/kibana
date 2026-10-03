@@ -71,13 +71,16 @@ ${renderTable(entries)}
 `;
 };
 
+// Shown for experimental and report-only changes, which don't gate. Edit the wording here.
+const RELEASE_NOTE_PROMPT = 'Consider adding a release note if the change is noteworthy.';
+
 const renderExperimentalSection = (entries: ImpactEntry[]): string => {
   if (entries.length === 0) {
     return '';
   }
   return `### Experimental — informational, not blocking merge (${entries.length})
 
-Experimental APIs are allowed to introduce breaking changes. These are listed for visibility only and do not fail this check.
+Experimental APIs are allowed to introduce breaking changes. These are listed for visibility only and do not fail this check. ${RELEASE_NOTE_PROMPT}
 
 ${renderTable(entries)}
 `;
@@ -99,7 +102,7 @@ const renderReportOnlySection = (entries: ImpactEntry[]): string => {
 
   return `### Reported only — not blocking merge (${entries.length})
 
-These match oasdiff rules Kibana treats as additive, so they do not fail this check. Consider adding a release note if the change is noteworthy.
+These match oasdiff rules Kibana treats as additive, so they do not fail this check. ${RELEASE_NOTE_PROMPT}
 
 ${reasons ? `${reasons}\n\n` : ''}${renderTable(entries)}
 `;

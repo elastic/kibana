@@ -164,7 +164,7 @@ CI posts (or updates) a PR comment whenever there is anything to report, **regar
 
 Gating changes (stable and Technical Preview) get release note guidance in the comment. Step 3 of "What to do" asks the author to add the `release_note:breaking` label to the PR. The "Release note" section after it asks for a release note in the PR description, describing the impact of the change on callers and what action to take to mitigate it. The docs workflow builds the changelog entry from the label and the description. CI doesn't write a file.
 
-Report-only changes get the prompt "Consider adding a release note if the change is noteworthy." because an additive change often doesn't warrant one. Experimental changes get neither the label guidance nor the prompt.
+Report-only and experimental changes get the prompt "Consider adding a release note if the change is noteworthy." because they don't gate, and a release note is the author's call. They don't get the label guidance.
 
 ## Usage
 

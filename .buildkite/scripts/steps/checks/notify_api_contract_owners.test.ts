@@ -226,6 +226,22 @@ describe('buildCommentBody', () => {
       expect(body).not.toContain('release_note:breaking');
     });
 
+    it('gives experimental changes the same prompt as report-only changes', () => {
+      const mixed = buildCommentBody([entry(), entry({ path: '/api/exp', tier: 'experimental' })]);
+      const experimentalSection = mixed.slice(mixed.indexOf('### Experimental'));
+
+      expect(experimentalSection).toContain(
+        'Consider adding a release note if the change is noteworthy.'
+      );
+
+      const experimentalOnly = buildCommentBody([
+        entry({ path: '/api/exp', tier: 'experimental' }),
+      ]);
+      expect(experimentalOnly).toContain(
+        'do not fail this check. Consider adding a release note if the change is noteworthy.'
+      );
+    });
+
     it('gives a report-only comment the prompt but no Release note section', () => {
       const body = buildCommentBody([
         entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
