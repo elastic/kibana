@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  type EuiComboBoxObject,
-  type KibanaUrl,
-  type Locator,
-  type ScoutPage,
-} from '@kbn/scout-oblt';
+import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmAppMenuReady } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../constants';
@@ -44,7 +39,6 @@ export class ServiceMapPage {
   public serviceMapFindMatchSummary: Locator;
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
-  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxObject;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
   public readonly dashboardEmbeddablePanel: Locator;
@@ -82,9 +76,6 @@ export class ServiceMapPage {
     this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
     this.serviceMapEmbeddable = page.testSubj.locator('apmServiceMapEmbeddable');
     this.serviceMapEditorSaveButton = page.testSubj.locator('apmServiceMapEditorSaveButton');
-    this.serviceMapEditorServiceNameComboBox = page.components.comboBox(
-      'apmServiceMapEditorServiceNameComboBox'
-    );
     this.serviceMapEditorServiceNameComboBoxLoading = page.testSubj.locator(
       'apmServiceMapEditorServiceNameComboBoxLoading'
     );
@@ -155,6 +146,21 @@ export class ServiceMapPage {
     const environmentOption = this.page.getByRole('option', { name: environment });
     await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await environmentOption.click();
+  }
+
+  async selectServiceMapEditorServiceName(serviceName: string) {
+    // fill() replaces the text (raw keyboard.type would drop focus mid-refetch on this
+    // `async` combo box, landing the value in the adjacent KQL box), then click the option
+    // by name: this waits for the async list to filter to the exact service before
+    // committing by mouse, avoiding a blind Enter on a control that may have lost focus.
+    const searchInput = this.page.testSubj
+      .locator('apmServiceMapEditorServiceNameComboBox')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
+    await searchInput.click();
+    await searchInput.fill(serviceName);
+    const serviceNameOption = this.page.getByRole('option', { name: serviceName });
+    await serviceNameOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await serviceNameOption.click();
   }
 
   /**
