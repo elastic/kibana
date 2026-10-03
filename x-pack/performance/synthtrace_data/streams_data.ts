@@ -61,6 +61,15 @@ function isConflictError(error: unknown): boolean {
   return err?.response?.status === 409;
 }
 
+function isNotFoundError(error: unknown): boolean {
+  const err = error as {
+    response?: { status?: number };
+    statusCode?: number;
+    meta?: { statusCode?: number };
+  };
+  return err?.response?.status === 404 || err?.statusCode === 404 || err?.meta?.statusCode === 404;
+}
+
 function isLockContentionError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
   return err?.response?.status === 422;
@@ -156,6 +165,50 @@ async function createSingleClassicStream(kibanaServer: KibanaServer, name: strin
       throw error;
     }
   }
+}
+
+async function updateLogsCustomTotalFieldsLimit(
+  es: Client,
+  log: ToolingLog,
+  totalFieldsLimit: number
+): Promise<void> {
+  let existingComponentTemplate:
+    | Awaited<
+        ReturnType<Client['cluster']['getComponentTemplate']>
+      >['component_templates'][number]['component_template']
+    | undefined;
+
+  try {
+    const response = await es.cluster.getComponentTemplate({
+      name: LOGS_CUSTOM_COMPONENT_TEMPLATE,
+    });
+    existingComponentTemplate = response.component_templates[0]?.component_template;
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      throw error;
+    }
+  }
+
+  const existingTemplate = existingComponentTemplate?.template ?? {};
+  const version = existingComponentTemplate?.version;
+
+  log.info(
+    `Updating component template ${LOGS_CUSTOM_COMPONENT_TEMPLATE} with ` +
+      `index.mapping.total_fields.limit=${totalFieldsLimit}...`
+  );
+
+  await es.cluster.putComponentTemplate({
+    name: LOGS_CUSTOM_COMPONENT_TEMPLATE,
+    template: {
+      ...existingTemplate,
+      settings: {
+        ...existingTemplate.settings,
+        'index.mapping.total_fields.limit': totalFieldsLimit,
+      },
+    },
+    ...(existingComponentTemplate?._meta ? { _meta: existingComponentTemplate._meta } : {}),
+    ...(typeof version === 'number' ? { version } : {}),
+  });
 }
 
 /** Create classic streams serially to reduce lock contention. */
@@ -817,6 +870,9 @@ export async function setupLargeWiredHierarchy(
 }
 
 const CHILD_STREAM = `${WIRED_ROOT_STREAM}.child1`;
+const CLASSIC_MAPPING_STREAM = 'logs-perf-classic-mapping';
+const LOGS_CUSTOM_COMPONENT_TEMPLATE = 'logs@custom';
+const LEGACY_CLASSIC_MAPPING_TEMPLATE = 'streams-perf-classic-mapping-fields-override';
 
 /** Skip heavy setup during performance TEST phase. */
 function shouldRunSetup(log: ToolingLog): boolean {
@@ -833,6 +889,14 @@ interface IngestConfig {
   processing: { steps: unknown[] };
   settings: Record<string, unknown>;
   wired: { fields: Record<string, unknown>; routing: unknown[] };
+  lifecycle: Record<string, unknown>;
+  failure_store: Record<string, unknown>;
+}
+
+interface ClassicIngestConfig {
+  processing: { steps: unknown[] };
+  settings: Record<string, unknown>;
+  classic: { field_overrides: Record<string, { type: string }> };
   lifecycle: Record<string, unknown>;
   failure_store: Record<string, unknown>;
 }
@@ -854,6 +918,34 @@ async function getAndUpdateIngestConfig(
   const config = response.data.ingest;
   const { updated_at: _updatedAt, ...processingWithoutTimestamp } = config.processing;
   config.processing = processingWithoutTimestamp as IngestConfig['processing'];
+
+  mutate(config);
+
+  await kibanaServer.request({
+    path: `/api/streams/${streamName}/_ingest`,
+    method: 'PUT',
+    headers: PUBLIC_API_HEADERS,
+    body: { ingest: config },
+  });
+}
+
+/** Classic-stream equivalent: GET ingest, mutate field_overrides, PUT back. */
+async function getAndUpdateClassicIngestConfig(
+  kibanaServer: KibanaServer,
+  streamName: string,
+  mutate: (config: ClassicIngestConfig) => void
+) {
+  const response = await kibanaServer.request<{
+    ingest: ClassicIngestConfig & { processing: { updated_at?: string } };
+  }>({
+    path: `/api/streams/${streamName}/_ingest`,
+    method: 'GET',
+    headers: PUBLIC_API_HEADERS,
+  });
+
+  const config = response.data.ingest;
+  const { updated_at: _updatedAt, ...processingWithoutTimestamp } = config.processing;
+  config.processing = processingWithoutTimestamp as ClassicIngestConfig['processing'];
 
   mutate(config);
 
@@ -1000,6 +1092,47 @@ export async function setupFieldMappingAtScale(kibanaServer: KibanaServer, log: 
   });
 
   log.info(`${FIELD_COUNT} fields mapped on ${CHILD_STREAM}`);
+}
+
+/**
+ * Setup for the classic-stream field mapping journey at scale.
+ * Creates one classic stream and sets 10,000 field_overrides via the public
+ * Streams API (the same path the schema editor uses).
+ */
+export async function setupClassicFieldMappingAtScale(
+  kibanaServer: KibanaServer,
+  es: Client,
+  log: ToolingLog
+) {
+  if (!shouldRunSetup(log)) return;
+
+  const FIELD_COUNT = 10000;
+  const FIELD_TYPES = ['keyword', 'long', 'double', 'boolean', 'ip', 'date'];
+  const TOTAL_FIELDS_LIMIT = FIELD_COUNT * 2;
+
+  await es.indices.deleteIndexTemplate(
+    { name: LEGACY_CLASSIC_MAPPING_TEMPLATE },
+    { ignore: [404] }
+  );
+
+  await updateLogsCustomTotalFieldsLimit(es, log, TOTAL_FIELDS_LIMIT);
+
+  await enableStreams(kibanaServer, log);
+  await createSingleClassicStream(kibanaServer, CLASSIC_MAPPING_STREAM);
+
+  log.info(`Mapping ${FIELD_COUNT} field_overrides on ${CLASSIC_MAPPING_STREAM}...`);
+
+  const fields: Record<string, { type: string }> = {};
+  for (let i = 1; i <= FIELD_COUNT; i++) {
+    const type = FIELD_TYPES[(i - 1) % FIELD_TYPES.length];
+    fields[`attributes.perf_classic_schema_${String(i).padStart(5, '0')}`] = { type };
+  }
+
+  await getAndUpdateClassicIngestConfig(kibanaServer, CLASSIC_MAPPING_STREAM, (config) => {
+    config.classic.field_overrides = { ...config.classic.field_overrides, ...fields };
+  });
+
+  log.info(`${FIELD_COUNT} field_overrides set on ${CLASSIC_MAPPING_STREAM}`);
 }
 
 /** Setup for the retention journey at scale. */
