@@ -25,6 +25,7 @@ export interface ImpactEntry {
   since?: string;
   reportOnly?: boolean;
   policyReason?: string;
+  allowlisted?: boolean;
 }
 
 interface ImpactReport {
@@ -108,7 +109,21 @@ ${reasons ? `${reasons}\n\n` : ''}${renderTable(entries)}
 `;
 };
 
-export const buildCommentBody = (entries: ImpactEntry[]): string => {
+const renderAllowlistedSection = (entries: ImpactEntry[]): string => {
+  if (entries.length === 0) {
+    return '';
+  }
+  return `### Approved — not blocking merge (${entries.length})
+
+These Stable or Technical Preview changes match an approved allowlist entry, so they do not fail this check. They still ship as breaking changes.
+
+${renderTable(entries)}
+`;
+};
+
+export const buildCommentBody = (allEntries: ImpactEntry[]): string => {
+  const allowlisted = allEntries.filter((e) => e.allowlisted);
+  const entries = allEntries.filter((e) => !e.allowlisted);
   const gating = entries.filter((e) => !e.reportOnly);
 
   const gatingSections = [
@@ -130,11 +145,33 @@ export const buildCommentBody = (entries: ImpactEntry[]): string => {
 
   const reportOnlySection = renderReportOnlySection(entries.filter((e) => e.reportOnly));
 
-  const sections = [gatingSections, experimentalSection, reportOnlySection]
+  const allowlistedSection = renderAllowlistedSection(allowlisted);
+
+  const sections = [gatingSections, allowlistedSection, experimentalSection, reportOnlySection]
     .filter(Boolean)
     .join('\n');
 
   const hasGating = gating.some((e) => e.tier !== 'experimental');
+
+  if (!hasGating && allowlisted.length > 0) {
+    return `## API Contract Breaking Changes
+
+The Stable or Technical Preview breaking change(s) below are approved in the allowlist, so they do not fail this check. They still ship as breaking changes and need a release note.
+
+${sections}
+### What to do
+
+Nothing here blocks merge. The approved breaking change(s) still ship with this PR, so:
+
+- add the \`${RELEASE_NOTE_LABEL}\` PR label (replacing any other \`release_note:*\` label).
+- add release note text to the PR description, see the Release note section below.
+
+### Release note
+
+${RELEASE_NOTE_GUIDANCE}
+
+See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;
+  }
 
   if (!hasGating) {
     return `## API Contract Breaking Changes

@@ -158,13 +158,15 @@ Tier and rule policy are independent. A stable-tier change still doesn't gate wh
 
 ### CI notifications
 
-CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Experimental changes and report-only rules each appear in their own non-blocking section. When there is nothing to report, no comment is posted.
+CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Allowlisted stable and Technical Preview changes, experimental changes, and report-only rules each appear in their own non-blocking section. Allowlisted experimental and report-only changes are left out. When there is nothing to report, no comment is posted.
 
 ### Release note suggestions
 
 Gating changes (stable and Technical Preview) get release note guidance in the PR comment and the CI log. The "If intentional" step of "What to do" asks the author to add an allowlist entry, the `release_note:breaking` label (in place of any other `release_note:*` label), and release note text in the PR description. The "Release note" section after it asks for a `## Release note` section in the PR description. Per the [release notes guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes), the release notes script publishes that text as the change's entry in the Breaking changes section, so it should tell API users what changed, how it affects them, and what they need to do. This check doesn't write release notes itself.
 
-When nothing gates (only report-only or experimental changes), "What to do" ends with "Optional: release note describing the change in the PR description", because a release note is the author's call. There is no label guidance.
+Allowlisting a stable or Technical Preview change stops it from failing the check, but it still ships as a breaking change. So once its allowlist entry is added, the change moves to an "Approved" section and the label and release note guidance stay, even when nothing else gates.
+
+When nothing gates and nothing is allowlisted (only report-only or experimental changes), "What to do" ends with "Optional: release note describing the change in the PR description", because a release note is the author's call. There is no label guidance.
 
 ## Usage
 
@@ -215,6 +217,8 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
    - add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
    - add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label).
    - add a `## Release note` section to the PR description. See [Release note suggestions](#release-note-suggestions).
+
+Once the allowlist entry is added, the check passes, but the comment stays. It lists the change as approved and keeps the label and release note steps.
 
 **Important:** Adding an allowlist entry does not absolve API owners from going through the Breaking Changes committee. Every stable and Technical Preview API has to follow the formal breaking change process for approval.
 

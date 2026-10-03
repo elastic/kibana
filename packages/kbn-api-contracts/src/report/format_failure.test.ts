@@ -175,10 +175,64 @@ describe('formatFailure', () => {
       '3. If intentional:\n' +
         '   - add an approved allowlist entry and coordinate with the owning team\n' +
         '   - add the `release_note:breaking` PR label (replacing any other `release_note:*` label)\n' +
-        '   - add release note text to the PR description, see Release note below\n',
+        '   - add release note text to the PR description, see the Release note section below\n',
       "Release note:\n\nAdd a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do."
     );
     expect(output).not.toContain('Optional: release note');
+  });
+
+  describe('allowlisted changes', () => {
+    const allowlistedEntry: ImpactReportEntry = {
+      ...stableEntry('/api/approved'),
+      allowlisted: true,
+    };
+    const RELEASE_NOTE_STEPS =
+      '- add the `release_note:breaking` PR label (replacing any other `release_note:*` label)\n' +
+      '- add release note text to the PR description, see the Release note section below\n';
+
+    it.each([
+      ['alone', [allowlistedEntry]],
+      [
+        'with a report-only change',
+        [
+          allowlistedEntry,
+          { ...stableEntry('/api/add'), reportOnly: true, policyReason: 'Additive.' },
+        ],
+      ],
+      ['with an experimental change', [allowlistedEntry, experimentalEntry('/api/exp')]],
+    ])('keeps the label and release note guidance when an approved change is %s', (_, entries) => {
+      const output = formatFailure(entries);
+
+      expectOutputContains(
+        output,
+        'API CONTRACT CHANGES REPORTED, NOT BLOCKING',
+        'No unapproved breaking changes detected in stable/tech_preview APIs.',
+        'Approved — not blocking merge:',
+        '/api/approved',
+        `Nothing here blocks merge. The approved breaking change(s) still ship with this PR, so:\n\n${RELEASE_NOTE_STEPS}`,
+        'Release note:\n\nAdd a `## Release note` section to the PR description.',
+        `for tier definitions and the allowlist workflow: ${README_LINK}`
+      );
+      expect(output).not.toContain('Optional: release note');
+      expect(output).not.toContain('add an approved allowlist entry');
+      expect(output).not.toContain('BREAKING CHANGES DETECTED');
+    });
+
+    it('lists approved changes after the gating ones without counting them', () => {
+      const output = formatFailure([allowlistedEntry, stableEntry('/api/gating')]);
+
+      expectOutputContains(
+        output,
+        'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview):',
+        '   - add an approved allowlist entry and coordinate with the owning team'
+      );
+      expect(output.indexOf('/api/gating')).toBeLessThan(
+        output.indexOf('Approved — not blocking merge:')
+      );
+      expect(output.indexOf('Approved — not blocking merge:')).toBeLessThan(
+        output.indexOf('/api/approved')
+      );
+    });
   });
 
   it('keeps each prose sentence on one line', () => {

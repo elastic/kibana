@@ -258,5 +258,45 @@ describe('buildCommentBody', () => {
       expect(body).toContain('for tier definitions and the rule policy.');
       expect(body).not.toContain('**If intentional**');
     });
+
+    describe('allowlisted changes', () => {
+      const approved = entry({ path: '/api/approved', allowlisted: true });
+
+      it.each([
+        ['alone', [approved]],
+        [
+          'with a report-only change',
+          [approved, entry({ reportOnly: true, policyReason: 'Additive response variant.' })],
+        ],
+        [
+          'with an experimental change',
+          [approved, entry({ path: '/api/exp', tier: 'experimental' })],
+        ],
+      ])('keeps the label and Release note section when an approved change is %s', (_, entries) => {
+        const body = buildCommentBody(entries);
+
+        expect(body).toContain('### Approved — not blocking merge (1)');
+        expect(body).toContain('| `/api/approved` `GET` |');
+        expect(body).toContain(
+          '### What to do\n\nNothing here blocks merge. The approved breaking change(s) still ship with this PR, so:\n\n'
+        );
+        expect(body).toContain(LABEL_BULLET.trimStart());
+        expect(body).toContain(RELEASE_NOTE_BULLET.trimStart());
+        expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+        expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
+        expect(body).not.toContain(OPTIONAL_PROMPT);
+        expect(body).not.toContain('**If intentional**');
+        expect(body).not.toContain('### Stable (GA)');
+      });
+
+      it('lists approved changes after the gating sections and keeps the gating guidance', () => {
+        const body = buildCommentBody([approved, entry({ path: '/api/gating' })]);
+
+        expect(body).toContain('### Stable (GA) (1)');
+        expect(body).toContain('2. **If intentional**:');
+        expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Approved'));
+        expect(body.indexOf('### Approved')).toBeLessThan(body.indexOf('### What to do'));
+      });
+    });
   });
 });
