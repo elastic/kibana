@@ -101,6 +101,7 @@ export function generateFormula(
   if (previousColumn.reducedTimeRange) {
     if (
       previousColumn.operationType !== 'count' ||
+      ('sourceField' in previousColumn && previousColumn.sourceField !== DOCUMENT_FIELD_NAME) ||
       previousColumn.filter ||
       previousColumn.timeShift
     ) {
