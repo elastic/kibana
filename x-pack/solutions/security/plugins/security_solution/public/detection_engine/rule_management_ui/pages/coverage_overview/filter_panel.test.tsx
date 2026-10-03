@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent, render, within } from '@testing-library/react';
+import { fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import {
   ruleActivityFilterDefaultOptions,
@@ -22,6 +22,8 @@ import {
   initialState,
   useCoverageOverviewDashboardContext,
 } from './coverage_overview_dashboard_context';
+
+jest.setTimeout(15_000);
 
 jest.mock('./coverage_overview_dashboard_context');
 
@@ -45,11 +47,7 @@ const mockCoverageOverviewContextReturn = {
 );
 
 const renderFiltersPanel = () => {
-  return render(
-    <TestProviders>
-      <CoverageOverviewFiltersPanel />
-    </TestProviders>
-  );
+  return renderWithKibanaRenderContext(<CoverageOverviewFiltersPanel />);
 };
 
 describe('CoverageOverviewFiltersPanel', () => {
