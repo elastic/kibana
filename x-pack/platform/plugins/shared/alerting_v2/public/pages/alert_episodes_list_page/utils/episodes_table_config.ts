@@ -50,6 +50,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'severity',
   '@timestamp',
   'rule.id',
+  'grouping',
   'duration',
   'tags',
   'rule_tags',
