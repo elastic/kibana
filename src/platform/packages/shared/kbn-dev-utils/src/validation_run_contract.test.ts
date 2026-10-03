@@ -40,6 +40,11 @@ describe('VALIDATION_PROFILE_DEFAULTS', () => {
         testMode: 'affected',
         downstream: 'deep',
       },
+      prepush: {
+        scope: 'prepush',
+        testMode: 'affected',
+        downstream: 'none',
+      },
       full: {
         scope: 'full',
         testMode: 'all',
@@ -127,10 +132,10 @@ describe('parseAndResolveValidationContract', () => {
 
   it('throws for unsupported flag values', () => {
     expect(() => parseAndResolveValidationContract({ profile: 'fast' })).toThrow(
-      "Unsupported --profile value 'fast'. Expected one of: precommit, quick, agent, branch, pr, full."
+      "Unsupported --profile value 'fast'. Expected one of: precommit, quick, agent, branch, pr, prepush, full."
     );
     expect(() => parseAndResolveValidationContract({ scope: 'workspace' })).toThrow(
-      "Unsupported --scope value 'workspace'. Expected one of: staged, local, branch, full."
+      "Unsupported --scope value 'workspace'. Expected one of: staged, local, branch, prepush, full."
     );
     expect(() => parseAndResolveValidationContract({ testMode: 'delta' })).toThrow(
       "Unsupported --test-mode value 'delta'. Expected one of: related, affected, all."
@@ -140,19 +145,47 @@ describe('parseAndResolveValidationContract', () => {
     );
   });
 
-  it('rejects refs outside branch scope', () => {
+  it('rejects refs outside branch/prepush scope', () => {
     expect(() =>
       parseAndResolveValidationContract({
         scope: 'local',
         baseRef: 'origin/main',
       })
-    ).toThrow('--base-ref can only be used when --scope is branch.');
+    ).toThrow('--base-ref can only be used when --scope is branch or prepush.');
 
     expect(() =>
       parseAndResolveValidationContract({
         scope: 'staged',
         headRef: 'HEAD~1',
       })
-    ).toThrow('--head-ref can only be used when --scope is branch.');
+    ).toThrow('--head-ref can only be used when --scope is branch or prepush.');
+  });
+
+  it('allows base-ref and head-ref with prepush scope', () => {
+    expect(
+      parseAndResolveValidationContract({
+        scope: 'prepush',
+        baseRef: 'origin/main',
+        headRef: 'HEAD',
+      })
+    ).toEqual({
+      profile: 'branch',
+      scope: 'prepush',
+      testMode: 'affected',
+      downstream: 'none',
+      baseRef: 'origin/main',
+      headRef: 'HEAD',
+    });
+  });
+
+  it('resolves prepush profile with prepush scope defaults', () => {
+    expect(parseAndResolveValidationContract({ profile: 'prepush' })).toEqual({
+      profile: 'prepush',
+      scope: 'prepush',
+      testMode: 'affected',
+      downstream: 'none',
+      baseRef: undefined,
+      headRef: 'HEAD',
+    });
   });
 });

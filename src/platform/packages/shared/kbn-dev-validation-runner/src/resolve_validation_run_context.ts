@@ -10,6 +10,7 @@
 import { createFailError } from '@kbn/dev-cli-errors';
 import {
   countCommitsBetweenRefs,
+  getUpstreamPushRef,
   hasStagedChanges,
   isShallowRepository,
   parseAndResolveValidationContract,
@@ -119,13 +120,23 @@ export const resolveValidationRunContext = async ({
     }
   }
 
-  // Resolve base for branch scope (for logging, reproduction, and Moon queries).
+  // Resolve base for branch/prepush scope (for logging, reproduction, and Moon queries).
   let resolvedBase: MoonAffectedBase | undefined;
-  if (contract.scope === 'branch') {
+  if (contract.scope === 'branch' || contract.scope === 'prepush') {
     try {
       const normalizedBaseRef = contract.baseRef?.trim() || undefined;
       if (normalizedBaseRef) {
         resolvedBase = { base: normalizedBaseRef, baseRef: normalizedBaseRef };
+      } else if (contract.scope === 'prepush') {
+        const upstreamRef = await getUpstreamPushRef();
+        if (upstreamRef) {
+          resolvedBase = upstreamRef;
+        } else {
+          // No tracking branch configured; fall back to merge-base with remote default.
+          resolvedBase = await resolveMoonAffectedBase({
+            headRef: contract.headRef?.trim() || 'HEAD',
+          });
+        }
       } else {
         resolvedBase = await resolveMoonAffectedBase({
           headRef: contract.headRef?.trim() || 'HEAD',
@@ -133,7 +144,7 @@ export const resolveValidationRunContext = async ({
       }
     } catch (error) {
       onWarning?.(
-        `Failed to resolve merge-base for affected ${runnerDescription} (${getErrorMessage(
+        `Failed to resolve base for affected ${runnerDescription} (${getErrorMessage(
           error
         )}). Falling back to full ${runnerDescription}.`
       );
@@ -146,19 +157,25 @@ export const resolveValidationRunContext = async ({
   }
 
   let branchCommitCount: number | undefined;
-  if (contract.scope === 'branch' && resolvedBase) {
+  if ((contract.scope === 'branch' || contract.scope === 'prepush') && resolvedBase) {
     try {
       branchCommitCount = await countCommitsBetweenRefs({
         base: resolvedBase.base,
         head: contract.headRef?.trim() || 'HEAD',
       });
     } catch {
-      // Branch change count is a logging enhancement only.
+      // Commit count is a logging enhancement only.
     }
   }
 
+  // prepush resolves via the upstream tracking ref but uses the same Moon query as branch.
+  const moonScope =
+    contract.scope === 'prepush'
+      ? 'branch'
+      : (contract.scope as Exclude<typeof contract.scope, 'full' | 'prepush'>);
+
   const changedFiles = await getMoonChangedFiles({
-    scope: contract.scope as Exclude<typeof contract.scope, 'full'>,
+    scope: moonScope,
     base: resolvedBase?.base,
     head: contract.headRef?.trim() || undefined,
   });
