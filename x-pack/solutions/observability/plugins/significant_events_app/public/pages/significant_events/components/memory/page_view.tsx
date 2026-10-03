@@ -57,12 +57,12 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
   const { canManage, canConfigure } = getNightshiftCapabilities(nightshift);
 
   const { data, isLoading, isError } = useMemoryPage(pageId);
-  const setArchived = useSetMemoryArchived();
-  const deletePage = useDeleteMemoryPage();
+  // Failures are toasted by the hooks, the way every other Nightshift write is,
+  // rather than by a banner this view would have to keep in step with its buttons.
+  const { mutate: setArchived, isLoading: isArchiving } = useSetMemoryArchived();
+  const { mutate: deletePage, isLoading: isDeleting } = useDeleteMemoryPage();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const [actionError, setActionError] = useState<string | undefined>();
-  const [busy, setBusy] = useState(false);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'memoryDeleteTitle' });
 
   const page = data?.page;
@@ -95,20 +95,6 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
     );
   }
 
-  const runAction = async (action: () => Promise<void>) => {
-    setBusy(true);
-    setActionError(undefined);
-    try {
-      await action();
-    } catch (error) {
-      // A conflict means the optimizer wrote between our read and write. Say so
-      // rather than silently retrying, so what is on screen is not a guess.
-      setActionError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <div data-test-subj="nightshiftMemoryPageView">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -134,8 +120,8 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
               <EuiButton
                 size="s"
                 iconType={page.archived ? 'refresh' : 'archive'}
-                isLoading={busy}
-                onClick={() => runAction(() => setArchived(page.id, !page.archived))}
+                isLoading={isArchiving}
+                onClick={() => setArchived({ id: page.id, archived: !page.archived })}
                 data-test-subj="nightshiftMemoryArchiveToggle"
               >
                 {page.archived ? (
@@ -159,7 +145,7 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
               size="s"
               color="danger"
               iconType="trash"
-              isDisabled={busy}
+              isDisabled={isDeleting}
               onClick={() => setConfirmingDelete(true)}
               data-test-subj="nightshiftMemoryDeleteButton"
             >
@@ -171,21 +157,6 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
-      {actionError !== undefined && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiPanel color="danger" paddingSize="s" data-test-subj="nightshiftMemoryActionError">
-            <EuiText size="xs">
-              <FormattedMessage
-                id="xpack.significantEventsApp.memory.actionError"
-                defaultMessage="That action could not be completed: {message}"
-                values={{ message: actionError }}
-              />
-            </EuiText>
-          </EuiPanel>
-        </>
-      )}
 
       <EuiSpacer size="s" />
       <MemoryTelemetryPanel page={page} usefulness={data.usefulness} confidence={data.confidence} />
@@ -274,10 +245,9 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
           onConfirm={() => {
             setConfirmingDelete(false);
             setDeleteConfirmation('');
-            return runAction(async () => {
-              await deletePage(page.id, page.title);
-              onDeleted();
-            });
+            // Navigating away only on success: the memory may well still be
+            // there, and a failed write must leave the page in place to retry.
+            deletePage({ id: page.id, confirmTitle: page.title }, { onSuccess: onDeleted });
           }}
         >
           <EuiText size="s">

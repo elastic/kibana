@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { useInfiniteQuery, useQuery, useQueryClient } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../util/errors';
 import {
   toFeatureAvailability,
   type FeatureAvailability,
 } from '../../../../util/feature_availability';
 import type { MemoryFilter, MemoryListResult } from './types';
+
+type MemoryClient = NonNullable<ReturnType<typeof useMemoryClient>>;
 
 const memoryKeys = {
   availability: ['nightshift', 'memory', 'availability'] as const,
@@ -27,7 +31,7 @@ const memoryKeys = {
  * nightshift_investigations plugin is not installed. Every query below stays
  * disabled in that case, matching the Cortex and decision-tree hooks.
  */
-const useMemoryClient = () => {
+export const useMemoryClient = () => {
   const {
     dependencies: {
       start: { nightshiftInvestigations },
@@ -152,37 +156,70 @@ export const useMemoryPage = (id: string | undefined) => {
 };
 
 /**
- * Archive or restore a memory, then refresh every list so counts and filters
- * stay honest. Invalidate rather than patch: the store aggregates stats over the
- * whole filtered set, so a locally adjusted total would drift from the server.
+ * Runs a memory write, toasting failures and refreshing every cached list.
+ *
+ * Refetch rather than patch: the store aggregates stats over the whole filtered
+ * set, so a locally adjusted total would drift from the server's.
  */
-export const useSetMemoryArchived = () => {
+const useMemoryMutation = <TVariables>(
+  write: (client: MemoryClient, variables: TVariables) => Promise<unknown>,
+  errorTitle: string
+) => {
   const client = useMemoryClient();
   const queryClient = useQueryClient();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
 
-  return async (id: string, archived: boolean): Promise<void> => {
-    await client!.fetch('POST /internal/nightshift/memory/pages/{id}/archive', {
-      signal: null,
-      params: { path: { id }, body: { archived } },
-    });
-    await queryClient.invalidateQueries({ queryKey: ['nightshift', 'memory'] });
-  };
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['nightshift', 'memory'] });
+
+  return useMutation<void, Error, TVariables>({
+    // Neither route's response is read: what the view needs next comes from the
+    // refreshed query, not from the write's own answer.
+    mutationFn: async (variables) => {
+      await write(client!, variables);
+    },
+    onSuccess: refresh,
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), { title: errorTitle });
+      // A conflict means the optimizer wrote between our read and our write, so
+      // what is on screen is stale whatever the outcome.
+      return refresh();
+    },
+  });
 };
+
+/**
+ * Archive or restore a memory. The route takes the state to move to, so the
+ * button's own reading of the page is what travels.
+ */
+export const useSetMemoryArchived = () =>
+  useMemoryMutation(
+    (client, { id, archived }: { id: string; archived: boolean }) =>
+      client.fetch('POST /internal/nightshift/memory/pages/{id}/archive', {
+        signal: null,
+        params: { path: { id }, body: { archived } },
+      }),
+    i18n.translate('xpack.significantEventsApp.memory.archiveErrorTitle', {
+      defaultMessage: 'Could not archive Semantic Memory page',
+    })
+  );
 
 /**
  * Permanently removes a memory. `confirmTitle` must match the page's current
  * title, which the route enforces — the UI passes the title it is showing so a
  * stale dialog cannot delete something that has since changed.
  */
-export const useDeleteMemoryPage = () => {
-  const client = useMemoryClient();
-  const queryClient = useQueryClient();
-
-  return async (id: string, confirmTitle: string): Promise<void> => {
-    await client!.fetch('DELETE /internal/nightshift/memory/pages/{id}', {
-      signal: null,
-      params: { path: { id }, body: { confirm_title: confirmTitle } },
-    });
-    await queryClient.invalidateQueries({ queryKey: ['nightshift', 'memory'] });
-  };
-};
+export const useDeleteMemoryPage = () =>
+  useMemoryMutation(
+    (client, { id, confirmTitle }: { id: string; confirmTitle: string }) =>
+      client.fetch('DELETE /internal/nightshift/memory/pages/{id}', {
+        signal: null,
+        params: { path: { id }, body: { confirm_title: confirmTitle } },
+      }),
+    i18n.translate('xpack.significantEventsApp.memory.deleteErrorTitle', {
+      defaultMessage: 'Could not delete Semantic Memory page',
+    })
+  );

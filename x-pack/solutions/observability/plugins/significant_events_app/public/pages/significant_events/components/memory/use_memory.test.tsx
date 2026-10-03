@@ -25,6 +25,7 @@ jest.mock('../../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const fetchMock = jest.fn();
+const addErrorMock = jest.fn();
 
 const summary = (id: string) => ({
   id,
@@ -66,6 +67,7 @@ const createWrapper = () => {
 
 const givenClient = () =>
   mockUseKibana.mockReturnValue({
+    core: { notifications: { toasts: { addError: addErrorMock } } },
     dependencies: {
       start: { nightshiftInvestigations: { investigationsClient: { fetch: fetchMock } } },
     },
@@ -73,6 +75,7 @@ const givenClient = () =>
 
 const givenNoClient = () =>
   mockUseKibana.mockReturnValue({
+    core: { notifications: { toasts: { addError: addErrorMock } } },
     dependencies: { start: {} },
   } as unknown as ReturnType<typeof useKibana>);
 
@@ -247,7 +250,7 @@ describe('useSetMemoryArchived', () => {
 
     const { result } = renderHook(() => useSetMemoryArchived(), { wrapper });
     await act(async () => {
-      await result.current('memory_a', true);
+      await result.current.mutateAsync({ id: 'memory_a', archived: true });
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -257,6 +260,28 @@ describe('useSetMemoryArchived', () => {
     // Invalidated rather than patched: the server aggregates stats over the whole
     // filtered set, so a locally adjusted total would drift from it.
     await waitFor(() => expect(listQueries().length).toBeGreaterThan(before));
+    expect(addErrorMock).not.toHaveBeenCalled();
+  });
+
+  it('toasts a failed archive and refetches, because a conflict means the page moved', async () => {
+    // The optimizer writes between our read and our write, so what is on screen
+    // is stale whatever the outcome. The toast is the operator's only report.
+    fetchMock.mockRejectedValue(new Error('version conflict'));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useSetMemoryArchived(), { wrapper });
+    await act(async () => {
+      await expect(result.current.mutateAsync({ id: 'memory_a', archived: true })).rejects.toThrow(
+        'version conflict'
+      );
+    });
+
+    expect(addErrorMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.any(String) }),
+      {
+        title: expect.any(String),
+      }
+    );
   });
 });
 
@@ -270,7 +295,7 @@ describe('useDeleteMemoryPage', () => {
 
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
-      await result.current('memory_a', 'Memory memory_a');
+      await result.current.mutateAsync({ id: 'memory_a', confirmTitle: 'Memory memory_a' });
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -282,18 +307,21 @@ describe('useDeleteMemoryPage', () => {
     await waitFor(() => expect(listQueries().length).toBeGreaterThan(before));
   });
 
-  it('propagates a rejected delete rather than reporting a success', async () => {
+  it('reports a rejected delete as an error state rather than a success', async () => {
     fetchMock.mockRejectedValue(new Error('version conflict'));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
-      await expect(result.current('memory_a', 'Memory memory_a')).rejects.toThrow(
-        'version conflict'
-      );
+      await expect(
+        result.current.mutateAsync({ id: 'memory_a', confirmTitle: 'Memory memory_a' })
+      ).rejects.toThrow('version conflict');
     });
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
     // A failed write must not invalidate anything: there is nothing to refetch.
     expect(listQueries()).toHaveLength(0);
+    expect(addErrorMock).toHaveBeenCalled();
   });
 });
 

@@ -40,8 +40,15 @@ const givenCapabilities = (nightshift: Record<string, boolean>) => {
 };
 
 const mockUseMemoryPage = useMemoryPage as jest.MockedFunction<typeof useMemoryPage>;
-const mockSetArchived = jest.fn();
-const mockDelete = jest.fn();
+/** Each mutation mock calls the success callback the view handed it, as react-query does. */
+const mockSetArchived = jest.fn(
+  (_variables: { id: string; archived: boolean }, options?: { onSuccess?: () => void }) =>
+    options?.onSuccess?.()
+);
+const mockDelete = jest.fn(
+  (_variables: { id: string; confirmTitle: string }, options?: { onSuccess?: () => void }) =>
+    options?.onSuccess?.()
+);
 const mockUseSetArchived = useSetMemoryArchived as jest.MockedFunction<typeof useSetMemoryArchived>;
 const mockUseDelete = useDeleteMemoryPage as jest.MockedFunction<typeof useDeleteMemoryPage>;
 
@@ -75,21 +82,22 @@ const asDetail = (
   } as unknown as ReturnType<typeof useMemoryPage>);
 
 const renderView = (onDeleted = jest.fn(), onSelectPage = jest.fn()) => {
-  render(
+  // A fresh element per call: React bails out of a re-render that is handed the
+  // very same element, and these tests rerender to model a refetch.
+  const ui = () => (
     <I18nProvider>
       <MemoryPageView pageId="memory_kafka-lag" onSelectPage={onSelectPage} onDeleted={onDeleted} />
     </I18nProvider>
   );
-  return { onDeleted, onSelectPage };
+  const { rerender } = render(ui());
+  return { rerenderView: () => rerender(ui()), onDeleted, onSelectPage };
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
   givenCapabilities({ manage: true, configure: true });
-  mockUseSetArchived.mockReturnValue(mockSetArchived);
-  mockUseDelete.mockReturnValue(mockDelete);
-  mockSetArchived.mockResolvedValue(undefined);
-  mockDelete.mockResolvedValue(undefined);
+  mockUseSetArchived.mockReturnValue({ mutate: mockSetArchived, isLoading: false } as never);
+  mockUseDelete.mockReturnValue({ mutate: mockDelete, isLoading: false } as never);
 });
 
 describe('MemoryPageView', () => {
@@ -140,7 +148,7 @@ describe('MemoryPageView', () => {
     await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
 
     await waitFor(() => {
-      expect(mockSetArchived).toHaveBeenCalledWith('memory_kafka-lag', true);
+      expect(mockSetArchived).toHaveBeenCalledWith({ id: 'memory_kafka-lag', archived: true });
     });
   });
 
@@ -152,7 +160,7 @@ describe('MemoryPageView', () => {
     await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
 
     await waitFor(() => {
-      expect(mockSetArchived).toHaveBeenCalledWith('memory_kafka-lag', false);
+      expect(mockSetArchived).toHaveBeenCalledWith({ id: 'memory_kafka-lag', archived: false });
     });
   });
 
@@ -163,40 +171,48 @@ describe('MemoryPageView', () => {
     mockUseMemoryPage.mockImplementation(() =>
       asDetail(archived ? { archived: true, archive_reason: 'manual' as const } : {})
     );
-    mockSetArchived.mockImplementation(async (_id: string, next: boolean) => {
-      archived = next;
-    });
-    renderView();
+    mockSetArchived.mockImplementation(
+      ({ archived: next }: { archived: boolean }, options?: { onSuccess?: () => void }) => {
+        archived = next;
+        options?.onSuccess?.();
+      }
+    );
+    const { rerenderView } = renderView();
 
     const toggle = () => screen.getByTestId('nightshiftMemoryArchiveToggle');
     expect(toggle()).toHaveTextContent('Archive');
 
     await userEvent.click(toggle());
-    await waitFor(() => expect(toggle()).toHaveTextContent('Restore'));
-    expect(mockSetArchived).toHaveBeenLastCalledWith('memory_kafka-lag', true);
+    expect(mockSetArchived).toHaveBeenLastCalledWith({
+      id: 'memory_kafka-lag',
+      archived: true,
+    });
+    // The write invalidated the query, so the archived state arrives from the
+    // server rather than from local state: re-render to pick it up.
+    rerenderView();
+    expect(toggle()).toHaveTextContent('Restore');
 
     await userEvent.click(toggle());
-    await waitFor(() => expect(toggle()).toHaveTextContent('Archive'));
-    expect(mockSetArchived).toHaveBeenLastCalledWith('memory_kafka-lag', false);
+    expect(mockSetArchived).toHaveBeenLastCalledWith({
+      id: 'memory_kafka-lag',
+      archived: false,
+    });
+    rerenderView();
+    expect(toggle()).toHaveTextContent('Archive');
     // Archived by a person carries the manual reason, and restoring clears it.
     expect(mockSetArchived).toHaveBeenCalledTimes(2);
   });
 
-  it('surfaces a failed restore rather than reporting the memory as active', async () => {
+  it('writes once per click, so a failed archive is never retried behind the operator', async () => {
+    // The store already exhausted its own optimistic-concurrency retries; the UI
+    // must not paper over that with another one. The failure itself is toasted by
+    // the hook, which is what `use_memory.test.tsx` covers.
     mockUseMemoryPage.mockReturnValue(asDetail({ archived: true, archive_reason: 'manual' }));
-    mockSetArchived.mockRejectedValue(new Error('version conflict'));
     renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
 
-    // The page on screen is unchanged, so the operator has to know the write failed
-    // rather than see a stale "archived" badge and assume it worked.
-    await waitFor(() => {
-      expect(screen.getByTestId('nightshiftMemoryActionError')).toHaveTextContent(
-        'version conflict'
-      );
-    });
-    expect(screen.getByTestId('nightshiftMemoryArchivedBadge')).toBeInTheDocument();
+    await waitFor(() => expect(mockSetArchived).toHaveBeenCalledTimes(1));
   });
 
   it('does not delete without an explicit confirmation', async () => {
@@ -221,8 +237,12 @@ describe('MemoryPageView', () => {
     await userEvent.click(screen.getByText('Delete permanently'));
 
     await waitFor(() => {
-      // The title is echoed so the route can refuse a stale confirmation.
-      expect(mockDelete).toHaveBeenCalledWith('memory_kafka-lag', 'Kafka consumer lag');
+      // The title is echoed so the route can refuse a stale confirmation, and the
+      // navigation away is the mutation's success callback rather than the click.
+      expect(mockDelete).toHaveBeenCalledWith(
+        { id: 'memory_kafka-lag', confirmTitle: 'Kafka consumer lag' },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
     });
     expect(onDeleted).toHaveBeenCalled();
   });
@@ -286,27 +306,12 @@ describe('MemoryPageView', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
-  it('surfaces a failed action instead of silently retrying', async () => {
-    mockSetArchived.mockRejectedValue(new Error('version conflict'));
-    mockUseMemoryPage.mockReturnValue(asDetail());
-    renderView();
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
-
+  it('stays on the page when the delete write fails', async () => {
     // The optimizer writes asynchronously, so a conflict is a real outcome the
-    // operator has to see rather than have retried behind their back.
-    await waitFor(() => {
-      expect(screen.getByTestId('nightshiftMemoryActionError')).toHaveTextContent(
-        'version conflict'
-      );
-    });
-    // One attempt, not a retry loop: the store already exhausted its own OCC
-    // retries, and the UI must not paper over that with another one.
-    expect(mockSetArchived).toHaveBeenCalledTimes(1);
-  });
-
-  it('surfaces a failed delete and leaves the page in place', async () => {
-    mockDelete.mockRejectedValue(new Error('version conflict'));
+    // operator has to see. The hook toasts it; the view must not navigate away.
+    // The operator has to see something, so the write is offered once and left
+    // alone. A failing mutation never calls its success callback.
+    mockDelete.mockImplementation(() => undefined);
     mockUseMemoryPage.mockReturnValue(asDetail());
     const { onDeleted } = renderView();
 
@@ -317,11 +322,7 @@ describe('MemoryPageView', () => {
     );
     await userEvent.click(screen.getByText('Delete permanently'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('nightshiftMemoryActionError')).toHaveTextContent(
-        'version conflict'
-      );
-    });
+    await waitFor(() => expect(mockDelete).toHaveBeenCalled());
     // The memory may well still be there — the store never confirmed the delete.
     expect(onDeleted).not.toHaveBeenCalled();
     expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
