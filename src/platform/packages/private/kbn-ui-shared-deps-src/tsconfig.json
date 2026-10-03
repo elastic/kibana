@@ -13,6 +13,7 @@
   ],
   "exclude": [
     "src/entry.js",
+    "src/set_public_path.js",
     "**/*.config.js",
     "target/**/*",
   ],

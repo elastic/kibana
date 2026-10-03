@@ -43,7 +43,7 @@ The optimizer uses a **unified single-compilation** model:
 
 2. **Entry generation** creates `target/.rspack-entry-wrappers/kibana-unified-entry.js` which synchronously imports core and asynchronously imports all plugins via `import()`.
 
-3. **Single RSPack invocation** compiles everything together. Shared dependencies (React, EUI, lodash, etc.) are **externalized** -- they are provided at runtime by `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`, which are built separately by webpack and served as `<script>` tags before `kibana.bundle.js`.
+3. **One Rspack MultiCompiler** builds the npm DLL, Monaco workers, source shared dependencies, and Kibana in dependency order. Shared dependencies remain externalized and are served as `<script>` tags before `kibana.bundle.js`.
 
 4. **Chunk splitting** is handled automatically by RSPack's `splitChunks` configuration. Heavy vendor libraries (maplibre-gl, ace-builds, vega, etc.) are split into separate async chunks. Common code used by 3+ plugins is also extracted.
 

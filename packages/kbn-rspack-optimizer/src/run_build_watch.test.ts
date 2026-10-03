@@ -10,32 +10,40 @@
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 jest.mock('./rspack_runtime', () => ({ rspack: jest.fn() }));
-jest.mock('./config/create_single_compile_config', () => ({
-  createSingleCompileConfig: jest.fn(),
+jest.mock('./config/create_multi_compile_config', () => ({
+  createMultiCompileConfig: jest.fn(),
+  KIBANA_COMPILER: 'kibana',
 }));
 
 import { rspack } from './rspack_runtime';
-import { createSingleCompileConfig } from './config/create_single_compile_config';
+import { createMultiCompileConfig } from './config/create_multi_compile_config';
 import { runBuild } from './run_build';
 
-import type { Compiler } from '@rspack/core';
+import type { MultiCompiler } from '@rspack/core';
 
 const nextTick = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 type WatchCallback = (err: Error | null, stats?: unknown) => void;
 
-const createStats = ({ errors }: { errors: string[] }) => ({
-  hash: `hash-${errors.length}`,
-  hasErrors: () => errors.length > 0,
-  hasWarnings: () => false,
-  toString: () => errors.join('\n'),
-  toJson: () => ({
-    errors: errors.map((message) => ({ message })),
-    entrypoints: { kibana: {} },
-    assets: [{ name: 'kibana.bundle.js', size: 10 }],
-    time: 100,
-  }),
-});
+const createStats = ({ errors }: { errors: string[] }) => {
+  const child = {
+    compilation: { name: 'kibana' },
+    hash: `hash-${errors.length}`,
+    hasErrors: () => errors.length > 0,
+    hasWarnings: () => false,
+    toString: () => errors.join('\n'),
+    toJson: () => ({
+      errors: errors.map((message) => ({ message })),
+      entrypoints: { kibana: {} },
+      assets: [{ name: 'kibana.bundle.js', size: 10 }],
+      time: 100,
+    }),
+  };
+  return {
+    hasErrors: () => errors.length > 0,
+    stats: [child],
+  };
+};
 
 describe('runBuild in watch mode', () => {
   let watchCallback: WatchCallback;
@@ -47,16 +55,21 @@ describe('runBuild in watch mode', () => {
   beforeEach(() => {
     writer.messages.length = 0;
     close.mockClear();
-    jest.mocked(createSingleCompileConfig).mockResolvedValue({ config: {}, bundleCount: 3 });
-    // fake compiler exposes only what runWatchBuild touches
+    jest.mocked(createMultiCompileConfig).mockResolvedValue({ configs: [{}], bundleCount: 3 });
     const compiler = {
-      outputPath: '/out',
-      hooks: { compile: { tap: jest.fn() } },
+      compilers: [
+        {
+          name: 'kibana',
+          outputPath: '/out',
+          options: {},
+        },
+      ],
+      hooks: { invalid: { tap: jest.fn() } },
       watch: jest.fn((_opts: unknown, cb: WatchCallback) => {
         watchCallback = cb;
         return { close };
       }),
-    } as unknown as Compiler;
+    } as unknown as MultiCompiler;
     jest.mocked(rspack).mockReturnValue(compiler);
   });
 

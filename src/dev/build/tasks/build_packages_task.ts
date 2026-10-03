@@ -19,9 +19,6 @@ import { getNodeSwcConfig } from '@kbn/swc-config/node';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { REPO_ROOT } from '@kbn/repo-info';
-import type { StdioOption } from 'execa';
-import execa from 'execa';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
@@ -112,13 +109,6 @@ export const BuildPackages: Task = {
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
-
-    log.info(`Building webpack artifacts which are necessary for the build`);
-    await buildWebpackBundles({
-      quiet: false,
-      dist: true,
-      noCache: true,
-    });
 
     await asyncForEachWithLimit(packages, cpus().length, async (pkg) => {
       const allPaths = new Set(Array.from(pkgFileMap.getFiles(pkg), (p) => p.abs));
@@ -252,37 +242,6 @@ export const BuildPackages: Task = {
           },
         });
 
-        if (
-          pkg.manifest.id === '@kbn/ui-shared-deps-src' ||
-          pkg.manifest.id === '@kbn/ui-shared-deps-npm'
-        ) {
-          await scanCopy({
-            source: config.resolveFromRepo(
-              'target',
-              'build',
-              pkg.normalizedRepoRelativeDir,
-              'shared_built_assets'
-            ),
-            destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'shared_built_assets'),
-            permissions: distPerms,
-            filter: (rec) => rec.source.ext !== '.map',
-          });
-        }
-
-        if (pkg.manifest.id === '@kbn/monaco') {
-          await scanCopy({
-            source: config.resolveFromRepo(
-              'target',
-              'build',
-              pkg.normalizedRepoRelativeDir,
-              'target_workers'
-            ),
-            destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'target_workers'),
-            permissions: distPerms,
-            filter: (rec) => rec.source.ext !== '.map',
-          });
-        }
-
         if (pkg.manifest.id === '@kbn/repo-packages') {
           // rewrite package map to point into node_modules
           await write(
@@ -345,24 +304,3 @@ export const BuildPackages: Task = {
     });
   },
 };
-
-export async function buildWebpackBundles({
-  quiet,
-  dist,
-  noCache,
-}: {
-  quiet: boolean;
-  dist: boolean;
-  noCache?: boolean;
-}) {
-  const options = [
-    quiet ? ['--quiet'] : [],
-    dist ? ['--dist'] : [],
-    noCache ? ['--no-cache'] : [],
-  ].flat();
-  const stdio: StdioOption[] = quiet
-    ? ['ignore', 'pipe', 'pipe']
-    : ['inherit', 'inherit', 'inherit'];
-
-  await execa('pnpm', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
-}
