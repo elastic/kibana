@@ -133,6 +133,48 @@ export const ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.transl
   }
 );
 
+// Detection rules created
+
+export const DETECTION_RULES_CREATED_SCHEMA_IDS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.schema.ids',
+  {
+    defaultMessage:
+      'The saved object IDs of the created rules. At most 2,000 per event; larger creations are split across several events.',
+  }
+);
+
+export const DETECTION_RULES_CREATED_SCHEMA_TYPES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.schema.types',
+  {
+    defaultMessage:
+      'The distinct detection rule types across all the rules in this event, for example query, eql, or machine_learning. This describes the whole batch, not individual rules: a condition on it matches when any rule in ids has that type.',
+  }
+);
+
+export const DETECTION_RULES_CREATED_SCHEMA_TAGS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.schema.tags',
+  {
+    defaultMessage:
+      'The distinct tags across all the rules in this event. This describes the whole batch, not individual rules: a condition on it matches when any rule in ids has that tag. Capped at 1,000 tags, each at most 256 characters; extra tags are dropped from the event.',
+  }
+);
+
+export const DETECTION_RULES_CREATED_SCHEMA_TOTAL_COUNT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.schema.totalCount',
+  {
+    defaultMessage:
+      'The total number of rules created by the operation that emitted this event. Larger than the length of ids when the operation was split across several events.',
+  }
+);
+
+export const DETECTION_RULES_CREATED_SCHEMA_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.schema.source',
+  {
+    defaultMessage:
+      'How the rules were created: api (UI or API create), import, prebuilt_install, duplicate, siem_migration, or restore (a deleted rule restored from its history).',
+  }
+);
+
 // Note created
 
 export const NOTE_CREATED_SCHEMA_NOTE_ID_DESCRIPTION = i18n.translate(
@@ -294,6 +336,26 @@ export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.trans
   {
     defaultMessage:
       'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesAdded, event.assigneesRemoved, and event.truncated (true when the payload was capped: more than 10,000 attack discoveries were affected, more than the per-operation assignee limit was supplied, or an assignee UID exceeded the maximum allowed length).',
+  }
+);
+
+// Detection rules created
+
+export const DETECTION_RULES_CREATED_TRIGGER_TITLE = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.title',
+  { defaultMessage: 'Security - Detection rules created' }
+);
+
+export const DETECTION_RULES_CREATED_TRIGGER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.description',
+  { defaultMessage: 'Emitted when one or more detection rules are created.' }
+);
+
+export const DETECTION_RULES_CREATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.detectionRulesCreated.documentation.details',
+  {
+    defaultMessage:
+      'Emitted after detection rules are created through the rule management API, a prebuilt rules install, or an import, and after a rule is duplicated. One event is emitted per creation operation (a create request, a prebuilt rules install batch, an import batch of up to 200 rules, a duplicate request, or a restore of a deleted rule), or per 2,000 rules when an operation creates more. Operations that create rules one at a time, such as some prebuilt rule and SIEM migration installs, emit one event per rule. The payload includes event.ids, event.types, event.tags, event.totalCount, and event.source. event.types and event.tags describe the whole batch, not individual rules. The event is emitted after the rules are saved and does not wait for workflows to run. Rules created directly through the alerting API do not fire this trigger.',
   }
 );
 
