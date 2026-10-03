@@ -7,6 +7,7 @@
 
 import type { PayloadAction } from 'redux-toolkit-v1';
 import { createSlice } from 'redux-toolkit-v1';
+import { isEqual } from 'lodash';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PageScope } from '../constants';
 import { SLICE_PREFIX } from '../constants';
@@ -63,7 +64,11 @@ export const sharedDataViewManagerSlice = createSlice({
           // NOTE: user is allowed to duplicate a managed data view and
           // we want both to show up in the list
           state.adhocDataViews.find(
-            (dv) => dv.title === dataViewSpec.title && dv.managed === dataViewSpec.managed
+            (dv) =>
+              dv.title === dataViewSpec.title &&
+              dv.managed === dataViewSpec.managed &&
+              dv.timeFieldName === dataViewSpec.timeFieldName &&
+              isEqual(dv.runtimeFieldMap ?? {}, dataViewSpec.runtimeFieldMap ?? {})
           )
         ) {
           return;

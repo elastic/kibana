@@ -96,6 +96,32 @@ describe('slices', () => {
         expect(state.adhocDataViews).toHaveLength(1);
         expect(state.adhocDataViews[0]).toEqual({ title: 'test ad hoc view' });
       });
+
+      it('should add an ad hoc data view with the same title but a different time field', () => {
+        const initialState = {
+          ...initialSharedState,
+          adhocDataViews: [{ title: 'test ad hoc view' }],
+        };
+        const timeFieldSpec = {
+          id: 'adhoc_test ad hoc view_hash',
+          title: 'test ad hoc view',
+          timeFieldName: 'kibana.combined_timestamp',
+          runtimeFieldMap: {
+            'kibana.combined_timestamp': { type: 'date' as const, script: { source: 'emit(0)' } },
+          },
+        };
+
+        const dataViewWithTimeField = {
+          title: 'test ad hoc view',
+          isPersisted: () => false,
+          toSpec: () => timeFieldSpec,
+        } as unknown as DataView;
+
+        const state = reducer(initialState, actions.addDataView(dataViewWithTimeField));
+
+        expect(state.adhocDataViews).toHaveLength(2);
+        expect(state.adhocDataViews[1]).toEqual(timeFieldSpec);
+      });
     });
 
     describe('state transitions', () => {

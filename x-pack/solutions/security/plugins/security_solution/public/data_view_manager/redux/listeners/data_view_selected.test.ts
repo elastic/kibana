@@ -190,6 +190,53 @@ describe('createDataViewSelectedListener', () => {
     );
   });
 
+  it('should create adhoc data view with the fallback time field and a time field specific id', async () => {
+    const fallbackTimeFieldSpec = {
+      timeFieldName: 'kibana.combined_timestamp',
+      runtimeFieldMap: {
+        'kibana.combined_timestamp': { type: 'date' as const, script: { source: 'emit(0)' } },
+      },
+    };
+
+    await listener.effect(
+      selectDataViewAsync({
+        fallbackPatterns: ['test-*'],
+        fallbackTimeFieldSpec,
+        scope: PageScope.default,
+      }),
+      mockListenerApi
+    );
+
+    expect(mockDataViewsService.create).toHaveBeenCalledWith({
+      id: expect.stringMatching(/^adhoc_test-\*_.+/),
+      title: 'test-*',
+      ...fallbackTimeFieldSpec,
+    });
+  });
+
+  it('should create distinct adhoc data view ids for different fallback time fields', async () => {
+    await listener.effect(
+      selectDataViewAsync({
+        fallbackPatterns: ['test-*'],
+        fallbackTimeFieldSpec: { timeFieldName: 'event.ingested' },
+        scope: PageScope.default,
+      }),
+      mockListenerApi
+    );
+    await listener.effect(
+      selectDataViewAsync({
+        fallbackPatterns: ['test-*'],
+        fallbackTimeFieldSpec: { timeFieldName: 'event.created' },
+        scope: PageScope.default,
+      }),
+      mockListenerApi
+    );
+
+    const [[firstSpec], [secondSpec]] = jest.mocked(mockDataViewsService.create).mock.calls;
+    expect(firstSpec.id).not.toEqual(secondSpec.id);
+    expect(firstSpec.id).not.toEqual('adhoc_test-*');
+  });
+
   describe('analyzer scope storage', () => {
     it('should store data view ID in storage when scope is analyzer', async () => {
       const analyzerListener = createDataViewSelectedListener({
