@@ -9,12 +9,10 @@
 
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
-import { remapFilterDataViewIds } from '../../../../../../common/session/inline_data_view_references';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import {
-  normalizeUrlAppState,
-  translateAppStateDataViewIds,
+  prepareInlineDataViewLoadState,
   type NormalizedInlineDataViewIds,
 } from '../../utils/normalize_inline_data_view_ids';
 import type { InternalStateThunkActionCreator } from '../internal_state';
@@ -37,39 +35,39 @@ export const applyInlineDataViewLoadState: InternalStateThunkActionCreator<
     _,
     { services, runtimeStateManager, urlStateStorage }
   ) {
-    const { navigationDataViewSpec, navigationIdMap, dataViewIdMap } = normalized;
     // Migrate legacy keys such as index as tab initialization does, before remapping references.
     const urlAppState = cleanupUrlState(
       urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
       services.uiSettings
     );
-    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-    const normalizedUrlAppState =
-      urlAppState && normalizeUrlAppState({ appState: urlAppState, selectedTab, normalized });
-    const translatedGlobalFilters =
-      urlGlobalState?.filters && remapFilterDataViewIds(urlGlobalState.filters, dataViewIdMap);
+    const urlGlobalState =
+      urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY) ?? undefined;
+    const prepared = prepareInlineDataViewLoadState({
+      normalized,
+      selectedTab,
+      urlAppState,
+      urlGlobalState,
+      initialTabState,
+    });
 
     const urlUpdates: Array<Promise<string | undefined>> = [];
-    if (normalizedUrlAppState !== urlAppState) {
+    if (prepared.urlAppState !== urlAppState) {
       urlUpdates.push(
-        urlStateStorage.set(APP_STATE_URL_KEY, normalizedUrlAppState, { replace: true })
+        urlStateStorage.set(APP_STATE_URL_KEY, prepared.urlAppState, { replace: true })
       );
     }
-    if (urlGlobalState && translatedGlobalFilters !== urlGlobalState.filters) {
+
+    if (prepared.urlGlobalState !== urlGlobalState) {
       urlUpdates.push(
-        urlStateStorage.set(
-          GLOBAL_STATE_URL_KEY,
-          { ...urlGlobalState, filters: translatedGlobalFilters },
-          { replace: true }
-        )
+        urlStateStorage.set(GLOBAL_STATE_URL_KEY, prepared.urlGlobalState, { replace: true })
       );
     }
     await Promise.all(urlUpdates);
 
-    if (dataViewIdMap.size) {
+    if (prepared.dataViewIdsToRemove.length) {
       const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
       const remainingAdHocDataViews = adHocDataViews.filter(
-        ({ id }) => id === undefined || !dataViewIdMap.has(id)
+        ({ id }) => id === undefined || !prepared.dataViewIdsToRemove.includes(id)
       );
       if (remainingAdHocDataViews.length !== adHocDataViews.length) {
         dispatch(setAdHocDataViews(remainingAdHocDataViews));
@@ -77,13 +75,5 @@ export const applyInlineDataViewLoadState: InternalStateThunkActionCreator<
     }
 
     // Keep location state for tab initialization before the selected-tab URL update discards it.
-    services.initialTabStateService.capture(
-      initialTabState && {
-        ...initialTabState,
-        dataViewSpec: navigationDataViewSpec,
-        ...(initialTabState.defaultState && {
-          defaultState: translateAppStateDataViewIds(initialTabState.defaultState, navigationIdMap),
-        }),
-      }
-    );
+    services.initialTabStateService.capture(prepared.initialTabState);
   };

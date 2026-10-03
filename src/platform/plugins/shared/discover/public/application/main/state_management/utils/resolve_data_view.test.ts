@@ -174,6 +174,26 @@ describe('loadDataView with inline specs', () => {
     expect(mockServices.dataViews.clearInstanceCache).not.toHaveBeenCalled();
   });
 
+  it('prefers a matching local definition to a persisted navigation view', async () => {
+    const { mockServices, resolve, get } = setup();
+    const initialAdHocDataViewSpec = { ...spec, id: derivedId };
+    const savedDataView = { id: 'saved-id', title: 'saved-*' };
+
+    const result = await loadDataView({
+      dataViewId: derivedId,
+      initialAdHocDataViewSpec,
+      locationDataViewSpec: savedDataView,
+      services: mockServices,
+      savedDataViews: [savedDataView],
+      adHocDataViews: [],
+    });
+
+    expect(resolve).toHaveBeenCalledWith(initialAdHocDataViewSpec);
+    expect(result.requestedDataViewId).toBe(derivedId);
+    expect(get).not.toHaveBeenCalled();
+    expect(mockServices.dataViews.clearInstanceCache).not.toHaveBeenCalled();
+  });
+
   it('propagates resolution failures without loading an unrelated default view', async () => {
     const { mockServices, resolve } = setup();
     const error = new Error('Cannot load inline view');

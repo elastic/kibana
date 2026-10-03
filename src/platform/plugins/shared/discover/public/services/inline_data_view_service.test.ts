@@ -21,6 +21,9 @@ const inlineSpec: DataViewSpec = { title: 'logs-*', timeFieldName: '@timestamp' 
 const editedSpec: DataViewSpec = { ...inlineSpec, title: 'other-logs-*' };
 const inlineDataViewId = generateInlineDataViewId(inlineSpec);
 const editedDataViewId = generateInlineDataViewId(editedSpec);
+const timestampFields: DataViewSpec['fields'] = {
+  '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+};
 
 const createDataView = (spec: DataViewSpec) =>
   new DataView({ spec, fieldFormats: fieldFormatsMock });
@@ -37,6 +40,100 @@ const setup = () => {
 };
 
 describe('createInlineDataViewService', () => {
+  describe('create', () => {
+    it('applies defaults in isolation and releases the draft when reusing the final view', async () => {
+      const { service, create, cache, clearInstanceCache } = setup();
+      const original = await service.resolve({ title: 'logs-*' });
+      const shared = await service.resolve(inlineSpec);
+      shared.setFieldCount('@timestamp', 7);
+      const spec = { ...original.toMinimalSpec(), fields: timestampFields };
+      const draft = await create({ ...spec, id: 'creation-draft' });
+      create.mockClear();
+      create.mockResolvedValueOnce(draft);
+
+      const result = await service.create(spec, { preferredTimeField: '@timestamp' });
+
+      expect(create).toHaveBeenNthCalledWith(1, { ...spec, id: undefined });
+      expect(draft.timeFieldName).toBe('@timestamp');
+      expect(result).toBe(shared);
+      expect(original.timeFieldName).toBeUndefined();
+      expect(spec.id).toBe(original.id);
+      expect(shared.getFieldAttrs().get('@timestamp')?.count).toBe(7);
+      expect([...cache.values()]).toStrictEqual([original, shared]);
+      expect(clearInstanceCache.mock.calls).toStrictEqual([['creation-draft']]);
+    });
+
+    it.each<[string, DataViewSpec['fields']]>([
+      ['missing', {}],
+      [
+        'not a date',
+        {
+          '@timestamp': {
+            name: '@timestamp',
+            type: 'keyword',
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      ],
+    ])('keeps the specified time field when the preferred field is %s', async (_, fields) => {
+      const { service } = setup();
+      const spec = { title: 'logs-*', timeFieldName: 'event.created', fields };
+
+      const result = await service.create(spec, { preferredTimeField: '@timestamp' });
+
+      expect(result.timeFieldName).toBe('event.created');
+      expect(result.id).toBe(generateInlineDataViewId(spec));
+    });
+
+    it('does not infer a time field unless requested', async () => {
+      const { service } = setup();
+      const spec = { title: 'logs-*', fields: timestampFields };
+
+      const result = await service.create(spec);
+
+      expect(result.timeFieldName).toBeUndefined();
+      expect(result.id).toBe(generateInlineDataViewId(spec));
+    });
+
+    it('propagates creation failures without clearing other cached views', async () => {
+      const { service, create, clearInstanceCache } = setup();
+      const error = new Error('Unable to fetch fields');
+      create.mockRejectedValueOnce(error);
+
+      await expect(service.create(inlineSpec)).rejects.toBe(error);
+      expect(clearInstanceCache).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completeCreation', () => {
+    it('finalizes a created view with its existing fields and releases its temporary ID', async () => {
+      const { service, create, cache, clearInstanceCache } = setup();
+      const created = await create({ ...inlineSpec, fields: timestampFields, id: 'created' });
+
+      const result = await service.completeCreation(created);
+
+      expect(result.id).toBe(inlineDataViewId);
+      expect(create).toHaveBeenLastCalledWith({ ...created.toSpec(), id: inlineDataViewId }, true);
+      expect([...cache.values()]).toStrictEqual([result]);
+      expect(clearInstanceCache.mock.calls).toStrictEqual([['created']]);
+    });
+
+    it.each<DataViewSpec>([
+      { ...inlineSpec, id: inlineDataViewId },
+      { ...inlineSpec, id: 'saved', version: '1' },
+      { ...inlineSpec, id: 'managed', managed: true },
+      { ...inlineSpec, id: 'esql', type: ESQL_TYPE },
+    ])('retains a created view that needs no replacement ($id)', async (spec) => {
+      const { service, create, cache, clearInstanceCache } = setup();
+      const created = await create(spec);
+
+      expect(await service.completeCreation(created)).toBe(created);
+      expect([...cache.values()]).toStrictEqual([created]);
+      expect(clearInstanceCache).not.toHaveBeenCalled();
+    });
+  });
+
   describe('resolve', () => {
     it('derives the ID of inline specs and shares their instance', async () => {
       const { create, service } = setup();

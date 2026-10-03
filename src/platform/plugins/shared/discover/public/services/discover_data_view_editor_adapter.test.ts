@@ -31,6 +31,8 @@ const setup = () => {
   dataViews.create.mockImplementation(async (spec) => createDataView(spec));
   const finalize = jest.fn();
   const inlineDataViews = {
+    create: jest.fn(),
+    completeCreation: jest.fn(),
     resolve: jest.fn(),
     finalize,
     beginEdit: (source: DataView) =>
@@ -39,7 +41,6 @@ const setup = () => {
   const onEditError = jest.fn();
   const editor = createDiscoverDataViewEditorAdapter({
     dataViewEditor,
-    dataViews,
     inlineDataViews,
     onEditError,
   });
@@ -58,29 +59,22 @@ describe('createDiscoverDataViewEditorAdapter', () => {
       'managed copy',
       { editData: createDataView({ id: 'picker-copy', title: 'logs-*', managed: true }) },
     ],
-  ])(
-    'finalizes a %s and releases the created view before notifying Discover',
-    async (_mode, modeOptions) => {
-      const { editor, dataViewEditor, dataViews, inlineDataViews, close } = setup();
-      const created = createDataView({ id: 'created', title: 'logs-*' });
-      const finalized = createDataView({ id: 'derived-id', title: 'logs-*' });
-      inlineDataViews.finalize.mockResolvedValue(finalized);
-      const onSave = jest.fn();
-      const options = { ...modeOptions, onSave, onCancel: jest.fn() };
+  ])('completes a %s through the service before notifying Discover', async (_mode, modeOptions) => {
+    const { editor, dataViewEditor, inlineDataViews, close } = setup();
+    const created = createDataView({ id: 'created', title: 'logs-*' });
+    const finalized = createDataView({ id: 'derived-id', title: 'logs-*' });
+    inlineDataViews.completeCreation.mockResolvedValue(finalized);
+    const onSave = jest.fn();
+    const options = { ...modeOptions, onSave, onCancel: jest.fn() };
 
-      expect(editor.openEditor(options)).toBe(close);
-      const [forwarded] = dataViewEditor.openEditor.mock.calls[0];
-      expect(forwarded).toEqual({ ...options, onSave: expect.any(Function) });
-      await forwarded.onSave(created);
+    expect(editor.openEditor(options)).toBe(close);
+    const [forwarded] = dataViewEditor.openEditor.mock.calls[0];
+    expect(forwarded).toStrictEqual({ ...options, onSave: expect.any(Function) });
+    await forwarded.onSave(created);
 
-      expect(inlineDataViews.finalize).toHaveBeenCalledWith(created);
-      expect(onSave).toHaveBeenCalledWith(finalized);
-      expect(dataViews.clearInstanceCache.mock.calls).toEqual([['created']]);
-      expect(dataViews.clearInstanceCache.mock.invocationCallOrder[0]).toBeLessThan(
-        onSave.mock.invocationCallOrder[0]
-      );
-    }
-  );
+    expect(inlineDataViews.completeCreation).toHaveBeenCalledWith(created);
+    expect(onSave).toHaveBeenCalledWith(finalized);
+  });
 
   it.each<DataViewSpec>([
     { id: 'saved', title: 'logs-*', version: '1' },
@@ -158,28 +152,14 @@ describe('createDiscoverDataViewEditorAdapter', () => {
   });
 
   it('passes a saved view to Discover as created', () => {
-    const { editor, dataViewEditor, dataViews, inlineDataViews } = setup();
+    const { editor, dataViewEditor, inlineDataViews } = setup();
     const saved = createDataView({ id: 'saved', title: 'logs-*', version: '1' });
     const onSave = jest.fn();
     editor.openEditor({ onSave });
 
     dataViewEditor.openEditor.mock.calls[0][0].onSave(saved);
 
-    expect(inlineDataViews.finalize).not.toHaveBeenCalled();
+    expect(inlineDataViews.completeCreation).not.toHaveBeenCalled();
     expect(onSave).toHaveBeenCalledWith(saved);
-    expect(dataViews.clearInstanceCache).not.toHaveBeenCalled();
-  });
-
-  it('keeps a created view cached when its identity is already final', async () => {
-    const { editor, dataViewEditor, dataViews, inlineDataViews } = setup();
-    const created = createDataView({ id: 'derived-id', title: 'logs-*' });
-    inlineDataViews.finalize.mockResolvedValue(created);
-    const onSave = jest.fn();
-    editor.openEditor({ onSave });
-
-    await dataViewEditor.openEditor.mock.calls[0][0].onSave(created);
-
-    expect(onSave).toHaveBeenCalledWith(created);
-    expect(dataViews.clearInstanceCache).not.toHaveBeenCalled();
   });
 });

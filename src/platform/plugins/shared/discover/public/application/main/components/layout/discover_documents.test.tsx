@@ -165,7 +165,9 @@ describe('Discover documents layout', () => {
     const { toolkit } = await setup({ services });
     await mountComponent({ fetchStatus: FetchStatus.COMPLETE, hits: esHitsMock, toolkit });
 
-    discoverGridMock.mock.calls[0][0].onEditField?.('message');
+    const tableProps = discoverGridMock.mock.calls[0][0];
+    expect(tableProps.onFieldEdited).toBeUndefined();
+    tableProps.onEditField?.('message');
 
     await waitFor(() => expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalled());
     expect(beginEdit).toHaveBeenCalledWith(dataViewMock);

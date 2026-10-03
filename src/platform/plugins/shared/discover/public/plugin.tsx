@@ -447,7 +447,6 @@ export class DiscoverPlugin
     }));
     const dataViewEditor = (this.dataViewEditorAdapter ??= createDiscoverDataViewEditorAdapter({
       dataViewEditor: plugins.dataViewEditor,
-      dataViews: plugins.data.dataViews,
       inlineDataViews,
       onEditError: (error, phase) => {
         core.notifications.toasts.addError(error, { title: getDataViewEditorErrorTitle(phase) });

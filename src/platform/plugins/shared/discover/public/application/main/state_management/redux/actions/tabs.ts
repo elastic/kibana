@@ -49,9 +49,7 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { fetchData } from './tab_state';
-import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { normalizeInlineDataViewIds } from '../../utils/normalize_inline_data_view_ids';
 import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
 import { showSessionWarnings } from '../../../../../session';
 
@@ -444,52 +442,23 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
-    const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({
-          tab: byValueEmbeddableTab,
-          profileStateRegistry: services.profileStateRegistry,
-        })
-      : undefined;
-
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
     const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
-    const { preparation, ...initialTabsState } = tabsStorageManager.loadLocally({
+    const { inlineDataViewIds, ...initialTabsState } = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
       shouldClearAllTabs,
-      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Give each inline view the ID of its own spec before the document or local tabs are used.
-      prepareTabs: ({ session, openTabs, closedTabs, defaultTabState, openTabsFromSession }) => {
-        const normalized = normalizeInlineDataViewIds({
-          sessionTabs: session?.tabs ?? [],
-          openTabs,
-          closedTabs,
-          defaultTabState,
-          openTabsFromSession,
-          navigationDataViewSpec: initialTabState?.dataViewSpec,
-          savedDataViewIds,
-        });
-
-        return {
-          session:
-            session && normalized.sessionTabs !== session.tabs
-              ? { ...session, tabs: normalized.sessionTabs }
-              : session,
-          openTabs: normalized.openTabs,
-          closedTabs: normalized.closedTabs,
-          defaultTabState: normalized.defaultTabState,
-          inlineDataViewIds: normalized,
-        };
-      },
+      defaultTab: services.embeddableEditor.getByValueTab(),
+      navigationDataViewSpec: initialTabState?.dataViewSpec,
+      savedDataViewIds,
     });
     const selectedTab = initialTabsState.allTabs.find(
       ({ id }) => id === initialTabsState.selectedTabId
     );
     await dispatch(
       applyInlineDataViewLoadState({
-        normalized: preparation.inlineDataViewIds,
+        normalized: inlineDataViewIds,
         selectedTab,
         initialTabState,
       })

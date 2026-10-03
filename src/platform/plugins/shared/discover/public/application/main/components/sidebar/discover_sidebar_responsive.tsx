@@ -444,7 +444,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddBreakdownField={onAddBreakdownField}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onAddFilter={onAddFilter}
-            onFieldEdited={onFieldEdited}
             onEditField={fieldEditor.editField}
             onDeleteField={fieldEditor.deleteField}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}

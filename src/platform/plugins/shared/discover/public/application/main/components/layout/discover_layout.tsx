@@ -247,7 +247,9 @@ export function DiscoverLayout() {
       let dataViewId = editedDataView.id;
       if (!editedDataView.isPersisted()) {
         // An inline edit can change the view's identity, so reset the view the tab now uses.
-        const nextDataView = await dispatch(applyAdHocDataViewEdit({ editedDataView }));
+        const nextDataView = await dispatch(
+          applyAdHocDataViewEdit({ confirmedDataView: editedDataView })
+        );
         dataViewId = nextDataView?.id;
       }
 

@@ -45,7 +45,13 @@ const build = (getBooleanValue$: CoreStart['featureFlags']['getBooleanValue$']) 
     profilesManager: {} as never,
     profileStateRegistry: {} as never,
     ebtManager: {} as never,
-    inlineDataViews: { resolve: jest.fn(), finalize: jest.fn(), beginEdit: jest.fn() },
+    inlineDataViews: {
+      create: jest.fn(),
+      completeCreation: jest.fn(),
+      resolve: jest.fn(),
+      finalize: jest.fn(),
+      beginEdit: jest.fn(),
+    },
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
   });
 };

@@ -18,8 +18,17 @@ import {
   type InlineDataViewEditSession,
 } from './inline_data_view_edit_session';
 
+export interface InlineDataViewCreationOptions {
+  /** Selects this field when it is a date; otherwise keeps the spec's time field. */
+  preferredTimeField?: string;
+}
+
 /** Gives Discover inline views the ID derived from their final spec, reusing the Data View cache. */
 export interface InlineDataViewService {
+  /** Creates an isolated view, applies the requested defaults and returns its final identity. */
+  create: (spec: DataViewSpec, options?: InlineDataViewCreationOptions) => Promise<DataView>;
+  /** Finalizes a newly created view owned by the caller and releases it only if replaced. */
+  completeCreation: (createdDataView: DataView) => Promise<DataView>;
   /** Starts an isolated edit with explicit commit and disposal. */
   beginEdit: (source: DataView) => InlineDataViewEditSession;
   /**
@@ -41,7 +50,7 @@ export const createInlineDataViewService = ({
 }: {
   dataViews: Pick<DataViewsContract, 'create' | 'clearInstanceCache'>;
 }): InlineDataViewService => {
-  const finalize = async (dataView: DataView): Promise<DataView> => {
+  const finalize = async (dataView: DataView) => {
     if (!isInlineDataView(dataView)) {
       return dataView;
     }
@@ -54,7 +63,26 @@ export const createInlineDataViewService = ({
     return dataViews.create({ ...dataView.toSpec(), id }, true);
   };
 
+  const completeCreation = async (createdDataView: DataView) => {
+    const finalizedDataView = await finalize(createdDataView);
+    if (createdDataView.id && createdDataView.id !== finalizedDataView.id) {
+      dataViews.clearInstanceCache(createdDataView.id);
+    }
+
+    return finalizedDataView;
+  };
+
   return {
+    create: async (spec, { preferredTimeField } = {}) => {
+      // Defaults must be applied to an isolated instance before its identity is shared.
+      const draft = await dataViews.create({ ...spec, id: undefined });
+      if (preferredTimeField && draft.fields.getByName(preferredTimeField)?.type === 'date') {
+        draft.timeFieldName = preferredTimeField;
+      }
+
+      return completeCreation(draft);
+    },
+    completeCreation,
     beginEdit: (source) => createInlineDataViewEditSession({ source, dataViews, finalize }),
     finalize,
     resolve: (spec) => {

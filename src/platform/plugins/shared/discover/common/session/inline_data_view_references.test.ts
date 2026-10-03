@@ -9,9 +9,11 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { BooleanRelation, buildCombinedFilter, FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
+import { createDataViewDataSource, createEsqlDataSource } from '../data_sources';
 import { generateInlineDataViewId } from './inline_data_view';
 import {
   createFilter,
@@ -22,7 +24,9 @@ import {
 import {
   bindUnreferencedAppFilters,
   getInlineDataViewIdentity,
+  normalizeInlineAppState,
   normalizeInlineSearchSource,
+  remapDataViewReferences,
   remapFilterDataViewIds,
 } from './inline_data_view_references';
 
@@ -136,13 +140,92 @@ describe('bindUnreferencedAppFilters', () => {
   });
 });
 
+describe('remapDataViewReferences', () => {
+  const idMap = new Map([['legacy-id', inlineDataViewId]]);
+
+  it('translates the data source and filters without changing other app state', () => {
+    const appState = {
+      columns: ['message'],
+      dataSource: createDataViewDataSource({ dataViewId: 'legacy-id' }),
+      filters: [createFilter('legacy-id'), foreignFilter],
+    };
+
+    expect(remapDataViewReferences(appState, idMap)).toStrictEqual({
+      columns: ['message'],
+      dataSource: createDataViewDataSource({ dataViewId: inlineDataViewId }),
+      filters: [createFilter(inlineDataViewId), foreignFilter],
+    });
+  });
+
+  it('returns the same app state when nothing refers to a translated ID', () => {
+    const appState = {
+      dataSource: createDataViewDataSource({ dataViewId: 'saved-data-view' }),
+      filters: [foreignFilter],
+    };
+
+    expect(remapDataViewReferences(appState, idMap)).toBe(appState);
+  });
+});
+
+describe('normalizeInlineAppState', () => {
+  const documentSearchSource = { index: { title: 'original-*' } };
+  const searchSource = { index: { ...inlineDataView, id: 'local-id' } };
+
+  it('inherits the document convention while keeping the local view and pinned filters', () => {
+    const appState = {
+      dataSource: createDataViewDataSource({ dataViewId: 'local-id' }),
+      filters: [unreferencedFilter, pinnedFilter, foreignFilter],
+    };
+
+    expect(
+      normalizeInlineAppState(appState, {
+        searchSource,
+        documentSearchSource,
+        sharedIdMap: new Map(),
+      })
+    ).toStrictEqual({
+      dataSource: createDataViewDataSource({ dataViewId: inlineDataViewId }),
+      filters: [
+        createFilterWithIndex(unreferencedFilter, inlineDataViewId),
+        pinnedFilter,
+        foreignFilter,
+      ],
+    });
+  });
+
+  it.each([createDataViewDataSource({ dataViewId: 'another-view' }), createEsqlDataSource()])(
+    'does not bind filters belonging to another data source: %j',
+    (dataSource) => {
+      const appState = { dataSource, filters: [unreferencedFilter] };
+
+      expect(
+        normalizeInlineAppState(appState, {
+          searchSource,
+          documentSearchSource,
+          sharedIdMap: new Map(),
+        })
+      ).toBe(appState);
+    }
+  );
+
+  it('uses an ID-less local view when the document does not supply the API convention', () => {
+    const appState = { filters: [unreferencedFilter] };
+
+    expect(
+      normalizeInlineAppState(appState, {
+        searchSource: { index: inlineDataView },
+        documentSearchSource: { index: { ...documentSearchSource.index, id: 'saved-id' } },
+        sharedIdMap: new Map(),
+      })
+    ).toStrictEqual({ filters: [createFilterWithIndex(unreferencedFilter, inlineDataViewId)] });
+  });
+});
+
 describe('normalizeInlineSearchSource', () => {
   const searchSource = {
     index: { ...inlineDataView, id: 'legacy-id' },
     filter: [createFilter('legacy-id'), unreferencedFilter],
   };
-  const identity = getInlineDataViewIdentity(searchSource);
-  const ownDataViewIdMap = new Map([['legacy-id', inlineDataViewId]]);
 
   it('normalizes an API group like the same group with explicit legacy references', () => {
     const filters: Parameters<typeof toStoredFilters>[0] = [
@@ -163,56 +246,39 @@ describe('normalizeInlineSearchSource', () => {
       filter: toStoredFilters(filters.map((filter) => ({ ...filter, data_view_id: 'legacy-id' }))),
     };
 
-    expect(
-      normalizeInlineSearchSource({
-        searchSource: apiSource,
-        identity: getInlineDataViewIdentity(apiSource),
-        ownDataViewIdMap: new Map(),
-        dataViewIdMap: new Map(),
-        bindUnreferencedFilters: true,
-      })
-    ).toEqual(
-      normalizeInlineSearchSource({
-        searchSource: legacySource,
-        identity: getInlineDataViewIdentity(legacySource),
-        ownDataViewIdMap,
-        dataViewIdMap: new Map(),
-        bindUnreferencedFilters: false,
-      })
+    expect(normalizeInlineSearchSource(apiSource, { sharedIdMap: new Map() })).toStrictEqual(
+      normalizeInlineSearchSource(legacySource, { sharedIdMap: new Map() })
     );
   });
 
-  it('assigns the derived ID and translates its own references', () => {
+  it('derives the identity and remaps own references without binding unreferenced CM filters', () => {
     const input = cloneDeep(searchSource);
 
-    const normalized = normalizeInlineSearchSource({
-      searchSource: input,
-      identity,
-      ownDataViewIdMap,
-      dataViewIdMap: new Map(),
-      bindUnreferencedFilters: false,
-    });
+    const normalized = normalizeInlineSearchSource(input, { sharedIdMap: new Map() });
 
-    expect(normalized).toEqual({
+    expect(normalized).toStrictEqual({
       index: { ...inlineDataView, id: inlineDataViewId },
       filter: [createFilter(inlineDataViewId), unreferencedFilter],
     });
-    expect(input).toEqual(searchSource);
+    expect(input).toStrictEqual(searchSource);
   });
 
-  it('binds unreferenced app filters only when requested', () => {
-    const normalized = normalizeInlineSearchSource({
-      searchSource,
-      identity,
-      ownDataViewIdMap,
-      dataViewIdMap: new Map(),
-      bindUnreferencedFilters: true,
-    });
+  it('binds unreferenced app filters of an ID-less spec without binding pinned filters', () => {
+    const input = {
+      index: inlineDataView,
+      filter: [unreferencedFilter, pinnedFilter, foreignFilter],
+    };
+    const normalized = normalizeInlineSearchSource(input, { sharedIdMap: new Map() });
 
-    expect(normalized.filter).toEqual([
-      createFilter(inlineDataViewId),
-      createFilterWithIndex(unreferencedFilter, inlineDataViewId),
-    ]);
+    expect(normalized).toStrictEqual({
+      index: { ...inlineDataView, id: inlineDataViewId },
+      filter: [
+        createFilterWithIndex(unreferencedFilter, inlineDataViewId),
+        pinnedFilter,
+        foreignFilter,
+      ],
+    });
+    expect(normalizeInlineSearchSource(normalized, { sharedIdMap: new Map() })).toBe(normalized);
   });
 
   it('uses the supplied shared map for pinned references', () => {
@@ -221,23 +287,51 @@ describe('normalizeInlineSearchSource', () => {
       $state: { store: FilterStateStore.GLOBAL_STATE },
     };
     const input = { ...searchSource, filter: [createFilter('legacy-id'), pinnedLegacyFilter] };
-    const normalize = (dataViewIdMap: Map<string, string>) =>
-      normalizeInlineSearchSource({
-        searchSource: input,
-        identity,
-        ownDataViewIdMap,
-        dataViewIdMap,
-        bindUnreferencedFilters: false,
-      });
 
-    expect(normalize(new Map()).filter).toEqual([
+    expect(normalizeInlineSearchSource(input, { sharedIdMap: new Map() }).filter).toStrictEqual([
       createFilter(inlineDataViewId),
       pinnedLegacyFilter,
     ]);
-    expect(normalize(new Map([['legacy-id', inlineDataViewId]])).filter).toEqual([
+    expect(
+      normalizeInlineSearchSource(input, {
+        sharedIdMap: new Map([['legacy-id', inlineDataViewId]]),
+      }).filter
+    ).toStrictEqual([
       createFilter(inlineDataViewId),
       createFilterWithIndex(pinnedLegacyFilter, inlineDataViewId),
     ]);
+  });
+
+  it('normalizes a restored copy completely using its associated ID-less document', () => {
+    const input = { ...searchSource, filter: [unreferencedFilter, pinnedFilter] };
+
+    expect(
+      normalizeInlineSearchSource(input, {
+        sharedIdMap: new Map(),
+        documentSearchSource: { index: { title: 'original-*' } },
+      })
+    ).toStrictEqual({
+      index: { ...inlineDataView, id: inlineDataViewId },
+      filter: [createFilterWithIndex(unreferencedFilter, inlineDataViewId), pinnedFilter],
+    });
+  });
+
+  it.each<[string, SerializedSearchSourceFields]>([
+    ['persisted', { index: 'saved-view-id' }],
+    ['managed', { index: { ...inlineDataView, managed: true } }],
+    ['ES|QL', { index: inlineDataView, query: { esql: 'FROM logs-*' } }],
+  ])('keeps the %s source while remapping references to other inline views', (_, source) => {
+    const input = { ...source, filter: [createFilter('legacy-id'), unreferencedFilter] };
+
+    expect(
+      normalizeInlineSearchSource(input, {
+        sharedIdMap: new Map([['legacy-id', inlineDataViewId]]),
+      })
+    ).toStrictEqual({
+      ...source,
+      filter: [createFilter(inlineDataViewId), unreferencedFilter],
+    });
+    expect(normalizeInlineSearchSource(input, { sharedIdMap: new Map() })).toBe(input);
   });
 
   it('returns the same search source when it is already normalized', () => {
@@ -245,16 +339,9 @@ describe('normalizeInlineSearchSource', () => {
       index: { ...inlineDataView, id: inlineDataViewId },
       filter: [createFilter(inlineDataViewId)],
     };
-    const normalizedIdentity = getInlineDataViewIdentity(normalizedSearchSource);
 
-    expect(
-      normalizeInlineSearchSource({
-        searchSource: normalizedSearchSource,
-        identity: normalizedIdentity,
-        ownDataViewIdMap: new Map(),
-        dataViewIdMap: new Map(),
-        bindUnreferencedFilters: true,
-      })
-    ).toBe(normalizedSearchSource);
+    expect(normalizeInlineSearchSource(normalizedSearchSource, { sharedIdMap: new Map() })).toBe(
+      normalizedSearchSource
+    );
   });
 });

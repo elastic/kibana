@@ -231,7 +231,7 @@ export const onDataViewEdited: InternalStateThunkActionCreator<
       const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
       dispatch(assignNextDataView({ tabId, dataView: newDataView }));
     } else {
-      await dispatch(applyAdHocDataViewEdit({ tabId, editedDataView }));
+      await dispatch(applyAdHocDataViewEdit({ tabId, confirmedDataView: editedDataView }));
     }
     void dispatch(internalStateActions.loadDataViewList());
     addLog('onDataViewEdited triggers data fetching');
@@ -242,11 +242,11 @@ export const onDataViewEdited: InternalStateThunkActionCreator<
 export const applyAdHocDataViewEdit: InternalStateThunkActionCreator<
   [
     TabActionPayload<{
-      editedDataView: DataView;
+      confirmedDataView: DataView;
     }>
   ],
   Promise<DataView | undefined>
-> = ({ tabId, editedDataView }) =>
+> = ({ tabId, confirmedDataView }) =>
   async function applyAdHocDataViewEditThunkFn(
     dispatch,
     getState,
@@ -261,24 +261,22 @@ export const applyAdHocDataViewEdit: InternalStateThunkActionCreator<
       prevDataView.id!
     );
 
-    const isInlineEdit = isInlineDataView(editedDataView);
-    let nextDataView = editedDataView;
+    let nextDataView = confirmedDataView;
 
-    if (!isInlineEdit) {
+    // Only excluded views retain UUID replacement and eviction of an unshared previous instance.
+    if (!isInlineDataView(confirmedDataView)) {
       nextDataView = await services.dataViews.create({
-        ...editedDataView.toSpec(),
+        ...confirmedDataView.toSpec(),
         id: uuidv4(),
       });
+
+      if (!isUsedInMultipleTabs) {
+        services.dataViews.clearInstanceCache(prevDataView.id);
+      }
     }
 
     if (nextDataView.id === prevDataView.id) {
       return nextDataView;
-    }
-
-    // A deterministic instance still represents the old definition for other copies and links.
-    const keepsPreviousInstance = isInlineEdit || isUsedInMultipleTabs;
-    if (!keepsPreviousInstance) {
-      services.dataViews.clearInstanceCache(prevDataView.id);
     }
 
     await updateFiltersReferences({
@@ -316,23 +314,15 @@ export const applyAdHocDataViewEdit: InternalStateThunkActionCreator<
     return nextDataView;
   };
 
-/** Creates an isolated Explore draft, infers its time field, and selects the finalized inline view. */
+/** Creates and selects an Explore view, preferring a date field named @timestamp. */
 export const createAndAppendAdHocDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewSpec: DataViewSpec }>],
   Promise<DataView>
 > = ({ tabId, dataViewSpec }) =>
   async function createAndAppendAdHocDataViewThunkFn(dispatch, _, { services }) {
-    const { dataViews, inlineDataViews } = services;
-    // A fresh ID prevents inferred defaults from mutating an existing cached view.
-    const draft = await dataViews.create({ ...dataViewSpec, id: undefined });
-    if (draft.fields.getByName('@timestamp')?.type === 'date') {
-      draft.timeFieldName = '@timestamp';
-    }
-
-    const newDataView = await inlineDataViews.finalize(draft);
-    if (draft.id && draft.id !== newDataView.id) {
-      dataViews.clearInstanceCache(draft.id);
-    }
+    const newDataView = await services.inlineDataViews.create(dataViewSpec, {
+      preferredTimeField: '@timestamp',
+    });
 
     dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await dispatch(

@@ -8,7 +8,7 @@
  */
 
 import type { DataViewEditorProps, DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isInlineDataView } from '../../common/session/inline_data_view';
 import {
   createInlineDataViewEditorController,
@@ -19,12 +19,10 @@ import type { InlineDataViewService } from './inline_data_view_service';
 /** Isolates inline edits and finalizes views before handing them back to Discover. */
 export const createDiscoverDataViewEditorAdapter = ({
   dataViewEditor,
-  dataViews,
   inlineDataViews,
   onEditError,
 }: {
   dataViewEditor: DataViewEditorStart;
-  dataViews: DataViewsContract;
   inlineDataViews: InlineDataViewService;
   onEditError: (error: Error, phase: InlineDataViewEditPhase) => void;
 }): DataViewEditorStart => {
@@ -54,14 +52,8 @@ export const createDiscoverDataViewEditorAdapter = ({
   // Created and copied views get the identity of their final spec.
   const openCreation = (options: DataViewEditorProps) => {
     const onSaveInlineDataView = async (createdDataView: DataView) => {
-      const finalizedDataView = await inlineDataViews.finalize(createdDataView);
-
-      // Requires the editor to reject custom IDs when a view is used without saving, including
-      // Duplicate; otherwise a cached view could be returned here and evicted.
-      if (createdDataView.id && createdDataView.id !== finalizedDataView.id) {
-        dataViews.clearInstanceCache(createdDataView.id);
-      }
-
+      // The editor rejects custom IDs for inline creation, so this instance is owned here.
+      const finalizedDataView = await inlineDataViews.completeCreation(createdDataView);
       return options.onSave(finalizedDataView);
     };
 

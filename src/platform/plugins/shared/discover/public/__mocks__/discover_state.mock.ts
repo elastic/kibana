@@ -23,7 +23,6 @@ import type {
   TabState,
 } from '../application/main/state_management/redux';
 import {
-  DEFAULT_TAB_STATE,
   internalStateActions,
   createInternalStateStore,
   createRuntimeStateManager,
@@ -47,7 +46,7 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { isObject, omit } from 'lodash';
+import { cloneDeep, isObject, omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -491,12 +490,15 @@ export function getDiscoverStateMock({
     : undefined;
   const mockUserId = 'mockUserId';
   const mockSpaceId = 'mockSpaceId';
-  const initialTabsState = tabsStorageManager.loadLocally({
-    userId: mockUserId,
-    spaceId: mockSpaceId,
-    persistedDiscoverSession,
-    defaultTabState: DEFAULT_TAB_STATE,
-  });
+  const initialTabsState = omit(
+    tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      savedDataViewIds: [],
+    }),
+    'inlineDataViewIds'
+  );
 
   if (!persistedDiscoverSession) {
     const stableTabId = 'stable-test-initial-tab-id';
@@ -518,7 +520,7 @@ export function getDiscoverStateMock({
       {
         userId: mockUserId,
         spaceId: mockSpaceId,
-        persistedDiscoverSession,
+        persistedDiscoverSession: initialTabsState.updatedDiscoverSession,
       },
       'requestId',
       { discoverSessionId: finalSavedSearch?.id }
@@ -527,14 +529,24 @@ export function getDiscoverStateMock({
 
   const currentTabId = internalState.getState().tabs.unsafeCurrentId;
   const currentTab = selectTab(internalState.getState(), currentTabId);
+  let dataView = finalSavedSearch?.searchSource.getField('index');
+  const normalizedSpec = currentTab.initialInternalState?.serializedSearchSource?.index;
+  if (dataView && isObject(normalizedSpec) && normalizedSpec.id !== dataView.id) {
+    // This synchronous mock skips runtime loading; keep its view aligned with the loaded document.
+    const source: DataView = dataView;
+    dataView = cloneDeep(source);
+    dataView.id = normalizedSpec.id;
+    dataView.toSpec = () => ({ ...source.toSpec(), id: normalizedSpec.id });
+    dataView.toMinimalSpec = () => ({ ...source.toMinimalSpec(), id: normalizedSpec.id });
+  }
 
   internalState.dispatch(
     internalStateActions.initializeTabState({
       tabId: currentTabId,
       initialAppState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
-        persistedTab: persistedDiscoverSession?.tabs[0],
-        dataView: finalSavedSearch?.searchSource.getField('index'),
+        persistedTab: initialTabsState.updatedDiscoverSession?.tabs[0],
+        dataView,
         services,
       }),
       initialProfileState: currentTab.profileState,
@@ -573,8 +585,6 @@ export function getDiscoverStateMock({
   });
 
   if (finalSavedSearch) {
-    const dataView = finalSavedSearch.searchSource.getField('index');
-
     tabRuntimeState.currentDataView$.next(dataView);
 
     if (dataView) {

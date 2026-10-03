@@ -17,6 +17,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { stableStringify } from '@kbn/std';
 import { every, isEmpty, isUndefined, omitBy, pick } from 'lodash';
 
+export interface InlineDataViewIdentity {
+  dataView: DataViewSpec;
+  id: string;
+}
+
 /** Returns the classic inline spec identified by value; ES|QL and managed views keep their IDs. */
 export const getInlineDataView = (
   searchSource: SerializedSearchSourceFields | undefined

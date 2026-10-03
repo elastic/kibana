@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewIdMap, InlineDataViewIdentity } from './inline_data_view_references';
+import type { InlineDataViewIdentity } from './inline_data_view';
+
+export type DataViewIdMap = ReadonlyMap<string, string>;
 
 // Load-time compatibility for stored IDs, separate from deriving identity and binding API filters.
 // The caller supplies visible definitions; no aliases are retained beyond this load.

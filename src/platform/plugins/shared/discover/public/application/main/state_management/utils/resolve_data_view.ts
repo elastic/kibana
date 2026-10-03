@@ -13,6 +13,10 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from '../redux';
 import { isInlineDataViewSpec } from '../../../../../common/session/inline_data_view';
+import {
+  getNavigationDataView,
+  getRequestedDataView,
+} from '../../../../../common/session/initial_data_view';
 
 interface DataViewData {
   /**
@@ -46,41 +50,35 @@ export async function loadDataView({
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
 }): Promise<DataViewData> {
-  let fetchId: string | undefined = dataViewId;
+  const navigationDataView = getNavigationDataView(
+    locationDataViewSpec,
+    savedDataViews.map(({ id }) => id)
+  );
+  const requested = getRequestedDataView({
+    dataViewId,
+    navigationDataView,
+    restoredDataViewSpec: initialAdHocDataViewSpec,
+  });
 
-  // Handle redirect with data view spec provided via history location state
-  if (locationDataViewSpec) {
-    const isPersisted = savedDataViews.find(
-      ({ id: currentId }) => currentId === locationDataViewSpec.id
-    );
-    if (isPersisted) {
-      // If passed a spec for a persisted data view, reassign the fetchId
-      fetchId = locationDataViewSpec.id!;
-    } else {
-      // Excluded views retain their historical replacement behavior.
-      if (!isInlineDataViewSpec(locationDataViewSpec) && locationDataViewSpec.id) {
-        dataViews.clearInstanceCache(locationDataViewSpec.id);
-      }
+  if (typeof requested === 'object') {
+    const isExcludedNavigationView =
+      requested === navigationDataView && !isInlineDataViewSpec(requested);
 
-      const createdAdHocDataView = await inlineDataViews.resolve(locationDataViewSpec);
-
-      return {
-        loadedDataView: createdAdHocDataView,
-        requestedDataViewId: createdAdHocDataView.id,
-        requestedDataViewFound: true,
-      };
+    // Only excluded navigation views retain their historical replacement behavior.
+    if (isExcludedNavigationView && requested.id) {
+      dataViews.clearInstanceCache(requested.id);
     }
-  }
 
-  // If the initial ad hoc data view spec matches the data view id, create and return it
-  if (dataViewId && initialAdHocDataViewSpec?.id === dataViewId) {
-    const createdAdHocDataView = await inlineDataViews.resolve(initialAdHocDataViewSpec);
+    const createdAdHocDataView = await inlineDataViews.resolve(requested);
+
     return {
       loadedDataView: createdAdHocDataView,
       requestedDataViewId: createdAdHocDataView.id,
       requestedDataViewFound: true,
     };
   }
+
+  const fetchId = requested;
 
   // First try to fetch the data view by ID
   let fetchedDataView: DataView | null = null;
