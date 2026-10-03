@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276968
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-08
+areas:
+- Search and data
+title: Register Tencent Cloud as an inference provider
+description: Adds Tencent Cloud to the inference provider registry so it appears in the AI Connector configuration form and the External Inference Endpoints page with a dedicated icon, display name, and usage telemetry counter.
