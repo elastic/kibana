@@ -324,6 +324,27 @@ describe('FlyoutTemplate body accordions', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Extra action' }));
     expect(onClick).toHaveBeenCalled();
   });
+
+  it('replaces the accordion action and content with a loading state', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Accordion
+            title="Errors"
+            action={{ label: 'Extra action', onClick: noop }}
+            isLoading
+            isLoadingMessage="Loading errors"
+          >
+            error list
+          </FlyoutTemplate.Body.Accordion>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.queryByRole('button', { name: 'Extra action' })).not.toBeInTheDocument();
+    expect(screen.getByText('Loading errors')).toBeInTheDocument();
+    expect(screen.queryByText('error list')).not.toBeInTheDocument();
+  });
 });
 
 describe('FlyoutTemplate body subsections', () => {
@@ -513,5 +534,60 @@ describe('FlyoutTemplate body subsections', () => {
     expect(bodyChildParses).toHaveLength(1);
 
     parseChildren.mockRestore();
+  });
+});
+
+describe('FlyoutTemplate body data attributes', () => {
+  it('forwards data attributes from sections, accordions, and subsections', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Section title="Overview" data-test-subj="section" data-kind="a">
+            <FlyoutTemplate.Body.Section.Subsection
+              title="Host"
+              data-test-subj="subsection"
+              data-kind="b"
+            >
+              host content
+            </FlyoutTemplate.Body.Section.Subsection>
+          </FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.Accordion title="Errors" data-test-subj="accordion" data-kind="c">
+            error list
+          </FlyoutTemplate.Body.Accordion>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('section')).toHaveAttribute('data-kind', 'a');
+    expect(screen.getByTestId('subsection')).toHaveAttribute('data-kind', 'b');
+    expect(screen.getByTestId('accordion')).toHaveAttribute('data-kind', 'c');
+  });
+
+  it('keeps the attributes the section styles depend on', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Section
+            title="Overview"
+            data-test-subj="section"
+            data-flyout-section="other"
+            data-open="true"
+          >
+            <FlyoutTemplate.Body.Section.Subsection
+              title="Host"
+              data-test-subj="subsection"
+              data-bordered="true"
+            >
+              host content
+            </FlyoutTemplate.Body.Section.Subsection>
+          </FlyoutTemplate.Body.Section>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const section = screen.getByTestId('section');
+    expect(section).toHaveAttribute('data-flyout-section', 'section');
+    expect(section).not.toHaveAttribute('data-open');
+    expect(screen.getByTestId('subsection')).not.toHaveAttribute('data-bordered');
   });
 });
