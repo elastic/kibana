@@ -393,29 +393,32 @@ export const createMemoryPageStore = ({
     return mapWrittenPage(id, document);
   };
 
+  /**
+   * The write-side projection of a page. Both writes that carry a read page
+   * forward — archive and restore — go through this, so a provenance field added to
+   * one cannot be left off the other.
+   */
+  const toWrite = (page: MemoryPage): MemoryPageWrite => ({
+    slug: page.slug,
+    title: page.title,
+    description: page.description,
+    content: page.content,
+    context: page.context,
+    tags: page.tags,
+    categories: page.categories,
+    references: page.references,
+    agent_id: page.agent_id,
+    conversation_id: page.conversation_id,
+    source: page.source,
+    merged_from: page.merged_from,
+    telemetry: page.telemetry,
+    user: page.updated_by,
+  });
+
   const toArchiveWrite = (
     version: VersionedMemoryPage,
     reason: MemoryArchiveReason
-  ): MemoryPageWrite => {
-    const latest = version.page;
-    return {
-      slug: latest.slug,
-      title: latest.title,
-      description: latest.description,
-      content: latest.content,
-      context: latest.context,
-      tags: latest.tags,
-      categories: latest.categories,
-      references: latest.references,
-      archive_reason: reason,
-      agent_id: latest.agent_id,
-      conversation_id: latest.conversation_id,
-      source: latest.source,
-      merged_from: latest.merged_from,
-      telemetry: latest.telemetry,
-      user: latest.updated_by,
-    };
-  };
+  ): MemoryPageWrite => ({ ...toWrite(version.page), archive_reason: reason });
 
   /**
    * `updated_at desc, slug asc` — a total order, so `search_after` can never skip
@@ -1067,19 +1070,7 @@ export const createMemoryPageStore = ({
         // The reason is the only archived marker, so dropping it is the whole
         // operation. Everything else is carried through unchanged.
         const restored: MemoryPageWrite = {
-          slug: versioned.page.slug,
-          title: versioned.page.title,
-          description: versioned.page.description,
-          content: versioned.page.content,
-          context: versioned.page.context,
-          tags: versioned.page.tags,
-          categories: versioned.page.categories,
-          references: versioned.page.references,
-          source: versioned.page.source,
-          merged_from: versioned.page.merged_from,
-          agent_id: versioned.page.agent_id,
-          conversation_id: versioned.page.conversation_id,
-          telemetry: versioned.page.telemetry,
+          ...toWrite(versioned.page),
           user: versioned.page.updated_by || 'nightshift',
         };
         try {
