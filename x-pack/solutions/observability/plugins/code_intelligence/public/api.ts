@@ -14,6 +14,7 @@ import type {
   CatalogSort,
 } from '../common/catalog_filters';
 import type { BatchRepositoryRequest, ExtractionBatchStatus } from '../common/extraction_batch';
+import type { FindingStatus } from '../common/finding_filters';
 import type { RepositorySettings, RepositorySettingsInput } from '../common/repository_settings';
 
 export type { ExtractionBatchStatus, RepositoryExtractionStatus } from '../common/extraction_batch';
@@ -44,6 +45,35 @@ export interface CatalogResponse {
   perPage: number;
   total: number;
   items: CatalogItem[];
+}
+
+/** A finding document from the findings index, with its `_id` as `id`. */
+export interface FindingItem {
+  id: string;
+  repository?: string;
+  revision?: string;
+  finding_type?: string;
+  signal_type?: string;
+  title?: string;
+  summary?: string;
+  evidence?: Array<{ path?: string; line?: number; excerpt?: string }>;
+  candidate_id?: string;
+  cataloged?: boolean;
+  catalog_document_ids?: string[];
+  log_level?: string;
+  status?: string;
+  review_note?: string | null;
+  reviewed_at?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: unknown;
+}
+
+export interface FindingsResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  items: FindingItem[];
 }
 
 const repositoryPath = (repository: string): string => {
@@ -115,3 +145,25 @@ export const getCatalogSummary = async (http: HttpSetup): Promise<CatalogReposit
   );
   return response.repositories ?? [];
 };
+
+/** An empty filter list matches every value; findings come newest first. */
+export const getFindings = (
+  http: HttpSetup,
+  query: {
+    repositories: readonly string[];
+    statuses: readonly FindingStatus[];
+    kinds: readonly CatalogSignalType[];
+    q?: string;
+    page: number;
+  }
+): Promise<FindingsResponse> =>
+  http.get('/internal/code_intelligence/findings', {
+    query: {
+      ...(query.repositories.length === 0 ? {} : { repository: [...query.repositories] }),
+      ...(query.statuses.length === 0 ? {} : { status: [...query.statuses] }),
+      ...(query.kinds.length === 0 ? {} : { kind: [...query.kinds] }),
+      ...(query.q === undefined ? {} : { q: query.q }),
+      page: query.page,
+      perPage: 25,
+    },
+  });

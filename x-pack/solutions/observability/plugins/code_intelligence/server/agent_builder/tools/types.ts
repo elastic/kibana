@@ -21,6 +21,9 @@ export const CODE_INTELLIGENCE_TOOL_IDS = {
   startExtraction: 'observability.code_intelligence.start_extraction',
   getExtractionStatus: 'observability.code_intelligence.get_extraction_status',
   searchCatalog: 'observability.code_intelligence.search_catalog',
+  getFinding: 'observability.code_intelligence.get_finding',
+  searchFindings: 'observability.code_intelligence.search_findings',
+  updateFindingStatus: 'observability.code_intelligence.update_finding_status',
 } as const;
 
 export const CODE_INTELLIGENCE_TOOL_TAGS = ['observability', 'code-intelligence'];

@@ -6,11 +6,14 @@
  */
 
 import { createGetExtractionStatusTool } from './get_extraction_status';
+import { createGetFindingTool } from './get_finding';
 import { createListRepositoriesTool } from './list_repositories';
 import { createSearchCatalogTool } from './search_catalog';
+import { createSearchFindingsTool } from './search_findings';
 import { createStartExtractionTool } from './start_extraction';
 import type { CodeIntelligenceToolDependencies } from './types';
 import { createUpsertRepositoryTool } from './upsert_repository';
+import { createUpdateFindingStatusTool } from './update_finding_status';
 
 export { CODE_INTELLIGENCE_TOOL_IDS, type CodeIntelligenceToolDependencies } from './types';
 
@@ -21,4 +24,7 @@ export const createCodeIntelligenceTools = (dependencies: CodeIntelligenceToolDe
     createStartExtractionTool(dependencies),
     createGetExtractionStatusTool(dependencies),
     createSearchCatalogTool(dependencies),
+    createGetFindingTool(dependencies),
+    createSearchFindingsTool(dependencies),
+    createUpdateFindingStatusTool(dependencies),
   ] as const;

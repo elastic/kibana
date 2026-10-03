@@ -12,6 +12,7 @@ import {
   buildPageContextAttachment,
   describePageContext,
   type CatalogPageContext,
+  type FindingsPageContext,
   type PageContext,
   type RepositoriesPageContext,
 } from './page_context';
@@ -28,6 +29,15 @@ const catalogContext: CatalogPageContext = {
 };
 
 const repositoriesContext: RepositoriesPageContext = { tab: 'repositories', total: 16 };
+
+const findingsContext: FindingsPageContext = {
+  tab: 'findings',
+  repositories: ['chatwoot/chatwoot'],
+  statuses: ['open'],
+  signalTypes: [],
+  search: '',
+  total: 82,
+};
 
 const contentOf = (context: PageContext) =>
   (
@@ -73,6 +83,27 @@ describe('describePageContext', () => {
     );
   });
 
+  it('describes the findings tab and the open finding', () => {
+    expect(describePageContext(findingsContext)).toBe(
+      'The user is viewing the Code Intelligence findings tab filtered to chatwoot/chatwoot, open status, 82 findings.'
+    );
+    expect(
+      describePageContext({
+        ...findingsContext,
+        selectedFinding: {
+          id: 'finding-1',
+          repository: 'chatwoot/chatwoot',
+          title: 'Phone number in health error log',
+          finding_type: 'sensitive-data',
+          status: 'open',
+          signal_type: 'log',
+        },
+      })
+    ).toMatch(
+      /^The user has the open sensitive-data finding "Phone number in health error log" \(chatwoot\/chatwoot, log, finding_id finding-1\) open on/
+    );
+  });
+
   it('describes the repositories tab and its open flyout', () => {
     expect(describePageContext({ ...repositoriesContext, editingRepository: 'grafana/loki' })).toBe(
       'The user is viewing the Code Intelligence repositories tab with 16 repositories. The settings flyout for grafana/loki is open.'
@@ -104,6 +135,30 @@ describe('buildPageContextAttachment', () => {
       'search: timeout',
       'sort: score',
       'total: 22',
+    ]);
+  });
+
+  it('has flat findings fields, including the open finding', () => {
+    expect(
+      contentOf({
+        ...findingsContext,
+        selectedFinding: { id: 'finding-1', title: 'T', status: 'verified' },
+      }).split('\n')
+    ).toEqual([
+      expect.stringContaining('verified'),
+      'url: http://localhost/app/codeIntelligence',
+      'tab: findings',
+      'repositories: ["chatwoot/chatwoot"]',
+      'statuses: ["open"]',
+      'signal_types: []',
+      'search: ',
+      'total: 82',
+      'selected_finding_id: finding-1',
+      'selected_finding_repository: ',
+      'selected_finding_title: T',
+      'selected_finding_type: ',
+      'selected_finding_status: verified',
+      'selected_finding_signal_type: ',
     ]);
   });
 });

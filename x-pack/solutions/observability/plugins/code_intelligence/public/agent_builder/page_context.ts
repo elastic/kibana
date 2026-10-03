@@ -7,7 +7,7 @@
 
 import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
-import type { CatalogItem } from '../api';
+import type { CatalogItem, FindingItem } from '../api';
 
 export const AGENT_BUILDER_SESSION_TAG = 'code_intelligence';
 export const PAGE_CONTEXT_ATTACHMENT_ID = 'code-intelligence-page-context';
@@ -35,7 +35,22 @@ export interface CatalogPageContext {
   >;
 }
 
-export type PageContext = RepositoriesPageContext | CatalogPageContext;
+export interface FindingsPageContext {
+  readonly tab: 'findings';
+  readonly repositories: readonly string[];
+  readonly statuses: readonly string[];
+  readonly signalTypes: readonly string[];
+  readonly search: string;
+  /** Absent until the first findings page loads. */
+  readonly total?: number;
+  /** The finding whose details flyout is open, if any. */
+  readonly selectedFinding?: Pick<
+    FindingItem,
+    'id' | 'repository' | 'title' | 'finding_type' | 'status' | 'signal_type'
+  >;
+}
+
+export type PageContext = RepositoriesPageContext | CatalogPageContext | FindingsPageContext;
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
@@ -56,6 +71,25 @@ const describeCatalog = (context: CatalogPageContext): string => {
   }, ${entry.signal_type ?? 'unknown signal type'}) open on ${view}.`;
 };
 
+const describeFindings = (context: FindingsPageContext): string => {
+  const filters = [
+    ...(context.repositories.length > 0 ? [context.repositories.join(' or ')] : []),
+    ...(context.statuses.length > 0 ? [`${context.statuses.join(' or ')} status`] : []),
+    ...(context.signalTypes.length > 0 ? [`${context.signalTypes.join(' or ')} signals`] : []),
+    ...(context.search === '' ? [] : [`search "${context.search}"`]),
+  ];
+  const view = `the Code Intelligence findings tab ${
+    filters.length === 0 ? 'with no filters' : `filtered to ${filters.join(', ')}`
+  }${context.total === undefined ? '' : `, ${plural(context.total, 'finding', 'findings')}`}`;
+  const finding = context.selectedFinding;
+  if (finding === undefined) return `The user is viewing ${view}.`;
+  return `The user has the ${finding.status ?? ''} ${finding.finding_type ?? ''} finding "${
+    finding.title ?? finding.id
+  }" (${finding.repository ?? 'unknown repository'}, ${
+    finding.signal_type ?? 'unknown signal type'
+  }, finding_id ${finding.id}) open on ${view}.`;
+};
+
 const describeRepositories = (context: RepositoriesPageContext): string =>
   `The user is viewing the Code Intelligence repositories tab with ${plural(
     context.total,
@@ -69,7 +103,11 @@ const describeRepositories = (context: RepositoriesPageContext): string =>
 
 /** 1 sentence for the agent that says what the user sees. */
 export const describePageContext = (context: PageContext): string =>
-  context.tab === 'catalog' ? describeCatalog(context) : describeRepositories(context);
+  context.tab === 'catalog'
+    ? describeCatalog(context)
+    : context.tab === 'findings'
+    ? describeFindings(context)
+    : describeRepositories(context);
 
 /** Flat string values, like the `additional_data` Discover sends; arrays are JSON strings. */
 export const pageContextData = (context: PageContext): Record<string, string> => {
@@ -80,6 +118,27 @@ export const pageContextData = (context: PageContext): Record<string, string> =>
       ...(context.editingRepository === undefined
         ? {}
         : { editing_repository: context.editingRepository }),
+    };
+  }
+  if (context.tab === 'findings') {
+    const finding = context.selectedFinding;
+    return {
+      tab: context.tab,
+      repositories: JSON.stringify(context.repositories),
+      statuses: JSON.stringify(context.statuses),
+      signal_types: JSON.stringify(context.signalTypes),
+      search: context.search,
+      ...(context.total === undefined ? {} : { total: String(context.total) }),
+      ...(finding === undefined
+        ? {}
+        : {
+            selected_finding_id: finding.id,
+            selected_finding_repository: finding.repository ?? '',
+            selected_finding_title: finding.title ?? '',
+            selected_finding_type: finding.finding_type ?? '',
+            selected_finding_status: finding.status ?? '',
+            selected_finding_signal_type: finding.signal_type ?? '',
+          }),
     };
   }
   const entry = context.selectedEntry;
@@ -114,7 +173,7 @@ export const buildPageContextAttachment = (context: PageContext, url: string): A
   type: AttachmentType.text,
   hidden: true,
   description:
-    'Code Intelligence page context: the tab, filters, totals, and open catalog entry or repository the user is viewing. Read it before answering questions about this page or what the user is looking at.',
+    'Code Intelligence page context: the tab, filters, totals, and open catalog entry, finding, or repository the user is viewing. Read it before answering questions about this page or what the user is looking at.',
   data: {
     content: [
       describePageContext(context),

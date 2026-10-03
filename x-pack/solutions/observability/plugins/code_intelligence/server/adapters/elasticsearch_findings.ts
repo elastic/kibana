@@ -40,12 +40,14 @@ const findingsMappings: estypes.MappingTypeMapping = {
     log_level: { type: 'keyword' },
     extractor_version: { type: 'keyword' },
     status: { type: 'keyword' },
+    review_note: { type: 'text' },
+    reviewed_at: { type: 'date' },
     created_at: { type: 'date' },
     updated_at: { type: 'date' },
   },
 };
 
-/** Fields rewritten on every extraction; `status` and `created_at` are deliberately absent. */
+/** Fields rewritten on every extraction; `status`, the review fields, and `created_at` are deliberately absent. */
 export const findingUpdateSource = (document: FindingDocument): Record<string, unknown> => ({
   repository: document.repository,
   revision: document.revision,

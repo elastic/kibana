@@ -25,7 +25,7 @@ describe('registerAgentBuilder', () => {
     expect(() => registerAgentBuilder({ ...dependencies, agentBuilder: undefined })).not.toThrow();
   });
 
-  it('registers the 5 catalog tools and the skill', () => {
+  it('registers the 8 code intelligence tools and the skill', () => {
     const agentBuilder = { tools: { register: jest.fn() }, skills: { register: jest.fn() } };
 
     registerAgentBuilder({ ...dependencies, agentBuilder });
@@ -36,6 +36,9 @@ describe('registerAgentBuilder', () => {
       'observability.code_intelligence.start_extraction',
       'observability.code_intelligence.get_extraction_status',
       'observability.code_intelligence.search_catalog',
+      'observability.code_intelligence.get_finding',
+      'observability.code_intelligence.search_findings',
+      'observability.code_intelligence.update_finding_status',
     ]);
     expect(agentBuilder.skills.register).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'observability.code-intelligence' })
@@ -66,6 +69,9 @@ describe('code intelligence skill', () => {
       'observability.code_intelligence.start_extraction',
       'observability.code_intelligence.get_extraction_status',
       'observability.code_intelligence.search_catalog',
+      'observability.code_intelligence.get_finding',
+      'observability.code_intelligence.search_findings',
+      'observability.code_intelligence.update_finding_status',
       'platform.core.execute_esql',
     ]);
   });

@@ -9,21 +9,19 @@ import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext } from 'react';
 
 import type { CatalogItem } from '../api';
 import { addQueryAttachment, hasQuery } from './add_query_attachment';
 import type { AgentBuilderStager } from './agent_builder_stager';
+import { useAgentBuilderAccess } from './use_agent_builder_access';
 
 export type AddQueryToAgent = (entry: CatalogItem) => void;
 
 /** Absent when Agent Builder is off or the user cannot chat. */
 export const AddQueryToAgentContext = createContext<AddQueryToAgent | undefined>(undefined);
 
-/**
- * Absent until Agent Builder reports the user can chat: the `agentBuilder.show` capability,
- * the license, and an LLM connector.
- */
+/** Absent until the user can chat with Agent Builder. */
 export const useAddQueryToAgent = ({
   agentBuilder,
   stager,
@@ -33,20 +31,7 @@ export const useAddQueryToAgent = ({
   stager: Pick<AgentBuilderStager, 'addQuery'> | undefined;
   toasts: Pick<ToastsStart, 'addSuccess'>;
 }): AddQueryToAgent | undefined => {
-  const [canChat, setCanChat] = useState(false);
-  useEffect(() => {
-    if (agentBuilder === undefined) return;
-    let active = true;
-    agentBuilder.getAgentBuilderAccess().then(
-      ({ hasRequiredLicense, hasLlmConnector }) => {
-        if (active) setCanChat(hasRequiredLicense && hasLlmConnector);
-      },
-      () => undefined
-    );
-    return () => {
-      active = false;
-    };
-  }, [agentBuilder]);
+  const canChat = useAgentBuilderAccess(agentBuilder);
 
   const addQuery = useCallback(
     (entry: CatalogItem) => {
