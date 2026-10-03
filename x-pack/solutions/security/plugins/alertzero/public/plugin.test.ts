@@ -73,7 +73,12 @@ describe('AlertZeroPublicPlugin app registration', () => {
     const coreStart = withSetting(coreMock.createStart(), setting$);
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}] as never);
 
-    plugin.setup(coreSetup as never, {} as never);
+    plugin.setup(
+      coreSetup as never,
+      {
+        workflowsExtensions: { registerStepDefinition: jest.fn() },
+      } as never
+    );
 
     return { coreSetup, plugin, coreStart };
   };
@@ -241,6 +246,29 @@ describe('AlertZeroPublicPlugin app registration', () => {
     subscription.unsubscribe();
 
     expect(statuses).toEqual([AppStatus.inaccessible, AppStatus.accessible]);
+  });
+});
+
+describe('AlertZeroPublicPlugin workflow step registration', () => {
+  const setupPlugin = (enabled: boolean) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const workflowsExtensions = { registerStepDefinition: jest.fn() };
+
+    plugin.setup(coreMock.createSetup() as never, { workflowsExtensions } as never);
+
+    return workflowsExtensions;
+  };
+
+  it('registers the reportWorkerOutcome step so the workflows editor knows it', () => {
+    const { registerStepDefinition } = setupPlugin(true);
+
+    expect(registerStepDefinition).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers no step when the deployment kill switch is off', () => {
+    const { registerStepDefinition } = setupPlugin(false);
+
+    expect(registerStepDefinition).not.toHaveBeenCalled();
   });
 });
 
