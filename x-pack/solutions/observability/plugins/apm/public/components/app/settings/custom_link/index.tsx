@@ -104,6 +104,14 @@ export function CustomLinkOverview() {
 
       <EuiSpacer size="m" />
 
+      {hasValidLicense ? 'hasValidLicense true' : 'hasValidLicense false'}
+      <br />
+      {showEmptyPrompt ? 'showEmptyPrompt true' : 'showEmptyPrompt false'}
+      <br />
+      {status}
+      <br />
+      {JSON.stringify(customLinks)}
+
       {hasValidLicense ? (
         showEmptyPrompt ? (
           <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
