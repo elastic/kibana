@@ -17,7 +17,11 @@ import { createBlankOpenApiDocument } from './bundler/merge_documents/create_bla
 import { writeDocuments } from './utils/write_documents';
 import type { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
-import { DEFAULT_BUNDLING_PROCESSORS, withIncludeLabelsProcessor } from './bundler/processor_sets';
+import {
+  DEFAULT_BUNDLING_PROCESSORS,
+  withIncludeLabelsProcessor,
+  withStripXStateVersionProcessor,
+} from './bundler/processor_sets';
 import type { PrototypeDocument } from './prototype_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
@@ -38,6 +42,13 @@ interface BundleOptions {
    */
   includeLabels?: string[];
 }
+
+/**
+ * The `x-labels` value marking an operation as available on Elastic Cloud Serverless.
+ * A serverless bundle has no stack version, so any "added in <version>" note in `x-state`
+ * is stripped from it (see `withStripXStateVersionProcessor`).
+ */
+const SERVERLESS_LABEL = 'serverless';
 
 export const bundle = async ({
   sourceGlob,
@@ -99,15 +110,20 @@ async function bundleDocuments(
   schemaFilePaths: string[],
   options?: BundleOptions
 ): Promise<ResolvedDocument[]> {
+  let processors = options?.includeLabels
+    ? withIncludeLabelsProcessor(DEFAULT_BUNDLING_PROCESSORS, options.includeLabels)
+    : DEFAULT_BUNDLING_PROCESSORS;
+
+  // Serverless has no stack version, so drop any "added in <version>" note from `x-state`,
+  // matching what `getXState` in `@kbn/router-to-openapispec` does for the programmatic route.
+  if (options?.includeLabels?.includes(SERVERLESS_LABEL)) {
+    processors = withStripXStateVersionProcessor(processors);
+  }
+
   const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
-        const resolvedDocument = await bundleDocument(
-          schemaFilePath,
-          options?.includeLabels
-            ? withIncludeLabelsProcessor(DEFAULT_BUNDLING_PROCESSORS, options.includeLabels)
-            : DEFAULT_BUNDLING_PROCESSORS
-        );
+        const resolvedDocument = await bundleDocument(schemaFilePath, processors);
 
         logger.debug(`Processed ${chalk.bold(basename(schemaFilePath))}`);
 
