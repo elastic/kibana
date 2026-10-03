@@ -59,7 +59,8 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
         // canonical key plus every original spelling it was seen spelled. The
         // terms are bounded by keywords × spellings rather than by keywords, since
         // a keyword's spellings travel as extra terms.
-        tags: z.preprocess((value) => (typeof value === 'string' ? [value] : value), tagTerms)
+        tags: z
+          .preprocess((value) => (typeof value === 'string' ? [value] : value), tagTerms)
           .optional(),
       })
       .optional()
