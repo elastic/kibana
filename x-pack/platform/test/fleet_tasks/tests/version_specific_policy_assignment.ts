@@ -30,12 +30,12 @@ export default function (providerContext: FtrProviderContextWithServices) {
     return res.body.item;
   }
 
-  async function getFleetPolicies(policyIdPrefix: string) {
+  async function getFleetPolicies(baseId: string) {
     const res = await es.search({
       index: '.fleet-policies',
       query: {
-        prefix: {
-          policy_id: policyIdPrefix,
+        term: {
+          policy_base_id: baseId,
         },
       },
       size: 100,
@@ -451,4 +451,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(variantDoc.revision_idx).to.be.greaterThan(0);
     });
   });
+
+  // Agents enrolled by a downlevel fleet-server after the last startup backfill have a versioned
+  // `policy_id` but no `policy_base_id`. The sweep must still reassign them when the parent no
+  // longer has version conditions, with `search.allow_expensive_queries` disabled.
 }
