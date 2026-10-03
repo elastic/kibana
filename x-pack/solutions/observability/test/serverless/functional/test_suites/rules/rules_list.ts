@@ -353,8 +353,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const resultToast = await toasts.getElementByIndex(1);
@@ -472,8 +476,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click(`checkboxSelectRow-${createdRule1.id}`);
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const resultToast = await toasts.getElementByIndex(1);
