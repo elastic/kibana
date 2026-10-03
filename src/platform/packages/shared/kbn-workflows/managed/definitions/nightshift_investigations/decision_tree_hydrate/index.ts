@@ -23,11 +23,15 @@ export const NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID =
  *
  * `enablement: 'enforced'` — a disabled workflow makes the beforeAgent hook
  * throw, which aborts the reinforcement round.
+ *
+ * The workflow ends with `nightshift.composeHydrateNotifications`: the writer catches its own
+ * failures into `notification`, and the agent hook reads only `model_context`, so composing here
+ * is what makes the degraded notice reach the reinforcement agent.
  */
 export const NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW = {
   id: NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 3,
+  version: 4,
   billable: false,
   yaml: DECISION_TREE_HYDRATE_WORKFLOW_YAML,
   management: {

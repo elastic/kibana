@@ -51,3 +51,20 @@ steps:
       prompt: '{{ inputs.prompt }}'
     on-failure:
       continue: true
+  # The writer catches its own failures and reports them in `notification`, but this workflow's
+  # output is the agent hook result, and `run_before_agent_workflows.ts` reads only
+  # `model_context` from it. Compose here so the reinforcement agent actually sees the notice
+  # that its tree workspace may be incomplete.
+  - name: compose_notifications
+    type: nightshift.composeHydrateNotifications
+    if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
+    with:
+      writers:
+        - directory: /workspace/decision-trees
+          notification: '{{ steps.hydrate_decision_trees.output.notification }}'
+          # False in exactly the case the writer produced no output at all (its `on-failure`
+          # continuation), where compose has to synthesize the notice itself.
+          completed: '${{ steps.hydrate_decision_trees.output != null }}'
+      # This workflow runs no Semantic Memory writer, and the reinforcement agent has no
+      # after-execution workflow to read a recall list, so there is nothing to recall.
+      recalled_ids: []

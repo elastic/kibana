@@ -24,7 +24,7 @@ const workflow = parse(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW.yaml) as {
     type?: string;
     if?: string;
     'on-failure'?: unknown;
-    with?: Record<string, string>;
+    with?: Record<string, unknown>;
   }>;
 };
 
@@ -50,6 +50,21 @@ describe('decision tree hydrate workflow', () => {
           prompt: '{{ inputs.prompt }}',
         },
       }),
+      expect.objectContaining({
+        name: 'compose_notifications',
+        type: 'nightshift.composeHydrateNotifications',
+        if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}',
+        with: {
+          writers: [
+            {
+              directory: '/workspace/decision-trees',
+              notification: '{{ steps.hydrate_decision_trees.output.notification }}',
+              completed: '${{ steps.hydrate_decision_trees.output != null }}',
+            },
+          ],
+          recalled_ids: [],
+        },
+      }),
     ]);
   });
 
@@ -71,7 +86,7 @@ describe('decision tree hydrate workflow', () => {
   });
 
   it('hydrates only on the first execution of a conversation round', () => {
-    expect(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW.version).toBe(3);
+    expect(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW.version).toBe(4);
     expect(workflow.triggers[0].inputs.properties.round_execution_index).toMatchObject({
       type: 'integer',
       default: 0,
@@ -85,5 +100,20 @@ describe('decision tree hydrate workflow', () => {
   // written; a swallowed failure here reports a green round that reinforced nothing.
   it('still swallows a failed write', () => {
     expect(workflow.steps[1]['on-failure']).toEqual({ continue: true });
+  });
+
+  // The beforeAgent hook reads only `model_context` from this workflow's output, so a writer
+  // that degrades to a `notification` is invisible to the agent unless compose runs here too.
+  it('composes the writer notification into the model context the agent reads', () => {
+    expect(workflow.steps[2].type).toBe('nightshift.composeHydrateNotifications');
+    const writers = (workflow.steps[2].with as { writers: Array<Record<string, unknown>> }).writers;
+    expect(writers).toEqual([
+      {
+        directory: '/workspace/decision-trees',
+        notification: '{{ steps.hydrate_decision_trees.output.notification }}',
+        completed: '${{ steps.hydrate_decision_trees.output != null }}',
+      },
+    ]);
+    expect(workflow.steps[2].if).toBe('${{ steps.obtain_sandbox.output.sandbox_id != null }}');
   });
 });

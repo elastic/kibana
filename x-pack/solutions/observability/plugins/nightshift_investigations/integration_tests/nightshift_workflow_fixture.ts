@@ -6,7 +6,7 @@
  */
 
 /**
- * Harness that runs the two managed Nightshift workflows through the REAL execution engine.
+ * Harness that runs the managed Nightshift workflows through the REAL execution engine.
  *
  * Three layers are real, which is the point: the managed YAML as shipped (read from
  * `@kbn/workflows/managed`, not a hand-written copy), the engine that compiles and drives
@@ -31,6 +31,7 @@ import { ExecutionStatus, StepCategory } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
@@ -148,6 +149,7 @@ export interface NightshiftWorkflowFixture {
   stubNeverEndingWriter: (stepType: string) => void;
   runMaterialize: (inputs?: Record<string, unknown>) => Promise<void>;
   runOptimize: (inputs?: Record<string, unknown>) => Promise<void>;
+  runDecisionTreeHydrate: (inputs?: Record<string, unknown>) => Promise<void>;
   executionStatus: () => ExecutionStatus | undefined;
   stepExecutions: (stepId: string) => Array<Record<string, unknown>>;
   /** The timeout the engine froze on a step's timeout zone, e.g. `'900s'` for the agent. */
@@ -418,6 +420,12 @@ export const createNightshiftWorkflowFixture = ({
     runOptimize: async (inputs = {}) => {
       await engine.runWorkflow({
         workflowYaml: managedYaml(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID),
+        inputs,
+      });
+    },
+    runDecisionTreeHydrate: async (inputs = {}) => {
+      await engine.runWorkflow({
+        workflowYaml: managedYaml(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID),
         inputs,
       });
     },
