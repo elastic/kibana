@@ -9,7 +9,10 @@
 import { schema } from '@kbn/config-schema';
 import type {
   ElasticsearchClient,
+  IKibanaResponse,
   IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
   PluginInitializerContext,
   RequestHandlerContext,
 } from '@kbn/core/server';
@@ -228,44 +231,69 @@ const resolveTimeField = async (
   }
 };
 
-const nestingDepthExceededMessage = 'Query nesting depth exceeds the maximum allowed limit';
+const security = {
+  authz: {
+    enabled: false,
+    reason: 'This route delegates authorization to the scoped ES client',
+  },
+} as const;
 
-type TimefieldOutcome =
-  | { outcome: 'badRequest' }
-  | { outcome: 'success'; body: { timeField: string | undefined } }
-  | { outcome: 'failure'; error: unknown };
-
-// Shared by both the GET and POST handlers below - resolution and the
-// success/failure metrics counter don't depend on how the request arrived.
-const resolveTimefieldForRequest = async (
-  requestHandlerContext: RequestHandlerContext,
-  logger: LoggerFactory,
-  query: string,
-  projectRouting: string | undefined
-): Promise<TimefieldOutcome> => {
+// Shared by the POST and GET routes, which differ only in where the params come from and
+// whether the response is HTTP-cacheable.
+const handleTimeFieldRequest = async ({
+  context,
+  request,
+  response,
+  logger,
+  query,
+  projectRouting,
+  cacheable,
+}: {
+  context: RequestHandlerContext;
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+  logger: LoggerFactory;
+  query: string;
+  projectRouting?: string;
+  cacheable: boolean;
+}): Promise<IKibanaResponse> => {
   if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
-    return { outcome: 'badRequest' };
+    return response.badRequest({
+      body: 'Query nesting depth exceeds the maximum allowed limit',
+    });
   }
 
-  const core = await requestHandlerContext.core;
+  const core = await context.core;
   const client = core.elasticsearch.client.asCurrentUser;
 
+  let body: { timeField: string | undefined };
   try {
-    const body = await resolveTimeField(client, query, logger.get(), projectRouting);
+    body = await resolveTimeField(client, query, logger.get(), projectRouting);
     esqlRouteRequestCounter.add(1, {
       route: 'timefield',
       outcome: 'success',
       'http.response.status_code': 200,
     });
-    return { outcome: 'success', body };
   } catch (error) {
     esqlRouteRequestCounter.add(1, {
       route: 'timefield',
       outcome: 'failure',
       'http.response.status_code': getErrorStatusCode(error),
     });
-    return { outcome: 'failure', error };
+    throw error;
   }
+
+  if (!cacheable) {
+    return response.ok({ body });
+  }
+  // A missing time field may be added by a mapping change soon, so don't cache it.
+  return respondWithSwrCache({
+    context,
+    request,
+    response,
+    body,
+    cacheable: Boolean(body.timeField),
+  });
 };
 
 export const registerGetTimeFieldRoute = (
@@ -275,12 +303,7 @@ export const registerGetTimeFieldRoute = (
   router.post(
     {
       path: TIMEFIELD_ROUTE,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security,
       validate: {
         body: schema.object({
           query: schema.string({ maxLength: 1000000 }),
@@ -288,38 +311,22 @@ export const registerGetTimeFieldRoute = (
         }),
       },
     },
-    async (requestHandlerContext, request, response) => {
-      const { query, projectRouting } = request.body;
-      const result = await resolveTimefieldForRequest(
-        requestHandlerContext,
+    (context, request, response) =>
+      handleTimeFieldRequest({
+        context,
+        request,
+        response,
         logger,
-        query,
-        projectRouting
-      );
-
-      if (result.outcome === 'badRequest') {
-        return response.badRequest({ body: nestingDepthExceededMessage });
-      }
-      if (result.outcome === 'failure') {
-        throw result.error;
-      }
-      return response.ok({ body: result.body });
-    }
+        ...request.body,
+        cacheable: false,
+      })
   );
 
-  // GET variant: identical resolution, but cacheable. Kept under
-  // TIMEFIELD_GET_MAX_QUERY_LENGTH so query-string encoding never risks hitting a
-  // URL-length limit imposed by infrastructure in front of Kibana; callers with a
-  // larger payload keep using the POST route above (uncached, as before).
+  // Cacheable variant for queries short enough to fit in a URL, see TIMEFIELD_GET_MAX_QUERY_LENGTH.
   router.get(
     {
       path: TIMEFIELD_ROUTE,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security,
       validate: {
         query: schema.object({
           query: schema.string({ maxLength: TIMEFIELD_GET_MAX_QUERY_LENGTH }),
@@ -329,30 +336,14 @@ export const registerGetTimeFieldRoute = (
         }),
       },
     },
-    async (requestHandlerContext, request, response) => {
-      const { query, projectRouting } = request.query;
-      const result = await resolveTimefieldForRequest(
-        requestHandlerContext,
-        logger,
-        query,
-        projectRouting
-      );
-
-      if (result.outcome === 'badRequest') {
-        return response.badRequest({ body: nestingDepthExceededMessage });
-      }
-      if (result.outcome === 'failure') {
-        throw result.error;
-      }
-
-      // A missing time field may be added by a mapping change soon, so don't cache it.
-      return respondWithSwrCache({
-        context: requestHandlerContext,
+    (context, request, response) =>
+      handleTimeFieldRequest({
+        context,
         request,
         response,
-        body: result.body,
-        cacheable: Boolean(result.body.timeField),
-      });
-    }
+        logger,
+        ...request.query,
+        cacheable: true,
+      })
   );
 };

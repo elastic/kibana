@@ -13,11 +13,8 @@ export const JOIN_INDICES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/join
 export const TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE =
   '/internal/esql/autocomplete/timeseries/indices';
 export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
-// Above this encoded query-string length, TIMEFIELD_ROUTE is called via POST
-// instead of GET, since a GET request can't safely rely on the HTTP
-// stale-while-revalidate caching this route otherwise gets. 2000 chars is the
-// long-standing safe cross-platform URL-length ceiling respected by most
-// proxies/load balancers, even though modern browsers allow far more.
+// Longest query string TIMEFIELD_ROUTE is called with via (cacheable) GET; longer queries use
+// POST to stay under URL-length limits of proxies in front of Kibana.
 export const TIMEFIELD_GET_MAX_QUERY_LENGTH = 2000;
 export const SOURCE_INFO_ROUTE = '/internal/esql/source_info';
 export const VIEWS_ROUTE = '/internal/esql/views';

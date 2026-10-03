@@ -75,6 +75,7 @@ export const createHandler: (
         response,
         body,
         cacheable: fields.length > 0,
+        varyByUserHash: true,
       });
     } catch (error) {
       if (

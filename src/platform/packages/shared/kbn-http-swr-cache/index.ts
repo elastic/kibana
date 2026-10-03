@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { respondWithSwrCache, SWR_CACHE_MAX_AGE_SETTING } from './src/respond_with_swr_cache';
-export type { RespondWithSwrCacheOptions } from './src/respond_with_swr_cache';
+export {
+  respondWithSwrCache,
+  DEFAULT_SWR_CACHE_MAX_AGE_SECONDS,
+} from './src/respond_with_swr_cache';

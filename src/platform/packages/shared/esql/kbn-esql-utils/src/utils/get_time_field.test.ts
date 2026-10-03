@@ -15,7 +15,7 @@ describe('getESQLTimeField', () => {
   const createHttp = (timeField = '@timestamp'): HttpStart =>
     ({
       post: jest.fn(async () => ({ timeField })),
-      fetch: jest.fn(async () => ({ timeField })),
+      get: jest.fn(async () => ({ timeField })),
     } as unknown as HttpStart);
 
   it('does not reuse the cache across SET project_routing values for the same FROM', async () => {
@@ -31,9 +31,9 @@ describe('getESQLTimeField', () => {
     });
 
     // Both queries are short, so they go through the cacheable GET path.
-    expect(http.fetch).toHaveBeenCalledTimes(2);
-    expect(http.fetch).toHaveBeenNthCalledWith(1, TIMEFIELD_ROUTE, expect.any(Object));
-    expect(http.fetch).toHaveBeenNthCalledWith(2, TIMEFIELD_ROUTE, expect.any(Object));
+    expect(http.get).toHaveBeenCalledTimes(2);
+    expect(http.get).toHaveBeenNthCalledWith(1, TIMEFIELD_ROUTE, expect.any(Object));
+    expect(http.get).toHaveBeenNthCalledWith(2, TIMEFIELD_ROUTE, expect.any(Object));
   });
 
   it('reuses the cache for the same SET project_routing and FROM', async () => {
@@ -43,7 +43,7 @@ describe('getESQLTimeField', () => {
     await getESQLTimeField({ query, http });
     await getESQLTimeField({ query, http });
 
-    expect(http.fetch).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledTimes(1);
   });
 
   describe('GET/POST selection (cacheable GET vs. uncached POST)', () => {
@@ -53,7 +53,7 @@ describe('getESQLTimeField', () => {
 
       await getESQLTimeField({ query, http });
 
-      expect(http.fetch).toHaveBeenCalledWith(
+      expect(http.get).toHaveBeenCalledWith(
         TIMEFIELD_ROUTE,
         expect.objectContaining({ query: { query, projectRouting: undefined } })
       );
@@ -71,7 +71,7 @@ describe('getESQLTimeField', () => {
       expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
         body: JSON.stringify({ query, projectRouting: undefined }),
       });
-      expect(http.fetch).not.toHaveBeenCalled();
+      expect(http.get).not.toHaveBeenCalled();
     });
 
     it('falls back to POST when projectRouting alone pushes the total length over the threshold', async () => {
@@ -84,7 +84,7 @@ describe('getESQLTimeField', () => {
       expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
         body: JSON.stringify({ query, projectRouting }),
       });
-      expect(http.fetch).not.toHaveBeenCalled();
+      expect(http.get).not.toHaveBeenCalled();
     });
 
     it('still dedupes concurrent calls regardless of which verb is used', async () => {
@@ -93,7 +93,7 @@ describe('getESQLTimeField', () => {
 
       await Promise.all([getESQLTimeField({ query, http }), getESQLTimeField({ query, http })]);
 
-      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledTimes(1);
     });
   });
 });

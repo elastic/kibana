@@ -69,7 +69,7 @@ export async function getESQLTimeField({
     return undefined;
   }
   const request = fitsInCacheableGetRequest(query, projectRouting)
-    ? http.fetch(TIMEFIELD_ROUTE, { query: { query, projectRouting } })
+    ? http.get(TIMEFIELD_ROUTE, { query: { query, projectRouting } })
     : http.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query, projectRouting }) });
   const pendingRequest = request
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)

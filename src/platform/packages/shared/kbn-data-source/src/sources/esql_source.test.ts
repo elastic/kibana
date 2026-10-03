@@ -488,11 +488,11 @@ describe('EsqlSource', () => {
   });
 
   describe('create with http', () => {
-    // TIMEFIELD_ROUTE is requested via GET (http.fetch) for short queries, cacheable
+    // TIMEFIELD_ROUTE is requested via GET (http.get) for short queries, cacheable
     // like the fields endpoint; SOURCE_INFO_ROUTE is still POST-only. Track both.
     const requestedPaths = (http: HttpStart) => [
       ...(http.post as jest.Mock).mock.calls.map((call) => call[0] as string),
-      ...(http.fetch as jest.Mock).mock.calls.map((call) => call[0] as string),
+      ...(http.get as jest.Mock).mock.calls.map((call) => call[0] as string),
     ];
 
     const createHttp = (overrides?: {
@@ -510,7 +510,7 @@ describe('EsqlSource', () => {
           }
           throw new Error(`unexpected path ${path}`);
         }),
-        fetch: jest.fn(async (path: string) => {
+        get: jest.fn(async (path: string) => {
           if (path === TIMEFIELD_ROUTE) {
             return { timeField: overrides?.timeField };
           }

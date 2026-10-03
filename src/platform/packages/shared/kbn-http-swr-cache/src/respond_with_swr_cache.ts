@@ -15,19 +15,24 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 
-/** Advanced setting controlling how long (in seconds) a response is considered fresh. */
-export const SWR_CACHE_MAX_AGE_SETTING = 'data_views:cache_max_age';
+// Advanced setting controlling how long (in seconds) a response is considered fresh
+const MAX_AGE_SETTING = 'data_views:cache_max_age';
 
-const DEFAULT_MAX_AGE_SECONDS = 5;
+export const DEFAULT_SWR_CACHE_MAX_AGE_SECONDS = 5;
 const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 
-export interface RespondWithSwrCacheOptions<TBody> {
+interface RespondWithSwrCacheOptions<TBody> {
   context: RequestHandlerContext;
   request: KibanaRequest;
   response: KibanaResponseFactory;
   body: TBody;
   /** Set to false to skip caching for this response (e.g. empty results), defaults to true. */
   cacheable?: boolean;
+  /**
+   * Set when the client sends a per-user `user-hash` header. Otherwise responses vary by
+   * cookie, so a different session never gets another user's cached response.
+   */
+  varyByUserHash?: boolean;
 }
 
 const unwrapEtag = (ifNoneMatch: string | string[] | undefined): string | undefined => {
@@ -39,8 +44,8 @@ const unwrapEtag = (ifNoneMatch: string | string[] | undefined): string | undefi
 const getMaxAge = async (context: RequestHandlerContext): Promise<number> => {
   const { uiSettings } = await context.core;
   // The setting isn't registered on serverless, so fall back to the default
-  const maxAge = await uiSettings.client.get<number | undefined>(SWR_CACHE_MAX_AGE_SETTING);
-  return maxAge ?? DEFAULT_MAX_AGE_SECONDS;
+  const maxAge = await uiSettings.client.get<number | undefined>(MAX_AGE_SETTING);
+  return maxAge ?? DEFAULT_SWR_CACHE_MAX_AGE_SECONDS;
 };
 
 /**
@@ -52,6 +57,7 @@ export const respondWithSwrCache = async <TBody>({
   response,
   body,
   cacheable = true,
+  varyByUserHash = false,
 }: RespondWithSwrCacheOptions<TBody>): Promise<IKibanaResponse> => {
   const bodyAsString = JSON.stringify(body);
   const etag = createHash('sha256').update(bodyAsString).digest('hex');
@@ -60,7 +66,7 @@ export const respondWithSwrCache = async <TBody>({
   const headers = {
     'content-type': 'application/json',
     etag,
-    vary: 'accept-encoding, user-hash',
+    vary: varyByUserHash ? 'accept-encoding, user-hash' : 'accept-encoding, cookie',
     'cache-control': maxAge
       ? `private, max-age=${maxAge}, stale-while-revalidate=${ONE_YEAR_SECONDS - maxAge}`
       : 'private, no-cache',
