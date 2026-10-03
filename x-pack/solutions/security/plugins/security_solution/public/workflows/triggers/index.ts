@@ -78,4 +78,12 @@ export const registerSecurityWorkflowTriggers = (
       (m): PublicTriggerDefinition => ({ ...m.noteUpdatedTriggerDef, icon: securityWorkflowIcon })
     )
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('../../../common/workflows/triggers').then(
+      (m): PublicTriggerDefinition => ({
+        ...m.detectionRulesCreatedTriggerDef,
+        icon: securityWorkflowIcon,
+      })
+    )
+  );
 };

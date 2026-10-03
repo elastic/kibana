@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 import { performBulkActionRoute } from './rules/bulk_actions/route';
 import { createRuleRoute } from './rules/create_rule/route';
@@ -30,7 +31,8 @@ export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
-  logger: Logger
+  logger: Logger,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   // Rules CRUD
   createRuleRoute(router);
@@ -40,7 +42,7 @@ export const registerRuleManagementRoutes = (
   deleteRuleRoute(router);
 
   // Rules bulk actions
-  performBulkActionRoute(router, ml);
+  performBulkActionRoute(router, ml, eventBus);
 
   // Rules export/import
   exportRulesRoute(router, config, logger);
