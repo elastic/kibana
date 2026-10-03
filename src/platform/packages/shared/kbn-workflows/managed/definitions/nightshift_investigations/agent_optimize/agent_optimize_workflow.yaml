@@ -153,6 +153,16 @@ steps:
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'
 
+  # Mirrors the investigation and reinforcement workflows: the reinforcement agent runs on
+  # the model the round used, with `connector_id` still the strict override for a manual run.
+  - name: resolve_model
+    type: nightshift.resolveModel
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
+
   # Only the reinforcement workflow used to ensure this agent, and it no longer runs. Without
   # this step a feature-disabled install would still try to run an agent that was never
   # registered, and a trees-enabled install would fail if the agent were ever pruned.
@@ -167,9 +177,9 @@ steps:
   - name: reinforce_decision_trees
     type: ai.agent
     agent-id: significant-events.decision-tree-reinforcement
-    connector-id-by-feature: 'significant_events_investigation'
-    plugin-id: 'significant_events_decision_tree_reinforce'
-    aggregate-by: 'significant_events'
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    plugin-id: 'nightshift_investigation_memory'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

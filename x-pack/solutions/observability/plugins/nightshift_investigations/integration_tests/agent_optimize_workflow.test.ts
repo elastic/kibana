@@ -23,6 +23,7 @@ import {
   createNightshiftWorkflowFixture,
   memoryOptimizeSummary,
   prepareReinforcementTurn,
+  resolveNightshiftModelForRequest,
   runCortexOptimize,
   runMemoryOptimize,
   type NightshiftWorkflowFixture,
@@ -96,12 +97,18 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(Math.max(cortexEnd, memoryEnd)).toBeLessThan(prepareStart);
   });
 
-  it('runs prepare, ensure and the agent in that order', () => {
+  it('runs prepare, resolve, ensure and the agent in that order', () => {
     expect([
       ...fixture.stepExecutions('prepare_turn').map((step) => step.stepId),
+      ...fixture.stepExecutions('resolve_model').map((step) => step.stepId),
       ...fixture.stepExecutions('ensure_reinforcement_agent').map((step) => step.stepId),
       ...fixture.agentRuns.map((run) => run.stepId),
-    ]).toEqual(['prepare_turn', 'ensure_reinforcement_agent', 'reinforce_decision_trees']);
+    ]).toEqual([
+      'prepare_turn',
+      'resolve_model',
+      'ensure_reinforcement_agent',
+      'reinforce_decision_trees',
+    ]);
   });
 
   it('installs the reinforcement agent before running it', () => {
@@ -125,14 +132,30 @@ describe('agent optimize workflow, an eligible investigator round', () => {
         config: expect.objectContaining({
           'agent-id': NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
           'create-conversation': true,
-          'connector-id-by-feature': 'significant_events_investigation',
-          'plugin-id': 'significant_events_decision_tree_reinforce',
-          'aggregate-by': 'significant_events',
+          'plugin-id': 'nightshift_investigation_memory',
+          'aggregate-by': 'nightshift',
           'product-solution': 'observability',
           'product-feature': 'nightshift',
         }),
       },
     ]);
+  });
+
+  // Reinforcement used to run on the model of the round that triggered it. The tail resolves
+  // its own connector the way the two optimizer branches do, so the agent gets the round's
+  // model rather than a hard-coded feature default.
+  it('runs the reinforcement agent on the model the round used', async () => {
+    const fixture = createNightshiftWorkflowFixture();
+
+    await fixture.runOptimize({
+      ...ELIGIBLE_ROUND_INPUTS,
+      round_connector_id: 'round-connector',
+    });
+
+    expect(resolveNightshiftModelForRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'investigation', roundConnectorId: 'round-connector' })
+    );
+    expect(fixture.agentRuns[0].config).toMatchObject({ 'connector-id': 'round-connector' });
   });
 
   // `${{ }}` keeps an array; Liquid `{{ }}` would stringify it to "[object Object]" and the
@@ -162,19 +185,20 @@ describe('agent optimize workflow, rounds that must not reinforce', () => {
   // answer. The workflow still installs with Cortex or Memory alone, so this runs on installs that
   // have no decision trees at all.
   it.each([
-    ['the decision-tree feature is off', { decisionTreesEnabled: false }],
-    ['the round came from another agent', { decisionTreesEnabled: true }],
-  ])('skips the whole reinforcement tail when %s', async (_case, options) => {
+    ['the decision-tree feature is off', { decisionTreesEnabled: false }, ELIGIBLE_ROUND_INPUTS],
+    [
+      'the round came from another agent',
+      { decisionTreesEnabled: true },
+      { ...ELIGIBLE_ROUND_INPUTS, agent_id: 'significant-events.investigation' },
+    ],
+  ])('skips the whole reinforcement tail when %s', async (_case, options, inputs) => {
     const fixture = createNightshiftWorkflowFixture(options);
-    const inputs =
-      options.decisionTreesEnabled === false
-        ? ELIGIBLE_ROUND_INPUTS
-        : { ...ELIGIBLE_ROUND_INPUTS, agent_id: 'significant-events.investigation' };
 
     await fixture.runOptimize(inputs);
 
     expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
     expect(fixture.stepOutput<{ skipped: boolean }>('prepare_turn')?.skipped).toBe(true);
+    expect(fixture.stepExecutions('resolve_model')).toHaveLength(0);
     expect(fixture.stepExecutions('ensure_reinforcement_agent')).toHaveLength(0);
     expect(fixture.agentRuns).toEqual([]);
     expect(prepareReinforcementTurn).not.toHaveBeenCalled();

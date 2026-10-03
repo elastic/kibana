@@ -26,6 +26,7 @@ const workflow = parse(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.yaml) as {
     timeout?: string;
     'branch-timeout'?: string;
     'agent-id'?: string;
+    'connector-id'?: string;
     'on-failure'?: unknown;
     with?: Record<string, unknown>;
     branches?: Array<{
@@ -130,6 +131,11 @@ describe('nightshift agent optimize workflow', () => {
         type: 'nightshift.decisionTreePrepare',
       }),
       expect.objectContaining({
+        name: 'resolve_model',
+        type: 'nightshift.resolveModel',
+        if: '${{ steps.prepare_turn.output.skipped == false }}',
+      }),
+      expect.objectContaining({
         name: 'ensure_reinforcement_agent',
         type: 'nightshift.ensureInvestigationAgent',
       }),
@@ -230,6 +236,7 @@ describe('nightshift agent optimize workflow', () => {
       'optimize_cortex',
       'optimize_memory',
       'prepare_turn',
+      'resolve_model',
       'ensure_reinforcement_agent',
       'reinforce_decision_trees',
     ]);
@@ -243,13 +250,33 @@ describe('nightshift agent optimize workflow', () => {
       (step) =>
         step.type === 'ai.agent' ||
         step.type === 'nightshift.decisionTreePrepare' ||
+        step.type === 'nightshift.resolveModel' ||
         step.type === 'nightshift.ensureInvestigationAgent'
     );
-    expect(reinforcement).toHaveLength(3);
+    expect(reinforcement).toHaveLength(4);
     expect(reinforcement.map((step) => step['on-failure'])).toEqual([
       undefined,
       undefined,
       undefined,
+      undefined,
     ]);
+  });
+
+  // Reinforcement used to run on the model of the round that triggered it. The tail has to
+  // resolve its model the same way the two optimizer branches do, or a manual optimize run
+  // with an explicit `connector_id` and every ordinary round drift apart.
+  it('runs the reinforcement agent on the model the round used', () => {
+    const ineligible = '${{ steps.prepare_turn.output.skipped == false }}';
+    const resolve = workflow.steps.find((step) => step.name === 'resolve_model');
+
+    expect(resolve?.if).toBe(ineligible);
+    expect(resolve?.with).toEqual({
+      step: 'investigation',
+      connector_id: '{{ inputs.connector_id }}',
+      round_connector_id: '{{ inputs.round_connector_id }}',
+    });
+    expect(workflow.steps.find((step) => step.name === 'reinforce_decision_trees')).toMatchObject({
+      'connector-id': '{{ steps.resolve_model.output.connector_id }}',
+    });
   });
 });

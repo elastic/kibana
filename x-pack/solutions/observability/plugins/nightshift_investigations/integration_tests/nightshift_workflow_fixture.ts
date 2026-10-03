@@ -25,6 +25,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus, StepCategory } from '@kbn/workflows';
 import {
@@ -63,6 +64,7 @@ import { ensureInvestigationAgentStepDefinition } from '../server/step_definitio
 import { memoryMaterializeToSandboxStepDefinition } from '../server/step_definitions/memory_materialize_to_sandbox';
 import { memoryOptimizeStepDefinition } from '../server/step_definitions/memory_optimize';
 import { obtainSandboxStepDefinition } from '../server/step_definitions/obtain_sandbox';
+import { resolveModelStepDefinition } from '../server/step_definitions/resolve_model';
 
 jest.mock('../server/cortex/register_cortex', () => ({
   hydrateCortexWorkspace: jest.fn(),
@@ -79,6 +81,19 @@ jest.mock('../server/decision_trees/register_decision_trees', () => ({
   prepareReinforcementTurn: jest.fn(),
 }));
 
+// The real resolver needs a live inference service and saved objects. Standing in for it keeps
+// the resolve step itself real — its schema, its output, its eligibility gate — while the test
+// asserts which connector the reinforcement agent was handed.
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: jest.fn(
+    async ({ requestedId, roundConnectorId }: { requestedId?: string; roundConnectorId?: string }) =>
+      // Liquid renders an absent optional input as '', which the real resolver also treats
+      // as "not requested".
+      requestedId || roundConnectorId || 'default-nightshift-connector'
+  ),
+}));
+
 // Re-exported so a test asserts on the same mocked bindings the handlers call. Importing them
 // from the source module in the test file would resolve the real ones instead: the `jest.mock`
 // calls above only register when this module is first loaded.
@@ -89,6 +104,7 @@ export {
   runMemoryOptimize,
   hydrateDecisionTreeWorkspace,
   prepareReinforcementTurn,
+  resolveNightshiftModelForRequest,
 };
 
 /** The managed YAML as installed, so a test cannot drift from what ships. */
@@ -238,7 +254,7 @@ export const createNightshiftWorkflowFixture = ({
     description: 'Records the reinforcement round instead of running a real agent.',
     configSchema: z.object({
       'agent-id': z.string().optional(),
-      'connector-id-by-feature': z.string().optional(),
+      'connector-id': z.string().optional(),
       'create-conversation': z.boolean().optional(),
       'plugin-id': z.string().optional(),
       'aggregate-by': z.string().optional(),
@@ -307,6 +323,12 @@ export const createNightshiftWorkflowFixture = ({
       getTelemetryConnectorId: () => undefined,
       logger,
       isEnabled: () => decisionTreesEnabled,
+    }),
+    resolveModelStepDefinition({
+      getInference: () => ({}) as never,
+      getSavedObjects: () => ({} as never),
+      getUiSettings: () => ({} as never),
+      logger,
     }),
     ensureInvestigationAgentStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,

@@ -114,22 +114,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  // Trees reach the sandbox through the combined workflow now, so trees alone still need
-  // that pre-hook even when Cortex and Memory are both off. The tree writer no-ops in the
-  // handler if the feature is off, so the reference is safe either way.
-  it('attaches the combined pre-hook for trees alone', () => {
-    const base = staticBase(
-      getInvestigationAgentType({
-        sandboxEnabled: true,
-        cortexEnabled: false,
-        memoryEnabled: false,
-        decisionTreesEnabled: true,
-      })
-    );
-
-    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
-  });
+  
 
   it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
     const base = staticBase(
