@@ -1,5 +1,5 @@
 {
-  "sha1": "4491e211e8ba7c2cf64fa3fae939a777d55e7245",
+  "sha1": "b343309dce4572f69e3fea5625e26af6cafb5fbb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -230,18 +230,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 353,
-        "column": 16
+        "line": 354,
+        "column": 7
       }
     },
     {
@@ -250,18 +244,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 358,
-        "column": 6
+        "line": 357,
+        "column": 11
       }
     },
     {
@@ -270,18 +258,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 364,
-        "column": 11
+        "column": 31
       }
     },
     {
@@ -290,18 +272,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 370,
-        "column": 27
+        "line": 372,
+        "column": 6
       }
     },
     {
@@ -310,18 +286,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 375,
-        "column": 31
+        "line": 377,
+        "column": 16
       }
     },
     {
@@ -330,18 +300,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 383,
-        "column": 7
+        "line": 382,
+        "column": 6
       }
     },
     {
@@ -350,18 +314,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 392,
-        "column": 6
+        "line": 391,
+        "column": 11
       }
     },
     {
@@ -370,18 +328,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 396,
-        "column": 31
+        "line": 398,
+        "column": 16
       }
     },
     {
@@ -390,18 +342,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 405,
-        "column": 16
+        "line": 406,
+        "column": 7
       }
     },
     {
@@ -410,17 +356,11 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 410,
+        "line": 409,
         "column": 11
       }
     },
@@ -430,18 +370,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 418,
-        "column": 16
+        "line": 419,
+        "column": 7
       }
     },
     {
@@ -450,18 +384,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 427,
-        "column": 16
+        "line": 428,
+        "column": 7
       }
     },
     {
@@ -470,18 +398,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 441,
-        "column": 11
+        "column": 31
       }
     },
     {
@@ -490,18 +412,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 450,
-        "column": 11
+        "column": 31
       }
     },
     {
@@ -510,18 +426,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 468,
-        "column": 6
+        "line": 465,
+        "column": 11
       }
     },
     {
@@ -530,18 +440,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 488,
-        "column": 6
+        "line": 483,
+        "column": 11
       }
     },
     {
@@ -550,18 +454,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 504,
-        "column": 11
+        "column": 31
       }
     },
     {
@@ -570,18 +468,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 513,
-        "column": 7
+        "line": 512,
+        "column": 6
       }
     },
     {
@@ -590,18 +482,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 519,
-        "column": 6
+        "line": 518,
+        "column": 11
       }
     },
     {
@@ -610,18 +496,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
-        "line": 523,
-        "column": 31
+        "line": 525,
+        "column": 16
       }
     },
     {

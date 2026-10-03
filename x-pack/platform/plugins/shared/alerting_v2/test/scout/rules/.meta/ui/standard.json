@@ -1,5 +1,5 @@
 {
-  "sha1": "7c6dcb9a800ddb189648f9a17cfdeae072a8765e",
+  "sha1": "117cbe7e1b5a43985b74b444440b475e0b7d806b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -306,8 +306,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
@@ -322,8 +322,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
