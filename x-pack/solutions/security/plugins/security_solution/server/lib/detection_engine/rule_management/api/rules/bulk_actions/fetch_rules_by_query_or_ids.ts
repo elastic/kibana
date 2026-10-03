@@ -13,6 +13,7 @@ import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
 import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
+import { RULE_NOT_FOUND_MESSAGE } from './utils';
 
 export const fetchRulesByQueryOrIds = async ({
   query,
@@ -43,7 +44,7 @@ export const fetchRulesByQueryOrIds = async ({
         errors: errors.map(({ id, error }) => {
           let message = fallbackErrorMessage;
           if (error.statusCode === 404) {
-            message = 'Rule not found';
+            message = RULE_NOT_FOUND_MESSAGE;
           }
           return {
             item: id,
@@ -56,7 +57,7 @@ export const fetchRulesByQueryOrIds = async ({
       // bulkGetRules will not return a partial object but throw an error instead.
       let message = error.message || fallbackErrorMessage;
       if (error.message === 'No rules found for bulk get') {
-        message = 'Rule not found';
+        message = RULE_NOT_FOUND_MESSAGE;
       }
       return {
         results: [],

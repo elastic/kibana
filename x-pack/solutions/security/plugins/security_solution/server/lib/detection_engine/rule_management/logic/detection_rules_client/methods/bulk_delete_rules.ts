@@ -7,8 +7,8 @@
 
 import { chunk } from 'lodash';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
 import type { RuleAlertType } from '../../../../rule_schema';
 
 // The `rulesClient.bulkDeleteRules` method converts IDs into a KQL "OR" query,
@@ -18,27 +18,88 @@ const CHUNK_SIZE = 1000;
 
 interface BulkDeleteRulesParams {
   rulesClient: RulesClient;
-  ruleIds: RuleObjectId[];
+  rules: RuleAlertType[];
   changeTracking?: SecurityRuleChangeTracking<never>;
+}
+
+interface BulkDeleteRulesResult {
+  rules: RuleAlertType[];
+  errors: BulkOperationError[];
+  skipped: BulkDeleteActionSkipResult[];
 }
 
 export const bulkDeleteRules = async ({
   rulesClient,
-  ruleIds,
+  rules,
   changeTracking,
-}: BulkDeleteRulesParams): Promise<{ rules: RuleAlertType[]; errors: BulkOperationError[] }> => {
+}: BulkDeleteRulesParams): Promise<BulkDeleteRulesResult> => {
+  const ruleIds = rules.map((rule) => rule.id);
+  const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
   const chunks = chunk(ruleIds, CHUNK_SIZE);
   const allRules: RuleAlertType[] = [];
   const allErrors: BulkOperationError[] = [];
+  const allSkipped: BulkDeleteActionSkipResult[] = [];
 
   for (const idsChunk of chunks) {
-    const { rules, errors } = await rulesClient.bulkDeleteRules({
-      ids: idsChunk,
-      changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
-    });
-    allRules.push(...(rules as RuleAlertType[]));
-    allErrors.push(...errors);
+    let result;
+    try {
+      result = await rulesClient.bulkDeleteRules({
+        ids: idsChunk,
+        changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
+      });
+    } catch (error) {
+      // When every rule in the chunk is already gone, alerting throws
+      // Boom.badRequest('No rules found for bulk delete'). Treat the
+      // entire chunk as skipped.
+      if (
+        error.isBoom &&
+        error.output?.statusCode === 400 &&
+        error.message?.includes('No rules found')
+      ) {
+        for (const id of idsChunk) {
+          allSkipped.push({
+            id,
+            name: rulesById.get(id)?.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        }
+      } else {
+        throw error;
+      }
+    }
+
+    if (result) {
+      allRules.push(...(result.rules as RuleAlertType[]));
+
+      for (const error of result.errors) {
+        if (error.status === 404 && rulesById.has(error.rule.id)) {
+          allSkipped.push({
+            id: error.rule.id,
+            name: error.rule.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        } else {
+          allErrors.push(error);
+        }
+      }
+
+      // Rules that silently drop out of alerting's PIT search (deleted between
+      // our fetch and the PIT query) appear in neither rules nor errors.
+      const returnedIds = new Set([
+        ...result.rules.map((r) => r.id),
+        ...result.errors.map((e) => e.rule.id),
+      ]);
+      for (const id of idsChunk) {
+        if (!returnedIds.has(id)) {
+          allSkipped.push({
+            id,
+            name: rulesById.get(id)?.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        }
+      }
+    }
   }
 
-  return { rules: allRules, errors: allErrors };
+  return { rules: allRules, errors: allErrors, skipped: allSkipped };
 };
