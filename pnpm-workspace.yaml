@@ -1268,6 +1268,7 @@ packages:
   - 'x-pack/platform/packages/shared/index-management/index_management_shared_types'
   - 'x-pack/platform/packages/shared/ingest-pipelines'
   - 'x-pack/platform/packages/shared/isomer/isomer'
+  - 'x-pack/platform/packages/shared/isomer/isomer-theme'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
   - 'x-pack/platform/packages/shared/kbn-ai-assistant'
   - 'x-pack/platform/packages/shared/kbn-ai-tools'
