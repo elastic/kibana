@@ -10,7 +10,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_GROUPING, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -1925,6 +1925,11 @@ describe('The custom threshold alert type', () => {
                     value: 'host-0',
                   },
                 ],
+                [ALERT_GROUPING]: {
+                  host: {
+                    name: 'host-0',
+                  },
+                },
               },
             },
           ];
@@ -1964,6 +1969,64 @@ describe('The custom threshold alert type', () => {
           timeUnit: 'm',
         });
       });
+      test('builds the recovered alert viewInAppUrl from the alert rule parameter snapshot', async () => {
+        setEvaluationResults([{}]);
+        const snapshotMetrics = [
+          { name: 'A', aggType: Aggregators.COUNT, filter: 'snapshot.filter:*' },
+        ];
+        services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
+          return [
+            {
+              alert: {
+                meta: [],
+                state: [],
+                context: {},
+                id: 'host-0',
+                getId: jest.fn().mockReturnValue('host-0'),
+                getUuid: jest.fn().mockReturnValue('mockedUuid'),
+                getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+              },
+              hit: {
+                'host.name': 'host-0',
+                [ALERT_GROUP]: [{ field: 'host.name', value: 'host-0' }],
+                [ALERT_RULE_PARAMETERS]: {
+                  searchConfiguration: {
+                    index: 'snapshot-data-view',
+                    query: { query: 'snapshot: true', language: 'kuery' },
+                  },
+                  criteria: [{ metrics: snapshotMetrics, timeSize: 5, timeUnit: 'h' }],
+                },
+              },
+            },
+          ];
+        });
+        services.alertFactory.done.mockImplementation(() => {
+          return {
+            getRecoveredAlerts: jest.fn().mockReturnValue([
+              {
+                setContext: jest.fn(),
+                getId: jest.fn().mockReturnValue('mockedId'),
+              },
+            ]),
+          };
+        });
+        await execute(COMPARATORS.GREATER_THAN, [0.9]);
+
+        expect(getViewInAppUrl).toHaveBeenCalledTimes(1);
+        expect(getViewInAppUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dataViewId: 'snapshot-data-view',
+            metrics: snapshotMetrics,
+            searchConfiguration: {
+              index: 'snapshot-data-view',
+              query: { query: 'snapshot: true', language: 'kuery' },
+            },
+            timeSize: 5,
+            timeUnit: 'h',
+          })
+        );
+      });
+
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
         setEvaluationResults([{}]);
         const mockedSetContext = jest.fn();

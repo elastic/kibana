@@ -268,8 +268,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataViewId: DATA_VIEW_ID,
           timeRange: { to: 'now' },
-          query: { query: 'host.name:* and container.id:*', language: 'kuery' },
-          filters: [],
+          query: { query: 'host.name:*', language: 'kuery' },
+          filters: [
+            {
+              $state: { store: 'appState' },
+              bool: {
+                minimum_should_match: 1,
+                should: [{ exists: { field: 'container.id' } }],
+              },
+              meta: {
+                alias: null,
+                disabled: false,
+                index: DATA_VIEW_ID,
+                negate: false,
+                type: 'custom',
+              },
+            },
+          ],
         });
         expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
