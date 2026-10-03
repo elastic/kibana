@@ -25,14 +25,18 @@ describe('getBulkUpdaterWriteResult', () => {
     expect(getBulkUpdaterWriteResult(undefined)).toBe('not_found');
   });
 
-  it('maps leftover version conflicts to noop (lost CAS)', () => {
+  it('maps leftover version conflicts to conflict (write never landed)', () => {
     expect(
       getBulkUpdaterWriteResult({
         id: 'a',
         index: '.idx',
         error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
       })
-    ).toBe('noop');
+    ).toBe('conflict');
+  });
+
+  it('keeps an updater decision not to write as noop', () => {
+    expect(getBulkUpdaterWriteResult({ id: 'a', index: '.idx', result: 'noop' })).toBe('noop');
   });
 
   it('throws on unexpected ES errors', () => {

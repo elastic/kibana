@@ -9,11 +9,12 @@
 
 import type { BulkItemResponse } from '../../types';
 
-export type BulkUpdaterWriteResult = 'updated' | 'noop' | 'not_found';
+export type BulkUpdaterWriteResult = 'updated' | 'noop' | 'not_found' | 'conflict';
 
 /**
  * Maps a single bulk-updater item response to a coarse write outcome.
- * Leftover version conflicts after OCC retries are a lost CAS (`noop`).
+ * `noop` means the updater decided not to write; `conflict` means version conflicts outlasted
+ * the OCC retries, so the write never landed and the current state is unknown.
  * Throws when ES returned an unexpected error.
  */
 export const getBulkUpdaterWriteResult = (
@@ -28,7 +29,7 @@ export const getBulkUpdaterWriteResult = (
   }
 
   if (item.error?.type === 'version_conflict_engine_exception') {
-    return 'noop';
+    return 'conflict';
   }
 
   if (item.error) {

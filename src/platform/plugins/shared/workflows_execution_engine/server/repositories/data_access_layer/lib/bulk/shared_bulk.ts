@@ -167,16 +167,34 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
   fallbackIndexes: string[]
 ): Promise<Map<string, UpdaterSource<TExecution>>> => {
   const foundById = new Map<string, UpdaterSource<TExecution>>();
+  const errorById = new Map<string, estypes.ErrorCause>();
   // Each updater item × each index — first found result per id wins.
   if (updaterBatch.length === 0) {
     return foundById;
   }
 
-  const mgetDocs = updaterBatch.flatMap(({ item }) =>
+  // Several updaters may target one id with different projections. Coalesce them into a single
+  // read per id so each updater sees (at least) the fields it asked for. An empty projection
+  // means the full source, which wins over any narrower one.
+  const projectionById = new Map<string, Set<string> | null>();
+  for (const { item } of updaterBatch) {
+    const existing = projectionById.get(item.documentId);
+    if (existing !== null) {
+      if (item.sourceFields.length === 0) {
+        projectionById.set(item.documentId, null);
+      } else {
+        const fields = existing ?? new Set<string>();
+        item.sourceFields.forEach((field) => fields.add(field));
+        projectionById.set(item.documentId, fields);
+      }
+    }
+  }
+
+  const mgetDocs = Array.from(projectionById).flatMap(([documentId, fields]) =>
     fallbackIndexes.map((index) => ({
-      _id: item.documentId,
+      _id: documentId,
       _index: index,
-      ...(item.sourceFields.length > 0 ? { _source: { includes: [...item.sourceFields] } } : {}),
+      ...(fields ? { _source: { includes: Array.from(fields) } } : {}),
     }))
   );
 
@@ -199,6 +217,16 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
         primaryTerm: doc._primary_term,
         index: doc._index,
       });
+    } else if ('error' in doc && doc.error && doc._id && !errorById.has(doc._id)) {
+      errorById.set(doc._id, doc.error);
+    }
+  }
+
+  // A per-document MGET error is a storage failure, not a missing document. Only surface it
+  // when no other index returned the document.
+  for (const [id, error] of errorById) {
+    if (!foundById.has(id)) {
+      throw new Error(`Bulk updater source read failed for ${id}: ${JSON.stringify(error)}`);
     }
   }
 
