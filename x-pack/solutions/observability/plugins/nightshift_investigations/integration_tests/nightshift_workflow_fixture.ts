@@ -87,7 +87,13 @@ jest.mock('../server/decision_trees/register_decision_trees', () => ({
 jest.mock('@kbn/nightshift-ai', () => ({
   ...jest.requireActual('@kbn/nightshift-ai'),
   resolveNightshiftModelForRequest: jest.fn(
-    async ({ requestedId, roundConnectorId }: { requestedId?: string; roundConnectorId?: string }) =>
+    async ({
+      requestedId,
+      roundConnectorId,
+    }: {
+      requestedId?: string;
+      roundConnectorId?: string;
+    }) =>
       // Liquid renders an absent optional input as '', which the real resolver also treats
       // as "not requested".
       requestedId || roundConnectorId || 'default-nightshift-connector'
@@ -325,7 +331,7 @@ export const createNightshiftWorkflowFixture = ({
       isEnabled: () => decisionTreesEnabled,
     }),
     resolveModelStepDefinition({
-      getInference: () => ({}) as never,
+      getInference: () => ({} as never),
       getSavedObjects: () => ({} as never),
       getUiSettings: () => ({} as never),
       logger,
@@ -431,13 +437,7 @@ export const createNightshiftWorkflowFixture = ({
       while (getExecution()?.status === ExecutionStatus.WAITING && guard < 40) {
         // Each still-polling branch has a wake-up scheduled; jumping to it re-enters the engine,
         // which is what lets a `branch-timeout` be evaluated against the elapsed time.
-        const resumeTask = engine.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
-        jest.useFakeTimers({ now: new Date(resumeTask?.runAt ?? Date.now() + 60_000) });
-        try {
-          await engine.resumeWorkflow();
-        } finally {
-          jest.useRealTimers();
-        }
+        await engine.resumeWorkflowAtScheduledTime();
         guard += 1;
       }
     },
