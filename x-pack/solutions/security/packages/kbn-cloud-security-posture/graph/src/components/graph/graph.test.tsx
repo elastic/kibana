@@ -93,7 +93,8 @@ describe('<Graph />', () => {
       await waitFor(() => {
         const nodeEl = container.querySelector('[data-id="1"]');
         expect(nodeEl).not.toBeNull();
-        expect(nodeEl).toHaveTextContent('Node 1');
+        // Non-interactive previews always render simplified (icon tile, no label text)
+        expect(nodeEl).not.toBeNull();
       });
     });
 
@@ -166,10 +167,11 @@ describe('<Graph />', () => {
       });
 
       await waitFor(() => {
+        // Entity node (hexagon) renders simplified in non-interactive mode — no label text
         const srcNodeEl = container.querySelector('[data-id="1"]');
         expect(srcNodeEl).not.toBeNull();
-        expect(srcNodeEl).toHaveTextContent('Node 1');
 
+        // Label node renders its text regardless of mode
         const targetNodeEl = container.querySelector('[data-id="2"]');
         expect(targetNodeEl).not.toBeNull();
         expect(targetNodeEl).toHaveTextContent('Node 2');
@@ -182,7 +184,7 @@ describe('<Graph />', () => {
   });
 
   describe('centering after refresh', () => {
-    const fitViewOptions = { duration: 200 };
+    const fitViewOptions = { duration: 200, maxZoom: 0.69 };
 
     const initialNodes: NodeViewModel[] = [
       {
@@ -251,6 +253,9 @@ describe('<Graph />', () => {
         );
       });
 
+      // Initial load triggers a fitView — clear it before testing re-render behavior
+      mockFitView.mockClear();
+
       // Re-render with the same nodes (no new nodes)
       rerender(
         <TestProviders>
@@ -291,6 +296,9 @@ describe('<Graph />', () => {
           initialNodes.length
         );
       });
+
+      // Initial load triggers a fitView — clear it before testing re-render behavior
+      mockFitView.mockClear();
 
       // Add new nodes
       const newNodes: NodeViewModel[] = [
@@ -352,6 +360,9 @@ describe('<Graph />', () => {
         );
       });
 
+      // Initial load triggers a fitView — clear it before testing re-render behavior
+      mockFitView.mockClear();
+
       const newNodes: NodeViewModel[] = [
         {
           id: 'newEntity1',
@@ -381,6 +392,7 @@ describe('<Graph />', () => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).toHaveBeenCalledWith({
           duration: 200,
+          maxZoom: 0.69,
           nodes: [{ id: newNodes[0].id }],
         });
       });
@@ -408,6 +420,9 @@ describe('<Graph />', () => {
           initialNodes.length
         );
       });
+
+      // Initial load triggers a fitView — clear it before testing re-render behavior
+      mockFitView.mockClear();
 
       // Add new nodes
       const newNodes: NodeViewModel[] = [
@@ -438,7 +453,7 @@ describe('<Graph />', () => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
 
         // no "nodes" key -> fit entire graph into view
-        expect(mockFitView).toHaveBeenCalledWith({ duration: 200 });
+        expect(mockFitView).toHaveBeenCalledWith({ duration: 200, maxZoom: 0.69 });
       });
     });
 
@@ -458,12 +473,14 @@ describe('<Graph />', () => {
         </TestProviders>
       );
 
-      // Wait for initial render
+      // Wait for initial render AND the initial fitView rAF to complete before clearing
       await waitFor(() => {
         expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
           initialNodes.length
         );
+        expect(mockFitView).toHaveBeenCalled();
       });
+      mockFitView.mockClear();
 
       // Add new nodes
       const newNodes: NodeViewModel[] = [
@@ -512,12 +529,14 @@ describe('<Graph />', () => {
         </TestProviders>
       );
 
-      // Wait for initial render
+      // Wait for initial render AND the initial fitView rAF to complete before clearing
       await waitFor(() => {
         expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
           initialNodes.length
         );
+        expect(mockFitView).toHaveBeenCalled();
       });
+      mockFitView.mockClear();
 
       // Add new nodes
       const newNodes: NodeViewModel[] = [
@@ -542,6 +561,7 @@ describe('<Graph />', () => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).toHaveBeenCalledWith({
           duration: 200,
+          maxZoom: 0.69,
           nodes: [{ id: 'entity1' }, { id: 'entity2' }],
         });
       });
@@ -563,12 +583,14 @@ describe('<Graph />', () => {
         </TestProviders>
       );
 
-      // Wait for initial render
+      // Wait for initial render AND the initial fitView rAF to complete before clearing
       await waitFor(() => {
         expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
           initialNodes.length
         );
+        expect(mockFitView).toHaveBeenCalled();
       });
+      mockFitView.mockClear();
 
       // Add new nodes
       const newNodes: NodeViewModel[] = [

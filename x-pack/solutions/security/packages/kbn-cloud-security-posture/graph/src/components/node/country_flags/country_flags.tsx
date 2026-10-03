@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, useEuiFontSize, EuiButtonEmpty } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useNodeDetailsPopover,
@@ -23,6 +22,7 @@ import {
   GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID,
 } from '../../test_ids';
 import { RoundedBadge } from '../styles';
+import { PlusCountBadge } from '../plus_count_badge/plus_count_badge';
 import { getCountryFlag, getCountryName } from './country_codes';
 
 const VISIBLE_FLAGS_LIMIT = 2;
@@ -78,7 +78,6 @@ export interface CountryFlagsProps {
 
 export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlagsProps) => {
   const validCodes = getValidCountryCodes(countryCodes);
-  const xsFontSize = useEuiFontSize('xs');
 
   if (validCodes.length === 0) {
     return null;
@@ -95,35 +94,14 @@ export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlags
 
   const counter =
     validCodes.length > VISIBLE_FLAGS_LIMIT ? (
-      onCountryClick ? (
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
-          data-test-subj={GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID}
-          onClick={onCountryClick}
-          aria-label={popoverAriaLabel}
-          flush="both"
-          css={css`
-            font-weight: medium;
-          `}
-        >
-          {'+'}
-          {validCodes.length - VISIBLE_FLAGS_LIMIT}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiText
-          size="xs"
-          color="subdued"
-          data-test-subj={GRAPH_FLAGS_PLUS_COUNT_ID}
-          css={css`
-            font-weight: medium;
-            ${xsFontSize};
-          `}
-        >
-          {'+'}
-          {validCodes.length - VISIBLE_FLAGS_LIMIT}
-        </EuiText>
-      )
+      <PlusCountBadge
+        count={validCodes.length - VISIBLE_FLAGS_LIMIT}
+        onClick={onCountryClick}
+        ariaLabel={popoverAriaLabel}
+        data-test-subj={
+          onCountryClick ? GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID : GRAPH_FLAGS_PLUS_COUNT_ID
+        }
+      />
     ) : null;
 
   return (

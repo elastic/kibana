@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { LabelNode } from './label_node/label_node';
-export { EdgeGroupNode } from './edge_group_node';
-export { RelationshipNode } from './relationship_node/relationship_node';
 export { EntityNode } from './entity_node';

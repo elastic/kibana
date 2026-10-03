@@ -21,26 +21,18 @@ import { Minimap as MinimapComp, type MinimapProps as MinimapPropsType } from '.
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { SvgDefsMarker } from '../edge/markers';
 import { layoutGraph } from '../graph/layout_graph';
-import {
-  DiamondNode,
-  EdgeGroupNode,
-  EllipseNode,
-  HexagonNode,
-  LabelNode,
-  PentagonNode,
-  RectangleNode,
-} from '../node';
+import { EdgeGroupNode, EntityNode, LabelNode } from '../node';
 import { DefaultEdge } from '../edge';
 import { basicSample } from '../mock/graph_sample';
 import { buildGraphFromViewModels } from '../utils';
 import type { NodeViewModel, EdgeViewModel } from '../types';
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
+  hexagon: EntityNode,
+  pentagon: EntityNode,
+  ellipse: EntityNode,
+  rectangle: EntityNode,
+  diamond: EntityNode,
   label: LabelNode,
   group: EdgeGroupNode,
 };
