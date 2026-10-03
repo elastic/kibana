@@ -19,6 +19,7 @@ import type {
   AttackAssigneesChangedPayload,
   NoteCreatedPayload,
   NoteUpdatedPayload,
+  DetectionRulesCreatedPayload,
 } from './types';
 
 export type SecuritySolutionEventBusListener<
@@ -63,6 +64,10 @@ export class SecuritySolutionEventBus extends EventEmitter {
     this.emit('noteUpdated', { type: 'noteUpdated', payload, request });
   }
 
+  emitDetectionRulesCreated(request: KibanaRequest, payload: DetectionRulesCreatedPayload) {
+    this.emit('detectionRulesCreated', { type: 'detectionRulesCreated', payload, request });
+  }
+
   onAlertStatusChanged(listener: SecuritySolutionEventBusListener<'alertStatusChanged'>) {
     this.on('alertStatusChanged', listener);
   }
@@ -93,5 +98,9 @@ export class SecuritySolutionEventBus extends EventEmitter {
 
   onNoteUpdated(listener: SecuritySolutionEventBusListener<'noteUpdated'>) {
     this.on('noteUpdated', listener);
+  }
+
+  onDetectionRulesCreated(listener: SecuritySolutionEventBusListener<'detectionRulesCreated'>) {
+    this.on('detectionRulesCreated', listener);
   }
 }

@@ -7,7 +7,12 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { AnalyticsServiceSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
@@ -16,6 +21,13 @@ import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detec
 import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
+import type { SecuritySolutionEventBus } from '../../../../../events/event_bus';
+import type { DetectionRulesCreatedSource } from '../../../../../../common/workflows/triggers';
+import {
+  emitDetectionRulesCreatedInChunks,
+  toCreatedRuleSummary,
+  type CreatedRuleSummary,
+} from '../../../../../workflows/triggers/emit_rules_created';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -29,6 +41,7 @@ import type {
   GetHistoryForRuleArgs,
   IDetectionRulesClient,
   ImportRulesArgs,
+  NotifyRulesCreatedArgs,
   PatchRuleArgs,
   RestoreRuleFromHistoryArgs,
   RevertPrebuiltRuleArgs,
@@ -75,6 +88,9 @@ interface DetectionRulesClientParams {
   license: ILicense;
   analytics?: AnalyticsServiceSetup;
   logger?: Logger;
+  /** Both are needed to emit `detectionRulesCreated`; omit either to skip emitting. */
+  eventBus?: SecuritySolutionEventBus;
+  request?: KibanaRequest;
 }
 
 export const createDetectionRulesClient = ({
@@ -88,8 +104,18 @@ export const createDetectionRulesClient = ({
   license,
   analytics,
   logger,
+  eventBus,
+  request,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+
+  const emitRulesCreated = (
+    rules: readonly CreatedRuleSummary[],
+    source: DetectionRulesCreatedSource
+  ): void => {
+    if (!eventBus || !request) return;
+    emitDetectionRulesCreatedInChunks({ eventBus, request, rules, source, logger });
+  };
 
   return {
     getRuleCustomizationStatus() {
@@ -110,9 +136,18 @@ export const createDetectionRulesClient = ({
         isRulesCustomizationEnabled,
       };
     },
+    notifyRulesCreated({ rules, source }: NotifyRulesCreatedArgs): void {
+      // Observability only: it must never fail the creation that already succeeded.
+      try {
+        emitRulesCreated(rules.map(toCreatedRuleSummary), source);
+      } catch (err) {
+        logger?.warn(`Failed to notify detectionRulesCreated workflow trigger: ${err}`);
+      }
+    },
+
     async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
-        return createRule({
+        const rule = await createRule({
           actionsClient,
           rulesClient,
           rule: {
@@ -126,6 +161,12 @@ export const createDetectionRulesClient = ({
           mlAuthz,
           changeTracking: args.changeTracking,
         });
+
+        if (!args.suppressCreatedEvent) {
+          emitRulesCreated([toCreatedRuleSummary(rule)], 'api');
+        }
+
+        return rule;
       });
     },
 
@@ -149,6 +190,10 @@ export const createDetectionRulesClient = ({
           sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule, logger);
         }
 
+        if (!args.suppressCreatedEvent) {
+          emitRulesCreated([toCreatedRuleSummary(rule)], 'prebuilt_install');
+        }
+
         return rule;
       });
     },
@@ -164,6 +209,15 @@ export const createDetectionRulesClient = ({
             logger
           );
         }
+
+        const assetsByRuleId = new Map(args.rules.map((asset) => [asset.rule_id, asset]));
+        emitRulesCreated(
+          result.results.flatMap(({ id, rule_id: ruleId }) => {
+            const asset = assetsByRuleId.get(ruleId);
+            return asset ? [{ id, type: asset.type, tags: asset.tags }] : [];
+          }),
+          'prebuilt_install'
+        );
 
         return result;
       });
@@ -279,6 +333,23 @@ export const createDetectionRulesClient = ({
           );
         }
 
+        // Overwritten rules already existed, so only newly created ones fire the trigger.
+        const rulesByRuleId = new Map(args.rules.map((rule) => [rule.rule_id, rule]));
+        emitRulesCreated(
+          result.successes.flatMap(({ rule_id: ruleId, isNew, telemetry }) =>
+            isNew
+              ? [
+                  {
+                    id: telemetry.id,
+                    type: telemetry.type,
+                    tags: rulesByRuleId.get(ruleId)?.tags,
+                  },
+                ]
+              : []
+          ),
+          'import'
+        );
+
         return result;
       });
     },
@@ -296,16 +367,17 @@ export const createDetectionRulesClient = ({
     }: RestoreRuleFromHistoryArgs): Promise<RestoreRuleFromHistoryResponse> {
       return withSecuritySpan('DetectionRulesClient.restoreRuleFromHistory', async () => {
         try {
-          const { restoredRevisionTimestamp, ...response } = await restoreRuleFromHistory({
-            actionsClient,
-            rulesClient,
-            prebuiltRuleAssetClient,
-            mlAuthz,
-            rulesAuthz,
-            ruleId,
-            changeId,
-            currentRuleRevision,
-          });
+          const { restoredRevisionTimestamp, recreated, ...response } =
+            await restoreRuleFromHistory({
+              actionsClient,
+              rulesClient,
+              prebuiltRuleAssetClient,
+              mlAuthz,
+              rulesAuthz,
+              ruleId,
+              changeId,
+              currentRuleRevision,
+            });
 
           if (analytics) {
             sendRuleRestoreTelemetryEvent(
@@ -313,6 +385,11 @@ export const createDetectionRulesClient = ({
               { rule: response.rule, restoredRevisionTimestamp },
               logger
             );
+          }
+
+          // A deleted rule is created again, so it needs the same follow-up as any new rule.
+          if (recreated) {
+            emitRulesCreated([toCreatedRuleSummary(response.rule)], 'restore');
           }
 
           return response;

@@ -29,5 +29,7 @@ export interface RestoreRuleFromHistoryParams {
 export interface RestoreRuleFromHistoryResult {
   rule: RuleResponse;
   no_change?: true;
+  /** True when the rule had been deleted and this restore created it again. */
+  recreated?: true;
   restoredRevisionTimestamp: string;
 }

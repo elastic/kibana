@@ -44,7 +44,11 @@ const translatedRule: StoredRuleMigrationRule = {
 describe('installCustomRules', () => {
   it('uses timing overrides from original rule annotations', async () => {
     const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
-    const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
+    const notifyRulesCreated = jest.fn();
+    const detectionRulesClient = {
+      createCustomRule,
+      notifyRulesCreated,
+    } as unknown as IDetectionRulesClient;
 
     await installCustomRules([translatedRule], false, detectionRulesClient);
 
@@ -54,6 +58,7 @@ describe('installCustomRules', () => {
         to: 'now',
         interval: '60s',
       }),
+      suppressCreatedEvent: true,
     });
     expect(createCustomRule.mock.calls[0][0].params).not.toHaveProperty('timestamp_override');
     expect(createCustomRule.mock.calls[0][0].params).not.toHaveProperty('ignored_annotation');
@@ -61,7 +66,11 @@ describe('installCustomRules', () => {
 
   it('uses shared defaults when timing annotations are missing', async () => {
     const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
-    const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
+    const notifyRulesCreated = jest.fn();
+    const detectionRulesClient = {
+      createCustomRule,
+      notifyRulesCreated,
+    } as unknown as IDetectionRulesClient;
     const ruleWithoutAnnotations: StoredRuleMigrationRule = {
       ...translatedRule,
       original_rule: {
@@ -78,12 +87,17 @@ describe('installCustomRules', () => {
         to: 'now',
         interval: '5m',
       }),
+      suppressCreatedEvent: true,
     });
   });
 
   it('uses shared interval default for non-Sentinel rules without interval annotation', async () => {
     const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
-    const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
+    const notifyRulesCreated = jest.fn();
+    const detectionRulesClient = {
+      createCustomRule,
+      notifyRulesCreated,
+    } as unknown as IDetectionRulesClient;
     const ruleWithoutAnnotations: StoredRuleMigrationRule = {
       ...translatedRule,
       original_rule: {
@@ -101,6 +115,65 @@ describe('installCustomRules', () => {
         to: 'now',
         interval: '5m',
       }),
+      suppressCreatedEvent: true,
+    });
+  });
+
+  // Creating rules one at a time must still produce a single event, so a migration of many rules
+  // starts one workflow run rather than one per rule.
+  it('reports all created rules in one event instead of one per rule', async () => {
+    const created1 = { id: 'so-1', rule_id: 'rule-1', type: 'esql', tags: ['t'] };
+    const created2 = { id: 'so-2', rule_id: 'rule-2', type: 'esql', tags: [] };
+    const createCustomRule = jest
+      .fn()
+      .mockResolvedValueOnce(created1)
+      .mockResolvedValueOnce(created2);
+    const notifyRulesCreated = jest.fn();
+    const detectionRulesClient = {
+      createCustomRule,
+      notifyRulesCreated,
+    } as unknown as IDetectionRulesClient;
+
+    await installCustomRules(
+      [translatedRule, { ...translatedRule, id: 'migration-rule-id-2' }],
+      false,
+      detectionRulesClient
+    );
+
+    expect(createCustomRule).toHaveBeenCalledTimes(2);
+    createCustomRule.mock.calls.forEach(([args]) =>
+      expect(args).toMatchObject({ suppressCreatedEvent: true })
+    );
+    expect(notifyRulesCreated).toHaveBeenCalledTimes(1);
+    expect(notifyRulesCreated).toHaveBeenCalledWith({
+      rules: [created1, created2],
+      source: 'siem_migration',
+    });
+  });
+
+  it('only reports the rules that were created when some fail', async () => {
+    const created = { id: 'so-1', rule_id: 'rule-1', type: 'esql', tags: [] };
+    const createCustomRule = jest
+      .fn()
+      .mockResolvedValueOnce(created)
+      .mockRejectedValueOnce(new Error('boom'));
+    const notifyRulesCreated = jest.fn();
+    const detectionRulesClient = {
+      createCustomRule,
+      notifyRulesCreated,
+    } as unknown as IDetectionRulesClient;
+
+    const { errors } = await installCustomRules(
+      [translatedRule, { ...translatedRule, id: 'migration-rule-id-2' }],
+      false,
+      detectionRulesClient
+    );
+
+    expect(errors).toHaveLength(1);
+    expect(notifyRulesCreated).toHaveBeenCalledTimes(1);
+    expect(notifyRulesCreated).toHaveBeenCalledWith({
+      rules: [created],
+      source: 'siem_migration',
     });
   });
 });

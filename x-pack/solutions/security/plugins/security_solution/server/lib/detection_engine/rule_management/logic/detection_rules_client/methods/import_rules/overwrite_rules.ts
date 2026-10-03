@@ -80,6 +80,7 @@ export async function overwriteRules({
 
       pending.set(existingRule.id, {
         rule_id: rule.rule_id,
+        isNew: false,
         telemetry: {
           id: existingRule.id,
           type: rule.type,

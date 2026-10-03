@@ -20,7 +20,9 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SecuritySolutionEventBus } from '../../../../../events/event_bus';
+import type { DetectionRulesCreatedPayload } from '../../../../../events/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
@@ -604,6 +606,87 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
 
       expect(result).not.toHaveProperty('restoredRevisionTimestamp');
       expect(Object.keys(result).sort()).toEqual(['rule']);
+    });
+  });
+
+  describe('detectionRulesCreated trigger', () => {
+    const request = httpServerMock.createKibanaRequest();
+    let events: DetectionRulesCreatedPayload[];
+    let clientWithBus: IDetectionRulesClient;
+
+    beforeEach(() => {
+      const eventBus = new SecuritySolutionEventBus();
+      events = [];
+      eventBus.onDetectionRulesCreated((event) => {
+        events.push(event.payload);
+      });
+      clientWithBus = createDetectionRulesClient({
+        actionsClient: {
+          isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+        } as unknown as jest.Mocked<ActionsClient>,
+        rulesClient,
+        userProfile: userProfileServiceMock.createStart(),
+        mlAuthz,
+        rulesAuthz,
+        savedObjectsClient: savedObjectsClientMock.create(),
+        license: licenseMock.createLicenseMock(),
+        productFeaturesService: createProductFeaturesServiceMock(),
+        eventBus,
+        request,
+      });
+    });
+
+    // Restoring a deleted rule creates it again, so it needs the same follow-up as any new rule.
+    it('emits one event with source restore when a deleted rule is recreated', async () => {
+      const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+      const recreated = getRuleMock(getQueryRuleParams());
+      rulesClient.resolve.mockRejectedValue(notFoundError);
+      rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+      rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 1, total: 0 });
+      rulesClient.create.mockResolvedValue(recreated);
+
+      const result = await clientWithBus.restoreRuleFromHistory({
+        ruleId: RULE_ID,
+        changeId: CHANGE_ID,
+      });
+
+      expect(events).toEqual([
+        {
+          ids: [recreated.id],
+          types: ['query'],
+          tags: recreated.tags,
+          totalCount: 1,
+          source: 'restore',
+        },
+      ]);
+      expect(Object.keys(result)).toEqual(['rule']);
+    });
+
+    it('does not emit when an existing rule is restored in place', async () => {
+      rulesClient.resolve.mockResolvedValue(liveAlertingRule);
+      rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+      rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+      await clientWithBus.restoreRuleFromHistory({
+        ruleId: RULE_ID,
+        changeId: CHANGE_ID,
+        currentRuleRevision: liveAlertingRule.revision,
+      });
+
+      expect(events).toHaveLength(0);
+    });
+
+    it('does not emit when the restore fails', async () => {
+      const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+      rulesClient.resolve.mockRejectedValue(notFoundError);
+      rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+      rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 1, total: 0 });
+      rulesClient.create.mockRejectedValue(new Error('conflict'));
+
+      await expect(
+        clientWithBus.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID })
+      ).rejects.toThrow();
+      expect(events).toHaveLength(0);
     });
   });
 

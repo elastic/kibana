@@ -28,6 +28,10 @@ import {
 } from './attacks/attack_assignees_changed';
 import { noteCreatedTriggerDef, NoteCreatedTriggerId } from './notes/note_created';
 import { noteUpdatedTriggerDef, NoteUpdatedTriggerId } from './notes/note_updated';
+import {
+  detectionRulesCreatedTriggerDef,
+  DetectionRulesCreatedTriggerId,
+} from './rules/detection_rules_created';
 
 const allDefs = [
   { def: alertStatusChangedTriggerDef, id: AlertStatusChangedTriggerId },
@@ -38,6 +42,7 @@ const allDefs = [
   { def: attackAssigneesChangedTriggerDef, id: AttackAssigneesChangedTriggerId },
   { def: noteCreatedTriggerDef, id: NoteCreatedTriggerId },
   { def: noteUpdatedTriggerDef, id: NoteUpdatedTriggerId },
+  { def: detectionRulesCreatedTriggerDef, id: DetectionRulesCreatedTriggerId },
 ];
 
 describe.each(allDefs)('$def.id', ({ def, id }) => {

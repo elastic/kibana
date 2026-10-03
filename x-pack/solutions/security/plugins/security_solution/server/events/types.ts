@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowStatus } from '../../common/workflows/triggers/constants';
+import type { DetectionRulesCreatedSource } from '../../common/workflows/triggers';
 
 export interface PreviousStatus {
   readonly id: string;
@@ -67,6 +68,14 @@ export interface NoteUpdatedPayload {
   readonly documentId: string;
 }
 
+export interface DetectionRulesCreatedPayload {
+  readonly ids: string[];
+  readonly types: string[];
+  readonly tags: string[];
+  readonly totalCount: number;
+  readonly source?: DetectionRulesCreatedSource;
+}
+
 interface SecuritySolutionDomainEventPayloadByType {
   readonly alertStatusChanged: AlertStatusChangedPayload;
   readonly alertTagsChanged: AlertTagsChangedPayload;
@@ -76,6 +85,7 @@ interface SecuritySolutionDomainEventPayloadByType {
   readonly attackAssigneesChanged: AttackAssigneesChangedPayload;
   readonly noteCreated: NoteCreatedPayload;
   readonly noteUpdated: NoteUpdatedPayload;
+  readonly detectionRulesCreated: DetectionRulesCreatedPayload;
 }
 
 export type SecuritySolutionDomainEventType = keyof SecuritySolutionDomainEventPayloadByType;

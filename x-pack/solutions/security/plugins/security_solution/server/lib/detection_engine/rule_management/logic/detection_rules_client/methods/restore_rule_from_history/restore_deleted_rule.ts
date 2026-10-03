@@ -74,7 +74,11 @@ export async function restoreDeletedRule({
         },
       });
 
-      return { rule: convertAlertingRuleToRuleResponse(createdRule), restoredRevisionTimestamp };
+      return {
+        rule: convertAlertingRuleToRuleResponse(createdRule),
+        restoredRevisionTimestamp,
+        recreated: true,
+      };
     }
   );
 }

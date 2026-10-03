@@ -20,6 +20,7 @@ import {
   AttackAssigneesChangedTriggerId,
   NoteCreatedTriggerId,
   NoteUpdatedTriggerId,
+  DetectionRulesCreatedTriggerId,
 } from '../../../common/workflows/triggers';
 
 export const registerSecurityWorkflowEventBridge = (
@@ -69,5 +70,9 @@ export const registerSecurityWorkflowEventBridge = (
 
   eventBus.onNoteUpdated((event) => {
     forwardEvent(NoteUpdatedTriggerId, event.payload, event.request);
+  });
+
+  eventBus.onDetectionRulesCreated((event) => {
+    forwardEvent(DetectionRulesCreatedTriggerId, event.payload, event.request);
   });
 };

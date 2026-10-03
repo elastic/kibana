@@ -11,6 +11,7 @@ export type DetectionRulesClientMock = jest.Mocked<IDetectionRulesClient>;
 
 const createDetectionRulesClientMock = () => {
   const mocked: DetectionRulesClientMock = {
+    notifyRulesCreated: jest.fn(),
     createCustomRule: jest.fn(),
     createPrebuiltRule: jest.fn(),
     bulkCreatePrebuiltRules: jest.fn(),

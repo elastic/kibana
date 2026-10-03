@@ -209,6 +209,32 @@ describe('SecuritySolutionEventBus', () => {
           truncated: false,
         }),
     },
+    {
+      name: 'detectionRulesCreated',
+      emit: (b: SecuritySolutionEventBus) =>
+        b.emitDetectionRulesCreated(mockRequest, {
+          ids: ['so-1'],
+          types: ['query'],
+          tags: ['a'],
+          totalCount: 1,
+          source: 'api',
+        }),
+      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onDetectionRulesCreated(cb),
+      expectedPayload: {
+        ids: ['so-1'],
+        types: ['query'],
+        tags: ['a'],
+        totalCount: 1,
+        source: 'api',
+      },
+      otherEmit: (b: SecuritySolutionEventBus) =>
+        b.emitAlertTagsChanged(mockRequest, {
+          alertIds: [],
+          tagsAdded: [],
+          tagsRemoved: [],
+          truncated: false,
+        }),
+    },
   ])('$name', ({ emit, on, expectedPayload, otherEmit }) => {
     it('listener receives the correct event shape', () => {
       const listener = jest.fn();

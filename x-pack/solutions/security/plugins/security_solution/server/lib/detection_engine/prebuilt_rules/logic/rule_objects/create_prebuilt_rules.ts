@@ -29,6 +29,7 @@ export const createPrebuiltRules = (
       executor: async (rule) => {
         return detectionRulesClient.createPrebuiltRule({
           params: rule,
+          suppressCreatedEvent: true,
           changeTracking: {
             ...changeTracking,
             metadata: {
@@ -38,6 +39,13 @@ export const createPrebuiltRules = (
           },
         });
       },
+    });
+
+    // One event for the whole install instead of one per rule. Rules created before a partial
+    // failure still count.
+    detectionRulesClient.notifyRulesCreated({
+      rules: result.results.map(({ result: createdRule }) => createdRule),
+      source: 'prebuilt_install',
     });
 
     logger?.debug(

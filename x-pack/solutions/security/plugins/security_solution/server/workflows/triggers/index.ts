@@ -15,6 +15,7 @@ import {
   attackAssigneesChangedTriggerDef,
   noteCreatedTriggerDef,
   noteUpdatedTriggerDef,
+  detectionRulesCreatedTriggerDef,
 } from '../../../common/workflows/triggers';
 
 export const registerSecurityWorkflowTriggers = (
@@ -28,4 +29,5 @@ export const registerSecurityWorkflowTriggers = (
   workflowsExtensions.registerTriggerDefinition(attackAssigneesChangedTriggerDef);
   workflowsExtensions.registerTriggerDefinition(noteCreatedTriggerDef);
   workflowsExtensions.registerTriggerDefinition(noteUpdatedTriggerDef);
+  workflowsExtensions.registerTriggerDefinition(detectionRulesCreatedTriggerDef);
 };

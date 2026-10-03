@@ -21,6 +21,7 @@ const EXPECTED_SECURITY_TRIGGER_IDS = [
   'security.attackAssigneesChanged',
   'security.attackStatusChanged',
   'security.attackTagsChanged',
+  'security.detectionRulesCreated',
   'security.noteCreated',
   'security.noteUpdated',
 ];

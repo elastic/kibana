@@ -101,6 +101,8 @@ describe('Import rules route', () => {
       successes: [
         {
           rule_id: rule.rule_id,
+
+          isNew: true,
           telemetry: { id: 'id-1', type: 'query', rule_source: { type: 'internal' } },
         },
       ],
@@ -237,6 +239,8 @@ describe('Import rules route', () => {
         successes: [
           {
             rule_id: 'rule-0',
+
+            isNew: true,
             telemetry: { id: 'id-0', type: 'query', rule_source: { type: 'internal' } },
           },
         ],
@@ -246,6 +250,8 @@ describe('Import rules route', () => {
         successes: [
           {
             rule_id: `rule-${RULE_IMPORT_BATCH_SIZE}`,
+
+            isNew: true,
             telemetry: { id: 'id-last', type: 'query', rule_source: { type: 'internal' } },
           },
         ],
@@ -293,6 +299,8 @@ describe('Import rules route', () => {
       successes: [
         {
           rule_id: 'rule-b',
+
+          isNew: true,
           telemetry: { id: 'id-rule-b', type: 'query', rule_source: { type: 'internal' } },
         },
       ],

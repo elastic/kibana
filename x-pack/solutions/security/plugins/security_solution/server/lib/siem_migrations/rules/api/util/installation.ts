@@ -98,6 +98,7 @@ export const installCustomRules = async (
 }> => {
   const errors: Error[] = [];
   const rulesToUpdate: UpdateRuleMigrationRule[] = [];
+  const createdCustomRules: RuleResponse[] = [];
   const createCustomRulesOutcome = await initPromisePool({
     concurrency: MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
     items: rulesToInstall,
@@ -116,7 +117,9 @@ export const installCustomRules = async (
           ...payloadRule,
           tags,
         },
+        suppressCreatedEvent: true,
       });
+      createdCustomRules.push(createdRule);
       rulesToUpdate.push({
         id: rule.id,
         elastic_rule: {
@@ -124,6 +127,11 @@ export const installCustomRules = async (
         },
       });
     },
+  });
+  // One event for the whole migration install instead of one per rule.
+  detectionRulesClient.notifyRulesCreated({
+    rules: createdCustomRules,
+    source: 'siem_migration',
   });
   errors.push(
     ...createCustomRulesOutcome.errors.map(

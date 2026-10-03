@@ -20,6 +20,7 @@ const EXPECTED_TRIGGER_IDS = [
   'security.attackAssigneesChanged',
   'security.noteCreated',
   'security.noteUpdated',
+  'security.detectionRulesCreated',
 ];
 
 describe('registerSecurityWorkflowTriggers (public)', () => {
@@ -28,7 +29,7 @@ describe('registerSecurityWorkflowTriggers (public)', () => {
 
     registerSecurityWorkflowTriggers(workflowsExtensions);
 
-    expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledTimes(8);
+    expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledTimes(9);
     expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
       expect.any(Function)
     );

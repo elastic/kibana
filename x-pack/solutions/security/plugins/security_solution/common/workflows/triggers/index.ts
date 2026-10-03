@@ -7,6 +7,8 @@
 
 export {
   MAX_ALERTS_PER_TRIGGER,
+  MAX_RULES_PER_TRIGGER,
+  MAX_TAGS_PER_RULES_EVENT,
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
   MAX_ASSIGNEE_UID_LENGTH,
@@ -37,3 +39,9 @@ export {
 } from './attacks/attack_assignees_changed';
 export { NoteCreatedTriggerId, noteCreatedTriggerDef } from './notes/note_created';
 export { NoteUpdatedTriggerId, noteUpdatedTriggerDef } from './notes/note_updated';
+export {
+  DetectionRulesCreatedTriggerId,
+  detectionRulesCreatedTriggerDef,
+  DETECTION_RULES_CREATED_SOURCE_VALUES,
+} from './rules/detection_rules_created';
+export type { DetectionRulesCreatedSource } from './rules/detection_rules_created';
