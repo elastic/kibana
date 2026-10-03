@@ -476,6 +476,20 @@ describe('WorkflowDetailPage', () => {
       expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
     });
 
+    it('opens the detail flyout for an unsaved workflow run', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: 'exec-1',
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: undefined });
+
+      expect(screen.getByTestId('workflow-execution-flyout')).toHaveTextContent('exec-1');
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
+    });
+
     it('closes the detail and list flyouts when Executions is clicked while a run is selected', () => {
       const setSelectedExecution = jest.fn();
       mockUseWorkflowUrlState.mockReturnValue({
