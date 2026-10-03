@@ -13,6 +13,7 @@ module.exports = {
   roots: ['<rootDir>/x-pack/solutions/observability/plugins/apm'],
   setupFilesAfterEnv: [
     '<rootDir>/x-pack/solutions/observability/plugins/apm/.storybook/jest_setup.ts',
+    '<rootDir>/x-pack/solutions/observability/plugins/apm/.storybook/jest_apm_test_environment.ts',
   ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/apm',
