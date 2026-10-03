@@ -42,7 +42,7 @@ const storeOfSize = (pages: number, tagsPerPage: number): KeywordEntry[] =>
 
 describe('computeKeywordPageRank', () => {
   it('returns empty scores for empty entries', () => {
-    expect(computeKeywordPageRank([]).scores).toEqual({});
+    expect(computeKeywordPageRank([])).toEqual({});
   });
 
   it('produces scores for co-occurring keywords', () => {
@@ -52,7 +52,7 @@ describe('computeKeywordPageRank', () => {
       entry({ tags: ['foo', 'bar'], usefulness: 0.5 }),
     ];
 
-    const { scores } = computeKeywordPageRank(entries, { maxIterations: 50, tolerance: 1e-8 });
+    const scores = computeKeywordPageRank(entries, { maxIterations: 50, tolerance: 1e-8 });
 
     expect(Object.keys(scores).sort()).toEqual(['bar', 'baz', 'foo']);
     expect(scores.foo).toBeGreaterThan(0);
@@ -65,7 +65,7 @@ describe('computeKeywordPageRank', () => {
       entry({ tags: ['qux', 'zap'] }),
     ];
 
-    const { scores } = computeKeywordPageRank(entries, { maxKeywords: 2 });
+    const scores = computeKeywordPageRank(entries, { maxKeywords: 2 });
     expect(Object.keys(scores).length).toBeLessThanOrEqual(2);
   });
 
@@ -76,7 +76,7 @@ describe('computeKeywordPageRank', () => {
       entry({ tags: ['foo', 'bar'], usefulness: 0.5 }),
     ];
 
-    const { scores } = computeKeywordPageRank(entries);
+    const scores = computeKeywordPageRank(entries);
 
     expect(scores.foo).toBeGreaterThan(scores.bar);
     expect(scores.foo).toBeGreaterThan(scores.baz);
@@ -85,7 +85,7 @@ describe('computeKeywordPageRank', () => {
   it('sums to one before normalization, so the scores are a ranking not a scale', () => {
     // Every keyword here co-occurs with another, so no mass is lost to a
     // dangling node; the dangling case is its own test below.
-    const { scores } = computeKeywordPageRank([
+    const scores = computeKeywordPageRank([
       entry({ tags: ['a', 'b', 'c'] }),
       entry({ tags: ['b', 'c', 'd'] }),
       entry({ tags: ['a', 'e'] }),
@@ -99,7 +99,7 @@ describe('computeKeywordPageRank', () => {
     // usefulness 0 × confidence 0 is zero, and a graph built from zero edges
     // would rank nothing at all — which is what MIN_EDGE_WEIGHT is for.
     const silent: KeywordEntry[] = [entry({ tags: ['foo', 'bar'], usefulness: 0, confidence: 0 })];
-    const { scores } = computeKeywordPageRank(silent);
+    const scores = computeKeywordPageRank(silent);
 
     expect(Object.keys(scores).sort()).toEqual(['bar', 'foo']);
     expect(scores.foo).toBeGreaterThan(0);
@@ -110,7 +110,7 @@ describe('computeKeywordPageRank', () => {
     // PageRank normalizes by each node's outgoing weight, so a graph's overall
     // scale cancels out: what the usefulness signal changes is the ratio between
     // a well-supported pair and a floor-weighted one.
-    const { scores } = computeKeywordPageRank([
+    const scores = computeKeywordPageRank([
       entry({ tags: ['foo', 'bar'] }),
       entry({ tags: ['foo', 'baz'], usefulness: 0, confidence: 0 }),
     ]);
@@ -121,13 +121,13 @@ describe('computeKeywordPageRank', () => {
   });
 
   it('keeps a duplicate tag in one entry from becoming a keyword of its own', () => {
-    const { scores } = computeKeywordPageRank([entry({ tags: ['foo', 'foo', 'bar'] })]);
+    const scores = computeKeywordPageRank([entry({ tags: ['foo', 'foo', 'bar'] })]);
 
     expect(Object.keys(scores).sort()).toEqual(['bar', 'foo']);
   });
 
   it('scores a lone keyword as a dangling node rather than dropping it', () => {
-    const { scores } = computeKeywordPageRank([
+    const scores = computeKeywordPageRank([
       entry({ tags: ['alone'], usefulness: 1, confidence: 1 }),
     ]);
 
@@ -136,7 +136,7 @@ describe('computeKeywordPageRank', () => {
   });
 
   it('merges tags that canonicalize to one keyword', () => {
-    const { scores } = computeKeywordPageRank([
+    const scores = computeKeywordPageRank([
       entry({ tags: ['invoke_agent', 'kafka'] }),
       entry({ tags: ['invoke-agent', 'redis'] }),
       entry({ tags: ['Invoke Agent', 'otel'] }),
@@ -148,7 +148,7 @@ describe('computeKeywordPageRank', () => {
   });
 
   it('leaves identifiers alone, so an index pattern is not folded into a phrase', () => {
-    const { scores } = computeKeywordPageRank([
+    const scores = computeKeywordPageRank([
       entry({ tags: ['traces-*', 'gen_ai.conversation.id'] }),
       entry({ tags: ['traces-*', 'ES|QL'] }),
     ]);
@@ -157,7 +157,7 @@ describe('computeKeywordPageRank', () => {
   });
 
   it('excludes the internal marker tag, which says nothing about the topic', () => {
-    const { scores } = computeKeywordPageRank([
+    const scores = computeKeywordPageRank([
       entry({ tags: ['memory', 'kafka', 'redis'] }),
       entry({ tags: ['memory', 'kafka', 'otel'] }),
     ]);
@@ -170,7 +170,7 @@ describe('computeKeywordPageRank', () => {
     const entries = storeOfSize(200, 25);
 
     const started = performance.now();
-    const { scores } = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
+    const scores = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
     const elapsed = performance.now() - started;
     // The measured number is reported in the PR; this is the bound it has to
     // stay under for the ranking to run on the render path with no worker.

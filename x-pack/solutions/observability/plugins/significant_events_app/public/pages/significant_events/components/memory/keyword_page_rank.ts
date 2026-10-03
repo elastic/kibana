@@ -26,7 +26,6 @@ export interface KeywordEntry {
 }
 
 export interface KeywordPageRankOptions {
-  dampingFactor?: number;
   tolerance?: number;
   maxIterations?: number;
   /** Keeps only the N most frequent keywords before any edge is built. */
@@ -83,8 +82,6 @@ export const MIN_CELL_AREA = 1e-6;
  */
 export const MEMORY_MARKER_TAG = 'memory';
 
-type KeywordPairKey = `${number},${number}`;
-
 const asUnit = (value: number): number => Math.min(Math.max(value, 0), 1);
 
 /**
@@ -98,7 +95,7 @@ const asUnit = (value: number): number => Math.min(Math.max(value, 0), 1);
 const entryKeywords = (keywords: readonly string[] | undefined): string[] => {
   const canonical: string[] = [];
   for (const keyword of keywords ?? []) {
-    const key = canonicalizeTag(String(keyword));
+    const key = canonicalizeTag(keyword);
     if (key === null || key === MEMORY_MARKER_TAG || canonical.includes(key)) continue;
     canonical.push(key);
   }
@@ -113,8 +110,7 @@ const entryKeywords = (keywords: readonly string[] | undefined): string[] => {
 export function computeKeywordPageRank(
   entries: readonly KeywordEntry[],
   options: KeywordPageRankOptions = {}
-): { scores: Record<string, number> } {
-  const damping = options.dampingFactor ?? DEFAULT_DAMPING;
+): Record<string, number> {
   const tolerance = options.tolerance ?? DEFAULT_TOLERANCE;
   const maxIterations = options.maxIterations ?? DEFAULT_MAX_ITERATIONS;
   const maxKeywords = options.maxKeywords;
@@ -123,7 +119,7 @@ export function computeKeywordPageRank(
   // Canonicalized once per entry and reused by both passes: `normalize('NFKC')`
   // is the most expensive thing in here, and this runs on the render path.
   const keywordsByEntry = entries.map((entry) => entryKeywords(entry.tags));
-  if (maxKeywords && maxKeywords > 0) {
+  if (maxKeywords !== undefined) {
     const counts = new Map<string, number>();
     for (const keywords of keywordsByEntry) {
       for (const keyword of keywords) {
@@ -139,7 +135,7 @@ export function computeKeywordPageRank(
   }
 
   const keywordToId = new Map<string, number>();
-  const weights = new Map<KeywordPairKey, number>();
+  const weights = new Map<number, Map<number, number>>();
   let nextId = 0;
 
   const getId = (keyword: string): number => {
@@ -173,41 +169,42 @@ export function computeKeywordPageRank(
       for (let j = i + 1; j < ids.length; j += 1) {
         const a = ids[i];
         const b = ids[j];
-        const ab = `${a},${b}` as KeywordPairKey;
-        const ba = `${b},${a}` as KeywordPairKey;
-        weights.set(ab, (weights.get(ab) ?? 0) + share);
-        weights.set(ba, (weights.get(ba) ?? 0) + share);
+        const fromA = weights.get(a) ?? new Map<number, number>();
+        fromA.set(b, (fromA.get(b) ?? 0) + share);
+        weights.set(a, fromA);
+        const fromB = weights.get(b) ?? new Map<number, number>();
+        fromB.set(a, (fromB.get(a) ?? 0) + share);
+        weights.set(b, fromB);
       }
     }
   }
 
   const nodeCount = keywordToId.size;
-  if (nodeCount === 0) return { scores: {} };
+  if (nodeCount === 0) return {};
 
   const outgoing = new Array<number>(nodeCount).fill(0);
   // Flattened once: the iteration below runs it up to a hundred times, and
-  // re-parsing `from,to` keys on every pass costs more than the arithmetic.
+  // walking the nested map on every pass would cost more than the arithmetic.
   const edges: Array<{ from: number; to: number; weight: number }> = [];
-  weights.forEach((weight, key) => {
-    const comma = key.indexOf(',');
-    const from = Number(key.slice(0, comma));
-    const to = Number(key.slice(comma + 1));
-    outgoing[from] += weight;
-    edges.push({ from, to, weight });
+  weights.forEach((targets, from) => {
+    targets.forEach((weight, to) => {
+      outgoing[from] += weight;
+      edges.push({ from, to, weight });
+    });
   });
 
   let ranks = new Array<number>(nodeCount).fill(1 / nodeCount);
   const teleport = 1 / nodeCount;
 
   for (let iteration = 0; iteration < maxIterations; iteration += 1) {
-    const next = new Array<number>(nodeCount).fill((1 - damping) * teleport);
+    const next = new Array<number>(nodeCount).fill((1 - DEFAULT_DAMPING) * teleport);
     for (const { from, to, weight } of edges) {
       const outWeight = outgoing[from];
       // A keyword that co-occurs with nothing keeps only its teleport mass, which
       // is how an isolated keyword settles at (1 - damping) / nodes rather than
       // pulling rank from keywords that are actually connected.
       if (outWeight <= 0) continue;
-      next[to] += (damping * ranks[from] * weight) / outWeight;
+      next[to] += (DEFAULT_DAMPING * ranks[from] * weight) / outWeight;
     }
 
     let change = 0;
@@ -220,31 +217,38 @@ export function computeKeywordPageRank(
   keywordToId.forEach((id, keyword) => {
     scores[keyword] = ranks[id] ?? 0;
   });
-  return { scores };
+  return scores;
 }
 
 /**
- * The spelling to show for each keyword, keyed canonically.
+ * Every spelling of every keyword, with how often each was written, keyed first by
+ * the canonical keyword.
  *
- * Tags are stored verbatim, so `Cart Cache` and `cart-cache` are one keyword
- * with two spellings: the commonest one is the one a person recognizes. A tie
- * goes to the first seen, which keeps the choice stable across renders.
+ * Tags are stored verbatim, so `Cart Cache` and `cart-cache` are one keyword with
+ * two spellings. A tie goes to the first seen, which keeps the choice stable
+ * across renders.
  */
-export const toKeywordDisplayNames = (entries: readonly KeywordEntry[]): Map<string, string> => {
+const countSpellings = (entries: readonly KeywordEntry[]): Map<string, Map<string, number>> => {
   const spellings = new Map<string, Map<string, number>>();
   for (const entry of entries) {
     for (const original of entry.tags ?? []) {
-      const key = canonicalizeTag(String(original));
+      const key = canonicalizeTag(original);
       if (key === null || key === MEMORY_MARKER_TAG) continue;
       const bySpelling = spellings.get(key) ?? new Map<string, number>();
-      bySpelling.set(String(original), (bySpelling.get(String(original)) ?? 0) + 1);
+      bySpelling.set(original, (bySpelling.get(original) ?? 0) + 1);
       spellings.set(key, bySpelling);
     }
   }
-  return new Map(
-    [...spellings].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)])
-  );
+  return spellings;
 };
+
+/**
+ * The spelling to show for each keyword, keyed canonically.
+ */
+export const toKeywordDisplayNames = (entries: readonly KeywordEntry[]): Map<string, string> =>
+  new Map(
+    [...countSpellings(entries)].map(([key, bySpelling]) => [key, mostFrequentSpelling(bySpelling)])
+  );
 
 /**
  * The treemap's rows: the top keywords of the whole set, ranked and capped.
@@ -258,24 +262,18 @@ export const toKeywordCells = (
 ): KeywordCell[] => {
   const selected = new Set(selectedKeywords);
 
-  const spellings = new Map<string, Map<string, number>>();
+  const spellings = countSpellings(entries);
   const memories = new Map<string, number>();
   for (const entry of entries) {
     const counted = new Set<string>();
-    for (const original of entry.tags ?? []) {
-      const key = canonicalizeTag(String(original));
-      if (key === null || key === MEMORY_MARKER_TAG) continue;
-      const bySpelling = spellings.get(key) ?? new Map<string, number>();
-      bySpelling.set(String(original), (bySpelling.get(String(original)) ?? 0) + 1);
-      spellings.set(key, bySpelling);
-      if (!counted.has(key)) {
-        counted.add(key);
-        memories.set(key, (memories.get(key) ?? 0) + 1);
-      }
+    for (const keyword of entryKeywords(entry.tags)) {
+      if (counted.has(keyword)) continue;
+      counted.add(keyword);
+      memories.set(keyword, (memories.get(keyword) ?? 0) + 1);
     }
   }
 
-  const { scores } = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
+  const scores = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
   const ranked = Object.entries(scores).filter(([keyword]) => !selected.has(keyword));
   if (ranked.length === 0) return [];
 
@@ -287,9 +285,8 @@ export const toKeywordCells = (
   return ranked
     .map(([keyword, score]) => ({
       keyword,
-      // Tags are stored verbatim, so `Cart Cache` and `cart-cache` are one
-      // keyword with two spellings: the commonest one is what a person
-      // recognizes, and it is what the cell is labelled with.
+      // The commonest spelling is the one a person recognizes, and it is what
+      // the cell is labelled with.
       display: mostFrequentSpelling(spellings.get(keyword)),
       // A flat set of scores has no meaningful order, so every keyword that has
       // any score is drawn at full size rather than one of them at 0.
@@ -350,10 +347,10 @@ export const toTagFilterTerms = (
   const spellings = new Map<string, Set<string>>();
   for (const entry of entries) {
     for (const original of entry.tags ?? []) {
-      const key = canonicalizeTag(String(original));
+      const key = canonicalizeTag(original);
       if (key === null || key === MEMORY_MARKER_TAG) continue;
       const seen = spellings.get(key) ?? new Set<string>();
-      seen.add(String(original));
+      seen.add(original);
       spellings.set(key, seen);
     }
   }
