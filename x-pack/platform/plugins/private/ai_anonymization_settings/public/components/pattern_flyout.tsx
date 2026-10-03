@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,7 +33,8 @@ import type { RegexAnonymizationRule } from '@kbn/inference-common';
 import { CUSTOM_PATTERN_ENTITY_CLASSES } from '../lib/entity_classes';
 import type { CustomPatternEntityClass } from '../lib/entity_classes';
 import type { NewCustomPattern } from '../hooks/use_anonymization_settings';
-import { PatternTesterPanel } from './pattern_tester_panel';
+import { generateSampleForPattern, toExampleFieldKey } from '../lib/generate_pattern_example';
+import { DEFAULT_EXAMPLE_INPUT_OBJECT, PatternTesterPanel } from './pattern_tester_panel';
 
 interface PatternFlyoutProps {
   /** When editing an existing custom pattern; omitted when adding a new one. */
@@ -47,6 +49,11 @@ const entityTypeOptions = CUSTOM_PATTERN_ENTITY_CLASSES.map((entityClass) => ({
   value: entityClass,
   inputDisplay: entityClass,
 }));
+
+/** The tester's side-by-side editors need more room than EuiModal's shrink-to-fit default. */
+const testerModalStyles = css`
+  width: min(1100px, 90vw);
+`;
 
 export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
   pattern,
@@ -86,6 +93,19 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
     () => [draftRule, ...enabledRules.filter((rule) => rule.id !== pattern?.id)],
     [draftRule, enabledRules, pattern?.id]
   );
+
+  // Demonstrates the pattern actually being edited, instead of only the fixed generic example:
+  // a real value matching its regex, inserted as the first field. `undefined` when no sample can
+  // be generated (e.g. unsupported regex syntax), which falls back to the generic example.
+  const contextualExampleInput = useMemo(() => {
+    const sample = generateSampleForPattern(regexPattern);
+    if (!sample) {
+      return undefined;
+    }
+    const fieldKey = toExampleFieldKey(name || entityClass);
+    const { [fieldKey]: _omitted, ...restOfDefaults } = DEFAULT_EXAMPLE_INPUT_OBJECT;
+    return JSON.stringify({ [fieldKey]: sample, ...restOfDefaults }, null, 2);
+  }, [regexPattern, name, entityClass]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -236,6 +256,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
           onClose={() => setIsTesterOpen(false)}
           aria-labelledby={testerModalTitleId}
           data-test-subj="aiAnonymizationSettingsPatternFlyoutTesterModal"
+          css={testerModalStyles}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={testerModalTitleId}>
@@ -246,7 +267,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <PatternTesterPanel rules={testerRules} />
+            <PatternTesterPanel rules={testerRules} defaultInput={contextualExampleInput} />
           </EuiModalBody>
         </EuiModal>
       )}
