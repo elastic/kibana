@@ -13,6 +13,7 @@ import { RISK_ENGINE_SETTINGS_URL, APP_ID } from '../../../../../common/constant
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
+import { getDefaultRiskEngineConfiguration } from '../utils/saved_object_configuration';
 
 export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['router']) => {
   router.versioned
@@ -38,7 +39,10 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
         const riskEngineClient = securitySolution.getRiskEngineDataClient();
 
         try {
-          const result = await riskEngineClient.getConfiguration();
+          // A missing configuration means the risk engine is not installed yet, which is not an error.
+          const result =
+            (await riskEngineClient.getConfiguration()) ??
+            getDefaultRiskEngineConfiguration({ namespace: securitySolution.getSpaceId() });
           securitySolution.getAuditLogger()?.log({
             message: 'User accessed risk engine configuration information',
             event: {
@@ -49,14 +53,11 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
             },
           });
 
-          if (!result) {
-            throw new Error('Unable to get risk engine configuration');
-          }
           return response.ok({
             body: {
               range: result.range,
               includeClosedAlerts:
-                Array.isArray(result?.excludeAlertStatuses) &&
+                Array.isArray(result.excludeAlertStatuses) &&
                 !result.excludeAlertStatuses.includes('closed'),
               enableResetToZero: result.enableResetToZero,
               filters: (result.filters || []).map((f) => ({
