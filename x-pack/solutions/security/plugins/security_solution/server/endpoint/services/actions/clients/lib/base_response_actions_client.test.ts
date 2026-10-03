@@ -266,6 +266,26 @@ describe('ResponseActionsClientImpl base class', () => {
       });
     });
 
+    it('should update cases with an unisolate attachment', async () => {
+      updateCasesOptions.command = 'unisolate';
+      updateCasesOptions.comment = 'releasing the host';
+
+      await baseClassMock.updateCases(updateCasesOptions);
+
+      expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
+        attachments: [
+          expect.objectContaining({
+            type: 'security.endpoint',
+            data: { content: 'releasing the host' },
+            metadata: expect.objectContaining({
+              command: 'unisolate',
+            }),
+          }),
+        ],
+        caseId: 'case-3',
+      });
+    });
+
     it('should not error if update to a case fails', async () => {
       (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
         if (options.caseId === 'case-2') {

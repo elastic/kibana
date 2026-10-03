@@ -8,6 +8,8 @@
 import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
 import type { ApplyMetadataMocksResponse } from '../../../metadata/mocks';
 import { createEndpointMetadataServiceTestContextMock } from '../../../metadata/mocks';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 import { EndpointAgentStatusClient } from '../../..';
 import { getPendingActionsSummary as _getPendingActionsSummary } from '../../../actions/pending_actions_summary';
 import { createMockEndpointAppContextService } from '../../../../mocks';
@@ -118,6 +120,31 @@ describe('EndpointAgentStatusClient', () => {
         pendingActions: {},
         status: 'unhealthy',
       },
+    });
+  });
+
+  it('sets isolated when endpoint metadata isolation is true', async () => {
+    const metadata = new EndpointMetadataGenerator('isolated-status').generate({
+      Endpoint: { state: { isolation: true } },
+    });
+    const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
+    jest.spyOn(metadataClient, 'getHostMetadataList').mockResolvedValue({
+      data: [
+        {
+          metadata,
+          host_status: HostStatus.HEALTHY,
+          last_checkin: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      total: 1,
+    });
+
+    await expect(statusClient.getAgentStatuses([metadata.agent.id])).resolves.toEqual({
+      [metadata.agent.id]: expect.objectContaining({
+        agentId: metadata.agent.id,
+        found: true,
+        isolated: true,
+      }),
     });
   });
 

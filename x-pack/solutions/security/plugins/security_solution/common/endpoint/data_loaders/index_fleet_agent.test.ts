@@ -9,6 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { deleteIndexedFleetAgents, type IndexedFleetAgentResponse } from './index_fleet_agent';
 import { EndpointDataLoadingError } from './utils';
 
+const agentIndices = ['.fleet-agents', '.fleet-agents-*'];
+
 const indexedData: IndexedFleetAgentResponse = {
   fleetAgentsIndex: '.fleet-agents',
   agents: [
@@ -59,12 +61,18 @@ describe('deleteIndexedFleetAgents', () => {
     expect(deleteByQuery).toHaveBeenCalledTimes(2);
     expect(deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: '.fleet-agents-*',
+        index: agentIndices,
+        allow_no_indices: true,
+        ignore_unavailable: true,
         conflicts: 'proceed',
       })
     );
     expect(refresh).toHaveBeenCalledTimes(1);
-    expect(refresh).toHaveBeenCalledWith({ index: '.fleet-agents-*' });
+    expect(refresh).toHaveBeenCalledWith({
+      index: agentIndices,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
   });
 
   it('throws when every attempt still has a version conflict', async () => {
@@ -81,7 +89,11 @@ describe('deleteIndexedFleetAgents', () => {
 
     expect(deleteByQuery).toHaveBeenCalledTimes(5);
     expect(refresh).toHaveBeenCalledTimes(5);
-    expect(refresh).toHaveBeenCalledWith({ index: '.fleet-agents-*' });
+    expect(refresh).toHaveBeenCalledWith({
+      index: agentIndices,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
   });
 
   it('keeps deleting when a refresh fails', async () => {
