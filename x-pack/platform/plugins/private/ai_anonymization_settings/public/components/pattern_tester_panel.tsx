@@ -28,24 +28,25 @@ import type { RegexAnonymizationRule } from '@kbn/inference-common';
 import { usePatternTester } from '../hooks/use_pattern_tester';
 import type { PatternTestAnonymization } from '../hooks/use_pattern_tester';
 
-export const DEFAULT_EXAMPLE_INPUT = JSON.stringify(
-  {
-    host: { name: 'web-prod-eu-04', ip: '10.42.7.19' },
-    user: { name: 'CORP\\a.mehta' },
-    source: { ip: '198.51.100.23' },
-    destination: { ip: '10.42.8.2' },
-    contact: 'a.mehta@example.com',
-    message: 'Repeated login failures detected from external IP',
-  },
-  null,
-  2
-);
+export const DEFAULT_EXAMPLE_INPUT_OBJECT: Record<string, unknown> = {
+  host: { name: 'web-prod-eu-04', ip: '10.42.7.19' },
+  user: { name: 'CORP\\a.mehta' },
+  source: { ip: '198.51.100.23' },
+  destination: { ip: '10.42.8.2' },
+  contact: 'a.mehta@example.com',
+  message: 'Repeated login failures detected from external IP',
+};
+
+export const DEFAULT_EXAMPLE_INPUT = JSON.stringify(DEFAULT_EXAMPLE_INPUT_OBJECT, null, 2);
 
 interface PatternTesterPanelProps {
   /** Regex rules to test with, e.g. all enabled rules, or the enabled rules plus a draft rule. */
   rules: RegexAnonymizationRule[];
   defaultInput?: string;
 }
+
+/** Tall enough to show a realistic multi-field example without immediately needing to scroll. */
+const CODE_EDITOR_HEIGHT = 420;
 
 const columns: Array<EuiBasicTableColumn<PatternTestAnonymization>> = [
   {
@@ -132,22 +133,10 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
                   </h3>
                 </EuiTitle>
               }
-              labelAppend={
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => setInputValue(defaultInput)}
-                  data-test-subj="aiAnonymizationSettingsInsertExampleButton"
-                >
-                  <FormattedMessage
-                    id="xpack.aiAnonymizationSettings.patternTester.insertExample"
-                    defaultMessage="Insert an example"
-                  />
-                </EuiButtonEmpty>
-              }
               helpText={
                 <FormattedMessage
                   id="xpack.aiAnonymizationSettings.patternTester.inputHelpText"
-                  defaultMessage="What the analyst sees"
+                  defaultMessage="What the analyst sees. Edit freely to try your own values."
                 />
               }
               isInvalid={Boolean(inputError)}
@@ -156,7 +145,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
             >
               <CodeEditor
                 languageId="json"
-                height={260}
+                height={CODE_EDITOR_HEIGHT}
                 value={inputValue}
                 onChange={setInputValue}
                 options={{ fontSize: 12, minimap: { enabled: false }, scrollBeyondLastLine: false }}
@@ -203,7 +192,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
             >
               <CodeEditor
                 languageId="json"
-                height={260}
+                height={CODE_EDITOR_HEIGHT}
                 value={result ? JSON.stringify(result.maskedInput, null, 2) : ''}
                 onChange={() => {}}
                 options={{
@@ -216,6 +205,8 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {/* Explicit gap: the code editor's help text paints outside the form row's measured height. */}
+        <EuiSpacer size="m" />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -277,7 +268,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" color="subdued" aria-hidden={true} />
+              <EuiIcon type="info" color="subdued" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
