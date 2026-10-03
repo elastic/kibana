@@ -549,7 +549,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 20 more"`
         );
       });
 
@@ -632,7 +632,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 20 more"`
         );
       });
 
@@ -654,7 +654,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 20 more"`
         );
       });
 
@@ -714,7 +714,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 22 more"`
+          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
         );
       });
 
@@ -747,7 +747,7 @@ describe('Perform bulk action request schema', () => {
         const result = PerformRulesBulkActionRequestBody.safeParse(payload);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 22 more"`
+          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
         );
       });
 

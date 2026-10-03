@@ -43,6 +43,19 @@ describe('getIsAlertSuppressionActive', () => {
     expect(result).toBe(false);
   });
 
+  it('should return true when only groupByV2 is configured and platinum license is present', async () => {
+    const licenseValue = (await licensingMock.license$.toPromise()) as ILicense;
+    (licenseValue.hasAtLeast as jest.Mock).mockReturnValueOnce(true);
+
+    const result = await getIsAlertSuppressionActive({
+      licensing: licensingMock,
+      isFeatureDisabled: false,
+      alertSuppression: { groupByV2: [{ field: 'host.name' }] },
+    });
+
+    expect(result).toBe(true);
+  });
+
   it('should return false when groupBy field exists but platinum license is not present', async () => {
     const licenseValue = (await licensingMock.license$.toPromise()) as ILicense;
     (licenseValue.hasAtLeast as jest.Mock).mockReturnValueOnce(false);
