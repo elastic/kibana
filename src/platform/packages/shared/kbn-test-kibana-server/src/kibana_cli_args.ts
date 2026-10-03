@@ -22,9 +22,10 @@ const ALIASES = new Map([
 ]);
 
 /**
- * These are the only flag names that allow duplicate definitions
+ * These are the only flag names that allow duplicate definitions. Kibana's CLI collects repeated
+ * `--config` paths and merges the files in order, so collapsing them would silently drop settings.
  */
-const ALLOW_DUPLICATES = new Set(['plugin-path']);
+const ALLOW_DUPLICATES = new Set(['plugin-path', 'config']);
 
 export type KibanaCliArg = string & {
   readonly __cliArgBrand: unique symbol;
