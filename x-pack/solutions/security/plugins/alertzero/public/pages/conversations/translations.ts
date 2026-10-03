@@ -53,3 +53,12 @@ export const PROPOSED_ACTIONS_SHOW_MORE_LABEL = i18n.translate(
   'xpack.alertzero.detailsFlyout.proposedActions.showMore',
   { defaultMessage: 'Show more proposed actions' }
 );
+
+export const BACKGROUND_WORK_TITLE = i18n.translate('xpack.alertzero.queue.backgroundWork.title', {
+  defaultMessage: 'Workers are running in the background',
+});
+
+export const BACKGROUND_WORK_BODY = i18n.translate('xpack.alertzero.queue.backgroundWork.body', {
+  defaultMessage:
+    'Nothing needs your attention right now. Proposed actions will appear here as workers find them.',
+});

@@ -57,6 +57,7 @@ import { EscalationModalBoundary } from './escalation_modal_boundary';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
+import { BackgroundWorkState } from './background_work_state';
 import { ConnectedCloseInvestigationModal } from '../../components/connected_status/connected_close_investigation_modal';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
@@ -156,6 +157,18 @@ const ConversationsPageContent: React.FC = () => {
   // category. Shares the chart row's query key, so it costs no extra request.
   const { data: chartsSummary, isLoading, error } = useProposalChartsSummary();
   const openCount = chartsSummary?.currentOpen ?? 0;
+
+  // Only once every count has settled: a failed or in-flight read arrives as zero and
+  // must not read as "nothing to review". Closed rows inside the window are work to
+  // show, so they keep the sections on screen.
+  const isBackgroundWorkState =
+    !isLoading &&
+    !error &&
+    chartsSummary !== undefined &&
+    openCount === 0 &&
+    sections.every(({ total, hasCountError, hasLoadError }) => {
+      return total === 0 && !hasCountError && !hasLoadError;
+    });
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
@@ -404,20 +417,29 @@ const ConversationsPageContent: React.FC = () => {
           />
           <ScanFailureCallout />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ProposalsTrendChartRow />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Impact
-            investigations={conversations}
-            entityFilter={effectiveEntityFilter}
-            onEntityFilterChange={setEntityFilter}
-          />
-        </EuiFlexItem>
+        {isBackgroundWorkState && (
+          <EuiFlexItem grow={false}>
+            <BackgroundWorkState />
+          </EuiFlexItem>
+        )}
+        {!isBackgroundWorkState && (
+          <EuiFlexItem grow={false}>
+            <ProposalsTrendChartRow />
+          </EuiFlexItem>
+        )}
+        {!isBackgroundWorkState && (
+          <EuiFlexItem>
+            <Impact
+              investigations={conversations}
+              entityFilter={effectiveEntityFilter}
+              onEntityFilterChange={setEntityFilter}
+            />
+          </EuiFlexItem>
+        )}
 
         {/* Every bucket is rendered, empty or not: the accordions are the page's structure,
             so one disappearing would move the others as the queue drains. */}
-        {sections.map((section) => (
+        {(isBackgroundWorkState ? [] : sections).map((section) => (
           <EuiFlexItem key={section.id} grow={false}>
             <QueueSection
               section={section}
