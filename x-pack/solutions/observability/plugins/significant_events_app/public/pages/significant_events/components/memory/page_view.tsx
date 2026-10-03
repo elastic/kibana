@@ -23,7 +23,6 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -31,11 +30,7 @@ import { MemoryLineage } from './lineage';
 import { MemorySourceTaskLink } from './source_task_link';
 import { MemoryTelemetryPanel } from './telemetry_panel';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const contentWithoutDuplicateTitle = (title: string, content: string): string =>
-  content.replace(new RegExp(`^#{1,3}\\s*${escapeRegExp(title)}\\s*\\n+`, 'i'), '');
+import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../shared/page_markdown';
 
 interface MemoryPageViewProps {
   pageId: string;
@@ -194,16 +189,7 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
 
       <EuiSpacer size="s" />
       {page.content.length > 0 ? (
-        <div
-          className={css`
-            .euiMarkdownFormat :not(pre) > code {
-              background: transparent;
-              padding: 0;
-              border-radius: 0;
-              box-shadow: none;
-            }
-          `}
-        >
+        <div className={pageMarkdownCss}>
           <EuiMarkdownFormat textSize="s">
             {contentWithoutDuplicateTitle(page.title, page.content)}
           </EuiMarkdownFormat>
