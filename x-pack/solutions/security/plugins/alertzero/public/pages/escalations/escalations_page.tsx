@@ -14,7 +14,13 @@ import {
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
-import { EscalationQueue, type EscalationQueueItem } from '@kbn/agentic-investigations-common';
+import {
+  EscalationQueue,
+  Impact,
+  matchesEntityFilter,
+  useEntityFilter,
+  type EscalationQueueItem,
+} from '@kbn/agentic-investigations-common';
 import {
   useAssignEscalation,
   useListEscalations,
@@ -99,6 +105,23 @@ export const EscalationsPage: React.FC = () => {
 
   const allItems = useMemo(() => [...openItems, ...closedItems], [openItems, closedItems]);
 
+  // One selection filters both queues. Pills come from every loaded row, open and closed.
+  const { entityFilter, setEntityFilter } = useEntityFilter(allItems);
+  const visibleOpenItems = useMemo(
+    () =>
+      entityFilter
+        ? openItems.filter((item) => matchesEntityFilter(item, entityFilter))
+        : openItems,
+    [openItems, entityFilter]
+  );
+  const visibleClosedItems = useMemo(
+    () =>
+      entityFilter
+        ? closedItems.filter((item) => matchesEntityFilter(item, entityFilter))
+        : closedItems,
+    [closedItems, entityFilter]
+  );
+
   const renderAssignees = useQueueAssignees({
     items: allItems,
     getRowKey: (e) => e.id,
@@ -152,9 +175,18 @@ export const EscalationsPage: React.FC = () => {
         {!isLoading && !pageError ? (
           <>
             <EuiFlexItem grow={false}>
+              <Impact
+                items={allItems}
+                entityFilter={entityFilter}
+                onEntityFilterChange={setEntityFilter}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
-                escalations={openItems}
+                escalations={visibleOpenItems}
+                loadedCount={openItems.length}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={openQuery.data?.pagination.total}
                 onLoadMore={() => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
@@ -166,7 +198,9 @@ export const EscalationsPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="closed"
-                escalations={closedItems}
+                escalations={visibleClosedItems}
+                loadedCount={closedItems.length}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={closedQuery.data?.pagination.total}
                 onLoadMore={() => setClosedPage((p) => p + 1)}
                 error={closedQuery.error as Error | null}

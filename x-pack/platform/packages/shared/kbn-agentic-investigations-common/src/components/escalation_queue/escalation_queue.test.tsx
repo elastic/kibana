@@ -137,4 +137,26 @@ describe('EscalationQueue', () => {
     const link = screen.getByTestId(`escalationCardLink-${openItem.id}`);
     expect(link).toHaveAttribute('href', `/chat/${openItem.id}`);
   });
+
+  it('shows the filtered empty-state copy when an Impact filter hides every row', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue status="open" escalations={[]} isFiltered renderAssignees={() => <span />} />
+    );
+    expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+  });
+
+  it('computes "Show more" from the unfiltered loaded count', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        loadedCount={3}
+        totalItemCount={5}
+        isFiltered
+        onLoadMore={jest.fn()}
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.getByTestId('escalationQueueLoadMore-open')).toHaveTextContent('2');
+  });
 });

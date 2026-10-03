@@ -120,8 +120,14 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
   };
   const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
 
+  const impactClient = {
+    getEntityIdsByConversationId: jest.fn().mockResolvedValue(new Map<string, string[]>()),
+  };
+  const getImpactClient = jest.fn().mockReturnValue(impactClient);
+
   const service = new EscalationsService({
     logger,
+    getImpactClient,
     getConversationClient,
     getAttachmentsClient,
     conversationTemplates,
@@ -136,6 +142,8 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     attachmentsClient,
     conversationTemplates,
     investigationStatusService,
+    getImpactClient,
+    impactClient,
   };
 };
 
@@ -546,6 +554,63 @@ describe('EscalationsService.list', () => {
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
       results: [MOCK_SUMMARY],
+    });
+  });
+
+  describe('entity_ids', () => {
+    const withLinked = (id: string, linked: string[]) => ({
+      ...MOCK_SUMMARY,
+      id,
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+
+    it('attaches the deduped union of the linked investigations entity ids', async () => {
+      const { service, impactClient, getImpactClient } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [withLinked('e1', ['inv-1', 'inv-2']), withLinked('e2', ['inv-3'])],
+          total: 2,
+        }),
+      });
+      impactClient.getEntityIdsByConversationId.mockResolvedValue(
+        new Map([
+          ['inv-1', ['host-1', 'user-1']],
+          ['inv-2', ['host-1', 'svc-1']],
+        ])
+      );
+
+      const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(getImpactClient).toHaveBeenCalledWith(request);
+      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledTimes(1);
+      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledWith([
+        'inv-1',
+        'inv-2',
+        'inv-3',
+      ]);
+      expect(result.results[0].entity_ids).toEqual(['host-1', 'user-1', 'svc-1']);
+      expect(result.results[1]).not.toHaveProperty('entity_ids');
+    });
+
+    it('skips the impact read when no escalation links an investigation', async () => {
+      const { service, getImpactClient } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
+      });
+
+      await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(getImpactClient).not.toHaveBeenCalled();
+    });
+
+    it('still returns the rows when the impact read fails', async () => {
+      const row = withLinked('e1', ['inv-1']);
+      const { service, impactClient } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [row], total: 1 }),
+      });
+      impactClient.getEntityIdsByConversationId.mockRejectedValue(new Error('forbidden'));
+
+      const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(result.results).toEqual([row]);
     });
   });
 

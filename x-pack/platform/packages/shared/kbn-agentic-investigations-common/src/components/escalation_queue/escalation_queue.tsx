@@ -54,6 +54,13 @@ interface EscalationQueueProps {
    * Cmd/middle-click to open in a new tab and showing the URL on hover.
    */
   getHref?: (escalation: EscalationQueueItem) => string | undefined;
+  /** An Impact filter is applied, so an empty list means "no match" rather than "no escalations". */
+  isFiltered?: boolean;
+  /**
+   * Number of escalations loaded from the server before the Impact filter, so "Show more (N)"
+   * stays accurate while `escalations` is narrowed. Defaults to `escalations.length`.
+   */
+  loadedCount?: number;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -87,10 +94,12 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     onClickCard,
     selectedConversationId,
     getHref,
+    isFiltered = false,
+    loadedCount,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
-    const remaining = serverTotal - escalations.length;
+    const remaining = serverTotal - (loadedCount ?? escalations.length);
     const showLoadMore = onLoadMore !== undefined && remaining > 0;
 
     const buttonContent = (
@@ -165,7 +174,9 @@ export const EscalationQueue = memo<EscalationQueueProps>(
       return (
         <EuiPanel>
           <EuiText size="xs" color="subdued">
-            {ESCALATION_QUEUE_LABELS.emptyQueue}
+            {isFiltered
+              ? ESCALATION_QUEUE_LABELS.emptyQueueWithFilter
+              : ESCALATION_QUEUE_LABELS.emptyQueue}
           </EuiText>
         </EuiPanel>
       );
