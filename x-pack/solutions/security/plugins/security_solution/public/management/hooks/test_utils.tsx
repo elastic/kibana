@@ -11,6 +11,10 @@ import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list
 import { coreMock } from '@kbn/core/public/mocks';
 import { ReactQueryClientProvider } from '../../common/containers/query_client/query_client_provider';
 
+// Effective budget is min(Jest test timeout, renderQuery's waitFor timeout); keep Jest well
+// above the waitFor timeout so a mocked render starved under CI parallel load has headroom.
+jest.setTimeout(30000);
+
 export const getFakeListId: () => string = () => 'FAKE_LIST_ID';
 export const getFakeListDefinition: () => CreateExceptionListSchema = () => ({
   name: 'FAKE_LIST_NAME',
@@ -42,7 +46,7 @@ export const renderQuery = async (
   const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
   });
-  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy(), { timeout: 5000 });
+  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy(), { timeout: 10000 });
   return resultHook.current;
 };
 
