@@ -54,3 +54,6 @@ export {
   IconChartGaugeCircleSimple,
   IconChartTagcloud,
 } from './src/assets';
+
+export { resolveVisIcon } from './src/vis_icons';
+export type { ResolvedVisIcon, VisIcon, VisIconType } from './src/vis_icons';
