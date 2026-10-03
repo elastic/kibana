@@ -13,7 +13,7 @@ import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
-import { formatIncompleteMaterializationNotice } from '../lib/hydrate_notification';
+import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
@@ -158,17 +158,17 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         // Degrade to a system_update line rather than a failed step: this is a
         // before-agent hook, so throwing here aborts the investigator round over one
         // writer that could not reach the sandbox.
-        context.logger.error(
-          `Memory materialize failed for sandbox ${sandboxId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
         return {
           output: {
             sandbox_id: sandboxId,
-            failed: true,
             recalled_ids: [],
-            notification: formatIncompleteMaterializationNotice(MEMORY_WORKSPACE_ROOT),
+            ...degradeOnWriterFailure({
+              logger: context.logger,
+              label: 'Memory materialize',
+              sandboxId,
+              directory: MEMORY_WORKSPACE_ROOT,
+              error,
+            }),
           },
         };
       }

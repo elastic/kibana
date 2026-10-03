@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
-import { formatIncompleteMaterializationNotice } from '../lib/hydrate_notification';
+import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -119,18 +119,18 @@ export const decisionTreeHydrateStepDefinition = ({
           `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
         );
       } catch (error) {
-        context.logger.error(
-          `Decision tree hydrate failed for sandbox ${sandboxId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
         return {
           output: {
             sandbox_id: sandboxId,
             conversation_id: conversationId,
             tree_count: 0,
-            failed: true,
-            notification: formatIncompleteMaterializationNotice(DECISION_TREE_WORKSPACE_ROOT),
+            ...degradeOnWriterFailure({
+              logger: context.logger,
+              label: 'Decision tree hydrate',
+              sandboxId,
+              directory: DECISION_TREE_WORKSPACE_ROOT,
+              error,
+            }),
           },
         };
       }

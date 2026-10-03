@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+
 /** Markdown fragment for one hydrate node. Empty when this turn wrote no new files. */
 export const formatHydrateNotification = (
   heading: string,
@@ -29,6 +31,34 @@ export const formatHydrateNotification = (
 export const formatIncompleteMaterializationNotice = (directory: string): string =>
   `Materialization of ${directory.replace(/\/$/, '')}/ encountered an error; ` +
   'its contents may be incomplete or missing.';
+
+/**
+ * The failure half of a workspace writer's contract: log it, and tell the model the directory
+ * may be incomplete. A writer step must not throw — materialize runs before the investigator
+ * and as the reinforcement agent's before-agent hook, so a failed writer would abort a round
+ * over one directory.
+ */
+export const degradeOnWriterFailure = ({
+  logger,
+  label,
+  sandboxId,
+  directory,
+  error,
+}: {
+  logger: Logger;
+  /** What the log line calls this writer, e.g. `'Cortex hydrate'`. */
+  label: string;
+  sandboxId: string;
+  directory: string;
+  error: unknown;
+}): { failed: true; notification: string } => {
+  logger.error(
+    `${label} failed for sandbox ${sandboxId}: ${
+      error instanceof Error ? error.message : String(error)
+    }`
+  );
+  return { failed: true, notification: formatIncompleteMaterializationNotice(directory) };
+};
 
 /** One workspace writer, as reported to {@link composeHydrateNotificationContext}. */
 export interface HydrateWriter {

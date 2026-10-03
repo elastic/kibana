@@ -12,7 +12,7 @@ import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
-import { formatIncompleteMaterializationNotice } from '../lib/hydrate_notification';
+import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -129,17 +129,17 @@ export const cortexHydrateStepDefinition = ({
           `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
         );
       } catch (error) {
-        context.logger.error(
-          `Cortex hydrate failed for sandbox ${sandboxId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
         return {
           output: {
             sandbox_id: sandboxId,
             conversation_id: resolvedConversationId,
-            failed: true,
-            notification: formatIncompleteMaterializationNotice(CORTEX_WORKSPACE_ROOT),
+            ...degradeOnWriterFailure({
+              logger: context.logger,
+              label: 'Cortex hydrate',
+              sandboxId,
+              directory: CORTEX_WORKSPACE_ROOT,
+              error,
+            }),
           },
         };
       }
