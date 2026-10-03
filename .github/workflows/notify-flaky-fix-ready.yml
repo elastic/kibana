@@ -1,0 +1,30 @@
+name: Notify on flaky-fix PR ready for review
+
+on:
+  pull_request_target:
+    types: [ready_for_review]
+
+jobs:
+  notify_slack:
+    name: Notify owning team Slack channel
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'flaky-test-fixer')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kibana-operations
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: 'elastic/kibana-operations'
+          ref: main
+          path: ./kibana-operations
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
+
+      - name: Notify owning team Slack channel
+        working-directory: ./kibana-operations/triage
+        env:
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER}}
+        run: |
+          npm ci --omit=dev
+          node flaky-fix-ready ${{github.event.pull_request.number}} || true
