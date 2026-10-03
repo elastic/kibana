@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { CategoriesResponse, MainCategories, PipelineStats } from '@kbn/siem-readiness';
 import {
   ALL_CATEGORIES,
-  getIndexCategoryMap,
+  getIndexCategoriesMap,
   SILENCE_THRESHOLD_MS,
   SILENCE_THRESHOLD_DEFAULT_MS,
 } from '@kbn/siem-readiness';
@@ -19,6 +19,18 @@ import type { IndexHealthEntry } from './fetch_index_health';
 import { fetchIndexHealth } from './fetch_index_health';
 import { fetchCategories } from './fetch_categories';
 import { toDataStreamName } from './utils';
+
+const resolveCategoriesForPipeline = (
+  indices: string[],
+  indexToCategoriesMap: Map<string, MainCategories[]>
+): MainCategories[] =>
+  Array.from(
+    new Set(
+      indices
+        .flatMap((idx) => indexToCategoriesMap.get(idx) ?? [])
+        .filter((c) => ALL_CATEGORIES.includes(c))
+    )
+  );
 
 export const fetchPipelines = async ({
   esClient,
@@ -31,7 +43,7 @@ export const fetchPipelines = async ({
   logger: Logger;
   /**
    * Pre-fetched categories result. When provided, the internal fetchCategories call is skipped.
-   * Used to resolve each pipeline's SIEM category so the per-category silence threshold applies.
+   * Used to resolve each pipeline's SIEM categories so the per-category silence threshold applies.
    */
   categoriesData?: CategoriesResponse;
 }): Promise<PipelineStats[]> => {
@@ -58,14 +70,23 @@ export const fetchPipelines = async ({
     addPipelineIndex(indexData.settings?.index?.final_pipeline, indexName);
   });
 
+  // Categories are available on both stateful and serverless and are required for UI/agent
+  // panel grouping (pipeline.categories). Resolve them before the serverless early return.
+  const resolvedCategories = categoriesData ?? (await fetchCategories({ esClient, logger }));
+  const indexToCategoriesMap = getIndexCategoriesMap(resolvedCategories);
+
   if (isServerless) {
-    const pipelines: PipelineStats[] = Object.keys(pipelineToIndices).map((name) => ({
-      name,
-      indices: Array.from(pipelineToIndices[name]),
-      docsCount: 0,
-      failedDocsCount: 0,
-      statsAvailable: false,
-    }));
+    const pipelines: PipelineStats[] = Object.keys(pipelineToIndices).map((name) => {
+      const indices = Array.from(pipelineToIndices[name]);
+      return {
+        name,
+        indices,
+        docsCount: 0,
+        failedDocsCount: 0,
+        statsAvailable: false,
+        categories: resolveCategoriesForPipeline(indices, indexToCategoriesMap),
+      };
+    });
 
     logger.info(`Retrieved ${pipelines.length} ingest pipelines (serverless mode)`);
     return pipelines;
@@ -105,12 +126,6 @@ export const fetchPipelines = async ({
     }));
 
   const indexHealth = await fetchIndexHealth({ esClient, logger });
-
-  // Resolve each pipeline's SIEM category so the per-category silence threshold can be applied.
-  // Categories live "at the edges" (tool/UI), so when not provided we self-fetch here — this is
-  // the layer where isSilent is computed, and it must know the category to pick the right threshold.
-  const resolvedCategories = categoriesData ?? (await fetchCategories({ esClient, logger }));
-  const indexToCategoryMap = getIndexCategoryMap(resolvedCategories);
 
   const now = Date.now();
 
@@ -156,14 +171,9 @@ export const fetchPipelines = async ({
       );
     }
 
-    // Resolve this pipeline's SIEM categories from the indices it serves.
-    const categories = Array.from(
-      new Set(
-        p.indices
-          .map((idx) => indexToCategoryMap.get(idx))
-          .filter((c): c is MainCategories => ALL_CATEGORIES.some((mc) => mc === c))
-      )
-    );
+    // Full union of SIEM categories across all indices this pipeline serves.
+    // Multi-valued so UI panels and the agent agree; silence uses the most lenient threshold.
+    const categories = resolveCategoriesForPipeline(p.indices, indexToCategoriesMap);
 
     // Apply the most lenient per-category silence threshold so a pipeline that also serves a
     // slow/batch category (e.g. Application/SaaS 24h) is not falsely flagged. Fall back to the

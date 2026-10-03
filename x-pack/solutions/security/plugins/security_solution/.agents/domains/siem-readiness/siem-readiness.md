@@ -9,7 +9,7 @@ kibana_paths:
   - x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_readiness/**
   - x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_readiness/**
   - x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/events/siem_readiness/**
-last_updated: 2026-07-08
+last_updated: 2026-07-14
 source_prs:
   - https://github.com/elastic/kibana/pull/269284
   - https://github.com/elastic/kibana/pull/252902
@@ -42,6 +42,10 @@ The five main categories and their `event.category` mappings (defined in `fetche
 Any `event.category` value not in this table is **uncategorized** and excluded from all views. An index that ingests multiple `event.category` values appears in multiple category groups simultaneously — this is expected and correct.
 
 ## Architectural invariants
+
+- **Single-source any computed output shown on more than one surface.** Any status, summary, label, classification, URL, or category membership displayed across multiple surfaces (dimension, agent, UI) must be a pure exported function / field in `@kbn/siem-readiness` (or a single server-computed field such as `pipeline.categories`). Never reimplement the same derivation inline in a tool and a tab.
+
+- **Index→category is multi-valued — never encode it as `Map<string, string>`.** An index can appear under multiple main categories because `event.category` is multi-valued. Use `getIndexCategoriesMap` → `Map<string, MainCategories[]>` and populate `pipeline.categories` / `finding.categories` as the full union. The UI accordion and the agent must both consume that server-computed field — never rebuild category membership separately in the UI with different cardinality.
 
 - **UI/agent parity must be preserved.** Both the HTTP route and the agent tool for each dimension call the same orchestrator (`getCoverage`, `getContinuity`, `getQuality`, `getRetention`). If you add logic to a tool that is not also in the route (or vice versa), or if you bypass the shared orchestrator, the agent and UI will return different answers. Users lose trust in both surfaces when they disagree.
 
@@ -124,6 +128,8 @@ Any `event.category` value not in this table is **uncategorized** and excluded f
 **PR #252902 — Double-counting indices across categories (caught by @JordanSh):** The initial retention tab counted items per category-group, so an index appearing in 3 categories was counted 3 times. The "Total non-compliant" count was inflated. A generic reviewer would have missed this because it requires knowing that indices can appear in multiple categories (a property of SIEM Readiness's multi-valued `event.category` model).
 
 **PR #272394 — `.find()` discards multi-stream health signals (caught by @JordanSh):** The initial `fetchPipelines` enrichment used `.find(h => h !== undefined)` to look up health data for a pipeline's backing indices. For pipelines attached to multiple data streams, all but the first match were silently discarded — so a pipeline that was silent on stream B (but healthy on stream A, which was found first) would appear healthy. A generic reviewer would have missed this because the code looks correct: it reads a health entry and uses it.
+
+**Single-valued index→category collapse (caught during Continuity agent/UI parity investigation):** `getIndexCategoryMap` returned `Map<string, string>` and used last-writer-wins when an index appeared under multiple main categories. The UI Continuity accordion kept its own multi-valued inline map, so the Endpoint panel could list a pipeline the agent did not attribute to Endpoint (and silence thresholds could flip independently across surfaces). Fix: replace with `getIndexCategoriesMap` → `Map<string, MainCategories[]>`, populate `pipeline.categories` / finding `categories` as the full union on the server, and have the UI accordion + status cards consume that field only.
 
 **Endpoint platform labels collapsed by OS (caught during composite vendor+OS work):** The initial `classifyPlatform` implementation checked `host.os.family` before any vendor field (`event.module`, `observer.vendor`), so every Windows endpoint vendor (CrowdStrike, Elastic Defend, SentinelOne) collapsed into a single `windows Endpoints` label. The agent could not distinguish vendors on the same OS. Fix: compose `Vendor (OS)` when a vendor signal is present, using generic title-casing rather than hardcoded lookup maps.
 

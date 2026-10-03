@@ -6,14 +6,14 @@
  */
 
 import type { CategoriesResponse, PipelineStats } from './types';
-import { getIndexCategoryMap } from './get_index_category_map';
+import { getIndexCategoriesMap } from './get_index_categories_map';
 
 /**
  * Returns the subset of pipelines that serve at least one categorized SIEM index.
  *
  * Uses exact-match against the categories backing index list: a pipeline is included
- * if any of its `indices` entries appears as a key in the index→category map built
- * from `categoriesData`.
+ * if any of its `indices` entries appears as a key in the multi-valued index→categories
+ * map built from `categoriesData`.
  *
  * This is the canonical filtering predicate shared by:
  *   - the server-side agent tool (getContinuityTool) — to decide which pipelines to surface
@@ -27,6 +27,6 @@ export const filterPipelinesByCategories = (
   categoriesData: CategoriesResponse | undefined
 ): PipelineStats[] => {
   if (!categoriesData?.mainCategoriesMap?.length) return [];
-  const indexToCategoryMap = getIndexCategoryMap(categoriesData);
-  return pipelines.filter((p) => p.indices.some((idx) => indexToCategoryMap.has(idx)));
+  const indexToCategoriesMap = getIndexCategoriesMap(categoriesData);
+  return pipelines.filter((p) => p.indices.some((idx) => indexToCategoriesMap.has(idx)));
 };
