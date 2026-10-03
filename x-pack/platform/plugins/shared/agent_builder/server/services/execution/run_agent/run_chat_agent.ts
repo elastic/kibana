@@ -70,6 +70,7 @@ import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
+import { getRawPromptOverride } from './raw_prompt_override';
 import {
   eventsForContext,
   groupTimelineEntries,
@@ -360,7 +361,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
   });
 
+  const rawPromptOverride = getRawPromptOverride(agentId);
+  if (rawPromptOverride) {
+    logger.info(
+      `Raw prompt override active for agent [${agentId}]: replacing system prompts, tools limited to [${rawPromptOverride.toolPrefix}*]`
+    );
+  }
+
   const promptFactory = createPromptFactory({
+    rawSystemPrompt: rawPromptOverride?.systemPrompt,
     configuration: resolvedConfiguration,
     spaceId: context.spaceId,
     skills: filteredSkills,
@@ -379,6 +388,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const agentGraph = createAgentGraph({
+    rawPromptOverride,
     logger,
     events: { emit: eventEmitter },
     chatModel: model.chatModel,

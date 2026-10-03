@@ -41,6 +41,10 @@ export const getStructuredAnswerPrompt = async (
     { resultStore, resultTransformer, logger }
   );
 
+  if (params.rawSystemPrompt) {
+    return [['system', params.rawSystemPrompt], ...contextMessages];
+  }
+
   return [
     [
       'system',

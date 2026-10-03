@@ -21,6 +21,7 @@ import {
   createReasoningEvent,
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
+import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { TodoStateManager, ToolManager } from '@kbn/agent-builder-server/runner';
 import {
   ConversationRoundStepType,
@@ -49,8 +50,13 @@ import {
 import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType, StateUpdate } from './state';
 import { StateAnnotation, toCurrentRun } from './state';
-import { processResearchResponse, processToolNodeResponse } from './response_processing';
-import { createAnswerAgentStructured } from './answer_agent_structured';
+import {
+  processResearchResponse,
+  processStructuredAnswerResponse,
+  processToolNodeResponse,
+} from './response_processing';
+import { createAnswerAgentStructured, structuredOutputSchema } from './answer_agent_structured';
+import { FINAL_ANSWER_TOOL_NAME, type RawPromptOverride } from './raw_prompt_override';
 import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
 import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
@@ -77,7 +83,9 @@ export const createAgentGraph = ({
   sessionId,
   cacheControl,
   contextManagement,
+  rawPromptOverride,
 }: {
+  rawPromptOverride?: RawPromptOverride;
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
   configuration: ResolvedConfiguration;
@@ -142,8 +150,33 @@ export const createAgentGraph = ({
     };
   };
 
+  // With a raw prompt override, the research phase sees only the prefixed tools plus a terminal
+  // final answer tool (structured runs only) whose parameters are the output schema.
+  const finalAnswerSchema = wrapJsonSchema({
+    schema: outputSchema ?? structuredOutputSchema,
+    property: 'response',
+    description: 'Submit the final answer. Calling this tool ends the run.',
+  });
+  const researchTools = rawPromptOverride
+    ? [
+        ...toolManager.list().filter(({ name }) => name.startsWith(rawPromptOverride.toolPrefix)),
+        ...(structuredOutput
+          ? [
+              {
+                type: 'function' as const,
+                function: {
+                  name: FINAL_ANSWER_TOOL_NAME,
+                  description: 'Submit the final answer. Calling this tool ends the run.',
+                  parameters: finalAnswerSchema.schema as Record<string, unknown>,
+                },
+              },
+            ]
+          : []),
+      ]
+    : toolManager.list();
+
   const researchAgent = async (state: StateType): Promise<StateUpdate> => {
-    const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
+    const researcherModel = chatModel.bindTools(researchTools).withConfig({
       tags: [tags.agent, tags.researchAgent],
       sessionId,
       cacheControl,
@@ -167,6 +200,26 @@ export const createAgentGraph = ({
       );
 
       const currentCycle = state.currentCycle + 1;
+
+      const finalAnswerCall =
+        rawPromptOverride && structuredOutput
+          ? response.tool_calls?.find(({ name }) => name === FINAL_ANSWER_TOOL_NAME)
+          : undefined;
+      if (finalAnswerCall) {
+        const args = finalAnswerCall.args as Record<string, unknown>;
+        const answer = processStructuredAnswerResponse(
+          finalAnswerSchema.wrapped ? args.response : args
+        );
+        if (answer.type === 'structured_answer') {
+          return {
+            researchOutcome: { type: 'handover', message: '', forceful: false },
+            answerOutcome: answer,
+            currentCycle,
+            errorCount: 0,
+          };
+        }
+      }
+
       const turn = processResearchResponse(response, { cycle: currentCycle, toolManager });
 
       const inputTokens = response.usage_metadata?.input_tokens;
@@ -239,7 +292,10 @@ export const createAgentGraph = ({
         return steps.executeTool;
       }
     }
-    // handover
+    // handover; a final answer tool call already carries the structured answer
+    if (structuredOutput && state.answerOutcome?.type === 'structured_answer') {
+      return steps.finalize;
+    }
     return structuredOutput ? steps.prepareToAnswer : steps.finalize;
   };
 
@@ -421,6 +477,7 @@ export const createAgentGraph = ({
         [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
+        [steps.finalize]: steps.finalize,
       })
       .addEdge(steps.prepareToAnswer, steps.answerAgent)
       .addConditionalEdges(steps.answerAgent, answerAgentEdge, {

@@ -46,7 +46,10 @@ export const getResearchAgentPrompt = async (
     { resultStore, resultTransformer, logger }
   );
 
-  return [['system', await getAgentSystemMessage(params)], ...contextMessages];
+  return [
+    ['system', params.rawSystemPrompt ?? (await getAgentSystemMessage(params))],
+    ...contextMessages,
+  ];
 };
 
 const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {

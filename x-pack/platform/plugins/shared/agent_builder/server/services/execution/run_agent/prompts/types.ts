@@ -54,6 +54,8 @@ export interface PromptFactoryParams {
   relevantSkillsEnabled: boolean;
   imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
+  /** When set, replaces the built-in system prompt of every phase (see `raw_prompt_override`). */
+  rawSystemPrompt?: string;
 }
 
 export interface HandoverParams {
