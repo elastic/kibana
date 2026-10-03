@@ -16,13 +16,7 @@ import type { MemoryFilter, MemoryListResult } from './types';
 
 const memoryKeys = {
   availability: ['nightshift', 'memory', 'availability'] as const,
-  pages: (filter: MemoryFilter) =>
-    ['nightshift', 'memory', 'pages', filter] as unknown as readonly [
-      'nightshift',
-      'memory',
-      'pages',
-      MemoryFilter
-    ],
+  pages: (filter: MemoryFilter) => ['nightshift', 'memory', 'pages', filter] as const,
   treemap: (tags: readonly string[]) =>
     ['nightshift', 'memory', 'keywords', tags.join('|')] as const,
   page: (id: string) => ['nightshift', 'memory', 'page', id] as const,
@@ -78,15 +72,12 @@ export const MEMORY_PAGE_SIZE = 25;
 export const useMemoryPages = (filter: MemoryFilter = 'all') => {
   const client = useMemoryClient();
 
-  // Single options object. The key is widened to `string[]` so the compiler
-  // cannot narrow onto the `(queryKey, queryFn, options)` overload, which does
-  // not accept `initialPageParam`.
-  // Two-argument form, matching the house pattern in
-  // `kbn-change-history-ui/src/hooks/use_change_history_list.ts`. The page param
-  // is the server's opaque `search_after` cursor, not an offset.
-  const query = useInfiniteQuery<MemoryListResult, Error>(
-    memoryKeys.pages(filter),
-    ({ signal, pageParam }) => {
+  // Single options object, as every other query in this file and the Nightshift
+  // listing hook. The page param is the server's opaque `search_after` cursor,
+  // not an offset.
+  const query = useInfiniteQuery<MemoryListResult, Error>({
+    queryKey: memoryKeys.pages(filter),
+    queryFn: ({ signal, pageParam }) => {
       const cursor = pageParam as string | undefined;
       return client!.fetch('GET /internal/nightshift/memory/pages', {
         signal: signal ?? null,
@@ -95,12 +86,10 @@ export const useMemoryPages = (filter: MemoryFilter = 'all') => {
         },
       }) as Promise<MemoryListResult>;
     },
-    {
-      enabled: client !== undefined,
-      // The server omits `cursor` when the result set is exhausted.
-      getNextPageParam: (lastPage) => lastPage.cursor,
-    }
-  );
+    enabled: client !== undefined,
+    // The server omits `cursor` when the result set is exhausted.
+    getNextPageParam: (lastPage) => lastPage.cursor,
+  });
 
   // Flatten the accumulated pages once, so consumers do not each do it.
   const rows = useMemo(() => query.data?.pages.flatMap((page) => page.pages) ?? [], [query.data]);
