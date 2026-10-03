@@ -22,7 +22,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -199,36 +198,18 @@ export function MemoryKeywordTreemap({
 
   return (
     <div data-test-subj="nightshiftMemoryTreemap">
-      <EuiTitle size="xxs">
-        <h3>
-          <FormattedMessage
-            id="xpack.significantEventsApp.memory.keywordTreemap.title"
-            defaultMessage="What the store is about"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.significantEventsApp.memory.keywordTreemap.caption"
-            defaultMessage="Cell area is a keyword's share of the store's connections. Select a keyword to filter by it."
-          />
-        </p>
-      </EuiText>
-
       {selectedKeywords.length > 0 && (
         <>
-          <EuiSpacer size="s" />
           <KeywordFilterRow
             selectedKeywords={selectedKeywords}
             displayNames={displayNames}
             onToggleKeyword={onToggleKeyword}
             onClearKeywords={onClearKeywords}
           />
+          <EuiSpacer size="s" />
         </>
       )}
 
-      <EuiSpacer size="s" />
       {cells.length === 0 ? (
         <EuiText size="s" color="subdued" data-test-subj="nightshiftMemoryTreemapEmpty">
           <FormattedMessage

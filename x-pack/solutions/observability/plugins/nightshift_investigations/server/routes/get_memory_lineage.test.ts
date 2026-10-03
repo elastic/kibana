@@ -6,7 +6,7 @@
  */
 import { notFound } from '@hapi/boom';
 import type { MemoryPage } from '../../common/memory';
-import { getMemoryLineageRoute, MAX_LINEAGE_DEPTH } from './get_memory_lineage';
+import { getMemoryLineageRoute } from './get_memory_lineage';
 
 const { handler } = getMemoryLineageRoute['GET /internal/nightshift/memory/pages/{id}/lineage'];
 
@@ -32,13 +32,15 @@ const memory = (id: string, mergedFrom: string[] = []): MemoryPage =>
     },
   } as unknown as MemoryPage);
 
-/** Serves the walk from a graph of `id -> merged_from`, one mget per level. */
+/** Serves the route from a graph of `id -> merged_from`, and reports only the ids it can resolve. */
 const run = (root: MemoryPage | undefined, graph: Record<string, string[]>, enabled = true) => {
   const store = {
     get: jest.fn().mockResolvedValue(root),
     getMany: jest
       .fn()
-      .mockImplementation(async (ids: string[]) => ids.map((id) => memory(id, graph[id] ?? []))),
+      .mockImplementation(async (ids: string[]) =>
+        ids.filter((id) => id in graph).map((id) => memory(id, graph[id] ?? []))
+      ),
   };
   const result = handler({
     request: {},
@@ -50,85 +52,45 @@ const run = (root: MemoryPage | undefined, graph: Record<string, string[]>, enab
 };
 
 describe('getMemoryLineageRoute', () => {
-  it('returns no ancestors and a zero depth for a memory with no merges', async () => {
-    const { result } = run(memory('memory_root'), {});
-    await expect(result).resolves.toEqual({ ancestors: [], depth: 0 });
+  it('returns no sources for a memory with no merges', async () => {
+    const { store, result } = run(memory('memory_root'), {});
+
+    await expect(result).resolves.toEqual({ sources: [] });
+    // Nothing to read, so the store is not asked.
+    expect(store.getMany).not.toHaveBeenCalled();
   });
 
-  it('reports the depth actually walked, not the cap', async () => {
-    // A single-level chain must report 1. Reporting MAX_LINEAGE_DEPTH whenever
-    // any ancestor existed overstated every chain as maximally deep.
-    const { result } = run(memory('memory_root', ['memory_a']), { memory_a: [] });
-
-    await expect(result).resolves.toEqual({
-      ancestors: [expect.objectContaining({ id: 'memory_a' })],
-      depth: 1,
-    });
-  });
-
-  it('counts each level of a multi-level chain', async () => {
-    const { result } = run(memory('memory_root', ['memory_a']), {
-      memory_a: ['memory_b'],
-      memory_b: ['memory_c'],
-      memory_c: [],
-    });
-
-    const lineage = await result;
-
-    expect(lineage.depth).toBe(3);
-    expect(lineage.ancestors.map((a: { id: string }) => a.id)).toEqual([
-      'memory_a',
-      'memory_b',
-      'memory_c',
-    ]);
-  });
-
-  it('reports the level each ancestor was reached at, so a fan-in is drawable', async () => {
-    // `memory_root` merged from two memories, one of which was itself merged from
-    // another. The levels are what let the UI show "Merged from: A, B" and
-    // "which merged from: C" instead of one flat chain.
+  it('reports the direct sources of a merge', async () => {
     const { result } = run(memory('memory_root', ['memory_a', 'memory_b']), {
-      memory_a: ['memory_c'],
+      memory_a: [],
       memory_b: [],
-      memory_c: [],
     });
 
     const lineage = await result;
 
-    expect(lineage.ancestors.map((a: { id: string; level: number }) => [a.id, a.level])).toEqual([
-      ['memory_a', 1],
-      ['memory_b', 1],
-      ['memory_c', 2],
+    expect(lineage.sources).toEqual([
+      { id: 'memory_a', title: 'Memory memory_a' },
+      { id: 'memory_b', title: 'Memory memory_b' },
     ]);
   });
 
-  it('reports the cap when the chain is longer than the walk allows', async () => {
-    // A chain deeper than the cap must say it stopped at the cap.
-    const deep: Record<string, string[]> = {};
-    for (let i = 0; i < MAX_LINEAGE_DEPTH + 3; i++) {
-      deep[`memory_${i}`] = [`memory_${i + 1}`];
-    }
-    const { result } = run(memory('memory_root', ['memory_0']), deep);
-
-    const lineage = await result;
-
-    expect(lineage.depth).toBe(MAX_LINEAGE_DEPTH);
-    expect(lineage.ancestors).toHaveLength(MAX_LINEAGE_DEPTH);
-  });
-
-  it('terminates on a cycle instead of looping', async () => {
+  it('does not walk past the direct sources', async () => {
+    // `memory_a` was itself merged from `memory_b`. Reporting `memory_b` would be
+    // a chain where the data records a fan-in, so only the direct source is read.
     const { store, result } = run(memory('memory_root', ['memory_a']), {
       memory_a: ['memory_b'],
-      memory_b: ['memory_a'],
+      memory_b: [],
     });
 
     const lineage = await result;
 
-    expect(lineage.ancestors.map((a: { id: string }) => a.id)).toEqual(['memory_a', 'memory_b']);
-    expect(store.getMany).toHaveBeenCalledTimes(2);
+    expect(lineage.sources.map(({ id }: { id: string }) => id)).toEqual(['memory_a']);
+    expect(store.getMany).toHaveBeenCalledTimes(1);
+    expect(store.getMany).toHaveBeenCalledWith(['memory_a']);
+    expect(store.get).toHaveBeenCalledTimes(1);
   });
 
-  it('reads a level with one mget rather than a get per ancestor', async () => {
+  it('reads every source in one mget rather than a get per source', async () => {
     const { store, result } = run(memory('memory_root', ['memory_a', 'memory_b']), {
       memory_a: [],
       memory_b: [],
@@ -138,62 +100,48 @@ describe('getMemoryLineageRoute', () => {
 
     expect(store.getMany).toHaveBeenCalledTimes(1);
     expect(store.getMany).toHaveBeenCalledWith(['memory_a', 'memory_b']);
-    expect(store.get).toHaveBeenCalledTimes(1);
   });
 
-  it('emits nothing for a memory that lists itself as its own source', async () => {
-    // Malformed but possible: a self-referencing `merged_from` must not make the
-    // walk chase its own tail, and the root is not its own ancestor.
-    const { store, result } = run(memory('memory_root', ['memory_root']), {});
+  it('drops a source that no longer exists rather than reporting an empty crumb', async () => {
+    // The store archives merge sources rather than deleting them, but one that is
+    // gone must not appear as a link to nothing.
+    const { result } = run(memory('memory_root', ['memory_a', 'memory_deleted']), {
+      memory_a: [],
+    });
 
-    await expect(result).resolves.toEqual({ ancestors: [], depth: 0 });
-    expect(store.getMany).not.toHaveBeenCalled();
+    const lineage = await result;
+
+    expect(lineage.sources.map(({ id }: { id: string }) => id)).toEqual(['memory_a']);
   });
 
-  it('reports the real ancestors of a memory that lists itself among them', async () => {
+  it('reports the real sources of a memory that lists itself among them', async () => {
     // Documents written before the write path stopped naming the target carry the
     // target's own id alongside the memories it really merged from. Skipping that
-    // id must not cost the walk the ancestors behind it.
+    // id must not cost the sources behind it.
     const { store, result } = run(memory('memory_root', ['memory_root', 'memory_a']), {
       memory_a: [],
     });
 
     const lineage = await result;
 
-    expect(lineage.ancestors.map((a: { id: string }) => a.id)).toEqual(['memory_a']);
-    expect(lineage.depth).toBe(1);
-    // The self id is dropped before the fetch, so the level is read in one mget.
-    expect(store.getMany).toHaveBeenCalledTimes(1);
+    expect(lineage.sources.map(({ id }: { id: string }) => id)).toEqual(['memory_a']);
+    // The self id is dropped before the read, so the source is fetched once.
     expect(store.getMany).toHaveBeenCalledWith(['memory_a']);
   });
 
-  it('follows the ancestors behind a self-reference deeper in the chain', async () => {
-    const { result } = run(memory('memory_root', ['memory_a']), {
-      memory_a: ['memory_a', 'memory_b'],
-      memory_b: [],
-    });
+  it('emits nothing for a memory that lists only itself as its own source', async () => {
+    const { store, result } = run(memory('memory_root', ['memory_root']), {});
 
-    const lineage = await result;
-
-    expect(lineage.ancestors.map((a: { id: string; level: number }) => [a.id, a.level])).toEqual([
-      ['memory_a', 1],
-      ['memory_b', 2],
-    ]);
+    await expect(result).resolves.toEqual({ sources: [] });
+    expect(store.getMany).not.toHaveBeenCalled();
   });
 
-  it('stops at the cap even when a cycle would otherwise keep the walk going', async () => {
-    // A cycle with a long tail: the cap, not cycle detection, is the backstop.
-    const deep: Record<string, string[]> = {};
-    for (let i = 0; i < MAX_LINEAGE_DEPTH * 2; i++) {
-      deep[`memory_${i}`] = [`memory_${i + 1}`];
-    }
-    deep[`memory_${MAX_LINEAGE_DEPTH * 2}`] = ['memory_0'];
-    const { store, result } = run(memory('memory_root', ['memory_0']), deep);
+  it('reports a source listed twice only once', async () => {
+    const { result } = run(memory('memory_root', ['memory_a', 'memory_a']), { memory_a: [] });
 
     const lineage = await result;
 
-    expect(lineage.depth).toBe(MAX_LINEAGE_DEPTH);
-    expect(store.getMany).toHaveBeenCalledTimes(MAX_LINEAGE_DEPTH);
+    expect(lineage.sources.map(({ id }: { id: string }) => id)).toEqual(['memory_a']);
   });
 
   it('throws not found when the memory does not exist', async () => {

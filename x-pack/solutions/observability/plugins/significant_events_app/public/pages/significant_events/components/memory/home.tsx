@@ -102,15 +102,6 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
           />
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.significantEventsApp.memory.homeDescription"
-            defaultMessage="What the investigator has learned, and how much of it has held up."
-          />
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued" data-test-subj="nightshiftMemoryHomeStats">
         <FormattedMessage

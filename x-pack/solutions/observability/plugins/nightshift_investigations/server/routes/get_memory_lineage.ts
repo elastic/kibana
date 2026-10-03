@@ -8,25 +8,17 @@
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
-import { toMemoryDisplayTelemetry } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
-
-/**
- * How far back the lineage walk goes. Mirrors the UI's cap; the server is
- * authoritative so a caller cannot request an unbounded walk.
- */
-export const MAX_LINEAGE_DEPTH = 5;
 
 export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/memory/pages/{id}/lineage',
   options: {
     access: 'internal',
-    summary: 'Get the merge lineage of a Semantic Memory page',
+    summary: 'Get the memories a Semantic Memory page was merged from',
     description:
-      'Walks `merged_from` breadth-first and returns the ancestors of a memory, ' +
-      'nearest first. The walk is bounded and skips any id it has already ' +
-      'visited, so a cyclic or self-referencing `merged_from` cannot loop it ' +
-      'and still reports the real ancestors.',
+      'Returns the direct merge sources of a memory, in the order `merged_from` ' +
+      'lists them. An id that no longer resolves is left out, and a page that ' +
+      'lists itself is not one of its own sources.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
@@ -45,64 +37,21 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
       throw notFound(`Semantic Memory page ${params.path.id} was not found`);
     }
 
-    const nowSec = Date.now() / 1000;
-    // Ids already emitted as ancestors, plus the root. Used to reject cycles and
-    // duplicates. A frontier id is added only once it has been *processed* —
-    // marking the frontier up front would make every fetched page look already
-    // seen and silently drop the whole chain.
-    const seen = new Set<string>([root.id]);
     /**
-     * Skips an id the walk has already visited — the root itself, or a page that
-     * is an ancestor twice over — and keeps going. A memory written by an in-place
-     * rewrite lists its own id in `merged_from`, and one merged into an existing
-     * page lists that page alongside its real ancestors; skipping those ids is what
-     * lets the real ones be reported instead of ending the walk on the first one.
+     * The page's own id is dropped before the read: a memory written by an
+     * in-place rewrite lists itself in `merged_from`, and it is not one of its
+     * own sources.
      */
-    const isVisited = (id: string) => seen.has(id);
-    const ancestors: Array<{
-      id: string;
-      title: string;
-      usefulness: number;
-      archived: boolean;
-      /**
-       * 1 for a memory the root was merged directly from, 2 for one of *its*
-       * sources, and so on.
-       *
-       * A merge is a fan-in, not a chain: `merged_from` holds several ids, so the
-       * ancestors are a tree. Reporting the level lets a caller draw that tree
-       * level by level instead of flattening it into a list that reads as a
-       * single line of ancestry.
-       */
-      level: number;
-    }> = [];
-
-    let frontier = (root.merged_from ?? []).filter((id) => !isVisited(id));
-
-    // How deep the walk actually got, which is not always MAX_LINEAGE_DEPTH: a
-    // chain of one reports 1. Truncated by the cap, this also reports that the
-    // walk stopped early, so a caller can tell a short chain from a clipped one.
-    let reachedDepth = 0;
-
-    for (let depth = 0; depth < MAX_LINEAGE_DEPTH && frontier.length > 0; depth++) {
-      // One mget per level rather than one get per ancestor.
-      const pages = await store.getMany(frontier);
-      reachedDepth = depth + 1;
-      const next: string[] = [];
-      for (const page of pages) {
-        if (isVisited(page.id)) continue;
-        seen.add(page.id);
-        ancestors.push({
-          id: page.id,
-          title: page.title,
-          usefulness: toMemoryDisplayTelemetry(page, nowSec).conversionRate,
-          archived: page.archived,
-          level: depth + 1,
-        });
-        next.push(...(page.merged_from ?? []));
-      }
-      frontier = [...new Set(next)].filter((id) => !isVisited(id));
+    const ids = [...new Set(root.merged_from ?? [])].filter((id) => id !== root.id);
+    if (ids.length === 0) {
+      return { sources: [] };
     }
 
-    return { ancestors, depth: reachedDepth };
+    // One mget rather than a get per source. A source the store no longer holds
+    // is simply absent from the result, so a deleted memory is not reported as a
+    // source with nothing behind it.
+    const pages = await store.getMany(ids);
+
+    return { sources: pages.map(({ id, title }) => ({ id, title })) };
   },
 });

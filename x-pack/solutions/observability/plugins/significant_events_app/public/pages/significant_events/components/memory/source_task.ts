@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../hooks/use_kibana';
-import type { MemoryPage } from './types';
-
 const AGENT_BUILDER_APP_PATH = '/app/agent_builder';
 
 /**
@@ -33,38 +27,3 @@ export const getSourceTaskPath = (conversationId: string, agentId: string | unde
     agentId
   )}/conversations/${conversation}`;
 };
-
-interface MemorySourceTaskLinkProps {
-  page: MemoryPage;
-}
-
-/**
- * A link to the investigation that produced this memory.
- *
- * Provenance is the one thing the page cannot show from the document itself, and a
- * memory with no `conversation_id` predates the field, so the link is omitted
- * rather than rendered dead.
- */
-export function MemorySourceTaskLink({ page }: MemorySourceTaskLinkProps) {
-  const {
-    core: { http },
-  } = useKibana();
-
-  const { conversation_id: conversationId, agent_id: agentId } = page;
-  if (conversationId === undefined || conversationId.length === 0) {
-    return null;
-  }
-
-  return (
-    <EuiText size="xs" color="subdued">
-      <EuiLink
-        href={http.basePath.prepend(getSourceTaskPath(conversationId, agentId))}
-        data-test-subj="nightshiftMemorySourceTaskLink"
-      >
-        {i18n.translate('xpack.significantEventsApp.memory.sourceTaskLink', {
-          defaultMessage: 'Source task',
-        })}
-      </EuiLink>
-    </EuiText>
-  );
-}

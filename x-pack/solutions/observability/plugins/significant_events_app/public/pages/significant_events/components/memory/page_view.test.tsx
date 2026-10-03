@@ -16,10 +16,10 @@ import type { MemoryPage } from './types';
 
 jest.mock('./use_memory');
 jest.mock('../../../../hooks/use_kibana');
-// The lineage component issues its own fetch; stub it so these tests stay about
+// The merged-from row issues its own fetch; stub it so these tests stay about
 // the page's own actions.
 jest.mock('./lineage', () => ({
-  MemoryLineage: () => <div data-test-subj="nightshiftMemoryLineage" />,
+  MemoryMergedFromRow: () => <div data-test-subj="nightshiftMemoryMergedFrom" />,
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -108,15 +108,77 @@ describe('MemoryPageView', () => {
     expect(screen.getByTestId('nightshiftMemoryPageTitle')).toHaveTextContent('Kafka consumer lag');
     // Usefulness and confidence are the two displayed numbers, computed
     // server-side so the UI and the model see the same values.
-    expect(screen.getByText('Usefulness').parentElement).toHaveTextContent('75%');
-    expect(screen.getByText('Confidence').parentElement).toHaveTextContent('60%');
+    expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('75%');
+    expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('60%');
   });
 
-  it('shows the task the memory was learned from', () => {
+  it('clamps a rate outside [0, 1] rather than rendering 4000%', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 4, confidence: -1 }));
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('100%');
+    expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('0%');
+  });
+
+  it('leaves the two rates uncoloured, so colour never carries the verdict', () => {
+    // 0% usefulness means "never surfaced", which is the normal state for a new
+    // memory, so a warning there would cry wolf on every cold start.
+    mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 0, confidence: 0 }));
+    renderView();
+
+    for (const colour of ['euiTextColor-danger', 'euiTextColor-warning']) {
+      for (const value of ['nightshiftMemoryUsefulnessValue', 'nightshiftMemoryConfidenceValue']) {
+        expect(screen.getByTestId(value).className).not.toContain(colour);
+      }
+    }
+  });
+
+  it('shows the task the memory was learned from as its source task', () => {
     mockUseMemoryPage.mockReturnValue(asDetail());
     renderView();
-    expect(screen.getByTestId('nightshiftMemoryContext')).toHaveTextContent(
+
+    expect(screen.getByTestId('nightshiftMemorySourceTask')).toHaveTextContent(
       'Checkout latency spike'
+    );
+  });
+
+  it('lists the memory tags but not the internal memory marker', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({ tags: ['memory', 'kafka', 'checkout'] }));
+    renderView();
+
+    expect(screen.getByText('kafka')).toBeInTheDocument();
+    expect(screen.getByText('checkout')).toBeInTheDocument();
+    // `memory` is the store's own type tag, not something the investigator wrote.
+    expect(screen.queryByText('memory')).not.toBeInTheDocument();
+  });
+
+  it('badges the reason a memory was retired, so archived is not just a boolean', () => {
+    mockUseMemoryPage.mockReturnValue(
+      asDetail({ archived: true, archive_reason: 'harmful' as const })
+    );
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchivedBadge')).toHaveTextContent(
+      'judged misleading'
+    );
+  });
+
+  it('shows no reason badge for a legacy archived page that has none', () => {
+    // A pre-`archive_reason` document reads as archived with nothing to say why.
+    mockUseMemoryPage.mockReturnValue(asDetail({ archived: true }));
+    renderView();
+
+    expect(screen.queryByTestId('nightshiftMemoryArchivedBadge')).not.toBeInTheDocument();
+  });
+
+  it('puts the metadata below the content, and the content above the fold of the footer', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    // The footer describes the page; the memory itself comes first.
+    const metadata = screen.getByTestId('nightshiftMemoryMetadata');
+    expect(screen.getByText('Scale the consumer.').compareDocumentPosition(metadata)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
     );
   });
 
@@ -359,22 +421,47 @@ describe('MemoryPageView', () => {
     expect(screen.getByTestId('nightshiftMemoryDeleteButton')).toBeInTheDocument();
   });
 
-  it('links to the conversation that produced the memory', () => {
+  it('links the source task to the conversation that produced the memory', () => {
     mockUseMemoryPage.mockReturnValue(
       asDetail({ conversation_id: 'conv-1', agent_id: 'nightshift.investigation' })
     );
     renderView();
 
-    expect(screen.getByTestId('nightshiftMemorySourceTaskLink')).toHaveAttribute(
+    // The task text is the link: it names the conversation rather than pointing
+    // at it with the word "Source task".
+    const link = screen.getByTestId('nightshiftMemorySourceTaskLink');
+    expect(link).toHaveAttribute(
       'href',
       '/app/agent_builder/agents/nightshift.investigation/conversations/conv-1'
     );
+    expect(link).toHaveTextContent('Checkout latency spike');
   });
 
-  it('omits the source-task link for a memory with no recorded conversation', () => {
+  it('names the conversation itself when the memory recorded no task text', () => {
+    mockUseMemoryPage.mockReturnValue(
+      asDetail({ context: '', conversation_id: 'conv-1', agent_id: 'agent-1' })
+    );
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemorySourceTaskLink')).toHaveTextContent(
+      'Agent Builder conversation'
+    );
+  });
+
+  it('shows the task text unlinked for a memory with no recorded conversation', () => {
     mockUseMemoryPage.mockReturnValue(asDetail());
     renderView();
 
+    expect(screen.getByTestId('nightshiftMemorySourceTask')).toHaveTextContent(
+      'Checkout latency spike'
+    );
     expect(screen.queryByTestId('nightshiftMemorySourceTaskLink')).not.toBeInTheDocument();
+  });
+
+  it('omits the source task for a memory that recorded neither', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({ context: '' }));
+    renderView();
+
+    expect(screen.queryByTestId('nightshiftMemorySourceTask')).not.toBeInTheDocument();
   });
 });

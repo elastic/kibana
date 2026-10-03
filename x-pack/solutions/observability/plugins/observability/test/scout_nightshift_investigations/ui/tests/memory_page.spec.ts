@@ -186,9 +186,9 @@ test.describe(
         archiveReason: 'manual',
       });
 
-      // E6: a merge is a fan-in, so the root has two direct sources and one of
-      // those has a source of its own — two levels, which is what the lineage
-      // rows by level rather than flattening into one list.
+      // E6: a merge is a fan-in, so the root has two direct sources, and one of
+      // those was itself merged from `MERGED_GRANDPARENT`. The root's row names
+      // its own sources only, so the grandparent proves the walk stops there.
       await seedMemory(esClient, {
         slug: MERGED_GRANDPARENT,
         title: 'Checkout connection pool exhausted',
@@ -330,7 +330,9 @@ test.describe(
       await expect(page.getByText('Raise the cache size')).toBeVisible();
       await expect(page.testSubj.locator('nightshiftMemoryUsefulnessValue')).toBeVisible();
       await expect(page.testSubj.locator('nightshiftMemoryConfidenceValue')).toBeVisible();
-      await expect(page.testSubj.locator('nightshiftMemoryContext')).toContainText(
+      // The task the memory was learned from is one row of the metadata footer,
+      // not a panel of its own: it is provenance, not part of the memory.
+      await expect(page.testSubj.locator('nightshiftMemorySourceTask')).toContainText(
         'Investigate why checkout latency spiked'
       );
       await attachScreenshot(page, testInfo, 'memory-e2-detail');
@@ -426,31 +428,30 @@ test.describe(
       await attachScreenshot(page, testInfo, 'memory-e5-pagination');
     });
 
-    test('E6 renders a merge lineage one level per row, each crumb linking to its source', async ({
+    test('E6 names the direct sources of a merge, each one linking to its memory', async ({
       page,
       kbnUrl,
     }, testInfo) => {
       await gotoMemory(page, kbnUrl);
       await page.testSubj.locator(`nightshiftMemoryLink-memory_${MERGED_ROOT}`).click();
 
-      const level1 = page.testSubj.locator('nightshiftMemoryLineageLevel-1');
-      const level2 = page.testSubj.locator('nightshiftMemoryLineageLevel-2');
-      await expect(level1).toBeVisible();
-      await expect(level2).toBeVisible();
-      // A merge is a fan-in: two direct sources, and only one of them merged again.
-      // The crumbs are `EuiLink`s without an `href`, so they render as buttons;
-      // they are matched on their own test subject rather than on the tag.
-      const crumbsIn = (level: typeof level1) =>
-        level.locator('[data-test-subj^="nightshiftMemoryLineageCrumb-"]');
-      await expect(crumbsIn(level1)).toHaveCount(2);
-      await expect(crumbsIn(level2)).toHaveCount(1);
-      const crumb = (level: typeof level1, id: string) =>
-        level.locator(`[data-test-subj="nightshiftMemoryLineageCrumb-${id}"]`);
-      await expect(crumb(level1, `memory_${MERGED_SOURCE_A}`)).toBeVisible();
-      await expect(crumb(level1, `memory_${MERGED_SOURCE_B}`)).toBeVisible();
-      await expect(crumb(level2, `memory_${MERGED_GRANDPARENT}`)).toBeVisible();
+      const mergedFrom = page.testSubj.locator('nightshiftMemoryMergedFrom');
+      await expect(mergedFrom).toBeVisible();
+      // A merge is a fan-in: two direct sources, one row. A source that was
+      // itself merged from `MERGED_GRANDPARENT` names that only on its own page.
+      const sources = mergedFrom.locator('[data-test-subj^="nightshiftMemoryMergedFrom-"]');
+      await expect(sources).toHaveCount(2);
+      await expect(
+        page.testSubj.locator(`nightshiftMemoryMergedFrom-memory_${MERGED_SOURCE_A}`)
+      ).toBeVisible();
+      await expect(
+        page.testSubj.locator(`nightshiftMemoryMergedFrom-memory_${MERGED_SOURCE_B}`)
+      ).toBeVisible();
+      await expect(
+        page.testSubj.locator(`nightshiftMemoryMergedFrom-memory_${MERGED_GRANDPARENT}`)
+      ).toHaveCount(0);
 
-      await page.testSubj.locator(`nightshiftMemoryLineageCrumb-memory_${MERGED_SOURCE_A}`).click();
+      await page.testSubj.locator(`nightshiftMemoryMergedFrom-memory_${MERGED_SOURCE_A}`).click();
       await expect(page.testSubj.locator('nightshiftMemoryPageTitle')).toHaveText(
         'Checkout DNS resolution stalled'
       );
@@ -466,6 +467,11 @@ test.describe(
 
       const link = page.testSubj.locator('nightshiftMemorySourceTaskLink');
       await expect(link).toBeVisible();
+      // The link is the task text itself, so it names the conversation rather
+      // than pointing at it.
+      await expect(link).toHaveText(
+        'Investigate why checkout latency spiked after the DNS cache change'
+      );
       // The canonical route is agent-scoped, so it needs both ids. A memory written
       // before `agent_id` was persisted only has the conversation, which resolves
       // through the legacy unscoped route.

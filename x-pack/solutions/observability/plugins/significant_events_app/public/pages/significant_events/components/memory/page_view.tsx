@@ -7,30 +7,47 @@
 
 import React, { useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiConfirmModal,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiLink,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
+import { FormattedMessage, FormattedNumber, FormattedRelative } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { MemoryLineage } from './lineage';
-import { MemorySourceTaskLink } from './source_task_link';
-import { MemoryTelemetryPanel } from './telemetry_panel';
+import { getMemoryArchiveReasonLabel } from './labels';
+import { MemoryMergedFromRow } from './lineage';
+import { getSourceTaskPath } from './source_task';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
 import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../shared/page_markdown';
+
+const asPercent = (value: number): number => Math.round(Math.max(0, Math.min(1, value)) * 100);
+
+/** One line with an ellipsis, for the values in the metadata footer. */
+const singleLine = css`
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
 
 interface MemoryPageViewProps {
   pageId: string;
@@ -44,6 +61,7 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
       application: {
         capabilities: { nightshift },
       },
+      http,
     },
   } = useKibana();
   // Mirrors the privilege tiers the routes enforce: archiving needs the
@@ -89,6 +107,20 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
       />
     );
   }
+
+  // `memory` is the store's own type tag, not something the investigator wrote.
+  const tags = page.tags.filter((tag) => tag !== 'memory');
+  const conversationId = page.conversation_id;
+  // A memory that recorded no conversation is named by its context alone; one
+  // that recorded a conversation but no context still has one to link to.
+  const sourceTask =
+    page.context && page.context.length > 0
+      ? page.context
+      : conversationId
+      ? i18n.translate('xpack.significantEventsApp.memory.metadata.conversationLabel', {
+          defaultMessage: 'Agent Builder conversation',
+        })
+      : undefined;
 
   return (
     <div data-test-subj="nightshiftMemoryPageView">
@@ -154,40 +186,6 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-      <MemoryTelemetryPanel page={page} usefulness={data.usefulness} confidence={data.confidence} />
-
-      <EuiSpacer size="xs" />
-      <MemorySourceTaskLink page={page} />
-
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        <FormattedMessage
-          id="xpack.significantEventsApp.memory.pageUpdated"
-          defaultMessage="Updated {when}"
-          values={{ when: <FormattedRelative value={page.updated_at} /> }}
-        />
-      </EuiText>
-
-      {page.context !== undefined && page.context.length > 0 && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.significantEventsApp.memory.contextHeading"
-              defaultMessage="Task this memory was learned from"
-            />
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiPanel paddingSize="s" data-test-subj="nightshiftMemoryContext">
-            <EuiText size="s">{page.context}</EuiText>
-          </EuiPanel>
-        </>
-      )}
-
-      <EuiSpacer size="m" />
-      <MemoryLineage page={page} onSelectPage={onSelectPage} />
-
-      <EuiSpacer size="s" />
       {page.content.length > 0 ? (
         <div className={pageMarkdownCss}>
           <EuiMarkdownFormat textSize="s">
@@ -202,6 +200,121 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
           />
         </EuiText>
       )}
+
+      {/* The page's own bookkeeping, rather than part of what the memory says: it
+          sits under the content so a reader gets the memory first and the
+          provenance after it. A row with nothing to say is left out. */}
+      <EuiSpacer size="l" />
+      <EuiHorizontalRule margin="none" />
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="column"
+        compressed
+        columnWidths={['auto', 'minmax(0, 1fr)']}
+        data-test-subj="nightshiftMemoryMetadata"
+      >
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.significantEventsApp.memory.telemetry.usefulnessLabel"
+            defaultMessage="Usefulness"
+          />
+        </EuiDescriptionListTitle>
+        {/* No colour: 0% usefulness means "never surfaced", which is the normal
+            state for a new memory, so painting it as a warning would cry wolf on
+            every cold start. The data-test-subj is what a test asserts against. */}
+        <EuiDescriptionListDescription data-test-subj="nightshiftMemoryUsefulnessValue">
+          <FormattedNumber value={asPercent(data.usefulness)} />%
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.significantEventsApp.memory.telemetry.confidenceLabel"
+            defaultMessage="Confidence"
+          />
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription data-test-subj="nightshiftMemoryConfidenceValue">
+          <FormattedNumber value={asPercent(data.confidence)} />%
+        </EuiDescriptionListDescription>
+
+        {page.archived && page.archive_reason !== undefined && (
+          <>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.metadata.archivedLabel"
+                defaultMessage="Archived"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiBadge color="hollow" data-test-subj="nightshiftMemoryArchivedBadge">
+                {getMemoryArchiveReasonLabel(page.archive_reason)}
+              </EuiBadge>
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        {tags.length > 0 && (
+          <>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.metadata.tagsLabel"
+                defaultMessage="Tags"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription
+              className={css`
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+              `}
+            >
+              {tags.map((tag) => (
+                <EuiBadge key={tag} color="accent">
+                  {tag}
+                </EuiBadge>
+              ))}
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.significantEventsApp.memory.metadata.updatedLabel"
+            defaultMessage="Updated"
+          />
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <FormattedRelative value={page.updated_at} />
+        </EuiDescriptionListDescription>
+
+        {sourceTask !== undefined && (
+          <>
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.metadata.sourceTaskLabel"
+                defaultMessage="Source task"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="nightshiftMemorySourceTask">
+              {/* One line, with the full text on hover: a provenance row that
+                  wraps over three lines is louder than it is useful. */}
+              <span className={singleLine} title={sourceTask}>
+                {conversationId ? (
+                  <EuiLink
+                    href={http.basePath.prepend(getSourceTaskPath(conversationId, page.agent_id))}
+                    data-test-subj="nightshiftMemorySourceTaskLink"
+                  >
+                    {sourceTask}
+                  </EuiLink>
+                ) : (
+                  sourceTask
+                )}
+              </span>
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        <MemoryMergedFromRow page={page} onSelectPage={onSelectPage} />
+      </EuiDescriptionList>
 
       {confirmingDelete && (
         <EuiConfirmModal
