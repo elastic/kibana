@@ -1675,6 +1675,8 @@
       "@kbn/io-ts-utils/*": ["./src/platform/packages/shared/kbn-io-ts-utils/*"],
       "@kbn/ipynb": ["./x-pack/solutions/search/packages/kbn-ipynb"],
       "@kbn/ipynb/*": ["./x-pack/solutions/search/packages/kbn-ipynb/*"],
+      "@kbn/isomer": ["./x-pack/platform/packages/shared/isomer/isomer"],
+      "@kbn/isomer/*": ["./x-pack/platform/packages/shared/isomer/isomer/*"],
       "@kbn/item-buffer": ["./src/platform/packages/private/kbn-item-buffer"],
       "@kbn/item-buffer/*": ["./src/platform/packages/private/kbn-item-buffer/*"],
       "@kbn/jest-benchmarks": ["./src/platform/packages/shared/kbn-jest-benchmarks"],

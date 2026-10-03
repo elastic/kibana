@@ -2486,6 +2486,9 @@ importers:
       '@kbn/ipynb':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-ipynb
+      '@kbn/isomer':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer
       '@kbn/item-buffer':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-item-buffer
@@ -9018,6 +9021,8 @@ importers:
   x-pack/platform/packages/shared/index-management/index_management_shared_types: {}
 
   x-pack/platform/packages/shared/ingest-pipelines: {}
+
+  x-pack/platform/packages/shared/isomer/isomer: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
 
