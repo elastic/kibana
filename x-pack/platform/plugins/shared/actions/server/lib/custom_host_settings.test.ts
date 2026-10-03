@@ -75,6 +75,7 @@ describe('custom_host_settings', () => {
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
       maxResponseContentLength: new ByteSizeValue(1000000),
+      maxPayloadSize: new ByteSizeValue(100 * 1024 * 1024),
       responseTimeout: moment.duration(60000),
       enableFooterInEmail: true,
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
