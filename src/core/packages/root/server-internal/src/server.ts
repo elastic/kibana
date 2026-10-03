@@ -660,7 +660,7 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
-    this.pubsub.start();
+    const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
 
@@ -692,6 +692,7 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      pubsub: pubsubStart,
       userStorage: userStorageStart,
     };
 

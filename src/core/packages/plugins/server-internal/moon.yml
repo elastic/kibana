@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-lifecycle-server'
+  - '@kbn/core-pubsub-server'
   - '@kbn/core-lifecycle-server-internal'
   - '@kbn/core-plugins-server'
   - '@kbn/config-mocks'
