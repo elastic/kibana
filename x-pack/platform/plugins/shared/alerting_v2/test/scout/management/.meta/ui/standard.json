@@ -1,5 +1,5 @@
 {
-  "sha1": "2c663ca3d8149bfbd9a52b5eb3038e30be430544",
+  "sha1": "8e0513a132d17caa6019148485f034d9124df2bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,8 +25,8 @@
       }
     },
     {
-      "id": "806265ae80d8d60-21f687a5b4985b5",
-      "title": "Management pages - required privileges user with full access can view every management page",
+      "id": "806265ae80d8d60-10363d3dc3e0993",
+      "title": "Alerting pages - required privileges user with full access can view every page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -41,12 +41,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
         "line": 61,
-        "column": 69
+        "column": 67
       }
     },
     {
-      "id": "806265ae80d8d60-b7f047f4a779368",
-      "title": "Management pages - required privileges user with read-only access can view every management page",
+      "id": "806265ae80d8d60-d0aa84aea634556",
+      "title": "Alerting pages - required privileges user with read-only access can view every page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -61,12 +61,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
         "line": 61,
-        "column": 97
+        "column": 95
       }
     },
     {
-      "id": "806265ae80d8d60-568f55e8c7b81e1",
-      "title": "Management pages - required privileges user without alerting_v2 access is redirected to the management landing on every page",
+      "id": "806265ae80d8d60-76307e7473aa577",
+      "title": "Alerting pages - required privileges user without alerting_v2 access sees the required privileges prompt on every page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -85,8 +85,8 @@
       }
     },
     {
-      "id": "806265ae80d8d60-d99fe7755387fda",
-      "title": "Management pages - required privileges user with rules read-only role can view the Rules and Rule library pages",
+      "id": "806265ae80d8d60-7c7141653dbc093",
+      "title": "Alerting pages - required privileges user with rules read-only role can view the Rules and Rule library pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -100,13 +100,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 65,
-        "column": 5
+        "line": 64,
+        "column": 8
       }
     },
     {
-      "id": "806265ae80d8d60-d3a2856980af75e",
-      "title": "Management pages - required privileges user with alerts read-only role can only view the Alerts page",
+      "id": "806265ae80d8d60-8921cc75f3f73b5",
+      "title": "Alerting pages - required privileges user with alerts read-only role can only view the Alerts page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -120,13 +120,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 85,
+        "line": 82,
         "column": 5
       }
     },
     {
-      "id": "806265ae80d8d60-46516218f3583d8",
-      "title": "Management pages - required privileges user with action policies read-only role can only view the Action Policies page",
+      "id": "806265ae80d8d60-f227e8e070cd42e",
+      "title": "Alerting pages - required privileges user with action policies read-only role can only view the Action Policies page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -145,8 +145,8 @@
       }
     },
     {
-      "id": "806265ae80d8d60-870a9a777319880",
-      "title": "Management pages - required privileges user with execution history read-only role can only view the Execution History page",
+      "id": "806265ae80d8d60-6c35fd794895eda",
+      "title": "Alerting pages - required privileges user with execution history read-only role can only view the Execution History page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
