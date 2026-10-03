@@ -11,11 +11,7 @@ jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
 }));
 
-import {
-  buildCommentBody,
-  dedupeByChange,
-  type ImpactEntry,
-} from './notify_api_contract_owners.ts';
+import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners.ts';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   path: '/api/spaces/space',
@@ -78,22 +74,9 @@ describe('buildCommentBody', () => {
 
   it('escapes pipe characters and newlines in the reason field', () => {
     const body = buildCommentBody([entry({ reason: 'a|b\nc' })]);
-    // Scoped to the table, where an unescaped pipe would break the column layout.
-    // The release-note snippet repeats the reason inside a fenced code block, where
-    // a raw pipe is harmless.
-    const table = body.slice(0, body.indexOf('### Recommended release note'));
 
-    expect(table).toContain('a\\|b c');
-    expect(table).not.toContain('a|b');
-  });
-
-  it('JSON-escapes a newline in the reason inside the release-note snippet', () => {
-    const body = buildCommentBody([entry({ reason: 'a|b\nc' })]);
-    const snippet = body.slice(body.indexOf('### Recommended release note'));
-
-    // A raw newline would terminate the YAML scalar and corrupt the document.
-    expect(snippet).toContain('\\n');
-    expect(snippet).not.toMatch(/title: "[^"\n]*\n[^"]*"/);
+    expect(body).toContain('a\\|b c');
+    expect(body).not.toContain('a|b');
   });
 
   it('omits the method badge when method is undefined', () => {
@@ -171,129 +154,99 @@ describe('buildCommentBody', () => {
     expect(body).not.toContain('allowlist.json');
   });
 
-  it('generates title and impact from the endpoint and reason', () => {
-    const body = buildCommentBody([
-      entry({
-        path: '/api/alerting/rule/{id}',
-        method: 'put',
-        reason: "Property 'notify_when' removed",
-      }),
-    ]);
+  describe('release note guidance', () => {
+    const SENTENCE =
+      'Add a release note to the PR description. The release note should describe the impact of the change on callers and what action to take to mitigate the change.';
+    const STEP_3 =
+      '3. **Add the `release_note:breaking` label** to this PR and a release note to the PR description, see the Release note section below.';
+    const README_LINK = 'See the [`@kbn/api-contracts` README]';
 
-    expect(body).toContain('title: "PUT /api/alerting/rule/{id}: Property \'notify_when\' removed"');
-    expect(body).toContain('impact: "Callers of PUT /api/alerting/rule/{id} are affected.');
-    // Only the author can say what callers should do, so it stays a placeholder.
-    expect(body).toContain('action: <what callers should do>');
-  });
+    it.each([
+      ['stable', entry()],
+      ['tech_preview', entry({ tier: 'tech_preview' })],
+    ])('adds the Release note section for a %s gating change', (_tier, gatingEntry) => {
+      const body = buildCommentBody([gatingEntry]);
 
-  it('notes the stable-since version in impact when present', () => {
-    expect(buildCommentBody([entry({ since: '8.12.0' })])).toContain('Stable since 8.12.0.');
-  });
+      expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+    });
 
-  it('renders products when the entry carries them', () => {
-    const body = buildCommentBody([entry({ products: ['cloud-serverless', 'kibana'] })]);
+    it('adds step 3 to the what-to-do list', () => {
+      const body = buildCommentBody([entry()]);
 
-    expect(body).toContain('  products:\n    - cloud-serverless\n    - kibana');
-  });
+      expect(body).toContain(STEP_3);
+      expect(body.slice(body.indexOf('3. **Add'), body.indexOf('### Release note'))).toContain(
+        '`release_note:breaking`'
+      );
+      expect(body).toContain('1. **Fix the breaking change**');
+      expect(body).toContain('2. **If intentional**');
+    });
 
-  it('omits products rather than guessing when the entry has none', () => {
-    const body = buildCommentBody([entry()]);
+    it('keeps the label out of the Release note section', () => {
+      const body = buildCommentBody([entry()]);
+      const section = body.slice(body.indexOf('### Release note'), body.lastIndexOf(README_LINK));
 
-    expect(body).toContain('### Recommended release note');
-    expect(body).not.toContain('products:');
-  });
+      expect(section).not.toContain('release_note:breaking');
+      expect(section).not.toContain('label');
+    });
 
-  it('renders one release-note entry per gating change', () => {
-    const body = buildCommentBody([
-      entry({ path: '/api/one' }),
-      entry({ path: '/api/two', tier: 'tech_preview' }),
-    ]);
+    it('places the Release note section after What to do and the README link last', () => {
+      const body = buildCommentBody([entry()]);
 
-    expect(body.match(/type: breaking-change/g)).toHaveLength(2);
-  });
+      expect(body.indexOf('### What to do')).toBeLessThan(body.indexOf('### Release note'));
+      expect(body.indexOf('### Release note')).toBeLessThan(body.lastIndexOf(README_LINK));
+      expect(body.indexOf(README_LINK)).toBe(body.lastIndexOf(README_LINK));
+      expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
+    });
 
-  it('keeps experimental changes out of the snippet while still reporting them', () => {
-    const body = buildCommentBody([
-      entry({ path: '/api/stable' }),
-      entry({ path: '/api/exp', tier: 'experimental' }),
-    ]);
-    const snippet = body.slice(body.indexOf('### Recommended release note'));
+    it('has no code fence, template heading or placeholders', () => {
+      const body = buildCommentBody([entry(), entry({ path: '/api/two', tier: 'tech_preview' })]);
 
-    expect(snippet).toContain('/api/stable');
-    expect(snippet).not.toContain('/api/exp');
-  });
+      expect(body).not.toContain('```');
+      expect(body).not.toMatch(/^#{1,2} Release note/m);
+      // One heading and one pointer from step 3.
+      expect(body.match(/Release note/g)).toHaveLength(2);
+      expect(body).not.toContain('<describe>');
+      expect(body).not.toContain('type: breaking-change');
+    });
 
-  it('prompts for a changelog entry on report-only changes without generating one', () => {
-    const body = buildCommentBody([
-      entry({ path: '/api/stable' }),
-      entry({ path: '/api/additive', reportOnly: true, policyReason: 'Additive response variant.' }),
-    ]);
-    const snippet = body.slice(body.indexOf('### Recommended release note'));
+    it('does not link the release note review guide', () => {
+      const body = buildCommentBody([
+        entry(),
+        entry({ path: '/api/additive', reportOnly: true, policyReason: 'Additive.' }),
+      ]);
 
-    expect(body).toContain('Consider adding a changelog entry if the change is noteworthy');
-    expect(snippet).not.toContain('/api/additive');
-  });
+      expect(body).not.toContain('release note review guide');
+      expect(body).not.toContain('docs-v3-preview');
+    });
 
-  it('quotes a reason containing YAML metacharacters', () => {
-    const body = buildCommentBody([entry({ reason: 'response: changed #1 to "two"' })]);
+    it('gives an experimental-only comment no Release note section', () => {
+      const body = buildCommentBody([entry({ path: '/api/exp', tier: 'experimental' })]);
 
-    // JSON-encoded, so the colon, hash and quotes cannot break the document.
-    expect(body).toContain('\\"two\\"');
-    expect(body).not.toContain('title: PUT');
-  });
-});
+      expect(body).not.toContain('### Release note');
+      expect(body).not.toContain('release_note:breaking');
+    });
 
-describe('dedupeByChange', () => {
-  const base: ImpactEntry = {
-    path: '/api/x',
-    method: 'GET',
-    reason: 'Endpoint removed',
-    tier: 'stable',
-  };
+    it('gives a report-only comment the prompt but no Release note section', () => {
+      const body = buildCommentBody([
+        entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+      ]);
 
-  it('unions products for the same change seen in both specs', () => {
-    const [merged] = dedupeByChange([
-      { ...base, products: ['kibana'] },
-      { ...base, products: ['cloud-serverless'] },
-    ]);
+      expect(body).toContain('Consider adding a release note if the change is noteworthy.');
+      expect(body).not.toContain('### Release note');
+      expect(body).not.toContain('release_note:breaking');
+    });
 
-    expect(merged.products).toEqual(['cloud-serverless', 'kibana']);
-  });
+    it('keeps the no-gating variant unchanged', () => {
+      const body = buildCommentBody([
+        entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+        entry({ path: '/api/exp', tier: 'experimental' }),
+      ]);
 
-  it('collapses the duplicate to a single row', () => {
-    expect(
-      dedupeByChange([
-        { ...base, products: ['kibana'] },
-        { ...base, products: ['cloud-serverless'] },
-      ])
-    ).toHaveLength(1);
-  });
-
-  it('sorts products so report read order does not change the output', () => {
-    const forward = dedupeByChange([
-      { ...base, products: ['kibana'] },
-      { ...base, products: ['cloud-serverless'] },
-    ]);
-    const reverse = dedupeByChange([
-      { ...base, products: ['cloud-serverless'] },
-      { ...base, products: ['kibana'] },
-    ]);
-
-    expect(forward[0].products).toEqual(reverse[0].products);
-  });
-
-  it('keeps distinct changes on the same endpoint apart', () => {
-    expect(
-      dedupeByChange([
-        { ...base, oasdiffId: 'response-property-removed' },
-        { ...base, oasdiffId: 'request-property-removed' },
-      ])
-    ).toHaveLength(2);
-  });
-
-  it('leaves products undefined when no report declared a distribution', () => {
-    const [merged] = dedupeByChange([{ ...base }]);
-
-    expect(merged.products).toBeUndefined();
+      expect(body).toContain(
+        '### What to do\n\nNothing here blocks merge. Consider whether a release note is worth adding for the listed change(s).\n\nSee the [`@kbn/api-contracts` README]'
+      );
+      expect(body).toContain('for tier definitions and the rule policy.');
+      expect(body).not.toContain('3. **Add the');
+    });
   });
 });

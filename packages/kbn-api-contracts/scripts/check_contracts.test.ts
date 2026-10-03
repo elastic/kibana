@@ -636,6 +636,28 @@ describe('check_contracts', () => {
       );
     });
 
+    it('records the serverless distribution in the report of a serverless run', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      await expect(
+        runCallback({
+          flags: {
+            ...defaultFlags,
+            distribution: 'serverless',
+            reportPath: 'target/reports/serverless-impact.json',
+          },
+          log: mockLog,
+        })
+      ).rejects.toThrow();
+
+      const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+        String(path).endsWith('serverless-impact.json')
+      );
+      expect(reportCall).toBeDefined();
+      expect(JSON.parse(reportCall![1] as string)).toMatchObject({ distribution: 'serverless' });
+    });
+
     it('writes a tier-classified report when reportPath is set', async () => {
       mockParseOasdiff.mockReturnValue([stableChange]);
       primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));

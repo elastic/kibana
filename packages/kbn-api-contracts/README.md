@@ -162,11 +162,9 @@ CI posts (or updates) a PR comment whenever there is anything to report, **regar
 
 ### Release note suggestions
 
-Gating changes (stable and Technical Preview) get a suggested `changelog.yml` entry in the comment. `title`, `products`, `subtype` and `impact` are generated from the change itself; `action` is left for the author, since only they know what callers should do. The entry is a suggestion in the comment, not a file written by CI.
+Gating changes (stable and Technical Preview) get release note guidance in the comment. Step 3 of "What to do" asks the author to add the `release_note:breaking` label to the PR. The "Release note" section after it asks for a release note in the PR description, describing the impact of the change on callers and what action to take to mitigate it. The docs workflow builds the changelog entry from the label and the description. CI doesn't write a file.
 
-`products` comes from which distribution reported the change. The check runs once per distribution and each impact report records its own, so `stack` maps to `kibana`, `serverless` maps to `cloud-serverless`, and a change breaking both specs lists both. It is omitted rather than guessed when a report predates the `distribution` field.
-
-Report-only changes get a prompt to consider a changelog entry instead of a generated one, because an additive change often doesn't warrant one. Experimental changes get neither.
+Report-only changes get the prompt "Consider adding a release note if the change is noteworthy." because an additive change often doesn't warrant one. Experimental changes get neither the label guidance nor the prompt.
 
 ## Usage
 
