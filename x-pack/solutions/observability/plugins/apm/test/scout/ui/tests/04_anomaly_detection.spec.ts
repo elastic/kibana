@@ -68,23 +68,21 @@ test.describe(
       browserAuth,
       config,
     }) => {
+      test.skip(
+        config.isCloud === true,
+        `The 'apmReadPrivilegesWithWriteSettings' custom role has no privileges for the 'Create job' button on ECH/MKI (see #248127) - role permissions need to be investigated`
+      );
       await browserAuth.loginAsApmReadPrivilegesWithWriteSettings();
       await anomalyDetectionPage.goto();
       const createButton = anomalyDetectionPage.getCreateJobButtonLocator();
-      // TODO: Test fails in MKI/ECH environments - investigate role permissions
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!config.isCloud) {
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(createButton).toBeEnabled();
+      await expect(createButton).toBeEnabled();
 
-        await test.step('verify create button functionality', async () => {
-          await anomalyDetectionPage.clickCreateJobButton();
+      await test.step('verify create button functionality', async () => {
+        await anomalyDetectionPage.clickCreateJobButton();
 
-          const pageContent = await page.textContent('body');
-          // eslint-disable-next-line playwright/no-conditional-expect
-          expect(pageContent).toContain('Select environments');
-        });
-      }
+        const pageContent = await page.textContent('body');
+        expect(pageContent).toContain('Select environments');
+      });
     });
 
     test('APM All Privileges Without Write Settings should not be able to modify settings', async ({
