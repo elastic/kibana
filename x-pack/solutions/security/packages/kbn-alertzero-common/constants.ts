@@ -70,6 +70,9 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
 export const FIND_OR_CREATE_INVESTIGATION_URL =
   `${HUNT_INTERNAL_ROUTE_BASE}/find_or_create_investigation` as const;
 
+/** Stamps the hunt-once gate on a report after a completed `run_hunt_coordinator` call. */
+export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_evidence` as const;
+
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
 
