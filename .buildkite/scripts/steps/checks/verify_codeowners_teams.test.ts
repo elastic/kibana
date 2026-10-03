@@ -21,6 +21,7 @@ import type { CodeOwnersEntry, Team } from '@kbn/code-owners';
 import {
   findConnectorSpecsOwnershipIssues,
   findUnrecognizedTeams,
+  findUnusedRegistryTeams,
   getCodeownersTeams,
   getRegistryGithubTeams,
 } from './verify_codeowners_teams.ts';
@@ -93,6 +94,29 @@ describe('findUnrecognizedTeams', () => {
     expect(findUnrecognizedTeams(codeowners, registry)).toEqual([
       'elastic/alpha-team',
       'elastic/zeta-team',
+    ]);
+  });
+});
+
+describe('findUnusedRegistryTeams', () => {
+  it('returns an empty list when every registry team owns something', () => {
+    const registry = [team('core', 'elastic/kibana-core')];
+    const codeowners = new Set(['elastic/kibana-core', 'elastic/kibana-operations']);
+
+    expect(findUnusedRegistryTeams(registry, codeowners)).toEqual([]);
+  });
+
+  it('returns the sorted registry teams missing from CODEOWNERS or without a github team', () => {
+    const registry = [
+      team('zeta', 'elastic/zeta-team'),
+      team('core', 'elastic/kibana-core'),
+      team('label-only', undefined),
+    ];
+    const codeowners = new Set(['elastic/kibana-core']);
+
+    expect(findUnusedRegistryTeams(registry, codeowners)).toEqual([
+      'label-only (no github team)',
+      'zeta (elastic/zeta-team)',
     ]);
   });
 });

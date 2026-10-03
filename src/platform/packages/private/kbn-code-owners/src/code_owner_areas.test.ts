@@ -20,8 +20,8 @@ import { getTeamByGithubHandle } from './teams';
  * `code_owner_areas.ts` before it was migrated to derive from `teams.jsonc`.
  *
  * This guards the ~10 consumers of `findAreaForCodeOwner` (Scout/FTR reporters)
- * against regressions: every handle that previously had an area must keep
- * resolving to the same area through the registry.
+ * against regressions: every registry handle that previously had an area must
+ * keep resolving to the same area.
  */
 const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   platform: [
@@ -30,22 +30,17 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/context-eng',
     'elastic/docs',
     'elastic/eui-team',
-    'elastic/fleet',
     'elastic/kibana-core',
     'elastic/kibana-dashboards',
     'elastic/kibana-data-discovery',
-    'elastic/kibana-design',
     'elastic/kibana-discover',
-    'elastic/kibana-esql',
     'elastic/kibana-localization',
     'elastic/kibana-management',
     'elastic/kibana-operations',
     'elastic/kibana-performance-testing',
-    'elastic/kibana-presentation',
     'elastic/kibana-reporting-services',
     'elastic/kibana-security',
     'elastic/kibana-tech-leads',
-    'elastic/kibana-visualizations',
     'elastic/logstash',
     'elastic/search-ml-ux',
     'elastic/platform-docs',
@@ -56,16 +51,11 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   ],
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-ml-ux'],
   observability: [
-    'elastic/actionable-obs-team',
     'elastic/apm-agent-approvers',
     'elastic/nightshift-context-and-research-team',
     'elastic/nightshift-investigations-team',
     'elastic/nightshift-sre-agent-team',
     'elastic/obs-cloudnative-monitoring',
-    'elastic/obs-docs',
-    'elastic/obs-exploration-team',
-    'elastic/obs-knowledge-team',
-    'elastic/obs-onboarding-team',
     'elastic/obs-signals-traces-team',
     'elastic/obs-ux-management-team',
     'elastic/observability-bi',
@@ -80,25 +70,18 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   ],
   security: [
     'elastic/contextual-security-apps',
-    'elastic/core-analysis',
     'elastic/siem-conduit',
-    'elastic/kibana-cases',
     'elastic/security-data-engineering',
     'elastic/security-defend-workflows',
     'elastic/security-design',
-    'elastic/security-detection-engine',
     'elastic/security-detection-engineering',
     'elastic/security-detection-platform',
-    'elastic/security-detection-rule-management',
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
     'elastic/security-generative-ai',
     'elastic/security-investigations',
-    'elastic/security-pds-deployment',
-    'elastic/security-service-integrations',
     'elastic/security-solution',
     'elastic/security-threat-hunting',
-    'elastic/security-threat-hunting-investigations',
   ],
   workplaceai: ['elastic/search-ml-ux', 'elastic/workchat-eng'],
   vectordb: ['elastic/search-ml-ux'],
