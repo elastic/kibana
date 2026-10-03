@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryPageRow } from './page_row';
 import { MemoryKeywordTreemap } from './keyword_treemap';
@@ -94,30 +101,38 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
 
   return (
     <div data-test-subj="nightshiftMemoryHome">
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.significantEventsApp.memory.homeTitle"
-            defaultMessage="Semantic Memory"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued" data-test-subj="nightshiftMemoryHomeStats">
-        <FormattedMessage
-          id="xpack.significantEventsApp.memory.stats.pagesLabel"
-          defaultMessage="{count, plural, one {# memory} other {# memories}}"
-          values={{ count: total }}
-        />
-        {' · '}
-        <FormattedMessage
-          id="xpack.significantEventsApp.memory.stats.archivedLabel"
-          defaultMessage="{count} archived"
-          values={{ count: archived }}
-        />
-      </EuiText>
+      {/* One header row: the tab already names the view, so the title and the
+          counts it summarizes read as a pair rather than as two stacked lines. */}
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.homeTitle"
+                defaultMessage="Semantic Memory"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="nightshiftMemoryHomeStats">
+            <FormattedMessage
+              id="xpack.significantEventsApp.memory.stats.pagesLabel"
+              defaultMessage="{count, plural, one {# memory} other {# memories}}"
+              values={{ count: total }}
+            />
+            {' · '}
+            <FormattedMessage
+              id="xpack.significantEventsApp.memory.stats.archivedLabel"
+              defaultMessage="{count} archived"
+              values={{ count: archived }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <MemoryKeywordTreemap
         pages={keywordPages}
         selectedKeywords={selectedKeywords}
@@ -127,7 +142,7 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
 
       {mostUseful.length > 0 && (
         <>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           <EuiTitle size="xxs">
             <h3>
               <FormattedMessage
@@ -146,6 +161,7 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
         </>
       )}
 
+      <EuiSpacer size="m" />
       {recentlyUpdated.length === 0 ? (
         // With nothing to list, the section heading would be a label with no
         // section under it, so the empty message stands on its own.

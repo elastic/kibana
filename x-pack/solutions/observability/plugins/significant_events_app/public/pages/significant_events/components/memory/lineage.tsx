@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiDescriptionListDescription, EuiDescriptionListTitle, EuiLink } from '@elastic/eui';
+import {
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoryClient } from './use_memory';
@@ -72,17 +78,20 @@ export function MemoryMergedFromRow({ page, onSelectPage }: MemoryMergedFromRowP
         />
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription data-test-subj="nightshiftMemoryMergedFrom">
-        {sources.map((source, index) => (
-          <React.Fragment key={source.id}>
-            {index > 0 && ', '}
-            <EuiLink
-              onClick={() => onSelectPage(source.id)}
-              data-test-subj={`nightshiftMemoryMergedFrom-${source.id}`}
-            >
-              {source.title}
-            </EuiLink>
-          </React.Fragment>
-        ))}
+        {/* One source per line: comma-joined titles of differing length read as
+            one run-on sentence, and a merge can name several. */}
+        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
+          {sources.map((source) => (
+            <EuiFlexItem key={source.id} grow={false}>
+              <EuiLink
+                onClick={() => onSelectPage(source.id)}
+                data-test-subj={`nightshiftMemoryMergedFrom-${source.id}`}
+              >
+                {source.title}
+              </EuiLink>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       </EuiDescriptionListDescription>
     </>
   );

@@ -102,6 +102,19 @@ describe('MemoryMergedFromRow', () => {
     expect(screen.queryByText('Merged from')).not.toBeInTheDocument();
   });
 
+  it('gives each source its own line rather than comma-joining them', async () => {
+    respondWith([
+      { id: 'memory_a', title: 'Kafka lag spikes' },
+      { id: 'memory_b', title: 'DNS resolution stalls' },
+    ]);
+    renderRow(page({ merged_from: ['memory_a', 'memory_b'] }));
+
+    await waitFor(() => expect(screen.getByText('DNS resolution stalls')).toBeInTheDocument());
+    // Comma-joined titles of differing length read as one run-on sentence.
+    const mergedFrom = screen.getByTestId('nightshiftMemoryMergedFrom');
+    expect(mergedFrom.textContent).toBe('Kafka lag spikesDNS resolution stalls');
+  });
+
   it('opens the memory a source names', async () => {
     respondWith([
       { id: 'memory_a', title: 'Kafka lag spikes' },

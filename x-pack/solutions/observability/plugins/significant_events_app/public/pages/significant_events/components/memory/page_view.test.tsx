@@ -163,6 +163,22 @@ describe('MemoryPageView', () => {
     );
   });
 
+  it('badges an archived memory beside its title', () => {
+    // The state is the first thing a reader needs, and it is not only in the
+    // provenance row: an archived memory is out of recall.
+    mockUseMemoryPage.mockReturnValue(asDetail({ archived: true }));
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchivedTitleBadge')).toHaveTextContent('Archived');
+  });
+
+  it('leaves an active memory unbadged beside its title', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.queryByTestId('nightshiftMemoryArchivedTitleBadge')).not.toBeInTheDocument();
+  });
+
   it('shows no reason badge for a legacy archived page that has none', () => {
     // A pre-`archive_reason` document reads as archived with nothing to say why.
     mockUseMemoryPage.mockReturnValue(asDetail({ archived: true }));
