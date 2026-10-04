@@ -507,6 +507,140 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
+  it('shows a delete error distinct from a save error when the previous dataset cannot be deleted', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
+    const add = jest.fn().mockResolvedValue(undefined);
+    const remove = jest.fn().mockRejectedValue(new Error('security_exception: unauthorized'));
+    const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const initialDataSet: DataSetWithName = {
+      name: 'logs-dataset',
+      data_source: 'source-1',
+      resource: 's3://bucket/*',
+      description: '',
+      settings: { format: 'csv' },
+    };
+
+    const { getByTestId, queryByTestId, findByTestId } = render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add, delete: remove },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={loadDataSets}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.change(getByTestId('createDatasetName'), {
+      target: { value: 'renamed-dataset' },
+    });
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
+    if (timestampPathInput) {
+      fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
+    }
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+
+    const callout = await findByTestId('createDatasetWizardSaveError');
+    expect(callout).toHaveTextContent(createDatasetWizardStrings.deletePreviousErrorTitle);
+    expect(callout).not.toHaveTextContent(createDatasetWizardStrings.saveErrorTitle);
+    expect(callout).toHaveTextContent(
+      createDatasetWizardStrings.deletePreviousErrorText(
+        'renamed-dataset',
+        'logs-dataset',
+        'security_exception: unauthorized'
+      )
+    );
+    expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
+    expect(loadDataSets).not.toHaveBeenCalled();
+    expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
+  });
+
+  it('returns to the datasets list and reports a refresh failure after saving in a toast', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
+    const add = jest.fn().mockResolvedValue(undefined);
+    const loadDataSets = jest.fn().mockRejectedValue(new Error('list unavailable'));
+    const addDanger = jest.fn();
+    const initialDataSet: DataSetWithName = {
+      name: 'logs-dataset',
+      data_source: 'source-1',
+      resource: 's3://bucket/*',
+      description: '',
+      settings: { format: 'csv' },
+    };
+
+    const { getByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add, delete: jest.fn() },
+                  dataSourcesClient: { add: jest.fn() },
+                  toasts: { addDanger },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={loadDataSets}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
+    if (timestampPathInput) {
+      fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
+    }
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+
+    await waitFor(() => expect(history.location.pathname).toBe(DATASETS_PATH));
+    expect(add).toHaveBeenCalledTimes(1);
+    expect(addDanger).toHaveBeenCalledWith({
+      title: createDatasetWizardStrings.refreshAfterSaveErrorTitle('logs-dataset'),
+      text: 'list unavailable',
+    });
+    expect(queryByTestId('createDatasetWizardSaveError')).toBeNull();
+  });
+
   it('shows the save error in a danger callout and stays on the page', async () => {
     const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
     const add = jest.fn().mockRejectedValue(new Error('validation_exception: bad resource'));
