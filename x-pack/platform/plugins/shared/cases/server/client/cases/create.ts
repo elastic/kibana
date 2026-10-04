@@ -174,7 +174,13 @@ export const create = async (
             query.owner,
             configurations[0]?.extractObservables
           ),
+          extractObservablesSource: 'space_default',
         },
+      };
+    } else {
+      query = {
+        ...query,
+        settings: { ...query.settings, extractObservablesSource: 'explicit' },
       };
     }
 

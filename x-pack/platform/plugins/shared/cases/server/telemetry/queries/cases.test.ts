@@ -155,6 +155,9 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        extractObservablesSource: {
+          buckets: [],
+        },
         status: {
           buckets: [
             {
@@ -381,6 +384,9 @@ describe('getCasesTelemetryData', () => {
           syncAlertsOn: 1,
           extractObservablesOff: 1,
           extractObservablesOn: 1,
+          extractObservablesSourceExplicit: 0,
+          extractObservablesSourceSpaceDefault: 0,
+          extractObservablesSourceRule: 0,
           observables: {
             auto: { default: 1, custom: 0 },
             manual: { default: 0, custom: 0 },
@@ -620,6 +626,11 @@ describe('getCasesTelemetryData', () => {
             "extractObservables": Object {
               "terms": Object {
                 "field": "cases.attributes.settings.extractObservables",
+              },
+            },
+            "extractObservablesSource": Object {
+              "terms": Object {
+                "field": "cases.attributes.settings.extractObservablesSource",
               },
             },
             "observability": Object {

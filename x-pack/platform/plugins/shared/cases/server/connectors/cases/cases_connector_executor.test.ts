@@ -284,6 +284,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -311,6 +312,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -338,6 +340,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -599,6 +602,7 @@ describe('CasesConnectorExecutor', () => {
                   "owner": "cases",
                   "settings": Object {
                     "extractObservables": false,
+                    "extractObservablesSource": "space_default",
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -974,6 +978,7 @@ describe('CasesConnectorExecutor', () => {
                   "owner": "cases",
                   "settings": Object {
                     "extractObservables": false,
+                    "extractObservablesSource": "space_default",
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -1140,6 +1145,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": true,
                     },
                     "severity": "high",
@@ -1224,6 +1230,7 @@ describe('CasesConnectorExecutor', () => {
                     "owner": "cases",
                     "settings": Object {
                       "extractObservables": false,
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1298,6 +1305,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: false,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
             expect(createdCase.assignees).toBeUndefined();
             expect(createdCase.customFields).toEqual([]);
@@ -1366,9 +1374,70 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
             expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
             expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
+          });
+
+          describe('extractObservables override', () => {
+            const v2TemplateWithExtractObservables = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+settings:
+  syncAlerts: true
+  extractObservables: true
+fields: []
+`,
+              },
+            };
+
+            beforeEach(() => {
+              casesClientMock.templates.getTemplate = jest
+                .fn()
+                .mockResolvedValue(v2TemplateWithExtractObservables);
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('wins over the template settings value', async () => {
+              await connectorExecutor.execute({
+                ...params,
+                owner: SECURITY_SOLUTION_OWNER,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                extractObservables: false,
+              });
+
+              expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+                syncAlerts: true,
+                extractObservables: false,
+                extractObservablesSource: 'rule',
+              });
+            });
+
+            it('falls back to the template settings value when the override is null', async () => {
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                extractObservables: null,
+              });
+
+              expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+                syncAlerts: true,
+                extractObservables: true,
+                extractObservablesSource: 'space_default',
+              });
+            });
           });
 
           it('skips template assignees without a Platinum license so case creation still succeeds', async () => {
@@ -1485,6 +1554,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: false,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -1598,6 +1668,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: true,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
             expect(createdCase.assignees).toEqual([{ uid: 'legacy-assignee' }]);
             expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 2 });
@@ -2281,6 +2352,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2297,6 +2369,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: false,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2313,6 +2386,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2336,6 +2410,125 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
+            });
+          });
+
+          it('per-rule extractObservables override wins over space config default', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: false,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+              extractObservablesSource: 'rule',
+            });
+          });
+
+          it('per-rule extractObservables: true overrides space config false', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+              extractObservablesSource: 'rule',
+            });
+          });
+
+          it('per-rule extractObservables: null inherits space config', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+              extractObservablesSource: 'space_default',
+            });
+          });
+
+          it('ignores the per-rule override for an owner that disables observables', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+              extractObservablesSource: 'space_default',
+            });
+          });
+
+          it('ignores the per-rule override for an owner that does not auto-extract by default (Stack)', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: 'cases',
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: 'cases',
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
           });
         });
@@ -2433,6 +2626,7 @@ fields: []
                     "owner": "cases",
                     "settings": Object {
                       "extractObservables": false,
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -2514,6 +2708,7 @@ fields: []
                     "owner": "cases",
                     "settings": Object {
                       "extractObservables": false,
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -4434,6 +4629,7 @@ fields: []
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -4459,6 +4655,7 @@ fields: []
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -4484,6 +4681,7 @@ fields: []
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
