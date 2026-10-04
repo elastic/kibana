@@ -60,6 +60,7 @@ export async function getServicesAlerts({
   const params = {
     size: 0,
     track_total_hits: false,
+    _source: false,
     query: {
       bool: {
         filter: [
