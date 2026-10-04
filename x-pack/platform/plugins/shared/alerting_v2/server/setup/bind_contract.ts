@@ -6,7 +6,7 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Setup, Start } from '@kbn/core-di';
+import { PluginStart, Setup, Start } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -16,10 +16,20 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import {
+  RuleSavedObjectsClientToken,
+  RulesSavedObjectServiceInternalToken,
+} from '../lib/services/rules_saved_object_service/tokens';
+import { createInternalUserRequest } from '../lib/internal_user_request';
+import { createInternalRulesClient } from '../lib/internal_rules_client';
+import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
   AlertingServerSetup,
   AlertingServerStart,
+  AlertingServerStartDependencies,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from '../types';
@@ -49,6 +59,25 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       return scope;
     };
 
+    // A credential-less request plus an internal-user rules SO client bound to the
+    // space, so the regular rules client code path runs without a user.
+    const savedObjects = get(CoreStart('savedObjects'));
+    const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+    const internalClient = savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+    });
+    const buildInternalScope = (spaceId: SpaceId) => {
+      const scope = buildScope(createInternalUserRequest(spaceId), spaceId);
+      const namespace = spaceIdToNamespace(spaces, spaceId);
+      scope
+        .bind(RuleSavedObjectsClientToken)
+        .toConstantValue(
+          namespace ? internalClient.asScopedToNamespace(namespace) : internalClient
+        );
+      return scope;
+    };
+    const rulesSavedObjectServiceInternal = get(RulesSavedObjectServiceInternalToken);
+
     const contract: AlertingServerStart = {
       async getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi> {
         return buildScope(request).get(RulesClient);
@@ -58,6 +87,12 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         spaceId: SpaceId
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
+      },
+      async getInternalRulesClient(): Promise<InternalRulesClientApi> {
+        return createInternalRulesClient({
+          rulesSavedObjectService: rulesSavedObjectServiceInternal,
+          getRulesClientInSpace: (spaceId) => buildInternalScope(spaceId).get(RulesClient),
+        });
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest

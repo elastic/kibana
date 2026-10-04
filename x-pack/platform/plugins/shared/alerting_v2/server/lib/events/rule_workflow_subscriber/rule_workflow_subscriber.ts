@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { isInternalUserRequest } from '../../internal_user_request';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -73,6 +74,16 @@ export class RuleWorkflowSubscriber {
     event: RuleEvent,
     context: AlertingPublisherContext
   ): Promise<void> {
+    // Scheduling a triggered workflow needs the caller's credentials, which an
+    // internal-user change does not have.
+    if (isInternalUserRequest(context.request)) {
+      this.logger.debug({
+        message: () =>
+          `Skipping workflow trigger "${trigger.triggerId}" for rule ${event.payload.ruleId}: changed by the internal user`,
+      });
+      return;
+    }
+
     try {
       const payload = trigger.toPayload(event);
       await this.workflows.emitEvent(context.request, trigger.triggerId, payload);
