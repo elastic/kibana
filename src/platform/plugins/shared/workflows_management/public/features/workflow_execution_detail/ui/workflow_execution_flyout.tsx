@@ -1123,7 +1123,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                               : approvalLabels
                           }
                           waitingStepExecutionId={selectedStepExecutionId ?? undefined}
-                          submitState={resumeSubmitState}
+                          submitState={resumeSelectedChildStep ? undefined : resumeSubmitState}
                         />
                       </div>
                     )}
