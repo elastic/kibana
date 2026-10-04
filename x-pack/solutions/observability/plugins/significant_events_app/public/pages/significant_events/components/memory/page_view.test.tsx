@@ -71,6 +71,9 @@ const page = (overrides: Partial<MemoryPage> = {}): MemoryPage => ({
   ...overrides,
 });
 
+/** The Elasticsearch revision the detail route returns with the page. */
+const VERSION = { seq_no: 7, primary_term: 1 };
+
 const asDetail = (
   overrides: Partial<MemoryPage> = {},
   data = { usefulness: 0.5, confidence: 0.8 }
@@ -78,7 +81,7 @@ const asDetail = (
   ({
     isLoading: false,
     isError: false,
-    data: { page: page(overrides), ...data },
+    data: { page: page(overrides), version: VERSION, ...data },
   } as unknown as ReturnType<typeof useMemoryPage>);
 
 const renderView = (
@@ -357,7 +360,7 @@ describe('MemoryPageView', () => {
     expect(mockDelete).not.toHaveBeenCalled();
   });
 
-  it('deletes with the page title and reports back when confirmed', async () => {
+  it('deletes the revision it read, and reports back when confirmed', async () => {
     mockUseMemoryPage.mockReturnValue(asDetail());
     const { onDeleted } = renderView();
 
@@ -370,13 +373,45 @@ describe('MemoryPageView', () => {
 
     await waitFor(() => {
       // The title is echoed so the route can refuse a stale confirmation, and the
-      // navigation away is the mutation's success callback rather than the click.
+      // revision travelled with it: the delete has to be conditional on what was
+      // read, not on what the server finds when the request lands.
       expect(mockDelete).toHaveBeenCalledWith(
-        { id: 'memory_kafka-lag', confirmTitle: 'Kafka consumer lag' },
+        { id: 'memory_kafka-lag', confirmTitle: 'Kafka consumer lag', version: VERSION },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
     expect(onDeleted).toHaveBeenCalled();
+  });
+
+  it('deletes the revision the operator actually reviewed, not the one on screen', async () => {
+    // The optimizer rewrites content without changing the title, so the revision
+    // is what distinguishes the page the dialog was opened on from its
+    // replacement. A refetch between reading and confirming replaces it.
+    const rewritten = { seq_no: 8, primary_term: 1 };
+    const detail = (version: { seq_no: number; primary_term: number }) =>
+      ({
+        isLoading: false,
+        isError: false,
+        data: { page: page(), version, usefulness: 0.5, confidence: 0.8 },
+      } as unknown as ReturnType<typeof useMemoryPage>);
+    mockUseMemoryPage.mockReturnValue(detail(rewritten));
+    const { rerenderView } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    await userEvent.type(
+      screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
+      'Kafka consumer lag'
+    );
+    mockUseMemoryPage.mockReturnValue(detail(VERSION));
+    rerenderView();
+    await userEvent.click(screen.getByText('Delete permanently'));
+
+    await waitFor(() =>
+      expect(mockDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ version: VERSION }),
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      )
+    );
   });
 
   it('keeps the destructive button disabled until the exact title is typed', async () => {

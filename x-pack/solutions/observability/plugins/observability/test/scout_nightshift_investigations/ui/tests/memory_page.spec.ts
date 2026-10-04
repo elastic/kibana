@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import type { EsClient, KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../scout/ui/fixtures';
@@ -14,6 +14,7 @@ import { mockInvestigationApi } from '../fixtures/mocks';
 import {
   attachScreenshot,
   deleteSeededMemories,
+  type SeedMemoryOptions,
   MEMORY_CONFIGURE_ROLE,
   MEMORY_INDEX,
   MEMORY_MANAGER_ROLE,
@@ -34,6 +35,23 @@ import {
 const suffix = randomUUID().slice(0, 8);
 const slug = (name: string) => `${name}-${suffix}`;
 
+/**
+ * A Space this suite owns, created and deleted around the run.
+ *
+ * The default Space is shared with every other suite on the deployment, so a
+ * pre-existing memory there would move the header's totals and its archived
+ * count under assertions that are about this run's fixture. Seeding here is what
+ * makes those numbers exact, and it is why teardown can be precise as well.
+ */
+const SUITE_SPACE_ID = `memory-ui-${randomUUID().slice(0, 8)}`;
+
+/** Every document this run seeded, so teardown deletes those and nothing else. */
+const seededDocumentIds: string[] = [];
+const seed = async (esClient: EsClient, options: SeedMemoryOptions) => {
+  seededDocumentIds.push(storedMemoryId(options.spaceId ?? SUITE_SPACE_ID, options.slug));
+  return seedMemory(esClient, { spaceId: SUITE_SPACE_ID, ...options });
+};
+
 /** The conversation the seeded provenance points at. It need not exist: E7 is about the URL. */
 const SEEDED_CONVERSATION_ID = `conv-${randomUUID()}`;
 
@@ -47,7 +65,7 @@ const MERGED_SOURCE_B = slug('merged-checkout-pool');
 const MERGED_GRANDPARENT = slug('merged-checkout-connection-pool');
 const OTHER_SPACE_MEMORY = slug('other-space-only');
 /**
- * Archived memories this run seeds in the default Space: one retired by a person
+ * Archived memories this run seeds in its own Space: one retired by a person
  * and three merge sources. The header's archived count has to see them while the
  * sidebar is showing Active.
  */
@@ -56,6 +74,11 @@ const ARCHIVED_SEEDED_COUNT = 4;
 const PAGE_SIZE_SLUGS = Array.from({ length: 30 }, (_, index) => slug(`paged-${index}`));
 
 const MAIN_TITLE = 'Checkout latency postmortem: consumer lag and DNS';
+/** The Agent Builder conversation route the provenance link points at. */
+const SOURCE_TASK_PATH = `/app/agent_builder/agents/${SEEDED_AGENT_ID}/conversations/${SEEDED_CONVERSATION_ID}`;
+/** Every reader is in the suite's own Space, so its URLs are Space-scoped. */
+const scoped = (path: string): string => `/s/${SUITE_SPACE_ID}${path}`;
+
 /** The `context` E11 searches for: only this memory carries the phrase. */
 const SEARCH_PHRASE = 'ingest-2 queue backlog';
 
@@ -89,6 +112,13 @@ const KEYWORD_DOCS: { key: string; tags: string[] }[] = [
 const INVOKE_AGENT_KEYWORD = 'invoke-agent';
 const CHECKOUT_KEYWORD = 'checkout';
 
+/**
+ * Every active document this run seeds: the paged rows, the keyword graph, and
+ * the four single-purpose memories `MAIN` plus the search, archive and delete
+ * targets. The archived documents are not listed while the sidebar shows Active.
+ */
+const SEEDED_ACTIVE_COUNT = PAGE_SIZE_SLUGS.length + KEYWORD_DOCS.length + 4;
+
 const hasTag = (docTags: string[], keyword: string) =>
   docTags.some((tag) => tag.toLowerCase().replace(/[\s_]+/g, '-') === keyword);
 
@@ -110,11 +140,12 @@ test.describe(
   () => {
     test.beforeAll(async ({ esClient, log, apiServices }) => {
       await waitForMemoryIndex(esClient, log);
-      // E12 needs a second real Space, not a space_id string on a document: the
-      // routes scope by `getSpaceId(request)`, so only a real Space exercises it.
+      // The routes scope by `getSpaceId(request)`, so both Spaces this suite uses
+      // are real ones rather than a space_id string on a document.
+      await apiServices.spaces.create({ id: SUITE_SPACE_ID, name: SUITE_SPACE_ID });
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
 
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: MAIN,
         title: MAIN_TITLE,
         content:
@@ -131,27 +162,8 @@ test.describe(
         agentId: SEEDED_AGENT_ID,
       });
 
-      // One surfaced once and marked useful: rate 1.0, confidence near zero. It
-      // still contributes to the keyword graph, at the floor weight.
-      await seedMemory(esClient, {
-        slug: slug('single-impression-fluke'),
-        title: 'Single-impression signal',
-        impressions: 1,
-        conversions: 1,
-        updatedAt: minutesAgo(2),
-      });
-
-      // The opposite corner: a rate the maths has actually seen enough of.
-      await seedMemory(esClient, {
-        slug: slug('well-evidenced-runbook'),
-        title: 'Well evidenced runbook',
-        impressions: 200,
-        conversions: 180,
-        updatedAt: minutesAgo(3),
-      });
-
       // E11's target. Only this document's `context` carries the phrase.
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: slug('ingest-backlog-runbook'),
         title: 'Ingest backlog runbook',
         context: `Diagnose the ${SEARCH_PHRASE} using ES|QL over logs-*`,
@@ -160,7 +172,7 @@ test.describe(
         updatedAt: minutesAgo(4),
       });
 
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: ARCHIVE_ME,
         title: 'Retire me from the active list',
         impressions: 3,
@@ -168,7 +180,7 @@ test.describe(
         updatedAt: minutesAgo(5),
       });
 
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: DELETE_ME,
         title: 'Delete me permanently',
         impressions: 2,
@@ -177,7 +189,7 @@ test.describe(
       });
 
       // E4: archived by a person, which is the only reason the UI can show.
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: slug('archived-dns-myth'),
         title: 'Archived DNS root cause claim',
         impressions: 4,
@@ -189,26 +201,26 @@ test.describe(
       // E6: a merge is a fan-in, so the root has two direct sources, and one of
       // those was itself merged from `MERGED_GRANDPARENT`. The root's row names
       // its own sources only, so the grandparent proves the walk stops there.
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: MERGED_GRANDPARENT,
         title: 'Checkout connection pool exhausted',
         archiveReason: 'merged',
         updatedAt: minutesAgo(30),
       });
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: MERGED_SOURCE_A,
         title: 'Checkout DNS resolution stalled',
         mergedFrom: [`memory_${MERGED_GRANDPARENT}`],
         archiveReason: 'merged',
         updatedAt: minutesAgo(20),
       });
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: MERGED_SOURCE_B,
         title: 'Checkout consumer pool saturation',
         archiveReason: 'merged',
         updatedAt: minutesAgo(19),
       });
-      await seedMemory(esClient, {
+      await seed(esClient, {
         slug: MERGED_ROOT,
         title: 'Checkout timeout synthesis',
         mergedFrom: [`memory_${MERGED_SOURCE_A}`, `memory_${MERGED_SOURCE_B}`],
@@ -217,23 +229,25 @@ test.describe(
         updatedAt: minutesAgo(18),
       });
 
-      // E5: one shared `updated_at` across the whole set. The store sorts on
-      // `updated_at desc, slug asc` precisely because the timestamp alone is not a
-      // total order, and that tiebreaker is what paging depends on.
+      // E5: one shared `updated_at` across the whole set, computed once. The store
+      // sorts on `updated_at desc, slug asc` precisely because the timestamp alone
+      // is not a total order, and that tiebreaker is what paging depends on — so
+      // the fixture has to give `search_after` a tied sort key to break.
+      const pagedUpdatedAt = minutesAgo(60);
       for (const pageSlug of PAGE_SIZE_SLUGS) {
-        await seedMemory(esClient, {
+        await seed(esClient, {
           slug: pageSlug,
           title: `Paged memory ${pageSlug}`,
           impressions: 1,
           conversions: 0,
-          updatedAt: minutesAgo(60),
+          updatedAt: pagedUpdatedAt,
         });
       }
 
       // E13's keyword graph. Recent enough to be inside the sidebar's first page,
       // so the home lists can be checked as well as the header count.
       for (const [index, doc] of KEYWORD_DOCS.entries()) {
-        await seedMemory(esClient, {
+        await seed(esClient, {
           slug: slug(doc.key),
           title: `Keyword memory ${doc.key}`,
           tags: doc.tags,
@@ -243,7 +257,7 @@ test.describe(
         });
       }
 
-      await seedMemory(esClient, {
+      await seed(esClient, {
         spaceId: OTHER_SPACE_ID,
         slug: OTHER_SPACE_MEMORY,
         title: 'Belongs to the other Space',
@@ -262,7 +276,8 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await deleteSeededMemories(esClient, ['default', OTHER_SPACE_ID]);
+      await deleteSeededMemories(esClient, seededDocumentIds);
+      await apiServices.spaces.delete(SUITE_SPACE_ID);
       await apiServices.spaces.delete(OTHER_SPACE_ID);
     });
 
@@ -275,14 +290,18 @@ test.describe(
      * briefly not one of its tabs and an unknown tab is redirected to the first
      * one. Loading the route directly and staying on it is the assertion.
      */
-    const gotoMemory = async (page: ScoutPage, kbnUrl: KibanaUrl, spaceId?: string) => {
+    const gotoMemory = async (
+      page: ScoutPage,
+      kbnUrl: KibanaUrl,
+      spaceId: string = SUITE_SPACE_ID
+    ) => {
       await page.goto(memoryUrl(kbnUrl, spaceId));
       await expect.poll(() => page.url(), { timeout: 30_000 }).toContain(memoryPath(spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
     };
 
     /** Reload on the Memory route and require it to still be Memory afterwards. */
-    const reloadMemory = async (page: ScoutPage, spaceId?: string) => {
+    const reloadMemory = async (page: ScoutPage, spaceId: string = SUITE_SPACE_ID) => {
       await page.reload();
       await expect.poll(() => page.url(), { timeout: 30_000 }).toContain(memoryPath(spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
@@ -328,8 +347,13 @@ test.describe(
 
       await expect(page.testSubj.locator('nightshiftMemoryPageTitle')).toHaveText(MAIN_TITLE);
       await expect(page.getByText('Raise the cache size')).toBeVisible();
-      await expect(page.testSubj.locator('nightshiftMemoryUsefulnessValue')).toBeVisible();
-      await expect(page.testSubj.locator('nightshiftMemoryConfidenceValue')).toBeVisible();
+      // The two numbers the route computed, rendered: 6 conversions of 8
+      // impressions is 75% and does not decay, because both counters decay by the
+      // same factor. Eight impressions is thin evidence, so confidence reads low
+      // even though usefulness reads high — the two are not the same claim. The
+      // maths itself is covered where it lives (`server/memory/ranking.test.ts`).
+      expect(await telemetryPercent(page, 'nightshiftMemoryUsefulnessValue')).toBe(75);
+      expect(await telemetryPercent(page, 'nightshiftMemoryConfidenceValue')).toBeLessThan(50);
       // The task the memory was learned from is one row of the metadata footer,
       // not a panel of its own: it is provenance, not part of the memory.
       await expect(page.testSubj.locator('nightshiftMemorySourceTask')).toContainText(
@@ -347,42 +371,6 @@ test.describe(
         page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`)
       ).toBeVisible();
       await attachScreenshot(page, testInfo, 'memory-e2-tag-filtered');
-    });
-
-    test('E3 reports the seeded usefulness, decayed, and separates it from confidence', async ({
-      page,
-      kbnUrl,
-    }, testInfo) => {
-      await gotoMemory(page, kbnUrl);
-
-      // 6 conversions of 8 impressions is 75%. Both counters decay by the same
-      // factor, so the rate holds however long the assertions take.
-      await page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`).click();
-      expect(await telemetryPercent(page, 'nightshiftMemoryUsefulnessValue')).toBe(75);
-      // Eight impressions is thin evidence, so confidence must read low even
-      // though usefulness reads high — the two numbers are not the same claim.
-      expect(await telemetryPercent(page, 'nightshiftMemoryConfidenceValue')).toBeLessThan(50);
-
-      await page.testSubj.locator('nightshiftMemoryHomeNav').click();
-      await page.testSubj
-        .locator(`nightshiftMemoryLink-memory_${slug('single-impression-fluke')}`)
-        .click();
-      // One impression marked useful: a perfect rate and almost no confidence.
-      expect(await telemetryPercent(page, 'nightshiftMemoryUsefulnessValue')).toBe(100);
-      const flukeConfidence = await telemetryPercent(page, 'nightshiftMemoryConfidenceValue');
-
-      await page.testSubj.locator('nightshiftMemoryHomeNav').click();
-      await page.testSubj
-        .locator(`nightshiftMemoryLink-memory_${slug('well-evidenced-runbook')}`)
-        .click();
-      expect(await telemetryPercent(page, 'nightshiftMemoryUsefulnessValue')).toBe(90);
-      const provenConfidence = await telemetryPercent(page, 'nightshiftMemoryConfidenceValue');
-
-      // The two evidence stories the store distinguishes, in numbers. They also
-      // weight the keyword graph: usefulness × confidence per memory.
-      expect(provenConfidence).toBeGreaterThan(70);
-      expect(provenConfidence).toBeGreaterThan(flukeConfidence);
-      await attachScreenshot(page, testInfo, 'memory-e3-telemetry');
     });
 
     test('E4 separates archived memories by their reason', async ({ page, kbnUrl }, testInfo) => {
@@ -413,13 +401,27 @@ test.describe(
       await gotoMemory(page, kbnUrl);
 
       const firstPage = await sidebarPageIds(page);
-      // 30 seeded rows on one `updated_at`, plus the rest of the fixture set: more
-      // rows than the 25 the list query returns.
-      expect(PAGE_SIZE_SLUGS.length).toBeGreaterThan(25);
+      // More seeded rows than the 25 one request returns, which is what makes the
+      // second `search_after` cursor mean anything.
+      expect(SEEDED_ACTIVE_COUNT).toBeGreaterThan(25);
 
       const loadMore = page.testSubj.locator('nightshiftMemoryLoadMore');
+      // Plain locator: `testSubj` prefixes its argument with `data-test-subj=`,
+      // which is not what a prefix selector wants.
+      const rowsShown = async () =>
+        (await page.locator('[data-test-subj^="nightshiftMemoryLink-"]').all()).length;
       await expect(loadMore).toBeVisible();
-      await loadMore.click();
+      // Page until the listing is exhausted rather than assuming a row count: the
+      // Space holds what this run seeded plus whatever the store derives from
+      // those pages, and only the owned rows are this suite's to count.
+      for (let requested = 0; requested < 5 && (await loadMore.count()) > 0; requested++) {
+        const before = await rowsShown();
+        await loadMore.click();
+        // Another page arrived, or the listing ran out and the button went with it.
+        await expect
+          .poll(async () => (await rowsShown()) > before || (await loadMore.count()) === 0)
+          .toBe(true);
+      }
       await expect(loadMore).toHaveCount(0);
 
       const all = await sidebarPageIds(page);
@@ -432,7 +434,7 @@ test.describe(
           1
         );
       }
-      // Nothing from the first page was dropped when the second one arrived.
+      // Nothing from the first page was dropped when the later ones arrived.
       for (const id of firstPage) {
         expect(all).toContain(id);
       }
@@ -483,21 +485,12 @@ test.describe(
       await expect(link).toHaveText(
         'Investigate why checkout latency spiked after the DNS cache change'
       );
-      // The canonical route is agent-scoped, so it needs both ids. A memory written
-      // before `agent_id` was persisted only has the conversation, which resolves
-      // through the legacy unscoped route.
-      const href = link;
-      await expect(href).toHaveAttribute(
-        'href',
-        `/app/agent_builder/agents/${SEEDED_AGENT_ID}/conversations/${SEEDED_CONVERSATION_ID}`
-      );
+      // The canonical route is agent-scoped, so it needs both ids, and the reader
+      // is in a Space, so the link carries the Space too.
+      await expect(link).toHaveAttribute('href', scoped(SOURCE_TASK_PATH));
 
       await link.click();
-      await expect
-        .poll(() => page.url())
-        .toContain(
-          `/app/agent_builder/agents/${SEEDED_AGENT_ID}/conversations/${SEEDED_CONVERSATION_ID}`
-        );
+      await expect.poll(() => page.url()).toContain(scoped(SOURCE_TASK_PATH));
       // The assertion is the route the browser resolved. Agent Builder then shows
       // its own empty state on a Scout stack (no chat connector is configured
       // there), which is not what this test is about, so wait only for the app
@@ -577,7 +570,7 @@ test.describe(
       // The irreversible part, checked in Elasticsearch rather than in the UI.
       const remaining = await esClient.count({
         index: MEMORY_INDEX,
-        query: { ids: { values: [storedMemoryId('default', DELETE_ME)] } },
+        query: { ids: { values: [storedMemoryId(SUITE_SPACE_ID, DELETE_ME)] } },
       });
       expect(remaining.count).toBe(0);
     });

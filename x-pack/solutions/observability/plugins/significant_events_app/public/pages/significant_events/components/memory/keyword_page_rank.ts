@@ -317,21 +317,6 @@ const mostFrequentSpelling = (bySpelling: Map<string, number> | undefined): stri
 };
 
 /**
- * Pages carrying every selected keyword. AND, like the server-side filter.
- */
-export const filterEntriesByKeywords = <T extends KeywordEntry>(
-  entries: readonly T[],
-  keywords: readonly string[]
-): T[] => {
-  const selected = keywords.map((keyword) => canonicalizeTag(keyword)).filter((kw) => kw !== null);
-  if (selected.length === 0) return [...entries];
-  return entries.filter((entry) => {
-    const present = new Set(entryKeywords(entry.tags));
-    return selected.every((keyword) => present.has(keyword));
-  });
-};
-
-/**
  * The tag terms to send the server for the selected keywords: each keyword's
  * canonical key plus every original spelling of it.
  *

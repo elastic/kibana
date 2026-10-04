@@ -7,7 +7,6 @@
 
 import {
   computeKeywordPageRank,
-  filterEntriesByKeywords,
   MAX_RANKED_KEYWORDS,
   MAX_TREEMAP_CELLS,
   MIN_CELL_AREA,
@@ -232,31 +231,6 @@ describe('toKeywordCells', () => {
   it('has nothing to draw when every keyword is selected or no memory carries one', () => {
     expect(toKeywordCells([])).toEqual([]);
     expect(toKeywordCells(store, ['agent-builder', 'redis', 'cart-cache', 'traces-*'])).toEqual([]);
-  });
-});
-
-describe('filterEntriesByKeywords', () => {
-  const store: KeywordEntry[] = [
-    entry({ tags: ['kafka', 'redis'] }),
-    entry({ tags: ['kafka'] }),
-    entry({ tags: ['redis'] }),
-  ];
-
-  it('returns everything when nothing is selected', () => {
-    expect(filterEntriesByKeywords(store, [])).toHaveLength(3);
-  });
-
-  it('ANDs the selected keywords, as the server-side filter does', () => {
-    expect(filterEntriesByKeywords(store, ['kafka'])).toHaveLength(2);
-    expect(filterEntriesByKeywords(store, ['kafka', 'redis'])).toHaveLength(1);
-    expect(filterEntriesByKeywords(store, ['kafka', 'otel'])).toHaveLength(0);
-  });
-
-  it('matches a keyword however it was spelled', () => {
-    const spelled = [entry({ tags: ['Cart Cache', 'kafka'] })];
-
-    expect(filterEntriesByKeywords(spelled, ['cart-cache'])).toHaveLength(1);
-    expect(filterEntriesByKeywords(spelled, ['CART_CACHE'])).toHaveLength(1);
   });
 });
 

@@ -429,7 +429,13 @@ export function MemoryPageView({
             setDeleteConfirmation('');
             // Navigating away only on success: the memory may well still be
             // there, and a failed write must leave the page in place to retry.
-            deletePage({ id: page.id, confirmTitle: page.title }, { onSuccess: onDeleted });
+            // The revision travels with the request, so a write that landed
+            // after this page was read answers 409 instead of taking the
+            // replacement the operator never saw.
+            deletePage(
+              { id: page.id, confirmTitle: page.title, version: data.version },
+              { onSuccess: onDeleted }
+            );
           }}
         >
           <EuiText size="s">

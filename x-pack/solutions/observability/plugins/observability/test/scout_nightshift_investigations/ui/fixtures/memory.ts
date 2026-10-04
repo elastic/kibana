@@ -18,7 +18,6 @@ export const MEMORY_INDEX = 'nightshift-semantic-memory';
  * investigation console, and its `/{tab}` route does not serve the Memory page.
  */
 const SIGNIFICANT_EVENTS_APP_ROUTE = 'significant_events';
-export const MEMORY_SPACE_TAG_FIELD = 'attributes.space_id';
 /** Agent Builder conversation the seeded memories claim to have come from. */
 export const SEEDED_AGENT_ID = 'nightshift.investigation';
 /** A second Space, so space isolation is a real second tenancy and not a label. */
@@ -190,19 +189,25 @@ export const waitForMemoryIndex = async (
   throw new Error(`Index ${MEMORY_INDEX} was not created within 60s`);
 };
 
-/** Removes everything this run seeded, scoped to the Spaces it seeded into. */
+/**
+ * Removes exactly the documents this run seeded.
+ *
+ * Scoped by id rather than by Space: a shared deployment's default Space holds
+ * memories this suite never wrote, and deleting those would leak state into
+ * whatever runs next.
+ */
 export const deleteSeededMemories = async (
   esClient: EsClient,
-  spaceIds: readonly string[]
+  documentIds: readonly string[]
 ): Promise<void> => {
-  for (const spaceId of spaceIds) {
-    await esClient.deleteByQuery({
-      index: MEMORY_INDEX,
-      query: { term: { [MEMORY_SPACE_TAG_FIELD]: spaceId } },
-      refresh: true,
-      conflicts: 'proceed',
-      ignore_unavailable: true,
-    });
+  for (const id of documentIds) {
+    try {
+      await esClient.delete({ index: MEMORY_INDEX, id, refresh: true });
+    } catch (err) {
+      // A test that deleted its own document (E10) needs no cleanup, and an
+      // interrupted run can leave a gap.
+      if ((err as { statusCode?: number }).statusCode !== 404) throw err;
+    }
   }
 };
 

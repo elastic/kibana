@@ -10,6 +10,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
+  MEMORY_KEYWORD_MAX_REQUESTS,
   MEMORY_KEYWORD_SIZE,
   MEMORY_PAGE_SIZE,
   useDeleteMemoryPage,
@@ -185,6 +186,52 @@ describe('useMemoryKeywordPages', () => {
     });
   });
 
+  it('follows the cursor so the ranking is not one page of the store', async () => {
+    // One 200-row page would describe the newest 200 memories and silently drop
+    // every older one, keywords and all.
+    fetchMock
+      .mockResolvedValueOnce(listResult(['memory_a'], 'cursor-1'))
+      .mockResolvedValueOnce(listResult(['memory_b'], 'cursor-2'))
+      .mockResolvedValueOnce(listResult(['memory_c']));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryKeywordPages(), { wrapper });
+
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(3));
+    expect(result.current.data?.pages.map(({ id }) => id)).toEqual([
+      'memory_a',
+      'memory_b',
+      'memory_c',
+    ]);
+    expect(listQueries()[1]).toEqual({
+      filter: 'active',
+      size: MEMORY_KEYWORD_SIZE,
+      cursor: 'cursor-1',
+    });
+    // Exhausted: no cursor on the last response, so there is no third request.
+    expect(listQueries()).toHaveLength(3);
+    expect(result.current.data?.capped).toBe(false);
+  });
+
+  it('stops at the cap and says the set was truncated', async () => {
+    // A store larger than the cap is a real store, so the answer has to admit
+    // that it ranked the newest N rather than pretend to be the whole thing.
+    fetchMock.mockImplementation((_endpoint: string, options: unknown) => {
+      const { cursor } = (options as { params: { query: { cursor?: string } } }).params.query;
+      const page = Number(cursor?.split('-')[1] ?? '0') + 1;
+      return Promise.resolve(listResult([`memory_page${page}`], `cursor-${page}`));
+    });
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryKeywordPages(), { wrapper });
+
+    await waitFor(() =>
+      expect(result.current.data?.pages).toHaveLength(MEMORY_KEYWORD_MAX_REQUESTS)
+    );
+    expect(listQueries()).toHaveLength(MEMORY_KEYWORD_MAX_REQUESTS);
+    expect(result.current.data?.capped).toBe(true);
+  });
+
   it('refetches when the selection changes, rather than reusing the stale set', async () => {
     fetchMock.mockResolvedValue(listResult([]));
     const { wrapper } = createWrapper();
@@ -202,6 +249,28 @@ describe('useMemoryKeywordPages', () => {
       filter: 'active',
       size: MEMORY_KEYWORD_SIZE,
       tags: ['kafka'],
+    });
+  });
+
+  it('keeps two selections apart even when their terms join to the same string', async () => {
+    // Tags are free text, so `a|b` and two terms `a` and `b` are different
+    // filters that a joined cache key cannot tell apart.
+    fetchMock.mockResolvedValue(listResult([]));
+    const { wrapper } = createWrapper();
+
+    const { rerender } = renderHook(({ tags }: { tags: string[] }) => useMemoryKeywordPages(tags), {
+      wrapper,
+      initialProps: { tags: ['es|ql'] },
+    });
+    await waitFor(() => expect(listQueries()).toHaveLength(1));
+
+    rerender({ tags: ['es', 'ql'] });
+
+    await waitFor(() => expect(listQueries()).toHaveLength(2));
+    expect(listQueries()[1]).toEqual({
+      filter: 'active',
+      size: MEMORY_KEYWORD_SIZE,
+      tags: ['es', 'ql'],
     });
   });
 
@@ -286,7 +355,9 @@ describe('useSetMemoryArchived', () => {
 });
 
 describe('useDeleteMemoryPage', () => {
-  it('deletes with the confirmed title and refetches the list', async () => {
+  const version = { seq_no: 7, primary_term: 1 };
+
+  it('deletes the reviewed revision with the confirmed title, and refetches the list', async () => {
     fetchMock.mockResolvedValue(listResult(['memory_a']));
     const { wrapper } = createWrapper();
     const { result: list } = renderHook(() => useMemoryPages('active'), { wrapper });
@@ -295,13 +366,20 @@ describe('useDeleteMemoryPage', () => {
 
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
-      await result.current.mutateAsync({ id: 'memory_a', confirmTitle: 'Memory memory_a' });
+      await result.current.mutateAsync({
+        id: 'memory_a',
+        confirmTitle: 'Memory memory_a',
+        version,
+      });
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
       'DELETE /internal/nightshift/memory/pages/{id}',
       expect.objectContaining({
-        params: { path: { id: 'memory_a' }, body: { confirm_title: 'Memory memory_a' } },
+        params: {
+          path: { id: 'memory_a' },
+          body: { confirm_title: 'Memory memory_a', version },
+        },
       })
     );
     await waitFor(() => expect(listQueries().length).toBeGreaterThan(before));
@@ -314,7 +392,11 @@ describe('useDeleteMemoryPage', () => {
     const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
     await act(async () => {
       await expect(
-        result.current.mutateAsync({ id: 'memory_a', confirmTitle: 'Memory memory_a' })
+        result.current.mutateAsync({
+          id: 'memory_a',
+          confirmTitle: 'Memory memory_a',
+          version,
+        })
       ).rejects.toThrow('version conflict');
     });
 

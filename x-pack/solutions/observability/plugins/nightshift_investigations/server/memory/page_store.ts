@@ -98,10 +98,14 @@ export const MAX_TAG_TERM_LENGTH = 200;
 
 export type MemoryRetrieveMatch = 'context' | 'content';
 
-export interface VersionedMemoryPage {
-  page: MemoryPage;
+/** Elasticsearch's optimistic-concurrency pair, as the store hands it out. */
+export interface MemoryPageVersion {
   seqNo: number;
   primaryTerm: number;
+}
+
+export interface VersionedMemoryPage extends MemoryPageVersion {
+  page: MemoryPage;
 }
 
 export interface MemoryPageWrite {
@@ -178,10 +182,11 @@ export interface MemoryPageStore {
   /** Clears `archive_reason`, returning the memory to active recall. */
   unarchive: (id: string) => Promise<MemoryPage | undefined>;
   /**
-   * Hard delete. Pass the version the caller read to make the delete conditional;
-   * without it the document is removed even if the optimizer has since rewritten it.
+   * Hard delete, conditional on the revision the caller read. The version is
+   * required: without a guard the document would be removed even if the optimizer
+   * has since rewritten what the operator was looking at.
    */
-  delete: (id: string, version?: VersionedMemoryPage) => Promise<void>;
+  delete: (id: string, version: MemoryPageVersion) => Promise<void>;
 }
 
 const normalizeSlugText = (slug: string): string =>
@@ -1062,9 +1067,10 @@ export const createMemoryPageStore = ({
      * Hard delete, guarded on the version the caller read.
      *
      * The optimizer writes asynchronously after a round, so a blind delete can
-     * remove a document the operator never saw. Passing the version makes the
-     * delete conditional: if anything landed in between, Elasticsearch rejects it
-     * and the route answers 409 rather than destroying the newer content.
+     * remove a document the operator never saw. The version is the one the
+     * operator reviewed, carried through the request, so the delete is
+     * conditional: if anything landed in between, Elasticsearch rejects it and the
+     * route answers 409 rather than destroying the newer content.
      */
     async delete(id, version) {
       const storedId = toStoredId(id);
@@ -1073,7 +1079,8 @@ export const createMemoryPageStore = ({
           {
             index: MEMORY_INDEX,
             id: storedId,
-            ...(version ? { if_seq_no: version.seqNo, if_primary_term: version.primaryTerm } : {}),
+            if_seq_no: version.seqNo,
+            if_primary_term: version.primaryTerm,
             refresh: 'wait_for',
           },
           { signal }

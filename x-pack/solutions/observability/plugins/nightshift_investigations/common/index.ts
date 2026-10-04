@@ -275,6 +275,7 @@ export {
   type MemoryStats,
   type ListMemoryPagesResponse,
   type GetMemoryPageResponse,
+  type MemoryPageRevision,
   type StoredMemoryPage,
 } from './memory';
 

@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryPageRow } from './page_row';
 import { MemoryKeywordTreemap } from './keyword_treemap';
-import { filterEntriesByKeywords, toTagFilterTerms } from './keyword_page_rank';
+import { toTagFilterTerms } from './keyword_page_rank';
 import { useMemoryKeywordPages } from './use_memory';
 import type { MemoryStats, MemorySummary } from './types';
 
@@ -62,11 +62,13 @@ export function MemoryHome({
   );
 
   // The lists below describe the whole store, so they honour the selection too.
-  // They filter the tab's own rows rather than the chart's wider slice: a list of
-  // memories the sidebar cannot open is not a useful answer.
+  // With a keyword selected they read the keyword query's own result rather than
+  // the sidebar's 25-row slice: a keyword drawn from a wider set can belong only
+  // to memories that slice does not hold. Opening one fetches it by id, so a row
+  // the sidebar has not loaded is still readable.
   const filteredPages = useMemo(
-    () => filterEntriesByKeywords(pages, selectedKeywords),
-    [pages, selectedKeywords]
+    () => (selectedKeywords.length === 0 ? pages : keywordPages),
+    [pages, selectedKeywords, keywordPages]
   );
 
   const recentlyUpdated = useMemo(
@@ -96,7 +98,7 @@ export function MemoryHome({
   // It is the Space's own count over every list filter, which is why the Active
   // view does not read "0 archived" — so `stats` is the tab's unfiltered
   // listing's stats, never the keyword query's.
-  const total = (selectedKeywords.length > 0 ? keywordResult?.stats.total : stats?.total) ?? 0;
+  const total = (selectedKeywords.length > 0 ? keywordResult?.stats?.total : stats?.total) ?? 0;
   const archived = stats?.archived ?? 0;
 
   return (
@@ -139,6 +141,22 @@ export function MemoryHome({
         onToggleKeyword={onToggleKeyword}
         onClearKeywords={onClearKeywords}
       />
+
+      {/* Ranking the whole store in one request would be unbounded, so the query
+          follows a bounded number of pages. What it could not reach is said here,
+          rather than the chart quietly describing a prefix. */}
+      {keywordResult?.capped && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued" data-test-subj="nightshiftMemoryKeywordCap">
+            <FormattedMessage
+              id="xpack.significantEventsApp.memory.keywordCap"
+              defaultMessage="Ranking covers the newest {count} memories."
+              values={{ count: keywordPages.length }}
+            />
+          </EuiText>
+        </>
+      )}
 
       {mostUseful.length > 0 && (
         <>

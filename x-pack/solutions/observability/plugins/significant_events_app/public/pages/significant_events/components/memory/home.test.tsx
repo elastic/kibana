@@ -79,11 +79,19 @@ const PAGES = [
  * any spelling of it, which is what the route and the store do with the terms.
  */
 const serverFilter = (pages: MemorySummary[], tags: readonly string[]): MemorySummary[] => {
-  const keywords = [...new Set(tags.map(canonicalizeTag).filter((tag) => tag !== null))];
-  if (keywords.length === 0) return pages;
+  // The terms arrive grouped by the keyword they belong to, so a page matches a
+  // keyword by carrying its canonical form or any of its spellings — and by
+  // nothing else, which is what makes two keywords an AND.
+  const keywords = new Map<string, Set<string>>();
+  for (const tag of tags) {
+    const key = canonicalizeTag(tag);
+    if (key === null) continue;
+    keywords.set(key, (keywords.get(key) ?? new Set<string>()).add(tag));
+  }
+  if (keywords.size === 0) return pages;
   return pages.filter((page) =>
-    keywords.every((keyword) =>
-      page.tags.some((tag) => canonicalizeTag(tag) === keyword || tags.includes(tag))
+    [...keywords].every(([keyword, terms]) =>
+      page.tags.some((tag) => canonicalizeTag(tag) === keyword || terms.has(tag))
     )
   );
 };
@@ -208,6 +216,39 @@ describe('MemoryHome keyword filtering', () => {
 
     expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith([]);
     expect(listedTitles()).toHaveLength(PAGES.length);
+  });
+
+  it('lists a matching memory the sidebar has not loaded', () => {
+    // The sidebar is a 25-row slice; a keyword drawn from the wider treemap can
+    // belong only to memories outside it, and its lists must still answer.
+    const older = summary({
+      id: 'memory_old',
+      title: 'Older kafka memory',
+      tags: ['memory', 'kafka'],
+      updated_at: '2026-02-01T00:00:00.000Z',
+    });
+    mockUseMemoryKeywordPages.mockImplementation(
+      (tags: readonly string[] = []) =>
+        ({
+          data: { pages: serverFilter([...PAGES, older], tags), total: 4, stats, capped: false },
+        } as unknown as ReturnType<typeof useMemoryKeywordPages>)
+    );
+    renderHome();
+
+    clickCell('kafka');
+
+    expect(listedTitles().join(' ')).toContain('Older kafka memory');
+  });
+
+  it('says so when the ranking could not reach the whole store', () => {
+    mockUseMemoryKeywordPages.mockReturnValue({
+      data: { pages: PAGES, total: 900, stats, capped: true },
+    } as unknown as ReturnType<typeof useMemoryKeywordPages>);
+    renderHome();
+
+    expect(screen.getByTestId('nightshiftMemoryKeywordCap')).toHaveTextContent(
+      `newest ${PAGES.length} memories`
+    );
   });
 
   it('shows the Space-wide archived count, which does not follow the keyword selection', () => {

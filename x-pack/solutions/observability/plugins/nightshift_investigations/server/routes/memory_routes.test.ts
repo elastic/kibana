@@ -45,6 +45,9 @@ const memory = (overrides: Partial<MemoryPage> = {}): MemoryPage =>
     ...overrides,
   } as unknown as MemoryPage);
 
+/** A read of one page, as Elasticsearch reports it: the page and its revision. */
+const versioned = (page: MemoryPage) => ({ page, seqNo: 7, primaryTerm: 1 });
+
 /** Handler resources plus the parsed params for one request. */
 const context = (store: unknown, enabled: boolean, params: unknown = { path: { id: '' } }) =>
   ({
@@ -179,10 +182,15 @@ describe('memory route request bounds', () => {
   ];
 
   // The write routes also require a body, so every case carries one: the read
-  // routes strip the unknown key rather than rejecting it.
+  // routes strip the unknown key rather than rejecting it. Delete carries the
+  // revision as well, which is what makes it conditional on what was read.
   const withId = (id: string) => ({
     path: { id },
-    body: { archived: true, confirm_title: 'Kafka consumer lag' },
+    body: {
+      archived: true,
+      confirm_title: 'Kafka consumer lag',
+      version: { seq_no: 7, primary_term: 1 },
+    },
   });
 
   it.each(routes)('rejects an over-long id on %s', (_endpoint, params) => {
@@ -203,6 +211,24 @@ describe('memory route request bounds', () => {
       archiveMemoryPageRoute['POST /internal/nightshift/memory/pages/{id}/archive'].params;
     expect(params.safeParse({ path: { id: ID } }).success).toBe(false);
     expect(params.safeParse({ path: { id: ID }, body: { archived: 'yes' } }).success).toBe(false);
+  });
+
+  it('rejects a delete that does not name the revision it read', () => {
+    // A delete without the reviewed revision would be blind, which is exactly
+    // what the optimistic-concurrency guard exists to prevent.
+    const params = deleteMemoryPageRoute['DELETE /internal/nightshift/memory/pages/{id}'].params;
+    expect(params.safeParse({ path: { id: ID }, body: { confirm_title: 'Kafka' } }).success).toBe(
+      false
+    );
+    expect(
+      params.safeParse({
+        path: { id: ID },
+        body: {
+          confirm_title: 'Kafka consumer lag',
+          version: { seq_no: -1, primary_term: 0 },
+        },
+      }).success
+    ).toBe(false);
   });
 
   it.each([
@@ -270,8 +296,8 @@ describe('getMemoryPageRoute', () => {
 
   it('returns the page with its decayed usefulness and confidence', async () => {
     const page = memory();
-    const get = jest.fn().mockResolvedValue(page);
-    const result = await handler(context({ get }, true, path()));
+    const getVersioned = jest.fn().mockResolvedValue(versioned(page));
+    const result = await handler(context({ getVersioned }, true, path()));
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -282,19 +308,28 @@ describe('getMemoryPageRoute', () => {
     );
   });
 
+  it('returns the revision a destructive write has to name', async () => {
+    // Deleting is conditional on what was read, and the detail response is where
+    // that revision is read.
+    const getVersioned = jest.fn().mockResolvedValue(versioned(memory()));
+    const result = await handler(context({ getVersioned }, true, path()));
+
+    expect(result.version).toEqual({ seq_no: 7, primary_term: 1 });
+  });
+
   it('throws not found for a missing page', async () => {
-    const get = jest.fn().mockResolvedValue(undefined);
-    await expect(handler(context({ get }, true, path()))).rejects.toEqual(
+    const getVersioned = jest.fn().mockResolvedValue(undefined);
+    await expect(handler(context({ getVersioned }, true, path()))).rejects.toEqual(
       notFound(`Semantic Memory page ${ID} was not found`)
     );
   });
 
   it('throws not found when Semantic Memory is disabled', async () => {
-    const get = jest.fn();
-    await expect(handler(context({ get }, false, path()))).rejects.toEqual(
+    const getVersioned = jest.fn();
+    await expect(handler(context({ getVersioned }, false, path()))).rejects.toEqual(
       notFound('Semantic Memory is not enabled')
     );
-    expect(get).not.toHaveBeenCalled();
+    expect(getVersioned).not.toHaveBeenCalled();
   });
 });
 
@@ -383,14 +418,18 @@ describe('archiveMemoryPageRoute', () => {
 
 describe('deleteMemoryPageRoute', () => {
   const { handler } = deleteMemoryPageRoute['DELETE /internal/nightshift/memory/pages/{id}'];
-  const body = (confirm_title: string) => ({ path: { id: ID }, body: { confirm_title } });
-  const versioned = (page: MemoryPage) => ({ page, seqNo: 7, primaryTerm: 1 });
+  const REVIEWED = { seq_no: 7, primary_term: 1 };
+  const body = (confirm_title: string, version = REVIEWED) => ({
+    path: { id: ID },
+    body: { confirm_title, version },
+  });
+  const versionedPage = versioned;
   /** A store whose `getVersioned` answers with `page`, or nothing when it is absent. */
   const storeWith = (
     page: MemoryPage | undefined,
     remove = jest.fn().mockResolvedValue(undefined)
   ) => ({
-    getVersioned: jest.fn().mockResolvedValue(page ? versioned(page) : undefined),
+    getVersioned: jest.fn().mockResolvedValue(page ? versionedPage(page) : undefined),
     delete: remove,
   });
 
@@ -399,9 +438,28 @@ describe('deleteMemoryPageRoute', () => {
 
     await handler(context(store, true, body('Kafka consumer lag')));
 
-    // Conditional on the version that was read, so a concurrent optimizer write
-    // cannot slip a document past the confirmation.
-    expect(store.delete).toHaveBeenCalledWith(ID, versioned(memory()));
+    // Conditional on the revision the operator reviewed, so a concurrent
+    // optimizer write cannot slip a document past the confirmation.
+    expect(store.delete).toHaveBeenCalledWith(ID, { seqNo: 7, primaryTerm: 1 });
+  });
+
+  it('deletes the revision that was reviewed, not the one this request read', async () => {
+    // The optimizer rewrites content without changing the title, so the read here
+    // agrees with the confirmation while the document behind it is already a
+    // replacement the operator never saw.
+    const rewritten = versioned(memory({ content: 'Rewritten by the optimizer.' }));
+    const store = {
+      getVersioned: jest.fn().mockResolvedValue({
+        ...rewritten,
+        seqNo: rewritten.seqNo + 1,
+      }),
+      delete: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await handler(context(store, true, body('Kafka consumer lag')));
+
+    // The reviewed revision, seq 7, not the seq 8 this request happened to read.
+    expect(store.delete).toHaveBeenCalledWith(ID, { seqNo: 7, primaryTerm: 1 });
   });
 
   it('refuses a stale or mistyped title, and reports the real one', async () => {

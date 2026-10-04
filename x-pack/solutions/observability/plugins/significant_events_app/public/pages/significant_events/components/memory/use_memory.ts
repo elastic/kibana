@@ -14,15 +14,27 @@ import {
   toFeatureAvailability,
   type FeatureAvailability,
 } from '../../../../util/feature_availability';
-import type { MemoryFilter, MemoryListResult } from './types';
+import type {
+  MemoryDetailResult,
+  MemoryFilter,
+  MemoryListResult,
+  MemoryStats,
+  MemorySummary,
+} from './types';
 
 type MemoryClient = NonNullable<ReturnType<typeof useMemoryClient>>;
+
+/** What a delete needs: the page, the title it was read with, and its revision. */
+interface DeleteMemoryPageVariables {
+  id: string;
+  confirmTitle: string;
+  version: MemoryDetailResult['version'];
+}
 
 const memoryKeys = {
   availability: ['nightshift', 'memory', 'availability'] as const,
   pages: (filter: MemoryFilter) => ['nightshift', 'memory', 'pages', filter] as const,
-  treemap: (tags: readonly string[]) =>
-    ['nightshift', 'memory', 'keywords', tags.join('|')] as const,
+  treemap: (tags: readonly string[]) => ['nightshift', 'memory', 'keywords', tags] as const,
   page: (id: string) => ['nightshift', 'memory', 'page', id] as const,
 };
 
@@ -121,22 +133,57 @@ export const useMemoryPages = (filter: MemoryFilter = 'all') => {
  */
 export const MEMORY_KEYWORD_SIZE = 200;
 
+/**
+ * Requests the keyword query follows before it stops, so the cap is one number:
+ * the newest `MEMORY_KEYWORD_SIZE * MEMORY_KEYWORD_MAX_REQUESTS` memories.
+ *
+ * Ranking the whole store in one response would be unbounded, and stopping at the
+ * first page would quietly describe a store that is older than 200 memories, so
+ * the query pages and says so when it stops.
+ */
+export const MEMORY_KEYWORD_MAX_REQUESTS = 5;
+
+export interface MemoryKeywordResult {
+  /** Every page fetched, in listing order. What the chart and lists read. */
+  pages: MemorySummary[];
+  stats: MemoryStats | undefined;
+  /** The server's count of the whole matching set, pages or not. */
+  total: number;
+  /** True when a cursor was left unfollowed, so the set is a prefix of the store. */
+  capped: boolean;
+}
+
 export const useMemoryKeywordPages = (tags: readonly string[] = []) => {
   const client = useMemoryClient();
 
   return useQuery({
     queryKey: memoryKeys.treemap(tags),
-    queryFn: ({ signal }) =>
-      client!.fetch('GET /internal/nightshift/memory/pages', {
-        signal: signal ?? null,
-        params: {
-          query: {
-            filter: 'active',
-            size: MEMORY_KEYWORD_SIZE,
-            ...(tags.length > 0 ? { tags: [...tags] } : {}),
+    queryFn: async ({ signal }): Promise<MemoryKeywordResult> => {
+      const pages: MemorySummary[] = [];
+      let stats: MemoryStats | undefined;
+      let total = 0;
+      let cursor: string | undefined;
+      for (let request = 0; request < MEMORY_KEYWORD_MAX_REQUESTS; request++) {
+        const result = (await client!.fetch('GET /internal/nightshift/memory/pages', {
+          signal: signal ?? null,
+          params: {
+            query: {
+              filter: 'active',
+              size: MEMORY_KEYWORD_SIZE,
+              ...(tags.length > 0 ? { tags: [...tags] } : {}),
+              ...(cursor ? { cursor } : {}),
+            },
           },
-        },
-      }) as Promise<MemoryListResult>,
+        })) as MemoryListResult;
+        pages.push(...result.pages);
+        stats = result.stats;
+        total = result.total;
+        // The server omits the cursor once the set is exhausted.
+        if (!result.cursor) return { pages, stats, total, capped: false };
+        cursor = result.cursor;
+      }
+      return { pages, stats, total, capped: true };
+    },
     enabled: client !== undefined,
   });
 };
@@ -144,7 +191,7 @@ export const useMemoryKeywordPages = (tags: readonly string[] = []) => {
 export const useMemoryPage = (id: string | undefined) => {
   const client = useMemoryClient();
 
-  return useQuery({
+  return useQuery<MemoryDetailResult>({
     queryKey: memoryKeys.page(id ?? ''),
     queryFn: ({ signal }) =>
       client!.fetch('GET /internal/nightshift/memory/pages/{id}', {
@@ -209,15 +256,19 @@ export const useSetMemoryArchived = () =>
 
 /**
  * Permanently removes a memory. `confirmTitle` must match the page's current
- * title, which the route enforces — the UI passes the title it is showing so a
- * stale dialog cannot delete something that has since changed.
+ * title, and `version` is the revision the detail route handed over, so the
+ * delete is conditional on the document that was actually read rather than on
+ * whatever the server finds when the request lands.
  */
 export const useDeleteMemoryPage = () =>
   useMemoryMutation(
-    (client, { id, confirmTitle }: { id: string; confirmTitle: string }) =>
+    (client, { id, confirmTitle, version }: DeleteMemoryPageVariables) =>
       client.fetch('DELETE /internal/nightshift/memory/pages/{id}', {
         signal: null,
-        params: { path: { id }, body: { confirm_title: confirmTitle } },
+        params: {
+          path: { id },
+          body: { confirm_title: confirmTitle, version },
+        },
       }),
     i18n.translate('xpack.significantEventsApp.memory.deleteErrorTitle', {
       defaultMessage: 'Could not delete Semantic Memory page',

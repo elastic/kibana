@@ -14,12 +14,12 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 
 /**
  * Deleting is irreversible, so it is held to a higher bar than archiving: it
- * needs the Nightshift configure privilege, not just manage.
+ * needs the Nightshift configure privilege, not just manage. A flat
+ * `requiredPrivileges` array requires every entry, so this is the configure
+ * privilege *and* the read the store is gated on.
  */
 export const memoryDeletePrivileges = [
-  NIGHTSHIFT_API_PRIVILEGES.configure,
-  NIGHTSHIFT_API_PRIVILEGES.manage,
-  'agentBuilder:read',
+  { allRequired: [NIGHTSHIFT_API_PRIVILEGES.configure, 'agentBuilder:read'] },
 ];
 
 /**
@@ -38,7 +38,9 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
     summary: 'Delete a Semantic Memory page',
     description:
       'Permanently removes a Semantic Memory page. Irreversible. The caller must confirm ' +
-      'by echoing the page title, so a mistyped or reflexive click cannot destroy content.',
+      'by echoing the page title, so a mistyped or reflexive click cannot destroy content, ' +
+      'and must name the revision it reviewed, so a concurrent write answers 409 instead of ' +
+      'deleting content the operator never saw.',
   },
   security: {
     authz: { requiredPrivileges: memoryDeletePrivileges },
@@ -50,14 +52,20 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
     body: z.object({
       /** Must equal the page's current title. */
       confirm_title: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      /** The revision the operator reviewed, as the detail route returned it. */
+      version: z.object({
+        seq_no: z.number().int().min(0),
+        primary_term: z.number().int().min(1),
+      }),
     }),
   }),
   handler: async ({ request, params, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 
     const store = getMemoryPageStore(request);
-    // Read the version as well as the title, so the delete is conditional on the
-    // exact document the operator confirmed.
+    const { version } = params.body;
+    // Read the title only to echo the real one back, so a mistyped or stale
+    // confirmation can be corrected rather than merely rejected.
     const versioned = await store.getVersioned(params.path.id);
     if (!versioned) {
       throw notFound(`Semantic Memory page ${params.path.id} was not found`);
@@ -69,7 +77,13 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
     }
 
     try {
-      await store.delete(params.path.id, versioned);
+      // Conditional on the revision the operator reviewed, not on this read: the
+      // optimizer rewrites content without changing the title, so a fresh read
+      // would accept the confirmation for a replacement they never saw.
+      await store.delete(params.path.id, {
+        seqNo: version.seq_no,
+        primaryTerm: version.primary_term,
+      });
     } catch (err) {
       // The optimizer rewrote the document between the read and the delete. 409,
       // not 500: the operator's intent was valid, the document they saw is not the

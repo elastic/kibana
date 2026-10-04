@@ -122,9 +122,17 @@ export interface ListMemoryPagesResponse {
   cursor?: string;
 }
 
+/** Elasticsearch's optimistic-concurrency pair, in the shape the wire uses. */
+export interface MemoryPageRevision {
+  seq_no: number;
+  primary_term: number;
+}
+
 export interface GetMemoryPageResponse {
   page: MemoryPage;
   /** Decayed display telemetry, so the UI need not recompute the bandit maths. */
   usefulness: number;
   confidence: number;
+  /** The revision this page was read at, which a destructive write must name. */
+  version: MemoryPageRevision;
 }
