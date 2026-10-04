@@ -38,8 +38,7 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   });
 
   evaluate('all 21 examples', async ({ evaluateDataset, log }) => {
-    const examplesFilter = process.env.EVAL_EXAMPLES
-      ?.split(',')
+    const examplesFilter = process.env.EVAL_EXAMPLES?.split(',')
       .map((id) => id.trim())
       .filter(Boolean);
     const examples = examplesFilter
