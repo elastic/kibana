@@ -107,5 +107,25 @@ export const applyAuditOtelFieldMap: OtelAttributesTransform = (attributes) => {
     attrs['http.request.method'] = method.toUpperCase();
   }
 
+  return serializeAuditDiffAttribute(attrs);
+};
+
+/**
+ * Reassembles flattened `kibana.diff.*` keys into one `kibana.diff` JSON string, since an
+ * array of objects is not a valid OTel attribute value and would be dropped. Does not mutate.
+ */
+export const serializeAuditDiffAttribute: OtelAttributesTransform = (attributes) => {
+  const diffPrefix = 'kibana.diff.';
+  const diffEntries = Object.entries(attributes).filter(([key]) => key.startsWith(diffPrefix));
+  if (diffEntries.length === 0) {
+    return attributes;
+  }
+  const attrs = { ...attributes };
+  const diff: Record<string, unknown> = {};
+  for (const [key, value] of diffEntries) {
+    diff[key.slice(diffPrefix.length)] = value;
+    delete attrs[key];
+  }
+  attrs['kibana.diff'] = JSON.stringify(diff);
   return attrs;
 };

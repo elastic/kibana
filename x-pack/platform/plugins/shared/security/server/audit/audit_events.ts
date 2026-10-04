@@ -296,6 +296,7 @@ export function savedObjectEvent({
   unauthorizedTypes,
   outcome,
   error,
+  savedObjectDiff,
 }: SavedObjectEventParams): AuditEvent | undefined {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
   const [present, progressive, past] = savedObjectAuditVerbs[action];
@@ -328,6 +329,7 @@ export function savedObjectEvent({
       delete_from_spaces: deleteFromSpaces,
       unauthorized_spaces: unauthorizedSpaces,
       unauthorized_types: unauthorizedTypes,
+      diff: savedObjectDiff,
     },
     error: error && {
       code: error.name,

@@ -109,6 +109,7 @@ export type {
   CheckAuthorizationResult,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
+  SavedObjectDiffAuditAction,
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
   AuthorizeBulkGetObject,

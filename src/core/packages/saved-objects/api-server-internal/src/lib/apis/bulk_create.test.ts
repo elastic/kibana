@@ -51,6 +51,7 @@ import {
   createDocumentMigrator,
   createSpySerializer,
   bulkCreateSuccess,
+  getMockMgetResponse,
   getMockBulkCreateResponse,
   expectErrorResult,
   expectErrorInvalidType,
@@ -59,8 +60,8 @@ import {
   createBadRequestErrorPayload,
   expectCreateResult,
   mockTimestampFieldsWithCreated,
+  createConflictErrorPayload,
 } from '../../test_helpers/repository.test.common';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
@@ -78,7 +79,7 @@ describe('#bulkCreate', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let securityExtension: ReturnType<typeof savedObjectsExtensionsMock.createSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -1061,6 +1062,286 @@ describe('#bulkCreate', () => {
         expect(result).toEqual({
           saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
         });
+      });
+    });
+
+    describe('saved object diff audit events', () => {
+      it('emits a per-object diff with an empty "before" when savedObjectDiffEnabled is true', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+
+        await bulkCreateSuccess(client, repository, [obj1, obj2]);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: {},
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            before: {},
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+      });
+
+      it('does not emit a diff event when savedObjectDiffEnabled is false', async () => {
+        securityExtension.savedObjectDiffEnabled = false;
+        await bulkCreateSuccess(client, repository, [obj1, obj2]);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fetch before-state on overwrite when types are not on the allow list', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
+
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { overwrite: true });
+
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+      });
+
+      it('fetches before-state on overwrite only for allow-listed types', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockImplementation(
+          (t: string) => t === obj1.type
+        );
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1]));
+
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { overwrite: true });
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({
+            docs: [expect.objectContaining({ _source: [obj1.type] })],
+          }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+      });
+
+      it('reuses the preflight read for multi-namespace overwrite before-state (no mget)', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const objects = [obj1, obj2].map((x) => ({ ...x, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
+        const [o1, o2] = objects;
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          { type: o1.type, id: o1.id },
+          {
+            type: o2.type,
+            id: o2.id,
+            existingDocument: {
+              _id: o2.id,
+              _source: {
+                type: o2.type,
+                namespaces: ['default'],
+                [o2.type]: { title: 'old-title' },
+              },
+            },
+          },
+        ]);
+
+        await bulkCreateSuccess(client, repository, objects, { overwrite: true });
+
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: [
+              expect.objectContaining({ id: o1.id, fields: [o1.type] }),
+              expect.objectContaining({ id: o2.id, fields: [o2.type] }),
+            ],
+          })
+        );
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ id: o1.id }),
+            before: {},
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ id: o2.id }),
+            before: { title: 'old-title' },
+          })
+        );
+      });
+
+      it('pairs before-state with the right object when single- and multi-namespace overwrites are mixed', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const multiObj = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
+        // Multi-namespace before-state comes from the preflight read...
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          {
+            type: multiObj.type,
+            id: multiObj.id,
+            existingDocument: {
+              _id: multiObj.id,
+              _source: {
+                type: multiObj.type,
+                namespaces: ['default'],
+                [multiObj.type]: { title: 'multi-old' },
+              },
+            },
+          },
+        ]);
+        // ...single-namespace before-state from the dedicated mget (title 'Testing').
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1]));
+
+        await bulkCreateSuccess(client, repository, [obj1, multiObj], { overwrite: true });
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({
+            docs: [expect.objectContaining({ _source: [obj1.type] })],
+          }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            before: expect.objectContaining({ title: 'Testing' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: multiObj.type, id: multiObj.id }),
+            before: { title: 'multi-old' },
+          })
+        );
+      });
+
+      it('emits unknown-outcome events for every object when the bulk request fails', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        client.bulk.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.bulkCreate([obj1, obj2])).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: { type: obj1.type, id: obj1.id, name: 'Test One' },
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: { type: obj2.type, id: obj2.id, name: 'Test Two' },
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+      });
+
+      it('audits a per-item failure as unknown with the attempted attributes', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        // first item commits, second item fails in the ES bulk response
+        mockGetBulkOperationError.mockReturnValueOnce(undefined);
+        mockGetBulkOperationError.mockReturnValueOnce(
+          createConflictErrorPayload(obj2.type, obj2.id) as unknown as Payload
+        );
+        client.bulk.mockResponseOnce(getMockBulkCreateResponse([obj1, obj2]));
+
+        await repository.bulkCreate([obj1, obj2]);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+        mockGetBulkOperationError.mockReset();
+      });
+
+      it('does not fail the bulk create when the diff audit emit throws', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(bulkCreateSuccess(client, repository, [obj1, obj2])).resolves.toBeDefined();
+      });
+
+      it('still creates and audits with before={} when the before-state mget fails', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        // obj1/obj2 are single-namespace, so there's no preflight mget — the only mget is
+        // the before-state fetch.
+        client.mget.mockRejectedValueOnce(new Error('mget boom'));
+
+        await expect(
+          bulkCreateSuccess(client, repository, [obj1, obj2], { overwrite: true })
+        ).resolves.toBeDefined();
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('before-state'));
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: {},
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            outcome: 'success',
+            before: {},
+          })
+        );
+      });
+
+      it('audits duplicate {type, id} entries in one request as separate events', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const dupe = { ...obj1, attributes: { title: 'Dupe' } };
+        const objects = [obj1, dupe];
+        // first entry commits, second hits a conflict in the ES bulk response
+        mockGetBulkOperationError.mockReturnValueOnce(undefined);
+        mockGetBulkOperationError.mockReturnValueOnce(
+          createConflictErrorPayload(obj1.type, obj1.id) as unknown as Payload
+        );
+        client.bulk.mockResponseOnce(getMockBulkCreateResponse(objects));
+
+        await repository.bulkCreate(objects);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Dupe' }),
+          })
+        );
+        mockGetBulkOperationError.mockReset();
       });
     });
 
