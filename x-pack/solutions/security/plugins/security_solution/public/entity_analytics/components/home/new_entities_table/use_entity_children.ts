@@ -91,7 +91,7 @@ const enrichEntityChildren = async (
     sort: { field: RISK_SCORE_NORM_FIELD, direction: 'desc' },
     cursor: null,
     pageSize: 100,
-    view: 'raw',
+    rowsMode: 'individual',
     concreteEntityIndexName,
   };
 

@@ -16,6 +16,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import type {
   TimeRange,
+  RowsMode,
   EntityGridResponse,
   QueryArgs,
   Row,
@@ -73,7 +74,7 @@ export interface UseEntityGridDataOptions {
   searchExpression?: string;
   entityExpression?: string;
   timeRange: TimeRange;
-  view?: 'resolved' | 'raw';
+  rowsMode?: RowsMode;
 }
 
 export const useEntityGridData = ({
@@ -86,7 +87,7 @@ export const useEntityGridData = ({
   searchExpression,
   entityExpression,
   timeRange,
-  view = 'resolved',
+  rowsMode = 'resolved',
 }: UseEntityGridDataOptions) => {
   const queryClient = useQueryClient();
   const {
@@ -115,7 +116,7 @@ export const useEntityGridData = ({
     searchExpression,
     entityExpression,
     timeRange,
-    view,
+    rowsMode,
     concreteEntityIndexName,
     spaceId,
   ] as const;
@@ -126,7 +127,7 @@ export const useEntityGridData = ({
     searchExpression,
     entityExpression,
     timeRange,
-    view,
+    rowsMode,
     concreteEntityIndexName,
     spaceId,
   ] as const;
@@ -148,7 +149,7 @@ export const useEntityGridData = ({
         sort: { field: sortField, direction: sortDirection },
         cursor,
         pageSize,
-        view,
+        rowsMode,
         concreteEntityIndexName,
         searchExpression,
         entityExpression,
@@ -196,7 +197,7 @@ export const useEntityGridData = ({
         sort: { field: sortField, direction: sortDirection },
         cursor: null,
         pageSize,
-        view,
+        rowsMode,
         concreteEntityIndexName,
         searchExpression,
         entityExpression,
@@ -224,7 +225,7 @@ export const useEntityGridData = ({
       searchExpression,
       entityExpression,
       timeRange,
-      view,
+      rowsMode,
       concreteEntityIndexName,
       spaceId,
       shellQuery.dataUpdatedAt,
@@ -232,14 +233,14 @@ export const useEntityGridData = ({
     async (): Promise<Row[]> => {
       if (!concreteEntityIndexName) return [];
       const shell = queryClient.getQueryData<EntityGridResponse>(shellQueryKey);
-      const rows = shell?.entities;
-      if (!rows) return [];
+      const pageRows = shell?.entities;
+      if (!pageRows) return [];
 
       const runQuery = createRunQuery(searchService);
 
       const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
       const skip = new Set<string>([...(col ? [col.id] : [])]);
-      if (view === 'raw') skip.add(GROUP_SIZE_FIELD);
+      if (rowsMode === 'individual') skip.add(GROUP_SIZE_FIELD);
 
       const args: QueryArgs = {
         namespace: spaceId,
@@ -247,13 +248,13 @@ export const useEntityGridData = ({
         sort: { field: sortField, direction: sortDirection },
         cursor,
         pageSize,
-        view,
+        rowsMode,
         concreteEntityIndexName,
         searchExpression,
         entityExpression,
       };
 
-      return enrichEntityRows(rows, args, skip, { runQuery, http }, ENRICH_FNS);
+      return enrichEntityRows(pageRows, args, skip, { runQuery, http }, ENRICH_FNS);
     },
     {
       enabled: !!concreteEntityIndexName && shellQuery.isSuccess && shellRows != null,

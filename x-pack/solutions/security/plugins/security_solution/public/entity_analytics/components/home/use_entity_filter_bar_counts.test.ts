@@ -17,17 +17,17 @@ import { CriticalityLevelsForBulkUpload } from '../../../../common/entity_analyt
 
 describe('buildEntityFilterCountsRequest', () => {
   it('uses the space-specific index alias', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'my-space', view: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'my-space', rowsMode: 'resolved' });
     expect(req.index).toEqual(['entities-latest-my-space']);
   });
 
   it('fetches no hits (size 0)', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
     expect(req.size).toBe(0);
   });
 
   it('filters to known entity types', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
     const filters = req.query.bool.filter;
     expect(filters).toContainEqual({
       terms: { 'entity.EngineMetadata.Type': getEntityAnalyticsEntityTypes() },
@@ -38,29 +38,29 @@ describe('buildEntityFilterCountsRequest', () => {
     const esFilter = { term: { 'host.name': 'foo' } };
     const req = buildEntityFilterCountsRequest({
       spaceId: 'default',
-      view: 'resolved',
+      rowsMode: 'resolved',
       filter: esFilter,
     });
     expect(req.query.bool.filter).toContainEqual(esFilter);
   });
 
   it('omits the caller filter when not provided', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
-    // only the entity type allowlist filter (and the resolved-view exclusion)
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
+    // only the entity type allowlist filter (and the resolved-rows exclusion)
     const hasExtraTerms = req.query.bool.filter.some((f) => !('terms' in f) && !('bool' in f));
     expect(hasExtraTerms).toBe(false);
   });
 
-  it('includes the resolved-view exclusion when view is resolved', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
+  it('includes the resolved-rows exclusion when rowsMode is resolved', () => {
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
     const hasResolutionExclusion = req.query.bool.filter.some(
       (f) => 'bool' in f && 'must_not' in (f as { bool: Record<string, unknown> }).bool
     );
     expect(hasResolutionExclusion).toBe(true);
   });
 
-  it('omits the resolved-view exclusion when view is raw', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'raw' });
+  it('omits the resolved-rows exclusion when rowsMode is individual', () => {
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'individual' });
     const hasResolutionExclusion = req.query.bool.filter.some(
       (f) => 'bool' in f && 'must_not' in (f as { bool: Record<string, unknown> }).bool
     );
@@ -68,7 +68,7 @@ describe('buildEntityFilterCountsRequest', () => {
   });
 
   it('has all five agg fields', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
     expect(req.aggs).toMatchObject({
       entity_types: { terms: { field: 'entity.EngineMetadata.Type' } },
       risk_levels: { terms: { field: 'entity.risk.calculated_level' } },
@@ -79,12 +79,12 @@ describe('buildEntityFilterCountsRequest', () => {
   });
 
   it('counts unscored entities via missing: Unknown on risk_levels', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
     expect(req.aggs.risk_levels.terms.missing).toBe(RiskSeverity.Unknown);
   });
 
   it('counts unassigned entities via missing: unassigned on asset_criticality', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', view: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
     expect(req.aggs.asset_criticality.terms.missing).toBe(
       CriticalityLevelsForBulkUpload.UNASSIGNED
     );

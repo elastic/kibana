@@ -26,7 +26,7 @@ import type { ColumnDescriptor, EnrichFn } from '../common';
 
 export type { ColumnDescriptor };
 
-// Ordered list of all grid columns; view arrays and GridColumnId are derived from this.
+// Ordered list of all grid columns; rows-mode arrays and GridColumnId are derived from this.
 export const ALL_COLUMNS = [
   actionsColumn,
   entityNameColumn,
@@ -51,16 +51,16 @@ export type GridColumnId = (typeof ALL_COLUMNS)[number]['id'];
 // `ALL_COLUMNS` typed as `readonly ColumnDescriptor[]` for runtime access (`.find`, `.map`).
 export const ALL_COLUMNS_LIST: readonly ColumnDescriptor[] = ALL_COLUMNS;
 
-// Resolved view: entities grouped by identity; shows "Records" count, hides "Resolved to".
-export const RESOLVED_VIEW_COLUMNS = ALL_COLUMNS.filter(
+// Resolved rows: entities grouped by identity; shows "Records" count, hides "Resolved to".
+export const RESOLVED_ROWS_COLUMNS = ALL_COLUMNS.filter(
   (c) => c.id !== 'entity.relationships.resolution.resolved_to'
 );
 
-// Raw view: individual unresolved records; shows "Resolved to" identity, hides "Records" count.
-export const RAW_VIEW_COLUMNS = ALL_COLUMNS.filter((c) => c.id !== 'group_size');
+// Individual rows: records; shows "Resolved to" identity, hides "Records" count.
+export const INDIVIDUAL_ROWS_COLUMNS = ALL_COLUMNS.filter((c) => c.id !== 'group_size');
 
-// Child rows (expanded under a resolved entity): neither grouping column applies.
-export const CHILD_VIEW_COLUMNS = ALL_COLUMNS.filter(
+// Child rows (expanded under a resolved entity): neither rows-mode column applies.
+export const CHILD_ROWS_COLUMNS = ALL_COLUMNS.filter(
   (c) => c.id !== 'group_size' && c.id !== 'entity.relationships.resolution.resolved_to'
 );
 

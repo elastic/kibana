@@ -12,6 +12,7 @@ export {
 } from './use_entity_analytics_url_state';
 export type {
   TimeRange,
+  RowsMode,
   EntityFilters,
   EntityAnalyticsUrlState,
   EntityAnalyticsUrlStateResult,
@@ -19,10 +20,14 @@ export type {
 export { EntitiesGrid } from './entities_grid';
 export type { EntitiesGridProps } from './entities_grid';
 export { EntitiesGroups } from './entities_groups';
-export type { GroupedViewProps as EntitiesGroupsProps } from './entities_groups';
+export type { EntitiesGroupsProps } from './entities_groups';
 export { renderEntityCell } from './entities_cell_renderer';
 export type { RowActions, CellHandlers } from './entities_cell_renderer';
-export { RESOLVED_VIEW_COLUMNS, RAW_VIEW_COLUMNS, CHILD_VIEW_COLUMNS } from './columns/registry';
+export {
+  RESOLVED_ROWS_COLUMNS,
+  INDIVIDUAL_ROWS_COLUMNS,
+  CHILD_ROWS_COLUMNS,
+} from './columns/registry';
 export type { GridColumnId } from './columns/registry';
 export { RESOLUTION_GROUPING_ID, PAGE_SIZE_OPTIONS, toList, joinAnd } from './common';
 export type { EntityGridResponse } from './common';

@@ -13,11 +13,11 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
 import { RISK_SCORE_NORM_FIELD, PAGE_SIZE_OPTIONS, TIME_RANGE_OPTIONS } from './common';
-import type { TimeRange } from './common';
+import type { RowsMode, TimeRange } from './common';
 import { isSignalCardId, type SignalCardId } from '../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
-export type { TimeRange };
+export type { TimeRange, RowsMode };
 
 export interface EntityFilters {
   entityTypes: EntityType[];
@@ -39,7 +39,7 @@ export const EMPTY_ENTITY_FILTERS: EntityFilters = {
 
 const PARAM = {
   TIME_RANGE: 'eaTimeRange',
-  VIEW: 'eaView',
+  ROWS_MODE: 'eaRowsMode',
   SORT_FIELD: 'eaSortField',
   SORT_DIR: 'eaSortDir',
   PAGE: 'eaPage',
@@ -61,7 +61,7 @@ export const MAX_EXPANDED_ENTITY_IDS = 20;
 
 const DEFAULTS = {
   timeRange: '30d' as TimeRange,
-  view: 'resolved' as const,
+  rowsMode: 'resolved' as RowsMode,
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc' as const,
   pageIndex: 0,
@@ -76,7 +76,7 @@ const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
 
 const isTimeRange = (v: string | null): v is TimeRange =>
   TIME_RANGE_OPTIONS.includes(v as TimeRange);
-const isView = (v: string | null): v is 'resolved' | 'raw' => v === 'resolved' || v === 'raw';
+const isRowsMode = (v: string | null): v is RowsMode => v === 'resolved' || v === 'individual';
 const isSortDir = (v: string | null): v is 'asc' | 'desc' => v === 'asc' || v === 'desc';
 const isNonNegativeInt = (v: string | null): boolean =>
   v != null && /^\d+$/.test(v) && Number(v) >= 0;
@@ -115,7 +115,7 @@ const writeExpandedParam = (params: URLSearchParams, ids: string[]) => {
 
 export interface EntityAnalyticsUrlState {
   timeRange: TimeRange;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   sortField: string;
   sortDirection: 'asc' | 'desc';
   pageIndex: number;
@@ -129,7 +129,7 @@ export interface EntityAnalyticsUrlState {
 
 export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setTimeRange: (val: TimeRange) => void;
-  setView: (val: 'resolved' | 'raw') => void;
+  setRowsMode: (val: RowsMode) => void;
   /** Resets page to 0. */
   setSort: (field: string, direction: 'asc' | 'desc') => void;
   setPage: (index: number) => void;
@@ -142,7 +142,7 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   resetPage: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;
-  /** Clears all expanded rows (e.g. on view switch). */
+  /** Clears all expanded rows (e.g. on rows-mode switch). */
   clearExpandedIds: () => void;
 }
 
@@ -165,7 +165,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     };
 
     ensure(PARAM.TIME_RANGE, isTimeRange, DEFAULTS.timeRange);
-    ensure(PARAM.VIEW, isView, DEFAULTS.view);
+    ensure(PARAM.ROWS_MODE, isRowsMode, DEFAULTS.rowsMode);
     ensure(PARAM.SORT_DIR, isSortDir, DEFAULTS.sortDirection);
     ensure(PARAM.PAGE_SIZE, isPageSize, DEFAULTS.pageSize);
     if (!params.get(PARAM.SORT_FIELD)) {
@@ -198,10 +198,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [rawTimeRange]
   );
 
-  const rawView = p.get(PARAM.VIEW);
-  const view = useMemo(
-    (): 'resolved' | 'raw' => (isView(rawView) ? rawView : DEFAULTS.view),
-    [rawView]
+  const rawRowsMode = p.get(PARAM.ROWS_MODE);
+  const rowsMode = useMemo(
+    (): RowsMode => (isRowsMode(rawRowsMode) ? rawRowsMode : DEFAULTS.rowsMode),
+    [rawRowsMode]
   );
 
   const rawSortField = p.get(PARAM.SORT_FIELD);
@@ -271,10 +271,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       }),
     [update]
   );
-  const setView = useCallback(
-    (val: 'resolved' | 'raw') =>
+  const setRowsMode = useCallback(
+    (val: RowsMode) =>
       update((params) => {
-        params.set(PARAM.VIEW, val);
+        params.set(PARAM.ROWS_MODE, val);
         params.delete(PARAM.PAGE);
         params.delete(PARAM.EXPANDED);
       }),
@@ -355,7 +355,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
 
   return {
     timeRange,
-    view,
+    rowsMode,
     sortField,
     sortDirection,
     pageIndex,
@@ -364,7 +364,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     expandedIds,
     activeTile,
     setTimeRange,
-    setView,
+    setRowsMode,
     setSort,
     setPage,
     setPageSize,

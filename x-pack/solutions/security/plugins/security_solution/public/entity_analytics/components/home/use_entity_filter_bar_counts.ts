@@ -22,6 +22,7 @@ import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analyti
 import { useKibana } from '../../../common/lib/kibana';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { getEntitiesAlias, ENTITY_LATEST } from './constants';
+import type { RowsMode } from './new_entities_table/common';
 
 export interface EntityFilterBarCounts {
   entity_types: Record<string, number>;
@@ -48,8 +49,8 @@ export const toBucketMap = (
 
 const ENTITY_TYPE_COUNT = getEntityAnalyticsEntityTypes().length;
 
-const getResolvedViewFilter = (view: 'resolved' | 'raw') =>
-  view === 'resolved'
+const getResolvedRowsFilter = (rowsMode: RowsMode) =>
+  rowsMode === 'resolved'
     ? [
         {
           bool: {
@@ -63,11 +64,11 @@ const getResolvedViewFilter = (view: 'resolved' | 'raw') =>
 
 export const buildEntityFilterCountsRequest = ({
   spaceId,
-  view,
+  rowsMode,
   filter,
 }: {
   spaceId: string;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   filter?: QueryDslQueryContainer;
 }) => ({
   index: [getEntitiesAlias(ENTITY_LATEST, spaceId)],
@@ -77,7 +78,7 @@ export const buildEntityFilterCountsRequest = ({
       filter: [
         { terms: { 'entity.EngineMetadata.Type': getEntityAnalyticsEntityTypes() } },
         ...(filter ? [filter] : []),
-        ...getResolvedViewFilter(view),
+        ...getResolvedRowsFilter(rowsMode),
       ],
     },
   },
@@ -119,23 +120,23 @@ interface UseEntityFilterBarCountsResult {
 
 export const useEntityFilterBarCounts = ({
   spaceId,
-  view,
+  rowsMode,
   filter,
 }: {
   spaceId: string | undefined;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   filter?: QueryDslQueryContainer;
 }): UseEntityFilterBarCountsResult => {
   const { data: dataServices } = useKibana().services;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['entity-filter-aggregations', spaceId, view, filter],
+    queryKey: ['entity-filter-aggregations', spaceId, rowsMode, filter],
     enabled: !!spaceId,
     keepPreviousData: true,
     queryFn: async (): Promise<EntityFilterBarCounts> => {
       const { rawResponse } = await lastValueFrom(
         dataServices.search.search({
-          params: buildEntityFilterCountsRequest({ spaceId: spaceId as string, view, filter }),
+          params: buildEntityFilterCountsRequest({ spaceId: spaceId as string, rowsMode, filter }),
         })
       );
       return parseEntityFilterCountsResponse(

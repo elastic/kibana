@@ -58,6 +58,7 @@ export const ENTITY_FIELDS = [
 // ── types ────────────────────────────────────────────────────────────────────
 
 export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
+export type RowsMode = 'resolved' | 'individual';
 export type Row = Record<string, unknown>;
 export type EsqlRunner = (q: string) => Promise<Row[]>;
 export type SortDir = 'asc' | 'desc';
@@ -75,7 +76,7 @@ export interface QueryArgs {
   sort: { field: string; direction: SortDir };
   cursor: PageCursor | null;
   pageSize: number;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   /** Concrete (non-alias) entity store index name — required for ES|QL LOOKUP JOIN from the browser. */
   concreteEntityIndexName: string;
   /**
@@ -137,8 +138,8 @@ export const buildKeepClause = (...extra: string[]): string => {
   return `| KEEP ${fields.map(quoteField).join(', ')}`;
 };
 
-export const buildResolvedViewFilter = (view: QueryArgs['view']): string[] =>
-  view === 'resolved' ? [`| WHERE ${RESOLVED_TO_FIELD} IS NULL`] : [];
+export const buildResolvedRowsFilter = (rowsMode: QueryArgs['rowsMode']): string[] =>
+  rowsMode === 'resolved' ? [`| WHERE ${RESOLVED_TO_FIELD} IS NULL`] : [];
 
 export const buildFilterClause = (filterExpression?: string): string[] =>
   filterExpression ? [`| WHERE ${filterExpression}`] : [];

@@ -27,7 +27,7 @@ import type { CellHandlers, RowActions } from './entities_cell_renderer';
 import type { GridColumnId, ColumnDescriptor } from './columns/registry';
 import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
 import type { TimeRange } from './use_entity_analytics_url_state';
-import type { Row } from './common';
+import type { Row, RowsMode } from './common';
 
 const GRID_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.ariaLabel',
@@ -45,7 +45,7 @@ const expandRowLabel = (isExpanded: boolean) =>
 
 export interface EntitiesGridProps {
   columns: ColumnDescriptor[];
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   sortField: string;
@@ -66,7 +66,7 @@ export interface EntitiesGridProps {
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   columns,
-  view,
+  rowsMode,
   timeRange,
   watchlistNames,
   sortField,
@@ -84,7 +84,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   pageSizeOptions = PAGE_SIZE_OPTIONS,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isRawView = view === 'raw';
+  const isIndividualRows = rowsMode === 'individual';
   const showToolbar = groupSelectorComponent !== undefined;
 
   // ── pagination cursors ────────────────────────────────────────────────────
@@ -119,30 +119,30 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   // Filter / time range: reset cursor pagination only — keep expanded rows.
   // View switch: clear expansion (different row model) and child cache.
   const isFirstRender = useRef(true);
-  const prevViewRef = useRef(view);
+  const prevRowsRef = useRef(rowsMode);
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      prevViewRef.current = view;
+      prevRowsRef.current = rowsMode;
       return;
     }
     resetPagination();
-    if (prevViewRef.current !== view) {
-      prevViewRef.current = view;
+    if (prevRowsRef.current !== rowsMode) {
+      prevRowsRef.current = rowsMode;
       clearExpandedIds();
       resetChildren();
     }
   }, [
     searchExpression,
     entityExpression,
-    view,
+    rowsMode,
     timeRange,
     resetPagination,
     clearExpandedIds,
     resetChildren,
   ]);
 
-  // Sync visible columns when the column set changes (e.g. view switch).
+  // Sync visible columns when the column set changes (e.g. rowsMode switch).
   const prevColumnsRef = useRef(columns);
   useEffect(() => {
     if (prevColumnsRef.current === columns) return;
@@ -169,7 +169,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     searchExpression,
     entityExpression,
     timeRange,
-    view,
+    rowsMode,
   });
 
   // Chain-fetch forward when user jumps beyond loaded pages.
@@ -363,7 +363,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       )}
       <EuiDataGrid
         aria-label={GRID_ARIA_LABEL}
-        leadingControlColumns={!isRawView ? [expanderColumn] : []}
+        leadingControlColumns={!isIndividualRows ? [expanderColumn] : []}
         columns={gridColumns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={total}
@@ -389,7 +389,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
                     prepend: (
                       <AdditionalControls
                         total={total}
-                        title={isRawView ? 'records' : 'entities'}
+                        title={isIndividualRows ? 'records' : 'entities'}
                         columns={visibleColumns}
                         onAddColumn={onAddColumn}
                         onRemoveColumn={onRemoveColumn}

@@ -6,7 +6,17 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+  type EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,8 +45,8 @@ import {
   EntitiesGrid,
   useEntityAnalyticsUrlState,
   useEntityGridFilters,
-  RAW_VIEW_COLUMNS,
-  RESOLVED_VIEW_COLUMNS,
+  INDIVIDUAL_ROWS_COLUMNS,
+  RESOLVED_ROWS_COLUMNS,
   toList,
   joinAnd,
 } from '../components/home/new_entities_table';
@@ -44,6 +54,7 @@ import type {
   RowActions,
   CellHandlers,
   EntityFilters,
+  RowsMode,
 } from '../components/home/new_entities_table';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
@@ -77,35 +88,47 @@ const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
 /** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
 const MAX_TILE_FILTER_ENTITY_IDS = 1000;
 
-const VIEW_BY_OPTIONS = [
+const ROWS_OPTIONS = [
   {
     key: 'resolved',
-    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.viewBy.resolvedLabel', {
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.rows.resolvedLabel', {
       defaultMessage: 'Resolved entities',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.home.rows.resolvedDescription',
+      {
+        defaultMessage: 'One row per resolved entity; its individual records are nested underneath',
+      }
+    ),
   },
   {
-    key: 'raw',
-    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.viewBy.rawLabel', {
-      defaultMessage: 'Raw records',
+    key: 'individual',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.rows.individualLabel', {
+      defaultMessage: 'Individual records',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.entityAnalytics.home.rows.individualDescription',
+      {
+        defaultMessage: 'One row per individual entity record; no resolution applied',
+      }
+    ),
   },
-];
+] as const;
 
 const GROUP_BY_OPTIONS = [
-  {
-    key: ENTITY_GROUPING_OPTIONS.RESOLUTION,
-    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.groupBy.resolutionLabel', {
-      defaultMessage: 'Resolution',
-    }),
-  },
   {
     key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
     label: i18n.translate('xpack.securitySolution.entityAnalytics.home.groupBy.entityTypeLabel', {
       defaultMessage: 'Entity type',
     }),
   },
-];
+  {
+    key: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.groupBy.resolutionLabel', {
+      defaultMessage: 'Resolution',
+    }),
+  },
+] as const;
 
 
 const GROUP_BY_SELECTOR_TITLE = i18n.translate(
@@ -113,15 +136,15 @@ const GROUP_BY_SELECTOR_TITLE = i18n.translate(
   { defaultMessage: 'Group by' }
 );
 
-const VIEW_BY_SELECTOR_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.viewBySelector.title',
-  { defaultMessage: 'View by' }
+const ROWS_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.rowsSelector.title',
+  { defaultMessage: 'Rows' }
 );
 
 const buildCombinedFilter = (
   esFilter: ESBoolQuery | undefined,
   entityFilters: EntityFilters,
-  view: 'resolved' | 'raw',
+  rowsMode: RowsMode,
   tileFilter?: QueryDslQueryContainer | null
 ) => {
   const filterClauses: QueryDslQueryContainer[] = [
@@ -144,7 +167,7 @@ const buildCombinedFilter = (
     ...(tileFilter ? [tileFilter] : []),
   ];
   const mustNotClauses =
-    view === 'resolved'
+    rowsMode === 'resolved'
       ? [{ exists: { field: 'entity.relationships.resolution.resolved_to' } }]
       : [];
   return filterClauses.length || mustNotClauses.length
@@ -153,9 +176,9 @@ const buildCombinedFilter = (
 };
 
 /** DSL counterpart of the tile ES|QL clause (grouping buckets use this path). */
-const buildTileFilter = (ids: string[], view: 'resolved' | 'raw'): QueryDslQueryContainer => {
+const buildTileFilter = (ids: string[], rowsMode: RowsMode): QueryDslQueryContainer => {
   if (!ids.length) return { match_none: {} };
-  if (view === 'raw') {
+  if (rowsMode === 'individual') {
     return {
       bool: {
         should: [
@@ -192,8 +215,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     setTimeRange,
     entityFilters,
     setEntityFilters,
-    view: viewBy,
-    setView: setViewBy,
+    rowsMode,
+    setRowsMode,
     sortField,
     sortDirection,
     setSort,
@@ -205,7 +228,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     setActiveTile,
   } = useEntityAnalyticsUrlState();
 
-  const activeColumns = viewBy === 'raw' ? RAW_VIEW_COLUMNS : RESOLVED_VIEW_COLUMNS;
+  const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
   const onEntityNameClick = useCallback(
     (row: Record<string, unknown>) => {
@@ -459,21 +482,21 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     // table stays consistent with a 0-count tile rather than falling back to all entities.
     if (!cappedTileEntityIds.length) return 'false';
     const list = toList(cappedTileEntityIds);
-    // Tiles emit resolved (effective) ids. Resolved view: parent rows only.
-    // Raw view: parent + members of those identities.
-    return viewBy === 'raw'
+    // Tiles emit resolved (effective) ids. Resolved rows: parent rows only.
+    // Individual rows: parent + members of those identities.
+    return rowsMode === 'individual'
       ? `(entity.id IN (${list}) OR entity.relationships.resolution.resolved_to IN (${list}))`
       : `entity.id IN (${list})`;
-  }, [cappedTileEntityIds, viewBy]);
+  }, [cappedTileEntityIds, rowsMode]);
 
   const tileFilter = useMemo((): QueryDslQueryContainer | null => {
     if (cappedTileEntityIds == null) return null;
-    return buildTileFilter(cappedTileEntityIds, viewBy);
-  }, [cappedTileEntityIds, viewBy]);
+    return buildTileFilter(cappedTileEntityIds, rowsMode);
+  }, [cappedTileEntityIds, rowsMode]);
 
   const combinedFilter = useMemo(
-    () => buildCombinedFilter(esFilter, entityFilters, viewBy, tileFilter),
-    [esFilter, entityFilters, viewBy, tileFilter]
+    () => buildCombinedFilter(esFilter, entityFilters, rowsMode, tileFilter),
+    [esFilter, entityFilters, rowsMode, tileFilter]
   );
 
   const groupingState = useMemo<EntityURLStateResult>(
@@ -506,7 +529,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   useUpdateEffect(() => {
     setGroupingPageIndex(0);
-  }, [tileWhereExpression, searchExpression, entityExpression, viewBy]);
+  }, [tileWhereExpression, searchExpression, entityExpression, rowsMode]);
 
   useUpdateEffect(() => {
     if (!activeTile || selectedEntityIds.length <= MAX_TILE_FILTER_ENTITY_IDS) {
@@ -746,7 +769,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         });
       }}
       options={GROUP_BY_OPTIONS.filter(
-        (o) => !(viewBy === 'resolved' && o.key === ENTITY_GROUPING_OPTIONS.RESOLUTION)
+        (o) => !(rowsMode === 'resolved' && o.key === ENTITY_GROUPING_OPTIONS.RESOLUTION)
       )}
       fields={isDataViewLoading ? [] : dataView.fields.getAll()}
       title={GROUP_BY_SELECTOR_TITLE}
@@ -755,31 +778,28 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     />
   );
 
-  const viewBySelectorElement = (
-    <GroupSelector
-      groupingId="ea-new-home-view-by"
-      groupsSelected={[viewBy]}
-      onGroupChange={(key) => {
-        const nextView = key as 'resolved' | 'raw';
-        setViewBy(nextView);
-        if (nextView === 'resolved') {
+  const rowsSelectorElement = (
+    <LabeledOptionSelector
+      title={ROWS_SELECTOR_TITLE}
+      options={ROWS_OPTIONS}
+      selectedKey={rowsMode}
+      onChange={(key) => {
+        const next = key as RowsMode;
+        setRowsMode(next);
+        if (next === 'resolved') {
           setGroupsSelected((prev) => {
             const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
             return filtered.length ? filtered : ['none'];
           });
         }
       }}
-      options={VIEW_BY_OPTIONS}
-      fields={[]}
-      title={VIEW_BY_SELECTOR_TITLE}
-      maxGroupingLevels={1}
-      settings={{ hideNoneOption: true, hideCustomFieldOption: true }}
+      data-test-subj="eaRowsModeSelector"
     />
   );
 
-  const viewControls = (
+  const tableControls = (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false}>{viewBySelectorElement}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{rowsSelectorElement}</EuiFlexItem>
       <EuiFlexItem grow={false}>{groupBySelectorElement}</EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -831,7 +851,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             filters={entityFilters}
             onFiltersChange={setEntityFilters}
             spaceId={spaceId}
-            view={viewBy}
+            rowsMode={rowsMode}
             esFilter={esFilter}
             watchlistNames={watchlistNames}
           />
@@ -866,23 +886,23 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 groupsSelected={groupsSelected}
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
-                view={viewBy}
+                rowsMode={rowsMode}
                 tileWhereExpression={tileWhereExpression}
-                groupSelectorComponent={viewControls}
+                groupSelectorComponent={tableControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
               />
             ) : (
               <EntitiesGrid
                 columns={activeColumns}
-                view={viewBy}
+                rowsMode={rowsMode}
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
                 searchExpression={searchExpression}
                 entityExpression={gridEntityExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
-                groupSelectorComponent={viewControls}
+                groupSelectorComponent={tableControls}
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSortChange={setSort}
@@ -897,5 +917,88 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
+  );
+};
+
+interface LabeledOption {
+  key: string;
+  label: string;
+  description?: string;
+}
+
+interface LabeledOptionSelectorProps {
+  title: string;
+  options: ReadonlyArray<LabeledOption>;
+  selectedKey: string;
+  onChange: (key: string) => void;
+  'data-test-subj'?: string;
+}
+
+const LabeledOptionSelector: React.FC<LabeledOptionSelectorProps> = ({
+  title,
+  options,
+  selectedKey,
+  onChange,
+  'data-test-subj': dataTestSubj,
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const selected = options.find((o) => o.key === selectedKey);
+  const buttonLabel = selected?.label ?? selectedKey;
+
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
+    () => [
+      {
+        id: 0,
+        width: 320,
+        items: options.map((option) => ({
+          'data-test-subj': `labeled-option-${option.key}`,
+          icon: option.key === selectedKey ? 'check' : 'empty',
+          name: (
+            <div>
+              <EuiText size="s">
+                <strong>{option.label}</strong>
+              </EuiText>
+              {option.description ? (
+                <EuiText size="xs" color="subdued">
+                  {option.description}
+                </EuiText>
+              ) : null}
+            </div>
+          ),
+          onClick: () => {
+            onChange(option.key);
+            setIsPopoverOpen(false);
+          },
+        })),
+      },
+    ],
+    [onChange, options, selectedKey]
+  );
+
+  return (
+    <EuiPopover
+      data-test-subj={dataTestSubj ?? 'labeledOptionSelector'}
+      button={
+        <EuiButtonEmpty
+          data-test-subj="labeled-option-selector-button"
+          flush="both"
+          iconSide="right"
+          iconSize="s"
+          iconType="chevronSingleDown"
+          onClick={() => setIsPopoverOpen((open) => !open)}
+          title={buttonLabel}
+          size="xs"
+        >
+          {`${title}: ${buttonLabel}`}
+        </EuiButtonEmpty>
+      }
+      closePopover={closePopover}
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
   );
 };

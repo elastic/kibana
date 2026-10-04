@@ -15,8 +15,9 @@ import type { EntityURLStateResult } from '../entities_table/hooks/use_entity_ur
 import { useEntityGridFilters } from './use_entity_grid_filters';
 import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../entities_table/constants';
 import { EntitiesGrid } from './entities_grid';
-import { CHILD_VIEW_COLUMNS } from './columns/registry';
+import { CHILD_ROWS_COLUMNS } from './columns/registry';
 import { RISK_SCORE_NORM_FIELD } from './common';
+import type { RowsMode } from './common';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
 
@@ -28,26 +29,26 @@ const TEST_SUBJECTS = {
   groupingLoading: TEST_SUBJ_GROUPING_LOADING,
 };
 
-export interface GroupedViewProps {
+export interface EntitiesGroupsProps {
   state: EntityURLStateResult;
   groupsSelected: string[];
   groupSelectorComponent: JSX.Element;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   /** Tile ES|QL clause (same as flat table); AND'd into leaf grids. */
   tileWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
 }
 
-export const EntitiesGroups: React.FC<GroupedViewProps> = ({
+export const EntitiesGroups: React.FC<EntitiesGroupsProps> = ({
   state,
   groupsSelected,
   groupSelectorComponent,
   timeRange,
   watchlistNames,
-  view,
+  rowsMode,
   tileWhereExpression,
   cellHandlers,
   rowActions,
@@ -59,7 +60,7 @@ export const EntitiesGroups: React.FC<GroupedViewProps> = ({
     groupSelectorComponent={groupSelectorComponent}
     timeRange={timeRange}
     watchlistNames={watchlistNames}
-    view={view}
+    rowsMode={rowsMode}
     tileWhereExpression={tileWhereExpression}
     cellHandlers={cellHandlers}
     rowActions={rowActions}
@@ -75,7 +76,7 @@ interface GroupWithPaginationProps {
   groupSelectorComponent?: JSX.Element;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   tileWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
@@ -88,7 +89,7 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
   groupSelectorComponent,
   timeRange,
   watchlistNames,
-  view,
+  rowsMode,
   tileWhereExpression,
   cellHandlers,
   rowActions,
@@ -114,7 +115,7 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
           selectedGroupOptions={selectedGroupOptions}
           timeRange={timeRange}
           watchlistNames={watchlistNames}
-          view={view}
+          rowsMode={rowsMode}
           tileWhereExpression={tileWhereExpression}
           cellHandlers={cellHandlers}
           rowActions={rowActions}
@@ -144,7 +145,7 @@ interface GroupContentProps {
   parentGroupFilters?: string;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   tileWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
@@ -164,7 +165,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
   parentGroupFilters,
   timeRange,
   watchlistNames,
-  view,
+  rowsMode,
   tileWhereExpression,
   cellHandlers,
   rowActions,
@@ -180,7 +181,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
         parentGroupFilters={JSON.stringify(merged)}
         timeRange={timeRange}
         watchlistNames={watchlistNames}
-        view={view}
+        rowsMode={rowsMode}
         tileWhereExpression={tileWhereExpression}
         cellHandlers={cellHandlers}
         rowActions={rowActions}
@@ -194,7 +195,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
       parentGroupFilters={parentGroupFilters}
       timeRange={timeRange}
       watchlistNames={watchlistNames}
-      view={view}
+      rowsMode={rowsMode}
       tileWhereExpression={tileWhereExpression}
       cellHandlers={cellHandlers}
       rowActions={rowActions}
@@ -212,7 +213,7 @@ interface GroupWithLocalPaginationProps {
   parentGroupFilters?: string;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   tileWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
@@ -226,7 +227,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
   parentGroupFilters,
   timeRange,
   watchlistNames,
-  view,
+  rowsMode,
   tileWhereExpression,
   cellHandlers,
   rowActions,
@@ -265,7 +266,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
           parentGroupFilters={JSON.stringify(groupFilters)}
           timeRange={timeRange}
           watchlistNames={watchlistNames}
-          view={view}
+          rowsMode={rowsMode}
           tileWhereExpression={tileWhereExpression}
           cellHandlers={cellHandlers}
           rowActions={rowActions}
@@ -290,7 +291,7 @@ interface LeafGridProps {
   parentGroupFilters?: string;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   tileWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
@@ -301,7 +302,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   parentGroupFilters,
   timeRange,
   watchlistNames,
-  view,
+  rowsMode,
   tileWhereExpression,
   cellHandlers,
   rowActions,
@@ -337,13 +338,13 @@ const LeafGrid: React.FC<LeafGridProps> = ({
 
   return (
     <EntitiesGrid
-      columns={CHILD_VIEW_COLUMNS}
+      columns={CHILD_ROWS_COLUMNS}
       pageSizeOptions={[5, 10, 25]}
       searchExpression={searchExpression}
       entityExpression={entityExpression}
       timeRange={timeRange}
       watchlistNames={watchlistNames}
-      view={view}
+      rowsMode={rowsMode}
       sortField={sortField}
       sortDirection={sortDirection}
       onSortChange={handleSortChange}

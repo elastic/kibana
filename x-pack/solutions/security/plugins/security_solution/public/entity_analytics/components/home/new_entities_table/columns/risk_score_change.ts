@@ -12,7 +12,7 @@ import {
   RISK_SCORE_NORM_FIELD,
   TIME_RANGE_DAYS,
   buildKeepClause,
-  buildResolvedViewFilter,
+  buildResolvedRowsFilter,
   buildFilterClause,
   buildLookupJoinClause,
   buildSearchIdInClause,
@@ -21,7 +21,14 @@ import {
   buildSortSuffix,
   buildCursorClause,
 } from '../common';
-import type { QueryArgs, RunContext, Row, TimeRange, ColumnDescriptor } from '../common';
+import type {
+  QueryArgs,
+  RunContext,
+  Row,
+  TimeRange,
+  RowsMode,
+  ColumnDescriptor,
+} from '../common';
 
 const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
 
@@ -35,7 +42,7 @@ const buildRiskScoreChangeBaseQuery = (
   namespace: string,
   timeRange: TimeRange,
   concreteEntityIndexName: string,
-  view: 'resolved' | 'raw',
+  rowsMode: RowsMode,
   searchExpression?: string,
   entityExpression?: string
 ): string => {
@@ -49,7 +56,7 @@ const buildRiskScoreChangeBaseQuery = (
     ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
     buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`,
-    ...buildResolvedViewFilter(view),
+    ...buildResolvedRowsFilter(rowsMode),
     ...buildFilterClause(entityExpression),
     `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - reference_score`,
     buildKeepClause(RISK_SCORE_CHANGE_FIELD),
@@ -62,7 +69,7 @@ const buildRiskScoreChangeDataQuery = ({
   sort: { direction: dir },
   cursor,
   pageSize,
-  view,
+  rowsMode,
   concreteEntityIndexName,
   searchExpression,
   entityExpression,
@@ -72,7 +79,7 @@ const buildRiskScoreChangeDataQuery = ({
       namespace,
       timeRange,
       concreteEntityIndexName,
-      view,
+      rowsMode,
       searchExpression,
       entityExpression
     ),
@@ -83,7 +90,7 @@ const buildRiskScoreChangeDataQuery = ({
 const buildRiskScoreChangeCountQuery = ({
   namespace,
   timeRange,
-  view,
+  rowsMode,
   concreteEntityIndexName,
   searchExpression,
   entityExpression,
@@ -93,7 +100,7 @@ const buildRiskScoreChangeCountQuery = ({
       namespace,
       timeRange,
       concreteEntityIndexName,
-      view,
+      rowsMode,
       searchExpression,
       entityExpression
     ),
