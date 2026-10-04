@@ -16,9 +16,13 @@ export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;
+  /** UIAM service account bound to this execution. Exchanged when the task runs. */
+  serviceAccountId?: string;
 }
 
 export interface ResumeWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;
+  /** UIAM service account bound to this execution. Exchanged when the task runs. */
+  serviceAccountId?: string;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -39,6 +39,8 @@ describe('ServiceAccountWorkloadBindings', () => {
   let backend: jest.Mocked<ServiceAccountsBackend>;
   let license: ReturnType<typeof licenseMock.create>;
   let checkPrivileges: jest.Mock;
+  let authenticate: jest.Mock;
+  let clusterClient: IClusterClient;
   let getCurrentUser: jest.Mock;
   let getCurrentUserProfileId: jest.Mock;
   let getSpaceId: jest.Mock;
@@ -53,6 +55,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       store,
       backend,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally: checkPrivileges }),
+      clusterClient,
       getCurrentUser,
       getCurrentUserProfileId,
       getSpaceId,
@@ -83,6 +86,12 @@ describe('ServiceAccountWorkloadBindings', () => {
       getFakeRequestPrincipal: jest.fn(),
     };
 
+    authenticate = jest.fn();
+    clusterClient = {
+      asScoped: jest.fn().mockReturnValue({
+        asCurrentUser: { security: { authenticate } },
+      }),
+    } as unknown as IClusterClient;
     license = licenseMock.create();
     license.isEnabled.mockReturnValue(true);
     checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
@@ -170,10 +179,54 @@ describe('ServiceAccountWorkloadBindings', () => {
       getCurrentUser.mockReturnValue(null);
 
       await expect(
-        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest({ headers: {} }), {
           serviceAccountId: 'service-account-id',
           ...WORKLOAD,
         })
+      ).rejects.toMatchObject({ output: { statusCode: 401 } });
+      expect(authenticate).not.toHaveBeenCalled();
+      expect(store.set).not.toHaveBeenCalled();
+    });
+
+    it('authenticates an Authorization header when Kibana has no stored user', async () => {
+      getCurrentUser.mockReturnValue(null);
+      authenticate.mockResolvedValue({
+        username: 'service-account-id',
+        roles: ['admin'],
+        enabled: true,
+        authentication_realm: { name: 'cloud-service-account', type: '_cloud_service_account' },
+        lookup_realm: { name: 'cloud-service-account', type: '_cloud_service_account' },
+        authentication_type: 'realm',
+      });
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'Bearer essu_token' },
+      });
+
+      await bindings.bindWorkload(PLUGIN_ID, request, {
+        serviceAccountId: 'service-account-id',
+        ...WORKLOAD,
+      });
+
+      expect(clusterClient.asScoped).toHaveBeenCalledWith(request);
+      expect(store.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          boundBy: { type: 'service_account', serviceAccountId: 'service-account-id' },
+        })
+      );
+    });
+
+    it('refuses an Authorization header Elasticsearch rejects', async () => {
+      getCurrentUser.mockReturnValue(null);
+      authenticate.mockRejectedValue({ statusCode: 401 });
+
+      await expect(
+        bindings.bindWorkload(
+          PLUGIN_ID,
+          httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'Bearer essu_token' },
+          }),
+          { serviceAccountId: 'service-account-id', ...WORKLOAD }
+        )
       ).rejects.toMatchObject({ output: { statusCode: 401 } });
       expect(store.set).not.toHaveBeenCalled();
     });

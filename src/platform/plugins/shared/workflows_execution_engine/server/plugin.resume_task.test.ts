@@ -111,6 +111,7 @@ describe('workflow:resume task runner event fields', () => {
       cloud: {} as never,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
     });
+    return coreStart;
   };
 
   beforeEach(() => {
@@ -529,5 +530,64 @@ describe('workflow:resume task runner event fields', () => {
       space_id: spaceId,
       outcome: 'failed',
     });
+  });
+
+  it('records an exhausted resume when the service account exchange fails', async () => {
+    const coreStart = setupPlugin();
+    jest
+      .spyOn(coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
+      .mockRejectedValue(new Error('binding unavailable'));
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId('exec-exchange'),
+          params: {
+            workflowRunId: 'exec-exchange',
+            spaceId: 'default',
+            serviceAccountId: 'sa-1',
+          },
+          attempts: 3,
+        },
+        fakeRequest: undefined,
+      })
+    );
+
+    await expect(runner.run()).rejects.toThrow('binding unavailable');
+    expect(mockResolveExhaustedWorkflowRunTask).toHaveBeenCalledTimes(1);
+    expect(mockResolveExhaustedWorkflowRunTask).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowRunId: 'exec-exchange',
+        taskAttempts: 3,
+        maxAttempts: 3,
+      })
+    );
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('records a resume failure once when the workflow throws after the exchange', async () => {
+    const coreStart = setupPlugin();
+    jest
+      .spyOn(coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
+      .mockImplementation(async (_params, run) => run({} as KibanaRequest));
+    mockResumeWorkflow.mockRejectedValue(new Error('step failed'));
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId('exec-step'),
+          params: {
+            workflowRunId: 'exec-step',
+            spaceId: 'default',
+            serviceAccountId: 'sa-1',
+          },
+          attempts: 1,
+        },
+        fakeRequest: undefined,
+      })
+    );
+
+    await expect(runner.run()).rejects.toThrow('step failed');
+    expect(mockResolveExhaustedWorkflowRunTask).toHaveBeenCalledTimes(1);
   });
 });

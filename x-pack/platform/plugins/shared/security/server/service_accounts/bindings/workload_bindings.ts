@@ -8,21 +8,23 @@
 import Boom from '@hapi/boom';
 import { randomBytes } from 'crypto';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  BindServiceAccountWorkloadParams,
-  ServiceAccountWorkloadBinding,
-  ServiceAccountWorkloadCoordinates,
-  ServiceAccountWorkloadRef,
-  ServiceAccountWorkloadRequestParams,
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  type BindServiceAccountWorkloadParams,
+  HTTPAuthorizationHeader,
+  type ServiceAccountWorkloadBinding,
+  type ServiceAccountWorkloadCoordinates,
+  type ServiceAccountWorkloadRef,
+  type ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import { deepFreeze } from '@kbn/std';
 
 import type { WorkloadBindingCoordinates } from './binding_saved_object';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
@@ -68,6 +70,11 @@ export interface ServiceAccountWorkloadBindingsOptions {
   store: WorkloadBindingStore;
   backend: ServiceAccountsBackend;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  /**
+   * Used when Kibana has no stored user for the request. A credential on `Authorization` is
+   * authenticated the same way the HTTP provider does.
+   */
+  clusterClient: IClusterClient;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   /**
    * Resolves the user profile behind a request, including the creator of an API key. Used to keep
@@ -88,6 +95,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   private readonly store: WorkloadBindingStore;
   private readonly backend: ServiceAccountsBackend;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  private readonly clusterClient: IClusterClient;
   private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   private readonly getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
   private readonly getSpaceId: (request: KibanaRequest) => string;
@@ -99,6 +107,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     store,
     backend,
     checkPrivilegesWithRequest,
+    clusterClient,
     getCurrentUser,
     getCurrentUserProfileId,
     getSpaceId,
@@ -109,6 +118,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     this.store = store;
     this.backend = backend;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
+    this.clusterClient = clusterClient;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentUserProfileId = getCurrentUserProfileId;
     this.getSpaceId = getSpaceId;
@@ -122,7 +132,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   ): Promise<ServiceAccountWorkloadBinding> {
     this.ensureAvailable();
 
-    const user = this.getCurrentUser(request);
+    const user = (await this.userForBind(request)) ?? null;
     if (!user) {
       throw Boom.unauthorized(
         'Cannot bind a service account to a workload: the request is not authenticated'
@@ -270,6 +280,43 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     }
 
     return binding;
+  }
+
+  /**
+   * Kibana's route authenticator stores the user. A request built outside that route, such as the
+   * inbound hub, only has `Authorization`. Elasticsearch still accepts it, so resolve the user the
+   * way the HTTP provider does: `_authenticate`, then `authentication_provider.type: 'http'`.
+   * `getAuthenticatedPrincipal` classifies a service account only when that type is `http`.
+   */
+  private async userForBind(request: KibanaRequest): Promise<AuthenticatedUser | null> {
+    const currentUser = this.getCurrentUser(request);
+    if (currentUser) {
+      return currentUser;
+    }
+
+    const header = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (!header) {
+      return null;
+    }
+
+    try {
+      const authenticationInfo = await this.clusterClient
+        .asScoped(request)
+        .asCurrentUser.security.authenticate();
+      // Elasticsearch `metadata` does not carry Kibana's `_reserved` marker. The HTTP provider
+      // makes the same conversion.
+      return deepFreeze({
+        ...authenticationInfo,
+        authentication_provider: { type: 'http', name: 'http' },
+        elastic_cloud_user: false,
+        http_authentication_scheme: header.scheme.toLowerCase(),
+      } as unknown as AuthenticatedUser);
+    } catch (error) {
+      if (getErrorStatusCode(error) === 401) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   private ensureCanManage(request: KibanaRequest, action: string): Promise<void> {

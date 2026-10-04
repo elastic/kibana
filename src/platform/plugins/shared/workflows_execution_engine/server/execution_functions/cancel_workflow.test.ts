@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { CoreServiceAccountsService } from '@kbn/core-security-server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ExecutionStatus,
@@ -46,12 +47,21 @@ const buildTaskManager = (): jest.Mocked<
   promoteQueuedRunTask: jest.fn().mockResolvedValue(undefined),
 });
 
+const disabledServiceAccounts = {
+  isEnabled: jest.fn().mockReturnValue(false),
+  getWorkloadBinding: jest.fn(),
+  withScopedRequestForWorkload: jest.fn(),
+  unbindWorkload: jest.fn(),
+} as unknown as CoreServiceAccountsService;
+
 const buildCancelParams = ({
   workflowExecutionRepository,
   workflowTaskManager,
+  serviceAccounts = disabledServiceAccounts,
 }: {
   workflowExecutionRepository: ReturnType<typeof buildRepository>;
   workflowTaskManager: ReturnType<typeof buildTaskManager>;
+  serviceAccounts?: CoreServiceAccountsService;
 }) => ({
   workflowExecutionId: 'exec-1',
   spaceId: 'default',
@@ -59,6 +69,7 @@ const buildCancelParams = ({
   workflowExecutionRepository:
     workflowExecutionRepository as unknown as WorkflowExecutionRepository,
   workflowTaskManager: workflowTaskManager as unknown as WorkflowTaskManager,
+  serviceAccounts,
   logger: loggingSystemMock.create().get() as Logger,
 });
 
@@ -117,6 +128,35 @@ describe('cancelWorkflow', () => {
       {}
     );
     expect(workflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+  });
+
+  it('releases a bearer binding when a queued execution is cancelled', async () => {
+    const workflowExecutionRepository = buildRepository(
+      buildExecution({ status: ExecutionStatus.QUEUED, spaceId })
+    );
+    const workflowTaskManager = buildTaskManager();
+    const serviceAccounts = {
+      isEnabled: jest.fn().mockReturnValue(true),
+      getWorkloadBinding: jest.fn().mockResolvedValue({ serviceAccountId: 'sa-1' }),
+      withScopedRequestForWorkload: jest.fn(
+        async (_params: unknown, run: (request: unknown) => unknown) => run({})
+      ),
+      unbindWorkload: jest.fn().mockResolvedValue(true),
+    } as unknown as CoreServiceAccountsService;
+
+    await cancelWorkflow(
+      buildCancelParams({ workflowExecutionRepository, workflowTaskManager, serviceAccounts })
+    );
+
+    expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith({
+      workloadType: 'service_account_bearer',
+      workloadId: workflowExecutionId,
+      spaceId,
+    });
+    expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(
+      {},
+      { workloadType: 'service_account_bearer', workloadId: workflowExecutionId }
+    );
   });
 
   it('sets cancelRequested, flips to CANCELLED, and wakes idle tasks for pending', async () => {
