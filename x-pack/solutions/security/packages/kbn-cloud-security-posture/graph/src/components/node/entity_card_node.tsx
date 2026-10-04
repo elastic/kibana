@@ -113,6 +113,12 @@ const EntityCardWrapper = styled.div<{
     border-style: dashed;
   }
 
+  /* Show dashed primary border on keyboard focus (interactive only) */
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    border-color: ${({ euiTheme }) => euiTheme.colors.primary};
+    border-style: dashed;
+  }
+
   /* Shadow when selected */
   .react-flow__node:not(.non-interactive).selected & {
     ${({ shadow }) => shadow};
@@ -396,6 +402,12 @@ const SourcesCell = memo<{ sources: string[] }>(({ sources }) => {
   );
 });
 SourcesCell.displayName = 'SourcesCell';
+
+/** Displayed in the entity name slot when the node has no label (e.g. unenriched grouped node). */
+const ENTITY_LABEL_PLACEHOLDER = i18n.translate(
+  'securitySolutionPackages.csp.graph.entityNode.labelPlaceholder',
+  { defaultMessage: 'N/A' }
+);
 
 const IP_ADDRESS_LABEL = i18n.translate(
   'securitySolutionPackages.csp.graph.entityNode.metadata.ipAddress',
@@ -724,7 +736,7 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
       {isGrouped ? (
         <EuiText size="xs">
           <EuiTextTruncate
-            text={label ?? ''}
+            text={label || ENTITY_LABEL_PLACEHOLDER}
             truncation="end"
             css={css`
               font-weight: ${euiTheme.font.weight.bold};
@@ -738,7 +750,7 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
         <>
           <EuiText size="xs">
             <EuiTextTruncate
-              text={label ?? ''}
+              text={label || ENTITY_LABEL_PLACEHOLDER}
               truncation="end"
               css={css`
                 font-weight: ${euiTheme.font.weight.bold};
@@ -1042,7 +1054,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 isGrouped={isGrouped}
                 countDisplay={countDisplay}
                 riskBadges={riskBadges}
-                iconBgColor={iconBgColor}
+                iconBgColor={euiTheme.colors.backgroundBaseSubdued}
                 euiTheme={euiTheme}
               />
             </EntityCardHeader>
@@ -1073,7 +1085,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
             <StackedCard
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               euiTheme={euiTheme}
-              bgColor={iconBgColor}
+              bgColor={euiTheme.colors.backgroundBasePlain}
               bottomOffset={8}
               scale={0.95}
             />

@@ -147,14 +147,14 @@ describe('LabelNode', () => {
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
-        disabled: '#E3E8F2',
+        backgroundLightPrimary: '#E6F1FA',
         borderBasePlain: '#D3DAE6',
         textHeading: '#1A1C21',
       },
     };
 
     const expectedColors = {
-      backgroundColor: mockEuiTheme.colors.disabled,
+      backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
       borderColor: mockEuiTheme.colors.borderBasePlain,
       textColor: mockEuiTheme.colors.textHeading,
     };

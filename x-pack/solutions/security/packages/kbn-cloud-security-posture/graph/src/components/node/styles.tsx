@@ -170,12 +170,13 @@ export const LabelShape = styled(EuiText, {
   `};
 `;
 
-export const LabelStackedShape = styled.div<{ borderColor: string }>`
+export const LabelStackedShape = styled.div<{ borderColor: string; backgroundColor: string }>`
   position: absolute;
   width: 100%;
   height: 100%;
   transform: scale(0.9) translateY(calc(-100% + 3px));
   z-index: -1;
+  background-color: ${(props) => props.backgroundColor};
   border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
   border-radius: ${LABEL_BORDER_RADIUS}px;
 `;
@@ -197,14 +198,14 @@ export const getLabelColors = (
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
     return {
-      backgroundColor: euiTheme.colors.disabled,
+      backgroundColor: euiTheme.colors.backgroundLightPrimary,
       borderColor: euiTheme.colors.borderBasePlain,
       textColor: euiTheme.colors.textHeading,
     };
   }
 
   return {
-    backgroundColor: euiTheme.colors.disabled,
+    backgroundColor: euiTheme.colors.backgroundLightPrimary,
     borderColor: euiTheme.colors.borderBasePlain,
     textColor: euiTheme.colors.textHeading,
   };
@@ -218,7 +219,7 @@ export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   return {
-    backgroundColor: euiTheme.colors.disabled,
+    backgroundColor: euiTheme.colors.backgroundLightPrimary,
     borderColor: euiTheme.colors.borderBasePlain,
     textColor: euiTheme.colors.textHeading,
   };

@@ -182,6 +182,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
         {showStackedShape(numEvents + numAlerts) && (
           <LabelStackedShape
             data-test-subj={TEST_SUBJ_STACKED_SHAPE}
+            backgroundColor={backgroundColor}
             borderColor={transparentize(borderColor, 0.5)}
           />
         )}

@@ -76,7 +76,7 @@ describe('RelationshipNode', () => {
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
-        disabled: '#E3E8F2',
+        backgroundLightPrimary: '#E6F1FA',
         borderBasePlain: '#D3DAE6',
         textHeading: '#1A1C21',
         textParagraph: '#DDDDDD',
@@ -89,14 +89,14 @@ describe('RelationshipNode', () => {
     it('should return relationship colors matching event/label node colors', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.disabled,
+        backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
         borderColor: mockEuiTheme.colors.borderBasePlain,
         textColor: mockEuiTheme.colors.textHeading,
       });
     });
 
     const expectedLabelColors = {
-      backgroundColor: mockEuiTheme.colors.disabled,
+      backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
       borderColor: mockEuiTheme.colors.borderBasePlain,
       textColor: mockEuiTheme.colors.textHeading,
     };
