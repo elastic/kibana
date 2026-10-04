@@ -44,7 +44,6 @@ export const EntitySearchBar: React.FC<Props> = ({ dataView, timeRange, onTimeRa
         idSelected={timeRange}
         onChange={(id) => onTimeRangeChange(id as TimeRange)}
         buttonSize="compressed"
-        color="primary"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
