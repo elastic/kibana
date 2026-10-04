@@ -397,7 +397,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.pressKeys(browser.keys.ENTER);
 
         await cases.casesTable.waitForCaseToBeListed(caseIds[0]);
-        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const searchedCaseTitle = await (
+          await cases.casesTable.getCaseById(caseIds[0])
+        ).findByTestSubject('case-details-link');
+        expect(await searchedCaseTitle.getVisibleText()).to.be(caseTitle);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });
