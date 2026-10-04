@@ -95,6 +95,7 @@ import {
   registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerSiemMigrationRuleItemsAttachment,
   registerImpactAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
@@ -372,6 +373,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getSpaceId: () => plugins.spaces.getActiveSpace().then((s) => s.id),
         data: plugins.data,
       });
+      registerSiemMigrationRuleItemsAttachment(plugins.agentBuilder.attachments);
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
         getUrlForApp: core.application.getUrlForApp,
