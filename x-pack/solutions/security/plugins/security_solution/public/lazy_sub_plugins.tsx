@@ -31,6 +31,7 @@ import { EntityAnalytics } from './entity_analytics';
 import { SiemMigrations } from './siem_migrations';
 import { SiemReadiness } from './siem_readiness';
 import { Configurations } from './configurations';
+import { AlertsV2 } from './alerts_v2';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -57,5 +58,6 @@ const subPluginClasses = {
   SiemMigrations,
   SiemReadiness,
   Reports,
+  AlertsV2,
 };
 export { subPluginClasses };

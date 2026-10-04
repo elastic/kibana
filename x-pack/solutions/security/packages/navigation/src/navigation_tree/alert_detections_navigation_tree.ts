@@ -30,6 +30,11 @@ export const createAlertDetectionsNavigationTree = (): RootNodePanelOpenerDefini
           id: SecurityPageName.alerts,
           link: securityLink(SecurityPageName.alerts),
         },
+        {
+          id: SecurityPageName.alertsV2,
+          link: securityLink(SecurityPageName.alertsV2),
+          badgeType: 'new',
+        },
       ],
     },
   ],

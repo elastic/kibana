@@ -50,7 +50,9 @@ export const ResponseSectionContent = memo<ResponseSectionContentProps>(
       defaultValue: false,
     });
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
 

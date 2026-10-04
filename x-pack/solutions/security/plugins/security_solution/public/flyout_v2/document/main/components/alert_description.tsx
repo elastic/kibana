@@ -12,9 +12,11 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useKibana } from '../../../../common/lib/kibana';
 import { EventKind } from '../constants/event_kinds';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 import {
@@ -46,13 +48,32 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({ hit, onShowRuleSum
   );
   const ruleSummaryDisabled = isRulePreview || !canReadRules || isRemoteDocument;
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
 
+  // v2 episodes carry `rule.id` but not the rule's description, so we resolve it from the rule via
+  // the RnA rules-by-ids lookup (same as the flyout title). v1 reads `kibana.alert.rule.description`
+  // straight off the document. `ruleIds` is memoized: the hook feeds it into a `useAsync` dep list.
+  const { services } = useKibana();
+  const isEpisode = useMemo(() => getFieldValue(hit, 'episode.id') != null, [hit]);
+  const episodeRuleId = useMemo(() => getFieldValue(hit, 'rule.id') as string | undefined, [hit]);
+  const ruleIds = useMemo(
+    () => (isEpisode && episodeRuleId ? [episodeRuleId] : []),
+    [isEpisode, episodeRuleId]
+  );
+  const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
+
   const ruleDescription = useMemo(
-    () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
-    [hit]
+    () =>
+      isEpisode
+        ? episodeRuleId
+          ? rulesCache[episodeRuleId]?.metadata?.description
+          : undefined
+        : (getFieldValue(hit, 'kibana.alert.rule.description') as string),
+    [isEpisode, episodeRuleId, rulesCache, hit]
   );
 
   const viewRule = useMemo(

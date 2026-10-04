@@ -81,6 +81,7 @@ import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { getIndicatorAttachment } from './cases/attachments/indicator';
 import { getTimelineAttachment } from './cases/attachments/timeline';
+import { getEpisodeAttachment } from './cases/attachments/episode';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
@@ -320,6 +321,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerAttachment(getEventType());
     cases.attachmentFramework.registerAttachment(getSecurityAlertType());
     cases.attachmentFramework.registerAttachment(getTimelineAttachment());
+    cases.attachmentFramework.registerAttachment(getEpisodeAttachment());
 
     // Always register the entity attachment renderer so that attachments created
     // while the feature flag was enabled continue to display correctly after the
@@ -854,6 +856,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         siemReadiness: new subPluginClasses.SiemReadiness(),
         configurations: new subPluginClasses.Configurations(),
         reports: new subPluginClasses.Reports(),
+        alertsV2: new subPluginClasses.AlertsV2(),
       };
     }
     return this._subPlugins;
@@ -888,6 +891,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
+      alertsV2: subPlugins.alertsV2.start(),
     };
   }
 
