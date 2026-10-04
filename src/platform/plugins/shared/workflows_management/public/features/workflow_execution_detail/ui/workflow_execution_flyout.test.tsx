@@ -66,10 +66,17 @@ jest.mock('./resume_execution_button', () => ({
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
     onStepExecutionClick,
+    waitingAction,
   }: {
     onStepExecutionClick: (id: string) => void;
+    waitingAction?: { autoOpen?: boolean; stepExecutionId?: string };
   }) => (
     <>
+      <div
+        data-test-subj="tree-waiting-action"
+        data-auto-open={String(Boolean(waitingAction?.autoOpen))}
+        data-waiting-step={waitingAction?.stepExecutionId ?? ''}
+      />
       <button
         type="button"
         data-test-subj="select-waiting-step"
@@ -192,16 +199,19 @@ describe('WorkflowExecutionFlyout resume', () => {
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 
-  it('shows Provide action on the run and honors ?resume=true', () => {
+  it('shows Provide action in Result and honors ?resume=true on the tree row', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
     mockWaitingStepResume.resumeMessage = 'Approve this';
     renderFlyout('?resume=true');
 
-    const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(1);
-    expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'true');
-    expect(resumeButtons[0]).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.getByTestId('workflowExecutionFlyoutResultLink')).toHaveTextContent(
+      'Provide action'
+    );
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
   });
 
   it('also shows resume on the waiting step Input section', () => {
@@ -212,14 +222,9 @@ describe('WorkflowExecutionFlyout resume', () => {
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
     const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(2);
-    expect(resumeButtons.map((button) => button.getAttribute('data-waiting-step'))).toEqual([
-      'step-wait',
-      'step-wait',
-    ]);
-    // Only the always-visible run control auto-opens from ?resume=true.
+    expect(resumeButtons).toHaveLength(1);
+    expect(resumeButtons[0]).toHaveAttribute('data-waiting-step', 'step-wait');
     expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'false');
-    expect(resumeButtons[1]).toHaveAttribute('data-auto-open', 'false');
   });
 });
 
