@@ -92,6 +92,7 @@ export const useIlmLifecycleSummary = ({
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const { signal } = useAbortController();
+  const ilmStatsDefinitionRef = useRef(definition);
 
   const isIlm = isIlmLifecycle(definition.effective_lifecycle);
   const policyName = isIlm
@@ -158,21 +159,39 @@ export const useIlmLifecycleSummary = ({
   };
 
   const {
-    value: ilmStatsValue,
-    loading: ilmLoading,
+    value: ilmStatsResult,
+    loading: ilmStatsLoading,
+    error: ilmStatsError,
     refresh: refreshIlmStats,
   } = useStreamsAppFetch(
     ({ signal: fetchSignal }) => {
       if (!isIlm) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
-        params: { path: { name: definition.stream.name } },
-        signal: fetchSignal,
-      });
+      ilmStatsDefinitionRef.current = definition;
+      return streamsRepositoryClient
+        .fetch('GET /internal/streams/{name}/lifecycle/_stats', {
+          params: { path: { name: definition.stream.name } },
+          signal: fetchSignal,
+        })
+        .then((ilmStats) => ({ definition, stats: ilmStats }));
     },
     [streamsRepositoryClient, definition, isIlm]
   );
+
+  const ilmStatsValue = ilmStatsResult?.stats;
+  // The fetch hook only flips `loading` once its effect runs, so the first render carrying a new
+  // definition still reports "settled" while holding the previous definition's stats. Report that
+  // window as loading too, otherwise the summary's readiness signal claims stale stats are current.
+  // A failed fetch is settled: no stats are coming, and staying "loading" would strand the hold.
+  // Keep the requested definition separately because a previous error remains in the fetch state
+  // until the next successful request, including during the first render after a definition change.
+  const ilmLoading =
+    ilmStatsLoading ||
+    ilmStatsDefinitionRef.current !== definition ||
+    (ilmStatsError === undefined &&
+      ilmStatsResult !== undefined &&
+      ilmStatsResult.definition !== definition);
 
   const applyOverwrite = async (context: DeleteContext) => {
     if (!isIlm) {
