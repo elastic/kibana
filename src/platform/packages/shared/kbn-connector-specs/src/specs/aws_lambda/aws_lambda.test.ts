@@ -442,4 +442,15 @@ describe('AwsLambdaConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('listFunctions input bounds', () => {
+    it.each([
+      [10_000, true],
+      [10_001, false],
+    ])('maxItems %d valid=%s', (maxItems, expected) => {
+      expect(AwsLambdaConnector.actions.listFunctions.input.safeParse({ maxItems }).success).toBe(
+        expected
+      );
+    });
+  });
 });

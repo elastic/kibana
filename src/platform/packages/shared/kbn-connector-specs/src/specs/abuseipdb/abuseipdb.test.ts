@@ -186,6 +186,21 @@ describe('AbuseIPDBConnector', () => {
       ).toThrow();
     });
 
+    it.each([
+      ['1024 ASCII characters', 'a'.repeat(1024), true],
+      ['1025 ASCII characters', 'a'.repeat(1025), false],
+      ['512 two-byte characters', 'é'.repeat(512), true],
+      ['513 two-byte characters', 'é'.repeat(513), false],
+    ])('should bound the comment at 1024 UTF-8 bytes: %s', (_label, comment, valid) => {
+      expect(
+        AbuseIPDBConnector.actions.reportIp.input.safeParse({
+          ip: '1.2.3.4',
+          categories: [18],
+          comment,
+        }).success
+      ).toBe(valid);
+    });
+
     it('should accept IPv6 addresses at the schema boundary', () => {
       expect(
         AbuseIPDBConnector.actions.reportIp.input.safeParse({
@@ -414,6 +429,17 @@ describe('AbuseIPDBConnector', () => {
       mockClient.get.mockRejectedValue(new Error('Network error'));
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow('Network error');
+    });
+  });
+
+  describe('getBlacklist input bounds', () => {
+    it.each([
+      [500_000, true],
+      [500_001, false],
+    ])('limit %d valid=%s', (limit, expected) => {
+      expect(AbuseIPDBConnector.actions.getBlacklist.input.safeParse({ limit }).success).toBe(
+        expected
+      );
     });
   });
 });

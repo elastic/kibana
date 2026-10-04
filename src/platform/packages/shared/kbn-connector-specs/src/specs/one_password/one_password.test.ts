@@ -285,4 +285,15 @@ describe('OnePasswordConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow('1Password API error (403):');
     });
   });
+
+  describe('listUsers input bounds', () => {
+    it.each([
+      [1000, true],
+      [1001, false],
+    ])('maxPageSize %d valid=%s', (maxPageSize, expected) => {
+      expect(OnePasswordConnector.actions.listUsers.input.safeParse({ maxPageSize }).success).toBe(
+        expected
+      );
+    });
+  });
 });
