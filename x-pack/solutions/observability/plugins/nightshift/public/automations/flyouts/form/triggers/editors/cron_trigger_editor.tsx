@@ -20,9 +20,11 @@ const describeCron = (expression: string): string =>
 export const CronTriggerEditor = ({
   trigger,
   onChange,
+  readOnly = false,
 }: {
   trigger: Extract<TriggerFormValues, { kind: 'cron' }>;
   onChange: (trigger: TriggerFormValues) => void;
+  readOnly?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isInvalid = !isValidCron(trigger.cronExpression);
@@ -37,11 +39,13 @@ export const CronTriggerEditor = ({
           placeholder="0 9 * * *"
           isInvalid={isInvalid}
           value={trigger.cronExpression}
+          disabled={readOnly}
           onChange={(event) => onChange({ ...trigger, cronExpression: event.target.value })}
           data-test-subj="automationCronExpression"
         />
         <TimezonePicker
           timezone={trigger.timezone}
+          readOnly={readOnly}
           onChange={(timezone) => onChange({ ...trigger, timezone })}
         />
       </Sentence>

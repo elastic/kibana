@@ -8,9 +8,26 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ExecutionStatus } from '@kbn/workflows';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
+
+const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
+  if (status === ExecutionStatus.COMPLETED) return 'succeeded';
+  if (status === ExecutionStatus.SKIPPED) return 'skipped';
+  if (
+    status === ExecutionStatus.PENDING ||
+    status === ExecutionStatus.WAITING ||
+    status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.WAITING_FOR_CHILD ||
+    status === ExecutionStatus.RUNNING ||
+    status === ExecutionStatus.QUEUED
+  ) {
+    return 'running';
+  }
+  return 'failed';
+};
 
 export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/automations/{id}/runs',
@@ -62,16 +79,50 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       spaceId
     );
 
-    const runs = executions.results.map((exec) => ({
-      id: exec.id,
-      status: exec.status,
-      startedAt: exec.startedAt,
-      finishedAt: exec.finishedAt,
-      duration: exec.duration,
-      triggeredBy: exec.triggeredBy,
-      // investigation_id is available via the trigger_investigation step output.
-      // Fetching it requires a per-execution detail call; deferred to the detail endpoint.
-    }));
+    const stepExecutions = await workflowsManagement.management.searchStepExecutions(
+      {
+        workflowId: so.attributes.workflowId,
+        stepId: 'trigger_investigation',
+        workflowExecutionIds: executions.results.map(({ id }) => id),
+        includeInput: true,
+        includeOutput: true,
+        startedAfter: params.query.startedAfter,
+        startedBefore: params.query.startedBefore,
+        page: 1,
+        size: Math.max(executions.results.length, 1),
+        sourceIncludes: ['workflowRunId', 'input', 'output'],
+        request,
+      },
+      spaceId
+    );
+    const stepByRunId = new Map(stepExecutions.results.map((step) => [step.workflowRunId, step]));
+
+    const runs = executions.results.map((exec) => {
+      const step = stepByRunId.get(exec.id);
+      const input =
+        step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
+          ? step.input
+          : {};
+      const output =
+        step?.output && !Array.isArray(step.output) && typeof step.output === 'object'
+          ? step.output
+          : {};
+      const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
+
+      return {
+        id: exec.id,
+        status: mapRunStatus(exec.status),
+        startedAt: exec.startedAt,
+        finishedAt: exec.finishedAt,
+        duration: exec.duration,
+        triggeredBy: exec.triggeredBy,
+        title: getString(input['title']),
+        message: getString(input['message']),
+        investigationId: getString(output['investigation_id']),
+        skipReason: null,
+        dailyLimit: so.attributes.runtime.dailyDispatchLimit,
+      };
+    });
 
     return {
       runs,

@@ -8,6 +8,8 @@
 import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { i18n } from '@kbn/i18n';
+import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useKibana } from '../hooks/use_kibana';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
@@ -27,6 +29,7 @@ import { AutomationsToolbar } from './list/automations_toolbar';
 import { RateLimitCallout } from './list/rate_limit_callout';
 import { getDeleteConfirmTitle, listLabels } from './list/translations';
 import { toCloneRequestBody } from './utils/clone_automation';
+import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout';
 import {
   getAutomationFacets,
   isAutomationRateLimited,
@@ -34,6 +37,8 @@ import {
 } from './utils/filter_automations';
 
 export const AutomationsPage = (): React.ReactElement => {
+  const history = useHistory();
+  const { id } = useParams<{ id: string }>();
   const { services } = useKibana();
   const canManage = getNightshiftCapabilities(
     services.application.capabilities.nightshift
@@ -46,6 +51,8 @@ export const AutomationsPage = (): React.ReactElement => {
   const [automationToDelete, setAutomationToDelete] = useState<Automation | undefined>();
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
+  const detailAutomation = automations.find((automation) => automation.id === id);
+  const navigate = (path: string) => history.push(path);
   const { runRange, runTotals, usedToday } = useAutomationUsage(automations, range);
   const isRateLimited = (automation: Automation) =>
     isAutomationRateLimited(automation, usedToday.get(automation.id) ?? 0);
@@ -93,6 +100,7 @@ export const AutomationsPage = (): React.ReactElement => {
         isRateLimited={isRateLimited}
         onClone={(automation) => createAutomation.mutate(toCloneRequestBody(automation))}
         onDelete={setAutomationToDelete}
+        onOpenAutomation={(automation) => navigate(`/automations/${automation.id}`)}
       />
     );
   };
@@ -130,6 +138,35 @@ export const AutomationsPage = (): React.ReactElement => {
           tagSuggestions={options.tags.map(({ label }) => label)}
           onClose={() => setIsCreateFlyoutOpen(false)}
         />
+      )}
+      {detailAutomation && (
+        <AutomationDetailFlyout
+          key={detailAutomation.id}
+          automations={visibleAutomations}
+          automation={detailAutomation}
+          canManage={canManage}
+          usedToday={usedToday.get(detailAutomation.id) ?? 0}
+          onClose={() => navigate('/automations')}
+          onDelete={setAutomationToDelete}
+        />
+      )}
+      {id && !isInitialLoading && !detailAutomation && (
+        <EuiCallOut announceOnMount={false} color="warning" iconType="warning">
+          <p>
+            {i18n.translate('xpack.nightshift.automations.detail.notFound', {
+              defaultMessage: 'Automation not found.',
+            })}
+          </p>
+          <EuiButton
+            data-test-subj="automationUnknownIdBack"
+            size="s"
+            onClick={() => navigate('/automations')}
+          >
+            {i18n.translate('xpack.nightshift.automations.breadcrumb', {
+              defaultMessage: 'Automations',
+            })}
+          </EuiButton>
+        </EuiCallOut>
       )}
       {automationToDelete && (
         <EuiConfirmModal

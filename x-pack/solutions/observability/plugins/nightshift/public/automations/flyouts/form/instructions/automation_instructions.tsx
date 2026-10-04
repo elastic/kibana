@@ -82,11 +82,13 @@ export const AutomationInstructions = ({
   mode,
   onInstructionsChange,
   onModeChange,
+  readOnly = false,
 }: {
   instructions: string;
   mode: InstructionMode;
   onInstructionsChange: (instructions: string) => void;
   onModeChange: (mode: InstructionMode) => void;
+  readOnly?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -127,6 +129,7 @@ export const AutomationInstructions = ({
           aria-label={labels.ariaLabel}
           placeholder={current.placeholder}
           value={instructions}
+          disabled={readOnly}
           onChange={(event) => onInstructionsChange(event.target.value)}
           css={css`
             display: block;
@@ -148,77 +151,79 @@ export const AutomationInstructions = ({
           `}
           data-test-subj="automationInstructions"
         />
-        <div
-          css={css`
-            position: absolute;
-            inset-block-end: ${euiTheme.size.s};
-            inset-inline-start: ${euiTheme.size.s};
-          `}
-        >
-          <EuiPopover
-            aria-label={labels.mode}
-            isOpen={isOpen}
-            closePopover={() => setIsOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            button={
-              <EuiButton
-                size="s"
-                color={current.color}
-                iconType={current.icon}
-                onClick={() => setIsOpen((open) => !open)}
-                data-test-subj="automationInstructionMode"
-              >
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  component="span"
-                >
-                  <EuiFlexItem grow={false} component="span">
-                    {current.label}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} component="span">
-                    <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiButton>
-            }
+        {!readOnly && (
+          <div
+            css={css`
+              position: absolute;
+              inset-block-end: ${euiTheme.size.s};
+              inset-inline-start: ${euiTheme.size.s};
+            `}
           >
-            <EuiContextMenuPanel
-              css={{ inlineSize: 300 }}
-              items={(Object.keys(modes) as InstructionMode[]).map((key) => (
-                <EuiContextMenuItem
-                  key={key}
-                  icon={key === mode ? 'check' : 'empty'}
-                  layoutAlign="top"
-                  onClick={() => {
-                    onModeChange(key);
-                    setIsOpen(false);
-                  }}
-                  data-test-subj={`automationInstructionMode-${key}`}
+            <EuiPopover
+              aria-label={labels.mode}
+              isOpen={isOpen}
+              closePopover={() => setIsOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              button={
+                <EuiButton
+                  size="s"
+                  color={current.color}
+                  iconType={current.icon}
+                  onClick={() => setIsOpen((open) => !open)}
+                  data-test-subj="automationInstructionMode"
                 >
                   <EuiFlexGroup
-                    gutterSize="s"
+                    gutterSize="xs"
                     alignItems="center"
                     responsive={false}
                     component="span"
                   >
                     <EuiFlexItem grow={false} component="span">
-                      <EuiIcon type={modes[key].icon} size="s" aria-hidden={true} />
+                      {current.label}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} component="span">
-                      <strong>{modes[key].label}</strong>
+                      <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                  <EuiText size="xs" color="subdued">
-                    {modes[key].help}
-                  </EuiText>
-                </EuiContextMenuItem>
-              ))}
-            />
-          </EuiPopover>
-        </div>
+                </EuiButton>
+              }
+            >
+              <EuiContextMenuPanel
+                css={{ inlineSize: 300 }}
+                items={(Object.keys(modes) as InstructionMode[]).map((key) => (
+                  <EuiContextMenuItem
+                    key={key}
+                    icon={key === mode ? 'check' : 'empty'}
+                    layoutAlign="top"
+                    onClick={() => {
+                      onModeChange(key);
+                      setIsOpen(false);
+                    }}
+                    data-test-subj={`automationInstructionMode-${key}`}
+                  >
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      component="span"
+                    >
+                      <EuiFlexItem grow={false} component="span">
+                        <EuiIcon type={modes[key].icon} size="s" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} component="span">
+                        <strong>{modes[key].label}</strong>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiText size="xs" color="subdued">
+                      {modes[key].help}
+                    </EuiText>
+                  </EuiContextMenuItem>
+                ))}
+              />
+            </EuiPopover>
+          </div>
+        )}
       </div>
     </>
   );

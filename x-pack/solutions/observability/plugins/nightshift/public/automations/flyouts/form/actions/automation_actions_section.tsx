@@ -86,10 +86,12 @@ const SlackActionRow = ({
   action,
   onChange,
   onRemove,
+  readOnly = false,
 }: {
   action: SlackActionFormValues;
   onChange: (action: SlackActionFormValues) => void;
   onRemove: () => void;
+  readOnly?: boolean;
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false} css={useActionRowCss()}>
     <EuiFlexItem grow={false}>
@@ -101,52 +103,66 @@ const SlackActionRow = ({
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiSelect
-        data-test-subj="nightshiftSlackActionRowSelect"
-        compressed
-        aria-label={actionLabels.whereToRespond}
-        value={action.target}
-        options={[
-          { value: 'channel', text: actionLabels.channel },
-          { value: 'self', text: actionLabels.directMessage },
-        ]}
-        onChange={(event) => onChange({ ...action, target: event.target.value as SlackTarget })}
-      />
+      {readOnly ? (
+        <EuiText size="s">
+          {action.target === 'channel' ? actionLabels.channel : actionLabels.directMessage}
+        </EuiText>
+      ) : (
+        <EuiSelect
+          data-test-subj="nightshiftSlackActionRowSelect"
+          compressed
+          aria-label={actionLabels.whereToRespond}
+          value={action.target}
+          options={[
+            { value: 'channel', text: actionLabels.channel },
+            { value: 'self', text: actionLabels.directMessage },
+          ]}
+          onChange={(event) => onChange({ ...action, target: event.target.value as SlackTarget })}
+        />
+      )}
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFieldText
-        compressed
-        aria-label={
-          action.target === 'channel' ? actionLabels.searchChannels : actionLabels.searchPeople
-        }
-        placeholder={
-          action.target === 'channel' ? actionLabels.searchChannels : actionLabels.searchPeople
-        }
-        value={action.destination}
-        onChange={(event) => onChange({ ...action, destination: event.target.value })}
-        data-test-subj="automationSlackDestination"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={actionLabels.removeAction} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label={actionLabels.removeAction}
-          onClick={onRemove}
-          data-test-subj="automationRemoveSlackAction"
+      {readOnly ? (
+        <EuiText size="s">{action.destination}</EuiText>
+      ) : (
+        <EuiFieldText
+          compressed
+          aria-label={
+            action.target === 'channel' ? actionLabels.searchChannels : actionLabels.searchPeople
+          }
+          placeholder={
+            action.target === 'channel' ? actionLabels.searchChannels : actionLabels.searchPeople
+          }
+          value={action.destination}
+          onChange={(event) => onChange({ ...action, destination: event.target.value })}
+          data-test-subj="automationSlackDestination"
         />
-      </EuiToolTip>
+      )}
     </EuiFlexItem>
+    {!readOnly && (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={actionLabels.removeAction} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={actionLabels.removeAction}
+            onClick={onRemove}
+            data-test-subj="automationRemoveSlackAction"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );
 
 export const AutomationActionsSection = ({
   slackAction,
   onSlackActionChange,
+  readOnly = false,
 }: {
   slackAction?: SlackActionFormValues;
   onSlackActionChange: (action?: SlackActionFormValues) => void;
+  readOnly?: boolean;
 }) => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const rowCss = useActionRowCss();
@@ -171,15 +187,17 @@ export const AutomationActionsSection = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={actionLabels.manageSoon}>
-              <EuiButtonEmpty
-                data-test-subj="nightshiftAutomationActionsSectionButton"
-                size="xs"
-                color="text"
-              >
-                {actionLabels.manage}
-              </EuiButtonEmpty>
-            </EuiToolTip>
+            {!readOnly && (
+              <EuiToolTip content={actionLabels.manageSoon}>
+                <EuiButtonEmpty
+                  data-test-subj="nightshiftAutomationActionsSectionButton"
+                  size="xs"
+                  color="text"
+                >
+                  {actionLabels.manage}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         {slackAction && (
@@ -189,10 +207,11 @@ export const AutomationActionsSection = ({
               action={slackAction}
               onChange={onSlackActionChange}
               onRemove={() => onSlackActionChange(undefined)}
+              readOnly={readOnly}
             />
           </>
         )}
-        {!slackAction && (
+        {!slackAction && !readOnly && (
           <>
             <EuiSpacer size="s" />
             <EuiPopover

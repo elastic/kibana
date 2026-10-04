@@ -17,9 +17,11 @@ import { triggerLabels, slackTriggerLeads } from '../translations';
 export const SlackTriggerEditor = ({
   trigger,
   onChange,
+  readOnly = false,
 }: {
   trigger: SlackTriggerFormValues;
   onChange: (trigger: TriggerFormValues) => void;
+  readOnly?: boolean;
 }) => (
   <Sentence>
     <EuiIcon type="logoSlack" aria-hidden={true} />
@@ -36,28 +38,32 @@ export const SlackTriggerEditor = ({
       values={trigger.channels}
       onChange={(channels) => onChange({ ...trigger, channels })}
       testSubject="automationSlackTriggerChannels"
+      readOnly={readOnly}
     />
-    {trigger.kind === 'slack_message' && (
-      <PillPopover
-        ariaLabel={triggerLabels.anyMessage}
-        label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
-        testSubject="automationSlackTriggerMessage"
-      >
-        {() => (
-          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
-            <EuiFieldText
-              compressed
-              autoFocus
-              aria-label={triggerLabels.anyMessage}
-              placeholder={triggerLabels.messageContains}
-              value={trigger.messageFilter}
-              onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
-              data-test-subj="automationSlackTriggerMessageInput"
-            />
-          </EuiPanel>
-        )}
-      </PillPopover>
-    )}
+    {trigger.kind === 'slack_message' &&
+      (readOnly ? (
+        <EuiText size="s">{trigger.messageFilter || triggerLabels.anyMessage}</EuiText>
+      ) : (
+        <PillPopover
+          ariaLabel={triggerLabels.anyMessage}
+          label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
+          testSubject="automationSlackTriggerMessage"
+        >
+          {() => (
+            <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+              <EuiFieldText
+                compressed
+                autoFocus
+                aria-label={triggerLabels.anyMessage}
+                placeholder={triggerLabels.messageContains}
+                value={trigger.messageFilter}
+                onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
+                data-test-subj="automationSlackTriggerMessageInput"
+              />
+            </EuiPanel>
+          )}
+        </PillPopover>
+      ))}
     <EuiText size="s">
       {trigger.kind === 'slack_message' ? triggerLabels.from : triggerLabels.slackBy}
     </EuiText>
@@ -68,6 +74,7 @@ export const SlackTriggerEditor = ({
       values={trigger.users}
       onChange={(users) => onChange({ ...trigger, users })}
       testSubject="automationSlackTriggerUsers"
+      readOnly={readOnly}
     />
   </Sentence>
 );

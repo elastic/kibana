@@ -94,3 +94,41 @@ export const toAutomationRequestBody = (
       : {},
   };
 };
+
+export const toAutomationUpdateBody = (
+  values: AutomationFormValues & { trigger: TriggerFormValues },
+  automation: import('../../hooks/use_automations').Automation
+) => {
+  const request = toAutomationRequestBody(values);
+  return {
+    name: request.name,
+    description: request.description ?? null,
+    tags: request.tags ?? [],
+    trigger: request.trigger,
+    execution: {
+      ...automation.execution,
+      ...request.execution,
+      promptTemplate: values.instructions.trim() || null,
+    },
+    completion: {
+      ...automation.completion,
+      ...(values.slackAction
+        ? {
+            action: 'post_to_slack' as const,
+            targetMode: values.slackAction.target,
+            destination: values.slackAction.destination.trim(),
+          }
+        : {
+            action: null,
+            targetMode: null,
+            destination: null,
+          }),
+    },
+    runtime: {
+      ...automation.runtime,
+      ...(hasDailyLimit(values.trigger)
+        ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
+        : { dailyDispatchLimit: null }),
+    },
+  };
+};

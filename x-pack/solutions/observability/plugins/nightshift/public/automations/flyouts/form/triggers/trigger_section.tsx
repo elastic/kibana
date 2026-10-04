@@ -27,11 +27,13 @@ export const AutomationTriggerSection = ({
   dailyDispatchLimit,
   onTriggerChange,
   onDailyDispatchLimitChange,
+  readOnly = false,
 }: {
   trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
   onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
+  readOnly?: boolean;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
     Partial<Record<TriggerFormValues['kind'], TriggerFormValues>>
@@ -43,9 +45,11 @@ export const AutomationTriggerSection = ({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>{triggerLabels.triggers}</h3>
-      </EuiTitle>
+      {!readOnly && (
+        <EuiTitle size="xs">
+          <h3>{triggerLabels.triggers}</h3>
+        </EuiTitle>
+      )}
       <EuiSpacer size="s" />
       <EuiPanel hasBorder hasShadow={false} paddingSize={trigger ? 's' : 'm'}>
         {!trigger && (
@@ -56,17 +60,21 @@ export const AutomationTriggerSection = ({
             <EuiSpacer size="s" />
             <TriggerPicker
               onSelect={selectTrigger}
-              button={(toggle) => (
-                <EuiButtonEmpty
-                  iconType="plus"
-                  color="text"
-                  flush="left"
-                  onClick={toggle}
-                  data-test-subj="automationAddTrigger"
-                >
-                  {triggerLabels.addTrigger}
-                </EuiButtonEmpty>
-              )}
+              button={(toggle) =>
+                readOnly ? (
+                  <></>
+                ) : (
+                  <EuiButtonEmpty
+                    iconType="plus"
+                    color="text"
+                    flush="left"
+                    onClick={toggle}
+                    data-test-subj="automationAddTrigger"
+                  >
+                    {triggerLabels.addTrigger}
+                  </EuiButtonEmpty>
+                )
+              }
             />
           </>
         )}
@@ -75,18 +83,31 @@ export const AutomationTriggerSection = ({
             trigger={trigger}
             onSelect={selectTrigger}
             onRemove={() => onTriggerChange(undefined)}
+            readOnly={readOnly}
           >
             {trigger.kind === 'alert' && (
-              <AlertTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+              <AlertTriggerEditor
+                trigger={trigger}
+                onChange={onTriggerChange}
+                readOnly={readOnly}
+              />
             )}
             {trigger.kind === 'every' && (
-              <EveryTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+              <EveryTriggerEditor
+                trigger={trigger}
+                onChange={onTriggerChange}
+                readOnly={readOnly}
+              />
             )}
             {trigger.kind === 'cron' && (
-              <CronTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+              <CronTriggerEditor trigger={trigger} onChange={onTriggerChange} readOnly={readOnly} />
             )}
             {isSlackTrigger(trigger) && (
-              <SlackTriggerEditor trigger={trigger} onChange={onTriggerChange} />
+              <SlackTriggerEditor
+                trigger={trigger}
+                onChange={onTriggerChange}
+                readOnly={readOnly}
+              />
             )}
           </TriggerRow>
         )}
@@ -99,6 +120,7 @@ export const AutomationTriggerSection = ({
                 : triggerLabels.dailyLimitHelp
             }
             onChange={onDailyDispatchLimitChange}
+            readOnly={readOnly}
           />
         )}
       </EuiPanel>

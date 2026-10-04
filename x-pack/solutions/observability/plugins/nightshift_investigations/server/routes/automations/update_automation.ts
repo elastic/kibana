@@ -28,13 +28,13 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     path: z.object({ id: z.string().min(1).max(512) }),
     body: z.object({
       name: z.string().min(1).max(500).optional(),
-      description: z.string().max(5000).optional(),
+      description: z.string().max(5000).nullable().optional(),
       tags: z.array(z.string().max(32)).max(50).optional(),
       isEnabled: z.boolean().optional(),
       trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
       execution: z
         .object({
-          promptTemplate: z.string().max(50000).optional(),
+          promptTemplate: z.string().max(50000).nullable().optional(),
           reasoningMode: z.enum(['investigate', 'observe']).optional(),
           agentId: z.string().max(512).optional(),
           connectorId: z.string().max(512).optional(),
@@ -42,14 +42,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         .optional(),
       completion: z
         .object({
-          action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
-          targetMode: z.enum(['thread', 'channel', 'self']).optional(),
-          destination: z.string().max(500).optional(),
+          action: z.enum(['create_investigation', 'post_to_slack', 'silent']).nullable().optional(),
+          targetMode: z.enum(['thread', 'channel', 'self']).nullable().optional(),
+          destination: z.string().max(500).nullable().optional(),
         })
         .optional(),
       runtime: z
         .object({
-          dailyDispatchLimit: z.number().int().min(0).optional(),
+          dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
           timeoutSeconds: z.number().int().min(1).optional(),
           dedupeWindowSeconds: z.number().int().min(0).optional(),
           overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
@@ -71,24 +71,63 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id
     );
-
-    // Merge nested objects field-by-field so a partial execution/completion/runtime patch
-    // does not erase fields that were omitted from the request body.
     const merged: NightshiftAutomationAttributes = {
       ...existing.attributes,
       ...(params.body.name !== undefined && { name: params.body.name }),
-      ...(params.body.description !== undefined && { description: params.body.description }),
+      ...(params.body.description !== undefined &&
+        (params.body.description === null
+          ? { description: undefined }
+          : { description: params.body.description })),
       ...(params.body.tags !== undefined && { tags: params.body.tags }),
       ...(params.body.isEnabled !== undefined && { isEnabled: params.body.isEnabled }),
       ...(params.body.trigger !== undefined && { trigger: params.body.trigger }),
-      ...(params.body.execution !== undefined && {
-        execution: { ...existing.attributes.execution, ...params.body.execution },
+      ...(params.body.execution && {
+        execution: {
+          ...existing.attributes.execution,
+          ...(params.body.execution.promptTemplate !== undefined && {
+            promptTemplate: params.body.execution.promptTemplate ?? undefined,
+          }),
+          ...(params.body.execution.reasoningMode !== undefined && {
+            reasoningMode: params.body.execution.reasoningMode,
+          }),
+          ...(params.body.execution.agentId !== undefined && {
+            agentId: params.body.execution.agentId,
+          }),
+          ...(params.body.execution.connectorId !== undefined && {
+            connectorId: params.body.execution.connectorId,
+          }),
+        },
       }),
-      ...(params.body.completion !== undefined && {
-        completion: { ...existing.attributes.completion, ...params.body.completion },
+      ...(params.body.completion && {
+        completion: {
+          ...existing.attributes.completion,
+          ...(params.body.completion.action !== undefined && {
+            action: params.body.completion.action ?? undefined,
+          }),
+          ...(params.body.completion.targetMode !== undefined && {
+            targetMode: params.body.completion.targetMode ?? undefined,
+          }),
+          ...(params.body.completion.destination !== undefined && {
+            destination: params.body.completion.destination ?? undefined,
+          }),
+        },
       }),
-      ...(params.body.runtime !== undefined && {
-        runtime: { ...existing.attributes.runtime, ...params.body.runtime },
+      ...(params.body.runtime && {
+        runtime: {
+          ...existing.attributes.runtime,
+          ...(params.body.runtime.dailyDispatchLimit !== undefined && {
+            dailyDispatchLimit: params.body.runtime.dailyDispatchLimit ?? undefined,
+          }),
+          ...(params.body.runtime.timeoutSeconds !== undefined && {
+            timeoutSeconds: params.body.runtime.timeoutSeconds,
+          }),
+          ...(params.body.runtime.dedupeWindowSeconds !== undefined && {
+            dedupeWindowSeconds: params.body.runtime.dedupeWindowSeconds,
+          }),
+          ...(params.body.runtime.overlapPolicy !== undefined && {
+            overlapPolicy: params.body.runtime.overlapPolicy,
+          }),
+        },
       }),
       updatedAt: new Date().toISOString(),
     };
@@ -112,7 +151,8 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     await soClient.update<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id,
-      soUpdates
+      soUpdates,
+      { mergeAttributes: false }
     );
 
     return { id: params.path.id, ...merged };

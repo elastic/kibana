@@ -22,10 +22,12 @@ export const DailyLimitField = ({
   value,
   helpText,
   onChange,
+  readOnly = false,
 }: {
   value: string;
   helpText: string;
   onChange: (value: string) => void;
+  readOnly?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -43,6 +45,7 @@ export const DailyLimitField = ({
             max={200}
             step={1}
             value={value}
+            disabled={readOnly}
             isInvalid={!isValidDailyLimit(value)}
             append={triggerLabels.perDay}
             onChange={(event) => onChange(event.target.value)}

@@ -8,14 +8,9 @@
 import React, { useState } from 'react';
 import {
   EuiConfirmModal,
-  EuiFieldText,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiTextArea,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -25,10 +20,7 @@ import {
   createAutomationFormValues,
   type AutomationFormValues,
 } from '../form/automation_form_values';
-import { AutomationActionsSection } from '../form/actions/automation_actions_section';
-import { AutomationInstructions } from '../form/instructions/automation_instructions';
-import { AutomationTriggerSection } from '../form/triggers/trigger_section';
-import { AutomationTagsField, tagLabels } from '../form/tags_field';
+import { AutomationFormBody } from '../form/automation_form_body';
 import { AutomationFlyoutFooter } from './automation_flyout_footer';
 import { toAutomationRequestBody } from '../form/to_automation_request';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
@@ -119,75 +111,14 @@ export const CreateAutomationFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormRow fullWidth label={labels.name} isInvalid={isNameInvalid}>
-          <EuiFieldText
-            fullWidth
-            compressed
-            placeholder={labels.namePlaceholder}
-            value={values.name}
-            isInvalid={isNameInvalid}
-            onChange={(event) => {
-              update({ name: event.target.value });
-              setIsNameInvalid(false);
-            }}
-            data-test-subj="automationName"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={tagLabels.tags}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {labels.optional}
-            </EuiText>
-          }
-        >
-          <AutomationTagsField
-            tags={values.tags}
-            suggestions={tagSuggestions}
-            onChange={(tags) => update({ tags })}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={labels.description}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {labels.optional}
-            </EuiText>
-          }
-        >
-          <EuiTextArea
-            fullWidth
-            compressed
-            rows={1}
-            resize="none"
-            css={{ fieldSizing: 'content', minBlockSize: 0, maxBlockSize: 160 }}
-            maxLength={200}
-            placeholder={labels.descriptionPlaceholder}
-            value={values.description}
-            onChange={(event) => update({ description: event.target.value })}
-            data-test-subj="automationDescription"
-          />
-        </EuiFormRow>
-        <EuiSpacer size="l" />
-        <AutomationTriggerSection
-          trigger={values.trigger}
-          dailyDispatchLimit={values.dailyDispatchLimit}
-          onTriggerChange={(trigger) => update({ trigger })}
-          onDailyDispatchLimitChange={(dailyDispatchLimit) => update({ dailyDispatchLimit })}
-        />
-        <EuiSpacer size="l" />
-        <AutomationInstructions
-          instructions={values.instructions}
-          mode={values.mode}
-          onInstructionsChange={(instructions) => update({ instructions })}
-          onModeChange={(mode) => update({ mode })}
-        />
-        <EuiSpacer size="l" />
-        <AutomationActionsSection
-          slackAction={values.slackAction}
-          onSlackActionChange={(slackAction) => update({ slackAction })}
+        <AutomationFormBody
+          values={values}
+          tagSuggestions={tagSuggestions}
+          isNameInvalid={isNameInvalid}
+          onChange={(changes) => {
+            update(changes);
+            if ('name' in changes) setIsNameInvalid(false);
+          }}
         />
       </EuiFlyoutBody>
       <AutomationFlyoutFooter

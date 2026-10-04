@@ -67,13 +67,13 @@ export function NightshiftPage(): React.ReactElement | null {
     [application, investigationsHref]
   );
   const isInvestigationsPage =
-    pathname.startsWith('/investigations') || pathname === '/automations';
+    pathname.startsWith('/investigations') || pathname.startsWith('/automations');
   const canUseInvestigationsPage = canUseAutomations && isInvestigationsPage;
   const tabs = canUseAutomations
     ? nightshiftTabs.map((tab) => ({
         ...tab,
         isSelected:
-          tab.id === (pathname.endsWith('/automations') ? 'automations' : 'allInvestigations'),
+          tab.id === (pathname.startsWith('/automations') ? 'automations' : 'allInvestigations'),
         href: tab.id === 'automations' ? automationsHref : investigationsHref,
       }))
     : undefined;
@@ -96,6 +96,25 @@ export function NightshiftPage(): React.ReactElement | null {
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
+      ...(pathname.startsWith('/automations/')
+        ? [
+            {
+              href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' }),
+              text: i18n.translate('xpack.nightshift.automations.breadcrumb', {
+                defaultMessage: 'Automations',
+              }),
+            },
+            ...(pathname.includes('/runs')
+              ? []
+              : [
+                  {
+                    text: i18n.translate('xpack.nightshift.automations.detail.breadcrumb', {
+                      defaultMessage: 'Automation details',
+                    }),
+                  },
+                ]),
+          ]
+        : []),
     ],
     { serverless }
   );
@@ -142,6 +161,8 @@ export function NightshiftPage(): React.ReactElement | null {
       >
         {canUseInvestigationsPage ? (
           <Routes>
+            <Route path="/automations/:id/runs" component={AutomationsPage} />
+            <Route path="/automations/:id" component={AutomationsPage} />
             <Route path="/automations" component={AutomationsPage} />
             <Route path="/investigations" component={() => <div>WIP</div>} />
           </Routes>

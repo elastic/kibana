@@ -12,10 +12,14 @@ export const TimeField = ({
   label,
   value,
   onChange,
+  disabled = false,
+  readOnly = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
+  readOnly?: boolean;
 }) => (
   <EuiFieldText
     data-test-subj="nightshiftTimeFieldFieldText"
@@ -23,6 +27,8 @@ export const TimeField = ({
     compressed
     aria-label={label}
     value={value}
+    disabled={disabled}
+    readOnly={readOnly}
     onChange={(event) => event.target.value && onChange(event.target.value)}
   />
 );

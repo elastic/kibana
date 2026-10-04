@@ -8,6 +8,8 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
 import { AutomationsPage } from './automations_page';
 import {
   useAutomationRunsInRange,
@@ -17,6 +19,7 @@ import {
   useDeleteAutomation,
   useFetchAutomations,
   useToggleAutomation,
+  useUpdateAutomation,
 } from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
 import type { Automation } from './hooks/use_automations';
@@ -30,6 +33,7 @@ jest.mock('./hooks/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
   useToggleAutomation: jest.fn(),
+  useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
@@ -60,14 +64,26 @@ describe('AutomationsPage', () => {
     mockUseCurrentUsername.mockReturnValue('Daniel Hughes');
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseToggleAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
+    (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
   });
 
-  it('shows the empty state and create action when no automations exist', () => {
-    render(
+  const renderPage = (initialPath = '/automations') => {
+    const history = createMemoryHistory({ initialEntries: [initialPath] });
+    return render(
       <I18nProvider>
-        <AutomationsPage />
+        <Router history={history}>
+          <>
+            <Route path="/automations/:id/runs" component={AutomationsPage} />
+            <Route path="/automations/:id" component={AutomationsPage} />
+            <Route path="/automations" component={AutomationsPage} />
+          </>
+        </Router>
       </I18nProvider>
     );
+  };
+
+  it('shows the empty state and create action when no automations exist', () => {
+    renderPage();
 
     expect(screen.getByText('Automations run on triggers you define')).toBeInTheDocument();
     expect(screen.queryByTestId('automationsSearch')).not.toBeInTheDocument();
@@ -100,11 +116,7 @@ describe('AutomationsPage', () => {
       isInitialLoading: false,
     });
 
-    render(
-      <I18nProvider>
-        <AutomationsPage />
-      </I18nProvider>
-    );
+    renderPage();
 
     fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'weekly' } });
     expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
@@ -123,11 +135,7 @@ describe('AutomationsPage', () => {
       refetch,
     });
 
-    render(
-      <I18nProvider>
-        <AutomationsPage />
-      </I18nProvider>
-    );
+    renderPage();
 
     expect(screen.getByText('Failed to load automations')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
@@ -176,12 +184,6 @@ describe('AutomationsPage', () => {
     const deleteMutate = jest.fn();
     const toggleMutate = jest.fn();
 
-    const renderPage = () =>
-      render(
-        <I18nProvider>
-          <AutomationsPage />
-        </I18nProvider>
-      );
     const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
 
     beforeEach(() => {
@@ -257,7 +259,7 @@ describe('AutomationsPage', () => {
 
       fireEvent.click(screen.getByTestId('automationActions-report'));
       fireEvent.click(await screen.findByTestId('deleteAutomation'));
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
     });
@@ -268,6 +270,16 @@ describe('AutomationsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Create automation' }));
 
       expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
+    });
+
+    it('opens a detail flyout and returns to the list with router navigation', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
+
+      expect(screen.getByTestId('automationDetailFlyout')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('automationCloseButton'));
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
     });
 
     it('filters by status with counts and clears the selection', async () => {
@@ -286,11 +298,13 @@ describe('AutomationsPage', () => {
       ).not.toBeInTheDocument();
 
       fireEvent.click(activeOption);
-      expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftAutomationFilterClearSelection'));
-      expect(screen.getByText('Daily report')).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('nightshiftAutomationName').map(({ textContent }) => textContent)
+      ).toContain('Daily report');
     });
 
     it('filters rate limited automations from the banner', () => {
@@ -301,7 +315,7 @@ describe('AutomationsPage', () => {
       );
       fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
 
-      expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
     });
 
@@ -317,7 +331,7 @@ describe('AutomationsPage', () => {
       fireEvent.click(screen.getByRole('option', { name: /Scheduled/ }));
 
       expect(screen.queryByText('Triage incoming alerts')).not.toBeInTheDocument();
-      expect(screen.getByText('Daily report')).toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftAutomationName')).toHaveTextContent('Daily report');
     });
 
     it('hides management actions for read-only users', () => {

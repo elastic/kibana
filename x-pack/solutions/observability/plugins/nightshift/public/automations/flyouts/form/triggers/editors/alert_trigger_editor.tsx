@@ -25,13 +25,23 @@ const ALERT_STATUSES = ['active', 'inactive'] as const;
 const AlertStatusPicker = ({
   status,
   onChange,
+  readOnly = false,
 }: {
   status: AlertStatus;
   onChange: (status: AlertStatus) => void;
+  readOnly?: boolean;
 }) => {
   const statusLabels = { active: triggerLabels.active, inactive: triggerLabels.recovered };
   const statusHelp = { active: triggerLabels.activeHelp, inactive: triggerLabels.recoveredHelp };
   const selected = status === 'any' ? [] : [status];
+
+  if (readOnly) {
+    return (
+      <EuiText size="s">
+        {status === 'any' ? triggerLabels.anyStatus : statusLabels[status]}
+      </EuiText>
+    );
+  }
 
   return (
     <PillPopover
@@ -72,9 +82,11 @@ const AlertStatusPicker = ({
 export const AlertTriggerEditor = ({
   trigger,
   onChange,
+  readOnly = false,
 }: {
   trigger: Extract<TriggerFormValues, { kind: 'alert' }>;
   onChange: (trigger: TriggerFormValues) => void;
+  readOnly?: boolean;
 }) => {
   return (
     <Sentence>
@@ -83,44 +95,54 @@ export const AlertTriggerEditor = ({
         <strong>{triggerLabels.whenAnAlert}</strong>
       </EuiText>
       <EuiText size="s">{triggerLabels.from}</EuiText>
-      <PillPopover
-        ariaLabel={triggerLabels.anyRule}
-        label={
-          [trigger.ruleNamePattern.trim(), ...trigger.ruleTags].filter(Boolean).join(', ') ||
-          triggerLabels.anyRule
-        }
-        testSubject="automationRulePicker"
-      >
-        {() => (
-          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
-            <EuiFormRow label={triggerLabels.ruleName} helpText={triggerLabels.ruleNameHelp}>
-              <EuiFieldText
-                compressed
-                value={trigger.ruleNamePattern}
-                onChange={(event) => onChange({ ...trigger, ruleNamePattern: event.target.value })}
-                data-test-subj="automationRuleNamePattern"
-              />
-            </EuiFormRow>
-            <EuiFormRow label={triggerLabels.tags}>
-              <EuiComboBox
-                compressed
-                noSuggestions
-                selectedOptions={trigger.ruleTags.map((tag) => ({ label: tag }))}
-                onCreateOption={(tag) =>
-                  onChange({ ...trigger, ruleTags: [...new Set([...trigger.ruleTags, tag])] })
-                }
-                onChange={(options) =>
-                  onChange({ ...trigger, ruleTags: options.map(({ label }) => label) })
-                }
-              />
-            </EuiFormRow>
-          </EuiPanel>
-        )}
-      </PillPopover>
+      {readOnly ? (
+        <EuiText size="s">
+          {[trigger.ruleNamePattern, ...trigger.ruleTags].filter(Boolean).join(', ') ||
+            triggerLabels.anyRule}
+        </EuiText>
+      ) : (
+        <PillPopover
+          ariaLabel={triggerLabels.anyRule}
+          label={
+            [trigger.ruleNamePattern.trim(), ...trigger.ruleTags].filter(Boolean).join(', ') ||
+            triggerLabels.anyRule
+          }
+          testSubject="automationRulePicker"
+        >
+          {() => (
+            <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+              <EuiFormRow label={triggerLabels.ruleName} helpText={triggerLabels.ruleNameHelp}>
+                <EuiFieldText
+                  compressed
+                  value={trigger.ruleNamePattern}
+                  onChange={(event) =>
+                    onChange({ ...trigger, ruleNamePattern: event.target.value })
+                  }
+                  data-test-subj="automationRuleNamePattern"
+                />
+              </EuiFormRow>
+              <EuiFormRow label={triggerLabels.tags}>
+                <EuiComboBox
+                  compressed
+                  noSuggestions
+                  selectedOptions={trigger.ruleTags.map((tag) => ({ label: tag }))}
+                  onCreateOption={(tag) =>
+                    onChange({ ...trigger, ruleTags: [...new Set([...trigger.ruleTags, tag])] })
+                  }
+                  onChange={(options) =>
+                    onChange({ ...trigger, ruleTags: options.map(({ label }) => label) })
+                  }
+                />
+              </EuiFormRow>
+            </EuiPanel>
+          )}
+        </PillPopover>
+      )}
       <EuiText size="s">{triggerLabels.changesTo}</EuiText>
       <AlertStatusPicker
         status={trigger.alertStatus}
         onChange={(alertStatus) => onChange({ ...trigger, alertStatus })}
+        readOnly={readOnly}
       />
     </Sentence>
   );

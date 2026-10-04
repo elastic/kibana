@@ -257,6 +257,17 @@ describe('NightshiftPage', () => {
       );
     });
 
+    it('keeps the automations page mounted for a detail route', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/automations/automation-1');
+
+      expect(await screen.findByTestId('nightshiftTabAutomations')).toHaveAttribute(
+        'href',
+        '/app/nightshift/automations'
+      );
+      expect(screen.getByTestId('automationsPageStub')).toBeInTheDocument();
+    });
+
     it('shows Settings instead of Investigations inside the investigations pages', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       mockUseKibana.mockReturnValue({

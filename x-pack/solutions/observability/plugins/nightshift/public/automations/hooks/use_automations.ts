@@ -190,6 +190,34 @@ export const useToggleAutomation = () => {
   }, errorToastTitles.update);
 };
 
+export const useUpdateAutomation = () => {
+  const { nightshiftInvestigations, notifications } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+
+  return useAutomationMutation<{
+    id: string;
+    body: Record<string, unknown> & { name: string };
+  }>(
+    ({ id, body }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('PUT /internal/nightshift/automations/{id}', {
+        params: { path: { id }, body },
+        signal: null,
+      });
+    },
+    errorToastTitles.update,
+    ({ body }) =>
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.updateSuccess', {
+          defaultMessage: 'Automation "{name}" updated',
+          values: { name: body.name },
+        }),
+      })
+  );
+};
+
 export const useDeleteAutomation = () => {
   const { nightshiftInvestigations } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;

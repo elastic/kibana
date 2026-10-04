@@ -56,7 +56,8 @@ it('replaces tags and keeps the other attributes', async () => {
   expect(soClient.update).toHaveBeenCalledWith(
     'nightshift-automation',
     'automation-1',
-    expect.objectContaining({ tags: ['triage'], name: 'Triage', isEnabled: true })
+    expect.objectContaining({ tags: ['triage'], name: 'Triage', isEnabled: true }),
+    { mergeAttributes: false }
   );
   expect(result).toMatchObject({ id: 'automation-1', tags: ['triage'] });
 });
@@ -69,6 +70,28 @@ it('merges partial nested updates', async () => {
     isEnabled: false,
     execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
   });
+});
+
+it('clears managed nested values when the request sends null', async () => {
+  const result = await call({
+    description: null,
+    execution: { promptTemplate: null },
+    completion: { action: null, targetMode: null, destination: null },
+    runtime: { dailyDispatchLimit: null },
+  });
+
+  expect(result).toMatchObject({
+    execution: {},
+    completion: {},
+    runtime: {},
+  });
+  expect(result.description).toBeUndefined();
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ execution: {}, completion: {}, runtime: {} }),
+    { mergeAttributes: false }
+  );
 });
 
 describe('request validation', () => {

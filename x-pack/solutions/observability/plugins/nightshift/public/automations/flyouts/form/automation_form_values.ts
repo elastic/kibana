@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Automation } from '../../hooks/use_automations';
+
 export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
@@ -16,6 +18,12 @@ export const SLACK_TRIGGER_EVENTS = {
   slack_invite: 'invite',
 } as const;
 export type SlackTriggerKind = keyof typeof SLACK_TRIGGER_EVENTS;
+
+const SLACK_EVENT_TO_FORM_KIND = {
+  message: 'slack_message',
+  mention: 'slack_mention',
+  invite: 'slack_invite',
+} as const;
 
 export const isSlackTriggerKind = (kind: string): kind is SlackTriggerKind =>
   kind in SLACK_TRIGGER_EVENTS;
@@ -99,3 +107,65 @@ export const createAutomationFormValues = (): AutomationFormValues => ({
   slackAction: undefined,
   isEnabled: false,
 });
+
+export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
+  const row = automation.trigger.rows[0];
+  const schedule = row?.kind === 'schedule' ? row : undefined;
+  const cronFields = schedule?.cronExpression?.split(' ') ?? [];
+  const isHourly = schedule?.schedulePreset === 'hourly';
+  const isWeekly = schedule?.schedulePreset === 'weekly';
+  const trigger: TriggerFormValues | undefined =
+    row?.kind === 'alert'
+      ? {
+          kind: 'alert',
+          ruleNamePattern: row.ruleNamePattern ?? '',
+          ruleTags: row.tags ?? [],
+          alertStatus: row.alertStatus ?? 'any',
+        }
+      : row?.kind === 'slack'
+      ? {
+          kind: SLACK_EVENT_TO_FORM_KIND[row.event],
+          channels: row.channels ?? [],
+          users: row.users ?? [],
+          messageFilter: row.messageFilter ?? '',
+        }
+      : schedule
+      ? isHourly || schedule.schedulePreset === 'daily' || isWeekly
+        ? {
+            kind: 'every',
+            unit: isHourly ? 'hour' : isWeekly ? 'week' : 'day',
+            time: `${(cronFields[1] ?? '9').padStart(2, '0')}:${(cronFields[0] ?? '0').padStart(
+              2,
+              '0'
+            )}`,
+            daysOfWeek: (cronFields[4] ?? '1,2,3,4,5').split(',').map(Number),
+            betweenHours: isHourly && cronFields[1] !== '*',
+            startTime: `${(cronFields[1]?.split('-')[0] ?? '9').padStart(2, '0')}:00`,
+            endTime: `${(cronFields[1]?.split('-')[1] ?? '17').padStart(2, '0')}:00`,
+            timezone: schedule.timezone ?? DEFAULT_TIMEZONE,
+          }
+        : {
+            kind: 'cron',
+            cronExpression: schedule.cronExpression ?? DEFAULT_CRON,
+            timezone: schedule.timezone ?? DEFAULT_TIMEZONE,
+          }
+      : undefined;
+
+  return {
+    name: automation.name,
+    tags: automation.tags ?? [],
+    description: automation.description ?? '',
+    trigger,
+    dailyDispatchLimit: String(automation.runtime.dailyDispatchLimit ?? 20),
+    instructions: automation.execution.promptTemplate ?? '',
+    mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
+    slackAction:
+      automation.completion.action === 'post_to_slack'
+        ? {
+            target: automation.completion.targetMode === 'self' ? 'self' : 'channel',
+            destination: automation.completion.destination ?? '',
+          }
+        : undefined,
+    isEnabled: automation.isEnabled,
+  };
+};

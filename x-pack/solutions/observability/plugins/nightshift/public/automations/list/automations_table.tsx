@@ -18,8 +18,6 @@ import { AutomationRunsCell } from './cells/runs_cell';
 import { AutomationUsageCell } from './cells/usage_cell';
 import { listLabels } from './translations';
 
-const openAutomation = () => {};
-
 export const AutomationsTable = ({
   automations,
   canManage,
@@ -30,6 +28,7 @@ export const AutomationsTable = ({
   isRateLimited,
   onClone,
   onDelete,
+  onOpenAutomation,
 }: {
   automations: Automation[];
   canManage: boolean;
@@ -40,6 +39,7 @@ export const AutomationsTable = ({
   isRateLimited: (automation: Automation) => boolean;
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
+  onOpenAutomation: (automation: Automation) => void;
 }) => {
   const toggleAutomation = useToggleAutomation();
   const getAuthorName = (automation: Automation) => getFacets(automation).author;
@@ -53,7 +53,7 @@ export const AutomationsTable = ({
         <AutomationNameCell
           automation={automation}
           isRateLimited={isRateLimited(automation)}
-          onOpen={openAutomation}
+          onOpen={() => onOpenAutomation(automation)}
         />
       ),
     },
@@ -132,7 +132,7 @@ export const AutomationsTable = ({
       tableCaption={listLabels.title}
       tableLayout="auto"
       hasBackground={false}
-      rowProps={{ onClick: openAutomation }}
+      rowProps={(automation: Automation) => ({ onClick: () => onOpenAutomation(automation) })}
     />
   );
 };
