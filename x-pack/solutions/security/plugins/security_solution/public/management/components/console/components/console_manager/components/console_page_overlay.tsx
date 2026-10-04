@@ -8,7 +8,7 @@
 import type { ReactNode, MouseEventHandler } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PageLayoutProps } from './page_layout';
 import { PageLayout } from './page_layout';
@@ -40,6 +40,10 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
   ({ console, onHide, isHidden, body, actions, pageTitle = '', showCloseButton = false }) => {
     const getTestId = useTestIdGenerator('consolePageOverlay');
 
+    // The overlay is exposed as a modal dialog, so it needs an accessible name. We point it at the
+    // element that renders the visible page title (eg. "Response console") so the two can't drift.
+    const titleId = useGeneratedHtmlId({ prefix: 'consolePageOverlayTitle' });
+
     // When the new flyout system is enabled, slot the overlay into EUI's shared flyout z-index
     // sequence so it renders above whatever flyout it was opened from, and below anything opened on
     // top of it (eg the response actions history flyout). Returns `undefined` for the legacy
@@ -64,6 +68,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
 
       return {
         pageTitle,
+        pageTitleId: titleId,
         pageBody: body,
         headerHasBottomBorder: false,
         'data-test-subj': getTestId('layout'),
@@ -97,7 +102,16 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
             ]
           : [...(actions ?? [])],
       };
-    }, [actions, body, getTestId, handleCloseOverlayOnClick, isHidden, pageTitle, showCloseButton]);
+    }, [
+      actions,
+      body,
+      getTestId,
+      handleCloseOverlayOnClick,
+      isHidden,
+      pageTitle,
+      showCloseButton,
+      titleId,
+    ]);
 
     return (
       <PageOverlay
@@ -107,6 +121,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         paddingSize="l"
         enableScrolling={false}
         zIndex={dynamicZIndex}
+        aria-labelledby={isHidden ? undefined : titleId}
       >
         <PageLayout {...layoutProps}>{console}</PageLayout>
       </PageOverlay>

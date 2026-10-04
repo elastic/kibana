@@ -272,6 +272,17 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.getByTestId('testRunningConsole')).toBeTruthy();
     });
 
+    it('should name the page overlay dialog using the visible page title', async () => {
+      await render();
+
+      const overlay = renderResult.getByTestId('consolePageOverlay');
+      const title = renderResult.getByTestId('consolePageOverlay-layout-titleHolder');
+
+      expect(overlay.getAttribute('role')).toEqual('dialog');
+      expect(title.id).toBeTruthy();
+      expect(overlay.getAttribute('aria-labelledby')).toEqual(title.id);
+    });
+
     it('should not show `Done` button', async () => {
       await render();
 
