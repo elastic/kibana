@@ -3284,6 +3284,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analy
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/http @elastic/workflows-eng
 /src/platform/packages/shared/kbn-connector-schemas/http @elastic/workflows-eng
 
+# Workflows Scout config sets
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/uiam_task_api_keys @elastic/workflows-eng
+
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-threat-hunting
 
