@@ -8,7 +8,36 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+import type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+  WorkflowsExtensionsExperimentalStepsInputConfig,
+} from '../common/experimental_steps_config';
+import { resolveExperimentalStepsConfig } from '../common/experimental_steps_config';
 
-export const config = {
-  schema: schema.object({}, { defaultValue: {} }),
+export type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+  WorkflowsExtensionsExperimentalStepsInputConfig,
+};
+export { resolveExperimentalStepsConfig };
+
+const experimentalStepsSchema = schema.object({
+  javaScriptStep: schema.boolean({ defaultValue: false }),
+});
+
+const experimentalStepsInputSchema = schema.oneOf([schema.boolean(), experimentalStepsSchema], {
+  defaultValue: false,
+});
+
+const configSchema = schema.object({
+  experimentalSteps: experimentalStepsInputSchema,
+});
+
+export const config: PluginConfigDescriptor<WorkflowsExtensionsConfig> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    experimentalSteps: true,
+  },
 };

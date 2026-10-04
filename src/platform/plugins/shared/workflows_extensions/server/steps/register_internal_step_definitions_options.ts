@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './javascript';
+import type { WorkflowsExtensionsExperimentalStepsConfig } from '../../common/experimental_steps_config';
+
+export interface RegisterInternalStepDefinitionsOptions {
+  experimentalSteps: WorkflowsExtensionsExperimentalStepsConfig;
+}
