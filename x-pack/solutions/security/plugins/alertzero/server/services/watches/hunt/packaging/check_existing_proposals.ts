@@ -8,22 +8,23 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
-import type { HasExistingProposals } from './run_package_report';
+import type { CountExistingProposals } from './run_package_report';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
- * Implements {@link HasExistingProposals} -- see that type's own doc comment for the invariant
- * this backs (any status counts, including settled). `excludeSuperseded` /
- * `excludeExpired` are passed explicit `false` here rather than left to the schema's own default,
- * which is how "any status" is actually achieved. Scoped by `origin` so another solution's
- * Proposal on the same conversation, however unlikely, never false-positives the guard.
+ * Implements {@link CountExistingProposals} -- see that type's own doc comment for the invariants
+ * this backs (any status counts, including settled; also the settlement barrier's baseline).
+ * `excludeSuperseded` / `excludeExpired` are passed explicit `false` here rather than left to the
+ * schema's own default, which is how "any status" is actually achieved. Scoped by `origin` so
+ * another solution's Proposal on the same conversation, however unlikely, never false-positives
+ * the guard.
  *
  * Logs and rethrows on a lookup failure rather than swallowing it: the caller
  * (`run_package_report.ts`) is what decides to fail closed, and separately records that the skip
  * was because the check itself failed, not because Proposals were actually found.
  */
-export const createExistingProposalsChecker = ({
+export const createExistingProposalsCounter = ({
   proposalsService,
   spaceId,
   request,
@@ -33,7 +34,7 @@ export const createExistingProposalsChecker = ({
   spaceId: string;
   request: KibanaRequest;
   logger?: Logger;
-}): HasExistingProposals => {
+}): CountExistingProposals => {
   return async (conversationId) => {
     try {
       const { total } = await proposalsService.list(
@@ -48,7 +49,7 @@ export const createExistingProposalsChecker = ({
         spaceId,
         request
       );
-      return total > 0;
+      return total;
     } catch (err) {
       logger?.warn(
         `package_report: could not check for existing proposals on ${conversationId}: ${
