@@ -7,6 +7,7 @@
 
 import type { RefObject } from 'react';
 import DOMPurify from 'dompurify';
+import { SUPPORTED_PDF_MIME_TYPE } from '@kbn/agent-builder-common/attachments';
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
@@ -74,8 +75,17 @@ const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts
   const { onPasteFile, onChange } = opts;
   if (!onPasteFile || !event.clipboardData) return false;
 
+  // POC: remove
+  // eslint-disable-next-line no-console
+  console.log(
+    '[pdf-poc] paste items',
+    Array.from(event.clipboardData.items).map((i) => `${i.kind}:${i.type}`)
+  );
+
   const imageItem = Array.from(event.clipboardData.items).find(
-    (item) => item.kind === 'file' && item.type.startsWith('image/')
+    (item) =>
+      item.kind === 'file' &&
+      (item.type.startsWith('image/') || item.type === SUPPORTED_PDF_MIME_TYPE)
   );
   if (!imageItem) return false;
 

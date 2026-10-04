@@ -7,6 +7,8 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
@@ -16,6 +18,7 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
+import { createPdfAttachmentType } from './pdf';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -36,6 +39,11 @@ export const registerAttachmentTypes = ({
     return startDeps.files;
   };
 
+  const getEsClient = async (request: KibanaRequest): Promise<ElasticsearchClient> => {
+    const [core] = await coreSetup.getStartServices();
+    return core.elasticsearch.client.asScoped(request).asCurrentUser;
+  };
+
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
@@ -45,6 +53,7 @@ export const registerAttachmentTypes = ({
     createConnectorSetupAttachmentType(),
     createSkillAttachmentType(),
     createImageAttachmentType({ getFilesPlugin }),
+    createPdfAttachmentType({ getEsClient, getFilesPlugin }),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

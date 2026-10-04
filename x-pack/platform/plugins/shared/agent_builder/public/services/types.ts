@@ -29,6 +29,8 @@ import type { SpaceSettingsService } from './space_settings';
 
 export interface AgentBuilderInternalService {
   filesClient: ScopedFilesClient;
+  // POC: optional so storybook mocks don't need it
+  pdfFilesClient?: ScopedFilesClient;
   agentService: AgentService;
   attachmentsService: AttachmentsService;
   renderersService: RenderersService;
