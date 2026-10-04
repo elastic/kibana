@@ -516,7 +516,12 @@ export function registerInternalToolsRoutes({
 
       const filteredConnectors = allConnectors
         .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
-        .filter((connector) => (type ? connector.actionTypeId === type : true));
+        .filter((connector) => (type ? connector.actionTypeId === type : true))
+        // The MCP v1 connector cannot be used as an agent tool; only surface it when
+        // explicitly requested by type (e.g. the MCP server management UI).
+        .filter(
+          (connector) => type === MCP_CONNECTOR_ID || connector.actionTypeId !== MCP_CONNECTOR_ID
+        );
 
       // Check OAuth authorization status for per-user connectors.
       // Batch query user_connector_token saved objects to determine which
