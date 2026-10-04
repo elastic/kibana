@@ -228,6 +228,38 @@ describe('findUserActionsRoute', () => {
     );
   });
 
+  it('projects comment user action payloads to the unified shape', async () => {
+    const casesClientMock = {
+      userActions: {
+        find: jest.fn().mockResolvedValue(userActionsMockData),
+      },
+      attachments: {
+        bulkGet: jest.fn().mockResolvedValue(attachmentsMockData),
+      },
+    };
+    const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+    const request = {
+      params: { case_id: 'my_fake_case_id' },
+      query: {},
+    };
+    const logger = { warn: jest.fn() };
+
+    // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
+    await findUserActionsRoute.handler({ context, request, response, logger });
+
+    const { body } = response.ok.mock.calls[0][0];
+
+    // legacy `{ comment, type: 'user' }` becomes unified `{ type: 'comment', data: { content } }`
+    expect(body.userActions[1].payload.comment).toEqual({
+      type: 'comment',
+      data: { content: 'First comment' },
+      owner: 'cases',
+    });
+    // non-comment user actions pass through unchanged
+    expect(body.userActions[0].payload).toEqual(userActionsMockData.userActions[0].payload);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   describe('query param decoding', () => {
     const casesClientMock = () => ({
       userActions: {

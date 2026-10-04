@@ -192,11 +192,14 @@ export class UserActionFinder {
   }
 
   private static buildActionFilter(): KueryNode | undefined {
-    const filterForUserActionsExcludingComments = fromKueryExpression(
-      `not (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE})`
+    // History excludes only comment *creations* (those live under the Comments
+    // filter). Comment edits and deletions are historical events, so they belong
+    // here — keeping All = Comments + History.
+    const filterForUserActionsExcludingCommentCreations = fromKueryExpression(
+      `not ((${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE}) and ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action: ${UserActionActions.create})`
     );
 
-    return filterForUserActionsExcludingComments;
+    return filterForUserActionsExcludingCommentCreations;
   }
 
   private static buildCommentTypeFilter(): KueryNode | undefined {

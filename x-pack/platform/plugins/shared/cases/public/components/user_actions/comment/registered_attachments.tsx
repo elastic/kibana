@@ -8,6 +8,7 @@
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
+import type { EuiCommentProps } from '@elastic/eui';
 import { EuiCode, EuiLoadingSpinner } from '@elastic/eui';
 
 import type {
@@ -41,6 +42,7 @@ type BuilderArgs<C, R> = Pick<
   attachment: SnakeToCamelCase<C>;
   registry: R;
   isLoading: boolean;
+  isDeleted?: boolean;
   getId: () => string;
   getAttachmentViewProps: () => object;
 };
@@ -88,6 +90,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
   caseData,
   permissions,
   isLoading,
+  isDeleted = false,
   getId,
   getAttachmentViewProps,
   handleDeleteComment,
@@ -140,22 +143,32 @@ export const createRegisteredAttachmentUserActionBuilder = <
     const className =
       creationActivity.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
 
+    const row: EuiCommentProps = {
+      username: (
+        <HoverableUserWithAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
+      ),
+      className,
+      css: creationActivity.css,
+      event: withActionSourceEvent(creationActivity.event, userAction.source),
+      eventColor: creationActivity.eventColor,
+      'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
+      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+      timelineAvatar: attachmentType.getIcon(props),
+      timelineAvatarAriaLabel: attachmentType.getLabel(),
+    };
+
+    // When the saved object is gone, the row stands in from the immutable user
+    // action payload as an event-only marker: it keeps the "added …" event but
+    // does not resurrect the body/widget (so a deleted comment's text is not
+    // shown) and carries no toolbar (nothing to act on). See #19036.
+    if (isDeleted) {
+      return [row];
+    }
+
     return [
       {
-        username: (
-          <HoverableUserWithAvatarResolver
-            user={attachment.createdBy}
-            userProfiles={userProfiles}
-          />
-        ),
-        className,
-        css: creationActivity.css,
-        event: withActionSourceEvent(creationActivity.event, userAction.source),
-        eventColor: creationActivity.eventColor,
-        'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
-        timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineAvatar: attachmentType.getIcon(props),
-        timelineAvatarAriaLabel: attachmentType.getLabel(),
+        ...row,
+        children: renderer(creationActivity, props),
         actions: (
           <UserActionContentToolbar id={attachment.id}>
             {visiblePrimaryActions.map((action) =>
@@ -169,7 +182,6 @@ export const createRegisteredAttachmentUserActionBuilder = <
             />
           </UserActionContentToolbar>
         ),
-        children: renderer(creationActivity, props),
       },
     ];
   },

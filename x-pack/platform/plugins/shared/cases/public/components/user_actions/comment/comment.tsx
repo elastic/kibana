@@ -121,6 +121,7 @@ const getCreateCommentUserAction = ({
   unifiedAttachmentTypeRegistry,
   permissions,
   attachment,
+  isDeleted,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
@@ -129,6 +130,7 @@ const getCreateCommentUserAction = ({
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
+  isDeleted: boolean;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
@@ -156,6 +158,7 @@ const getCreateCommentUserAction = ({
       permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
+      isDeleted,
       handleDeleteComment,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
@@ -169,6 +172,29 @@ const getCreateCommentUserAction = ({
 
   return [];
 };
+
+/**
+ * Stands in for a deleted attachment saved object so the create row still renders
+ * through the normal live-attachment path instead of being dropped. The user action
+ * payload is the original create request, so it already has everything the
+ * registered type needs (`data`, `attachmentId`, `metadata`) — only the saved-object
+ * bookkeeping fields are missing and are filled in from the user action itself.
+ * See #19036.
+ */
+const buildAttachmentFromPayload = (
+  userAction: SnakeToCamelCase<CommentUserAction>
+): AttachmentUIV2 =>
+  ({
+    ...userAction.payload.comment,
+    id: userAction.commentId ?? userAction.id,
+    createdAt: userAction.createdAt,
+    createdBy: userAction.createdBy,
+    pushedAt: null,
+    pushedBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    version: '',
+  } as AttachmentUIV2);
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
@@ -200,13 +226,15 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const attachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
-
-    if (attachment == null) {
-      return [];
-    }
     if (attachmentUserAction.action === UserActionActions.create) {
-      const commentAction = getCreateCommentUserAction({
+      // If the attachment saved object is gone, un-hide the row by standing in
+      // with the payload and render it read-only (no edit/delete/view on a
+      // deleted saved object) — see #19036.
+      const liveAttachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
+      const isDeleted = liveAttachment == null;
+      const attachment = liveAttachment ?? buildAttachmentFromPayload(attachmentUserAction);
+
+      return getCreateCommentUserAction({
         appId,
         caseData,
         casesConfiguration,
@@ -215,6 +243,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         unifiedAttachmentTypeRegistry,
         permissions,
         attachment,
+        isDeleted,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         loadingCommentIds,
@@ -223,10 +252,10 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseConnectors,
         attachments,
       });
-
-      return commentAction;
     }
 
+    // `update` (edited comment) does not need the live attachment: the payload
+    // is self-contained, so this must not be gated on the SO still existing.
     const label = getUpdateLabelTitle();
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,

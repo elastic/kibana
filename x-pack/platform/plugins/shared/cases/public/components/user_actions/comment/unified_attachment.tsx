@@ -27,6 +27,7 @@ type BuilderArgs = Pick<
 > & {
   attachment: SnakeToCamelCase<UnifiedAttachment>;
   isLoading: boolean;
+  isDeleted?: boolean;
 };
 
 export const createUnifiedAttachmentUserActionBuilder = ({
@@ -37,6 +38,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
   permissions,
   caseData,
   isLoading,
+  isDeleted,
   handleDeleteComment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -53,6 +55,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     caseData,
     handleDeleteComment,
     isLoading,
+    isDeleted,
     getId: () =>
       toUnifiedAttachmentType(
         attachment.type,

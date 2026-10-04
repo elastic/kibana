@@ -39,7 +39,11 @@ export const useLastPage = ({
 
     switch (userActivityQueryParams.type) {
       case 'action':
-        lastPageType = Math.ceil(userActionsStats.totalOtherActions / perPage);
+        // History = everything except comment creations (edits + deletions
+        // included), matching `buildActionFilter` on the server.
+        lastPageType = Math.ceil(
+          (userActionsStats.total - userActionsStats.totalCommentCreations) / perPage
+        );
         break;
       case 'user':
         lastPageType = Math.ceil(userActionsStats.totalCommentCreations / perPage || 1);
