@@ -28,6 +28,11 @@ export interface CardCompressedHeaderProps
       'onExpandCollapse' | 'expanded' | 'actions' | 'policies'
     > {
   artifact: ArtifactInfo;
+  /**
+   * The `id` of the card section toggled by the expand/collapse button. Only rendered while the card
+   * is expanded, hence optional
+   */
+  expandedSectionId?: string;
 }
 
 export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
@@ -36,6 +41,7 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
     onExpandCollapse,
     policies,
     actions,
+    expandedSectionId,
     expanded = false,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -54,6 +60,8 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
           <CardExpandButton
             expanded={expanded}
             onClick={handleExpandCollapseClick}
+            itemName={artifact.name}
+            controlsId={expandedSectionId}
             data-test-subj={getTestId('expandCollapse')}
           />
         }
@@ -70,7 +78,13 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
         effectScope={
           <EffectScope policies={policyNavLinks} data-test-subj={getTestId('effectScope')} />
         }
-        actionMenu={<CardActionsFlexItem actions={actions} data-test-subj={getTestId('actions')} />}
+        actionMenu={
+          <CardActionsFlexItem
+            actions={actions}
+            itemName={artifact.name}
+            data-test-subj={getTestId('actions')}
+          />
+        }
       />
     );
   }

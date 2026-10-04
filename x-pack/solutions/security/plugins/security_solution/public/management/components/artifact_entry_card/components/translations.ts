@@ -130,6 +130,7 @@ export const OS_MAC = i18n.translate('xpack.securitySolution.artifactCard.condit
   defaultMessage: 'Mac',
 });
 
+/** Tooltip text for the card's expand button. Kept short, as the tooltip sits next to the card name */
 export const EXPAND_ACTION = i18n.translate(
   'xpack.securitySolution.artifactExpandableCard.expand',
   {
@@ -137,12 +138,27 @@ export const EXPAND_ACTION = i18n.translate(
   }
 );
 
+/** Tooltip text for the card's collapse button. Kept short, as the tooltip sits next to the card name */
 export const COLLAPSE_ACTION = i18n.translate(
   'xpack.securitySolution.artifactExpandableCard.collpase',
   {
     defaultMessage: 'Collapse',
   }
 );
+
+/** Accessible name for the card's expand button, which needs the card name to be identifiable */
+export const EXPAND_ITEM_ACTION = (itemName: string) =>
+  i18n.translate('xpack.securitySolution.artifactExpandableCard.expandItem', {
+    defaultMessage: 'Expand {itemName}',
+    values: { itemName },
+  });
+
+/** Accessible name for the card's collapse button, which needs the card name to be identifiable */
+export const COLLAPSE_ITEM_ACTION = (itemName: string) =>
+  i18n.translate('xpack.securitySolution.artifactExpandableCard.collapseItem', {
+    defaultMessage: 'Collapse {itemName}',
+    values: { itemName },
+  });
 
 export const SHOW_COMMENTS_LABEL = (count: number = 0) =>
   i18n.translate('xpack.securitySolution.artifactCard.comments.label.show', {
