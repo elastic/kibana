@@ -9,38 +9,16 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiText,
-  EuiToolTip,
-  type EuiBadgeProps,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useBoolean } from '@kbn/react-hooks';
+import { EuiBadge, EuiPopover, type EuiBadgeProps, useGeneratedHtmlId } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import {
-  actionFilterForText,
-  actionFilterOutText,
-  closeCellActionPopoverText,
-  copyValueAriaText,
-  copyValueText,
-  filterForText,
-  filterOutText,
-  openCellActionPopoverAriaText,
-} from './translations';
+import { openCellActionPopoverAriaText } from './translations';
 import { truncateReactNode } from './utils';
+import { ContextualBadgePopover } from './summary_column/contextual_badge_popover';
+import { useHoverFadePopover } from './summary_column/use_hover_fade_popover';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -55,15 +33,27 @@ interface CellActionsPopoverProps {
   rawValue: unknown;
   /** Optional callback to customize rendering of the formatted value */
   renderFormattedValue?: (formattedValue: ReactNode) => ReactNode;
+  icon?: EuiBadgeProps['iconType'];
+  onOpenOverview?: () => void;
+  isTracesSummary?: boolean;
   /** Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
-      onClick: () => void;
+      onClick?: () => void;
       onClickAriaLabel: string;
       'data-test-subj': string;
     };
   }) => ReactElement;
 }
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
 
 export function CellActionsPopover({
   onFilter,
@@ -72,114 +62,69 @@ export function CellActionsPopover({
   formattedValue,
   textValue,
   rawValue,
-  renderFormattedValue,
+  icon,
+  onOpenOverview,
+  isTracesSummary,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
-  const { euiTheme } = useEuiTheme();
   const popoverTitleId = useGeneratedHtmlId();
-  const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+  const { isOpen, isFadingOut, open, scheduleClose, closeNow, fadeMs } = useHoverFadePopover();
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
       onFilter(property ?? name, rawValue, operator);
-      closePopover();
+      closeNow();
     }
   };
 
   const popoverTriggerProps = {
-    onClick: togglePopover,
     onClickAriaLabel: openCellActionPopoverAriaText,
     'data-test-subj': `dataTableCellActionsPopover_${name}`,
   };
 
   return (
-    <EuiPopover
-      aria-labelledby={popoverTitleId}
-      button={renderPopoverTrigger({ popoverTriggerProps })}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      anchorPosition="downCenter"
-      panelPaddingSize="s"
-    >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        data-test-subj="dataTableCellActionPopoverTitle"
+    <span onMouseEnter={open} onMouseLeave={scheduleClose}>
+      <EuiPopover
+        aria-labelledby={popoverTitleId}
+        button={renderPopoverTrigger({ popoverTriggerProps })}
+        isOpen={isOpen}
+        closePopover={closeNow}
+        anchorPosition="downCenter"
+        panelPaddingSize="none"
+        ownFocus={false}
+        display="inline-block"
+        panelProps={{
+          onMouseEnter: open,
+          onMouseLeave: scheduleClose,
+          css: css`
+            ${fadeMs === 0
+              ? ''
+              : isFadingOut
+              ? `opacity: 0; transition: opacity ${fadeMs}ms ease;`
+              : `animation: ${fadeIn} ${fadeMs}ms ease;`}
+          `,
+        }}
       >
-        <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <EuiText
-            size="s"
-            className="eui-textBreakWord"
-            css={css`
-              font-family: ${euiTheme.font.familyCode};
-            `}
-          >
-            <strong id={popoverTitleId}>{name}</strong>{' '}
-            {typeof renderFormattedValue === 'function' ? (
-              <>{renderFormattedValue(formattedValue)}</>
-            ) : rawValue != null && typeof rawValue !== 'object' ? (
-              <>{rawValue as ReactNode}</>
-            ) : (
-              <span>{formattedValue}</span>
-            )}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={closeCellActionPopoverText} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={closeCellActionPopoverText}
-              data-test-subj="dataTableExpandCellActionPopoverClose"
-              iconSize="s"
-              iconType="cross"
-              size="xs"
-              onClick={closePopover}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {onFilter ? (
-        <EuiPopoverFooter>
-          <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
-            <EuiButtonEmpty
-              key="addToFilterAction"
-              size="s"
-              iconType="plusCircle"
-              aria-label={actionFilterForText(textValue)}
-              onClick={makeFilterHandlerByOperator('+')}
-              data-test-subj={`dataTableCellAction_addToFilterAction_${name}`}
-            >
-              {filterForText}
-            </EuiButtonEmpty>
-            <EuiButtonEmpty
-              key="removeFromFilterAction"
-              size="s"
-              iconType="minusCircle"
-              aria-label={actionFilterOutText(textValue)}
-              onClick={makeFilterHandlerByOperator('-')}
-              data-test-subj={`dataTableCellAction_removeFromFilterAction_${name}`}
-            >
-              {filterOutText}
-            </EuiButtonEmpty>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
-      ) : null}
-      <EuiPopoverFooter>
-        <EuiCopy textToCopy={textValue}>
-          {(copy) => (
-            <EuiButtonEmpty
-              key="copyToClipboardAction"
-              size="s"
-              iconType="copy"
-              aria-label={copyValueAriaText(name)}
-              onClick={copy}
-              data-test-subj={`dataTableCellAction_copyToClipboardAction_${name}`}
-            >
-              {copyValueText}
-            </EuiButtonEmpty>
-          )}
-        </EuiCopy>
-      </EuiPopoverFooter>
-    </EuiPopover>
+        <ContextualBadgePopover
+          name={name}
+          textValue={textValue}
+          titleId={popoverTitleId}
+          icon={icon}
+          onFilterFor={onFilter ? makeFilterHandlerByOperator('+') : undefined}
+          onFilterOut={onFilter ? makeFilterHandlerByOperator('-') : undefined}
+          onOpenOverview={
+            onOpenOverview
+              ? () => {
+                  onOpenOverview();
+                  closeNow();
+                }
+              : undefined
+          }
+          onClose={closeNow}
+          isTracesSummary={isTracesSummary}
+        />
+      </EuiPopover>
+    </span>
   );
 }
 
@@ -193,8 +138,10 @@ export interface FieldBadgeWithActionsProps
     | 'textValue'
     | 'rawValue'
     | 'renderFormattedValue'
+    | 'icon'
+    | 'onOpenOverview'
+    | 'isTracesSummary'
   > {
-  icon?: EuiBadgeProps['iconType'];
   color?: string;
   truncateTitle?: boolean;
 }
@@ -210,6 +157,8 @@ export type FieldBadgeWithActionsPropsAndDependencies = FieldBadgeWithActionsPro
 export function FieldBadgeWithActions({
   icon,
   onFilter,
+  onOpenOverview,
+  isTracesSummary,
   name,
   property,
   renderFormattedValue,
@@ -235,6 +184,9 @@ export function FieldBadgeWithActions({
       formattedValue={formattedValue}
       textValue={textValue}
       rawValue={rawValue}
+      icon={icon}
+      onOpenOverview={onOpenOverview}
+      isTracesSummary={isTracesSummary}
       renderFormattedValue={renderFormattedValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge

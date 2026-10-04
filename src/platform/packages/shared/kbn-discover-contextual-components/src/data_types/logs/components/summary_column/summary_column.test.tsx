@@ -161,16 +161,16 @@ describe('SummaryColumn', () => {
       expect(screen.queryByText('+2')).not.toBeInTheDocument();
     });
 
-    it('should display a popover with details and actions upon a badge click', async () => {
+    it('should display a popover with details and actions upon a badge hover', async () => {
       const record = getBaseRecord();
-      renderSummary(record);
-      // Open badge popover
-      await userEvent.click(
+      const onOpenOverview = jest.fn();
+      renderSummary(record, { onOpenOverview });
+      await userEvent.hover(
         screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
       );
 
       expect(screen.getByTestId('dataTableCellActionPopoverTitle')).toHaveTextContent(
-        'service.name synth-service-2'
+        'synth-service-2'
       );
       expect(
         screen.getByTestId(`dataTableCellAction_addToFilterAction_${constants.SERVICE_NAME_FIELD}`)
@@ -185,6 +185,24 @@ describe('SummaryColumn', () => {
           `dataTableCellAction_copyToClipboardAction_${constants.SERVICE_NAME_FIELD}`
         )
       ).toBeInTheDocument();
+      expect(screen.getByTestId('discoverContextualBadgePopover')).toBeInTheDocument();
+      expect(
+        screen.getByTestId(
+          `discoverContextualBadgePopover_nodeHealth_${constants.SERVICE_NAME_FIELD}`
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(
+          `discoverContextualBadgePopover_activeAlerts_${constants.SERVICE_NAME_FIELD}`
+        )
+      ).toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByTestId(
+          `discoverContextualBadgePopover_openOverview_${constants.SERVICE_NAME_FIELD}`
+        )
+      );
+      expect(onOpenOverview).toHaveBeenCalledWith(record);
     });
   });
 

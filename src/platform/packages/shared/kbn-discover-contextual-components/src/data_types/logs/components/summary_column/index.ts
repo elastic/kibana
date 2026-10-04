@@ -10,3 +10,6 @@
 export * from './content';
 export * from './resource';
 export * from './summary_column';
+export * from './contextual_badge_popover';
+export * from './get_badge_context';
+export * from './use_hover_fade_popover';
