@@ -28,11 +28,6 @@ interface RespondWithSwrCacheOptions<TBody> {
   body: TBody;
   /** Set to false to skip caching for this response (e.g. empty results), defaults to true. */
   cacheable?: boolean;
-  /**
-   * Set when the client sends a per-user `user-hash` header. Otherwise responses vary by
-   * cookie, so a different session never gets another user's cached response.
-   */
-  varyByUserHash?: boolean;
 }
 
 const unwrapEtag = (ifNoneMatch: string | string[] | undefined): string | undefined => {
@@ -57,7 +52,6 @@ export const respondWithSwrCache = async <TBody>({
   response,
   body,
   cacheable = true,
-  varyByUserHash = false,
 }: RespondWithSwrCacheOptions<TBody>): Promise<IKibanaResponse> => {
   const bodyAsString = JSON.stringify(body);
   const etag = createHash('sha256').update(bodyAsString).digest('hex');
@@ -66,7 +60,9 @@ export const respondWithSwrCache = async <TBody>({
   const headers = {
     'content-type': 'application/json',
     etag,
-    vary: varyByUserHash ? 'accept-encoding, user-hash' : 'accept-encoding, cookie',
+    // Clients send a per-user `user-hash` header, so cached responses never cross users.
+    // Not the cookie: Kibana re-issues the session cookie on every response.
+    vary: 'accept-encoding, user-hash',
     'cache-control': maxAge
       ? `private, max-age=${maxAge}, stale-while-revalidate=${ONE_YEAR_SECONDS - maxAge}`
       : 'private, no-cache',
