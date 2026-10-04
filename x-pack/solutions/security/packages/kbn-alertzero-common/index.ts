@@ -198,10 +198,12 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
+  migrateStoredTemplateValues,
   projectStoredAutonomyLevel,
+  renameStoredField,
   touchesWorkerSettings,
 } from './impl/worker_settings';
-export type { WorkerSettingsDeclaration } from './impl/worker_settings';
+export type { WorkerSettingsDeclaration, WorkerSettingsMigration } from './impl/worker_settings';
 export type {
   SystemSecurityWatchCatalogEntry,
   SystemSecurityWorkerCatalogEntry,
