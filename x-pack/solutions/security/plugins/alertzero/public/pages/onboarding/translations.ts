@@ -80,6 +80,14 @@ export const ENABLE_AND_CONTINUE = i18n.translate('xpack.alertzero.onboarding.en
   defaultMessage: 'Enable and continue',
 });
 
+export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
+  'xpack.alertzero.onboarding.modifyForbiddenCallout',
+  {
+    defaultMessage:
+      'You need the manage_security cluster privilege to enable workers. Ask an administrator.',
+  }
+);
+
 export const NOT_NOW = i18n.translate('xpack.alertzero.onboarding.notNow', {
   defaultMessage: 'Not now — explore Security without AlertZero',
 });
