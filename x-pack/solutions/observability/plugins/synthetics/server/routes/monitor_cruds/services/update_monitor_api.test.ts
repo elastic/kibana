@@ -816,10 +816,7 @@ describe('UpdateMonitorAPI', () => {
        * Parity with the single-monitor PUT: a monitor that has a private
        * location resolves its private locations inside `normalizeMonitor`,
        * which uses the internal repository and the union of the request space
-       * and the monitor's `KIBANA_SPACES`. There is no separate request-scoped
-       * batch fetch — that earlier pre-fetch was redundant because
-       * `normalizeMonitor` already performs (and caches) this lookup per
-       * monitor, just like `editSyntheticsMonitorRoute`.
+       * and the monitor's `KIBANA_SPACES`.
        */
       const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
@@ -847,6 +844,40 @@ describe('UpdateMonitorAPI', () => {
       const [client, namespaces] = getPrivateLocationsForNamespaces.mock.calls[0];
       expect(client).toBe(internalClient);
       expect([...namespaces].sort()).toEqual(['default', 'team-a']);
+    });
+
+    it('reuses the private-locations lookup for monitors that share the same spaces', async () => {
+      const { getPrivateLocationsForNamespaces } = jest.requireMock(
+        '../../../synthetics_service/get_private_locations'
+      );
+      getPrivateLocationsForNamespaces.mockResolvedValue([
+        { id: 'pl-1', label: 'PL', spaces: ['default'], isServiceManaged: false },
+      ]);
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({
+          id: 'mon-1',
+          attributes: {
+            locations: [{ id: 'pl-1', label: 'PL', isServiceManaged: false }],
+            [ConfigKey.KIBANA_SPACES]: ['default'],
+          },
+        }),
+        mockDecryptedMonitor({
+          id: 'mon-2',
+          attributes: {
+            locations: [{ id: 'pl-1', label: 'PL', isServiceManaged: false }],
+            [ConfigKey.KIBANA_SPACES]: ['default'],
+          },
+        }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }),
+      });
+
+      expect(result.survivors).toHaveLength(2);
+      expect(getPrivateLocationsForNamespaces).toHaveBeenCalledTimes(1);
     });
   });
 
