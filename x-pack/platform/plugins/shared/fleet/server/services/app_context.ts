@@ -95,6 +95,7 @@ class AppContextService {
   ];
   private reportingStart: ReportingStart | undefined;
   private featureFlags: FeatureFlagsStart | undefined;
+  private isFipsEnabled: boolean = false;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -125,6 +126,7 @@ class AppContextService {
     this.alertingStart = appContext.alertingStart;
     this.reportingStart = appContext.reportingStart;
     this.featureFlags = appContext.featureFlags;
+    this.isFipsEnabled = appContext.isFipsEnabled;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -166,6 +168,10 @@ class AppContextService {
 
   public getSecurityLicense() {
     return this.securitySetup!.license;
+  }
+
+  public getIsFipsEnabled() {
+    return this.isFipsEnabled;
   }
 
   public getCloud() {

@@ -104,6 +104,7 @@ import {
   FleetError,
   fleetErrorToResponseOptions,
   PackagePolicyValidationError,
+  PackageFipsIncompatibleError,
   PackagePolicyRestrictionRelatedError,
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -171,6 +172,7 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
+import { isPackageFipsIncompatible } from './epm/packages/filter_fips_packages';
 import {
   compileTemplate,
   getMetaVariables,
@@ -683,6 +685,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         prerelease: true,
       }));
 
+    assertFipsCompatiblePackageOrThrow(enrichedPackagePolicy, pkgInfo, options?.force);
+
     let inputs = getInputsWithIds(enrichedPackagePolicy, packagePolicyId, undefined, pkgInfo);
 
     // Check if it is a limited package, and if so, check that the corresponding agent policy does not
@@ -1073,6 +1077,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         const { pkgInfo, assetsMap } = packageInfoAndAsset;
+
+        assertFipsCompatiblePackageOrThrow(packagePolicy, pkgInfo, options?.force);
 
         let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
@@ -3920,6 +3926,35 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
+  }
+}
+
+function assertFipsCompatiblePackageOrThrow(
+  packagePolicy: Pick<NewPackagePolicy, 'inputs'>,
+  pkgInfo: PackageInfo,
+  force?: boolean
+) {
+  if (force || !appContextService.getIsFipsEnabled()) {
+    return;
+  }
+  if (isPackageFipsIncompatible(pkgInfo.policy_templates)) {
+    throw new PackageFipsIncompatibleError(
+      `Cannot create a package policy for ${pkgInfo.name}: the integration is not FIPS compatible`
+    );
+  }
+  const nonFipsTemplates = new Set(
+    (pkgInfo.policy_templates ?? [])
+      .filter((template) => template.fips_compatible === false)
+      .map((template) => template.name)
+  );
+  const nonFipsInput = packagePolicy.inputs.find(
+    (input) =>
+      input.enabled && !!input.policy_template && nonFipsTemplates.has(input.policy_template)
+  );
+  if (nonFipsInput) {
+    throw new PackageFipsIncompatibleError(
+      `Cannot create a package policy for ${pkgInfo.name}: the policy template ${nonFipsInput.policy_template} is not FIPS compatible`
+    );
   }
 }
 
