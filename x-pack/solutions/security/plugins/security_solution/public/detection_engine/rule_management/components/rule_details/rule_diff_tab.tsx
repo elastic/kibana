@@ -19,8 +19,12 @@ import type { Filter } from '@kbn/es-query';
 import { normalizeMachineLearningJobIds } from '../../../../../common/detection_engine/utils';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { DiffView } from './json_diff/diff_view';
-import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
+import {
+  normalizeRequiredFieldsForDisplay,
+  stringifyWithExpandedEmpties,
+} from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -139,8 +143,8 @@ export const getRuleDiffSources = (
   );
 
   return [
-    stringifyWithExpandedEmpties(visibleOldRuleProperties),
-    stringifyWithExpandedEmpties(visibleNewRuleProperties),
+    stringifyWithExpandedEmpties(normalizeRequiredFields(visibleOldRuleProperties)),
+    stringifyWithExpandedEmpties(normalizeRequiredFields(visibleNewRuleProperties)),
   ];
 };
 
@@ -198,4 +202,21 @@ export const RuleDiffTab = ({
       </EuiPanel>
     </>
   );
+};
+
+/*
+  "ecs" is derived from the field's name and type on the backend, so it's not shown.
+  Order and duplicates don't matter either.
+*/
+const normalizeRequiredFields = (
+  ruleProperties: Partial<RuleResponse>
+): Omit<Partial<RuleResponse>, 'required_fields'> & { required_fields?: RequiredFieldInput[] } => {
+  if (!ruleProperties.required_fields) {
+    return ruleProperties;
+  }
+
+  return {
+    ...ruleProperties,
+    required_fields: normalizeRequiredFieldsForDisplay(ruleProperties.required_fields),
+  };
 };

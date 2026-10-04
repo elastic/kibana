@@ -39,7 +39,22 @@ export class Subject<T> {
   next(value: T) {
     if (value !== this.value) {
       this.value = value;
-      this.callbacks.forEach((fn) => fn(value));
+      this.notify();
     }
+  }
+
+  /**
+   * Updates the value without notifying the subscribers. Lets several updates
+   * be batched into a single notify() call.
+   */
+  setValueSilently(value: T) {
+    this.value = value;
+  }
+
+  /**
+   * Notifies the subscribers of the current value.
+   */
+  notify() {
+    this.callbacks.forEach((fn) => fn(this.value));
   }
 }

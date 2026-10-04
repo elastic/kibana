@@ -17,7 +17,7 @@ interface NameComboBoxProps {
   field: FieldHook<RequiredFieldInput>;
   itemId: string;
   autoFocus?: boolean;
-  availableFieldNames: string[];
+  getAvailableFieldNames: () => string[];
   typesByFieldName: Record<string, string[] | undefined>;
   nameWarning: string;
   nameError: { message: string } | undefined;
@@ -27,7 +27,7 @@ export function NameComboBox({
   field,
   itemId,
   autoFocus,
-  availableFieldNames,
+  getAvailableFieldNames,
   typesByFieldName,
   nameWarning,
   nameError,
@@ -35,13 +35,29 @@ export function NameComboBox({
   const { value, setValue } = field;
   const { euiTheme } = useEuiTheme();
 
+  /*
+    Building options for all available field names is expensive with long required fields lists
+    since every row has its own combobox. Available field names are read only when the user
+    focuses the combobox, so changes in other rows don't re-render this one.
+  */
+  const [availableFieldNames, setAvailableFieldNames] = useState<string[]>(() =>
+    autoFocus ? getAvailableFieldNames() : []
+  );
+  const handleFocus = useCallback(
+    () => setAvailableFieldNames(getAvailableFieldNames()),
+    [getAvailableFieldNames]
+  );
+
   const selectableNameOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       /* Not adding an empty string to the list of selectable field names */
-      (value.name ? [value.name] : []).concat(availableFieldNames).map((name) => ({
-        label: name,
-        value: name,
-      })),
+      (value.name ? [value.name] : [])
+        /* Available field names might be read before this row's name changed */
+        .concat(availableFieldNames.filter((name) => name !== value.name))
+        .map((name) => ({
+          label: name,
+          value: name,
+        })),
     [availableFieldNames, value.name]
   );
 
@@ -110,6 +126,7 @@ export function NameComboBox({
       options={selectableNameOptions}
       selectedOptions={selectedNameOption ? [selectedNameOption] : []}
       onChange={handleNameChange}
+      onFocus={handleFocus}
       isClearable={false}
       onCreateOption={handleAddCustomName}
       isInvalid={Boolean(nameError)}

@@ -6,8 +6,14 @@
  */
 
 import type { RuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import type { ThreeWayDiff } from '../../../../../../common/api/detection_engine';
-import { getFieldDiffsForRuleSchedule } from './get_field_diffs_for_grouped_fields';
+import type {
+  RequiredFieldArray,
+  ThreeWayDiff,
+} from '../../../../../../common/api/detection_engine';
+import {
+  getFieldDiffsForRequiredFields,
+  getFieldDiffsForRuleSchedule,
+} from './get_field_diffs_for_grouped_fields';
 
 describe('getFieldDiffsForRuleSchedule', () => {
   describe('full rule schedule', () => {
@@ -388,5 +394,46 @@ describe('getFieldDiffsForRuleSchedule', () => {
 
       expect(result).toEqual([]);
     });
+  });
+});
+
+describe('getFieldDiffsForRequiredFields', () => {
+  it('returns no diff when versions differ only in order, duplicates and "ecs"', () => {
+    const result = getFieldDiffsForRequiredFields({
+      current_version: [
+        { name: 'host.name', type: 'keyword', ecs: true },
+        { name: 'custom.field', type: 'keyword', ecs: false },
+      ],
+      target_version: [
+        { name: 'custom.field', type: 'keyword', ecs: true },
+        { name: 'host.name', type: 'keyword', ecs: false },
+        { name: 'host.name', type: 'keyword', ecs: false },
+      ],
+    } as ThreeWayDiff<RequiredFieldArray>);
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns a diff without "ecs" with one sorted field per line', () => {
+    const result = getFieldDiffsForRequiredFields({
+      current_version: [{ name: 'host.name', type: 'keyword', ecs: true }],
+      target_version: [
+        { name: 'user.name', type: 'keyword', ecs: true },
+        { name: 'host.name', type: 'keyword', ecs: true },
+      ],
+    } as ThreeWayDiff<RequiredFieldArray>);
+
+    expect(result).toEqual([
+      {
+        fieldName: 'required_fields',
+        currentVersion: ['[', '  { "name": "host.name", "type": "keyword" }', ']'].join('\n'),
+        targetVersion: [
+          '[',
+          '  { "name": "host.name", "type": "keyword" },',
+          '  { "name": "user.name", "type": "keyword" }',
+          ']',
+        ].join('\n'),
+      },
+    ]);
   });
 });

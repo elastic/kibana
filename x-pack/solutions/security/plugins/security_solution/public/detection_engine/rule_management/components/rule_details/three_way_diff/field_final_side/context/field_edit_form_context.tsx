@@ -15,12 +15,15 @@ import React, {
 } from 'react';
 import type { FormHook } from '../../../../../../../shared_imports';
 import { invariant } from '../../../../../../../../common/utils/invariant';
+import { useAsyncActionWithLoading } from '../../../../../../../common/hooks/use_async_action_with_loading';
 
 type FieldEditFormCleanUp = () => void;
 
 interface FieldEditFormContextType {
   form: FormHook | undefined;
   registerForm: (form: FormHook) => FieldEditFormCleanUp;
+  isSubmitting: boolean;
+  submit: () => Promise<void>;
 }
 
 const FieldEditFormContext = createContext<FieldEditFormContextType | null>(null);
@@ -56,8 +59,14 @@ export function FieldEditFormContextProvider({ children }: PropsWithChildren<{}>
     [formRef, setForm]
   );
 
+  const submitForm = useCallback(() => formRef.current?.submit(), [formRef]);
+  // Shared between "Save" and "Cancel" buttons to disable "Cancel" while the form is submitting
+  const [isSubmitting, submit] = useAsyncActionWithLoading(submitForm);
+
   return (
-    <FieldEditFormContext.Provider value={{ form: formRef.current, registerForm }}>
+    <FieldEditFormContext.Provider
+      value={{ form: formRef.current, registerForm, isSubmitting, submit }}
+    >
       {children}
     </FieldEditFormContext.Provider>
   );
