@@ -385,6 +385,12 @@ export interface DocLinks {
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly api: string;
+      readonly explore: {
+        readonly landing: string;
+        readonly hostsPage: string;
+        readonly networkPage: string;
+        readonly usersPage: string;
+      };
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;

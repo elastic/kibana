@@ -529,6 +529,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         api: isServerless
           ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-entity-analytics-api`
           : `${KIBANA_APIS}group/endpoint-security-entity-analytics-api`,
+        explore: {
+          landing: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/explore`,
+          hostsPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/hosts-page`,
+          networkPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/network-page`,
+          usersPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/users-page`,
+        },
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
         assetCriticality: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/asset-criticality`,
