@@ -1240,7 +1240,7 @@ export class DataViewsService {
 
   async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
     const dataViewLazy = await this.createFromSpecLazy(spec);
-    await this.createSavedObject(dataViewLazy, overwrite);
+    await this.createSavedObject(dataViewLazy, overwrite, spec.namespaces === undefined);
     await this.setDefault(dataViewLazy.id!);
     return dataViewLazy;
   }
@@ -1260,7 +1260,7 @@ export class DataViewsService {
     displayErrors = true
   ) {
     const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    await this.createSavedObject(dataView, overwrite);
+    await this.createSavedObject(dataView, overwrite, spec.namespaces === undefined);
     await this.setDefault(dataView.id!);
     return dataView;
   }
@@ -1271,7 +1271,11 @@ export class DataViewsService {
    * @param override Overwrite if existing index pattern exists
    */
 
-  async createSavedObject(dataView: AbstractDataView, overwrite = false) {
+  async createSavedObject(
+    dataView: AbstractDataView,
+    overwrite = false,
+    preserveNamespaces = false
+  ) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
@@ -1279,7 +1283,12 @@ export class DataViewsService {
 
     if (dupe) {
       if (overwrite) {
-        await this.delete(dupe.id);
+        if (dupe.id !== dataView.id) {
+          if (preserveNamespaces && dupe.namespaces) {
+            dataView.namespaces = dupe.namespaces;
+          }
+          await this.delete(dupe.id);
+        }
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
