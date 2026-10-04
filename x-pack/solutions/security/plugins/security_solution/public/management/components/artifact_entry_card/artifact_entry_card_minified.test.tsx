@@ -14,6 +14,8 @@ import { act, fireEvent } from '@testing-library/react';
 import type { AnyArtifact } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
+import { DISABLED_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -113,5 +115,61 @@ describe.each([
 
     expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
     expect(passedItem).toBe(item);
+  });
+
+  it('should not show an enabled status by default', () => {
+    render({ item, isSelected: false, onToggleSelectedArtifact: onToggleSelectedArtifactMock });
+
+    expect(renderResult.queryByTestId('testCard-enabledStatus')).toBeNull();
+  });
+
+  it('should show Enabled next to the title when showEnabledColumn is set', () => {
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      showEnabledColumn: true,
+    });
+
+    expect(renderResult.getByTestId('testCard-enabledStatus')).toHaveTextContent('Enabled');
+  });
+
+  it('should show Disabled next to the title when the artifact has the disabled tag', () => {
+    if (!('tags' in item) || !Array.isArray(item.tags)) {
+      render({
+        item,
+        isSelected: false,
+        onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+        showEnabledColumn: true,
+      });
+
+      expect(renderResult.getByTestId('testCard-enabledStatus')).toHaveTextContent('Enabled');
+      return;
+    }
+
+    item.tags = [...item.tags, DISABLED_ARTIFACT_TAG];
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      showEnabledColumn: true,
+    });
+
+    expect(renderResult.getByTestId('testCard-enabledStatus')).toHaveTextContent('Disabled');
+  });
+
+  it('should replace criteria conditions when CriteriaComponent is provided', () => {
+    const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+    MockCriteria.displayName = 'MockCriteria';
+
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      CriteriaComponent: MockCriteria,
+    });
+
+    expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
   });
 });

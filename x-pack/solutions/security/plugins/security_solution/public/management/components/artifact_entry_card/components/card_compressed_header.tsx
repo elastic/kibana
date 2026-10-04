@@ -20,6 +20,7 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
 import { DescriptionField } from './description_field';
+import { ArtifactEnabledStatus } from './artifact_enabled_status';
 
 export interface CardCompressedHeaderProps
   extends Pick<CommonProps, 'data-test-subj'>,
@@ -28,6 +29,8 @@ export interface CardCompressedHeaderProps
       'onExpandCollapse' | 'expanded' | 'actions' | 'policies'
     > {
   artifact: ArtifactInfo;
+  /** When true, shows a read-only Enabled column aligned with the card grid header. */
+  showEnabledColumn?: boolean;
 }
 
 export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
@@ -37,6 +40,7 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
     policies,
     actions,
     expanded = false,
+    showEnabledColumn = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -70,12 +74,43 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
         effectScope={
           <EffectScope policies={policyNavLinks} data-test-subj={getTestId('effectScope')} />
         }
+        enabledStatus={
+          showEnabledColumn ? (
+            <ArtifactEnabledStatus
+              tags={artifact.tags}
+              data-test-subj={getTestId('enabledStatus')}
+            />
+          ) : undefined
+        }
         actionMenu={<CardActionsFlexItem actions={actions} data-test-subj={getTestId('actions')} />}
       />
     );
   }
 );
 CardCompressedHeader.displayName = 'CardCompressedHeader';
+
+const Columns = styled.div`
+  display: grid;
+  align-items: center;
+  justify-items: stretch;
+  column-gap: ${({ theme }) => theme.euiTheme.size.l};
+  width: 100%;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 1fr);
+
+  &.showEnabled {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 1fr) 6.5rem;
+  }
+`;
+
+const ColumnCell = styled.div`
+  min-width: 0;
+  max-width: 100%;
+`;
+
+const EnabledStatusHolder = styled.div`
+  justify-self: start;
+  max-width: 100%;
+`;
 
 const ButtonIconPlaceHolder = styled.div`
   display: inline-block;
@@ -101,6 +136,8 @@ export interface CardCompressedHeaderLayoutProps extends Pick<CommonProps, 'data
   name: ReactNode;
   description: ReactNode;
   effectScope: ReactNode;
+  /** Read-only enabled status. When omitted, the column is not rendered. */
+  enabledStatus?: ReactNode;
   /**
    * The EuiFlexItem react node that contains the actions for the carc. If wanting to NOT include a menu,
    * but still want the placeholder for it be preserved (ex. for the Grid headers), set prop to `true`
@@ -119,6 +156,7 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
     name,
     expandToggle,
     effectScope,
+    enabledStatus,
     actionMenu,
     description,
     'data-test-subj': dataTestSubj,
@@ -143,29 +181,36 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
           {expandToggle}
         </EuiFlexItem>
         <EuiFlexItem className={cssClassNames + flushTopCssClassname}>
-          <EuiFlexGroup alignItems="center" className={flushTopCssClassname}>
-            <EuiFlexItem
-              grow={2}
+          <Columns
+            className={`${flushTopCssClassname}${enabledStatus != null ? ' showEnabled' : ''}`}
+          >
+            <ColumnCell
               className={cssClassNames + flushTopCssClassname}
               data-test-subj={getTestId('titleHolder')}
             >
               {name}
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={3}
+            </ColumnCell>
+            <ColumnCell
               className={cssClassNames + flushTopCssClassname}
               data-test-subj={getTestId('descriptionHolder')}
             >
               {description}
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={1}
+            </ColumnCell>
+            <ColumnCell
               data-test-subj={getTestId('effectScopeHolder')}
               className={flushTopCssClassname}
             >
               {effectScope}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </ColumnCell>
+            {enabledStatus != null && (
+              <EnabledStatusHolder
+                data-test-subj={getTestId('enabledHolder')}
+                className={flushTopCssClassname}
+              >
+                {enabledStatus}
+              </EnabledStatusHolder>
+            )}
+          </Columns>
         </EuiFlexItem>
         {actionMenu === true ? (
           <EuiFlexItem

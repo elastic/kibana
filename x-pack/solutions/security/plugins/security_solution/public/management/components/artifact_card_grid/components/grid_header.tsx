@@ -15,16 +15,26 @@ import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_ent
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const GridHeaderContainer = styled(CardSectionPanel)`
-  padding-top: 0;
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  && {
+    /* Match the collapsible card inset (section padding + outer border) so column tracks line up. */
+    padding: 0
+      calc(${({ theme }) => theme.eui.euiSizeL} + ${({ theme }) => theme.eui.euiBorderWidthThin})
+      ${({ theme }) => theme.eui.euiSizeS};
+  }
 `;
 
 export type GridHeaderProps = Pick<CommonProps, 'data-test-subj'> & {
   expandAllIconType: 'fold' | 'unfold';
   onExpandCollapseAll(): void;
+  showEnabledColumn?: boolean;
 };
 export const GridHeader = memo<GridHeaderProps>(
-  ({ 'data-test-subj': dataTestSubj, expandAllIconType, onExpandCollapseAll }) => {
+  ({
+    'data-test-subj': dataTestSubj,
+    expandAllIconType,
+    onExpandCollapseAll,
+    showEnabledColumn = false,
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const expandToggleElement = useMemo(
@@ -46,7 +56,6 @@ export const GridHeader = memo<GridHeaderProps>(
             aria-expanded={expandAllIconType === 'fold'}
             iconType={expandAllIconType}
             onClick={() => onExpandCollapseAll()}
-            css={{ marginLeft: '-5px' }}
           />
         </EuiToolTip>
       ),
@@ -89,6 +98,18 @@ export const GridHeader = memo<GridHeaderProps>(
                 />
               </strong>
             </EuiText>
+          }
+          enabledStatus={
+            showEnabledColumn ? (
+              <EuiText size="xs" data-test-subj={getTestId('enabled')}>
+                <strong>
+                  <FormattedMessage
+                    id="xpack.securitySolution.artifactCardGrid.enabledColumn"
+                    defaultMessage="Enabled"
+                  />
+                </strong>
+              </EuiText>
+            ) : undefined
           }
           actionMenu={true}
         />
