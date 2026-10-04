@@ -136,6 +136,13 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
+   * Applies exceptions that reference columns computed by an ES|QL rule query (for example with EVAL
+   * or STATS) by inlining them at the end of the query. Exceptions on fields of the source indices
+   * keep using the DSL filter of the `_query` request. Exceptions that cannot be applied are logged.
+   */
+  esqlNativeExceptionsEnabled: false,
+
+  /**
    * Enables gap reason display in the gaps table and reason-based filtering.
    */
   gapReasonDetectionEnabled: true,
