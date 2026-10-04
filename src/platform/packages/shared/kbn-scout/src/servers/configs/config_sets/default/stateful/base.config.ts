@@ -240,6 +240,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      // Pin the histogram bar target so chart/histogram assertions stay stable (the default is 100)
+      '--uiSettings.overrides.histogram:barTarget=50',
     ],
   },
 };
