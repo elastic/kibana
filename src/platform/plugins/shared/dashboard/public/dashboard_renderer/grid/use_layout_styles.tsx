@@ -66,7 +66,7 @@ export const useLayoutStyles = () => {
         padding: ${euiTheme.size.xxs};
         z-index: ${euiTheme.levels.menu};
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-bottom-left-radius: ${euiTheme.border.radius.control};
+        border-top-right-radius: ${euiTheme.border.radius.control};
 
         & .kbnGridPanel--resizeGauge--inner {
           padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};

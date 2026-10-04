@@ -36,14 +36,6 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
 /** AlertZero nodes that follow the platform Discover / Dashboards entries. */
 export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
-    link: alertZeroLink(SecurityPageName.alerts),
-    icon: 'bell',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.attacks),
-    icon: 'warning',
-  },
-  {
     link: alertZeroLink(SecurityPageName.alertZeroEscalations),
     icon: 'flag',
   },
@@ -54,13 +46,5 @@ export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
     // that `NodeDefinition` cannot express.
     link: alertZeroLink(SecurityPageName.alertZeroWatches),
     icon: 'eye',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroThreatHunt),
-    icon: 'inspect',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroStreams),
-    icon: 'aggregate',
   },
 ];
