@@ -1,0 +1,13 @@
+classification: true_positive
+why: Process tree shows WINWORD spawning encoded PowerShell, C2 to malicious-c2.example.com, Run-key persistence, and SMB to ADMIN$.
+must_retrieve:
+  - entity_store
+  - raw_events
+evidence_ids:
+  entity:
+    - host:ad-scenario-host-wks-alice-01
+    - user:alice.chen@ad-scenario-host-wks-alice-01@local
+  event:
+    - ad-scenario-encoded-powershell-process-1
+    - ad-scenario-encoded-powershell-network-2
+must_not_cite: []
