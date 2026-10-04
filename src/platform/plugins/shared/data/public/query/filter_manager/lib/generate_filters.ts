@@ -8,7 +8,14 @@
  */
 
 import _ from 'lodash';
-import type { Filter, DataViewFieldBase, DataViewBase, RangeFilterParams } from '@kbn/es-query';
+import type {
+  Filter,
+  DataViewFieldBase,
+  DataViewBase,
+  RangeFilterParams,
+  CombinedFilter,
+  BooleanRelation,
+} from '@kbn/es-query';
 import {
   isExistsFilter,
   isPhraseFilter,
@@ -17,7 +24,9 @@ import {
   getFilterField,
   isRangeFilter,
   isScriptedPhraseFilter,
+  isCombinedFilter,
   buildFilter,
+  buildCombinedFilter,
   FilterStateStore,
   FILTERS,
 } from '@kbn/es-query';
@@ -25,6 +34,15 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Serializable } from '@kbn/utility-types';
 
 import type { FilterManager } from '../filter_manager';
+
+export interface GenerateFiltersOptions {
+  /**
+   * When set, a multi-value input produces a single combined filter using this relation instead
+   * of one filter per value. The relation stays editable in the filter bar, which is how a user
+   * turns an "all of" filter into an "any of" one. See https://github.com/elastic/kibana/issues/39433
+   */
+  readonly multiValueRelation?: BooleanRelation;
+}
 
 function getExistingFilter(
   appFilters: Filter[],
@@ -65,6 +83,36 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
 }
 
 /**
+ * Finds a combined filter that already holds exactly the same values, in the same order, for the
+ * given field, so that re-triggering the same filter action toggles it instead of duplicating it.
+ */
+const getExistingCombinedFilter = (
+  appFilters: Filter[],
+  fieldName: string,
+  values: unknown[]
+): CombinedFilter | undefined => {
+  const existingFilter = _.find(
+    appFilters,
+    (filter) =>
+      isCombinedFilter(filter) &&
+      filter.meta.params.length === values.length &&
+      values.every((value, valueIndex) =>
+        Boolean(getExistingFilter([filter.meta.params[valueIndex]], fieldName, value))
+      )
+  );
+
+  return existingFilter && isCombinedFilter(existingFilter) ? existingFilter : undefined;
+};
+
+const updateExistingCombinedFilter = (existingFilter: CombinedFilter, negate: boolean) => {
+  existingFilter.meta.disabled = false;
+  existingFilter.meta.params = existingFilter.meta.params.map((subFilter) => ({
+    ...subFilter,
+    meta: { ...subFilter.meta, negate },
+  }));
+};
+
+/**
  * Generate filter objects, as a result of triggering a filter action on a
  * specific index pattern field.
  *
@@ -73,6 +121,7 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
  * @param {any} values - One or more values to filter for.
  * @param {string} operation - "-" to create a negated filter
  * @param {string} index - Index string to generate filters for
+ * @param {GenerateFiltersOptions} options - Optional behaviour overrides
  *
  * @returns {object} An array of filters to be added back to filterManager
  */
@@ -81,7 +130,8 @@ export function generateFilters(
   field: DataViewFieldBase | string,
   values: any,
   operation: string,
-  index: DataViewBase
+  index: DataViewBase,
+  options: GenerateFiltersOptions = {}
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
 
@@ -148,15 +198,42 @@ export function generateFilters(
     return value;
   }
 
-  return _.chain(values)
-    .map(castValue)
-    .map((value) => {
-      const existing = getExistingFilter(appFilters, fieldName, value);
-      if (existing) {
-        updateExistingFilter(existing, negate);
-      }
+  const castedValues: unknown[] = _.map(values, (value) => castValue(value));
+  const { multiValueRelation } = options;
 
-      return existing ?? generateFilter(value as Serializable);
-    })
-    .value();
+  // A multi-value input (filtering on an array field) collapses into one combined filter rather
+  // than one pill per value. Negation stays on the sub-filters so the resulting query is identical
+  // to the one built from separate pills, while the relation between the values becomes explicit
+  // and editable in the filter bar.
+  if (multiValueRelation && castedValues.length > 1 && fieldName !== '_exists_') {
+    const existingCombinedFilter = getExistingCombinedFilter(appFilters, fieldName, castedValues);
+
+    if (existingCombinedFilter) {
+      updateExistingCombinedFilter(existingCombinedFilter, negate);
+      return [existingCombinedFilter];
+    }
+
+    const combinedFilter = buildCombinedFilter(
+      multiValueRelation,
+      castedValues.map((value) => generateFilter(value as Serializable)),
+      index,
+      false,
+      false,
+      null,
+      FilterStateStore.APP_STATE
+    );
+    // `buildCombinedFilter` does not set a key, but the filter mappers and the filter bar rely on it
+    combinedFilter.meta.key = fieldName;
+
+    return [combinedFilter];
+  }
+
+  return castedValues.map((value) => {
+    const existing = getExistingFilter(appFilters, fieldName, value);
+    if (existing) {
+      updateExistingFilter(existing, negate);
+    }
+
+    return existing ?? generateFilter(value as Serializable);
+  });
 }
