@@ -132,7 +132,8 @@ do not re-derive the closed set. The caller already picked the alerts that matte
 any query would re-fetch data you are holding. Go to Step 3 and report every count as scoped to this
 set (Step 4 says how). Fall back to the two queries below **only** when the tool errors
 or returns fewer alerts than you asked for — the missing ones may have aged out of the
-index.
+index. Run that fallback **at most once**; if it also comes up short, work with the
+alerts you hold and say which ids are missing.
 
 **No ids provided — run the two queries below.**
 
@@ -175,13 +176,18 @@ These are the only alerts you can speak about with certainty — they carry a hu
 text) — it defaults to 24. When the request states an explicit analysis window (for
 example, a workflow passing the number of days it harvested over), use that window,
 capped at the 168-hour maximum, and say in the output when the stated window exceeds
-the cap. Otherwise use 72 or 168 when the user asks about a longer period, and retry
+the cap. Otherwise use 72 or 168 when the user asks about a longer period, and retry **once**
 with a larger value if a query returns nothing (alerts older than the window are not
 searched). Do not put a time range in the query text.
 
 Read the results defensively: from the noise query take the total and the dominant
 entities; from the confirmed dispositions query take which entities the closed
 \`false_positive\`/\`benign_positive\` alerts actually sit on.
+
+Those two queries are the entire data-collection step. Do not issue further
+\`security.alerts\` calls to corroborate a pattern, spot-check a suspicion, or
+pre-validate an exception against the index — the diagnosis in Step 3 works from
+these results alone.
 
 ### Step 3: Analyse the Alert Pattern
 
@@ -273,6 +279,10 @@ remediations the user can perform in the Detection Rules UI. It never applies a 
 offers to apply one, or hands off to a rule-mutation skill. The exception proposal below
 is **plain-text guidance the analyst types into the UI themselves** — describing it in a
 structured way is expected; it is not an auto-applied or machine-actionable change.
+
+Producing the output ends the investigation: make **no further tool calls** after
+presenting it — no verification queries, no follow-up fetches, no re-reads of the
+attachment.
 
 The output must always contain these five sections, in order. Use a \`##\` header for each
 section (e.g. \`## Alert Volume\`) — **do not use numbered list items for sections**; tables
