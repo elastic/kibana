@@ -145,8 +145,7 @@ export function fromStoredSearchEmbeddableByValue(
   } = storedState;
   const [tab] = attributes.tabs ?? extractTabs(attributes).tabs;
   const apiTab = fromStoredTab(tab.attributes, references);
-  // Saved Metrics settings only apply to an ES|QL tab; a mismatch is dropped rather than failing
-  // the panel, unlike the session API which rejects the session outright.
+  // Saved Metrics settings only apply to an ES|QL tab; other tabs use the default type.
   const typedTab: DiscoverSessionApiEmbeddableTab =
     tab.attributes.tabTypeState && isDiscoverSessionEsqlTab(apiTab)
       ? { ...apiTab, ...fromStoredTabTypeState(tab.attributes.tabTypeState) }

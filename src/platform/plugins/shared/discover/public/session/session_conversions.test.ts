@@ -468,9 +468,10 @@ describe('Discover session conversion and UI preparation', () => {
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });
 
-  it('rejects Metrics settings on a classic tab when building a save request', () => {
+  it('ignores Metrics settings on a classic tab when building a save request', () => {
     const session = fromDiscoverSessionApiResponse(response);
     const [classicTab] = session.tabs;
+    const requestWithoutSettings = toDiscoverSessionApiData(session);
     classicTab.tabTypeState = {
       type: DiscoverTabType.Metrics,
       dimensions: ['host.name'],
@@ -480,9 +481,7 @@ describe('Discover session conversion and UI preparation', () => {
       histogramPercentile: 'p99',
     };
 
-    expect(() => toDiscoverSessionApiData(session)).toThrow(
-      `Tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
-    );
+    expect(toDiscoverSessionApiData(session)).toStrictEqual(requestWithoutSettings);
   });
 
   it('preserves inline IDs and filter references without mutating the session', () => {

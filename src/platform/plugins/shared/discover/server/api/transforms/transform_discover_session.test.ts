@@ -1248,25 +1248,29 @@ describe('discover session API transforms', () => {
       expect(writtenBack.tabs[0].attributes.tabTypeState).toEqual(savedTabTypeState);
     });
 
-    it('rejects saved metrics state on a classic tab instead of dropping it', () => {
+    it('ignores saved metrics state on a classic tab while preserving its classic settings', () => {
       const [classicTab, metricsTab] = discoverSessionAttributes.tabs;
 
-      expect(() =>
-        transformDiscoverSessionOut({
-          ...discoverSessionAttributes,
-          tabs: [
-            {
-              ...classicTab,
-              attributes: {
-                ...classicTab.attributes,
-                tabTypeState: metricsTab.attributes.tabTypeState,
-              },
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              tabTypeState: metricsTab.attributes.tabTypeState,
             },
-          ],
-        })
-      ).toThrow(
-        `Tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
+          },
+        ],
+      });
+
+      expect(sessionState.tabs).toStrictEqual([discoverSessionApiData.tabs[0]]);
+
+      const { attributes: writtenBack } = transformDiscoverSessionIn(
+        discoverSessionApiDataSchema.parse(sessionState)
       );
+
+      expect(writtenBack.tabs[0].attributes.tabTypeState).toBeUndefined();
     });
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {

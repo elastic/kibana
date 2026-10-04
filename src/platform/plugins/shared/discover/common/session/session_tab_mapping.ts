@@ -103,22 +103,16 @@ export const fromStoredEsqlSessionSettings = (
   }),
 });
 
-/** Applies tab type settings, rejecting Metrics settings on Classic tabs. */
+/** Adds saved type settings, ignoring Metrics settings on non-ES|QL tabs. */
 export const applySessionTabTypeState = (
   apiTab: TabWithoutTypeState,
   tabTypeState: DiscoverSessionTabAttributes['tabTypeState']
 ): DiscoverSessionApiTab => {
-  const apiTabTypeState = fromStoredTabTypeState(tabTypeState);
-
-  if (apiTabTypeState.type === DiscoverTabType.Default) {
-    return { ...apiTab, ...apiTabTypeState };
-  }
-
   if (!isDiscoverSessionEsqlTab(apiTab)) {
-    throw new Error(`Tab "${apiTab.label}" with ID "${apiTab.id}" requires an ES|QL data source.`);
+    return { ...apiTab, type: DiscoverTabType.Default };
   }
 
-  return { ...apiTab, ...apiTabTypeState };
+  return { ...apiTab, ...fromStoredTabTypeState(tabTypeState) };
 };
 
 /**
