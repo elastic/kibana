@@ -9,6 +9,7 @@ import { startInvestigationRoute } from './start_investigation';
 import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
+import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
 import { listInvestigationsRoute } from './list_investigations';
 import { updateInvestigationRoute } from './update_investigation';
 import { followInvestigationRoute } from './follow_investigation';
@@ -38,6 +39,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
   ...ensureInvestigationRoute,
+  ...findOrCreateSlackThreadInvestigationRoute,
   ...listInvestigationsRoute,
   ...updateInvestigationRoute,
   ...followInvestigationRoute,
