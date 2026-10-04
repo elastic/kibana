@@ -182,6 +182,23 @@ spaceTest.describe(
         },
       });
 
+      // 4b. Gate on the same field-caps read the exception flyout consumes,
+      //     so the just-added runtime field is resolvable before the UI runs.
+      await expect
+        .poll(
+          async () => {
+            const { data } = await kbnClient.request<{ fields: Array<{ name: string }> }>({
+              method: 'GET',
+              path: `/s/${scoutSpace.id}/internal/data_views/fields?pattern=${mlAnomalyIndex}&allow_no_index=true`,
+              headers: { 'elastic-api-version': '1' },
+              retries: 0,
+            });
+            return data.fields.some((f) => f.name === runtimeFieldName);
+          },
+          { timeout: 60_000, intervals: [2_000] }
+        )
+        .toBe(true);
+
       // 5. ML detection rule. `anomaly_threshold` sits well below the
       //    synthesized record's `record_score` so the rule fires on the
       //    seeded anomaly immediately.
