@@ -25,7 +25,6 @@ export enum AttacksEventTypes {
   GenerationsControlCenterOpened = 'Attacks Generations Control Center Opened',
   GenerateClicked = 'Attacks Generate Clicked',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
-  WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
   TypeFilterChanged = 'Attacks Type Filter Changed',
   TourCalloutAction = 'Attacks Tour Callout Action',
   TourStepAction = 'Attacks Tour Step Action',
@@ -143,7 +142,6 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.GenerateClicked]: AttacksGenerateClickedParams;
   [AttacksEventTypes.ScheduleDetailsFlyoutOpened]: AttacksScheduleDetailsFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;
-  [AttacksEventTypes.WorkflowRunTriggered]: AttacksActionBaseParams;
   [AttacksEventTypes.TypeFilterChanged]: AttacksTypeFilterChangedParams;
   [AttacksEventTypes.TourCalloutAction]: AttacksTourCalloutActionParams;
   [AttacksEventTypes.TourStepAction]: AttacksTourStepActionParams;

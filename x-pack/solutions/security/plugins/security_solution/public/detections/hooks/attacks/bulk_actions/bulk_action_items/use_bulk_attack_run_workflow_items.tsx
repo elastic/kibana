@@ -17,28 +17,15 @@ import {
 } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
-import { useKibana } from '../../../../../common/lib/kibana';
-import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
-import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { RUN_ATTACK_WORKFLOW_ACTION_ID } from '../../../../../common/constants/action_ids';
-
-export interface UseBulkAttackRunWorkflowItemsProps {
-  /** Source of the action for telemetry */
-  telemetrySource?: AttacksActionTelemetrySource;
-}
 
 /**
  * Hook that provides bulk action items and panels for running workflows on attacks.
  */
-export const useBulkAttackRunWorkflowItems = ({
-  telemetrySource,
-}: UseBulkAttackRunWorkflowItemsProps = {}): BulkAttackActionItems => {
+export const useBulkAttackRunWorkflowItems = (): BulkAttackActionItems => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
-  const {
-    services: { telemetry },
-  } = useKibana();
 
   const canRunWorkflow = useMemo(
     () =>
@@ -46,27 +33,19 @@ export const useBulkAttackRunWorkflowItems = ({
     [loading, hasIndexWrite, hasAttackIndexWrite, workflowUIEnabled, canExecuteWorkflow]
   );
 
-  const handleExecute = useCallback(() => {
-    if (telemetrySource) {
-      telemetry?.reportEvent(AttacksEventTypes.WorkflowRunTriggered, { source: telemetrySource });
-    }
-  }, [telemetry, telemetrySource]);
-
-  const renderContent = useCallback(
-    ({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
-      const alertIds = alertItems.flatMap(({ _id, ecs }) =>
-        ecs._index ? [{ _id, _index: ecs._index }] : []
-      );
-      return (
-        <AlertWorkflowsPanel
-          alertIds={alertIds}
-          onClose={closePopoverMenu}
-          onExecute={handleExecute}
-        />
-      );
-    },
-    [handleExecute]
-  );
+  const renderContent = useCallback(({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
+    const alertIds = alertItems.flatMap(({ _id, ecs }) =>
+      ecs._index ? [{ _id, _index: ecs._index }] : []
+    );
+    return (
+      <AlertWorkflowsPanel
+        alertIds={alertIds}
+        onClose={closePopoverMenu}
+        telemetrySurface="attack"
+        isBulk={alertIds.length > 1}
+      />
+    );
+  }, []);
 
   const items = useMemo(
     () =>

@@ -208,11 +208,6 @@ export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = 
   },
 };
 
-export const attacksWorkflowRunTriggeredEvent: AttacksTelemetryEvent = {
-  eventType: AttacksEventTypes.WorkflowRunTriggered,
-  schema: actionSourceSchema,
-};
-
 export const attacksTypeFilterChangedEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.TypeFilterChanged,
   schema: {
@@ -289,7 +284,6 @@ export const attacksTelemetryEvents = [
   attacksGenerationsControlCenterOpenedEvent,
   attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
-  attacksWorkflowRunTriggeredEvent,
   attacksTypeFilterChangedEvent,
   attacksTourCalloutActionEvent,
   attacksTourStepActionEvent,
