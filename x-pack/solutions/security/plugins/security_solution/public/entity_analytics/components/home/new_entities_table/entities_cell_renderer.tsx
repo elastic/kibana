@@ -156,6 +156,8 @@ const RowActionsCell: React.FC<RowActionsCellProps> = ({
   );
 };
 
+export { RowActionsCell };
+
 export interface RowActions {
   onInvestigateInTimeline: (row: Record<string, unknown>) => void;
   onOpenEntityGraph: (row: Record<string, unknown>) => void;
@@ -174,22 +176,12 @@ export const renderEntityCell = (
   row: Record<string, unknown>,
   watchlistNames: Map<string, string>,
   euiTheme: EuiThemeComputed,
-  handlers?: CellHandlers,
-  rowActions?: RowActions
+  handlers?: CellHandlers
 ): JSX.Element => {
   const { onEntityNameClick, onGroupSizeClick, onAlertCountClick, onAnomalyCountClick } =
     handlers ?? {};
 
   switch (columnId) {
-    case 'actions':
-      if (!rowActions) return <>{'—'}</>;
-      return (
-        <RowActionsCell
-          onInvestigateInTimeline={() => rowActions.onInvestigateInTimeline(row)}
-          onOpenEntityGraph={() => rowActions.onOpenEntityGraph(row)}
-        />
-      );
-
     case 'entity.name': {
       const name = String(value ?? '—');
       if (!onEntityNameClick) {

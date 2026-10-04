@@ -11,7 +11,6 @@ import { riskScoreChangeColumn } from './risk_score_change';
 import { groupSizeColumn } from './group_size';
 import { caseCountColumn } from './cases';
 import {
-  actionsColumn,
   entityNameColumn,
   resolvedToColumn,
   entityTypeColumn,
@@ -28,7 +27,6 @@ export type { ColumnDescriptor };
 
 // Ordered list of all grid columns; rows-mode arrays and GridColumnId are derived from this.
 export const ALL_COLUMNS = [
-  actionsColumn,
   entityNameColumn,
   groupSizeColumn,
   resolvedToColumn,

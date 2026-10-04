@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { useEntityGridData } from './use_entity_grid_data';
 import { useEntityChildren } from './use_entity_children';
 import { PAGE_SIZE_OPTIONS } from './common';
-import { renderEntityCell } from './entities_cell_renderer';
+import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
 import { ExpandedEntityRow } from './entities_expanded_row';
 import { AdditionalControls } from '../entities_table/additional_controls';
 import { LastUpdated } from '../last_updated';
@@ -84,7 +84,6 @@ interface EntityGridCellContext {
   watchlistNames: Map<string, string>;
   euiTheme: EuiThemeComputed;
   cellHandlers?: CellHandlers;
-  rowActions?: RowActions;
 }
 
 /** Custom-body / expander React context — expand state lives here, not in cellContext. */
@@ -94,6 +93,7 @@ interface EntityGridView extends EntityGridCellContext {
   columns: ColumnDescriptor[];
   prefetchChildren: (entityId: string) => void;
   toggleExpandedId: (entityId: string) => void;
+  rowActions?: RowActions;
 }
 
 const EntityGridBodyContext = createContext<EntityGridView | null>(null);
@@ -108,7 +108,7 @@ const useEntityGridView = (): EntityGridView => {
 
 const RenderEntityGridCell: RenderCellValue = (cellProps) => {
   const { rowIndex, columnId } = cellProps;
-  const { rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, rowActions } =
+  const { rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers } =
     cellProps as typeof cellProps & EntityGridCellContext;
   const row = rows[rowIndex - pageIndex * pageSize];
   if (!row) return null;
@@ -118,8 +118,7 @@ const RenderEntityGridCell: RenderCellValue = (cellProps) => {
     row,
     watchlistNames,
     euiTheme,
-    cellHandlers,
-    rowActions
+    cellHandlers
   );
 };
 
@@ -159,8 +158,37 @@ const EXPANDER_COLUMN: EuiDataGridControlColumn = {
   rowCellRender: EntityGridExpanderCell,
 };
 
-const NO_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
-const EXPANDER_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [EXPANDER_COLUMN];
+const ACTIONS_HEADER_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.actionsColumnHeader',
+  { defaultMessage: 'Actions' }
+);
+
+const EntityGridActionsHeader = () => <>{ACTIONS_HEADER_LABEL}</>;
+
+const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  const { rows, pageIndex, pageSize, rowActions } = useEntityGridView();
+  const row = rows[rowIndex - pageIndex * pageSize];
+  if (!row || !rowActions) return null;
+  return (
+    <RowActionsCell
+      onInvestigateInTimeline={() => rowActions.onInvestigateInTimeline(row)}
+      onOpenEntityGraph={() => rowActions.onOpenEntityGraph(row)}
+    />
+  );
+};
+
+const ACTIONS_COLUMN: EuiDataGridControlColumn = {
+  id: 'actions',
+  width: 110,
+  headerCellRender: EntityGridActionsHeader,
+  rowCellRender: EntityGridActionsCell,
+};
+
+const INDIVIDUAL_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [ACTIONS_COLUMN];
+const RESOLVED_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [
+  EXPANDER_COLUMN,
+  ACTIONS_COLUMN,
+];
 
 const EntityGridCustomBody = memo(
   ({
@@ -171,7 +199,7 @@ const EntityGridCustomBody = memo(
     footerRow,
   }: EuiDataGridCustomBodyProps) => {
     const { euiTheme } = useEuiTheme();
-    const { rows, expandedIds, childMap, columns, watchlistNames, cellHandlers, rowActions } =
+    const { rows, expandedIds, childMap, columns, watchlistNames, cellHandlers } =
       useEntityGridView();
 
     return (
@@ -236,7 +264,6 @@ const EntityGridCustomBody = memo(
                     euiTheme={euiTheme}
                     watchlistNames={watchlistNames}
                     handlers={cellHandlers}
-                    rowActions={rowActions}
                   />
                 ))}
               </React.Fragment>
@@ -426,9 +453,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       watchlistNames,
       euiTheme,
       cellHandlers,
-      rowActions,
     }),
-    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, rowActions]
+    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers]
   );
 
   const gridView = useMemo(
@@ -439,8 +465,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       columns,
       prefetchChildren,
       toggleExpandedId,
+      rowActions,
     }),
-    [cellContext, expandedIds, childMap, columns, prefetchChildren, toggleExpandedId]
+    [cellContext, expandedIds, childMap, columns, prefetchChildren, toggleExpandedId, rowActions]
   );
 
   return (
@@ -457,7 +484,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EuiDataGrid
           aria-label={GRID_ARIA_LABEL}
           leadingControlColumns={
-            isIndividualRows ? NO_LEADING_CONTROL_COLUMNS : EXPANDER_LEADING_CONTROL_COLUMNS
+            isIndividualRows
+              ? INDIVIDUAL_LEADING_CONTROL_COLUMNS
+              : RESOLVED_LEADING_CONTROL_COLUMNS
           }
           columns={gridColumns}
           columnVisibility={columnVisibility}

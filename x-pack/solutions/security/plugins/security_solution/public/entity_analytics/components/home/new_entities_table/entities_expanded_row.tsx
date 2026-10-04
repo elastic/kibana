@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiDataGridCustomBodyProps, EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import { renderEntityCell } from './entities_cell_renderer';
-import type { CellHandlers, RowActions } from './entities_cell_renderer';
+import type { CellHandlers } from './entities_cell_renderer';
 import type { GridColumnId } from './columns/registry';
 
 interface ChildTreeConnectorProps {
@@ -25,7 +25,6 @@ interface ExpandedEntityRowProps {
   euiTheme: EuiThemeComputed;
   watchlistNames: Map<string, string>;
   handlers?: CellHandlers;
-  rowActions?: RowActions;
 }
 
 export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
@@ -36,7 +35,6 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
   euiTheme,
   watchlistNames,
   handlers,
-  rowActions,
 }) => (
   <div
     role="row"
@@ -64,14 +62,13 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
     >
       {visCols.map((col) => {
         const colDef = columns.find((c) => c.id === col.id);
-        if (!colDef) return <div key={col.id} style={{ width: 36, flexShrink: 0 }} />;
+        if (!colDef) {
+          const width = 'width' in col && typeof col.width === 'number' ? col.width : 36;
+          return <div key={col.id} style={{ width, flexShrink: 0 }} />;
+        }
 
         const w = colDef.initialWidth ?? 150;
         const value = child[col.id as GridColumnId];
-
-        if (col.id === 'actions') {
-          return <div key={col.id} style={{ width: w, flexShrink: 0 }} />;
-        }
 
         if (col.id === 'entity.name') {
           return (
@@ -112,8 +109,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                     child,
                     watchlistNames,
                     euiTheme,
-                    handlers,
-                    rowActions
+                    handlers
                   )}
                 </div>
               </div>
@@ -149,8 +145,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
               child,
               watchlistNames,
               euiTheme,
-              handlers,
-              rowActions
+              handlers
             )}
           </div>
         );

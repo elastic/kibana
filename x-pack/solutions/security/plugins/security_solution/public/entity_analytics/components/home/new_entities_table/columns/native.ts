@@ -50,14 +50,6 @@ const buildNativeEntityCountQuery = ({
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
-export const actionsColumn = {
-  id: 'actions',
-  displayAsText: 'Actions',
-  initialWidth: 110,
-  isSortable: false,
-  isExpandable: false,
-} as const satisfies ColumnDescriptor;
-
 export const entityNameColumn = {
   id: 'entity.name',
   displayAsText: 'Entity name',
