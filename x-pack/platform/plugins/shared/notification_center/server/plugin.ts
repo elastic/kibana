@@ -21,6 +21,7 @@ import { registerNotificationDataStream } from './storage/notification_data_stre
 import { buildForType } from './lib/submit';
 import { registerNotificationUserStorage } from './storage/user_storage';
 import { registerNotificationRoutes } from './routes';
+import { getNotificationCenterUiSettings } from './ui_settings';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -50,6 +51,7 @@ export class NotificationCenterPlugin
     // core gates the plugin on xpack.notificationCenter.enabled;
     this.logger.debug('Setting up Notification Center plugin');
 
+    core.uiSettings.register(getNotificationCenterUiSettings());
     registerNotificationDataStream(core.dataStreams);
     registerNotificationUserStorage(core.userStorage);
     registerNotificationCleanupTask(core, plugins.taskManager, this.logger);

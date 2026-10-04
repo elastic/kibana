@@ -33,10 +33,20 @@ export {
   NOTIFICATION_CENTER_API_VERSION,
 } from './routes';
 
+export {
+  NOTIFICATION_CENTER_SETTINGS_CATEGORY,
+  NOTIFICATION_CENTER_ENABLED_SETTING,
+  NOTIFICATION_CENTER_SETTING_DEFAULT,
+  NOTIFICATION_CENTER_SETTING_KEYS,
+  namespaceSettingKey,
+  typeSettingKey,
+} from './ui_settings';
+
 export { NOTIFICATION_REGISTRY } from './notification_registry';
 export {
   NOTIFICATION_NAMESPACES,
   NOTIFICATION_TYPES,
+  NOTIFICATION_TYPE_REFS,
   isRegisteredNotificationRef,
 } from './notification_registry_utils';
 export type {

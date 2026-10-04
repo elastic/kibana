@@ -6,21 +6,42 @@ It is a **presentation + ingestion layer**: consumers evaluate their own state a
 to the center through submitter helper; this plugin builds the idempotency key, stores and
 queries notifications for users, and renders them.
 
-## Feature flags
+## What gates what
 
-The plugin is gated by two [core feature flags](../../../../../src/core/packages/feature-flags/README.mdx),
-both **off by default**:
+Three independent gates, at different scopes and with different operators:
 
-| Key                                              | Purpose                              |
-| ------------------------------------------------ | ------------------------------------ |
-| `notificationCenter.uiEnabled`                   | Kibana UI visibility                 |
-| `notificationCenter.types.inference.modelStatus` | Inference model status notifications |
+| Gate                                            | Scope                 | Decides                                                              |
+| ----------------------------------------------- | --------------------- | -------------------------------------------------------------------- |
+| `xpack.notificationCenter.enabled` (kibana.yml)  | deployment, static    | whether the plugin exists at all — routes, data stream, cleanup task, `submit()` |
+| `notificationCenter.uiEnabled` (LaunchDarkly)    | deployment, dynamic   | whether the UI may render; the operator shutoff, flippable without a restart |
+| `notificationCenter.types.<ns>.<type>` (LaunchDarkly) | deployment, dynamic | whether `submit()` accepts that type — **server-side only**       |
+| `notificationCenter:*` (advanced settings)       | space, user-editable  | which notifications the UI displays                                   |
 
-Individual notification _types_ (model status, etc.) are gated separately and land as
-consumers are introduced.
-Their definitions and rules are managed in the separate [`elastic/kibana-feature-flags`](https://github.com/elastic/kibana-feature-flags) repository
+The UI renders a notification only when `uiEnabled` **and** the space's master switch **and** its
+namespace switch **and** its type switch all pass. Everything is off until launch, when
+`uiEnabled` and the advanced-setting defaults flip to `true`.
 
-Flags default to `false` when LaunchDarkly value is unreachable.
+The advanced settings are read in exactly one place — [`public/lib/ui_visibility.ts`](./public/lib/ui_visibility.ts).
+They must never reach `submit()`, the routes or the cleanup task; keying per-space data behaviour
+on a user-editable saved object is the anti-pattern this split avoids.
+
+### Static plugin enablement
+
+`xpack.notificationCenter.enabled` (default `false`) is set in `kibana.yml` config
+
+```yaml
+xpack.notificationCenter.enabled: true
+```
+
+Once enabled, the dynamic flags determine further plugin behavior
+
+### Feature flags
+
+[Core feature flags](../../../../../src/core/packages/feature-flags/README.mdx) are **off by
+default**, including when the LaunchDarkly value is unreachable. Individual notification _types_
+are gated separately and land as consumers are introduced. Their definitions and rules are managed
+in the separate [`elastic/kibana-feature-flags`](https://github.com/elastic/kibana-feature-flags)
+repository.
 
 To force a flag locally, add an override to your `kibana.dev.yml`:
 
@@ -32,15 +53,35 @@ feature_flags.overrides:
 > ⚠️ Feature flags are dynamic config and cannot be used to decide plugin
 > setup lifecycle
 
-## Static plugin enablement
+### Space opt-in (advanced settings)
 
-`xpack.notificationCenter.enabled` (default `false`) is set in `kibana.yml` config
+Three levels of boolean advanced setting, all derived from `NOTIFICATION_REGISTRY` and registered
+in [`server/ui_settings.ts`](./server/ui_settings.ts) under a `Notification Center` category:
 
-```yaml
-xpack.notificationCenter.enabled: true
-```
+| Key                                             | Turns off                               |
+| ----------------------------------------------- | --------------------------------------- |
+| `notificationCenter:enabled`                    | the Notification Center in this space   |
+| `notificationCenter:types:<namespace>`          | every type in one namespace             |
+| `notificationCenter:types:<namespace>:<type>`   | one type                                |
 
-Once enabled, the dynamic flags determine further plugin behavior
+The registry-derived keys form one tree mirroring the type's LaunchDarkly key
+(`notificationCenter.types.<namespace>.<type>`), with the namespace key parenting its type keys —
+the same shape as core's `dateFormat` and `dateFormat:dow`.
+
+Rows are namespace-scoped (no `scope: 'global'`), which is what makes them per-space, and ship as
+`technicalPreview`. Registering a type adds its rows automatically.
+
+Two consequences worth knowing:
+
+- The rows are visible regardless of LaunchDarkly. In a deployment where a type's flag is off, its
+  toggle is editable but inert — nothing of that type is ever submitted.
+- **Serverless hides all of them.** `setupProjectSettings(SEARCH_PROJECT_SETTINGS)` makes core
+  stamp `readonly` + `readonlyMode: 'strict'` on every setting missing from that allowlist, and
+  NC's keys cannot be added while `xpack.notificationCenter.enabled` defaults to `false`
+  (`validateAllowlist` throws at boot for an allowlisted key that is not registered). Use the
+  stateful stack to exercise real toggling. `uiSettings.overrides` in `kibana.dev.yml` still works
+  on serverless — `applyOverrides` runs regardless of readonly mode — but an overridden setting
+  pins rather than defaults, so it cannot then be changed in the UI.
 
 ## Notification-type flag strategy
 

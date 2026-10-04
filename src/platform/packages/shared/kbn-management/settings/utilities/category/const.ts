@@ -17,6 +17,7 @@ export const BANNER_CATEGORY = 'banner';
 export const DISCOVER_CATEGORY = 'discover';
 export const MACHINE_LEARNING_CATEGORY = 'machineLearning';
 export const NOTIFICATIONS_CATEGORY = 'notifications';
+export const NOTIFICATION_CENTER_CATEGORY = 'notificationCenter';
 export const OBSERVABILITY_CATEGORY = 'observability';
 export const REPORTING_CATEGORY = 'reporting';
 export const ROLLUPS_CATEGORY = 'rollups';
@@ -38,6 +39,7 @@ export const CATEGORY_ORDER = [
   DISCOVER_CATEGORY,
   MACHINE_LEARNING_CATEGORY,
   NOTIFICATIONS_CATEGORY,
+  NOTIFICATION_CENTER_CATEGORY,
   OBSERVABILITY_CATEGORY,
   REPORTING_CATEGORY,
   ROLLUPS_CATEGORY,

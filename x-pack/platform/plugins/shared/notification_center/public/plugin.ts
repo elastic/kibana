@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { getNotificationCenterVisibility$ } from './lib/ui_visibility';
 import type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
 export class NotificationCenterPlugin
@@ -15,8 +16,10 @@ export class NotificationCenterPlugin
     return {};
   }
 
-  public start(_core: CoreStart): NotificationCenterPublicStart {
-    return {};
+  public start(core: CoreStart): NotificationCenterPublicStart {
+    return {
+      visibility$: getNotificationCenterVisibility$(core),
+    };
   }
 
   public stop() {}
