@@ -1,5 +1,5 @@
 {
-  "sha1": "7466158ae5019f847e3c458cef984e7ad723ce23",
+  "sha1": "30db32344bd1ab4763948439cd981468e424aded",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,8 +21,8 @@
       }
     },
     {
-      "id": "27cb3cfb52afaa0-d4057e4746e6d25",
-      "title": "Annotations List create an annotation",
+      "id": "27cb3cfb52afaa0-a1217bdbc781d9b",
+      "title": "Annotations List creates, displays, updates and deletes an annotation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -32,56 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 17,
+        "line": 20,
         "column": 25
-      }
-    },
-    {
-      "id": "27cb3cfb52afaa0-847fd6698b3b503",
-      "title": "Annotations List Go to SLOs and check that annotation is displayed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 31,
-        "column": 18
-      }
-    },
-    {
-      "id": "27cb3cfb52afaa0-2d4124b6ff8f776",
-      "title": "Annotations List update annotation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 44,
-        "column": 10
-      }
-    },
-    {
-      "id": "27cb3cfb52afaa0-c180b803b4e7cdb",
-      "title": "Annotations List delete annotation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 60,
-        "column": 18
       }
     },
     {
