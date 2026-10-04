@@ -8,101 +8,50 @@
 import {
   ANOMALY_COUNT_FIELD,
   ENTITY_ID_FIELD,
-  ENTITY_TYPE_FILTER,
-  alertLookbackCutoff,
-  buildKeepClause,
-  buildResolvedRowsFilter,
-  buildFilterClause,
-  buildLookupJoinClause,
-  buildSearchIdInClause,
-  entityAliasOf,
-  toList,
-  buildSortSuffix,
-  buildCursorClause,
+  ML_ANOMALY_INDICES,
   buildEuidStages,
+  buildForeignSortQueries,
+  lookbackCutoff,
+  nullOnFailure,
+  toList,
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
-import { isAbortError } from '../../../../../common/utils/exceptions';
 
-const ML_ANOMALY_INDICES = '.ml-anomalies-*';
+/** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 const ANOMALY_BASE_FILTER = `result_type == "record" AND is_interim == false`;
 
-// ── query builders: anomaly_count sort ───────────────────────────────────────
+/** Final anomaly records in the time range, one row per record with its derived `entity.id`. */
+const buildAnomalyEntityRows = ({ timeRange }: QueryArgs): string[] => [
+  `FROM ${ML_ANOMALY_INDICES}`,
+  `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
+  ...buildEuidStages(),
+];
 
-const buildAnomalyCountSortBaseQuery = (cutoff: string): string =>
+// ── sort queries ──────────────────────────────────────────────────────────────
+
+const buildAnomalyCountBaseQuery = (args: QueryArgs): string =>
   [
-    `FROM ${ML_ANOMALY_INDICES}`,
-    `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${cutoff}"`,
-    ...buildEuidStages(),
+    ...buildAnomalyEntityRows(args),
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
-const buildAnomalyCountSortDataQuery = (args: QueryArgs): string => {
-  const {
-    namespace,
-    timeRange,
-    sort: { direction: dir },
-    cursor,
-    pageSize,
-    rowsMode,
-    concreteEntityIndexName,
-    searchExpression,
-    entityExpression,
-  } = args;
-  const inner = [
-    buildAnomalyCountSortBaseQuery(alertLookbackCutoff(timeRange)),
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
-    buildKeepClause(args, ANOMALY_COUNT_FIELD),
-    ...buildCursorClause(cursor),
-  ].join('\n');
-
-  return [
-    SET_UNMAPPED_NULLIFY,
-    `FROM (`,
-    inner,
-    `)`,
-    buildSortSuffix(ANOMALY_COUNT_FIELD, dir, pageSize),
-  ].join('\n');
-};
-
-const buildAnomalyCountSortCountQuery = ({
-  namespace,
-  timeRange,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
-  [
-    SET_UNMAPPED_NULLIFY,
-    buildAnomalyCountSortBaseQuery(alertLookbackCutoff(timeRange)),
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
-    `| KEEP \`${ENTITY_ID_FIELD}\``,
-    `| STATS total = COUNT(*)`,
-  ].join('\n');
+const buildAnomalyCountQueries = (args: QueryArgs) =>
+  buildForeignSortQueries(args, {
+    baseQuery: buildAnomalyCountBaseQuery(args),
+    sortField: ANOMALY_COUNT_FIELD,
+    settings: [SET_UNMAPPED_NULLIFY],
+  });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildAnomalyCountEnrichQuery = ({ timeRange }: QueryArgs, entityIds: string[]): string => {
-  const ids = toList(entityIds);
-  return [
+const buildAnomalyCountEnrichQuery = (args: QueryArgs, entityIds: string[]): string =>
+  [
     SET_UNMAPPED_NULLIFY,
-    `FROM ${ML_ANOMALY_INDICES}`,
-    `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${alertLookbackCutoff(timeRange)}"`,
-    ...buildEuidStages(),
-    `| WHERE \`entity.id\` IN (${ids})`,
+    ...buildAnomalyEntityRows(args),
+    `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
-};
 
 const enrichAnomalyCount = async (
   pageRows: Row[],
@@ -115,14 +64,11 @@ const enrichAnomalyCount = async (
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   if (!entityIds.length) return;
 
-  const rows = await runQuery(buildAnomalyCountEnrichQuery(args, entityIds)).catch((err) => {
-    if (isAbortError(err)) throw err;
-    return null;
-  });
+  const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, entityIds)));
   if (!rows) return;
 
   const byId = new Map(
-    rows.map((r) => [r['entity.id'] as string, r[ANOMALY_COUNT_FIELD] as number])
+    rows.map((r) => [r[ENTITY_ID_FIELD] as string, r[ANOMALY_COUNT_FIELD] as number])
   );
   for (const row of pageRows) {
     row[ANOMALY_COUNT_FIELD] = byId.get(row[ENTITY_ID_FIELD] as string) ?? 0;
@@ -137,7 +83,7 @@ export const anomalyCountColumn = {
   initialWidth: 120,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildAnomalyCountSortDataQuery,
-  buildCountQuery: buildAnomalyCountSortCountQuery,
+  buildSortQuery: (args) => buildAnomalyCountQueries(args).sort,
+  buildCountQuery: (args) => buildAnomalyCountQueries(args).count,
   enrichPage: enrichAnomalyCount,
 } as const satisfies ColumnDescriptor;

@@ -14,82 +14,68 @@ import {
   buildKeepClause,
   buildFilterClause,
   buildLookupJoinClause,
+  nullOnFailure,
   toList,
   buildSortSuffix,
   buildCursorClause,
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
-import { isAbortError } from '../../../../../common/utils/exceptions';
 
-// ── query builders: group_size sort ──────────────────────────────────────────
-// Inner FROM is the entity index, so searchFilters can stay in WHERE (KQL legal).
+const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
-const buildGroupSizeSortDataQuery = (args: QueryArgs): string => {
-  const {
-    namespace,
-    sort: { direction: dir },
-    cursor,
-    pageSize,
-    concreteEntityIndexName,
-    searchExpression,
-    entityExpression,
-  } = args;
-  const entityAlias = entityAliasOf(namespace);
-  const inner = [
-    `FROM ${entityAlias}`,
+// ── sort queries ──────────────────────────────────────────────────────────────
+
+/**
+ * Counts entities per resolution group, keyed by the target's `entity.id`.
+ * The search expression filters the members. A group matches when any member matches,
+ * even when the target does not. The inner FROM is the entity index, so KQL is valid.
+ */
+const buildGroupSizeBaseQuery = (
+  { namespace, searchExpression }: QueryArgs,
+  countColumn: string
+): string =>
+  [
+    `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildFilterClause(searchExpression),
-    `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
-    `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
+    `| EVAL group_key = ${GROUP_KEY}`,
+    `| STATS ${countColumn} = COUNT(*) BY group_key`,
     `| RENAME group_key AS \`entity.id\``,
   ].join('\n');
 
-  return [
-    `FROM (\n${inner}\n)`,
-    buildLookupJoinClause(concreteEntityIndexName),
+const buildGroupSizeSortQuery = (args: QueryArgs): string =>
+  [
+    `FROM (\n${buildGroupSizeBaseQuery(args, GROUP_SIZE_FIELD)}\n)`,
+    buildLookupJoinClause(args.concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(entityExpression),
+    ...buildFilterClause(args.entityExpression),
     buildKeepClause(args, GROUP_SIZE_FIELD),
-    ...buildCursorClause(cursor),
-    buildSortSuffix(GROUP_SIZE_FIELD, dir, pageSize),
-  ].join('\n');
-};
-
-const buildGroupSizeSortCountQuery = ({
-  namespace,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string => {
-  const entityAlias = entityAliasOf(namespace);
-  const inner = [
-    `FROM ${entityAlias}`,
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(searchExpression),
-    `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
-    `| STATS _c = COUNT(*) BY group_key`,
-    `| RENAME group_key AS \`entity.id\``,
+    ...buildCursorClause(args.cursor),
+    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
   ].join('\n');
 
-  return [
-    `FROM (\n${inner}\n)`,
-    buildLookupJoinClause(concreteEntityIndexName),
+const buildGroupSizeCountQuery = (args: QueryArgs): string =>
+  [
+    `FROM (\n${buildGroupSizeBaseQuery(args, '_c')}\n)`,
+    buildLookupJoinClause(args.concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(entityExpression),
+    ...buildFilterClause(args.entityExpression),
     `| STATS total = COUNT(*)`,
   ].join('\n');
-};
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildGroupSizeEnrichQuery = (namespace: string, groupKeys: readonly string[]): string => {
+const buildGroupSizeEnrichQuery = (
+  { namespace }: QueryArgs,
+  groupKeys: readonly string[]
+): string => {
   const keys = toList(groupKeys);
   return [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
-    // Lucene-pushable superset of the group_key filter below; skips entities outside page groups.
+    // Pushable prefilter for the group_key filter below.
     `| WHERE ${RESOLVED_TO_FIELD} IN (${keys}) OR ${ENTITY_ID_FIELD} IN (${keys})`,
-    `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
+    `| EVAL group_key = ${GROUP_KEY}`,
     `| WHERE group_key IN (${keys})`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
   ].join('\n');
@@ -97,7 +83,7 @@ const buildGroupSizeEnrichQuery = (namespace: string, groupKeys: readonly string
 
 const enrichGroupSize = async (
   pageRows: Row[],
-  { namespace }: QueryArgs,
+  args: QueryArgs,
   skip: Set<string>,
   { runQuery }: RunContext
 ): Promise<void> => {
@@ -106,18 +92,15 @@ const enrichGroupSize = async (
   const entityIds = [...new Set(pageRows.map((r) => r[ENTITY_ID_FIELD] as string))].filter(Boolean);
   if (!entityIds.length) return;
 
-  const rows = await runQuery(buildGroupSizeEnrichQuery(namespace, entityIds)).catch((err) => {
-    if (isAbortError(err)) throw err;
-    return null;
-  });
+  const rows = await nullOnFailure(runQuery(buildGroupSizeEnrichQuery(args, entityIds)));
   if (!rows) return;
 
   const byGroupKey = new Map(
     rows.map((r) => [r.group_key as string, r[GROUP_SIZE_FIELD] as number])
   );
   for (const row of pageRows) {
-    // Targets: group_key == entity.id → COUNT(*) of all members. Aliases: nothing maps to
-    // their entity.id as a group leader → miss → 1 (they are a single record).
+    // A target row matches its group key and gets the member count. An alias row is
+    // never a group key, so it gets 1: it is a single record.
     row[GROUP_SIZE_FIELD] = byGroupKey.get(row[ENTITY_ID_FIELD] as string) ?? 1;
   }
 };
@@ -130,7 +113,7 @@ export const groupSizeColumn = {
   initialWidth: 100,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildGroupSizeSortDataQuery,
-  buildCountQuery: buildGroupSizeSortCountQuery,
+  buildSortQuery: buildGroupSizeSortQuery,
+  buildCountQuery: buildGroupSizeCountQuery,
   enrichPage: enrichGroupSize,
 } as const satisfies ColumnDescriptor;

@@ -11,54 +11,48 @@ import {
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
   TIME_RANGE_DAYS,
+  buildForeignSortFilterSteps,
   buildKeepClause,
-  buildResolvedRowsFilter,
-  buildFilterClause,
-  buildLookupJoinClause,
-  buildSearchIdInClause,
-  entityAliasOf,
+  nullOnFailure,
+  riskScoreIndexOf,
   toList,
   buildSortSuffix,
   buildCursorClause,
 } from '../common';
-import type { QueryArgs, RunContext, Row, TimeRange, ColumnDescriptor } from '../common';
-import { isAbortError } from '../../../../../common/utils/exceptions';
+import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 
-const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
+// A risk score doc stores its entity under host.risk, user.risk or service.risk.
+const RISK_ID_VALUE_COALESCE = `COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`;
+const RISK_ID_FIELD_COALESCE = `COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field)`;
+const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
 
-const ENTITY_ID_COALESCE = `COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`;
-const ENTITY_ID_FIELD_COALESCE = `COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field)`;
-const RISK_SCORE_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
+/**
+ * Risk score docs that can be the reference: scored at or before the start of the time
+ * range, and keyed by EUID. The reference score is the last of these per entity.
+ * Risk score change is the current entity score minus the reference score.
+ */
+const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] => [
+  `FROM ${riskScoreIndexOf(namespace)}`,
+  `| WHERE \`@timestamp\` <= NOW() - ${TIME_RANGE_DAYS[timeRange]} day`,
+];
 
-// ── query builders: risk_score_change sort ────────────────────────────────────
+// ── sort queries ──────────────────────────────────────────────────────────────
 
-const buildRiskScoreChangeBaseQuery = (args: QueryArgs): string => {
-  const {
-    namespace,
-    timeRange,
-    concreteEntityIndexName,
-    rowsMode,
-    searchExpression,
-    entityExpression,
-  } = args;
-  const days = TIME_RANGE_DAYS[timeRange];
-  return [
-    `FROM ${riskScoreIndexOf(namespace)}`,
-    `| WHERE \`@timestamp\` <= NOW() - ${days} day`,
-    `| WHERE ${ENTITY_ID_FIELD_COALESCE} == "entity.id"`,
-    `| EVAL \`entity.id\` = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
+const buildRiskScoreChangeBaseQuery = (args: QueryArgs): string =>
+  [
+    ...buildReferenceScoreDocs(args),
+    `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
+    `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
     `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
+    ...buildForeignSortFilterSteps(
+      args,
+      `${ENTITY_TYPE_FILTER} AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`
+    ),
     `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - reference_score`,
     buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
   ].join('\n');
-};
 
-const buildRiskScoreChangeDataQuery = (args: QueryArgs): string =>
+const buildRiskScoreChangeSortQuery = (args: QueryArgs): string =>
   [
     buildRiskScoreChangeBaseQuery(args),
     ...buildCursorClause(args.cursor),
@@ -70,20 +64,14 @@ const buildRiskScoreChangeCountQuery = (args: QueryArgs): string =>
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildReferenceScoreEnrichQuery = (
-  namespace: string,
-  entityIds: string[],
-  timeRange: TimeRange
-): string => {
+const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): string => {
   const ids = toList(entityIds);
-  const days = TIME_RANGE_DAYS[timeRange];
   return [
-    `FROM ${riskScoreIndexOf(namespace)}`,
-    `| WHERE \`@timestamp\` <= NOW() - ${days} day`,
-    // Lucene-pushable superset of the COALESCE id filter below; skips docs for off-page entities.
+    ...buildReferenceScoreDocs(args),
+    // Pushable prefilter for the COALESCE filters below.
     `| WHERE host.risk.id_value IN (${ids}) OR user.risk.id_value IN (${ids}) OR service.risk.id_value IN (${ids})`,
-    `| WHERE ${ENTITY_ID_FIELD_COALESCE} == "entity.id"`,
-    `| EVAL entity_id = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
+    `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
+    `| EVAL entity_id = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
     `| WHERE entity_id IN (${ids})`,
     `| STATS reference_score = LAST(score, \`@timestamp\`) BY entity_id`,
   ].join('\n');
@@ -91,7 +79,7 @@ const buildReferenceScoreEnrichQuery = (
 
 const enrichRiskScoreChange = async (
   pageRows: Row[],
-  { namespace, timeRange }: QueryArgs,
+  args: QueryArgs,
   skip: Set<string>,
   { runQuery }: RunContext
 ): Promise<void> => {
@@ -100,12 +88,7 @@ const enrichRiskScoreChange = async (
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   if (!entityIds.length) return;
 
-  const rows = await runQuery(
-    buildReferenceScoreEnrichQuery(namespace, entityIds, timeRange)
-  ).catch((err) => {
-    if (isAbortError(err)) throw err;
-    return null;
-  });
+  const rows = await nullOnFailure(runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds)));
   if (!rows) return;
 
   const byId = new Map(rows.map((r) => [r.entity_id as string, r.reference_score as number]));
@@ -125,7 +108,7 @@ export const riskScoreChangeColumn = {
   initialWidth: 140,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildRiskScoreChangeDataQuery,
+  buildSortQuery: buildRiskScoreChangeSortQuery,
   buildCountQuery: buildRiskScoreChangeCountQuery,
   enrichPage: enrichRiskScoreChange,
 } as const satisfies ColumnDescriptor;

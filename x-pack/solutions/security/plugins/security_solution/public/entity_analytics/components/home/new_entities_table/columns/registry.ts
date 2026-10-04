@@ -23,6 +23,31 @@ import {
 } from './native';
 import type { ColumnDescriptor, EnrichFn } from '../common';
 
+/*
+ * How the entities grid loads a page:
+ * 1. The sort column builds the sort query. It returns one page plus one row, which
+ *    tells if a next page exists. The cursor of the next page comes from the last row.
+ * 2. The count query also comes from the active sort column, because the sort decides
+ *    which rows exist. A native sort counts every entity that passes the filters.
+ *    A foreign sort counts only entities that have a value for it, for example
+ *    entities with alerts. The count's cache key has no cursor, so it runs once per
+ *    sort and filter, not once per page.
+ * 3. Each enrich function fills computed columns for the page rows only.
+ *
+ * Terms used in this folder:
+ * - Native sort: the sort field is on the entity doc. One query on the entity index.
+ * - Foreign sort: the sort value comes from another index (alerts, risk scores,
+ *   anomalies). STATS computes it per entity.id, then LOOKUP JOIN adds the entity doc.
+ * - Page rows: the entity rows of the current page.
+ * - Stamped alert: an alert with `kibana.alert.entity.id`. An unstamped alert has no
+ *   such field; its EUIDs come from the raw user, host and service fields.
+ * - EUID: the entity id derived from raw identity fields, for example `host:<host.id>`.
+ * - Resolution group: a target entity and the alias entities resolved to it.
+ * - Pushable prefilter: a filter that ES|QL pushes down to Lucene and that matches a
+ *   superset of an exact filter that follows it. It makes the exact filter cheap.
+ * - Search expression: KQL and filter pills. Entity expression: URL filters and tiles.
+ */
+
 export type { ColumnDescriptor };
 
 // Ordered list of all grid columns; rows-mode arrays and GridColumnId are derived from this.

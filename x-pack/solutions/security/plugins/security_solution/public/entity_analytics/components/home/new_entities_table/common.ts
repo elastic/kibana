@@ -15,6 +15,7 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
+import { isAbortError } from '../../../../common/utils/exceptions';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -123,6 +124,9 @@ export interface ColumnDescriptor extends EuiDataGridColumn, ColumnDataHandlers 
 // ── index name helpers ────────────────────────────────────────────────────────
 
 export const entityAliasOf = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
+export const alertsIndexOf = (namespace: string) => `.alerts-security.alerts-${namespace}`;
+export const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
+export const ML_ANOMALY_INDICES = '.ml-anomalies-*';
 
 // ── primitives ───────────────────────────────────────────────────────────────
 
@@ -164,7 +168,10 @@ export const buildCombinedFilterClause = (
   entityExpression?: string
 ): string[] => buildFilterClause(joinAnd(searchExpression, entityExpression));
 
-/** Simple entity LOOKUP — join key only (no searchFilters in `ON`). */
+/**
+ * Joins entity docs on `entity.id` only. The search expression must not go in `ON`:
+ * ES|QL rejects KQL there. The join needs a concrete index name, not the alias.
+ */
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
 
@@ -214,8 +221,19 @@ export const createEsqlRunner = (
     );
 };
 
-export const alertLookbackCutoff = (range: TimeRange): string =>
+/** ISO timestamp at the start of the time range. Alert and anomaly queries filter on it. */
+export const lookbackCutoff = (range: TimeRange): string =>
   new Date(Date.now() - TIME_RANGE_DAYS[range] * MS_PER_DAY).toISOString();
+
+/**
+ * Resolves to `null` when an enrich request fails, so one enricher cannot fail the page.
+ * An abort still rejects: the query key changed and the caller drops the result.
+ */
+export const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
+  request.catch((err) => {
+    if (isAbortError(err)) throw err;
+    return null;
+  });
 
 // ── cursors ──────────────────────────────────────────────────────────────────
 
@@ -229,6 +247,10 @@ export const decodeCursor = (s: string): PageCursor => {
   }
 };
 
+/**
+ * Keeps the rows after the cursor in `SORT field <dir> NULLS LAST, entity.id ASC` order.
+ * Null sort values come last, so every page after a non-null cursor also keeps them.
+ */
 export const buildCursorClause = (cursor: PageCursor | null): string[] => {
   if (cursor == null) return [];
   const { sortField, sortValue, sortDirection, entityId } = cursor;
@@ -249,9 +271,62 @@ export const buildSortSuffix = (field: string, dir: SortDir, pageSize: number): 
 
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
 
+// ── foreign sorts ────────────────────────────────────────────────────────────
+
+/**
+ * Joins entity docs onto `STATS … BY entity.id` rows and applies the grid filters.
+ * The search expression runs in an entities subquery: ES|QL rejects KQL after STATS.
+ * The entity expression runs after the join, so it can use any entity doc field.
+ */
+export const buildForeignSortFilterSteps = (
+  { namespace, rowsMode, concreteEntityIndexName, searchExpression, entityExpression }: QueryArgs,
+  entityCondition: string = ENTITY_TYPE_FILTER
+): string[] => [
+  ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
+  buildLookupJoinClause(concreteEntityIndexName),
+  `| WHERE ${entityCondition}`,
+  ...buildResolvedRowsFilter(rowsMode),
+  ...buildFilterClause(entityExpression),
+];
+
+interface ForeignSortQueryOptions {
+  /** Pipeline that ends in `STATS <sortField> = … BY entity.id`. */
+  baseQuery: string;
+  sortField: string;
+  /** Statements that go before the query, for example `SET …;`. */
+  settings?: readonly string[];
+}
+
+/** Sort and count queries for a foreign sort. */
+export const buildForeignSortQueries = (
+  args: QueryArgs,
+  { baseQuery, sortField, settings = [] }: ForeignSortQueryOptions
+): { sort: string; count: string } => {
+  const filtered = [baseQuery, ...buildForeignSortFilterSteps(args)];
+  const page = [...filtered, buildKeepClause(args, sortField), ...buildCursorClause(args.cursor)];
+  return {
+    sort: [
+      ...settings,
+      'FROM (',
+      page.join('\n'),
+      ')',
+      buildSortSuffix(sortField, args.sort.direction, args.pageSize),
+    ].join('\n'),
+    count: [
+      ...settings,
+      ...filtered,
+      `| KEEP \`${ENTITY_ID_FIELD}\``,
+      '| STATS total = COUNT(*)',
+    ].join('\n'),
+  };
+};
+
 // ── EUID query pipeline builders ─────────────────────────────────────────────
 
-/** Evaluates identity fields and COALESCEs into `entity.id`. Used for anomaly queries. */
+/**
+ * Derives one EUID per document into `entity.id` (first of user, host, service).
+ * Anomaly queries use it: ML records do not carry `entity.id`.
+ */
 export const buildEuidStages = (): string[] => {
   const parts: string[] = [];
   for (const entityType of ALLOWED_ENTITY_TYPES) {
@@ -267,11 +342,12 @@ export const buildEuidStages = (): string[] => {
 };
 
 /**
- * Folds typed EUID columns into one multi-value column. `MV_APPEND` nulls if any
- * arg is null, so each slot is a rotated COALESCE (non-null whenever any EUID is)
- * and MV_DEDUPE drops the repeats. ~3.5x cheaper than a CASE over every combination.
+ * Puts the user, host and service EUIDs into one multi-value column.
+ * `MV_APPEND` returns null when an argument is null. Each slot is a rotated COALESCE,
+ * which is not null when any EUID exists, and MV_DEDUPE removes the repeats.
+ * This is about 3.5x faster than a CASE over every null combination.
  */
-const evalGuardedTypedEuids = (outputColumn: string): string =>
+const evalTypedEuidsAsMultiValue = (outputColumn: string): string =>
   [
     `| EVAL ${outputColumn} = MV_DEDUPE(MV_APPEND(MV_APPEND(`,
     '  COALESCE(user_euid, host_euid, service_euid),',
@@ -286,38 +362,30 @@ const indentForkBranch = (esql: string): string =>
     .join('\n');
 
 export interface AlertEuidPipelineOptions {
-  /**
-   * When set, the stamped FORK branch only keeps alerts whose
-   * `kibana.alert.entity.id` is in this list (enrich path).
-   */
+  /** When set, the stamped branch keeps only alerts stamped with one of these entity ids. */
   stampedEntityIds?: readonly string[];
   /**
-   * ES|QL boolean expression narrowing the unstamped FORK branch (typically OR of
-   * `getEuidEsqlFilterBasedOnDocument` clauses). When `stampedEntityIds` is set and
-   * this is omitted, the unstamped branch is disabled (`WHERE false`) so enrich does
-   * not scan the full unstamped alert set.
+   * Exact filter for the unstamped branch: an OR of `getEuidEsqlFilterBasedOnDocument`
+   * clauses. When `stampedEntityIds` is set and this is not, the unstamped branch is
+   * off (`WHERE false`), so the enrich query does not scan all unstamped alerts.
    */
-  legacyIdentityClause?: string;
+  unstampedIdentityClause?: string;
   /**
-   * Lucene-pushable superset of `legacyIdentityClause`. Emitted as its own top-level
-   * conjunct: nested inside the clause's parentheses, ES|QL no longer pushes it down.
+   * Pushable prefilter for `unstampedIdentityClause`. It must be its own top-level
+   * conjunct: nested inside the clause's parentheses, ES|QL does not push it down.
    */
-  legacyIdentityPrefilter?: string;
+  unstampedIdentityPrefilter?: string;
 }
 
 /**
- * EUID pipeline for alert documents.
- *
- * Stamped vs derived work is split with FORK so stamped alerts never pay for EUID
- * `EVAL`s (same approach as NAT tiles).
- *
- * - Stamped (`kibana.alert.entity.id`): copy that field (may already be multi-value).
- * - Unstamped: derive user/host/service EUIDs and combine with null-guarded MV_APPEND.
- *
- * MV_EXPAND makes `entity.id` scalar so STATS / LOOKUP JOIN keys stay single-valued.
+ * Maps alert documents to `entity.id` rows. FORK splits the work:
+ * - Stamped alerts copy `kibana.alert.entity.id`, which can be multi-value.
+ * - Unstamped alerts derive the user, host and service EUIDs from raw fields.
+ * The split keeps the EUID `EVAL`s off stamped alerts. MV_EXPAND then makes
+ * `entity.id` single-value for STATS and LOOKUP JOIN.
  */
 export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): string[] => {
-  const { stampedEntityIds, legacyIdentityClause, legacyIdentityPrefilter } = options;
+  const { stampedEntityIds, unstampedIdentityClause, unstampedIdentityPrefilter } = options;
   const idsList = stampedEntityIds?.length ? toList(stampedEntityIds) : undefined;
   const keepCols = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
 
@@ -328,36 +396,36 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
     `| KEEP ${keepCols}`,
   ];
 
-  const derivedEvals: string[] = [];
+  const unstampedEvals: string[] = [];
   for (const entityType of ALLOWED_ENTITY_TYPES) {
     const fieldEvals = getFieldEvaluationsEsql(entityType);
-    if (fieldEvals) derivedEvals.push(`| EVAL ${fieldEvals}`);
-    derivedEvals.push(`| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`);
+    if (fieldEvals) unstampedEvals.push(`| EVAL ${fieldEvals}`);
+    unstampedEvals.push(`| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`);
   }
-  derivedEvals.push(evalGuardedTypedEuids('_ea_entity_id'));
+  unstampedEvals.push(evalTypedEuidsAsMultiValue('_ea_entity_id'));
 
-  let derivedWhere: string;
-  if (idsList != null && legacyIdentityClause == null) {
-    derivedWhere = 'WHERE false';
-  } else if (legacyIdentityClause != null) {
+  let unstampedWhere: string;
+  if (idsList != null && unstampedIdentityClause == null) {
+    unstampedWhere = 'WHERE false';
+  } else if (unstampedIdentityClause != null) {
     const conjuncts = [
       '`kibana.alert.entity.id` IS NULL',
-      ...(legacyIdentityPrefilter ? [`(${legacyIdentityPrefilter})`] : []),
-      `(${legacyIdentityClause})`,
+      ...(unstampedIdentityPrefilter ? [`(${unstampedIdentityPrefilter})`] : []),
+      `(${unstampedIdentityClause})`,
     ];
-    derivedWhere = `WHERE ${conjuncts.join(' AND ')}`;
+    unstampedWhere = `WHERE ${conjuncts.join(' AND ')}`;
   } else {
-    derivedWhere = 'WHERE `kibana.alert.entity.id` IS NULL';
+    unstampedWhere = 'WHERE `kibana.alert.entity.id` IS NULL';
   }
 
-  const derivedSteps = [derivedWhere, ...derivedEvals, `| KEEP ${keepCols}`];
+  const unstampedSteps = [unstampedWhere, ...unstampedEvals, `| KEEP ${keepCols}`];
 
   const fork = [
     '| FORK (',
     indentForkBranch(stampedSteps.join('\n')),
     '  )',
     '  (',
-    indentForkBranch(derivedSteps.join('\n')),
+    indentForkBranch(unstampedSteps.join('\n')),
     '  )',
   ].join('\n');
 

@@ -14,43 +14,45 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
-  ENTITY_TYPE_FILTER,
   LAST_SEEN_ALERT_FIELD,
-  alertLookbackCutoff,
-  buildKeepClause,
-  buildResolvedRowsFilter,
-  buildFilterClause,
-  buildLookupJoinClause,
-  buildSearchIdInClause,
-  entityAliasOf,
-  toList,
-  buildSortSuffix,
-  buildCursorClause,
+  alertsIndexOf,
   buildAlertEuidPipeline,
+  buildForeignSortQueries,
+  lookbackCutoff,
+  nullOnFailure,
+  toList,
 } from '../common';
 import type { QueryArgs, Row, RunContext, ColumnDescriptor } from '../common';
-import { isAbortError } from '../../../../../common/utils/exceptions';
-
-const alertsIndexOf = (namespace: string) => `.alerts-security.alerts-${namespace}`;
 
 const ALERT_OPEN_STATUS_FILTER =
   'kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed"';
 
-const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
-  typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
+const SEVERITY_COUNT_FIELDS = {
+  critical: 'alert_critical',
+  high: 'alert_high',
+  medium: 'alert_medium',
+  low: 'alert_low',
+} as const;
 
-/** Raw identity fields every per-row euid clause matches on with `==`. */
+const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
+
+/** Raw identity fields that every per-row EUID clause matches with `==`. */
 const IDENTITY_SOURCE_FIELDS = [
   ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
 ];
 
+const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
+  typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
+
 const stringValuesOf = (value: unknown): string[] =>
   [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
 
+// ── unstamped alert filters ───────────────────────────────────────────────────
+
 /**
- * `field IN (...)` over the identity values of `rows`. A superset of their euid clauses that
- * Lucene can push down; the clauses alone cannot be pushed because they cast fields with
- * `TO_STRING`, which forces a scan of every unstamped alert in the window.
+ * Pushable prefilter: `field IN (…)` over the identity values of `rows`.
+ * It matches a superset of the rows' EUID clauses. The clauses cast fields with
+ * `TO_STRING`, so ES|QL cannot push them down and scans every unstamped alert.
  */
 const buildIdentityPrefilter = (rows: Row[]): string | undefined => {
   const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
@@ -60,18 +62,17 @@ const buildIdentityPrefilter = (rows: Row[]): string | undefined => {
   return parts.length ? parts.join(' OR ') : undefined;
 };
 
-interface LegacyIdentityFilters {
-  legacyIdentityClause: string;
-  legacyIdentityPrefilter?: string;
+interface UnstampedIdentityFilters {
+  unstampedIdentityClause: string;
+  unstampedIdentityPrefilter?: string;
 }
 
 /**
- * OR of per-row identity filters for the unstamped alert branch, plus its pushable
- * prefilter. Uses existing euid helpers against page rows (identity fields kept via
- * ENTITY_FIELDS). Duplicate clauses are deduped. Rows that cannot produce a clause are
- * omitted — we never widen to bare `kibana.alert.entity.id IS NULL`.
+ * Filters the unstamped branch to alerts of the page rows: an OR of per-row EUID
+ * clauses and its pushable prefilter. Rows without a clause are left out, so the
+ * filter never widens to all unstamped alerts.
  */
-const buildLegacyIdentityFilters = (pageRows: Row[]): LegacyIdentityFilters | undefined => {
+const buildUnstampedIdentityFilters = (pageRows: Row[]): UnstampedIdentityFilters | undefined => {
   const clauses = new Set<string>();
   const matchedRows: Row[] = [];
   for (const row of pageRows) {
@@ -86,149 +87,61 @@ const buildLegacyIdentityFilters = (pageRows: Row[]): LegacyIdentityFilters | un
   }
   if (clauses.size === 0) return undefined;
   return {
-    legacyIdentityClause: [...clauses].join(' OR '),
-    legacyIdentityPrefilter: buildIdentityPrefilter(matchedRows),
+    unstampedIdentityClause: [...clauses].join(' OR '),
+    unstampedIdentityPrefilter: buildIdentityPrefilter(matchedRows),
   };
 };
 
-// ── query builders: last_seen_alert sort ──────────────────────────────────────
+// ── sort queries ──────────────────────────────────────────────────────────────
 
-const buildAlertLastSeenBaseQuery = (alertsIndex: string, cutoff: string): string =>
+/** Open alerts in the time range, one row per alert and entity id. */
+const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
+  `FROM ${alertsIndexOf(namespace)}`,
+  `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
+  `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
+  ...buildAlertEuidPipeline(),
+];
+
+const buildAlertCountBaseQuery = (args: QueryArgs): string =>
   [
-    `FROM ${alertsIndex}`,
-    `| WHERE \`@timestamp\` >= "${cutoff}"`,
+    ...buildOpenAlertEntityRows(args),
+    `| STATS ${ALERT_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
+  ].join('\n');
+
+const buildLastSeenAlertBaseQuery = ({ namespace, timeRange }: QueryArgs): string =>
+  [
+    `FROM ${alertsIndexOf(namespace)}`,
+    `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
     ...buildAlertEuidPipeline(),
     `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`) BY \`entity.id\``,
   ].join('\n');
 
-const buildLastSeenAlertDataQuery = (args: QueryArgs): string => {
-  const {
-    namespace,
-    timeRange,
-    sort: { direction: dir },
-    cursor,
-    pageSize,
-    rowsMode,
-    concreteEntityIndexName,
-    searchExpression,
-    entityExpression,
-  } = args;
-  const inner = [
-    buildAlertLastSeenBaseQuery(alertsIndexOf(namespace), alertLookbackCutoff(timeRange)),
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
-    buildKeepClause(args, LAST_SEEN_ALERT_FIELD),
-    ...buildCursorClause(cursor),
-  ].join('\n');
+const buildAlertCountQueries = (args: QueryArgs) =>
+  buildForeignSortQueries(args, {
+    baseQuery: buildAlertCountBaseQuery(args),
+    sortField: ALERT_COUNT_FIELD,
+  });
 
-  return [`FROM (`, inner, `)`, buildSortSuffix(LAST_SEEN_ALERT_FIELD, dir, pageSize)].join('\n');
-};
-
-const buildLastSeenAlertCountQuery = ({
-  namespace,
-  timeRange,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
-  [
-    buildAlertLastSeenBaseQuery(alertsIndexOf(namespace), alertLookbackCutoff(timeRange)),
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
-    `| KEEP \`${ENTITY_ID_FIELD}\``,
-    `| STATS total = COUNT(*)`,
-  ].join('\n');
-
-// ── query builders: alert_count sort ─────────────────────────────────────────
-
-const buildAlertCountSortBaseQuery = (alertsIndex: string, cutoff: string): string =>
-  [
-    `FROM ${alertsIndex}`,
-    `| WHERE \`@timestamp\` >= "${cutoff}"`,
-    `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
-    ...buildAlertEuidPipeline(),
-    `| STATS ${ALERT_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
-  ].join('\n');
-
-const buildAlertCountSortDataQuery = (args: QueryArgs): string => {
-  const {
-    namespace,
-    timeRange,
-    sort: { direction: dir },
-    cursor,
-    pageSize,
-    rowsMode,
-    concreteEntityIndexName,
-    searchExpression,
-    entityExpression,
-  } = args;
-  const inner = [
-    buildAlertCountSortBaseQuery(alertsIndexOf(namespace), alertLookbackCutoff(timeRange)),
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
-    buildKeepClause(args, ALERT_COUNT_FIELD),
-    ...buildCursorClause(cursor),
-  ].join('\n');
-
-  return [`FROM (`, inner, `)`, buildSortSuffix(ALERT_COUNT_FIELD, dir, pageSize)].join('\n');
-};
-
-const buildAlertCountSortCountQuery = ({
-  namespace,
-  timeRange,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
-  [
-    buildAlertCountSortBaseQuery(alertsIndexOf(namespace), alertLookbackCutoff(timeRange)),
-    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildFilterClause(entityExpression),
-    `| KEEP \`${ENTITY_ID_FIELD}\``,
-    `| STATS total = COUNT(*)`,
-  ].join('\n');
+const buildLastSeenAlertQueries = (args: QueryArgs) =>
+  buildForeignSortQueries(args, {
+    baseQuery: buildLastSeenAlertBaseQuery(args),
+    sortField: LAST_SEEN_ALERT_FIELD,
+  });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const SEVERITY_COUNT_FIELDS = {
-  critical: 'alert_critical',
-  high: 'alert_high',
-  medium: 'alert_medium',
-  low: 'alert_low',
-} as const;
-
-const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
-
-const buildAlertEnrichQuery = (
-  alertsIndex: string,
+const buildAlertsEnrichQuery = (
+  args: QueryArgs,
   entityIds: readonly string[],
-  cutoff: string,
-  legacyIdentity?: LegacyIdentityFilters
+  unstampedIdentity?: UnstampedIdentityFilters
 ): string => {
-  const ids = toList(entityIds);
+  const { namespace, timeRange } = args;
   return [
-    `FROM ${alertsIndex}`,
-    `| WHERE \`@timestamp\` >= "${cutoff}"`,
+    `FROM ${alertsIndexOf(namespace)}`,
+    `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
-    ...buildAlertEuidPipeline({
-      stampedEntityIds: entityIds,
-      ...legacyIdentity,
-    }),
-    `| WHERE \`entity.id\` IN (${ids})`,
+    ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
+    `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
     `| STATS ${[
       `${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`)`,
       `${ALERT_COUNT_FIELD} = COUNT(*)`,
@@ -240,28 +153,20 @@ const buildAlertEnrichQuery = (
   ].join('\n');
 };
 
+/** Fills the alert count, last alert, and per-severity counts of the page rows. */
 const enrichAlerts = async (
   pageRows: Row[],
-  { namespace, timeRange }: QueryArgs,
+  args: QueryArgs,
   skip: Set<string>,
   { runQuery }: RunContext
 ): Promise<void> => {
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   if (!entityIds.length) return;
 
-  const legacyIdentity = buildLegacyIdentityFilters(pageRows);
-
-  const rows = await runQuery(
-    buildAlertEnrichQuery(
-      alertsIndexOf(namespace),
-      entityIds,
-      alertLookbackCutoff(timeRange),
-      legacyIdentity
-    )
-  ).catch((err) => {
-    if (isAbortError(err)) throw err;
-    return null;
-  });
+  const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
+  const rows = await nullOnFailure(
+    runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity))
+  );
   if (!rows) return;
 
   const byId = new Map(rows.map((r) => [r[ENTITY_ID_FIELD] as string, r]));
@@ -284,8 +189,8 @@ export const alertCountColumn = {
   initialWidth: 100,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildAlertCountSortDataQuery,
-  buildCountQuery: buildAlertCountSortCountQuery,
+  buildSortQuery: (args) => buildAlertCountQueries(args).sort,
+  buildCountQuery: (args) => buildAlertCountQueries(args).count,
   enrichPage: enrichAlerts,
 } as const satisfies ColumnDescriptor;
 
@@ -295,8 +200,8 @@ export const lastSeenAlertColumn = {
   initialWidth: 180,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildLastSeenAlertDataQuery,
-  buildCountQuery: buildLastSeenAlertCountQuery,
-  // enrichPage intentionally absent — enrichAlerts (on alertCountColumn) populates this field too.
-  // The registry deduplicates enrichPage by function reference before executing.
+  buildSortQuery: (args) => buildLastSeenAlertQueries(args).sort,
+  buildCountQuery: (args) => buildLastSeenAlertQueries(args).count,
+  // No enrichPage: enrichAlerts on alertCountColumn also fills this field.
+  // The registry runs each enrichPage function once.
 } as const satisfies ColumnDescriptor;

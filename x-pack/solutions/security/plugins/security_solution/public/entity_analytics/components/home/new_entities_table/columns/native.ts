@@ -16,7 +16,7 @@ import {
 } from '../common';
 import type { ColumnDescriptor, QueryArgs } from '../common';
 
-const buildNativeEntityDataQuery = (args: QueryArgs): string => {
+const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   const {
     namespace,
     sort: { field, direction: dir },
@@ -58,7 +58,7 @@ export const entityNameColumn = {
   initialWidth: 200,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildNativeEntityDataQuery,
+  buildSortQuery: buildNativeEntitySortQuery,
   buildCountQuery: buildNativeEntityCountQuery,
 } as const satisfies ColumnDescriptor;
 
@@ -76,7 +76,7 @@ export const entityTypeColumn = {
   initialWidth: 120,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildNativeEntityDataQuery,
+  buildSortQuery: buildNativeEntitySortQuery,
   buildCountQuery: buildNativeEntityCountQuery,
 } as const satisfies ColumnDescriptor;
 
@@ -86,7 +86,7 @@ export const riskScoreColumn = {
   initialWidth: 120,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildNativeEntityDataQuery,
+  buildSortQuery: buildNativeEntitySortQuery,
   buildCountQuery: buildNativeEntityCountQuery,
 } as const satisfies ColumnDescriptor;
 
@@ -96,7 +96,7 @@ export const criticalityColumn = {
   initialWidth: 160,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildNativeEntityDataQuery,
+  buildSortQuery: buildNativeEntitySortQuery,
   buildCountQuery: buildNativeEntityCountQuery,
 } as const satisfies ColumnDescriptor;
 
@@ -122,7 +122,7 @@ export const firstSeenColumn = {
   initialWidth: 180,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildNativeEntityDataQuery,
+  buildSortQuery: buildNativeEntitySortQuery,
   buildCountQuery: buildNativeEntityCountQuery,
 } as const satisfies ColumnDescriptor;
 
@@ -132,6 +132,6 @@ export const lastSeenColumn = {
   initialWidth: 180,
   isSortable: true,
   isExpandable: false,
-  buildSortQuery: buildNativeEntityDataQuery,
+  buildSortQuery: buildNativeEntitySortQuery,
   buildCountQuery: buildNativeEntityCountQuery,
 } as const satisfies ColumnDescriptor;
