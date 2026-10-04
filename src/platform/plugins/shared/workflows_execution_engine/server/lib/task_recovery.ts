@@ -142,8 +142,9 @@ export type InterruptedWorkflowResumeTaskResult =
 
 /**
  * When Task Manager retries `workflow:resume` (`attempts > 1`), the prior claim did not finish successfully.
- * Fail non-terminal executions that are no longer waiting for input (stuck RUNNING / WAITING, etc.).
- * If still `waiting_for_input`, invoke the resume handler again - the first attempt never completed.
+ * Fail non-terminal executions that are no longer waiting for input or a child (stuck RUNNING / WAITING, etc.).
+ * If still `waiting_for_input` or `waiting_for_child`, invoke the resume handler again.
+ * A running child re-parks; a finished child is applied, so the parent does not stay waiting.
  */
 export async function resolveInterruptedWorkflowResumeTask({
   workflowExecutionRepository,
@@ -180,9 +181,12 @@ export async function resolveInterruptedWorkflowResumeTask({
     return { action: 'task_complete', reason: 'noop', execution };
   }
 
-  if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+  if (
+    execution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+    execution.status === ExecutionStatus.WAITING_FOR_CHILD
+  ) {
     logger.warn(
-      `workflow:resume retry for execution ${workflowRunId} still waiting_for_input - invoking resume handler again`
+      `workflow:resume retry for execution ${workflowRunId} still ${execution.status} - invoking resume handler again`
     );
     return { action: 'resume_workflow' };
   }

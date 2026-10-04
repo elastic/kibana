@@ -380,6 +380,28 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
   });
 
+  it('returns resume_workflow when still waiting_for_child so a finished child can cascade', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'x',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+    } as EsWorkflowExecution);
+
+    await expect(
+      resolveInterruptedWorkflowResumeTask({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'x',
+        spaceId: 'default',
+        taskAttempts: 2,
+        logger,
+      })
+    ).resolves.toEqual({ action: 'resume_workflow' });
+
+    expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+  });
+
   it('returns task_complete when execution is already terminal', async () => {
     mockExecutionLookup(workflowExecutionsDataClient, {
       id: 'x',
