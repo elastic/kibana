@@ -161,6 +161,26 @@ export class ComboBoxService extends FtrService {
     await this.setFilterValue(comboBoxElement, value);
     await this.openOptionsList(comboBoxElement);
 
+    // Wait for the target option to be present in a settled list before clicking.
+    // Dynamic options lists (e.g. Lens field picker) may still be mid-render when
+    // the loading spinner clears; a click before the list settles is silently dropped,
+    // leaving filter text in the input but no committed selection.
+    await this.retry.waitFor(`"${trimmedValue}" option settled in options list`, async () => {
+      try {
+        await this.waitForOptionsListLoading(comboBoxElement);
+        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        if (!isOpen) return false;
+        const comboOptions = await this.find.allByCssSelector('.euiComboBoxOption', 1000);
+        for (const comboOption of comboOptions) {
+          const text = ((await comboOption.getVisibleText()) ?? '').toLowerCase().trim();
+          if (text === trimmedValue) return true;
+        }
+        return false;
+      } catch {
+        return false;
+      }
+    });
+
     await this.clickOption(options.clickWithMouse, trimmedValue);
     await this.closeOptionsList(comboBoxElement);
   }
