@@ -66,19 +66,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/242130
-      describe.skip('severity', () => {
+      describe('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-table-column-severity-low');
+          await testSubjects.missingOrFail('case-severity-badge-low');
+          await testSubjects.existOrFail('case-severity-badge-medium');
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/245961
-      describe.skip('tags', () => {
+      describe('tags', () => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
@@ -124,6 +123,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
            */
           await cases.casesTable.bulkEditTags([0, 1], ['two', 'three', 'five']);
           await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForTableToFinishLoading();
           const case1 = await cases.api.getCase({ caseId: caseIds[0] });
           const case2 = await cases.api.getCase({ caseId: caseIds[1] });
           const case3 = await cases.api.getCase({ caseId: caseIds[2] });
@@ -136,6 +136,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('adds a new tag', async () => {
           await cases.casesTable.bulkAddNewTag([0, 1], 'tw');
           await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForTableToFinishLoading();
 
           const case1 = await cases.api.getCase({ caseId: caseIds[0] });
           const case2 = await cases.api.getCase({ caseId: caseIds[1] });
