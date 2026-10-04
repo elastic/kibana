@@ -16,7 +16,7 @@ export const graphWorkspace: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   hidden: false,
   management: {
-    icon: 'graphApp',
+    icon: 'aggregate',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
