@@ -147,3 +147,53 @@ export const MAX_CASES_TO_OPEN_HELP_TEXT = (maxCases: number) =>
     defaultMessage: 'Set the maximum amount of cases to be opened. (Max {maxCases})',
     values: { maxCases },
   });
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesLabel',
+  {
+    defaultMessage: 'Auto-extract observables',
+  }
+);
+
+const EXTRACT_OBSERVABLES_INHERIT_YES = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInheritYes',
+  {
+    defaultMessage: 'Yes',
+  }
+);
+
+const EXTRACT_OBSERVABLES_INHERIT_NO = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInheritNo',
+  {
+    defaultMessage: 'No',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_INHERIT = (spaceDefault: boolean) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.extractObservablesInherit', {
+    defaultMessage: 'Use space default ({value})',
+    values: {
+      value: spaceDefault ? EXTRACT_OBSERVABLES_INHERIT_YES : EXTRACT_OBSERVABLES_INHERIT_NO,
+    },
+  });
+
+export const EXTRACT_OBSERVABLES_INHERIT_TEMPLATE = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInheritTemplate',
+  {
+    defaultMessage: 'Use template/space default',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_ON = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_OFF = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
