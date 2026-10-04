@@ -77,6 +77,8 @@ export function QuickSearchVisor({
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
+  const hasTypedNlPlaceholderRef = useRef(false);
+  const [typeNlPlaceholder, setTypeNlPlaceholder] = useState(false);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const wasVisibleRef = useRef(isVisible);
   const telemetryService = useMemo(
@@ -124,7 +126,13 @@ export function QuickSearchVisor({
   const onVisorModeChange = useCallback(
     (id: string) => {
       setVisorMode(id as VisorMode);
-      if (id === VisorMode.KQL) {
+      if (id === VisorMode.NaturalLanguage) {
+        if (!hasTypedNlPlaceholderRef.current) {
+          hasTypedNlPlaceholderRef.current = true;
+          setTypeNlPlaceholder(true);
+        }
+      } else {
+        setTypeNlPlaceholder(false);
         onStopGeneration();
       }
     },
@@ -265,6 +273,7 @@ export function QuickSearchVisor({
                     <NLInput
                       value={nlValue}
                       placeholder={nlPlaceholder}
+                      animatePlaceholder={typeNlPlaceholder}
                       disabled={isNlLoading}
                       onChange={setNlValue}
                       onSubmit={onNlSubmit}

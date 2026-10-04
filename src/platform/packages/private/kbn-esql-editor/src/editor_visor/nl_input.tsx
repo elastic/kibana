@@ -6,14 +6,45 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { EuiTextArea } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { NL_TEXTAREA_MAX_HEIGHT } from './visor.styles';
 
+const PLACEHOLDER_TYPE_INTERVAL_MS = 32;
+
+const prefersReducedMotion = (): boolean =>
+  typeof window.matchMedia !== 'function' ||
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const useTypedText = (text: string, enabled: boolean): string => {
+  const [count, setCount] = useState(0);
+  const isTyping = enabled && !prefersReducedMotion();
+
+  useEffect(() => {
+    if (!isTyping) {
+      return;
+    }
+    setCount(0);
+    const timer = window.setInterval(() => {
+      setCount((current) => {
+        if (current + 1 >= text.length) {
+          window.clearInterval(timer);
+        }
+        return current + 1;
+      });
+    }, PLACEHOLDER_TYPE_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [text, isTyping]);
+
+  return isTyping ? text.slice(0, count) : text;
+};
+
 interface NLInputProps {
   value: string;
   placeholder: string;
+  /** Types the placeholder once. Later visits should pass false. */
+  animatePlaceholder?: boolean;
   disabled: boolean;
   onChange: (value: string) => void;
   onSubmit: () => void;
@@ -23,12 +54,14 @@ interface NLInputProps {
 export function NLInput({
   value,
   placeholder,
+  animatePlaceholder = false,
   disabled,
   onChange,
   onSubmit,
   inputStyles,
 }: NLInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const typedPlaceholder = useTypedText(placeholder, animatePlaceholder);
 
   const updateHeight = useCallback(() => {
     const textarea = textareaRef.current;
@@ -57,7 +90,7 @@ export function NLInput({
         fullWidth
         resize="none"
         rows={1}
-        placeholder={placeholder}
+        placeholder={typedPlaceholder}
         value={value}
         disabled={disabled}
         onChange={(e) => {
