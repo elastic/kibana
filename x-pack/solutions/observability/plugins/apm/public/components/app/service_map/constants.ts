@@ -57,9 +57,6 @@ export const DEFAULT_NODE_SIZE = 56;
 /** Off-screen position for hidden elements (ensures they don't flash on screen) */
 export const OFFSCREEN_POSITION = -10000;
 
-/** Divisor for calculating popover offset from edge midpoint */
-export const EDGE_OFFSET_DIVISOR = 4;
-
 /** Duration of the center animation in milliseconds */
 export const CENTER_ANIMATION_DURATION_MS = 200;
 

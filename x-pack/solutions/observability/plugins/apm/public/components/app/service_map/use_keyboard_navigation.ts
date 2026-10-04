@@ -17,7 +17,7 @@ interface UseKeyboardNavigationOptions {
   edges: ServiceMapEdge[];
   selectedNodeId: string | null;
   selectedNodeForPopover: ServiceMapNode | null;
-  selectedEdgeForPopover: ServiceMapEdge | null;
+  selectedEdgeForFlyout: ServiceMapEdge | null;
   onNodeSelect: (node: ServiceMapNode | null) => void;
   onEdgeSelect: (edge: ServiceMapEdge | null) => void;
   onPopoverClose: () => void;
@@ -43,7 +43,7 @@ export function useKeyboardNavigation({
   edges,
   selectedNodeId,
   selectedNodeForPopover,
-  selectedEdgeForPopover,
+  selectedEdgeForFlyout,
   onNodeSelect,
   onEdgeSelect,
   onPopoverClose,
@@ -89,12 +89,12 @@ export function useKeyboardNavigation({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && (selectedNodeForPopover || selectedEdgeForPopover)) {
+      if (event.key === 'Escape' && (selectedNodeForPopover || selectedEdgeForFlyout)) {
         event.preventDefault();
         onPopoverClose();
         setScreenReaderAnnouncement(
-          i18n.translate('xpack.apm.serviceMap.popoverClosed', {
-            defaultMessage: 'Popover closed',
+          i18n.translate('xpack.apm.serviceMap.flyoutClosed', {
+            defaultMessage: 'Flyout closed',
           })
         );
         return;
@@ -109,7 +109,7 @@ export function useKeyboardNavigation({
           if (!focusedEdge) return;
           event.preventDefault();
 
-          if (selectedEdgeForPopover?.id === edgeElementId) {
+          if (selectedEdgeForFlyout?.id === edgeElementId) {
             onPopoverClose();
           } else {
             onEdgeSelect(focusedEdge);
@@ -181,7 +181,7 @@ export function useKeyboardNavigation({
     edges,
     selectedNodeId,
     selectedNodeForPopover,
-    selectedEdgeForPopover,
+    selectedEdgeForFlyout,
     onNodeSelect,
     onEdgeSelect,
     onPopoverClose,
