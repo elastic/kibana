@@ -6,25 +6,15 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as redux from 'react-redux-v7';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { useFetchMaintenanceWindows } from '../../../hooks';
-import { selectDynamicSettings } from '../../../state/settings/selectors';
-
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
-}));
 
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   useFetchMaintenanceWindows: jest.fn().mockReturnValue({ data: undefined }),
 }));
 
-const mockUseSelector = redux.useSelector as jest.MockedFunction<typeof redux.useSelector>;
-const mockDispatch = jest.fn();
 const mockUseFetchMWs = useFetchMaintenanceWindows as unknown as jest.MockedFunction<
   () => {
     data?: {
@@ -58,16 +48,7 @@ const setMWs = (mws: Array<ReturnType<typeof mockMW>>) => {
 describe('useHasPendingMwChanges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (redux.useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-
     mockUseFetchMWs.mockReturnValue({ data: undefined });
-
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === selectDynamicSettings) {
-        return { settings: { privateLocationsSyncInterval: 5 } };
-      }
-      return undefined;
-    });
   });
 
   it('returns no pending changes when monitor has no MWs', () => {
@@ -91,18 +72,8 @@ describe('useHasPendingMwChanges', () => {
     expect(result.current.hasPendingChanges).toBe(true);
   });
 
-  it('detects recently modified inactive MW as pending change', () => {
-    const recentlyUpdated = new Date(Date.now() - 60 * 1000).toISOString(); // 1 min ago
-    setMWs([mockMW('mw-1', recentlyUpdated)]);
-
-    const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
-
-    expect(result.current.hasPendingChanges).toBe(true);
-  });
-
-  it('returns no pending changes for MW updated longer ago than sync interval', () => {
-    const oldUpdate = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 min ago
-    setMWs([mockMW('mw-1', oldUpdate)]);
+  it('does not treat an existing inactive MW as pending after an edit', () => {
+    setMWs([mockMW('mw-1', new Date().toISOString())]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
 
