@@ -55,6 +55,14 @@ const normalizeThrottle = (
   };
 };
 
+const toApiThrottle = (
+  throttle: ActionPolicySavedObjectAttributes['throttle']
+): ActionPolicyResponse['throttle'] => {
+  const normalized = normalizeThrottle(throttle);
+  if (normalized == null) return null;
+  return { ...normalized, strategy: normalizeNullableField(normalized.strategy) };
+};
+
 export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKey: auth.apiKey,
   apiKeyOwner: auth.owner,
@@ -147,7 +155,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     matcher: normalizeNullableField(attributes.matcher) as PolicyMatcher | null,
     group_by: normalizeNullableField(attributes.groupBy),
     grouping_mode: normalizeNullableField(attributes.groupingMode),
-    throttle: normalizeThrottle(attributes.throttle),
+    throttle: toApiThrottle(attributes.throttle),
     snoozed_until: normalizeNullableField(attributes.snoozedUntil),
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,

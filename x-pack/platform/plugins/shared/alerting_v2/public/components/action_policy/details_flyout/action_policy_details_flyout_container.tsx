@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
+import { throttleResponseToRequest } from '@kbn/alerting-v2-utils';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { useAlertingLocators } from '../../../application/locator_context';
@@ -86,7 +87,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({
       grouping_mode: groupingMode ?? 'per_episode',
       ...(matcher != null && { matcher }),
       ...(groupBy != null && { group_by: groupBy }),
-      ...(throttle != null && { throttle }),
+      ...(throttle != null && { throttle: throttleResponseToRequest(throttle) }),
     };
     createActionPolicy(data);
     onClose();

@@ -209,7 +209,7 @@ const mockFetchResult = (overrides: Partial<MockFetchResult> = {}) => {
 
 const mockNewEventsCount = (total: number) => {
   mockUseCountNewActionPolicyExecutions.mockReturnValue({
-    data: buildResponse({ per_page: 0, total }),
+    data: buildResponse({ per_page: 1, total }),
   });
 };
 

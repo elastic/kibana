@@ -6,7 +6,30 @@
  */
 
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
-import { attachmentDataToActionPolicyPayload } from './action_policy_mappers';
+import {
+  attachmentDataToActionPolicyPayload,
+  throttleResponseToRequest,
+} from './action_policy_mappers';
+
+describe('throttleResponseToRequest', () => {
+  it('returns undefined for a null or missing throttle', () => {
+    expect(throttleResponseToRequest(null)).toBeUndefined();
+    expect(throttleResponseToRequest(undefined)).toBeUndefined();
+  });
+
+  it('omits a null strategy', () => {
+    expect(throttleResponseToRequest({ strategy: null, interval: null })).toEqual({
+      interval: null,
+    });
+  });
+
+  it('keeps a set strategy and interval', () => {
+    expect(throttleResponseToRequest({ strategy: 'time_interval', interval: '5m' })).toEqual({
+      strategy: 'time_interval',
+      interval: '5m',
+    });
+  });
+});
 
 describe('attachmentDataToActionPolicyPayload', () => {
   it('fills required defaults for empty data', () => {
@@ -54,5 +77,13 @@ describe('attachmentDataToActionPolicyPayload', () => {
     const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result.matcher).toEqual({ tags: ['critical'] });
+  });
+
+  it('drops a null throttle strategy so the payload passes the request schema', () => {
+    const result = attachmentDataToActionPolicyPayload({
+      throttle: { strategy: null, interval: null },
+    });
+
+    expect(result.throttle).toEqual({ interval: null });
   });
 });

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
+import { throttleResponseToRequest } from '@kbn/alerting-v2-utils';
 import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -171,7 +172,7 @@ export const ActionPoliciesTable = () => {
         grouping_mode: groupingMode ?? 'per_episode',
         ...(matcher != null && { matcher }),
         ...(groupBy != null && { group_by: groupBy }),
-        ...(throttle != null && { throttle }),
+        ...(throttle != null && { throttle: throttleResponseToRequest(throttle) }),
       };
       createActionPolicy(data, { onSuccess: () => refetchRef.current() });
     },
