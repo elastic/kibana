@@ -131,7 +131,7 @@ test.describe(
       const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();
       await expect(suggestWidget).toBeVisible();
 
-      await page.keyboard.type('ela');
+      await pageObjects.workflowEditor.typeInYamlEditor('ela');
 
       // Verify step types are shown in suggestions (alphabetically sorted, starting with 'a')
       await expect(
@@ -143,13 +143,15 @@ test.describe(
       await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.bulk' })).toBeVisible();
 
       await suggestWidget.getByRole('option', { name: 'elasticsearch.search' }).click();
+      // Re-assert editor focus so the structural key presses below can't leak to the chat panel.
+      await pageObjects.workflowEditor.focusYamlEditor();
       await page.keyboard.press('Enter');
-      await page.keyboard.type('with:');
+      await pageObjects.workflowEditor.typeInYamlEditor('with:');
       await page.keyboard.press('Enter');
       await page.keyboard.press('Space');
 
       await expect(suggestWidget).toBeVisible();
-      await page.keyboard.type('ind');
+      await pageObjects.workflowEditor.typeInYamlEditor('ind');
 
       await expect(suggestWidget.getByRole('option', { name: 'index' })).toBeVisible();
     });
