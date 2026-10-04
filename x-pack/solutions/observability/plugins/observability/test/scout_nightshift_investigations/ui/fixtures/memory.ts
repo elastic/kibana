@@ -157,13 +157,37 @@ export const toMemoryDocument = ({
 export const storedMemoryId = (spaceId: string, slug: string): string =>
   `${spaceId}:memory_${slug}`;
 
+const INFERENCE_READY_ATTEMPTS = 60;
+
+/**
+ * The index's `semantic_text` fields run ELSER on write, and on a fresh cluster
+ * the model may still be downloading when the first document lands.
+ */
+const indexWhenInferenceReady = async (
+  esClient: EsClient,
+  request: Parameters<EsClient['index']>[0]
+) => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await esClient.index(request);
+    } catch (error) {
+      const { message, meta } = error as { message?: string; meta?: { body?: unknown } };
+      const downloading = /download task is currently running/.test(
+        `${message} ${JSON.stringify(meta?.body ?? '')}`
+      );
+      if (!downloading || attempt >= INFERENCE_READY_ATTEMPTS) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+};
+
 export const seedMemory = async (
   esClient: EsClient,
   options: SeedMemoryOptions
 ): Promise<string> => {
   const spaceId = options.spaceId ?? 'default';
   const pageId = `memory_${options.slug}`;
-  await esClient.index({
+  await indexWhenInferenceReady(esClient, {
     index: MEMORY_INDEX,
     id: storedMemoryId(spaceId, options.slug),
     document: toMemoryDocument(options),

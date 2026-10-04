@@ -87,7 +87,11 @@ apiTest.describe(
         const response = await archiveMemoryPage(apiClient, reader, memory.pageId, true);
 
         expect(response).toHaveStatusCode(403);
-        expect(await documentExists(esClient, memory.documentId)).toBe(true);
+        // Archiving keeps the document, so existence alone would not show the
+        // refusal left it untouched.
+        const unchanged = await getMemoryPage(apiClient, reader, memory.pageId);
+        expect(unchanged).toHaveStatusCode(200);
+        expect(unchanged.body.page.archived).toBe(false);
       }
     );
 

@@ -40,6 +40,7 @@ import { getMemoryArchiveReasonLabel } from './labels';
 import { MemoryMergedFromRow } from './lineage';
 import { getSourceTaskPath } from './source_task';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
+import type { MemoryDetailResult } from './types';
 import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../shared/page_markdown';
 
 const asPercent = (value: number): number => Math.round(Math.max(0, Math.min(1, value)) * 100);
@@ -84,7 +85,11 @@ export function MemoryPageView({
   // rather than by a banner this view would have to keep in step with its buttons.
   const { mutate: setArchived, isLoading: isArchiving } = useSetMemoryArchived();
   const { mutate: deletePage, isLoading: isDeleting } = useDeleteMemoryPage();
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // Snapshotted when the dialog opens: a refetch while it is open must not swap
+  // in a revision the operator never reviewed.
+  const [deleteTarget, setDeleteTarget] = useState<
+    { id: string; title: string; version: MemoryDetailResult['version'] } | undefined
+  >();
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const modalTitleId = useGeneratedHtmlId({ prefix: 'memoryDeleteTitle' });
 
@@ -205,7 +210,9 @@ export function MemoryPageView({
               color="danger"
               iconType="trash"
               isDisabled={isDeleting}
-              onClick={() => setConfirmingDelete(true)}
+              onClick={() =>
+                setDeleteTarget({ id: page.id, title: page.title, version: data.version })
+              }
               data-test-subj="nightshiftMemoryDeleteButton"
             >
               <FormattedMessage
@@ -399,7 +406,7 @@ export function MemoryPageView({
         )}
       </EuiPanel>
 
-      {confirmingDelete && (
+      {deleteTarget && (
         <EuiConfirmModal
           titleProps={{ id: modalTitleId }}
           aria-labelledby={modalTitleId}
@@ -410,7 +417,7 @@ export function MemoryPageView({
             />
           }
           onCancel={() => {
-            setConfirmingDelete(false);
+            setDeleteTarget(undefined);
             setDeleteConfirmation('');
           }}
           confirmButtonText={
@@ -421,19 +428,23 @@ export function MemoryPageView({
           }
           // The route echoes the title back and refuses a mismatch, so the dialog
           // makes the operator produce it rather than supplying it for them.
-          confirmButtonDisabled={deleteConfirmation !== page.title}
+          confirmButtonDisabled={deleteConfirmation !== deleteTarget.title}
           buttonColor="danger"
           data-test-subj="nightshiftMemoryDeleteConfirm"
           onConfirm={() => {
-            setConfirmingDelete(false);
+            setDeleteTarget(undefined);
             setDeleteConfirmation('');
             // Navigating away only on success: the memory may well still be
             // there, and a failed write must leave the page in place to retry.
             // The revision travels with the request, so a write that landed
-            // after this page was read answers 409 instead of taking the
+            // after the dialog opened answers 409 instead of taking the
             // replacement the operator never saw.
             deletePage(
-              { id: page.id, confirmTitle: page.title, version: data.version },
+              {
+                id: deleteTarget.id,
+                confirmTitle: deleteTarget.title,
+                version: deleteTarget.version,
+              },
               { onSuccess: onDeleted }
             );
           }}
@@ -442,7 +453,7 @@ export function MemoryPageView({
             <FormattedMessage
               id="xpack.significantEventsApp.memory.deleteConfirmBody"
               defaultMessage="“{title}” will be removed from Semantic Memory. This cannot be undone — archiving keeps the record and is reversible."
-              values={{ title: page.title }}
+              values={{ title: deleteTarget.title }}
             />
           </EuiText>
           <EuiSpacer size="m" />

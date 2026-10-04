@@ -383,10 +383,10 @@ describe('MemoryPageView', () => {
     expect(onDeleted).toHaveBeenCalled();
   });
 
-  it('deletes the revision the operator actually reviewed, not the one on screen', async () => {
+  it('deletes the revision the dialog was opened on, not one refetched while open', async () => {
     // The optimizer rewrites content without changing the title, so the revision
     // is what distinguishes the page the dialog was opened on from its
-    // replacement. A refetch between reading and confirming replaces it.
+    // replacement. A refetch while the dialog is open must not swap it in.
     const rewritten = { seq_no: 8, primary_term: 1 };
     const detail = (version: { seq_no: number; primary_term: number }) =>
       ({
@@ -394,7 +394,7 @@ describe('MemoryPageView', () => {
         isError: false,
         data: { page: page(), version, usefulness: 0.5, confidence: 0.8 },
       } as unknown as ReturnType<typeof useMemoryPage>);
-    mockUseMemoryPage.mockReturnValue(detail(rewritten));
+    mockUseMemoryPage.mockReturnValue(detail(VERSION));
     const { rerenderView } = renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
@@ -402,7 +402,7 @@ describe('MemoryPageView', () => {
       screen.getByTestId('nightshiftMemoryDeleteConfirmTitle'),
       'Kafka consumer lag'
     );
-    mockUseMemoryPage.mockReturnValue(detail(VERSION));
+    mockUseMemoryPage.mockReturnValue(detail(rewritten));
     rerenderView();
     await userEvent.click(screen.getByText('Delete permanently'));
 

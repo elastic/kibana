@@ -47,6 +47,30 @@ export interface SeededMemory {
 export const storedMemoryId = (spaceId: string, slug: string): string =>
   `${spaceId}:memory_${slug}`;
 
+const INFERENCE_READY_ATTEMPTS = 60;
+
+/**
+ * The index's `semantic_text` fields run ELSER on write, and on a fresh cluster
+ * the model may still be downloading when the first document lands.
+ */
+const indexWhenInferenceReady = async (
+  esClient: EsClient,
+  request: Parameters<EsClient['index']>[0]
+) => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await esClient.index(request);
+    } catch (error) {
+      const { message, meta } = error as { message?: string; meta?: { body?: unknown } };
+      const downloading = /download task is currently running/.test(
+        `${message} ${JSON.stringify(meta?.body ?? '')}`
+      );
+      if (!downloading || attempt >= INFERENCE_READY_ATTEMPTS) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+};
+
 /**
  * Writes one memory straight into the index, the way the investigator would.
  *
@@ -59,10 +83,9 @@ export const seedMemory = async (
   spaceId: string,
   { slug = `api-${randomUUID().slice(0, 8)}`, title }: { slug?: string; title?: string }
 ): Promise<SeededMemory> => {
-  const slug_ = slug;
-  const documentId = storedMemoryId(spaceId, slug_);
-  const resolvedTitle = title ?? `API memory ${slug_}`;
-  await esClient.index({
+  const documentId = storedMemoryId(spaceId, slug);
+  const resolvedTitle = title ?? `API memory ${slug}`;
+  await indexWhenInferenceReady(esClient, {
     index: MEMORY_INDEX,
     id: documentId,
     refresh: 'wait_for',
@@ -74,7 +97,7 @@ export const seedMemory = async (
       context: `Investigate ${resolvedTitle}`,
       tags: ['memory'],
       attributes: {
-        slug: slug_,
+        slug,
         space_id: spaceId,
         categories: [],
         references: [],
@@ -88,7 +111,7 @@ export const seedMemory = async (
       },
     },
   });
-  return { pageId: `memory_${slug_}`, documentId, title: resolvedTitle };
+  return { pageId: `memory_${slug}`, documentId, title: resolvedTitle };
 };
 
 /** Removes exactly the documents this test seeded, by id. */

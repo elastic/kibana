@@ -7,9 +7,11 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -53,12 +55,25 @@ export function MemoryHome({
     () => toTagFilterTerms(allKeywordPages, selectedKeywords),
     [allKeywordPages, selectedKeywords]
   );
-  const { data: keywordResult } = useMemoryKeywordPages(tagTerms);
+  const {
+    data: keywordResult,
+    isLoading: isKeywordLoading,
+    isError: isKeywordError,
+  } = useMemoryKeywordPages(tagTerms);
+  // A filtered result that has not arrived, or failed, is not an empty store.
+  const isFiltering = selectedKeywords.length > 0;
+  const keywordStatus = !isFiltering
+    ? 'ready'
+    : isKeywordError
+    ? 'error'
+    : isKeywordLoading
+    ? 'loading'
+    : 'ready';
   const keywordPages = useMemo(
     // With nothing selected both queries are the same one, so the unfiltered
     // slice is used directly rather than waiting on a second copy of it.
-    () => (selectedKeywords.length === 0 ? allKeywordPages : keywordResult?.pages ?? []),
-    [selectedKeywords, allKeywordPages, keywordResult]
+    () => (isFiltering ? keywordResult?.pages ?? [] : allKeywordPages),
+    [isFiltering, allKeywordPages, keywordResult]
   );
 
   // The lists below describe the whole store, so they honour the selection too.
@@ -158,7 +173,33 @@ export function MemoryHome({
         </>
       )}
 
-      {mostUseful.length > 0 && (
+      {keywordStatus === 'error' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="danger"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.keywordErrorTitle"
+                defaultMessage="Could not load the memories for this keyword"
+              />
+            }
+            data-test-subj="nightshiftMemoryKeywordError"
+          />
+        </>
+      )}
+
+      {keywordStatus === 'loading' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiLoadingSpinner size="m" data-test-subj="nightshiftMemoryKeywordLoading" />
+        </>
+      )}
+
+      {keywordStatus === 'ready' && mostUseful.length > 0 && (
         <>
           <EuiSpacer size="m" />
           <EuiTitle size="xxs">
@@ -180,7 +221,7 @@ export function MemoryHome({
       )}
 
       <EuiSpacer size="m" />
-      {recentlyUpdated.length === 0 ? (
+      {keywordStatus !== 'ready' ? null : recentlyUpdated.length === 0 ? (
         // With nothing to list, the section heading would be a label with no
         // section under it, so the empty message stands on its own.
         <EuiText size="s" color="subdued">

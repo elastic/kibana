@@ -240,6 +240,24 @@ describe('MemoryHome keyword filtering', () => {
     expect(listedTitles().join(' ')).toContain('Older kafka memory');
   });
 
+  it.each([
+    ['fails', { isError: true }, 'nightshiftMemoryKeywordError'],
+    ['is loading', { isLoading: true }, 'nightshiftMemoryKeywordLoading'],
+  ])('does not report an empty store while the filtered query %s', (_, state, testSubj) => {
+    mockUseMemoryKeywordPages.mockImplementation(
+      (tags: readonly string[] = []) =>
+        (tags.length === 0
+          ? { data: { pages: PAGES, total: PAGES.length, stats } }
+          : { data: undefined, ...state }) as unknown as ReturnType<typeof useMemoryKeywordPages>
+    );
+    renderHome();
+
+    clickCell('kafka');
+
+    expect(screen.getByTestId(testSubj)).toBeInTheDocument();
+    expect(screen.queryByText(/No memories yet/)).not.toBeInTheDocument();
+  });
+
   it('says so when the ranking could not reach the whole store', () => {
     mockUseMemoryKeywordPages.mockReturnValue({
       data: { pages: PAGES, total: 900, stats, capped: true },
