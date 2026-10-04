@@ -7,63 +7,83 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import { chain } from 'lodash';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import type { ServiceTypeOf } from '@kbn/core-di';
 import {
+  Request,
+  Response,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+} from '@kbn/core-di-server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  isSavedObjectErrorResult,
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
 } from '@kbn/core-saved-objects-server';
-import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { v1 } from '../../common';
-import type { ISavedObjectsManagement } from '../services';
+import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
+import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
 
-export const registerBulkGetRoute = (
-  router: IRouter,
-  managementServicePromise: Promise<ISavedObjectsManagement>
-) => {
-  router.post(
-    {
-      path: '/api/kibana/management/saved_objects/_bulk_get',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {
-        body: schema.arrayOf(
-          schema.object({
-            type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
-            id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
-          }),
-          { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
-        ),
-      },
+@injectable()
+export class BulkGetRoute {
+  static method = 'post' as const;
+  static handleLegacyErrors = true;
+  static path = '/api/kibana/management/saved_objects/_bulk_get';
+  static security = {
+    authz: {
+      enabled: false,
+      reason: 'This route is opted out from authorization',
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const managementService = await managementServicePromise;
-      const { getClient, typeRegistry } = (await context.core).savedObjects;
+  } as const;
+  static validate = {
+    body: schema.arrayOf(
+      schema.object({
+        type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+        id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
+      }),
+      { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
+    ),
+  };
 
-      const objects = req.body;
-      const uniqueTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());
-      const includedHiddenTypes = Array.from(uniqueTypes).filter(
-        (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
-      );
+  private readonly client: SavedObjectsClientContract;
 
-      const client = getClient({ includedHiddenTypes });
-      const response = await client.bulkGet<unknown>(objects);
+  constructor(
+    @inject(SavedObjectsClientFactory)
+    clientFactory: ServiceTypeOf<typeof SavedObjectsClientFactory>,
+    @inject(SavedObjectsTypeRegistry) typeRegistry: ServiceTypeOf<typeof SavedObjectsTypeRegistry>,
+    @inject(SavedObjectsManagement)
+    private readonly management: ISavedObjectsManagement,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      never,
+      never,
+      TypeOf<typeof BulkGetRoute.validate.body>
+    >,
+    @inject(Response) private readonly response: ServiceTypeOf<typeof Response>
+  ) {
+    this.client = clientFactory({
+      includedHiddenTypes: chain(request.body)
+        .map(({ type }) => type)
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value(),
+    });
+  }
 
-      const body: v1.BulkGetResponseHTTP = response.saved_objects.map((obj) => {
-        if (isSavedObjectErrorResult(obj)) {
-          return toSavedObjectWithMeta(obj);
-        } else {
-          return injectMetaAttributes(obj, managementService);
-        }
-      });
+  async handle() {
+    const response = await this.client.bulkGet<unknown>(this.request.body);
+    const body: v1.BulkGetResponseHTTP = response.saved_objects.map((obj) =>
+      isSavedObjectErrorResult(obj)
+        ? toSavedObjectWithMeta(obj)
+        : injectMetaAttributes(obj, this.management)
+    );
 
-      return res.ok({ body });
-    })
-  );
-};
+    return this.response.ok({ body });
+  }
+}
