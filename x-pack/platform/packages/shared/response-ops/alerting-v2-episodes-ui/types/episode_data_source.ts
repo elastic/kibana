@@ -21,6 +21,14 @@ export interface EpisodeDataSourceServices {
   http: HttpStart;
 }
 
+export interface EpisodeSearchField {
+  name: string;
+  type: string;
+  esTypes: string[];
+  searchable: boolean;
+  aggregatable: boolean;
+}
+
 interface EpisodeDataSourceBaseParams {
   services: EpisodeDataSourceServices;
   abortSignal?: AbortSignal;
@@ -104,6 +112,7 @@ export interface EpisodeDataSource {
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];

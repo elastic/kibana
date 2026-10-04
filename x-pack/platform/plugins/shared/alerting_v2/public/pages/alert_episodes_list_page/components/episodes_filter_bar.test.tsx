@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { createMockServices } from '@kbn/alerting-v2-episodes-ui/hooks/test_utils';
@@ -16,7 +16,18 @@ import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_
 import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
-jest.mock('react-use/lib/useDebounce', () => jest.fn());
+const mockUseDebounce = jest.fn();
+const mockEpisodesKqlInput = jest.fn((_props: Record<string, unknown>) => (
+  <div data-test-subj="episodesFilterBar-search" />
+));
+
+jest.mock('react-use/lib/useDebounce', () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockUseDebounce(...args),
+}));
+jest.mock('./episodes_kql_input', () => ({
+  EpisodesKqlInput: (props: Record<string, unknown>) => mockEpisodesKqlInput(props),
+}));
 
 const mockUseEuiContainerQuery = jest.fn();
 
@@ -91,6 +102,14 @@ const renderFilterBar = () =>
     </TestProviders>
   );
 
+const getLatestEpisodesKqlInputProps = () => {
+  const props = mockEpisodesKqlInput.mock.calls.at(-1)?.[0];
+  if (!props) {
+    throw new Error('EpisodesKqlInput was not rendered');
+  }
+  return props as { onChange: (value: string, isValid: boolean) => void };
+};
+
 describe('EpisodesFilterBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -104,6 +123,42 @@ describe('EpisodesFilterBar', () => {
       data: [],
       isFetching: false,
     } as unknown as ReturnType<typeof useBulkGetProfiles>);
+  });
+
+  it('does not apply an invalid KQL query', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      const { onChange } = getLatestEpisodesKqlInputProps();
+      onChange('severity:', false);
+    });
+    act(() => {
+      const debounceCallback = mockUseDebounce.mock.calls.at(-1)?.[0] as () => void;
+      debounceCallback();
+    });
+
+    expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
+  });
+
+  it('applies a valid KQL query', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      const { onChange } = getLatestEpisodesKqlInputProps();
+      onChange('severity: high', true);
+    });
+    act(() => {
+      const debounceCallback = mockUseDebounce.mock.calls.at(-1)?.[0] as () => void;
+      debounceCallback();
+    });
+
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'] })).toEqual({
+      status: ['active'],
+      queryString: 'severity: high',
+    });
   });
 
   it('renders search and all episode filters', () => {

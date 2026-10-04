@@ -73,7 +73,7 @@ describe('buildEpisodesKpisQuery', () => {
 
   it('applies queryString filter when provided', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
-    expect(output).toContain('QSTR(');
+    expect(output).toContain('KQL(');
   });
 
   it('does not include SORT or LIMIT', () => {
