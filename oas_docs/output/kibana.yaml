@@ -177519,7 +177519,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -177591,7 +177590,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -177663,7 +177661,6 @@ components:
               type: object
               properties:
                 text:
-                  default: ''
                   description: Axis title text.
                   type: string
                 visible:
@@ -179556,7 +179553,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -179592,7 +179588,6 @@ components:
           type: object
           properties:
             text:
-              default: ''
               description: Axis title text.
               type: string
             visible:
@@ -184272,8 +184267,7 @@ components:
             - enum:
                 - stepped
               type: string
-          default: linear
-          description: Curve interpolation method for line and area series
+          description: Curve interpolation method for line and area series. Defaults to linear.
         overlays:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyStylingOverlays'
         points:
