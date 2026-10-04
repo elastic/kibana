@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
+import { releaseHost } from '../fixtures/process_actions';
 import {
   createEnabledRuleWithAutomatedResponseActions,
   deleteAlertsForRule,
@@ -17,7 +18,8 @@ import { test } from '../fixtures';
 
 const ALERT_TIMEOUT_MS = 180_000;
 const RESPONSE_STATUS_TIMEOUT_MS = 180_000;
-const TEST_TIMEOUT_MS = 15 * 60 * 1000;
+/** Includes up to 120s to release host isolation before the next spec SSHes in. */
+const TEST_TIMEOUT_MS = 18 * 60 * 1000;
 
 test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }, () => {
   test.setTimeout(TEST_TIMEOUT_MS);
@@ -28,15 +30,37 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  test.afterEach(async ({ kbnClient, esClient }) => {
+  test.afterEach(async ({ kbnClient, esClient, enrolledEndpoint }) => {
     const rule = seededRule;
     seededRule = undefined;
-    if (!rule) {
-      return;
+    const failures: unknown[] = [];
+
+    // Delete the rule before releasing the host. It matches process.name: "sleep"
+    // and would isolate the VM again, and kill the next spec's sleep, if it is
+    // still enabled while unisolate is in flight.
+    if (rule) {
+      try {
+        await deleteSeededRule(kbnClient, rule.id);
+      } catch (error) {
+        failures.push(error);
+      }
+
+      try {
+        await deleteAlertsForRule(esClient, rule.id);
+      } catch (error) {
+        failures.push(error);
+      }
     }
 
-    await deleteSeededRule(kbnClient, rule.id);
-    await deleteAlertsForRule(esClient, rule.id);
+    try {
+      await releaseHost(kbnClient, enrolledEndpoint.agentId);
+    } catch (error) {
+      failures.push(error);
+    }
+
+    if (failures.length > 0) {
+      throw new AggregateError(failures, 'Failed to clean up the shared Endpoint host');
+    }
   });
 
   test('shows isolate, kill-process, and failed suspend-process on the alert flyout', async ({
