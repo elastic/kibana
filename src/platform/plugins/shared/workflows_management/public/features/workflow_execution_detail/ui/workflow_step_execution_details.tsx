@@ -32,6 +32,7 @@ import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_b
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
+import { approvalLabelsForStepExecution } from '../model/use_waiting_step_resume';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -47,6 +48,8 @@ interface WorkflowStepExecutionDetailsProps {
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  /** Run that owns `stepExecution`. Differs from `workflowExecutionId` for an injected child step. */
+  resumeExecutionId?: string;
   hasResumeError?: boolean;
   onRetryResume?: () => void;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
@@ -70,6 +73,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    resumeExecutionId,
     hasResumeError,
     onRetryResume,
     childWorkflowExecution,
@@ -189,12 +193,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                       {isWaitingForInput && (
                         <>
                           <ResumeExecutionButton
-                            executionId={workflowExecutionId}
+                            executionId={resumeExecutionId ?? workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
                             stepStartedAt={stepExecution?.startedAt}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
-                            approvalLabels={approvalLabels}
+                            approvalLabels={
+                              stepExecution?.id === waitingStepExecutionId
+                                ? approvalLabels
+                                : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
+                            }
                             autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}
                           />

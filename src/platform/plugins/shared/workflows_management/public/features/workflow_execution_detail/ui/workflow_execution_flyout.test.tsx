@@ -54,11 +54,16 @@ jest.mock('../model/use_waiting_step_resume', () => ({
 }));
 
 jest.mock('./resume_execution_button', () => ({
-  ResumeExecutionButton: (props: { autoOpen?: boolean; waitingStepExecutionId?: string }) => (
+  ResumeExecutionButton: (props: {
+    autoOpen?: boolean;
+    waitingStepExecutionId?: string;
+    executionId?: string;
+  }) => (
     <div
       data-test-subj="resume-execution-button"
       data-auto-open={String(Boolean(props.autoOpen))}
       data-waiting-step={props.waitingStepExecutionId ?? ''}
+      data-execution-id={props.executionId ?? ''}
     />
   ),
 }));
@@ -322,5 +327,46 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
       'href',
       '/app/workflows/flyout-test-child?executionId=child-exec-1'
     );
+  });
+
+  it('resumes a waiting child step against the child run', () => {
+    mockWaitingStepResume.waitingStepExecutionId = undefined;
+    mockChildExecutions.set('parent-execute', {
+      ...childExecution,
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'child-lookup',
+          stepId: 'hitl',
+          stepType: 'waitForApproval',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          workflowRunId: 'child-exec-1',
+          workflowId: 'flyout-test-child',
+        }),
+      ],
+    });
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'parent-exec',
+      workflowId: 'flyout-test-parent',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      stepExecutions: parentExecution.stepExecutions,
+    });
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'child-lookup',
+        stepId: 'hitl',
+        stepType: 'waitForApproval',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: { message: 'Approve the child', approveLabel: 'Approve' },
+      },
+      isLoading: false,
+    });
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-child-step'));
+
+    const resumeButton = screen.getByTestId('resume-execution-button');
+    expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
+    expect(resumeButton).toHaveAttribute('data-waiting-step', 'child-lookup');
   });
 });
