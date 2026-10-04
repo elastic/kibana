@@ -6,11 +6,11 @@ exports[`ElasticAgentCard props button 1`] = `
   footer={
     <EuiButton
       fill={true}
+      href="/app/integrations/browse"
     >
       Button
     </EuiButton>
   }
-  href="/app/integrations/browse"
   image={
     <EuiImage
       alt=""
@@ -36,11 +36,11 @@ exports[`ElasticAgentCard props category 1`] = `
   footer={
     <EuiButton
       fill={true}
+      href="/app/integrations/browse/custom"
     >
       Add Elastic Agent
     </EuiButton>
   }
-  href="/app/integrations/browse/custom"
   image={
     <EuiImage
       alt=""
@@ -66,11 +66,11 @@ exports[`ElasticAgentCard props href 1`] = `
   footer={
     <EuiButton
       fill={true}
+      href="#"
     >
       Button
     </EuiButton>
   }
-  href="#"
   image={
     <EuiImage
       alt=""
@@ -101,11 +101,11 @@ exports[`ElasticAgentCard props recommended 1`] = `
   footer={
     <EuiButton
       fill={true}
+      href="/app/integrations/browse"
     >
       Add Elastic Agent
     </EuiButton>
   }
-  href="/app/integrations/browse"
   image={
     <EuiImage
       alt=""
@@ -131,11 +131,11 @@ exports[`ElasticAgentCard renders 1`] = `
   footer={
     <EuiButton
       fill={true}
+      href="/app/integrations/browse"
     >
       Add Elastic Agent
     </EuiButton>
   }
-  href="/app/integrations/browse"
   image={
     <EuiImage
       alt=""
