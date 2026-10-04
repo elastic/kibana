@@ -5,26 +5,15 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-
-export type Maybe<T> = T | null;
+import { Direction } from '@kbn/securitysolution-timeline-common';
 
 export interface TotalValue {
   value: number;
   relation: string;
 }
 
-export interface CursorType {
-  value?: Maybe<string>;
-  tiebreaker?: Maybe<string>;
-}
-
 export interface Inspect {
   dsl: string[];
-}
-
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
 }
 
 export interface SortField<Field = string> {

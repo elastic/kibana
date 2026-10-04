@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export const PRESS = i18n.translate(
-  'xpack.timelines.hoverActions.tooltipWithKeyboardShortcut.pressTooltipLabel',
+  'securitySolutionPackages.timelineComponents.hoverActions.tooltipWithKeyboardShortcut.pressTooltipLabel',
   {
     defaultMessage: 'Press',
   }

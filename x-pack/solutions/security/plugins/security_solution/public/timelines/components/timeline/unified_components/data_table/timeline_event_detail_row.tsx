@@ -8,7 +8,7 @@ import React, { useRef, memo, useEffect } from 'react';
 
 import type { EuiDataGridSetCellProps, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { EventsTrSupplement } from '../../styles';
 import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
 import type { RowRenderer } from '../../../../../../common/types';
