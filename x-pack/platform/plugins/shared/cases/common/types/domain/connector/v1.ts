@@ -9,6 +9,11 @@ import * as rt from 'io-ts';
 
 import type { ActionType as ConnectorActionType } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
+import {
+  ExternalSyncFieldMappingsRt,
+  ExternalSyncFieldRulesRt,
+  ExternalSyncSettingsRt,
+} from '../external_sync/v1';
 
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ConnectorActionType;
@@ -237,12 +242,31 @@ const ConnectorMappingRt = rt.strict({
 
 export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
 
-export const ConnectorMappingsAttributesRt = rt.strict({
+const ConnectorMappingsBasicProps = {
   mappings: ConnectorMappingsRt,
   owner: rt.string,
-});
+};
+
+// Sync settings live with the per-connector mappings so each external system keeps its own policy.
+const ConnectorSyncSettingsProps = {
+  externalSync: ExternalSyncSettingsRt,
+  externalSyncFields: ExternalSyncFieldRulesRt,
+  externalSyncFieldMappings: ExternalSyncFieldMappingsRt,
+};
+
+export const ConnectorSyncSettingsRt = rt.exact(rt.partial(ConnectorSyncSettingsProps));
+
+export const ConnectorMappingsAttributesRt = rt.intersection([
+  rt.strict(ConnectorMappingsBasicProps),
+  ConnectorSyncSettingsRt,
+]);
+
+export const ConnectorMappingsAttributesPartialRt = rt.exact(
+  rt.partial({ ...ConnectorMappingsBasicProps, ...ConnectorSyncSettingsProps })
+);
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
+export type ConnectorSyncSettings = rt.TypeOf<typeof ConnectorSyncSettingsRt>;
 export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 export type ConnectorMappingActionType = rt.TypeOf<typeof ConnectorMappingActionTypeRt>;
 export type ConnectorMappingSource = rt.TypeOf<typeof ConnectorMappingSourceRt>;

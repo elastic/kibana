@@ -28,6 +28,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     extended_fields: i18n.EXTENDED_FIELDS,
     template: i18n.APPLIED_TEMPLATE,
     workflow: i18n.WORKFLOW_RAN,
+    sync: i18n.SYNCED_FROM_EXTERNAL,
   };
 
   switch (type) {
@@ -35,6 +36,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     case 'delete_case':
     case 'pushed':
     case 'workflow':
+    case 'sync':
       return actionsMap[type];
     default:
       return i18n.USER_ACTION_EDITED(actionsMap[type]);

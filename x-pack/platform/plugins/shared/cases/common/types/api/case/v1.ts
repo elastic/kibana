@@ -642,6 +642,14 @@ export const CasePushRequestParamsRt = rt.strict({
 });
 
 /**
+ * Sync case from its external incident
+ */
+
+export const CaseSyncRequestParamsRt = rt.strict({
+  case_id: rt.string,
+});
+
+/**
  * Taxonomies
  */
 

@@ -28,7 +28,7 @@ export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
-  const { attachments, caseId } = args;
+  const { attachments, caseId, origin } = args;
 
   const {
     logger,
@@ -90,7 +90,7 @@ export const bulkCreate = async (
       idsByType.set(attachment.type, ids);
     }
     for (const [type, ids] of idsByType) {
-      emitAttachmentsAddedEvent(clientArgs, updatedCase, ids, type);
+      emitAttachmentsAddedEvent(clientArgs, updatedCase, ids, type, origin);
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.

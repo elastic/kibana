@@ -28,6 +28,7 @@ import {
   DELETE_REGISTERED_ATTACHMENT,
 } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
+import { AttachmentAuthor } from './attachment_author';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
 import { AttachmentErrorCallout } from './attachment_error_callout';
@@ -142,12 +143,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     return [
       {
-        username: (
-          <HoverableUserWithAvatarResolver
-            user={attachment.createdBy}
-            userProfiles={userProfiles}
-          />
-        ),
+        username: <AttachmentAuthor attachment={attachment} userProfiles={userProfiles} />,
         className,
         css: creationActivity.css,
         event: withActionSourceEvent(creationActivity.event, userAction.source),

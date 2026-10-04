@@ -197,6 +197,19 @@ describe('ConnectorMappingResponseRt', () => {
       });
     });
 
+    it('keeps the connector sync settings', () => {
+      const response = {
+        id: 'test',
+        version: 'test',
+        mappings,
+        externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+        externalSyncFields: [{ field: 'comments', direction: 'off' }],
+      };
+      const query = ConnectorMappingResponseRt.decode(response);
+
+      expect(query).toStrictEqual({ _tag: 'Right', right: response });
+    });
+
     it('removes foo:bar attributes from the response', () => {
       const query = ConnectorMappingResponseRt.decode({
         id: 'test',

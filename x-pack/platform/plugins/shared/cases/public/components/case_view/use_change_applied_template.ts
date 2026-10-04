@@ -66,6 +66,7 @@ interface ChangeAppliedTemplateArgs {
 const buildTemplateSettings = (settings: TemplateSettings | undefined): CaseSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
   extractObservables: settings?.extractObservables ?? false,
+  ...(settings?.externalSync && { externalSync: settings.externalSync }),
 });
 
 export const computeNewExtendedFields = (

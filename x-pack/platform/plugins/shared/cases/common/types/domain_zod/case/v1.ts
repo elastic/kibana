@@ -40,6 +40,11 @@ export const CaseSeveritySchema = BundledCaseSeveritySchema;
  */
 export const CaseSettingsSchema = Settings;
 
+export const ExternalSyncSettingsSchema = z.object({
+  autoPush: z.boolean(),
+  conflictStrategy: z.enum(['external', 'kibana']),
+});
+
 export const CaseTemplateSchema = z.object({
   id: z.string(),
   version: z.number(),

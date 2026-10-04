@@ -50,6 +50,8 @@ export const casesQueriesKeys = {
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
+  externalFieldCatalog: (connectorId: string) =>
+    [...casesQueriesKeys.connectors, 'externalFieldCatalog', connectorId] as const,
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
   conversationAccess: (conversationId: string) =>
     [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
@@ -79,6 +81,7 @@ export const casesMutationsKeys = {
   updateCase: ['update-case'] as const,
   updateCases: ['update-cases'] as const,
   pushCase: ['push-case'] as const,
+  syncCase: ['sync-case'] as const,
   updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,

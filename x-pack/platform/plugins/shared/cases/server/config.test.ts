@@ -30,6 +30,9 @@ describe('config validation', () => {
           "attachments": Object {
             "enabled": true,
           },
+          "bidirectionalSync": Object {
+            "enabled": true,
+          },
           "chat": Object {
             "enabled": true,
           },
@@ -195,6 +198,11 @@ describe('config validation', () => {
     it('allows templates.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ templates: { enabled: false } });
       expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets bidirectionalSync.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.bidirectionalSync.enabled).toBe(true);
     });
 
     it('sets runWorkflows.enabled default to false', () => {

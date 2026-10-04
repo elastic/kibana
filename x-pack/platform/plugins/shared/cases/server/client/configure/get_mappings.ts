@@ -12,6 +12,7 @@ import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { MappingsArgs } from './types';
+import { pickConnectorSyncSettings } from './utils';
 
 export const getMappings = async (
   { connector }: MappingsArgs,
@@ -44,6 +45,7 @@ export const getMappings = async (
       id: so.id,
       version: so.version,
       mappings: so.attributes.mappings,
+      ...pickConnectorSyncSettings(so.attributes),
     };
 
     return decodeOrThrow(ConnectorMappingResponseRt)(res);

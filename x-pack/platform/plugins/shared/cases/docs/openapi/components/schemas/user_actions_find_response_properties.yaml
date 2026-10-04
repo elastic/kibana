@@ -45,6 +45,7 @@ properties:
       - $ref: 'payload_settings.yaml'
       - $ref: 'payload_severity.yaml'
       - $ref: 'payload_status.yaml'
+      - $ref: 'payload_sync.yaml'
       - $ref: 'payload_tags.yaml'
       - $ref: 'payload_title.yaml'
       - $ref: 'payload_user_comment.yaml'

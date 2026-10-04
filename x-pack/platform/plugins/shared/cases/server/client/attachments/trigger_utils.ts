@@ -8,17 +8,20 @@
 import type { Case } from '../../../common/types/domain';
 import type { Owner } from '../../../common/constants/types';
 import type { CasesClientArgs } from '..';
+import type { CaseUpdateOrigin } from '../../events/types';
 
 export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
   updatedCase: Case,
   attachmentIds: string[],
-  attachmentType: string
+  attachmentType: string,
+  origin?: CaseUpdateOrigin
 ): void {
   clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
     caseId: updatedCase.id,
     attachmentIds,
     attachmentType,
     owner: updatedCase.owner as Owner,
+    ...(origin != null ? { origin } : {}),
   });
 }

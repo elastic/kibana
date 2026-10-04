@@ -379,6 +379,18 @@ export type OwnerEnum = typeof Owner.enum;
 export const OwnerEnum = Owner.enum;
 
 /**
+  * Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. On a configuration these are the defaults of the configuration's connector and apply to new cases that use it. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+
+  */
+export const ExternalSyncSettings = lazySchema(() =>
+  z.object({
+    autoPush: z.boolean(),
+    conflictStrategy: z.enum(['external', 'kibana']),
+  })
+);
+export type ExternalSyncSettings = z.infer<typeof ExternalSyncSettings>;
+
+/**
  * An object that contains the case settings.
  */
 export const Settings = lazySchema(() =>
@@ -397,6 +409,7 @@ export const Settings = lazySchema(() =>
       .describe(
         "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
       ),
+    externalSync: ExternalSyncSettings.optional(),
   })
 );
 export type Settings = z.infer<typeof Settings>;
@@ -1094,6 +1107,33 @@ export type ConnectorTypesEnum = typeof ConnectorTypes.enum;
 export const ConnectorTypesEnum = ConnectorTypes.enum;
 
 /**
+  * Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`. Pulling `tags` and `comments` requires a connector that exposes them (Jira); other connectors leave them unchanged. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+
+  */
+export const ExternalSyncFieldRule = lazySchema(() =>
+  z.object({
+    field: z.enum(['title', 'description', 'status', 'tags', 'comments']),
+    direction: z.enum(['both', 'push', 'pull', 'off']),
+    conflictStrategy: z.enum(['external', 'kibana']).optional(),
+  })
+);
+export type ExternalSyncFieldRule = z.infer<typeof ExternalSyncFieldRule>;
+
+/**
+  * Technical preview. Carries one external field of the configuration's connector onto a global case field. `externalField` is the field key as the external system reports it; `caseField` is the storage key of a global field definition. `direction` and `conflictStrategy` behave as for the built-in field rules. Supported for Jira and ServiceNow connectors, up to 20 mappings per connector.
+
+  */
+export const ExternalSyncFieldMapping = lazySchema(() =>
+  z.object({
+    externalField: z.string(),
+    caseField: z.string(),
+    direction: z.enum(['both', 'push', 'pull', 'off']),
+    conflictStrategy: z.enum(['external', 'kibana']).optional(),
+  })
+);
+export type ExternalSyncFieldMapping = z.infer<typeof ExternalSyncFieldMapping>;
+
+/**
   * The words and phrases that help categorize templates. It can be an empty array.
 
   */
@@ -1304,6 +1344,25 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .describe(
         "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
       ),
+    externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+     */
+    externalSyncFields: z
+      .array(ExternalSyncFieldRule)
+      .optional()
+      .describe(
+        "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
+    /**
+     * Technical preview. External fields of the configuration's connector carried onto global case fields.
+     */
+    externalSyncFieldMappings: z
+      .array(ExternalSyncFieldMapping)
+      .optional()
+      .describe(
+        "Technical preview. External fields of the configuration's connector carried onto global case fields."
+      ),
     owner: Owner,
     templates: Templates.optional(),
   })
@@ -1412,6 +1471,25 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe(
         'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
+      ),
+    externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+     */
+    externalSyncFields: z
+      .array(ExternalSyncFieldRule)
+      .optional()
+      .describe(
+        "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
+    /**
+     * Technical preview. External fields of the configuration's connector carried onto global case fields.
+     */
+    externalSyncFieldMappings: z
+      .array(ExternalSyncFieldMapping)
+      .optional()
+      .describe(
+        "Technical preview. External fields of the configuration's connector carried onto global case fields."
       ),
     templates: Templates.optional(),
     /**
@@ -2683,6 +2761,40 @@ export const PayloadStatus = lazySchema(() =>
 );
 export type PayloadStatus = z.infer<typeof PayloadStatus>;
 
+export const PayloadSync = lazySchema(() =>
+  z.object({
+    /**
+     * Technical preview. The case was reconciled from its external incident.
+     */
+    sync: z
+      .object({
+        connector_name: z.string(),
+        external_id: z.string(),
+        external_title: z.string(),
+        external_url: z.string(),
+        /**
+         * Case fields updated from the external incident.
+         */
+        updated_fields: z
+          .array(z.string())
+          .describe('Case fields updated from the external incident.'),
+        /**
+         * Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.
+         */
+        conflicted_fields: z
+          .array(z.string())
+          .describe(
+            'Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.'
+          ),
+        external_updated_at: z.string().optional(),
+        external_updated_by: z.string().optional(),
+      })
+      .optional()
+      .describe('Technical preview. The case was reconciled from its external incident.'),
+  })
+);
+export type PayloadSync = z.infer<typeof PayloadSync>;
+
 export const PayloadTags = lazySchema(() =>
   z.object({
     tags: z.array(z.string()).optional(),
@@ -2836,6 +2948,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadSettings,
       PayloadSeverity,
       PayloadStatus,
+      PayloadSync,
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,

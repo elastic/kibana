@@ -22,6 +22,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('../common'));
 
     loadTestFile(require.resolve('./cases/push_case'));
+    loadTestFile(require.resolve('./cases/sync_case'));
     loadTestFile(require.resolve('./configure'));
     // NOTE: `./analytics_v2_off` is intentionally NOT loaded here. This config
     // does not pin `xpack.cases.analyticsV2.enabled`, so it follows the plugin

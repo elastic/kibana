@@ -112,6 +112,20 @@ describe('TemplateMetadataPreview', () => {
     expect(screen.getByText('Off')).toBeInTheDocument();
   });
 
+  it('renders the external sync defaults when provided', () => {
+    renderComponent({
+      parsedTemplate: {
+        name: 'Title',
+        settings: { externalSync: { autoPush: true, conflictStrategy: 'kibana' } },
+        fields: [],
+      },
+    });
+
+    expect(screen.getByText('Push changes automatically')).toBeInTheDocument();
+    expect(screen.getByText('On')).toBeInTheDocument();
+    expect(screen.getByText('Keep the Kibana value')).toBeInTheDocument();
+  });
+
   it('does not render settings rows when settings are not provided', () => {
     renderComponent();
 

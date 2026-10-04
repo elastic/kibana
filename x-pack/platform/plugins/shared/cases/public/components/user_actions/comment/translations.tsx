@@ -40,6 +40,12 @@ export const UNSAVED_DRAFT_COMMENT = i18n.translate(
   }
 );
 
+export const VIA_CONNECTOR = (connectorName: string): string =>
+  i18n.translate('xpack.cases.userActions.comment.viaConnector', {
+    values: { connectorName },
+    defaultMessage: 'via {connectorName}',
+  });
+
 export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
   'xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle',
   {

@@ -1,0 +1,34 @@
+type: object
+description: >
+  Technical preview. How one case field moves between the case and the external incident.
+  `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`.
+  `status` supports only `pull` and `off`. Pulling `tags` and `comments` requires a connector that
+  exposes them (Jira); other connectors leave them unchanged.
+  `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+required:
+  - field
+  - direction
+properties:
+  field:
+    type: string
+    enum:
+      - title
+      - description
+      - status
+      - tags
+      - comments
+    example: title
+  direction:
+    type: string
+    enum:
+      - both
+      - push
+      - pull
+      - off
+    example: both
+  conflictStrategy:
+    type: string
+    enum:
+      - external
+      - kibana
+    example: kibana

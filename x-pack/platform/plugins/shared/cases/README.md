@@ -23,6 +23,43 @@ This plugin provides cases management in Kibana
 
 [**Explore the API docs »**](https://www.elastic.co/guide/en/security/current/cases-api-overview.html)
 
+## Sync with an external system (technical preview)
+
+Cases can keep a pushed case and its external incident in step in both directions. Outbound changes are pushed automatically when a case has "Push changes automatically" on. Inbound changes are applied when the case is synced from its incident: manually with **Sync from <connector>** on the case, through `POST /api/cases/{caseId}/_sync`, or from a workflow with the `cases.syncCase` step.
+
+Per-connector defaults and field rules live on **Stack Management → Cases → Settings**, under the selected incident management system. They apply to new cases that use that connector; each case can override them in its Connectors panel.
+
+For Jira and ServiceNow, the **External fields** table in the same block carries additional external fields onto global case fields from the Field Library, in the direction you choose. Values travel through the connector's free-form fields (`otherFields` for Jira, `additional_fields` for ServiceNow) on push and are read from the incident on sync.
+
+### Apply changes from Jira automatically
+
+Kibana does not poll Jira. To apply Jira edits without pressing **Sync from Jira**, let Jira call Kibana and run the sync step from a workflow. No change is needed on the Jira side beyond a webhook.
+
+1. In **Stack Management → Connectors**, create an **Inbound Webhook** connector and copy its ingest URL and token (the token is shown once; rotate it to get a new one).
+2. In Jira, create a system webhook (**Settings → System → Webhooks**) for the `Issue updated` event, scoped with a JQL filter to the project you push cases to. Jira system webhooks cannot send headers, so put the token in the URL:
+
+   ```text
+   https://<kibana>/api/actions/events/.inboundWebhook/<inbound-webhook-connector-id>?token=<ingest-token>
+   ```
+
+3. Create a workflow that reacts to the webhook and syncs the case linked to the issue. `event.body` is the Jira webhook payload; the connector id is the Jira connector your cases push through.
+
+   ```yaml
+   name: Sync cases from Jira
+   enabled: true
+   triggers:
+     - type: ".inboundWebhook.received"
+       connector-id: "<inbound-webhook-connector-id>"
+   steps:
+     - name: sync_case
+       type: cases.syncCase
+       with:
+         external_id: "{{ event.body.issue.id }}"
+         connector_id: "<jira-connector-id>"
+   ```
+
+The step resolves the case from the incident id recorded at push time, applies the incident according to the connector's field rules (title, description, status, and, for Jira, labels as tags and new comments attributed to their Jira author), and records a `sync` entry in the case activity. Cases that were never pushed are skipped. The workflow runs as the user who last saved the inbound webhook connector, so that user needs push access to the cases.
+
 ## Cases UI
 
 ### Embed Cases UI components in any Kibana plugin

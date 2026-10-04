@@ -13,3 +13,10 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
+
+export interface ServiceNowField {
+  element: string;
+  column_label: string;
+  mandatory: string;
+  max_length: string;
+}

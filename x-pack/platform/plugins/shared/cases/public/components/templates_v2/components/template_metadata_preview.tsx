@@ -17,6 +17,7 @@ import { ConnectorTypes } from '../../../../common/types/domain';
 import { SeverityHealth } from '../../severity/config';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import * as commonI18n from '../../../common/translations';
+import * as editConnectorI18n from '../../edit_connector/translations';
 import * as i18n from '../translations';
 import { SEVERITY_TITLE } from '../../severity/translations';
 import { componentStyles } from './template_metadata_preview.styles';
@@ -131,6 +132,25 @@ export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({
               : commonI18n.EXTRACT_OBSERVABLES_SWITCH_LABEL_OFF}
           </EuiText>
         </MetadataRow>
+      )}
+
+      {settings?.externalSync !== undefined && (
+        <>
+          <MetadataRow label={editConnectorI18n.AUTO_PUSH_LABEL}>
+            <EuiText size="s">
+              {settings.externalSync.autoPush
+                ? editConnectorI18n.AUTO_PUSH_ON
+                : editConnectorI18n.AUTO_PUSH_OFF}
+            </EuiText>
+          </MetadataRow>
+          <MetadataRow label={editConnectorI18n.CONFLICT_STRATEGY_LABEL}>
+            <EuiText size="s">
+              {settings.externalSync.conflictStrategy === 'kibana'
+                ? editConnectorI18n.CONFLICT_KEEP_KIBANA
+                : editConnectorI18n.CONFLICT_KEEP_EXTERNAL}
+            </EuiText>
+          </MetadataRow>
+        </>
       )}
 
       {connector && connector.type !== ConnectorTypes.none && (

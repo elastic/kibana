@@ -18,6 +18,7 @@ import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRtV2 } from '../attachment/v2';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
 import { CaseObservableRt } from '../observable/v1';
+import { ExternalSyncSettingsRt } from '../external_sync/v1';
 
 export { CaseStatuses };
 
@@ -75,6 +76,7 @@ export const CaseSettingsRt = rt.intersection([
   rt.exact(
     rt.partial({
       extractObservables: rt.boolean,
+      externalSync: ExternalSyncSettingsRt,
     })
   ),
 ]);

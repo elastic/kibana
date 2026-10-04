@@ -16,15 +16,17 @@ import {
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
 import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
+import { ExternalSyncSettingsSchema } from '../../domain_zod/case/v1';
 import { CaseUserProfilesSchema } from '../../domain_zod/user/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
 
-/** Default case settings a template applies when creating a case; both optional and independent. */
+/** Default case settings a template applies when creating a case; all optional and independent. */
 export const TemplateSettingsSchema = z.object({
   syncAlerts: z.boolean().optional(),
   extractObservables: z.boolean().optional(),
+  externalSync: ExternalSyncSettingsSchema.optional(),
 });
 
 export type TemplateSettings = z.infer<typeof TemplateSettingsSchema>;

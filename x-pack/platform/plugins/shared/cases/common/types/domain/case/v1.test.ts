@@ -157,6 +157,27 @@ describe('RelatedCaseRt', () => {
     expect(result.data).toStrictEqual(defaultRequest);
   });
 
+  it('accepts externalSync settings', () => {
+    const query = CaseSettingsRt.decode({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'kibana', foo: 'bar' },
+    });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { syncAlerts: true, externalSync: { autoPush: true, conflictStrategy: 'kibana' } },
+    });
+  });
+
+  it('rejects an unknown externalSync conflict strategy', () => {
+    const query = CaseSettingsRt.decode({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'newest' },
+    });
+
+    expect(query._tag).toBe('Left');
+  });
+
   it('zod: strips unknown fields', () => {
     const result = RelatedCaseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);

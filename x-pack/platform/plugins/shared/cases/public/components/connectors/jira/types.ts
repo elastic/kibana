@@ -10,6 +10,7 @@ export interface Fields {
   [key: string]: {
     allowedValues: Array<{ name: string; id: string }> | [];
     defaultValue: { name: string; id: string } | {};
+    name?: string;
   };
 }
 

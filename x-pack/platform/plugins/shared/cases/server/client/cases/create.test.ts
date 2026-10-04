@@ -2435,4 +2435,76 @@ describe('create', () => {
       expect(createCaseCall.settings.extractObservables).toBe(true);
     });
   });
+
+  describe('externalSync defaulting from the connector sync settings', () => {
+    const externalSyncCasesClient = createCasesClientMock();
+    externalSyncCasesClient.configure.get = jest
+      .fn()
+      .mockResolvedValue([{ owner: theCase.owner, customFields: [] }]);
+    const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+    const jiraCase = {
+      ...theCase,
+      connector: { id: 'jira-1', name: 'Jira', type: ConnectorTypes.jira, fields: null },
+    };
+
+    const createClientArgsWithConnectorSync = (attributes?: Record<string, unknown>) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.connectorMappingsService.find.mockResolvedValue({
+        saved_objects: attributes != null ? [{ id: 'mapping-1', attributes }] : [],
+        total: attributes != null ? 1 : 0,
+        page: 1,
+        per_page: 1,
+      } as never);
+      return clientArgs;
+    };
+
+    it('inherits externalSync from the case connector when omitted', async () => {
+      const clientArgs = createClientArgsWithConnectorSync({ externalSync });
+
+      await create(jiraCase, clientArgs, externalSyncCasesClient);
+
+      expect(clientArgs.services.connectorMappingsService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({ hasReference: { type: 'action', id: 'jira-1' } }),
+        })
+      );
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toEqual(externalSync);
+    });
+
+    it('uses explicit externalSync over the connector defaults', async () => {
+      const clientArgs = createClientArgsWithConnectorSync({ externalSync });
+      const explicit = { autoPush: false, conflictStrategy: 'external' as const };
+
+      await create(
+        { ...jiraCase, settings: { ...jiraCase.settings, externalSync: explicit } },
+        clientArgs,
+        externalSyncCasesClient
+      );
+
+      expect(clientArgs.services.connectorMappingsService.find).not.toHaveBeenCalled();
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toEqual(explicit);
+    });
+
+    it('leaves externalSync unset when the connector has no sync settings', async () => {
+      const clientArgs = createClientArgsWithConnectorSync();
+
+      await create(jiraCase, clientArgs, externalSyncCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toBeUndefined();
+    });
+
+    it('does not look up sync settings for a case without a connector', async () => {
+      const clientArgs = createClientArgsWithConnectorSync({ externalSync });
+
+      await create(theCase, clientArgs, externalSyncCasesClient);
+
+      expect(clientArgs.services.connectorMappingsService.find).not.toHaveBeenCalled();
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toBeUndefined();
+    });
+  });
 });

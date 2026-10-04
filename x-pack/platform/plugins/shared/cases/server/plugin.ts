@@ -78,6 +78,8 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { registerAutoPushListener } from './external_sync/auto_push_listener';
+import { LicensingService } from './services/licensing';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
 
@@ -477,6 +479,20 @@ export class CasePlugin
     // this.casesEventBus will be set to a defined value in the setup() function
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
+
+    if (this.caseConfig.bidirectionalSync.enabled) {
+      const licensingService = new LicensingService(
+        plugins.licensing.license$,
+        plugins.licensing.featureUsage.notifyUsage
+      );
+      registerAutoPushListener({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        casesEventBus: this.casesEventBus!,
+        getCasesClient: this.getCasesClientWithRequest(core, 'external_sync'),
+        isAtLeastEnterprise: () => licensingService.isAtLeastEnterprise(),
+        logger: this.logger,
+      });
+    }
 
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function

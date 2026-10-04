@@ -13,4 +13,5 @@ enum:
   - status
   - settings
   - severity
+  - sync
 example: create_case
