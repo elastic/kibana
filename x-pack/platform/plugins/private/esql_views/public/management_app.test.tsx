@@ -61,6 +61,7 @@ const renderApp = (
   {
     canCreate = true,
     canEdit = true,
+    canDelete = true,
     EsqlEditor = MockEsqlEditor,
     isDiscoverAvailable = true,
     discoverLocator,
@@ -68,6 +69,7 @@ const renderApp = (
   }: {
     canCreate?: boolean;
     canEdit?: boolean;
+    canDelete?: boolean;
     EsqlEditor?: ComponentType<EsqlEditorProps>;
     isDiscoverAvailable?: boolean;
     discoverLocator?: ReturnType<typeof createDiscoverLocator>;
@@ -80,6 +82,7 @@ const renderApp = (
         <ManagementApp
           canCreate={canCreate}
           canEdit={canEdit}
+          canDelete={canDelete}
           client={client}
           isDiscoverAvailable={isDiscoverAvailable}
           discoverLocator={discoverLocator}
@@ -168,6 +171,41 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByTestId('esqlViewsActionsButton'));
     expect(await screen.findByTestId('esqlViewsDeleteButton')).toBeInTheDocument();
     expect(screen.queryByTestId('esqlViewsEditButton')).not.toBeInTheDocument();
+  });
+
+  it('hides delete, selection, and bulk delete controls without the delete capability', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue(twoViews);
+
+    renderApp(client, { canDelete: false });
+
+    await screen.findByText('logs-view');
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsBulkDeleteButton')).not.toBeInTheDocument();
+
+    fireEvent.click(within(getRow('logs-view')).getByTestId('esqlViewsActionsButton'));
+    expect(await screen.findByTestId('esqlViewsEditButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsDeleteButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the row actions menu without the edit and delete capabilities', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue(twoViews);
+
+    renderApp(client, {
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      discoverLocator: createDiscoverLocator(),
+    });
+
+    await screen.findByText('logs-view');
+    expect(screen.queryByTestId('esqlViewsCreateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsActionsButton')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(
+      within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction')
+    ).not.toHaveAttribute('aria-disabled', 'true');
   });
 
   it('offers edit and delete in the row actions menu with the edit capability', async () => {

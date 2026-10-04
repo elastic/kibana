@@ -26,6 +26,7 @@ import { useEsqlViews } from './use_esql_views';
 interface ManagementAppProps {
   canCreate: boolean;
   canEdit: boolean;
+  canDelete: boolean;
   client: EsqlViewsClient;
   isDiscoverAvailable: boolean;
   discoverLocator?: DiscoverEsqlLocator;
@@ -39,6 +40,7 @@ type FormState = { type: 'create' } | { type: 'edit'; view: EsqlView };
 export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   canCreate,
   canEdit,
+  canDelete,
   client,
   isDiscoverAvailable,
   discoverLocator,
@@ -57,6 +59,8 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
 
   const { viewsPendingDelete, isDeleting, requestDelete, cancelDelete, confirmDelete } =
     useDeleteEsqlViews({ client, toasts, onDeleted });
+
+  const openEditForm = useCallback((view: EsqlView) => setFormState({ type: 'edit', view }), []);
 
   const openInDiscover = useCallback(
     (view: EsqlView) => {
@@ -118,9 +122,9 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         isDiscoverAvailable={isDiscoverAvailable && discoverLocator !== undefined}
         selectedViews={selectedViews}
         onSelectionChange={setSelectedViews}
-        onEdit={canEdit ? (view) => setFormState({ type: 'edit', view }) : undefined}
+        onEdit={canEdit ? openEditForm : undefined}
         onReload={reload}
-        onDelete={requestDelete}
+        onDelete={canDelete ? requestDelete : undefined}
         onOpenInDiscover={openInDiscover}
       />
     );
