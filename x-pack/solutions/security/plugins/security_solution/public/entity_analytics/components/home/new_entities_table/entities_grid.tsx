@@ -79,6 +79,10 @@ const GRID_STYLE: EuiDataGridStyle = {
   stripes: false,
 };
 
+const rowCellsCss = css`
+  display: flex;
+`;
+
 const expandRowLabel = (isExpanded: boolean) =>
   isExpanded
     ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseRowAriaLabel', {
@@ -220,6 +224,15 @@ const EntityGridCustomBody = memo(
       cellPadding,
     } = useEntityGridView();
     const onResetFilters = useResetEntityGridFilters();
+    // One style object for all rows, instead of serializing it again for each row.
+    const rowCss = useMemo(
+      () => css`
+        inline-size: fit-content;
+        min-inline-size: 100%;
+        border-block-end: ${euiTheme.border.thin};
+      `,
+      [euiTheme.border.thin]
+    );
 
     return (
       <>
@@ -243,20 +256,8 @@ const EntityGridCustomBody = memo(
               entityId && expandedIds.has(entityId) ? childMap.get(entityId) ?? [] : [];
             return (
               <React.Fragment key={entityId ?? i}>
-                <div
-                  role="row"
-                  className="euiDataGridRow"
-                  css={css`
-                    inline-size: fit-content;
-                    min-inline-size: 100%;
-                    border-block-end: ${euiTheme.border.thin};
-                  `}
-                >
-                  <div
-                    css={css`
-                      display: flex;
-                    `}
-                  >
+                <div role="row" className="euiDataGridRow" css={rowCss}>
+                  <div css={rowCellsCss}>
                     {visCols.map((col, ci) => (
                       <Cell
                         colIndex={ci}

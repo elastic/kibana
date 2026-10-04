@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { css } from '@emotion/react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,6 @@ import {
   EuiPopover,
   EuiText,
   EuiTextColor,
-  EuiTextTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -99,28 +98,24 @@ const isCriticalityLevel = (value: unknown): value is CriticalityLevelWithUnassi
 const ALERT_SEVERITIES = [
   {
     key: 'critical',
-    field: 'alert_critical',
     label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.critical', {
       defaultMessage: 'Critical',
     }),
   },
   {
     key: 'high',
-    field: 'alert_high',
     label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.high', {
       defaultMessage: 'High',
     }),
   },
   {
     key: 'medium',
-    field: 'alert_medium',
     label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.medium', {
       defaultMessage: 'Medium',
     }),
   },
   {
     key: 'low',
-    field: 'alert_low',
     label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.low', {
       defaultMessage: 'Low',
     }),
@@ -139,20 +134,17 @@ const cellTruncateCss = css`
   flex: 1;
 `;
 
-const DefaultCell: React.FC<{ value: unknown }> = ({ value }) => {
+const ellipsisCss = css`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+const DefaultCell = memo(({ value }: { value: unknown }) => {
   const text = Array.isArray(value) ? value.map((v) => String(v)).join(', ') : String(value ?? '—');
-  return (
-    <div
-      css={css`
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      `}
-    >
-      {text}
-    </div>
-  );
-};
+  return <div css={ellipsisCss}>{text}</div>;
+});
+DefaultCell.displayName = 'DefaultCell';
 
 interface RowActionsCellProps {
   onInvestigateInTimeline: () => void;
@@ -241,42 +233,51 @@ const nameCellCss = css`
   width: 100%;
 `;
 
-const EntityNameCell = ({
-  value,
-  row,
-  onEntityNameClick,
-}: {
-  value: unknown;
-  row: Record<string, unknown>;
-  onEntityNameClick?: (row: Record<string, unknown>) => void;
-}) => {
-  const name = String(value ?? '—');
-  if (!onEntityNameClick) {
+const nameLinkCss = css`
+  display: block;
+  width: 100%;
+  min-width: 0;
+`;
+
+/**
+ * Truncates with CSS. EuiTextTruncate measures each cell after render, which costs a
+ * commit per cell; CSS ellipsis also keeps the full name readable by screen readers.
+ */
+const EntityNameCell = memo(
+  ({
+    value,
+    row,
+    onEntityNameClick,
+  }: {
+    value: unknown;
+    row: Record<string, unknown>;
+    onEntityNameClick?: (row: Record<string, unknown>) => void;
+  }) => {
+    const name = String(value ?? '—');
+    const text = (
+      <span css={ellipsisCss} title={name}>
+        {name}
+      </span>
+    );
     return (
       <div css={nameCellCss}>
-        <EuiTextTruncate text={name} />
+        {onEntityNameClick ? (
+          <EuiLink onClick={() => onEntityNameClick(row)} css={[nameLinkCss, ellipsisCss]}>
+            {text}
+          </EuiLink>
+        ) : (
+          <div css={ellipsisCss}>{text}</div>
+        )}
       </div>
     );
   }
-  // Link wraps truncation (not the reverse): EuiTextTruncate aria-hides truncated text,
-  // so a nested link would be focusable but unreachable to screen readers.
-  return (
-    <div css={nameCellCss}>
-      <EuiLink
-        onClick={() => onEntityNameClick(row)}
-        css={css`
-          display: block;
-          width: 100%;
-          min-width: 0;
-        `}
-      >
-        <EuiTextTruncate text={name} />
-      </EuiLink>
-    </div>
-  );
-};
+);
+EntityNameCell.displayName = 'EntityNameCell';
 
-const EntityTypeCell = ({ value }: { value: unknown }) => {
+// Cell leaves below are memoized on primitive props: EUI re-renders every cell when the
+// page rows change (shell, then enrich), but most cell values stay the same.
+
+const EntityTypeCell = memo(({ value }: { value: unknown }) => {
   if (!isEntityType(value)) return <>{value == null ? '—' : String(value)}</>;
   const iconType = EntityIconByType[value];
   return (
@@ -291,9 +292,10 @@ const EntityTypeCell = ({ value }: { value: unknown }) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
+EntityTypeCell.displayName = 'EntityTypeCell';
 
-const RiskScoreChangeCell = ({ value }: { value: unknown }) => {
+const RiskScoreChangeCell = memo(({ value }: { value: unknown }) => {
   if (typeof value !== 'number') return <>{'—'}</>;
   const delta = value;
   if (delta === 0) return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
@@ -306,118 +308,162 @@ const RiskScoreChangeCell = ({ value }: { value: unknown }) => {
       </EuiTextColor>
     </EuiText>
   );
-};
+});
+RiskScoreChangeCell.displayName = 'RiskScoreChangeCell';
 
-const AlertCountCell = ({
-  value,
-  row,
-  euiTheme,
-  onAlertCountClick,
-}: {
-  value: unknown;
-  row: Record<string, unknown>;
-  euiTheme: EuiThemeComputed;
-  onAlertCountClick?: (row: Record<string, unknown>) => void;
-}) => {
-  if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
-  const alertCount = value;
-  const severities = ALERT_SEVERITIES.map(({ key, label, field }) => ({
-    key,
-    label,
-    count: getNumber(row, field) ?? 0,
-    color: getSeverityColor(key, euiTheme),
-  })).filter((s) => s.count > 0);
-  return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-      <EuiFlexItem css={noPointerEventsCss}>
-        <DistributionBar stats={severities} hideLastTooltip />
-      </EuiFlexItem>
-      {onAlertCountClick ? (
-        <EuiBadge
-          color="hollow"
-          onClick={() => onAlertCountClick(row)}
-          onClickAriaLabel={i18nStrings.openAlerts}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          {alertCount}
-        </EuiBadge>
-      ) : (
-        <EuiBadge color="hollow">{alertCount}</EuiBadge>
-      )}
-    </EuiFlexGroup>
-  );
-};
+interface AlertSeverityCounts {
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
 
-const GroupSizeCell = ({
-  value,
-  row,
-  onGroupSizeClick,
-}: {
-  value: unknown;
-  row: Record<string, unknown>;
-  onGroupSizeClick?: (row: Record<string, unknown>) => void;
-}) =>
-  onGroupSizeClick ? (
-    <div
-      css={css`
-        display: flex;
-        overflow: hidden;
-      `}
-    >
-      <EuiLink onClick={() => onGroupSizeClick(row)} css={cellTruncateCss}>
-        {String(value ?? '—')}
-      </EuiLink>
-    </div>
-  ) : (
-    <DefaultCell value={value} />
-  );
+/** The distribution bar is the most expensive cell content, so it renders only on new counts. */
+const AlertSeverityBar = memo(
+  ({ euiTheme, ...counts }: AlertSeverityCounts & { euiTheme: EuiThemeComputed }) => {
+    const severities = ALERT_SEVERITIES.map(({ key, label }) => ({
+      key,
+      label,
+      count: counts[key],
+      color: getSeverityColor(key, euiTheme),
+    })).filter((s) => s.count > 0);
+    return <DistributionBar stats={severities} hideLastTooltip />;
+  }
+);
+AlertSeverityBar.displayName = 'AlertSeverityBar';
 
-const RelativeTimeCell = ({ value }: { value: unknown }) => {
+const AlertCountCell = memo(
+  ({
+    value,
+    row,
+    euiTheme,
+    onAlertCountClick,
+  }: {
+    value: unknown;
+    row: Record<string, unknown>;
+    euiTheme: EuiThemeComputed;
+    onAlertCountClick?: (row: Record<string, unknown>) => void;
+  }) => {
+    if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
+    const alertCount = value;
+    return (
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiFlexItem css={noPointerEventsCss}>
+          <AlertSeverityBar
+            euiTheme={euiTheme}
+            critical={getNumber(row, 'alert_critical') ?? 0}
+            high={getNumber(row, 'alert_high') ?? 0}
+            medium={getNumber(row, 'alert_medium') ?? 0}
+            low={getNumber(row, 'alert_low') ?? 0}
+          />
+        </EuiFlexItem>
+        {onAlertCountClick ? (
+          <EuiBadge
+            color="hollow"
+            onClick={() => onAlertCountClick(row)}
+            onClickAriaLabel={i18nStrings.openAlerts}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            {alertCount}
+          </EuiBadge>
+        ) : (
+          <EuiBadge color="hollow">{alertCount}</EuiBadge>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
+AlertCountCell.displayName = 'AlertCountCell';
+
+const GroupSizeCell = memo(
+  ({
+    value,
+    row,
+    onGroupSizeClick,
+  }: {
+    value: unknown;
+    row: Record<string, unknown>;
+    onGroupSizeClick?: (row: Record<string, unknown>) => void;
+  }) =>
+    onGroupSizeClick ? (
+      <div
+        css={css`
+          display: flex;
+          overflow: hidden;
+        `}
+      >
+        <EuiLink onClick={() => onGroupSizeClick(row)} css={cellTruncateCss}>
+          {String(value ?? '—')}
+        </EuiLink>
+      </div>
+    ) : (
+      <DefaultCell value={value} />
+    )
+);
+GroupSizeCell.displayName = 'GroupSizeCell';
+
+const RelativeTimeCell = memo(({ value }: { value: unknown }) => {
   if (value == null) return <>{'—'}</>;
   const m = typeof value === 'string' || typeof value === 'number' ? moment(value) : null;
   return <>{m?.isValid() ? m.fromNow() : String(value)}</>;
-};
+});
+RelativeTimeCell.displayName = 'RelativeTimeCell';
 
-const AnomalyCountCell = ({
-  value,
-  row,
-  onAnomalyCountClick,
-}: {
-  value: unknown;
-  row: Record<string, unknown>;
-  onAnomalyCountClick?: (row: Record<string, unknown>) => void;
-}) => {
-  if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
-  const anomalyCount = value;
-  return onAnomalyCountClick ? (
-    <EuiLink
-      onClick={() => onAnomalyCountClick(row)}
-      onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
-    >
-      {anomalyCount}
-    </EuiLink>
-  ) : (
-    <>{String(anomalyCount)}</>
-  );
-};
+const AnomalyCountCell = memo(
+  ({
+    value,
+    row,
+    onAnomalyCountClick,
+  }: {
+    value: unknown;
+    row: Record<string, unknown>;
+    onAnomalyCountClick?: (row: Record<string, unknown>) => void;
+  }) => {
+    if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
+    const anomalyCount = value;
+    return onAnomalyCountClick ? (
+      <EuiLink
+        onClick={() => onAnomalyCountClick(row)}
+        onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
+      >
+        {anomalyCount}
+      </EuiLink>
+    ) : (
+      <>{String(anomalyCount)}</>
+    );
+  }
+);
+AnomalyCountCell.displayName = 'AnomalyCountCell';
 
-const WatchlistsCell = ({
-  value,
-  watchlistNames,
-}: {
-  value: unknown;
-  watchlistNames: Map<string, string>;
-}) => {
-  const names = toEntitySourceArray(value).map((id) => watchlistNames.get(id) ?? id);
-  return (
-    <TruncatedBadgeList
-      values={names}
-      overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
-      textSize="s"
-      data-test-subj="entityWatchlistsValue"
-    />
-  );
-};
+const WatchlistsCell = memo(
+  ({ value, watchlistNames }: { value: unknown; watchlistNames: Map<string, string> }) => {
+    const names = toEntitySourceArray(value).map((id) => watchlistNames.get(id) ?? id);
+    return (
+      <TruncatedBadgeList
+        values={names}
+        overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
+        textSize="s"
+        data-test-subj="entityWatchlistsValue"
+      />
+    );
+  }
+);
+WatchlistsCell.displayName = 'WatchlistsCell';
+
+const RiskScoreValueCell = memo(({ value }: { value: unknown }) => (
+  <RiskScoreCell riskScore={typeof value === 'number' ? value : undefined} />
+));
+RiskScoreValueCell.displayName = 'RiskScoreValueCell';
+
+const CriticalityCell = memo(({ value }: { value: unknown }) => (
+  <AssetCriticalityBadge criticalityLevel={isCriticalityLevel(value) ? value : 'unassigned'} />
+));
+CriticalityCell.displayName = 'CriticalityCell';
+
+const SourceCell = memo(({ value }: { value: unknown }) => (
+  <EntitySourceValue values={toEntitySourceArray(value)} textSize="s" />
+));
+SourceCell.displayName = 'SourceCell';
 
 const renderKnownEntityCell = (
   columnId: GridColumnId,
@@ -442,7 +488,7 @@ const renderKnownEntityCell = (
     case 'entity.EngineMetadata.Type':
       return <EntityTypeCell value={value} />;
     case 'entity.risk.calculated_score_norm':
-      return <RiskScoreCell riskScore={typeof value === 'number' ? value : undefined} />;
+      return <RiskScoreValueCell value={value} />;
     case 'risk_score_change':
       return <RiskScoreChangeCell value={value} />;
     case 'alert_count':
@@ -461,13 +507,9 @@ const renderKnownEntityCell = (
     case 'entity.attributes.watchlists':
       return <WatchlistsCell value={value} watchlistNames={watchlistNames} />;
     case 'asset.criticality':
-      return (
-        <AssetCriticalityBadge
-          criticalityLevel={isCriticalityLevel(value) ? value : 'unassigned'}
-        />
-      );
+      return <CriticalityCell value={value} />;
     case 'entity.source':
-      return <EntitySourceValue values={toEntitySourceArray(value)} textSize="s" />;
+      return <SourceCell value={value} />;
     case 'entity.relationships.resolution.resolved_to':
       return <DefaultCell value={value} />;
   }
