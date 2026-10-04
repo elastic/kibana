@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/scout-oblt';
+import type { KbnClient, ScoutPage } from '@kbn/scout-oblt';
 import { euiSelectors, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -57,6 +57,25 @@ const deleteTestAnnotations = async (kbnClient: KbnClient) => {
   await deleteAnnotationsByTitle(kbnClient, UPDATED_ANNOTATION_TITLE);
 };
 
+const expectAnnotationTooltip = async (
+  page: ScoutPage,
+  { title, message }: { title: string; message: string }
+) => {
+  const tableRow = page.locator(euiSelectors.basicTable.ROW_SELECTOR).filter({ hasText: title });
+  const marker = page.getByRole('button', { name: message });
+  const tooltipDescription = page.locator(
+    `[data-test-subj="annotation-tooltip-description"]:has-text("${message}")`
+  );
+
+  // The chart re-mounts its marker while the save refetch settles, dropping the marker's
+  // mouseenter; the pointer has to leave and re-enter the marker for the chart to re-deliver it.
+  await expect(async () => {
+    await tableRow.hover();
+    await marker.hover();
+    await expect(tooltipDescription).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout: 60_000, intervals: [1_000] });
+};
+
 test.describe(
   'Annotations List',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -89,12 +108,10 @@ test.describe(
       await expect(
         page.locator(euiSelectors.basicTable.ROW_SELECTOR).filter({ hasText: ANNOTATION_TITLE })
       ).toHaveCount(1);
-      await page.getByRole('button', { name: ANNOTATION_MESSAGE }).hover();
-      await expect(
-        page.locator(
-          `[data-test-subj="annotation-tooltip-description"]:has-text("${ANNOTATION_MESSAGE}")`
-        )
-      ).toBeVisible();
+      await expectAnnotationTooltip(page, {
+        title: ANNOTATION_TITLE,
+        message: ANNOTATION_MESSAGE,
+      });
     });
 
     test('Go to SLOs and check that annotation is displayed', async ({
@@ -131,12 +148,10 @@ test.describe(
           `[data-test-subj="annotation-marker-body"]:has-text("${UPDATED_ANNOTATION_TITLE}")`
         )
       ).toBeVisible();
-      await page.getByRole('button', { name: UPDATED_ANNOTATION_MESSAGE }).hover();
-      await expect(
-        page.locator(
-          `[data-test-subj="annotation-tooltip-description"]:has-text("${UPDATED_ANNOTATION_MESSAGE}")`
-        )
-      ).toBeVisible();
+      await expectAnnotationTooltip(page, {
+        title: UPDATED_ANNOTATION_TITLE,
+        message: UPDATED_ANNOTATION_MESSAGE,
+      });
     });
 
     test('delete annotation', async ({ page, pageObjects, kbnClient }) => {
