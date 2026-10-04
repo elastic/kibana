@@ -82,14 +82,18 @@ const buildGroupSizeSortCountQuery = ({
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildGroupSizeEnrichQuery = (namespace: string, groupKeys: readonly string[]): string =>
-  [
+const buildGroupSizeEnrichQuery = (namespace: string, groupKeys: readonly string[]): string => {
+  const keys = toList(groupKeys);
+  return [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
+    // Lucene-pushable superset of the group_key filter below; skips entities outside page groups.
+    `| WHERE ${RESOLVED_TO_FIELD} IN (${keys}) OR ${ENTITY_ID_FIELD} IN (${keys})`,
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
-    `| WHERE group_key IN (${toList(groupKeys)})`,
+    `| WHERE group_key IN (${keys})`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
   ].join('\n');
+};
 
 const enrichGroupSize = async (
   pageRows: Row[],
