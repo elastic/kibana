@@ -380,7 +380,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
   });
 
-  it('returns resume_workflow when still waiting_for_child so a finished child can cascade', async () => {
+  it('returns resume_workflow when still waiting_for_child so handler can retry', async () => {
     mockExecutionLookup(workflowExecutionsDataClient, {
       id: 'x',
       spaceId: 'default',
