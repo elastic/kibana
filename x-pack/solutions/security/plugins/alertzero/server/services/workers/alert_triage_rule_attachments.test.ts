@@ -161,6 +161,18 @@ describe('detachRuleIdChunks', () => {
     });
   });
 
+  it('passes ignoreMissingRules through, and does not set it by default', async () => {
+    const service = makeAttachmentService({ attachedIds: ['r1'] });
+
+    await detachRuleIdChunks(service, [['r1']], { ignoreMissingRules: true });
+
+    expect(service.updateRuleAttachments).toHaveBeenCalledWith({
+      attachRuleIds: [],
+      detachRuleIds: ['r1'],
+      ignoreMissingRules: true,
+    });
+  });
+
   it('skips empty chunks without calling updateRuleAttachments', async () => {
     const service = makeAttachmentService({ attachedIds: ['r1'] });
 
