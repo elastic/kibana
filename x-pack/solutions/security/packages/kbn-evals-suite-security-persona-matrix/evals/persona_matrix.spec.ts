@@ -23,8 +23,13 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
-    await seedPersonaMatrixTools({ kbnClient, log });
-    log.info('[persona-matrix] seeded virustotal_lookup + on_call_lookup tools');
+    const seedProfile = process.env.SEED_PROFILE === 'parity' ? 'parity' : 'minimal';
+    await seedPersonaMatrixTools({ kbnClient, log, parity: seedProfile === 'parity' });
+    log.info(
+      `[persona-matrix] seeded persona-matrix tools (profile: ${seedProfile}${
+        seedProfile === 'parity' ? ' incl. original-era shims' : ''
+      })`
+    );
   });
 
   evaluate.afterAll(async ({ esClient, kbnClient, log }) => {
