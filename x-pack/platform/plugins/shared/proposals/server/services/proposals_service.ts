@@ -21,7 +21,11 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
-import { PROPOSAL_ATTACHMENT_TYPE, PROPOSALS_RESUME_CHANNEL } from '@kbn/proposals-common';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSALS_RESUME_CHANNEL,
+} from '@kbn/proposals-common';
 import type {
   CreateProposalRequest,
   DismissReason,
@@ -38,7 +42,6 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
-import { isExpired } from '@kbn/proposals-common';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -47,10 +50,9 @@ import {
 } from './esql';
 import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
-import { toSortRanks } from '../storage/sort_ranks';
+import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -146,15 +148,17 @@ export class ProposalsService {
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
-    // Both are required on the stored document, so a blank has to resolve to
-    // something rather than to an omission: `confidence` feeds the queue's
-    // secondary sort rank, and `origin` says who proposed it.
+    // Required on the stored document, so a blank has to resolve to something
+    // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
-    const origin = blankToUndefined(params.origin) ?? 'worker';
 
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
+      // Resolved once here rather than re-derived by every reader: same
+      // precedence as `category`, with the action's own name behind it and a
+      // constant behind that, so every proposal is named exactly once.
+      title: blankToUndefined(params.title) ?? metadata?.name ?? DEFAULT_PROPOSAL_TITLE,
       comment: params.comment,
       actionWorkflowId,
       actionInput: params.actionInput,
@@ -162,7 +166,7 @@ export class ProposalsService {
       impact,
       confidence,
       category,
-      origin,
+      origin: params.origin,
       ...toSortRanks({ impact, confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
@@ -176,18 +180,10 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
-    // The action's name, since a proposal has no title of its own yet; the
-    // workflow id is the last resort so an unnamed action still reads as
-    // something more specific than the generic fallback.
-    await this.attachToConversation(
-      id,
-      params.conversationId,
-      metadata?.name ?? actionWorkflowId,
-      request
-    );
+    await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
-    return { ...proposal, action: metadata, expired: isExpired(proposal) };
+    return { ...proposal, action: metadata };
   }
 
   /**
@@ -201,7 +197,7 @@ export class ProposalsService {
   private async attachToConversation(
     proposalId: string,
     conversationId: string,
-    title: string | undefined,
+    title: string,
     request: KibanaRequest
   ): Promise<void> {
     try {
@@ -256,8 +252,8 @@ export class ProposalsService {
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
       sort: sort ?? [
-        { impactRank: { order: 'asc' } },
-        { confidenceRank: { order: 'asc' } },
+        { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+        { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
         { expiresAt: { order: 'asc', missing: '_last' } },
         // Final tiebreak, so paging over equally-ranked proposals is stable.
@@ -289,7 +285,7 @@ export class ProposalsService {
    * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
-    { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
+    { windowHours, bucketMinutes, origin }: ProposalChartsSummaryQuery,
     spaceId: string
   ): Promise<ProposalChartsSummaryResponse> {
     const now = Date.now();
@@ -307,7 +303,7 @@ export class ProposalsService {
       currentOpen: 0,
     });
 
-    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes };
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes, origin };
 
     let anchorResponse;
     let opensResponse;
@@ -559,7 +555,11 @@ export class ProposalsService {
    * `workflowExecutionId` is the original's, because the gate execution is
    * still running and parked — approving the clone resumes that same execution.
    */
-  async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
+  async clone(
+    { id, executionError }: CloneProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
     // Asserted here rather than left to the caller, because this is reachable
@@ -584,6 +584,10 @@ export class ProposalsService {
     const cloneId = uuidv4();
     const { id: _id, ...original } = proposal;
 
+    // What the predecessor will carry once the supersession write below lands,
+    // resolved here so both documents agree on it.
+    const failure = executionError ?? original.executionError;
+
     const document: ProposalDocument = {
       ...original,
       status: 'pending',
@@ -594,6 +598,9 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // Why the attempt this one re-offers failed. Denormalised from the
+      // predecessor so the queue can say so from the row it already has.
+      previousExecutionError: failure,
     };
 
     // The clone is created before the original is marked, deliberately. The
@@ -608,10 +615,12 @@ export class ProposalsService {
     const superseded: ProposalDocument = {
       ...original,
       supersededBy: cloneId,
-      ...(executionError !== undefined ? { executionError } : {}),
+      ...(failure !== undefined ? { executionError: failure } : {}),
     };
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
 
     return cloneId;
   }
@@ -625,7 +634,7 @@ export class ProposalsService {
    * any single revision — mirroring `clone()`'s inheritance of the same fields.
    */
   async revise(
-    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    { id, title, comment, actionInput, impact, confidence }: ReviseProposalParams,
     spaceId: string,
     request: KibanaRequest
   ): Promise<{ proposalId: string; revision: number }> {
@@ -650,12 +659,6 @@ export class ProposalsService {
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
     }
-    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
-    // workflow settles the record, so a revision cut here would be born expired.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(id);
-    }
-
     const { id: _id, ...original } = proposal;
 
     // The override is merged over the predecessor's input and the merged object is
@@ -678,6 +681,9 @@ export class ProposalsService {
     // Resolved once, so the enums and the ranks derived from them cannot drift.
     const nextImpact = impact ?? original.impact;
     const nextConfidence = confidence ?? original.confidence;
+    // Only a real override replaces the predecessor's: a blank would strip the
+    // proposal of the name `create()` resolved for it.
+    const nextTitle = blankToUndefined(title);
 
     const revisionId = uuidv4();
     const rootProposalId = original.rootProposalId ?? id;
@@ -698,6 +704,10 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // `previousExecutionError` rides along with the spread untouched: a
+      // revision corrects a proposal, it does not run anything, so the last
+      // attempt to fail is still the one the predecessor was re-offered for.
+      ...(nextTitle !== undefined ? { title: nextTitle } : {}),
       ...(comment !== undefined ? { comment } : {}),
       ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
       impact: nextImpact,
@@ -737,6 +747,8 @@ export class ProposalsService {
       }
       throw error;
     }
+
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
 
     return { proposalId: revisionId, revision };
   }
@@ -1007,10 +1019,11 @@ export class ProposalsService {
    * stays at `pending` for as long as the gate workflow's post-gate steps take
    * to run, so a status check alone would let a second approver through.
    *
-   * The status catches what the decision cannot: the workflow settles an
-   * unanswered proposal as `expired` on attempt exhaustion or a failure before
-   * anyone decided, which leaves no decision behind and can happen well before
-   * the wall-clock deadline. The date check below would still read it as live.
+   * The `status` catches what the decision cannot: the workflow settles an
+   * undecided proposal as `expired` on attempt exhaustion or a failure before
+   * anyone decided, which leaves no decision behind. A deadline that has
+   * passed but not yet been swept to `expired` still reads `pending` here
+   * which is accepted lag, rather than a second check against `expiresAt`.
    *
    * `pending` is the only status that is valid while undecided, so anything
    * else is already settled.
@@ -1025,12 +1038,6 @@ export class ProposalsService {
       throw new ProposalConflictError(
         `Proposal [${proposal.id}] has settled as ${proposal.status}`
       );
-    }
-    // Kept alongside the status check for the lag between a deadline passing
-    // and the workflow settling the record, during which it still reads
-    // `pending`.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(proposal.id);
     }
   }
 
@@ -1112,7 +1119,7 @@ export class ProposalsService {
       ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
-    return { ...proposal, action, expired: isExpired(proposal) };
+    return { ...proposal, action };
   }
 
   /**
@@ -1146,7 +1153,6 @@ export class ProposalsService {
         proposal.actionWorkflowId !== undefined
           ? metaMap.get(proposal.actionWorkflowId)
           : undefined,
-      expired: isExpired(proposal),
     }));
   }
 }
@@ -1197,6 +1203,9 @@ const toFilterClauses = (
   if (filters.conversationId) {
     filter.push({ term: { conversationId: filters.conversationId } });
   }
+  if (filters.origin) {
+    filter.push({ term: { origin: filters.origin } });
+  }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
   }
@@ -1227,10 +1236,10 @@ const toFilterClauses = (
 
 /**
  * Drops the storage-only sort ranks, so they never reach the API contract.
- * Destructuring is the point: adding a rank field forces this to be updated.
+ * One key rather than a list, because they are nested under `ranks`: a third
+ * rank is a change to `ProposalSortRanks` alone.
  */
-const stripRanks = ({ impactRank, confidenceRank, ...proposal }: StoredProposalRecord): Proposal =>
-  proposal;
+const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => proposal;
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });

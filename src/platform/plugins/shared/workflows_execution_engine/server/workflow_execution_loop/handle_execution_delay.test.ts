@@ -62,7 +62,6 @@ const makeParams = (
     },
     workflowLogger: {
       logWarn: jest.fn(),
-      flushEvents: jest.fn().mockResolvedValue(undefined),
     },
     stepIoService: {
       flush: jest.fn().mockResolvedValue(undefined),

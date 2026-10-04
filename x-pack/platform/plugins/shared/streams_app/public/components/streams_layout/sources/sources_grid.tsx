@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import type {
@@ -252,9 +251,18 @@ export const SourcesGrid = ({
     );
   }
 
+  const isEmpty = sources.length === 0;
+
   return (
-    <>
+    <div
+      css={css`
+        position: relative;
+        block-size: 100%;
+        min-block-size: 0;
+      `}
+    >
       <EuiDataGrid
+        height={isEmpty ? 'auto' : undefined}
         aria-label={i18n.translate('xpack.streams.sources.tableCaption', {
           defaultMessage: 'Configured stream sources',
         })}
@@ -279,9 +287,17 @@ export const SourcesGrid = ({
           onChangePage: (pageIndex) => onPaginationChange({ ...pagination, pageIndex }),
         }}
       />
-      {sources.length === 0 && (
-        <>
-          <EuiSpacer size="m" />
+      {isEmpty && (
+        <div
+          css={css`
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+          `}
+        >
           <EuiEmptyPrompt
             iconType={hasActiveFilters ? 'search' : 'database'}
             title={
@@ -304,9 +320,12 @@ export const SourcesGrid = ({
                     defaultMessage: 'Add a source to start sending data to this stream.',
                   })
             }
+            css={css`
+              pointer-events: auto;
+            `}
           />
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 };

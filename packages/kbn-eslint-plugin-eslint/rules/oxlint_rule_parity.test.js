@@ -10,7 +10,7 @@
 const { execFileSync } = require('child_process');
 const { resolve } = require('path');
 
-it('replays migrated base rule cases with Oxlint', () => {
+it('replays each dedicated Oxlint plugin rule case with Oxlint', () => {
   execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_oxlint_rule_tests.mjs')], {
     cwd: resolve(__dirname, '../../..'),
     stdio: 'inherit',
