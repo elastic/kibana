@@ -7,7 +7,7 @@ The default `test/scout/` config set has no Fleet Server and no VirtualBox/Multi
 ## What it runs
 
 - Config set: `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/edr_real_fleet/`
-- Playwright: `ui/playwright.config.ts` (`workers: 1`)
+- Playwright: `ui/playwright.config.ts` and `api/playwright.config.ts` (`workers: 1`)
 - Host: Vagrant + VirtualBox on CI (`CI=true`), Multipass locally
 - Fleet Server: Docker via `startFleetServerIfNecessary()` after Kibana is up
 
@@ -27,6 +27,14 @@ node scripts/scout run-tests --location local --arch stateful --domain classic \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
 ```
 
+The live-agent API specs use the same server config set:
+
+```bash
+node scripts/scout run-tests --location local --arch stateful --domain classic \
+  --serverConfigSet edr_real_fleet \
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts
+```
+
 To iterate against an already-running stack, start servers once:
 
 ```bash
@@ -40,6 +48,8 @@ node scripts/playwright test \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts \
   --project local
 ```
+
+Use `api/playwright.config.ts` in that command to run only the API specs.
 
 ## CI
 
