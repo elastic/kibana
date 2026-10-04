@@ -93,6 +93,10 @@ export const useCanvasNodePositions = () => {
   return useCanvasStateSelector((state) => state.context.nodePositions);
 };
 
+export const useShowConfirmRemoveProcessingModal = () => {
+  return useCanvasStateSelector((state) => state.context.confirmations.processing);
+};
+
 export const useCanvasEvents = () => {
   const service = CanvasStateContext.useActorRef();
 
@@ -116,6 +120,18 @@ export const useCanvasEvents = () => {
       },
       changeUnitConnection: (unitDefinition: Unit) => {
         service.send({ type: 'unit.stage', unitDefinition });
+      },
+      showProcessingRemovalPrompt: () => {
+        service.send({ type: 'flyout.confirmation.prompt', confirmation: 'processing' });
+      },
+      confirmProcessingRemoval: () => {
+        service.send({ type: 'flyout.confirmation.answer', confirmation: 'processing' });
+      },
+      hideProcessingRemovalPrompt: () => {
+        service.send({
+          type: 'flyout.confirmation.close',
+          confirmation: 'processing',
+        });
       },
     }),
     [service]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
@@ -24,6 +24,8 @@ import {
   StreamDetailEnrichmentFooter,
 } from '../stream_management/data_management/stream_detail_pipeline_processing/page_content';
 import { loadProcessing } from '../stream_management/data_management/stream_detail_pipeline_processing/processing_persistence_adapter';
+import { useShowConfirmRemoveProcessingModal } from '../stream_management/data_management/stream_detail_canvas/state_management';
+import { StreamRemoveProcessingConfirmationModal } from './stream_remove_processing_confirm_modal';
 
 export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
   const { euiTheme } = useEuiTheme();
@@ -35,6 +37,7 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
       },
     },
   } = useKibana();
+  const showConfirmationModal = useShowConfirmRemoveProcessingModal();
 
   const { value, loading, error, refresh } = useStreamsAppFetch(
     ({ signal }) =>
@@ -46,6 +49,11 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
       }),
     [core, name, streamsRepositoryClient]
   );
+
+  const refreshAll = useCallback(() => {
+    refreshStreams?.();
+    refresh();
+  }, [refresh, refreshStreams]);
 
   if (loading && !value) {
     return (
@@ -79,23 +87,26 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
       definition={value.definition}
       pipeline={value.pipeline}
       processingPersistenceAdapter={value.processingPersistenceAdapter}
-      refreshDefinition={refreshStreams ?? refresh}
+      refreshDefinition={refreshAll}
     >
-      <EuiFlyoutBody
-        css={css`
-          .euiFlyoutBody__overflowContent {
-            box-sizing: border-box;
-            height: 100%;
-            padding: ${euiTheme.size.xxs};
-          }
+      <>
+        <EuiFlyoutBody
+          css={css`
+            .euiFlyoutBody__overflowContent {
+              box-sizing: border-box;
+              height: 100%;
+              padding: ${euiTheme.size.xxs};
+            }
 
-          .euiFlyoutBody__overflowContent > div {
-            height: 100%;
-          }
-        `}
-      >
-        <StreamDetailEnrichmentContentImpl />
-      </EuiFlyoutBody>
+            .euiFlyoutBody__overflowContent > div {
+              height: 100%;
+            }
+          `}
+        >
+          <StreamDetailEnrichmentContentImpl />
+        </EuiFlyoutBody>
+        {showConfirmationModal && <StreamRemoveProcessingConfirmationModal refresh={refreshAll} />}
+      </>
       <StreamDetailEnrichmentFooter />
     </StreamDetailEnrichmentContentProvider>
   );

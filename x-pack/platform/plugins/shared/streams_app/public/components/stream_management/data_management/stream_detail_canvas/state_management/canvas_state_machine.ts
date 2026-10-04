@@ -156,6 +156,25 @@ export const canvasStateMachine = setup({
         error: undefined,
       };
     }),
+    storeConfirmationPrompt: assign(({ context, event }) => {
+      switch (event.type) {
+        case 'flyout.confirmation.prompt':
+          return {
+            confirmations: {
+              ...context.confirmations,
+              [event.confirmation]: 'unconfirmed' as const,
+            },
+          };
+        case 'flyout.confirmation.answer':
+          return {
+            confirmations: { ...context.confirmations, [event.confirmation]: 'confirmed' as const },
+          };
+        case 'flyout.confirmation.close':
+          return { confirmations: { ...context.confirmations, [event.confirmation]: undefined } };
+        default:
+          return {};
+      }
+    }),
     storeUnitFailure: assign({
       error: ({ event }) =>
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
@@ -358,6 +377,13 @@ export const canvasStateMachine = setup({
               }),
             },
             raise({ type: 'url.sync' }),
+          ],
+        },
+        'flyout.confirmation.*': {
+          actions: [
+            {
+              type: 'storeConfirmationPrompt',
+            },
           ],
         },
         'flyout.tab': {
@@ -572,6 +598,7 @@ export const canvasStateMachine = setup({
       // Kept in the Canvas parent so API-backed coordinates can be loaded and
       // persisted alongside the unit without changing the graph components.
       nodePositions: {},
+      confirmations: {},
       error: undefined,
       sourcesRef: spawn('sourcesMachine', {
         input: {
