@@ -545,6 +545,42 @@ describe('ApplyThrottlingStep', () => {
     expect(result.data?.plan?.throttled).toHaveLength(0);
   });
 
+  it('compares the alert_status of the last notified record for on_status_change', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new ApplyThrottlingStep(queryService);
+
+    const groups = [
+      createActionGroup({
+        id: 'unchanged',
+        policyId: 'p1',
+        episodes: [createAlertEpisode({ episode_status: 'active' })],
+      }),
+      createActionGroup({
+        id: 'changed',
+        policyId: 'p1',
+        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+      }),
+    ];
+    const policies = new Map([
+      ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'on_status_change' } })],
+    ]);
+    const lastNotified = '2026-01-22T08:00:00.000Z';
+
+    mockEsClient.esql.query.mockResolvedValue(
+      createLastNotifiedTimestampsResponse([
+        { action_group_id: 'unchanged', last_notified: lastNotified, alert_status: 'active' },
+        { action_group_id: 'changed', last_notified: lastNotified, alert_status: 'active' },
+      ])
+    );
+
+    const result = await step.execute(createDispatcherPipelineState({ groups, policies }), logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.plan?.toDispatch.map(({ id }) => id)).toEqual(['changed']);
+    expect(result.data?.plan?.throttled.map(({ id }) => id)).toEqual(['unchanged']);
+  });
+
   it('returns empty dispatch and throttled when no groups', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new ApplyThrottlingStep(queryService);
