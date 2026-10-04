@@ -33701,7 +33701,6 @@
     "xpack.ml.timeSeriesExplorer.mlSingleMetricViewerChart.annotationsErrorTitle": "Une erreur est survenue pendant la récupération des annotations",
     "xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo": "La liste contient des valeurs provenant des résultats du tracé de modèle.",
     "xpack.ml.timeSeriesExplorer.noResultsFoundLabel": "Aucun résultat trouvé",
-    "xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel": "Aucune tâche à indicateur unique n'a été trouvée",
     "xpack.ml.timeSeriesExplorer.orderLabel": "Ordre",
     "xpack.ml.timeSeriesExplorer.pageTitle": "Single Metric Viewer (Visionneuse d'indicateur unique)",
     "xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel": "moyenne",

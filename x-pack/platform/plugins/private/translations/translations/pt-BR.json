@@ -33881,7 +33881,6 @@
     "xpack.ml.timeSeriesExplorer.mlSingleMetricViewerChart.annotationsErrorTitle": "Ocorreu um erro ao buscar anotações",
     "xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo": "A lista contém valores dos resultados do gráfico do modelo.",
     "xpack.ml.timeSeriesExplorer.noResultsFoundLabel": "Nenhum resultado encontrado",
-    "xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel": "Nenhuma tarefa de métrica única encontrada",
     "xpack.ml.timeSeriesExplorer.orderLabel": "Ordem",
     "xpack.ml.timeSeriesExplorer.pageTitle": "Visualizador de métrica única",
     "xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel": "média",

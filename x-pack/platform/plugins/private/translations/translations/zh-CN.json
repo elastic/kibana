@@ -33904,7 +33904,6 @@
     "xpack.ml.timeSeriesExplorer.mlSingleMetricViewerChart.annotationsErrorTitle": "提取标注时发生错误",
     "xpack.ml.timeSeriesExplorer.nonAnomalousResultsWithModelPlotInfo": "该列表包含模型绘图结果的值。",
     "xpack.ml.timeSeriesExplorer.noResultsFoundLabel": "找不到结果",
-    "xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel": "未找到单指标作业",
     "xpack.ml.timeSeriesExplorer.orderLabel": "顺序",
     "xpack.ml.timeSeriesExplorer.pageTitle": "Single Metric Viewer",
     "xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel": "平均值",
