@@ -47,7 +47,7 @@ export interface AlertTriageAttachmentService {
   updateRuleAttachments(params: {
     attachRuleIds: string[];
     detachRuleIds: string[];
-  }): Promise<unknown>;
+  }): Promise<{ matched: number; updated: number }>;
 }
 
 /**

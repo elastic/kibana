@@ -55,6 +55,7 @@ const makeAttachmentService = (
           attached.delete(id);
           notAttached.add(id);
         }
+        return { matched: attachRuleIds.length + detachRuleIds.length, updated: 0 };
       }
     ),
   };
