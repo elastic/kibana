@@ -245,7 +245,7 @@ ${noteBlock}### What to do
 
 1. **Fix the breaking change** if it was unintentional.
 2. **If intentional**:
-   - add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
+   - add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` value from the table above, plus \`source\` when the table shows one, to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
    - ${releaseNote.labelStep}.
    - ${releaseNote.textStep}.
 
@@ -289,11 +289,11 @@ const isImpactReport = (report: unknown): report is ImpactReport =>
 
 // The same change appearing in both the stack and serverless specs collapses to
 // one row, keyed by endpoint + change identity.
-const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
+export const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
   Array.from(
     new Map(
       entries.map((e) => [
-        `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}`,
+        `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}::${e.reason}`,
         e,
       ])
     ).values()

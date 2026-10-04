@@ -14,6 +14,7 @@ jest.mock('#pipeline-utils', () => ({
 
 import {
   buildCommentBody,
+  dedupeByChange,
   GITHUB_COMMENT_MAX_LENGTH,
   postedCommentLength,
   type ImpactEntry,
@@ -371,5 +372,34 @@ describe('buildCommentBody', () => {
       expect(body).not.toContain('**Fix the breaking change**');
       expect(body).not.toContain('/api/approved-huge');
     });
+  });
+});
+
+describe('dedupeByChange', () => {
+  it('collapses the same change from the stack and serverless reports into one row', () => {
+    const change = entry({ oasdiffId: 'request-parameter-removed', reason: "deleted 'simulate'" });
+
+    expect(dedupeByChange([change, { ...change }])).toEqual([change]);
+  });
+
+  it('keeps distinct changes to the same endpoint under the same rule', () => {
+    const first = entry({ oasdiffId: 'request-property-removed', reason: "removed 'name'" });
+    const second = entry({ oasdiffId: 'request-property-removed', reason: "removed 'type'" });
+
+    expect(dedupeByChange([first, second])).toEqual([first, second]);
+  });
+
+  it('keeps kbn: rule changes at different source locations apart', () => {
+    const tightening = entry({
+      oasdiffId: 'kbn:request-additional-properties-tightened',
+      reason: 'Request body schema disallows extra fields',
+    });
+
+    expect(
+      dedupeByChange([
+        { ...tightening, source: '/components/schemas/A' },
+        { ...tightening, source: '/components/schemas/B' },
+      ])
+    ).toHaveLength(2);
   });
 });
