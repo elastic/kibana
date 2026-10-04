@@ -43,7 +43,7 @@ import { AdditionalControls } from '../entities_table/additional_controls';
 import { DataViewContext } from '../entities_table';
 import { LastUpdated } from '../last_updated';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
-import type { ColumnDescriptor } from './columns/registry';
+import { isGridColumnId, type ColumnDescriptor } from './columns/registry';
 import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import type { Row, RowsMode } from './common';
@@ -113,6 +113,7 @@ interface EntityGridView extends EntityGridCellContext {
   prefetchChildren: (entityId: string) => void;
   toggleExpandedId: (entityId: string) => void;
   rowActions?: RowActions;
+  isFetching: boolean;
 }
 
 const EntityGridBodyContext = createContext<EntityGridView | null>(null);
@@ -211,14 +212,14 @@ const EntityGridCustomBody = memo(
     footerRow,
   }: EuiDataGridCustomBodyProps) => {
     const { euiTheme } = useEuiTheme();
-    const { rows, expandedIds, childMap, columns, watchlistNames, cellHandlers } =
+    const { rows, expandedIds, childMap, columns, watchlistNames, cellHandlers, isFetching } =
       useEntityGridView();
     const onResetFilters = useResetEntityGridFilters();
 
     return (
       <>
         {headerRow}
-        {rows.length === 0 ? (
+        {rows.length === 0 && !isFetching ? (
           <EuiEmptyPrompt
             color="transparent"
             body={<p>{EMPTY_GRID_MESSAGE}</p>}
@@ -336,8 +337,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const catalogIdSet = useMemo(() => new Set(columns.map((c) => c.id)), [columns]);
   const keepFields = useMemo(
-    () => visibleColumns.filter((id) => !catalogIdSet.has(id)),
-    [visibleColumns, catalogIdSet]
+    () => visibleColumns.filter((id) => !isGridColumnId(id)),
+    [visibleColumns]
   );
 
   const { childMap, isChildFetching, prefetchChildren } = useEntityChildren({
@@ -521,6 +522,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       prefetchChildren,
       toggleExpandedId,
       rowActions,
+      isFetching,
     }),
     [
       cellContext,
@@ -530,6 +532,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       prefetchChildren,
       toggleExpandedId,
       rowActions,
+      isFetching,
     ]
   );
 

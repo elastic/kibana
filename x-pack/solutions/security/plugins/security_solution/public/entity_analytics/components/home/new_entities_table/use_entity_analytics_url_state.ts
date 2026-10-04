@@ -12,7 +12,12 @@ import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_anal
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
-import { RISK_SCORE_NORM_FIELD, PAGE_SIZE_OPTIONS, TIME_RANGE_OPTIONS } from './common';
+import {
+  GROUP_SIZE_FIELD,
+  RISK_SCORE_NORM_FIELD,
+  PAGE_SIZE_OPTIONS,
+  TIME_RANGE_OPTIONS,
+} from './common';
 import type { RowsMode, TimeRange } from './common';
 import { isSignalCardId, type SignalCardId } from '../needs_attention_tiles/data';
 
@@ -279,6 +284,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
         params.set(PARAM.ROWS_MODE, val);
         params.delete(PARAM.PAGE);
         params.delete(PARAM.EXPANDED);
+        if (val === 'individual' && params.get(PARAM.SORT_FIELD) === GROUP_SIZE_FIELD) {
+          params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
+          params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
+        }
       }),
     [update]
   );

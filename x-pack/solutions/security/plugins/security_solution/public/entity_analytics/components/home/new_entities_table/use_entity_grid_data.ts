@@ -221,8 +221,9 @@ export const useEntityGridData = ({
     },
     {
       enabled: !!concreteEntityIndexName,
-      // Do not keepPreviousData: a stale unfiltered total leaves phantom pages when
-      // entityExpression gains a NAT tile IN-list (shell updates, count would look wrong).
+      // No keepPreviousData: a stale unfiltered total invents phantom pages after a
+      // tile/filter. `total` below falls back to the painted page so rowCount does
+      // not snap to 0 and collapse the grid.
     }
   );
 
@@ -273,7 +274,12 @@ export const useEntityGridData = ({
     },
     {
       enabled:
-        isCurrentPage && !!concreteEntityIndexName && shellQuery.isSuccess && shellRows != null,
+        isCurrentPage &&
+        !!concreteEntityIndexName &&
+        shellQuery.isSuccess &&
+        !shellQuery.isPreviousData &&
+        shellRows != null,
+      keepPreviousData: true,
       onSuccess: () => setUpdatedAt(Date.now()),
     }
   );
@@ -281,9 +287,19 @@ export const useEntityGridData = ({
   // Prefer shell (empties the grid), then count / enrich — one toast when several fail together.
   useErrorToast(GRID_QUERY_ERROR_TITLE, shellQuery.error ?? countQuery.error ?? enrichQuery.error);
 
+  // keepPreviousData on both queries holds the last page across key changes. Do not
+  // paint previous enrich onto a new shell (different entity ids).
+  const rows =
+    (shellQuery.isPreviousData
+      ? enrichQuery.data ?? shellRows
+      : enrichQuery.isPreviousData
+      ? shellRows
+      : enrichQuery.data ?? shellRows) ?? [];
+  const total = countQuery.data ?? (rows.length > 0 ? pageIndex * pageSize + rows.length : 0);
+
   return {
-    rows: enrichQuery.data ?? shellRows ?? [],
-    total: countQuery.data ?? 0,
+    rows,
+    total,
     updatedAt,
     isFetching:
       !isCurrentPage ||
