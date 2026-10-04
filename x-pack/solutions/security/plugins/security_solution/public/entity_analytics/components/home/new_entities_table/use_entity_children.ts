@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
-import { useQueries, useQueryClient } from '@kbn/react-query';
+import { useQueries, useQueryClient, type QueryFunctionContext } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -172,7 +172,7 @@ export const useEntityChildren = ({
         concreteEntityIndexName ?? '',
         keepFieldsKey
       ),
-      queryFn: ({ signal }) => {
+      queryFn: ({ signal }: QueryFunctionContext) => {
         if (!fetchParams) throw new Error('entity store index not resolved');
         return fetchEntityChildrenShell({ ...fetchParams, entityId, signal });
       },
@@ -201,7 +201,7 @@ export const useEntityChildren = ({
           keepFieldsKey,
           shell?.dataUpdatedAt ?? 0,
         ],
-        queryFn: ({ signal }) => {
+        queryFn: ({ signal }: QueryFunctionContext) => {
           if (!fetchParams) throw new Error('entity store index not resolved');
           const rows = queryClient.getQueryData<Row[]>(shellKey) ?? shell?.data;
           if (!rows) return [];
@@ -251,7 +251,8 @@ export const useEntityChildren = ({
           fetchParams.concreteEntityIndexName,
           keepFieldsKey
         ),
-        queryFn: ({ signal }) => fetchEntityChildrenShell({ ...fetchParams, entityId, signal }),
+        queryFn: ({ signal }: QueryFunctionContext) =>
+          fetchEntityChildrenShell({ ...fetchParams, entityId, signal }),
         staleTime: CHILDREN_STALE_TIME_MS,
       });
     },
