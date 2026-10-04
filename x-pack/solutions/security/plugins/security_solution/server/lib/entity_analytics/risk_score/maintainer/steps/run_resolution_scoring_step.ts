@@ -21,7 +21,7 @@ interface RunResolutionScoringParams {
   logger: ScopedLogger;
   entityType: EntityType;
   alertsIndex: string;
-  lookupIndex: string;
+  entityStoreIndex: string;
   pageSize: number;
   sampleSize: number;
   now: string;
@@ -42,7 +42,7 @@ export const runResolutionScoringStep = async ({
   logger: runLogger,
   entityType,
   alertsIndex,
-  lookupIndex,
+  entityStoreIndex,
   pageSize,
   sampleSize,
   now,
@@ -71,7 +71,7 @@ export const runResolutionScoringStep = async ({
     logger: runLogger,
     entityType,
     alertsIndex,
-    lookupIndex,
+    entityStoreIndex,
     pageSize,
     sampleSize,
     now,
