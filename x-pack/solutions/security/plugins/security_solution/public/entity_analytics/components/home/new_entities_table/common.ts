@@ -192,6 +192,9 @@ export const esqlResponseToRows = (result: unknown): Row[] =>
       .rawResponse
   );
 
+/** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
+export const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
+
 export const createEsqlRunner = (
   searchService: DataPublicPluginStart['search'],
   signal?: AbortSignal
@@ -199,7 +202,14 @@ export const createEsqlRunner = (
   return async (query) =>
     esqlResponseToRows(
       await lastValueFrom(
-        searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+        searchService.search(
+          { params: { query } },
+          {
+            abortSignal: signal,
+            strategy: 'esql_async',
+            projectRouting: ESQL_PROJECT_ROUTING,
+          }
+        )
       )
     );
 };
