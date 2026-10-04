@@ -139,6 +139,7 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/es-types'
   - '@kbn/app-header'
+  - '@kbn/connector-specs'
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
   - '@kbn/core-chrome-browser-context-mocks'
