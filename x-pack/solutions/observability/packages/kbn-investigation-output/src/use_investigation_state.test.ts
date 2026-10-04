@@ -130,6 +130,37 @@ describe('useInvestigationState', () => {
       expect(mockGetExecution).toHaveBeenCalledWith('exec-1', { includeOutput: true });
     });
 
+    it('normalizes legacy persisted severity and hypothesis status values', async () => {
+      mockGetExecution.mockResolvedValue(
+        completedExecutionWithOutput({
+          structured_output: {
+            summary: 'Payment errors are elevated.',
+            severity: '60-high',
+            hypotheses: [
+              {
+                candidate: 'Payment service unavailable',
+                confidence: 0.9,
+                status: 'rejected',
+              },
+            ],
+          },
+        })
+      );
+      const http = createHttp();
+
+      const { result } = renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
+      );
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('complete');
+      });
+      expect(result.current.state).toMatchObject({
+        severity: 'high',
+        hypotheses: [expect.objectContaining({ status: 'dismissed' })],
+      });
+    });
+
     it('reads the result from the real agent step when a timeout wrapper shares its stepId', async () => {
       mockGetExecution.mockResolvedValue({
         status: 'completed',
