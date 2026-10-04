@@ -50,10 +50,23 @@ describe('serviceMetadataIconsRoute params', () => {
   it('accepts a valid path and query', () => {
     const result = serviceMetadataIconsRoute.params!.safeParse({
       path: { serviceName: 'opbeans-java' },
-      query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+      query: {
+        start: '2021-01-01T00:00:00.000Z',
+        end: '2021-01-02T00:00:00.000Z',
+        environment: 'production',
+      },
     });
 
     expectParseSuccess(result);
+  });
+
+  it('rejects a missing environment', () => {
+    expectParseError(
+      serviceMetadataIconsRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+      })
+    );
   });
 
   it('rejects a missing query', () => {
