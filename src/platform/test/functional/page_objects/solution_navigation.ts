@@ -10,6 +10,7 @@
 import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
 type NavigationId = string;
 
@@ -204,23 +205,42 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
         log.debug('SolutionNavigation.sidenav.clickLink', JSON.stringify(by));
 
-        const clickLinkByDeepLinkId = async (deepLinkId: string) => {
+        // The nav root holds the rail and the side panel but not the popovers, which are portalled
+        // to `body`, so a hit here means the item is reachable without expanding More.
+        const existsInNav = async (testSubj: string, timeout: number) =>
+          await find.existsByDisplayedByCssSelector(
+            `#kbnChromeNav-root ${testSubjSelector(testSubj)}`,
+            timeout
+          );
+
+        const waitForClickable = async (description: string, testSubj: string) => {
           // Wait for link to be available (visible and enabled)
           // This includes waiting for nested panel contents to render after panel animations
-          await retry.waitFor(`deepLinkId ${deepLinkId} to be clickable`, async () => {
-            // First check if it's in main nav or any open panels (e.g., nested panel)
-            // Use a longer timeout to account for panel animations
-            const existsInMain = await testSubjects.exists(`~nav-item-deepLinkId-${deepLinkId}`);
-            if (existsInMain) {
+          await retry.waitFor(description, async () => {
+            // Nav items register asynchronously after a page load, so wait before concluding that
+            // this one overflowed into More.
+            if (await existsInNav(testSubj, TIMEOUT_CHECK)) {
               return true;
             }
 
             // If not in main nav/panels, try expanding More menu
             await expandMoreIfNeeded();
 
-            const existsInMore = await testSubjects.exists(`~nav-item-deepLinkId-${deepLinkId}`);
-            return existsInMore;
+            return await testSubjects.exists(testSubj);
           });
+
+          // A More popover opened while probing is persistent, and its full-viewport mask would
+          // intercept every click on an item that lives in the nav itself.
+          if (await existsInNav(testSubj, 0)) {
+            await collapseMoreIfNeeded();
+          }
+        };
+
+        const clickLinkByDeepLinkId = async (deepLinkId: string) => {
+          await waitForClickable(
+            `deepLinkId ${deepLinkId} to be clickable`,
+            `~nav-item-deepLinkId-${deepLinkId}`
+          );
 
           await retry.tryForTime(30000, async () => {
             const link = await testSubjects.find(
@@ -232,22 +252,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         };
 
         const clickLinkByNavId = async (navId: string) => {
-          // Wait for link to be available (visible and enabled)
-          // This includes waiting for nested panel contents to render after panel animations
-          await retry.waitFor(`navId ${navId} to be clickable`, async () => {
-            // First check if it's in main nav or any open panels (e.g., nested panel)
-            // Use a longer timeout to account for panel animations
-            const existsInMain = await testSubjects.exists(`~nav-item-id-${navId}`);
-            if (existsInMain) {
-              return true;
-            }
-
-            // If not in main nav/panels, try expanding More menu
-            await expandMoreIfNeeded();
-
-            const existsInMore = await testSubjects.exists(`~nav-item-id-${navId}`);
-            return existsInMore;
-          });
+          await waitForClickable(`navId ${navId} to be clickable`, `~nav-item-id-${navId}`);
 
           await retry.tryForTime(30000, async () => {
             const link = await testSubjects.find(`~nav-item-id-${navId}`, TIMEOUT_CHECK);
