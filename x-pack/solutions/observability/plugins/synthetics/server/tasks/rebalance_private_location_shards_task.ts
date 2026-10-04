@@ -164,6 +164,7 @@ export class RebalancePrivateLocationShardsTask {
             healthyAgentIds,
             recoveryAgentIds,
             capacities,
+            browserAgentIds,
             nextHealthySince: locationHealthySince,
           } = planLocationRebalance({
             agents,
@@ -185,7 +186,7 @@ export class RebalancePrivateLocationShardsTask {
           }
 
           this.debugLog(
-            `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, recovery-eligible=${recoveryAgentIds.length}`
+            `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, browser-capable=${browserAgentIds.length}, recovery-eligible=${recoveryAgentIds.length}`
           );
 
           // Idempotent placement + diff-based writes: only monitors whose assigned
@@ -199,6 +200,7 @@ export class RebalancePrivateLocationShardsTask {
               },
               healthyAgentIds,
               recoveryAgentIds,
+              browserAgentIds,
               capacities,
               signal,
             });

@@ -12,6 +12,7 @@ import {
   getMonitorCostMib,
   BROWSER_COST_MIB,
   LIGHTWEIGHT_COST_MIB,
+  UNASSIGNED_AGENT_ID,
   type MonitorPlacement,
 } from './assign_shards';
 
@@ -215,6 +216,7 @@ describe('rebalanceByCost', () => {
     id,
     cost: BROWSER_COST_MIB,
     currentAgentId,
+    browser: true,
   });
 
   const loadByHost = (assignment: Map<string, string>, monitors: MonitorPlacement[]) => {
@@ -370,5 +372,56 @@ describe('rebalanceByCost', () => {
       recoveryAgentIds: [...healthy].reverse(),
     });
     expect([...a.entries()].sort()).toEqual([...b.entries()].sort());
+  });
+
+  it('places browser monitors only on elastic-agent-complete agents', () => {
+    const monitors = [br('b0'), br('b1'), ...Array.from({ length: 6 }, (_, i) => lw(`m${i}`))];
+    const agents = ['complete-a', 'complete-b', 'basic'];
+    const assignment = rebalanceByCost(monitors, agents, {
+      browserAgentIds: ['complete-a', 'complete-b'],
+      recoveryAgentIds: agents,
+    });
+
+    expect(['complete-a', 'complete-b']).toContain(assignment.get('b0'));
+    expect(['complete-a', 'complete-b']).toContain(assignment.get('b1'));
+    for (const monitor of monitors) {
+      if (!monitor.browser) {
+        expect(agents).toContain(assignment.get(monitor.id));
+      }
+    }
+  });
+
+  it('moves a browser off a non-complete agent and leaves lightweight monitors there', () => {
+    const monitors = [br('b0', 'basic'), lw('m0', 'basic')];
+    const assignment = rebalanceByCost(monitors, ['complete', 'basic'], {
+      browserAgentIds: ['complete'],
+      recoveryAgentIds: ['complete', 'basic'],
+    });
+
+    expect(assignment.get('b0')).toBe('complete');
+    expect(assignment.get('m0')).toBe('basic');
+  });
+
+  it('pins a browser to nobody when no complete agent is healthy', () => {
+    const monitors = [br('b0', 'basic'), lw('m0')];
+    const assignment = rebalanceByCost(monitors, ['basic'], { browserAgentIds: [] });
+
+    expect(assignment.get('b0')).toBe(UNASSIGNED_AGENT_ID);
+    expect(assignment.get('m0')).toBe('basic');
+  });
+
+  it('does not load-balance a browser onto a non-complete recovery agent', () => {
+    const monitors = [
+      br('b0', 'complete'),
+      ...Array.from({ length: 4 }, (_, i) => lw(`m${i}`, 'complete')),
+    ];
+    const assignment = rebalanceByCost(monitors, ['complete', 'basic'], {
+      browserAgentIds: ['complete'],
+      recoveryAgentIds: ['complete', 'basic'],
+    });
+
+    expect(assignment.get('b0')).toBe('complete');
+    const movedToBasic = [...assignment.values()].filter((agentId) => agentId === 'basic').length;
+    expect(movedToBasic).toBeGreaterThan(0);
   });
 });

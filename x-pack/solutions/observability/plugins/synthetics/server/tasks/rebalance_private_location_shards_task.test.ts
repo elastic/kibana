@@ -74,9 +74,14 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
     ReturnType<typeof getPrivateLocationsModule.getPrivateLocations>
   >[number]);
 
-const agentInfo = (lastCheckin: number, memoryMib: number | null = null): AgentInfo => ({
+const agentInfo = (
+  lastCheckin: number,
+  memoryMib: number | null = null,
+  complete = false
+): AgentInfo => ({
   lastCheckin,
   memoryMib,
+  complete,
 });
 
 const taskInstance = (
@@ -331,7 +336,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
       jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
         new Map([
-          ['agent-1', agentInfo(NOW, 2048)],
+          ['agent-1', agentInfo(NOW, 2048, true)],
           ['agent-2', agentInfo(NOW, null)],
         ])
       );
@@ -346,6 +351,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         location: { id: 'loc-1', label: 'Location 1', agentPolicyId: 'ap-1' },
         healthyAgentIds: ['agent-1', 'agent-2'],
         recoveryAgentIds: ['agent-1'],
+        browserAgentIds: ['agent-1'],
         capacities: new Map([['agent-1', 2048]]),
         signal: expect.any(AbortSignal),
       });

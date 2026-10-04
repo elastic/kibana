@@ -22,6 +22,7 @@ import type { MonitorConfigRepository } from '../../../services/monitor_config_r
 import { getSavedObjectKqlFilter } from '../../common';
 import { isAgentShardingActive } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import { isCompleteElasticAgent } from '../../../synthetics_service/private_location/get_agent_info';
 
 const BYTES_PER_MIB = 1024 * 1024;
 
@@ -42,6 +43,8 @@ interface EnrolledAgentMeta {
   lastCheckinMessage: string | null;
   platform: string | null;
   tags: string[];
+  /** `elastic-agent-complete` image. */
+  complete: boolean;
 }
 
 interface AgentLocalMetadata {
@@ -103,6 +106,7 @@ export const getEnrolledAgents = async (
         lastCheckinMessage: agent.last_checkin_message ?? null,
         platform: meta?.os?.platform ?? meta?.os?.name ?? null,
         tags: agent.tags ?? [],
+        complete: isCompleteElasticAgent(agent.local_metadata),
       });
     }
 
@@ -337,6 +341,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
               platform: meta.platform,
               tags: meta.tags,
               monitorsAssigned: isAgentSharding ? assignmentCounts.get(meta.agentId) ?? 0 : null,
+              complete: meta.complete,
             };
           })
           .sort((a, b) => {
