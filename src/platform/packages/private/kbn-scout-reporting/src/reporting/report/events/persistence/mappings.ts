@@ -143,6 +143,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       mode: {
         type: 'keyword',
       },
+      attributes: {
+        type: 'keyword',
+      },
     },
   },
   fully_parallel: {

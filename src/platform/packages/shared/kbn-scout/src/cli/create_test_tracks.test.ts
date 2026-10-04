@@ -90,6 +90,7 @@ const createStatsEntry = (
   ({
     path: configPath,
     test_target: testTarget,
+    target_attributes: [],
     runCount: 10,
     runtime: {
       avg: estimate,
@@ -596,6 +597,216 @@ describe('identifyTestLoads', () => {
         );
 
         expect(loads).toHaveLength(1);
+      });
+    });
+
+    describe('kind: "targetAttributes" (test limit scope)', () => {
+      const createConfigWithTests = (
+        configPath: string,
+        tests: Array<{ id: string; tags: string[] }>
+      ) =>
+        createMockConfig({
+          path: configPath,
+          manifest: {
+            path: `${configPath}.meta.json`,
+            exists: true,
+            sha1: 'abc',
+            testChannels: [],
+            tests: tests.map(({ id, tags }) => ({
+              id,
+              title: id,
+              expectedStatus: 'passed',
+              tags,
+              location: { file: 'test.spec.ts', line: 1, column: 1 },
+            })),
+          },
+        });
+
+      it('excludes configs whose only tests for the target are limited out', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(0);
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          )
+        ).toHaveLength(1);
+      });
+
+      it('keeps configs that still have an unlimited test for the target', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+            { id: 'agnostic', tags: ['@local-stateful-classic'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(1);
+      });
+
+      it('evaluates limits against the same test that carries the target tag', () => {
+        // The only test for the requested target is limited out; the unlimited test
+        // belongs to a different target and must not keep the config alive.
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'fips-only', tags: ['@local-stateful-classic', '@limit/only-fips'] },
+            { id: 'other-target', tags: ['@local-serverless-search'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          )
+        ).toHaveLength(0);
+      });
+
+      it('excludes except-fips-only configs when fips is declared', () => {
+        mockTestConfigs = [
+          createConfigWithTests('plugin-a/config.ts', [
+            { id: 'non-fips', tags: ['@local-stateful-classic', '@limit/except-fips'] },
+          ]),
+        ];
+
+        expect(
+          identifyTestLoads(
+            ciConfig,
+            stats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          )
+        ).toHaveLength(0);
+      });
+
+      describe('runtime statistics', () => {
+        const attributeStats = new ScoutTestConfigStats({
+          lastUpdated: new Date(),
+          lookbackDays: 1,
+          buildkite: {},
+          configs: [
+            createStatsEntry('plugin-a/config.ts', testTarget, 60000),
+            {
+              ...createStatsEntry('plugin-a/config.ts', testTarget, 300000),
+              target_attributes: ['fips'],
+            } as ScoutTestConfigStatsEntry,
+          ],
+        });
+
+        beforeEach(() => {
+          mockTestConfigs = [
+            createConfigWithTests('plugin-a/config.ts', [
+              { id: 'agnostic', tags: ['@local-stateful-classic'] },
+            ]),
+          ];
+        });
+
+        it('picks the statistics recorded without attributes for an attribute-less run', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set() }],
+            log
+          );
+
+          expect(loads[0].stats?.runtime.estimate).toBe(60000);
+        });
+
+        it('picks the fips statistics when fips is declared', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(loads[0].stats?.runtime.estimate).toBe(300000);
+        });
+
+        const withoutFipsStats = () =>
+          new ScoutTestConfigStats({
+            lastUpdated: new Date(),
+            lookbackDays: 1,
+            buildkite: {},
+            configs: [createStatsEntry('plugin-a/config.ts', testTarget, 60000)],
+          });
+
+        it('falls back to attribute-blind statistics when the attribute has no history', () => {
+          const loads = identifyTestLoads(
+            ciConfig,
+            withoutFipsStats(),
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          // Without this fallback every config would land on `buildTrack`'s whole-lane
+          // estimate, opening one lane per config on the very first run under a new attribute.
+          expect(loads[0].stats?.runtime.estimate).toBe(60000);
+          expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('falling back'));
+        });
+
+        it('does not warn about a fallback when the attribute set matches exactly', () => {
+          identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('falling back'));
+        });
+
+        it('reports no statistics when the config has no history at all', () => {
+          const unrelatedStats = new ScoutTestConfigStats({
+            lastUpdated: new Date(),
+            lookbackDays: 1,
+            buildkite: {},
+            configs: [createStatsEntry('plugin-z/config.ts', testTarget, 60000)],
+          });
+
+          const loads = identifyTestLoads(
+            ciConfig,
+            unrelatedStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(loads[0].stats).toBeUndefined();
+        });
       });
     });
   });

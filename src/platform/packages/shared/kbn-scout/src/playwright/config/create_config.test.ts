@@ -40,6 +40,7 @@ describe('createPlaywrightConfig', () => {
   const originalCI = process.env.CI;
   const originalRetries = process.env.SCOUT_TEST_RETRIES;
   const originalBuildkiteRetryCount = process.env.BUILDKITE_RETRY_COUNT;
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
 
   const restoreEnvVar = (name: string, value: string | undefined) => {
     if (value === undefined) {
@@ -55,12 +56,53 @@ describe('createPlaywrightConfig', () => {
     delete process.env.CI;
     delete process.env.SCOUT_TEST_RETRIES;
     delete process.env.BUILDKITE_RETRY_COUNT;
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
   });
 
   afterAll(() => {
     restoreEnvVar('CI', originalCI);
     restoreEnvVar('SCOUT_TEST_RETRIES', originalRetries);
     restoreEnvVar('BUILDKITE_RETRY_COUNT', originalBuildkiteRetryCount);
+    restoreEnvVar('SCOUT_TARGET_ATTRIBUTES', originalTargetAttributes);
+  });
+
+  describe('test limits', () => {
+    const grepInvertFor = (rawTargetAttributes?: string) => {
+      if (rawTargetAttributes === undefined) {
+        delete process.env.SCOUT_TARGET_ATTRIBUTES;
+      } else {
+        process.env.SCOUT_TARGET_ATTRIBUTES = rawTargetAttributes;
+      }
+
+      return createPlaywrightConfig({ testDir: './tests' }).grepInvert as RegExp;
+    };
+
+    afterEach(() => {
+      delete process.env.SCOUT_IGNORE_TEST_LIMITS;
+    });
+
+    it('excludes only-fips tests when no target attribute is declared', () => {
+      const grepInvert = grepInvertFor();
+
+      expect(grepInvert.test('a test @local-stateful-classic @limit/only-fips')).toBe(true);
+      expect(grepInvert.test('a test @local-stateful-classic @limit/except-fips')).toBe(false);
+      expect(grepInvert.test('a test @local-stateful-classic')).toBe(false);
+    });
+
+    it('excludes except-fips tests when the fips attribute is declared', () => {
+      const grepInvert = grepInvertFor('fips');
+
+      expect(grepInvert.test('a test @local-stateful-classic @limit/except-fips')).toBe(true);
+      expect(grepInvert.test('a test @local-stateful-classic @limit/only-fips')).toBe(false);
+      expect(grepInvert.test('a test @local-stateful-classic')).toBe(false);
+    });
+
+    it('applies no filtering when SCOUT_IGNORE_TEST_LIMITS is set', () => {
+      process.env.SCOUT_IGNORE_TEST_LIMITS = 'true';
+
+      expect(grepInvertFor('fips')).toBeUndefined();
+      expect(grepInvertFor()).toBeUndefined();
+    });
   });
 
   it('should return a valid default Playwright configuration', () => {

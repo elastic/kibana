@@ -41,7 +41,11 @@ export async function generateScoutConfigManifest(configPath: string, log?: Tool
       project: 'local',
       passWithNoTests: true,
     },
-    {},
+    {
+      // Manifests must record every test with its raw tags, whatever the current
+      // environment, so the distribution system can evaluate '@limit/*' tags per run.
+      SCOUT_IGNORE_TEST_LIMITS: 'true',
+    },
     log
   );
 

@@ -69,6 +69,8 @@ export interface ScoutTestRunInfo {
   target: {
     type: string;
     mode: string;
+    /** Test target attributes the run was executed under, e.g. `['fips']`. */
+    attributes?: string[];
   };
   fully_parallel?: boolean;
   config?: {
