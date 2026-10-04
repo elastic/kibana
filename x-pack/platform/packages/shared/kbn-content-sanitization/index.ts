@@ -5,17 +5,5 @@
  * 2.0.
  */
 
-export {
-  writeFile,
-  writeFileSync,
-  appendFile,
-  appendFileSync,
-  createWriteStream,
-  readFile,
-  readFileSync,
-  createReadStream,
-  deleteFile,
-  deleteFileSync,
-} from './lib';
-
-export { getSafePath } from './utils';
+export { sanitizeSvg } from './src/svg';
+export { sanitizeImageDataUrl } from './src/data_url';
