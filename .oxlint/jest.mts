@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Linter = require('eslint').Linter;
+import type { DummyRuleMap } from 'oxlint';
 
-const coreRule = new Linter().getRules().get('no-restricted-imports');
-
-/**
- * This rule is used to prevent the use of deprecated imports in Kibana code.
- * It is a wrapper around the core ESLint rule `no-restricted-imports` with
- * a different id to avoid conflicts with the core rule.
- */
-module.exports = coreRule;
+export const jestRules: DummyRuleMap = {
+  'jest/no-focused-tests': 'error',
+  // 'jest/no-identical-title': 'error',
+};

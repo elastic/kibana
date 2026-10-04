@@ -12,7 +12,7 @@ import { bin } from 'oxlint/package.json';
 
 export const LINT_LABEL = 'oxlint';
 export const LINT_LOG_PREFIX = `[${LINT_LABEL}]`;
-export const OXLINT_CONFIG_PATH = '.oxlintrc.json';
+export const OXLINT_CONFIG_PATH = 'oxlint.config.mts';
 
 /** Mirrors `LINTABLE_EXTENSIONS` in `packages/kbn-lint-cli/run_lint_cli.ts`. */
 export const LINTABLE_EXTENSIONS: Record<string, true> = {
