@@ -50,6 +50,7 @@ const mockWaitingStepResume = {
 };
 
 jest.mock('../model/use_waiting_step_resume', () => ({
+  ...jest.requireActual('../model/use_waiting_step_resume'),
   useWaitingStepResume: () => mockWaitingStepResume,
 }));
 
@@ -58,12 +59,14 @@ jest.mock('./resume_execution_button', () => ({
     autoOpen?: boolean;
     waitingStepExecutionId?: string;
     executionId?: string;
+    approvalLabels?: { approveLabel?: string };
   }) => (
     <div
       data-test-subj="resume-execution-button"
       data-auto-open={String(Boolean(props.autoOpen))}
       data-waiting-step={props.waitingStepExecutionId ?? ''}
       data-execution-id={props.executionId ?? ''}
+      data-approve-label={props.approvalLabels?.approveLabel ?? ''}
     />
   ),
 }));
@@ -368,5 +371,6 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
     const resumeButton = screen.getByTestId('resume-execution-button');
     expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
     expect(resumeButton).toHaveAttribute('data-waiting-step', 'child-lookup');
+    expect(resumeButton).toHaveAttribute('data-approve-label', 'Approve');
   });
 });
