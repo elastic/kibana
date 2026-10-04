@@ -13,6 +13,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateOAuthClientRoute({
   router,
+  basePath,
   config,
   getAuthenticationService,
   serverlessProjectId,
@@ -44,8 +45,8 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const resource = config.mcp?.oauth2?.metadata?.resource;
-        if (!resource) {
+        const configuredResource = config.mcp?.oauth2?.metadata?.resource;
+        if (!configuredResource) {
           return response.notFound({
             body: {
               message:
@@ -53,6 +54,13 @@ export function defineCreateOAuthClientRoute({
             },
           });
         }
+
+        // Build a space-aware resource URL by injecting the request's space
+        // prefix (e.g. /s/marketing) into the configured resource path.
+        const resourceUrl = new URL(configuredResource);
+        const spaceBasePath = basePath.get(request);
+        resourceUrl.pathname = `${spaceBasePath}${resourceUrl.pathname}`;
+        const resource = resourceUrl.toString();
 
         if (!serverlessProjectId) {
           return response.notFound({

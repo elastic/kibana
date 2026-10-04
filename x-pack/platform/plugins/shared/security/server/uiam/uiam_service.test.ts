@@ -653,12 +653,15 @@ describe('UiamService', () => {
       (securityTelemetry.recordOAuthTokenExchangeAttempt as jest.Mock).mockClear();
     });
 
+    const resourcePath = '/api/agent_builder/mcp';
+    const expectedAudience = `https://my-project.kb.us-east-1.cloud.es.io:9243${resourcePath}`;
+
     it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
       const mockResponse = {
         token: 'essu_ephemeral_token_value',
         credentials: {
           oauth: {
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+            audience: expectedAudience,
           },
         },
       };
@@ -668,13 +671,15 @@ describe('UiamService', () => {
         json: async () => mockResponse,
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).resolves.toBe(
-        'essu_ephemeral_token_value'
-      );
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', resourcePath)
+      ).resolves.toBe('essu_ephemeral_token_value');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
+        `https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=${encodeURIComponent(
+          expectedAudience
+        )}`,
         {
           method: 'POST',
           headers: {
@@ -702,9 +707,9 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).rejects.toThrow(
-        'OAuth token audience mismatch'
-      );
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', resourcePath)
+      ).rejects.toThrow('OAuth token audience mismatch');
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
         {
@@ -715,6 +720,45 @@ describe('UiamService', () => {
       );
     });
 
+    it('rejects when audience has the same host but a different space prefix', async () => {
+      const spaceAPath = '/s/space-a/api/agent_builder/mcp';
+      const spaceBPath = '/s/space-b/api/agent_builder/mcp';
+      const spaceBExpectedAudience = `https://my-project.kb.us-east-1.cloud.es.io:9243${spaceBPath}`;
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_ephemeral_token_value',
+          credentials: {
+            oauth: { audience: spaceBExpectedAudience },
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', spaceAPath)
+      ).rejects.toThrow('OAuth token audience mismatch');
+    });
+
+    it('succeeds when audience matches a space-prefixed resource path', async () => {
+      const spacePath = '/s/marketing/api/agent_builder/mcp';
+      const spaceAudience = `https://my-project.kb.us-east-1.cloud.es.io:9243${spacePath}`;
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_space_token',
+          credentials: {
+            oauth: { audience: spaceAudience },
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', spacePath)
+      ).resolves.toBe('essu_space_token');
+    });
+
     it('throws and logs error when UIAM service returns an error', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -723,7 +767,9 @@ describe('UiamService', () => {
         headers: new Headers(),
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
+      await expect(
+        uiamService.exchangeOAuthToken('essu_invalid_token', resourcePath)
+      ).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
         { outcome: 'failure', oauthErrorType: 'UNKNOWN', oauthErrorCode: undefined }
@@ -746,7 +792,9 @@ describe('UiamService', () => {
         headers: new Headers(),
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
+      await expect(
+        uiamService.exchangeOAuthToken('essu_expired_token', resourcePath)
+      ).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
         { outcome: 'failure', oauthErrorType: 'AUTHENTICATION.TOKEN', oauthErrorCode: '0x7E0116' }

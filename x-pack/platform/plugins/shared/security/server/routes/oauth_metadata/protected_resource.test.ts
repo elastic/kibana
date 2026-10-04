@@ -59,7 +59,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       });
     });
 
-    it('returns 200 for path-aware discovery requests', async () => {
+    it('returns 200 for path-aware discovery requests without a path', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
         serverless: true,
       });
@@ -75,6 +75,50 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
         resource: 'https://kibana.example.com/api/agent_builder/mcp',
+      });
+    });
+
+    it('returns path-aware resource URL when a path is provided', async () => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
+        serverless: true,
+      });
+      defineOAuthProtectedResourceRoute(mockRouteDefinitionParams);
+
+      const [[, _metadataHandler], [, fallbackHandler]] =
+        mockRouteDefinitionParams.router.get.mock.calls;
+      const mockContext = securityRequestHandlerContextMock.create();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'get',
+        params: { path: 'api/agent_builder/mcp' },
+      });
+
+      const response = await fallbackHandler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        authorization_servers: ['https://auth.example.com'],
+        resource: 'https://kibana.example.com/api/agent_builder/mcp',
+      });
+    });
+
+    it('returns space-prefixed resource URL for a custom-space path', async () => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
+        serverless: true,
+      });
+      defineOAuthProtectedResourceRoute(mockRouteDefinitionParams);
+
+      const [[, _metadataHandler], [, fallbackHandler]] =
+        mockRouteDefinitionParams.router.get.mock.calls;
+      const mockContext = securityRequestHandlerContextMock.create();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'get',
+        params: { path: 's/marketing/api/agent_builder/mcp' },
+      });
+
+      const response = await fallbackHandler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        authorization_servers: ['https://auth.example.com'],
+        resource: 'https://kibana.example.com/s/marketing/api/agent_builder/mcp',
       });
     });
 
