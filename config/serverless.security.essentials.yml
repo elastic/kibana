@@ -3,6 +3,29 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: essentials
 
+xpack.fleet.internal.registry.excludePackages: [
+  # Oblt integrations
+  'apm',
+  'synthetics',
+  'synthetics_dashboards',
+
+  # Deprecated security integrations
+  'bluecoat',
+  'cisco',
+  'cyberark',
+  'cylance',
+  'f5',
+  'fortinet_forticlient',
+  'juniper_junos',
+  'juniper_netscreen',
+  'microsoft',
+  'netscout',
+  'radware',
+  'symantec',
+  'tomcat',
+
+]
+
 ### Agent Builder should not be enabled in this tier
 xpack.agentBuilder.enabled: false
 

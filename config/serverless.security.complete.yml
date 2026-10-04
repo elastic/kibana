@@ -3,6 +3,29 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
+xpack.fleet.internal.registry.excludePackages: [
+  # Oblt integrations
+  'apm',
+  'synthetics',
+  'synthetics_dashboards',
+
+  # Deprecated security integrations
+  'bluecoat',
+  'cisco',
+  'cyberark',
+  'cylance',
+  'f5',
+  'fortinet_forticlient',
+  'juniper_junos',
+  'juniper_netscreen',
+  'microsoft',
+  'netscout',
+  'radware',
+  'symantec',
+  'tomcat',
+
+]
+
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"
