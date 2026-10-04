@@ -272,7 +272,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
-  const showExecutionFlyouts = isExecutionsViewEnabled && Boolean(id) && canReadWorkflowExecution;
+  // Draft runs on /create have an execution before the workflow has an id. The list still
+  // needs an id; the detail flyout only needs the selected execution.
+  const showExecutionFlyouts = isExecutionsViewEnabled && canReadWorkflowExecution;
   const sidebarExecutionList =
     !isExecutionsViewEnabled &&
     id &&

@@ -47,8 +47,11 @@ describe('getDeepLinks', () => {
     expect(deepLinks.map((link) => link.id)).toEqual(['list', 'executions', 'library']);
   });
 
-  it('does not set visibleIn on the workflows deep link when the library is disabled', () => {
-    const [workflowsDeepLink] = getDeepLinks({ libraryEnabled: false });
+  it('does not set visibleIn on the workflows deep link when the library and executions view are disabled', () => {
+    const [workflowsDeepLink] = getDeepLinks({
+      libraryEnabled: false,
+      executionsViewEnabled: false,
+    });
 
     expect(workflowsDeepLink).toEqual(expect.objectContaining({ id: 'list', path: '/' }));
     expect(workflowsDeepLink.visibleIn).toBeUndefined();

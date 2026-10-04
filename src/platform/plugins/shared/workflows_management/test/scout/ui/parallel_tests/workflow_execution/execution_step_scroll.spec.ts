@@ -29,19 +29,6 @@ test.describe('Workflow execution - Step scroll', { tag: [...tags.stateful.class
   }) => {
     const workflowName = 'Scroll Test Workflow';
 
-    const expectEditorScrolledTo = async (searchText: string) => {
-      const targetLine = await pageObjects.workflowEditor.getLineOfText(searchText);
-      await expect
-        .poll(
-          async () => {
-            const range = await pageObjects.workflowEditor.getEditorVisibleLineRange();
-            return range.startLine <= targetLine && targetLine <= range.endLine;
-          },
-          { timeout: 10_000 }
-        )
-        .toBe(true);
-    };
-
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getScrollTestWorkflowYaml(workflowName));
     await pageObjects.workflowEditor.saveWorkflow();
@@ -52,43 +39,35 @@ test.describe('Workflow execution - Step scroll', { tag: [...tags.stateful.class
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    await test.step('click last step and verify editor scrolled to it', async () => {
-      await pageObjects.workflowExecution.executionPanel
-        .getByRole('button', { name: 'step_hotel' })
-        .click();
+    // The execution flyout opens the step detail. It does not scroll the YAML editor.
+    const expectStepDetail = async (stepName: string) => {
+      await expect(
+        pageObjects.workflowExecution.executionPanel.getByRole('heading', { name: stepName })
+      ).toBeVisible();
+    };
 
-      await expectEditorScrolledTo('name: step_hotel');
+    await test.step('click last step and verify its detail opens', async () => {
+      await (await pageObjects.workflowExecution.getStep('step_hotel')).click();
+      await expectStepDetail('step_hotel');
     });
 
-    await test.step('click first step and verify editor scrolled back', async () => {
-      await pageObjects.workflowExecution.executionPanel
-        .getByRole('button', { name: 'step_alpha' })
-        .click();
-
-      await expectEditorScrolledTo('name: step_alpha');
+    await test.step('click first step and verify its detail opens', async () => {
+      await (await pageObjects.workflowExecution.getStep('step_alpha')).click();
+      await expectStepDetail('step_alpha');
     });
 
-    await test.step('editing while a step is highlighted does not jump back to that step', async () => {
-      await pageObjects.workflowEditor.setCursorToText('message: "Hotel executing last"');
-      await expectEditorScrolledTo('name: step_hotel');
-
-      const currentYaml = await pageObjects.workflowEditor.getYamlEditorValue();
-      await pageObjects.workflowEditor.setYamlEditorValue(`${currentYaml}
-
-  - name: step_india
-    type: console
-    with:
-      message: "India executing after hotel"`);
-
-      await expectEditorScrolledTo('name: step_hotel');
-    });
-
-    await test.step('click trigger and verify editor scrolled to triggers section', async () => {
-      await pageObjects.workflowExecution.executionPanel
-        .getByRole('button', { name: 'manual' })
-        .click();
-
-      await expectEditorScrolledTo('triggers:');
+    await test.step('click inputs and verify the manual payload', async () => {
+      await (await pageObjects.workflowExecution.getStep('Manual trigger')).click();
+      await expectStepDetail('manual');
+      expect(
+        await pageObjects.workflowExecution.getStepResultJson<Record<string, string>>('input')
+      ).toStrictEqual(
+        expect.objectContaining({
+          param_a: 'value_a',
+          param_b: 'value_b',
+          param_c: 'value_c',
+        })
+      );
     });
   });
 });

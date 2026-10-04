@@ -78,7 +78,7 @@ describe('Workflows Management UI Settings', () => {
         [WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID]: expect.objectContaining({
           name: 'Workflow Executions view',
           description: expect.stringContaining('execution flyout'),
-          value: false,
+          value: true,
           readonly: true,
           readonlyMode: 'ui',
           requiresPageReload: true,
