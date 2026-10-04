@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';

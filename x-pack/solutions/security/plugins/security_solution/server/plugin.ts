@@ -142,6 +142,9 @@ import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService, type CdnConfig } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
+import { indexFieldsProvider } from './lib/timelines_server/search_strategy/index_fields';
+import { timelineSearchStrategyProvider } from './lib/timelines_server/search_strategy/timeline';
+import { timelineEqlSearchStrategyProvider } from './lib/timelines_server/search_strategy/timeline/eql';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
@@ -820,6 +823,20 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.data.search.registerSearchStrategy(
           THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
           threatIntelligenceSearchStrategy
+        );
+
+        // Timeline search strategies (previously registered by the timelines plugin)
+        plugins.data.search.registerSearchStrategy(
+          'indexFields',
+          indexFieldsProvider(core.getStartServices)
+        );
+        plugins.data.search.registerSearchStrategy(
+          'timelineSearchStrategy',
+          timelineSearchStrategyProvider(depsStart.data, this.logger)
+        );
+        plugins.data.search.registerSearchStrategy(
+          'timelineEqlSearchStrategy',
+          timelineEqlSearchStrategyProvider(depsStart.data)
         );
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
