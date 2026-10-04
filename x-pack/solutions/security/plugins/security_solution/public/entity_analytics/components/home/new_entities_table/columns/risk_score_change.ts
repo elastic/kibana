@@ -80,6 +80,8 @@ const buildReferenceScoreEnrichQuery = (
   return [
     `FROM ${riskScoreIndexOf(namespace)}`,
     `| WHERE \`@timestamp\` <= NOW() - ${days} day`,
+    // Lucene-pushable superset of the COALESCE id filter below; skips docs for off-page entities.
+    `| WHERE host.risk.id_value IN (${ids}) OR user.risk.id_value IN (${ids}) OR service.risk.id_value IN (${ids})`,
     `| WHERE ${ENTITY_ID_FIELD_COALESCE} == "entity.id"`,
     `| EVAL entity_id = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
     `| WHERE entity_id IN (${ids})`,
