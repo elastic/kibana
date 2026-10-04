@@ -7,7 +7,7 @@
 
 import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
-import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
+import { getEntitiesAlias, ENTITY_LATEST, ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import type { AssetCriticalityLevel, EntityRiskLevels } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { ScoutLogger } from '@kbn/scout';
@@ -170,6 +170,51 @@ export async function assignEntitiesToWatchlist({
       `Failed to assign entities to watchlist ${watchlistId} (${res.status}): ${JSON.stringify(
         res.body
       )}`
+    );
+  }
+}
+
+export async function linkEntitiesForResolution({
+  supertest,
+  targetId,
+  entityIds,
+}: {
+  supertest: SuperTest.Agent;
+  targetId: string;
+  entityIds: readonly string[];
+}): Promise<void> {
+  const res = await supertest
+    .post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK)
+    .set(MUTATING_HEADERS)
+    .send({ target_id: targetId, entity_ids: entityIds });
+  if (res.status !== 200) {
+    throw new Error(
+      `Failed to link entities [${entityIds.join(', ')}] to "${targetId}" (${
+        res.status
+      }): ${JSON.stringify(res.body)}`
+    );
+  }
+}
+
+export async function setResolutionRuleEnabled({
+  supertest,
+  ruleId,
+  enabled,
+}: {
+  supertest: SuperTest.Agent;
+  ruleId: string;
+  enabled: boolean;
+}): Promise<void> {
+  const path = ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE.replace('{id}', ruleId).replace(
+    '/enable',
+    enabled ? '/enable' : '/disable'
+  );
+  const res = await supertest.put(path).set(MUTATING_HEADERS);
+  if (res.status !== 200) {
+    throw new Error(
+      `Failed to set resolution rule "${ruleId}" enabled=${enabled} (${
+        res.status
+      }): ${JSON.stringify(res.body)}`
     );
   }
 }
