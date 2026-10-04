@@ -21,7 +21,7 @@ import {
 import { extractDeclaredHeight } from './extract_declared_height';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
-- Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
+- Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); }
 - Card/surface backgrounds: var(--cc-color-surface).
 - Accent colors for UI emphasis: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
 - Chart series colors: var(--cc-vis-0) through var(--cc-vis-9), in order. Use these for bars, lines, slices and any per-category color — they are the host's colorblind-safe visualization palette. Do NOT use the semantic accent colors above for data series; they are UI chrome and read heavy when used as data.
@@ -31,7 +31,7 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.
 - This applies to SVG charts too. In a chart, \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a token — var(--cc-vis-N) for data marks, var(--cc-color-*) for chrome like axes and gridlines. For example \`<path fill="var(--cc-vis-0)">\`. Charts are where hardcoded palettes creep in; there is no exception for a chart.
 - Illustration is the one exception. The tokens above are the panel's UI vocabulary: surfaces, text, chrome, borders and data marks. They are not for pictures. When you are drawing a thing rather than charting it — an animal, a plant, a vehicle, a scene — pick colors that are plausible for the subject itself. Do NOT color an illustration from var(--cc-vis-N) or the accent tokens: those are a data palette, and an animal or object rendered in chart colors looks wrong. Literal colors are correct here, because a depicted thing looks the same in light and dark mode. The page background, all text, and any card behind the illustration still use tokens.
-- Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.
+- Never re-declare \`background\` or \`color\` on \`body\`. The host owns the panel surface, and overriding it makes the panel stand apart from its host.
 - Motion durations: var(--cc-motion-fast), var(--cc-motion-normal), var(--cc-motion-slow), with var(--cc-ease) for easing. No arbitrary values like 1.6s or one-off cubic-bezier curves.`;
 
 const HEIGHT_DECLARATION_GUIDANCE = `HEIGHT DECLARATION — the FIRST line of your output must be exactly:

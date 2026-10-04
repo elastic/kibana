@@ -49,6 +49,18 @@ describe('Presentation panel', () => {
     );
   });
 
+  it('uses the default EUI panel color when no color is specified', async () => {
+    await renderPresentationPanel(defaultProps);
+
+    expect(screen.getByTestId('embeddablePanel')).toHaveClass('euiPanel--plain');
+  });
+
+  it('supports a transparent EUI panel color', async () => {
+    await renderPresentationPanel({ ...defaultProps, panelColor: 'transparent' });
+
+    expect(screen.getByTestId('embeddablePanel')).toHaveClass('euiPanel--transparent');
+  });
+
   it('renders a blocking error when one is present', async () => {
     const api: DefaultPresentationPanelApi = {
       uuid: 'test',
