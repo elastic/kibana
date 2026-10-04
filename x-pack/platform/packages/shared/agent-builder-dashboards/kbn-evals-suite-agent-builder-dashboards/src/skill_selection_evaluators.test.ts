@@ -26,7 +26,7 @@ const evaluateOutput = async (
 ) =>
   evaluator.evaluate({
     input: { question: 'question' },
-    expected: { expected: 'expected' },
+    expected: {},
     metadata: undefined,
     output,
   });
@@ -65,7 +65,7 @@ describe('skill selection evaluators', () => {
     expect(result.label).toBe('PASS');
   });
 
-  it('passes when visualization skill loads without dashboard management', async () => {
+  it('passes when visualization skill loads without the dashboards skill', async () => {
     const result = await evaluateOutput(
       visualizationSkillWithoutDashboardEvaluator,
       createOutput([
@@ -91,7 +91,7 @@ describe('skill selection evaluators', () => {
     );
   });
 
-  it('fails visualization routing when dashboard management is used', async () => {
+  it('fails visualization routing when the dashboards skill is used', async () => {
     const result = await evaluateOutput(
       visualizationSkillWithoutDashboardEvaluator,
       createOutput([
@@ -111,7 +111,7 @@ describe('skill selection evaluators', () => {
     expect(result.metadata).toEqual(expect.objectContaining({ dashboardToolCalled: true }));
   });
 
-  it('passes when dashboard management is not activated for data exploration', async () => {
+  it('passes when the dashboards skill is not activated for data exploration', async () => {
     const result = await evaluateOutput(
       dashboardSkillNotActivatedEvaluator,
       createOutput([
