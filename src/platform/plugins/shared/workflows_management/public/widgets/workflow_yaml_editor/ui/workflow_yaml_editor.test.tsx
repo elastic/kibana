@@ -172,6 +172,7 @@ jest.mock('./decorations', () => ({
   useFocusedStepDecoration: jest.fn(),
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
+  useStepDurationDecorations: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
   useWorkflowEventsOnDecorations: jest.fn(),
   useWorkflowIdDecorations: jest.fn(),
