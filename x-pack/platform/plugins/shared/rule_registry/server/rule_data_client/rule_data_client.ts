@@ -237,15 +237,29 @@ export class RuleDataClient implements IRuleDataClient {
               return response;
             }
 
-            // TODO: #160572 - add support for version conflict errors, in case alert was updated
-            // some other way between the time it was fetched and the time it was updated.
             // Redact part of reason message that echoes back value
             const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
               estypes.BulkResponse,
               unknown
             >;
-            const error = new errors.ResponseError(sanitizedResponse);
-            this.options.logger.error(error);
+
+            // Version conflicts (HTTP 409) are an expected, tolerated outcome of the
+            // alert-writing flow: alert documents are written with op_type `create`, so
+            // overlapping/retried rule executions that regenerate the same deterministic
+            // alert `_id` are rejected as duplicates. Callers already ignore these (see
+            // errorAggregator(..., [409]) in create_persistence_rule_type_wrapper.ts), so
+            // logging them at ERROR is pure noise. Only log when there is at least one
+            // failure that is not a benign 409.
+            const hasNonVersionConflictError = sanitizedResponse.body.items.some((item) => {
+              const status = item.create?.status ?? item.index?.status;
+              return status != null && status >= 400 && status !== 409;
+            });
+
+            if (hasNonVersionConflictError) {
+              const error = new errors.ResponseError(sanitizedResponse);
+              this.options.logger.error(error);
+            }
+
             return sanitizedResponse;
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
