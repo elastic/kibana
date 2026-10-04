@@ -17,6 +17,15 @@ import { useEntityAnalyticsRoutes } from '../../api/api';
 import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams } from './types';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const ASSET_CRITICALITY_BULK_UPLOAD_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY,
+  'asset_criticality_bulk_upload'
+);
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const { telemetry } = useKibana().services;
@@ -105,7 +114,8 @@ export const AssetCriticalityFileUploader: React.FC = () => {
       try {
         const result = await uploadAssetCriticalityFile(
           state.validatedFile.validLines.text,
-          state.validatedFile.name
+          state.validatedFile.name,
+          ASSET_CRITICALITY_BULK_UPLOAD_CONTEXT
         );
 
         dispatch({

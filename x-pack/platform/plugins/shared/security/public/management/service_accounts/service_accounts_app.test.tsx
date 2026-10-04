@@ -94,26 +94,24 @@ describe('ServiceAccountsApp', () => {
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
   });
 
-  it('creates an account with an optional description', async () => {
-    const { create } = await renderApp();
-    await fillForm();
-    fireEvent.change(screen.getByTestId('createServiceAccountDescription'), {
-      target: { value: 'Reads investigation events.' },
-    });
-    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+  it.each([false, true])(
+    'creates an account with an optional description (serverless: %s)',
+    async (isServerless) => {
+      const { create } = await renderApp({ isServerless });
+      await fillForm();
+      fireEvent.change(screen.getByTestId('createServiceAccountDescription'), {
+        target: { value: 'Reads investigation events.' },
+      });
+      fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
 
-    await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
-    expect(create).toHaveBeenCalledWith({
-      name: account.name,
-      roles: ['workflow_reader'],
-      description: 'Reads investigation events.',
-    });
-  });
-
-  it('does not offer descriptions on Serverless while UIAM does not support them', async () => {
-    await renderApp({ isServerless: true });
-    expect(screen.queryByTestId('createServiceAccountDescription')).not.toBeInTheDocument();
-  });
+      await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
+      expect(create).toHaveBeenCalledWith({
+        name: account.name,
+        roles: ['workflow_reader'],
+        description: 'Reads investigation events.',
+      });
+    }
+  );
 
   it('opens the create flyout from the directory action', async () => {
     const { history } = await renderApp({ pathname: '/' });
