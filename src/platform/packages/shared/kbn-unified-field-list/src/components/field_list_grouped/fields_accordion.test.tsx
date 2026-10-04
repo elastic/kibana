@@ -142,4 +142,19 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
       expect(screen.getByTestId('extra-action')).toBeVisible();
     });
   });
+
+  describe('when the group is reorderable', () => {
+    it('should wrap the field items in a reorder provider', () => {
+      setup({ isReorderable: true });
+
+      expect(screen.getByTestId('domDragDrop-reorderableGroup')).toBeInTheDocument();
+      expect(screen.getByText(dataView.fields[0].name)).toBeVisible();
+    });
+
+    it('should not render a reorder provider otherwise', () => {
+      setup({ isReorderable: false });
+
+      expect(screen.queryByTestId('domDragDrop-reorderableGroup')).not.toBeInTheDocument();
+    });
+  });
 });

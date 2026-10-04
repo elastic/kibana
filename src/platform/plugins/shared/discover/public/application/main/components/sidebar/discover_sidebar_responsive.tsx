@@ -129,6 +129,13 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
+   * Callback to move a field column to another position in the table,
+   * enables reordering the selected fields in the sidebar
+   * @param fieldName
+   * @param targetIndex
+   */
+  onMoveField?: (fieldName: string, targetIndex: number) => void;
+  /**
    * Currently selected data view
    */
   selectedDataView?: DataView;
@@ -185,6 +192,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onChangeDataView,
     onAddField,
     onRemoveField,
+    onMoveField,
     sidebarToggleState$,
     additionalFilters,
   } = props;
@@ -443,6 +451,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
+            onMoveFieldInWorkspace={onMoveField}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             prependInFlyout={prependDataViewPickerForMobile}
             ref={initializeUnifiedFieldListSidebarContainerApi}
