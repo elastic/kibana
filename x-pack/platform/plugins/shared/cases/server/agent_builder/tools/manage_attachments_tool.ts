@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
 import { addAlertsStepCommonDefinition } from '../../../common/workflows/steps/add_alerts';
 import { addEventsStepCommonDefinition } from '../../../common/workflows/steps/add_events';
@@ -17,7 +18,8 @@ import { addAlertsStepDefinition } from '../../workflows/steps/add_alerts';
 import { addEventsStepDefinition } from '../../workflows/steps/add_events';
 import { addAttachmentsStepDefinition } from '../../workflows/steps/add_attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../common/constants';
+import { MAX_ATTACHMENT_ID_LENGTH, MAX_BULK_CREATE_ATTACHMENTS } from '../../../common/constants';
+import { AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
 import {
@@ -57,13 +59,14 @@ const describeAttachmentsField = (authorableTypeIds: string[]): string => {
 const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
   z.object({
     mode: z
-      .enum(['add_comment', 'add_alerts', 'add_events', 'add_attachments'])
+      .enum(['add_comment', 'add_alerts', 'add_events', 'add_attachments', 'attach_conversation'])
       .describe(
         'Required fields per mode:\n' +
           '- add_comment: case_id, comment\n' +
           '- add_alerts: case_id, alerts ({alertId, index, rule?}[])\n' +
           '- add_events: case_id, events ({eventId, index}[])\n' +
-          '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)'
+          '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)\n' +
+          '- attach_conversation: case_id; attaches the current conversation to the case. Provide conversation_id only to attach a different conversation the user can open.'
       ),
     ...addCommentStepCommonDefinition.inputSchema.partial().shape,
     ...addAlertsStepCommonDefinition.inputSchema.partial().shape,
@@ -74,6 +77,12 @@ const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
       .max(MAX_BULK_CREATE_ATTACHMENTS)
       .optional()
       .describe(describeAttachmentsField(authorableTypeIds)),
+    conversation_id: z
+      .string()
+      .min(1)
+      .max(MAX_ATTACHMENT_ID_LENGTH)
+      .optional()
+      .describe('For attach_conversation: defaults to the current conversation.'),
   });
 
 // Static schema used only for typing; the tool builds a schema with the
@@ -123,7 +132,7 @@ export const manageAttachmentsTool = (
   return {
     id: platformCoreCasesTools.manageAttachments,
     type: ToolType.builtin,
-    description: `Add attachments to cases. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Add attachments to cases. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps), \`attach_conversation\` (keep this chat on the case). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Manage Case Attachments',
       readOnlyHint: false,
@@ -135,7 +144,20 @@ export const manageAttachmentsTool = (
     tags: ['cases'],
     excludeFromMcp: true,
     handler: async (args, toolContext) => {
-      const { mode, case_id, attachments, ...rest } = args;
+      const { mode, case_id, attachments, conversation_id, ...rest } = args;
+
+      const getAddAttachmentsStepDefOrThrow = () => {
+        if (!isCasesAttachmentsEnabled) {
+          throw new Error(
+            `Adding attachments is disabled. Enable \`xpack.cases.attachments\` to use \`${mode}\`.`
+          );
+        }
+        const stepDef = getAddAttachmentsStepDef();
+        if (!stepDef) {
+          throw new Error('No authorable attachment types are registered.');
+        }
+        return stepDef;
+      };
 
       const runStep = async () => {
         switch (mode) {
@@ -145,17 +167,39 @@ export const manageAttachmentsTool = (
             return invokeStepHandler(addAlertsStepDef, { case_id, ...rest }, toolContext);
           case 'add_events':
             return invokeStepHandler(addEventsStepDef, { case_id, ...rest }, toolContext);
-          case 'add_attachments': {
-            if (!isCasesAttachmentsEnabled) {
+          case 'add_attachments':
+            return invokeStepHandler(
+              getAddAttachmentsStepDefOrThrow(),
+              { case_id, attachments },
+              toolContext
+            );
+          case 'attach_conversation': {
+            if (!unifiedAttachmentTypeRegistry.has(AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE)) {
+              throw new Error('Conversation attachments are not available in this deployment.');
+            }
+            const conversationId =
+              conversation_id ??
+              (toolContext.runContext != null
+                ? getAgentFromRunContext(toolContext.runContext)?.conversationId
+                : undefined);
+            if (!conversationId) {
               throw new Error(
-                'Adding attachments is disabled. Enable `xpack.cases.attachments` to use `add_attachments`.'
+                'The current conversation could not be determined. Provide conversation_id.'
               );
             }
-            const stepDef = getAddAttachmentsStepDef();
-            if (!stepDef) {
-              throw new Error('No authorable attachment types are registered.');
-            }
-            return invokeStepHandler(stepDef, { case_id, attachments }, toolContext);
+            return invokeStepHandler(
+              getAddAttachmentsStepDefOrThrow(),
+              {
+                case_id,
+                attachments: [
+                  {
+                    type: AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
+                    attachmentId: conversationId,
+                  },
+                ],
+              },
+              toolContext
+            );
           }
           default: {
             const _exhaustive: never = mode;

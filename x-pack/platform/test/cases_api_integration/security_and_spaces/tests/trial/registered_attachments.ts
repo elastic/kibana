@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
         dashboard: 'f90453ec712ce4505cc425e7e881e1d58ea274c3',
         discoverSession: 'e4d51ad49552db8d708898824dcd9fb06372e321',
         map: '37745ed7a0f005fb14522c5cc7c1ba3d9e0df579',
+        'agentBuilder.conversation': '71d4ba0d642d2f3d6e89a98daa3837dc6e2b7706',
       });
     });
   });

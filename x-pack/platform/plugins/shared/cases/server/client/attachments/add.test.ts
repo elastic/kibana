@@ -8,6 +8,7 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { MAX_USER_ACTIONS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import {
+  AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
@@ -20,8 +21,10 @@ import {
   createUserActionServiceMock,
 } from '../../services/mocks';
 import { createCasesClientMockArgs } from '../mocks';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import {
   commentAttachmentType,
+  createConversationAttachmentType,
   stackAlertAttachmentType,
 } from '../../attachment_framework/attachments';
 import { addComment, pickCreatedOrExistingAttachment } from './add';
@@ -122,6 +125,58 @@ describe('addComment', () => {
         entities: expect.arrayContaining([
           expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
         ]),
+      })
+    );
+  });
+
+  it('persists the payload returned by the type resolve hook', async () => {
+    const bulkGet = jest
+      .fn()
+      .mockResolvedValue(new Map([['conversation-1', { title: 'Triage', agent_id: 'agent-1' }]]));
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ bulkGet }) },
+    } as unknown as AgentBuilderPluginStart;
+    clientArgs.unifiedAttachmentTypeRegistry.register(
+      createConversationAttachmentType(async () => agentBuilder)
+    );
+
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.create.mockResolvedValue({
+      ...mockCaseUnifiedAttachments[0],
+      id: 'mock-saved-object-id',
+    });
+
+    await addComment(
+      {
+        comment: {
+          type: AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
+          attachmentId: 'conversation-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        caseId,
+      },
+      clientArgs
+    );
+
+    expect(attachmentService.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({
+          type: AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
+          attachmentId: 'conversation-1',
+          metadata: { title: 'Triage', agentId: 'agent-1' },
+        }),
       })
     );
   });

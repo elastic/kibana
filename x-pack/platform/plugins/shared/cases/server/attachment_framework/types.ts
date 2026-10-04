@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type { z } from '@kbn/zod/v4';
 import type {
@@ -61,6 +62,15 @@ export interface UnifiedAttachmentType
    */
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
+  /**
+   * Runs after schema validation and before persistence. Lets a reference type
+   * verify the requester can read the referenced object and fill server-owned
+   * metadata. Throw a Boom error to reject the attachment.
+   */
+  resolve?: (
+    payload: UnifiedAttachmentPayload,
+    context: { request: KibanaRequest }
+  ) => Promise<UnifiedAttachmentPayload>;
 }
 
 export interface UnifiedAttachmentTypeSetup
@@ -73,6 +83,7 @@ export interface UnifiedAttachmentTypeSetup
   schema: z.ZodType;
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
+  resolve?: UnifiedAttachmentType['resolve'];
 }
 
 export interface AttachmentFramework {

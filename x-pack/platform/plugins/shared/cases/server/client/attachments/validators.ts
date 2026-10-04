@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
@@ -45,4 +46,18 @@ export const validateUnifiedAttachments = ({
   }
 
   parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
+};
+
+/** Applies the type's `resolve` hook when it defines one; otherwise returns the payload unchanged. */
+export const resolveUnifiedAttachment = ({
+  query,
+  unifiedAttachmentTypeRegistry,
+  request,
+}: {
+  query: UnifiedAttachmentPayload;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  request: KibanaRequest;
+}): Promise<UnifiedAttachmentPayload> => {
+  const { resolve } = unifiedAttachmentTypeRegistry.get(query.type);
+  return resolve ? resolve(query, { request }) : Promise.resolve(query);
 };
