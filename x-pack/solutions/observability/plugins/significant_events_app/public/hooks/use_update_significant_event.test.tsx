@@ -33,7 +33,7 @@ describe('useUpdateSignificantEvent', () => {
     fetch.mockReset();
     addSuccess.mockReset();
     addError.mockReset();
-    fetch.mockResolvedValue({ event_uuid: 'event-1', updated: 1, ignored: 0, status: 'dismissed' });
+    fetch.mockResolvedValue({ updated: 1, ignored: 0, status: 'inactive' });
     mockUseKibana.mockReturnValue({
       core: { notifications: { toasts: { addSuccess, addError } } },
       dependencies: {
@@ -44,16 +44,16 @@ describe('useUpdateSignificantEvent', () => {
     } as never);
   });
 
-  it('omits assessment_note when the caller does not pass a note', async () => {
+  it('omits assessment_note when an active status is requested', async () => {
     const { result } = renderHook(() => useUpdateSignificantEvent(), { wrapper });
 
     act(() => {
-      result.current.updateEventStatus({ eventId: 'event-1', status: 'closed' });
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'active' });
     });
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('POST /internal/significant_events/events/{id}/update', {
-        params: { path: { id: 'event-1' }, body: { status: 'closed' } },
+        params: { path: { id: 'event-1' }, body: { status: 'active' } },
         signal: null,
       });
     });
@@ -65,7 +65,7 @@ describe('useUpdateSignificantEvent', () => {
     act(() => {
       result.current.updateEventStatus({
         eventId: 'event-1',
-        status: 'dismissed',
+        status: 'inactive',
         assessmentNote: 'known noise',
       });
     });
@@ -74,7 +74,7 @@ describe('useUpdateSignificantEvent', () => {
       expect(fetch).toHaveBeenCalledWith('POST /internal/significant_events/events/{id}/update', {
         params: {
           path: { id: 'event-1' },
-          body: { status: 'dismissed', assessment_note: 'known noise' },
+          body: { status: 'inactive', assessment_note: 'known noise' },
         },
         signal: null,
       });

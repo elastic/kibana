@@ -20,6 +20,10 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { inputsModel, State } from '../../../../common/store';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 import { usersSelectors } from '../../store';
 import type { InspectResponse } from '../../../../types';
@@ -28,6 +32,11 @@ import { USERS_ALL_TABLE_QUERY_ID } from './users_table_query_types';
 import * as i18n from './translations';
 
 const ENTITY_STORE_USERS_LIST_QUERY_KEY = 'ENTITY_STORE_USERS_LIST';
+
+const USERS_ENTITY_STORE_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_entity_store_list'
+);
 
 export const mapUserEntityRecordToUser = (record: Entity): User | null => {
   if ('user' in record && record.user != null) {
@@ -162,6 +171,7 @@ export const useAllEntityStoreUsers = (
           sortField: sortFieldForApi,
           sortOrder: direction,
         },
+        context: USERS_ENTITY_STORE_LIST_CONTEXT,
       }),
     enabled: !skip,
     cacheTime: 0,

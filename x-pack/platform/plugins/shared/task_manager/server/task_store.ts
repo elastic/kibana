@@ -768,6 +768,18 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
+          const { credential, encryptedCredential } = doc;
+          // The encryption-aware client can't rewrite such a task: a merged update re-encrypts the
+          // API key without credential in its AAD, and a full replace encrypts encryptedCredential
+          // twice.
+          if (
+            (credential !== undefined || encryptedCredential !== undefined) &&
+            (apiKey || uiamApiKey)
+          ) {
+            throw new Error(
+              'Task has both a credential and an API key, which this version of Kibana cannot update'
+            );
+          }
 
           acc.set(doc.id, {
             type: 'task',
@@ -778,6 +790,12 @@ export class TaskStore {
               ...(apiKey ? { apiKey } : {}),
               ...(uiamApiKey ? { uiamApiKey } : {}),
               ...(userScope ? { userScope } : {}),
+              // A full replace drops every attribute it doesn't send. credential is in the AAD, so it
+              // and encryptedCredential must be copied unchanged or decryption fails.
+              ...(!mergeAttributes && credential !== undefined ? { credential } : {}),
+              ...(!mergeAttributes && encryptedCredential !== undefined
+                ? { encryptedCredential }
+                : {}),
             },
             mergeAttributes,
           });
@@ -792,17 +810,36 @@ export class TaskStore {
       new Map()
     );
 
+    // The encryption-aware client would encrypt the stored encryptedCredential ciphertext again,
+    // so those tasks are written through the plain repository.
+    const objectsToUpdate = Array.from(newDocs.values());
+    const plainRepositoryObjects =
+      soClientToUpdate === this.savedObjectsRepository
+        ? []
+        : objectsToUpdate.filter(({ attributes }) => attributes.encryptedCredential !== undefined);
+    const soClientObjects = objectsToUpdate.filter(
+      (object) => !plainRepositoryObjects.includes(object)
+    );
+
     let updatedSavedObjects: Awaited<
       ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
     >['saved_objects'];
     try {
-      ({ saved_objects: updatedSavedObjects } =
-        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
-          Array.from(newDocs.values()),
-          {
-            refresh: false,
-          }
-        ));
+      const [soClientResult, plainRepositoryResult] = await Promise.all([
+        soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
+          refresh: false,
+        }),
+        plainRepositoryObjects.length
+          ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+              plainRepositoryObjects,
+              { refresh: false }
+            )
+          : { saved_objects: [] },
+      ]);
+      updatedSavedObjects = [
+        ...soClientResult.saved_objects,
+        ...plainRepositoryResult.saved_objects,
+      ];
     } catch (e) {
       await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
@@ -1387,7 +1424,8 @@ export class TaskStore {
  * Returns true when a task document holds an encrypted API key credential
  * (either an ES API key or a UIAM API key) together with the `userScope`
  * metadata required to process it. Must be kept in sync with every credential
- * field registered for ESO encryption on the `task` saved object type.
+ * field registered for ESO encryption on the `task` saved object type, except
+ * `encryptedCredential`, which is never decrypted or re-encrypted on update.
  */
 export function docHasEncryptedApiKey(
   doc: Pick<ConcreteTaskInstance, 'apiKey' | 'uiamApiKey' | 'userScope'>
@@ -1400,7 +1438,16 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credential',
+      'encryptedCredential'
+    ),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1417,7 +1464,16 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credential',
+      'encryptedCredential'
+    ),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
