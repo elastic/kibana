@@ -51,6 +51,16 @@ export interface RuleSavedObjectService {
     references: SavedObjectReference[],
     spaceId?: string
   ) => Promise<void>;
+  /**
+   * Flips `enabled` on the raw rule document, leaving the executor task
+   * scheduled.
+   *
+   * The rules API always disables the task alongside the rule, so it cannot
+   * produce the one state the `rule_disabled` halt exists for: a task that
+   * still runs, reading a rule that says it must not. Writing the attribute
+   * directly is the only way to observe that halt without racing the disable.
+   */
+  setEnabled: (ruleId: string, enabled: boolean, spaceId?: string) => Promise<void>;
 }
 
 export const getRuleSavedObjectService = ({
@@ -99,6 +109,17 @@ export const getRuleSavedObjectService = ({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: getDocumentId(ruleId, spaceId),
           doc: { references },
+          refresh: 'wait_for',
+        });
+      }),
+
+    setEnabled: (ruleId, enabled, spaceId = DEFAULT_SPACE_ID) =>
+      measurePerformanceAsync(log, 'ruleSavedObject.setEnabled', async () => {
+        const client = await getSavedObjectClient();
+        await client.update({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: getDocumentId(ruleId, spaceId),
+          doc: { [RULE_SAVED_OBJECT_TYPE]: { enabled } },
           refresh: 'wait_for',
         });
       }),

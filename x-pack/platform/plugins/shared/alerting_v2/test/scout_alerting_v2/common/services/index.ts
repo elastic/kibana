@@ -23,7 +23,11 @@ export { getRuleTemplatesApiService } from './rule_templates_api_service';
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
-export type { RuleExecutionsApiService } from './rule_executions_api_service';
+export type {
+  ReportedRun,
+  ReportedRunStatus,
+  RuleExecutionsApiService,
+} from './rule_executions_api_service';
 export { getRuleExecutionsApiService } from './rule_executions_api_service';
 
 export type { AlertActionsEventsService, AlertActionsFilter } from './alert_actions_events_service';

@@ -322,6 +322,29 @@ For each breached ES\|QL row, the executor:
 | `rule_disabled` | The rule is present but disabled. |
 | `state_not_ready` | A step ran without required upstream state. Usually indicates ordering or stream wiring misuse. |
 
+## Reason codes
+
+`kibana.task.data.reason` says why a run did not simply succeed. The vocabulary lives in `execution_outcome/execution_reason.ts` and is a published contract: dashboards and the execution history API filter on these values.
+
+The codes are deliberately not step names or halt reasons. `STEP_EXECUTION_REASONS` and `HALT_EXECUTION_REASONS` translate internal names into published codes, so the pipeline stays free to rename its parts without changing what a run reports.
+
+| Code | Published when |
+| --- | --- |
+| `rule_disabled` | The rule is present but disabled. |
+| `rule_deleted` | The saved object no longer exists. |
+| `state_not_ready` | A step ran without required upstream state. |
+| `query_failed` | `execute_rule_query` threw. |
+| `recovery_query_failed` | The recovery query threw. |
+| `no_data_failed` | The data-presence query threw. |
+| `store_failed` | `store_alert_events` threw. |
+| `director_failed` | `director` threw. |
+| `cancelled_timeout` | The task timeout fired, whatever was in flight at the time. |
+| `unexpected_error` | A step that owns no code of its own threw. |
+
+For a run that threw, a cancellation outranks everything, then a code tagged at the failing operation via `tagFailureReason`, then the code owned by the step. An error reaching the task runner with no step tag reports no reason at all.
+
+`recovery_query_failed` and `no_data_failed` are finer than a step — both belong to `classify_absent_groups` — so `detectDataPresence` and `executeRecoveryQuery` tag them at the call site instead.
+
 ## Middleware vs decorators
 
 | Mechanism | Use it for | Current examples |
@@ -417,7 +440,21 @@ bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 
 Binding order is execution order. Match neighboring scope conventions unless you have a clear reason not to.
 
-### Step 4: Add focused tests
+### Step 4: Give it a published reason code
+
+Add an entry to `STEP_EXECUTION_REASONS` in `execution_outcome/execution_reason.ts`, naming the code the event log publishes when the step throws. Reach for `UNEXPECTED_ERROR` unless the failure is worth telling apart from any other.
+
+```typescript
+export const STEP_EXECUTION_REASONS: Readonly<Record<string, RuleExecutionReason>> = {
+  create_alert_events: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
+  my_new_step: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
+  classify_absent_groups: RULE_EXECUTION_REASONS.UNEXPECTED_ERROR,
+};
+```
+
+`execution_reason.test.ts` fails until the entry exists, and fails again if the step is later renamed without the key moving with it.
+
+### Step 5: Add focused tests
 
 ```typescript
 import { MyNewStep } from './my_new_step';
