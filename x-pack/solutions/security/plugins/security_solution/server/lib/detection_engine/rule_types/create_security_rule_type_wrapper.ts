@@ -12,7 +12,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
+import {
+  buildExceptionFilter,
+  removeExpiredExceptions,
+} from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
@@ -425,6 +428,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
+                    // POC (native ES|QL exceptions): pass the exception items through
+                    // so the ES|QL executor can compile them into the query. Expired
+                    // exceptions are removed here, matching what buildExceptionFilter
+                    // does for the DSL/post-filter paths.
+                    allExceptionItems: removeExpiredExceptions(exceptionItems, startedAt),
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,

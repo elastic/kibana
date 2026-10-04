@@ -7,7 +7,9 @@
 
 import { performance } from 'perf_hooks';
 import type { estypes } from '@elastic/elasticsearch';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, partition } from 'lodash';
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   computeIsESQLQueryAggregating,
@@ -31,6 +33,8 @@ import {
   checkMissingIdFieldWarning,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import { buildNativeEsqlExceptionQuery, getFromClause } from './utils/build_esql_native_exceptions';
+import type { PositionSchema } from './utils/build_esql_native_exceptions';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
@@ -59,6 +63,12 @@ import type { ScheduleNotificationResponseActionsService } from '../../rule_resp
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
 
+// POC: when a rule's name contains this marker, scalar detection exceptions are
+// compiled into the ES|QL query (a `WHERE NOT (...)` stage, early or late) instead of
+// applied as a DSL pre-filter. Name-based so the same rule can be A/B compared
+// against the V1 path.
+const POC_NATIVE_ESQL_EXCEPTIONS_NAME_MARKER = 'POC EXCEPTIONS';
+
 export const esqlExecutor = async ({
   sharedParams,
   services,
@@ -81,6 +91,7 @@ export const esqlExecutor = async ({
     secondaryTimestamp,
     exceptionFilter,
     unprocessedExceptions,
+    allExceptionItems,
     ruleExecutionLogger,
   } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -105,6 +116,109 @@ export const esqlExecutor = async ({
       ruleExecutionLogger,
       isAggregating: isRuleAggregating,
     });
+
+    // POC: native ES|QL exceptions. Scalar exception items are compiled into the
+    // query: items whose fields are all in the source indices run as a `WHERE` right
+    // after FROM (event-level), items on computed columns as a `WHERE` at the end
+    // (alert-level). Value-list (`list`) items stay on the existing DSL
+    // implementation, so the two mechanisms never apply the same item twice.
+    const useNativeEsqlExceptions =
+      (completeRule.ruleConfig.name ?? '').includes(POC_NATIVE_ESQL_EXCEPTIONS_NAME_MARKER) &&
+      (allExceptionItems?.length ?? 0) > 0;
+
+    let queryToRun = transformedQuery;
+    let effectiveExceptionFilter = exceptionFilter;
+    let effectiveUnprocessedExceptions = unprocessedExceptions;
+
+    if (useNativeEsqlExceptions && allExceptionItems) {
+      const [listItems, nativeItems] = partition(allExceptionItems, (item) =>
+        (item.entries as EntriesArray).some((entry) => entry.type === 'list')
+      );
+
+      // Resolve the columns available at each position with `LIMIT 0` probes (name +
+      // type, no rows): the source columns (right after FROM) decide which items run
+      // early against the source, the output columns (after the pipeline) which run
+      // late against the alert. The output probe includes computed / aggregated
+      // columns and reflects KEEP/DROP, which field_caps on the source cannot.
+      const probeSchema = async (probeQuery: string): Promise<PositionSchema> => {
+        const probe = await services.scopedClusterClient.asCurrentUser.esql.query({
+          query: `${probeQuery}\n| LIMIT 0`,
+        });
+        const columns = new Set<string>();
+        const columnTypes: Record<string, string | undefined> = {};
+        for (const col of probe.columns ?? []) {
+          columns.add(col.name);
+          columnTypes[col.name] = col.type;
+        }
+        return { columns, columnTypes };
+      };
+
+      let source: PositionSchema | undefined;
+      let output: PositionSchema | undefined;
+      if (nativeItems.length > 0) {
+        const fromClause = getFromClause(transformedQuery);
+        try {
+          if (fromClause == null) {
+            throw new Error('query does not start with a FROM command');
+          }
+          [source, output] = await Promise.all([
+            probeSchema(fromClause),
+            probeSchema(transformedQuery),
+          ]);
+        } catch (e) {
+          ruleExecutionLogger.warn(
+            `POC native ES|QL exceptions: schema probe failed, falling back to the DSL exception filter: ${e?.message}`
+          );
+        }
+      }
+
+      const probeFailed = nativeItems.length > 0 && (source == null || output == null);
+
+      if (!probeFailed) {
+        // Value-list items go to the DSL filter; scalar items are compiled in-query.
+        // Rebuild the DSL filter (and its unprocessed-exceptions warning) from the
+        // value-list items only. The items are already expiry-filtered upstream, so
+        // the `startedAt` passed here only re-confirms that.
+        if (listItems.length > 0) {
+          const { filter, unprocessedExceptions: listUnprocessed } = await buildExceptionFilter({
+            lists: listItems,
+            excludeExceptions: true,
+            chunkSize: 10,
+            alias: null,
+            listClient: sharedParams.listClient,
+            startedAt: tuple.to.toDate(),
+          });
+          effectiveExceptionFilter = filter;
+          effectiveUnprocessedExceptions = listUnprocessed;
+        } else {
+          effectiveExceptionFilter = undefined;
+          effectiveUnprocessedExceptions = [];
+        }
+
+        if (nativeItems.length > 0 && source != null && output != null) {
+          const { query: queryWithExceptions, skipped } = buildNativeEsqlExceptionQuery({
+            query: transformedQuery,
+            items: nativeItems,
+            source,
+            output,
+          });
+          if (skipped.length) {
+            const details = skipped.map((s) => `${s.itemId} (${s.reason})`).join('; ');
+            result.warningMessages.push(
+              `${skipped.length} exception item(s) could not be applied to this ES|QL rule: ${details}`
+            );
+            ruleExecutionLogger.warn(`POC native ES|QL exceptions: skipped ${details}`);
+          }
+          const appliedCount = nativeItems.length - skipped.length;
+          if (appliedCount > 0) {
+            queryToRun = queryWithExceptions;
+            ruleExecutionLogger.info(
+              `POC native ES|QL exceptions: applied ${appliedCount} scalar exception item(s) in-query.\nQuery:\n${queryToRun}`
+            );
+          }
+        }
+      }
+    }
 
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
@@ -139,14 +253,14 @@ export const esqlExecutor = async ({
         }
 
         const esqlRequest = buildEsqlSearchRequest({
-          query: transformedQuery,
+          query: queryToRun,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
           filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
           primaryTimestamp,
           secondaryTimestamp,
-          exceptionFilter,
+          exceptionFilter: effectiveExceptionFilter,
           excludedDocuments,
           ruleExecutionTimeout,
         });
@@ -159,7 +273,9 @@ export const esqlExecutor = async ({
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
         ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
-        const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+        // Warn about exceptions that are not applied (large value lists). In native
+        // mode this set covers only the value-list items still on the DSL path.
+        const exceptionsWarning = getUnprocessedExceptionsWarnings(effectiveUnprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
         }

@@ -103,6 +103,11 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  // POC (native ES|QL exceptions): the full set of exception items for the rule,
+  // before the DSL/post-filter split, so the ES|QL executor can compile them
+  // directly into the query when the POC flag is on. Optional so existing
+  // sharedParams builders (and test mocks) do not need to change.
+  allExceptionItems?: ExceptionListItemSchema[];
   alertTimestampOverride: Date | undefined;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
