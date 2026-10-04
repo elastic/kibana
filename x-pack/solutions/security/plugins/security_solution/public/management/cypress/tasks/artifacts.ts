@@ -302,8 +302,13 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('blocklist-form-field-select').click();
     cy.getByTestSubj('blocklist-form-file.Ext.code_signature').click();
   },
-  selectOperator: (operator: 'is one of' | 'is') => {
-    const matchOperator = operator === 'is' ? 'match' : 'match_any';
+  selectField: (field: 'file.path' | 'file.path.caseless' | 'file.name') => {
+    cy.getByTestSubj('blocklist-form-field-select').click();
+    cy.getByTestSubj(`blocklist-form-${field}`).click();
+  },
+  selectOperator: (operator: 'is one of' | 'is' | 'Match') => {
+    const matchOperator =
+      operator === 'is' ? 'match' : operator === 'Match' ? 'wildcard' : 'match_any';
     cy.getByTestSubj('blocklist-form-operator-select-multi').click();
     cy.get(`button[role="option"][id="${matchOperator}"]`).click();
   },
@@ -325,8 +330,8 @@ export const blocklistFormSelectors = {
       cy.getByTestSubj('comboBoxSearchInput').type(`Elastic, Inc.{enter}`);
     });
   },
-  setSingleValue: () => {
-    cy.getByTestSubj('blocklist-form-value-input').type('Elastic, Inc.');
+  setSingleValue: (value: string = 'Elastic, Inc.') => {
+    cy.getByTestSubj('blocklist-form-value-input').type(value);
   },
   submitBlocklist: () => {
     cy.getByTestSubj('blocklistPage-flyout-submitButton').click();

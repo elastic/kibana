@@ -93,6 +93,9 @@ export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: strin
     'xpack.securitySolution.blocklist.entry.field.signature',
     { defaultMessage: 'Signature' }
   ),
+  'file.name': i18n.translate('xpack.securitySolution.blocklist.entry.field.fileName', {
+    defaultMessage: 'File Name',
+  }),
 };
 
 export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]: string } = {
@@ -112,7 +115,17 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]:
     'xpack.securitySolution.blocklist.entry.field.description.signature',
     { defaultMessage: 'The signer of the application' }
   ),
+  'file.name': i18n.translate('xpack.securitySolution.blocklist.entry.field.description.fileName', {
+    defaultMessage: 'The name of the application',
+  }),
 };
+
+export const MATCHES_OPERATOR_LABEL = i18n.translate(
+  'xpack.securitySolution.blocklist.operator.matches',
+  {
+    defaultMessage: 'Match',
+  }
+);
 
 export const POLICY_SELECT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.blocklist.policyAssignmentSectionDescription',
@@ -139,6 +152,20 @@ export const ERRORS = {
     'xpack.securitySolution.blocklist.warnings.values.wildcardPresent',
     {
       defaultMessage: "A wildcard in the filename will affect the endpoint's performance",
+    }
+  ),
+  WILDCARD_WRONG_OPERATOR: i18n.translate(
+    'xpack.securitySolution.blocklist.warnings.values.wildcardWrongOperator',
+    {
+      defaultMessage:
+        'Using a "*" or a "?" in the value with the "is one of" operator can make the entry ineffective. Change the operator to "Match" to ensure wildcards run properly.',
+    }
+  ),
+  UNNECESSARY_ESCAPING: i18n.translate(
+    'xpack.securitySolution.blocklist.warnings.values.unnecessaryEscaping',
+    {
+      defaultMessage:
+        'Endpoint artifacts do not require escaping when using "\\", "*" or "?" characters.',
     }
   ),
   DUPLICATE_VALUE: i18n.translate(

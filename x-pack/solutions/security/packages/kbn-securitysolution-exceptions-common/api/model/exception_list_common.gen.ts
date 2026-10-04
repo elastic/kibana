@@ -285,35 +285,55 @@ export const TrustedDeviceUsernameEntry = lazySchema(() =>
 );
 export type TrustedDeviceUsernameEntry = z.infer<typeof TrustedDeviceUsernameEntry>;
 
-export const BlocklistHashOrPathEntry = lazySchema(() =>
+export const BlocklistHashEntry = lazySchema(() =>
   z.object({
     /**
-     * File hash or path field
+     * File hash field
      */
     field: z
-      .enum([
-        'file.hash.md5',
-        'file.hash.sha1',
-        'file.hash.sha256',
-        'file.path',
-        'file.path.caseless',
-      ])
-      .describe('File hash or path field'),
+      .enum(['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'])
+      .describe('File hash field'),
     /**
-     * Must be match_any for blocklists
+     * Must be match_any for blocklist hash entries
      */
-    type: z.literal('match_any').describe('Must be match_any for blocklists'),
+    type: z.literal('match_any').describe('Must be match_any for blocklist hash entries'),
     /**
-     * Array of hash values or file paths
+     * Array of hash values
      */
-    value: z.array(z.string()).min(1).describe('Array of hash values or file paths'),
+    value: z.array(z.string()).min(1).describe('Array of hash values'),
     /**
      * Must be the value "included"
      */
     operator: z.literal('included').describe('Must be the value "included"'),
   })
 );
-export type BlocklistHashOrPathEntry = z.infer<typeof BlocklistHashOrPathEntry>;
+export type BlocklistHashEntry = z.infer<typeof BlocklistHashEntry>;
+
+export const BlocklistPathOrFileNameEntry = lazySchema(() =>
+  z.object({
+    /**
+     * File path or file name field (available on all OS)
+     */
+    field: z
+      .enum(['file.path', 'file.path.caseless', 'file.name'])
+      .describe('File path or file name field (available on all OS)'),
+    /**
+      * Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)
+
+      */
+    type: z
+      .enum(['match_any', 'wildcard'])
+      .describe(
+        'Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)\n'
+      ),
+    value: z.union([z.string(), z.array(z.string()).min(1)]),
+    /**
+     * Must be the value "included"
+     */
+    operator: z.literal('included').describe('Must be the value "included"'),
+  })
+);
+export type BlocklistPathOrFileNameEntry = z.infer<typeof BlocklistPathOrFileNameEntry>;
 
 export const BlocklistWindowsCodeSignatureEntry = lazySchema(() =>
   z.object({
@@ -856,16 +876,22 @@ export const BlocklistWindowsProperties = lazySchema(() =>
     /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-* Path entry: only 1 allowed
+* Path or File Name entry: only 1 allowed
 * Code signature entry: only 1 allowed
 
       */
     entries: z
-      .array(z.union([BlocklistHashOrPathEntry, BlocklistWindowsCodeSignatureEntry]))
+      .array(
+        z.union([
+          BlocklistHashEntry,
+          BlocklistPathOrFileNameEntry,
+          BlocklistWindowsCodeSignatureEntry,
+        ])
+      )
       .min(1)
       .optional()
       .describe(
-        '**Validation rules:**\n* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)\n* Path entry: only 1 allowed\n* Code signature entry: only 1 allowed\n'
+        '**Validation rules:**\n* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)\n* Path or File Name entry: only 1 allowed\n* Code signature entry: only 1 allowed\n'
       ),
     /**
      * Windows-only
@@ -885,15 +911,15 @@ export const BlocklistLinuxProperties = lazySchema(() =>
     /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-* Path entry: only 1 allowed
+* Path or File Name entry: only 1 allowed
 
       */
     entries: z
-      .array(BlocklistHashOrPathEntry)
+      .array(z.union([BlocklistHashEntry, BlocklistPathOrFileNameEntry]))
       .min(1)
       .optional()
       .describe(
-        '**Validation rules:**\n* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)\n* Path entry: only 1 allowed\n'
+        '**Validation rules:**\n* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)\n* Path or File Name entry: only 1 allowed\n'
       ),
     /**
      * Linux-only
@@ -913,15 +939,15 @@ export const BlocklistMacProperties = lazySchema(() =>
     /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-* Path entry: only 1 allowed
+* Path or File Name entry: only 1 allowed
 
       */
     entries: z
-      .array(BlocklistHashOrPathEntry)
+      .array(z.union([BlocklistHashEntry, BlocklistPathOrFileNameEntry]))
       .min(1)
       .optional()
       .describe(
-        '**Validation rules:**\n* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)\n* Path entry: only 1 allowed\n'
+        '**Validation rules:**\n* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)\n* Path or File Name entry: only 1 allowed\n'
       ),
     /**
      * macOS-only
