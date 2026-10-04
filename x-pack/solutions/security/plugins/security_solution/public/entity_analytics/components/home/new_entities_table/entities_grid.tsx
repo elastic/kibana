@@ -21,6 +21,7 @@ import {
   EuiProgress,
   EuiText,
   EuiToolTip,
+  useEuiFontSize,
   useEuiTheme,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridControlColumn,
@@ -50,6 +51,16 @@ const GRID_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Entity analytics grid' }
 );
 
+const RESOLVED_ROWS_TOTAL_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.resolvedRowsTotalTitle',
+  { defaultMessage: 'resolved entities' }
+);
+
+const INDIVIDUAL_ROWS_TOTAL_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.individualRowsTotalTitle',
+  { defaultMessage: 'entity records' }
+);
+
 const EMPTY_GRID_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.emptyMessage',
   { defaultMessage: 'No records match the current filters' }
@@ -61,7 +72,7 @@ const EXPANDER_HEADER_LABEL = i18n.translate(
 );
 
 const GRID_STYLE: EuiDataGridStyle = {
-  border: 'horizontal',
+  border: 'none',
   header: 'underline',
   cellPadding: 'm',
   fontSize: 'm',
@@ -312,6 +323,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   pageSizeOptions = PAGE_SIZE_OPTIONS,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { fontSize: toolbarFontSize, lineHeight: toolbarLineHeight } = useEuiFontSize('xs');
   const { dataView } = useContext(DataViewContext);
   const isIndividualRows = rowsMode === 'individual';
   const showToolbar = groupSelectorComponent !== undefined;
@@ -427,29 +439,44 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
             additionalControls: {
               left: {
                 prepend: (
-                  <AdditionalControls
-                    total={total}
-                    title={isIndividualRows ? 'records' : 'entities'}
-                    columns={visibleColumns}
-                    onAddColumn={onAddColumn}
-                    onRemoveColumn={onRemoveColumn}
-                    onResetColumns={onResetColumns}
-                    showFieldsButton={true}
-                  />
+                  <div
+                    css={css`
+                      .entityAnalyticsDataTableTotal {
+                        font-weight: ${euiTheme.font.weight.semiBold};
+                        font-size: ${toolbarFontSize};
+                        line-height: ${toolbarLineHeight};
+                        border-inline-end: ${euiTheme.border.thin};
+                        padding-inline-end: ${euiTheme.size.m};
+                        margin-inline-end: ${euiTheme.size.xs};
+                      }
+                    `}
+                  >
+                    <AdditionalControls
+                      total={total}
+                      title={
+                        isIndividualRows ? INDIVIDUAL_ROWS_TOTAL_TITLE : RESOLVED_ROWS_TOTAL_TITLE
+                      }
+                      columns={visibleColumns}
+                      onAddColumn={onAddColumn}
+                      onRemoveColumn={onRemoveColumn}
+                      onResetColumns={onResetColumns}
+                      showFieldsButton={true}
+                    />
+                  </div>
                 ),
-                append:
-                  updatedAt != null ? (
-                    <div
-                      css={css`
-                        border-inline-start: ${euiTheme.border.thin};
-                        padding-inline-start: ${euiTheme.size.s};
-                      `}
-                    >
-                      <LastUpdated updatedAt={updatedAt} />
-                    </div>
-                  ) : null,
               },
-              right: groupSelectorComponent,
+              right: (
+                <div
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    gap: ${euiTheme.size.m};
+                  `}
+                >
+                  {updatedAt != null ? <LastUpdated updatedAt={updatedAt} /> : null}
+                  {groupSelectorComponent}
+                </div>
+              ),
             },
           }
         : false,
@@ -462,8 +489,12 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       onRemoveColumn,
       onResetColumns,
       updatedAt,
+      euiTheme.font.weight.semiBold,
+      toolbarFontSize,
+      toolbarLineHeight,
       euiTheme.border.thin,
-      euiTheme.size.s,
+      euiTheme.size.m,
+      euiTheme.size.xs,
       groupSelectorComponent,
     ]
   );
