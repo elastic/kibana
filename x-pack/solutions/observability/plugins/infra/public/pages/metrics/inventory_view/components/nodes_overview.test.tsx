@@ -35,9 +35,6 @@ jest.mock('../hooks/use_asset_details_flyout_url_state', () => ({
 jest.mock('../../../../hooks/use_time_range_metadata', () => ({
   useTimeRangeMetadataContext: jest.fn(),
 }));
-jest.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
-}));
 
 jest.mock('../../../../components/empty_states', () => ({
   NoData: ({
@@ -85,10 +82,6 @@ const mockedUseWaffleOptionsContext =
 const mockedUseTimeRangeMetadataContext = jest.requireMock(
   '../../../../hooks/use_time_range_metadata'
 ).useTimeRangeMetadataContext as jest.Mock;
-// Intentional `as jest.Mock` type assertion as jest.requireMock returns an untyped factory for the pod schema flag hook;
-const mockedUseIsPodSchemaSelectorEnabled = jest.requireMock(
-  '../../../../hooks/use_is_pod_schema_selector_enabled'
-).useIsPodSchemaSelectorEnabled as jest.Mock;
 
 const options: InfraWaffleMapOptions = {
   formatter: InfraFormatterType.percent,
@@ -138,14 +131,11 @@ const renderOverview = () =>
 describe('NodesOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
     mockPreferredSchema('semconv');
     mockSchemas(['ecs']);
   });
 
-  it('shows SwitchSchemaMessage for pods when the flag is on and preferredSchema is unavailable', () => {
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
+  it('shows SwitchSchemaMessage for pods when preferredSchema is unavailable', () => {
     renderOverview();
 
     expect(screen.getByTestId('noMetricsDataPrompt')).toBeInTheDocument();
@@ -154,20 +144,5 @@ describe('NodesOverview', () => {
     expect(mockedUseWaffleOptionsContext()).toEqual(
       expect.objectContaining({ preferredSchema: 'semconv' })
     );
-  });
-
-  it('keeps the generic empty state for pods when the flag is off', () => {
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
-
-    renderOverview();
-
-    expect(screen.getByTestId('noMetricsDataPrompt')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('infraInventoryViewNoDataInSelectedSchema')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('infraNodesOverviewNoDataSupportedIntegrationLink')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('infraNoDataButton')).toBeInTheDocument();
   });
 });

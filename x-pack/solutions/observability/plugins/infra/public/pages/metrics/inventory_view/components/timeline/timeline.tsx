@@ -48,8 +48,8 @@ import {
 } from '../../../metrics_explorer/components/helpers/calculate_domain';
 import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
-import { useInventoryRequestSchema } from '../../hooks/use_inventory_request_schema';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 interface Props {
   interval: string;
@@ -104,7 +104,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     metric: anomalyMetricName,
   };
 
-  const effectiveSchema = useInventoryRequestSchema(nodeType, preferredSchema);
+  const effectiveSchema = getInventoryRequestSchema(preferredSchema);
 
   const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
     { ...anomalyParams, schema: effectiveSchema },
