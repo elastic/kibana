@@ -20,6 +20,22 @@ import type {
   EsqlEsqlClusterInfo,
   EsqlEsqlShardFailure,
 } from '@elastic/elasticsearch/lib/api/types';
+import { errors, type TransportResult } from '@elastic/elasticsearch';
+
+const createVerificationError = (reason: string) =>
+  new errors.ResponseError({
+    statusCode: 400,
+    headers: {},
+    warnings: [],
+    meta: {} as TransportResult['meta'],
+    body: {
+      error: {
+        type: 'verification_exception',
+        reason,
+        root_cause: [{ type: 'verification_exception', reason }],
+      },
+    },
+  } as TransportResult);
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -79,11 +95,53 @@ describe('fetchEsqlQuery', () => {
         )
       );
 
-      try {
-        await fetchEsqlQuery({
+      const error = await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: defaultParams,
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        sourceFields: [],
+      }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['all', [{ count: 0, group: 'all documents', hits: [], sourceFields: {} }]],
+      ['row', []],
+    ])(
+      'should return an empty run with a warning when the index is unknown (groupBy: %s)',
+      async (groupBy, expectedResults) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError('Found 1 problem\nline 1:1: Unknown index [logs-missing]')
+        );
+        (getEsqlQueryHits as jest.Mock).mockImplementationOnce(
+          jest.requireActual('../../../../common').getEsqlQueryHits
+        );
+
+        const result = await fetchEsqlQuery({
           ruleId: 'testRuleId',
           alertLimit: 1,
-          params: defaultParams,
+          params: { ...defaultParams, groupBy },
           services: {
             logger,
             scopedClusterClient,
@@ -104,10 +162,64 @@ describe('fetchEsqlQuery', () => {
           dateEnd: new Date().toISOString(),
           sourceFields: [],
         });
-      } catch (e) {
-        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+
+        expect(result).toEqual({
+          index: null,
+          link: '/app/r?l=DISCOVER_APP_LOCATOR',
+          parsedResults: { results: expectedResults, truncated: false },
+        });
+        const warning = 'The target index does not exist. The query returned no results.';
+        expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+        expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
       }
-    });
+    );
+
+    it.each([
+      ['multiple indices', 'from logs-exists, logs-missing'],
+      ['a subquery', 'from logs-exists | where host.name in (from logs-missing)'],
+    ])(
+      'should return an empty run with a warning when the index is unknown and the query uses %s',
+      async (_, esql) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError('Found 1 problem\nline 1:1: Unknown index [logs-missing]')
+        );
+        (getEsqlQueryHits as jest.Mock).mockImplementationOnce(
+          jest.requireActual('../../../../common').getEsqlQueryHits
+        );
+
+        const result = await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: { ...defaultParams, esqlQuery: { esql } },
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+          sourceFields: [],
+        });
+
+        expect(result.parsedResults.results).toEqual([
+          { count: 0, group: 'all documents', hits: [], sourceFields: {} },
+        ]);
+        expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+          'The target index does not exist. The query returned no results.'
+        );
+      }
+    );
 
     it('should add a warning when is_partial is true', async () => {
       const shardFailure: EsqlEsqlShardFailure = {
