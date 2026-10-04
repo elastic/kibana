@@ -456,6 +456,11 @@ export class WorkflowsService {
     return this.crudService.updateWorkflow(id, workflow, spaceId, request);
   }
 
+  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+    await this.ensureInitialized();
+    return this.crudService.rotatePage(id, spaceId, request);
+  }
+
   public async restoreWorkflowVersion(
     workflowId: string,
     eventId: string,

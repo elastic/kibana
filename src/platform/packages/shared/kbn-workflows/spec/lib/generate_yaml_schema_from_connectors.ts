@@ -37,6 +37,10 @@ import {
   WorkflowSettingsSchema,
 } from '../schema';
 import { type CustomTriggerSchemaInput, getTriggerSchema } from '../schema/triggers';
+import {
+  hasAtMostOnePageTrigger,
+  MULTIPLE_PAGE_TRIGGERS_ERROR,
+} from '../schema/triggers/page_trigger_schema';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -79,7 +83,10 @@ export function generateYamlSchemaFromConnectors(
 
   const triggerSchema = getTriggerSchema(sortedTriggers);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: z
+      .array(triggerSchema)
+      .min(1)
+      .refine(hasAtMostOnePageTrigger, { message: MULTIPLE_PAGE_TRIGGERS_ERROR }),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -99,7 +106,10 @@ export function generateLightweightYamlSchema(
   // not materialize connector or step-definition schemas.
   const triggerSchema = getTriggerSchema(triggers);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: z
+      .array(triggerSchema)
+      .min(1)
+      .refine(hasAtMostOnePageTrigger, { message: MULTIPLE_PAGE_TRIGGERS_ERROR }),
   });
 
   return workflowBaseWithTriggers.extend({

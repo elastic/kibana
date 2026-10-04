@@ -8,7 +8,7 @@
  */
 
 export interface WorkflowTrigger {
-  type: 'alert' | 'scheduled' | 'manual';
+  type: 'alert' | 'scheduled' | 'manual' | 'page';
   with?: Record<string, unknown>;
 }
 

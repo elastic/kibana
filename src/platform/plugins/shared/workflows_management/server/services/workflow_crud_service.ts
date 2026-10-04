@@ -1042,6 +1042,24 @@ export class WorkflowCrudService {
     };
   }
 
+  /**
+   * Retires a workflow page URL by incrementing the counter its secret is derived
+   * from. Only `pageGeneration` changes: the YAML and version stay the same, so a
+   * rotation is not a new workflow version.
+   */
+  async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+    const profileId =
+      (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
+    const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
+      request,
+      mutate: (existingSource: WorkflowProperties) => {
+        assertWorkflowOperation(existingSource, 'edit', profileId);
+        return { ...existingSource, pageGeneration: (existingSource.pageGeneration ?? 0) + 1 };
+      },
+    });
+    return finalData.pageGeneration ?? 0;
+  }
+
   async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
