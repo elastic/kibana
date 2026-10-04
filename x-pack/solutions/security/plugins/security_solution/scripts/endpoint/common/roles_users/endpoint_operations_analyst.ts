@@ -70,6 +70,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             'host_isolation_exceptions_all',
             'blocklist_all',
             'endpoint_exceptions_all',
+            'custom_yara_signatures_read',
             'host_isolation_all',
             'process_operations_all',
             'actions_log_management_all',
