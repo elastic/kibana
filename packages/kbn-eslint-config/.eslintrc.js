@@ -18,6 +18,7 @@
  */
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
+const featureFlagSnapshotAllowlist = require('./feature_flag_snapshot_allowlist');
 
 const USES_ELASTIC_APM_AGENT = [
   // Core platform APM integration & agent infrastructure
@@ -107,6 +108,14 @@ module.exports = {
       'error',
       {
         endOfLine: 'auto',
+      },
+    ],
+
+    // Temporary file exceptions. Clear them in follow-up PRs. See feature_flag_snapshot_allowlist.js.
+    '@kbn/eslint/no_feature_flag_snapshot': [
+      'error',
+      {
+        allow: featureFlagSnapshotAllowlist,
       },
     ],
 
