@@ -27,7 +27,12 @@ import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-
 import type { DataStream, TemplateDeserialized } from '../../../../../../../common';
 import { API_BASE_PATH } from '../../../../../../../common/constants';
 import { splitSizeAndUnits } from '../../../../../../../common';
-import { isNextGenIlm } from '../../../../../lib/data_streams';
+import {
+  getIlmPolicyNameForSummary,
+  isIlmLifecyclePreferred,
+  isLookupIndexMode,
+} from '../../../../../lib/data_streams';
+import { LOOKUP_INDEX_MODE } from '../../../../../../../common/constants';
 import { useAppContext } from '../../../../../app_context';
 import {
   updateDSFailureStore,
@@ -154,24 +159,17 @@ export const useEditDataLifecycle = ({
     }
   }, []);
 
-  // Eagerly load ILM policies for the summary's policy inspection (stateful, next-gen ILM only).
+  // Eagerly load ILM policies for the summary's policy inspection.
   useEffect(() => {
     if (config.isServerless) return;
     if (!dataStream) return;
-    if (!isNextGenIlm(dataStream)) return;
-    if (typeof dataStream.ilmPolicyName !== 'string' || dataStream.ilmPolicyName.length === 0)
-      return;
+    if (!isIlmLifecyclePreferred(dataStream)) return;
+    const summaryIlmPolicyName = getIlmPolicyNameForSummary(dataStream);
+    if (typeof summaryIlmPolicyName !== 'string' || summaryIlmPolicyName.length === 0) return;
     if (ilmPolicies.length > 0) return;
 
     loadIlmPolicies();
-  }, [
-    config.isServerless,
-    dataStream,
-    dataStream?.ilmPolicyName,
-    dataStream?.nextGenerationManagedBy,
-    ilmPolicies.length,
-    loadIlmPolicies,
-  ]);
+  }, [config.isServerless, dataStream, ilmPolicies.length, loadIlmPolicies]);
 
   useEffect(() => {
     const licensing = plugins.licensing;
@@ -294,9 +292,11 @@ export const useEditDataLifecycle = ({
         }
       } else {
         // Back to the data stream's own configuration
-        const nextMethod = isNextGenIlm(dataStream) ? 'ilm' : 'dlm';
+        const nextMethod = isIlmLifecyclePreferred(dataStream) ? 'ilm' : 'dlm';
         setLifecycleMethod(nextMethod);
-        setSelectedIlmPolicyName(nextMethod === 'ilm' ? dataStream.ilmPolicyName : undefined);
+        setSelectedIlmPolicyName(
+          nextMethod === 'ilm' ? getIlmPolicyNameForSummary(dataStream) : undefined
+        );
       }
     },
     [dataStream, flyoutSeed.templateIlmPolicyName]
@@ -385,20 +385,34 @@ export const useEditDataLifecycle = ({
       // the details summary stay consistent.
       setFailureStoreEnabled(Boolean(dataStream.failureStoreEnabled));
 
-      const shouldInheritIlm =
+      const templateInheritsIlm =
         resolvedLifecycle.inheritSuccessful &&
         resolvedLifecycle.resolvedIlmPolicyName !== undefined;
-      const nextMethod = shouldInheritIlm || isNextGenIlm(dataStream) ? 'ilm' : 'dlm';
-      setLifecycleMethod(nextMethod);
-      setSelectedIlmPolicyName(
-        shouldInheritIlm
-          ? resolvedLifecycle.resolvedIlmPolicyName
-          : nextMethod === 'ilm'
-          ? dataStream.ilmPolicyName
-          : undefined
-      );
+      const isLookup = isLookupIndexMode(dataStream);
 
-      setInheritSuccessfulLifecycle(resolvedLifecycle.inheritSuccessful);
+      // The template describes future generations, which a lookup stream skips. Its editable
+      // lifecycle is the one managing its eligible historical backing indices, so that history
+      // seeds the method and policy, and counts as inherited only when it matches the template.
+      const seedFromHistory = isLookup || !templateInheritsIlm;
+      const nextMethod = !seedFromHistory || isIlmLifecyclePreferred(dataStream) ? 'ilm' : 'dlm';
+      const nextIlmPolicyName =
+        nextMethod !== 'ilm'
+          ? undefined
+          : seedFromHistory
+          ? getIlmPolicyNameForSummary(dataStream)
+          : resolvedLifecycle.resolvedIlmPolicyName;
+      setLifecycleMethod(nextMethod);
+      setSelectedIlmPolicyName(nextIlmPolicyName);
+
+      const seededLifecycleMatchesTemplate = isLookup
+        ? nextMethod === 'ilm'
+          ? nextIlmPolicyName !== undefined &&
+            nextIlmPolicyName === resolvedLifecycle.resolvedIlmPolicyName
+          : resolvedLifecycle.resolvedIlmPolicyName === undefined
+        : nextMethod !== 'ilm' || templateInheritsIlm;
+      setInheritSuccessfulLifecycle(
+        resolvedLifecycle.inheritSuccessful && seededLifecycleMatchesTemplate
+      );
       setInheritFailedLifecycle(resolvedLifecycle.inheritFailed);
 
       const href =
@@ -458,7 +472,11 @@ export const useEditDataLifecycle = ({
                 : undefined;
 
             const nextLifecycle = (() => {
-              if (!successfulData || successfulData.inheritLifecycle) {
+              if (!successfulData) {
+                return undefined;
+              }
+
+              if (successfulData.inheritLifecycle) {
                 return { inherit: {} };
               }
 
@@ -511,7 +529,7 @@ export const useEditDataLifecycle = ({
 
             const nextIngest = {
               ...upsertRequest.stream.ingest,
-              lifecycle: nextLifecycle,
+              ...(nextLifecycle ? { lifecycle: nextLifecycle } : {}),
               // Only override the failure store when the failed-data tab was part of this apply.
               // The Inspect-policy "Apply" shortcut sends only `successfulData`, so we keep the
               // stream's current failure store (already carried over by the spread above) instead
@@ -545,7 +563,22 @@ export const useEditDataLifecycle = ({
         };
 
         const applySuccessful = async () => {
-          if (!successfulData || successfulData.inheritLifecycle) {
+          if (!successfulData) {
+            return;
+          }
+
+          // ES ignores lifecycle settings on lookup indices but persists them, so a lookup stream
+          // must not carry a stream-level ILM override or a policy on its lookup generations.
+          // Backing indices whose mode is unknown (omitted by the Get Data Streams API) are
+          // treated as ineligible: only indices explicitly known to be non-lookup are updated.
+          const isLookup = isLookupIndexMode(dataStream);
+          const ilmEligibleIndices = isLookup
+            ? dataStream.indices.filter(
+                ({ indexMode }) => indexMode !== undefined && indexMode !== LOOKUP_INDEX_MODE
+              )
+            : dataStream.indices;
+
+          if (successfulData.inheritLifecycle) {
             // "Inherit" means reset to the index template defaults (Streams behavior),
             // not disabling lifecycle outright.
             const template = await loadIndexTemplate();
@@ -612,7 +645,7 @@ export const useEditDataLifecycle = ({
               });
               throwIfRequestError(clearDsSettings, 'Failed to clear data stream ILM settings');
               const indexResults = await Promise.all(
-                dataStream.indices.map((index) =>
+                ilmEligibleIndices.map((index) =>
                   updateIndexSettings(index.name, {
                     'index.lifecycle.name': templateIlmName,
                     'index.lifecycle.prefer_ilm': true,
@@ -676,16 +709,17 @@ export const useEditDataLifecycle = ({
           const disableDsl = await updateDataLifecycle([dataStream.name], { enabled: false });
           throwIfRequestError(disableDsl, 'Failed to disable data lifecycle');
 
+          // For lookup streams this clears any stale stream-level override left from before the mode change.
           const putDsSettings = await updateDataStreamSettings([dataStream.name], {
-            'index.lifecycle.name': successfulData.ilmPolicyName,
-            'index.lifecycle.prefer_ilm': true,
+            'index.lifecycle.name': isLookup ? null : successfulData.ilmPolicyName,
+            'index.lifecycle.prefer_ilm': isLookup ? null : true,
           });
           throwIfRequestError(putDsSettings, 'Failed to update data stream ILM settings');
 
           // Data stream settings only affect future backing indices, so update the existing
           // backing indices too for the change to take effect immediately.
           const indexResults = await Promise.all(
-            dataStream.indices.map((index) =>
+            ilmEligibleIndices.map((index) =>
               updateIndexSettings(index.name, {
                 'index.lifecycle.name': successfulData.ilmPolicyName,
                 'index.lifecycle.prefer_ilm': true,
@@ -749,12 +783,24 @@ export const useEditDataLifecycle = ({
         const failedReason =
           failedResult.status === 'rejected' ? getErrorMessage(failedResult.reason) : undefined;
 
+        // An un-attempted half resolves without doing anything, so the paired messages below
+        // ("one half saved, the other did not") only hold when both halves were attempted.
+        const attemptedSuccessful = Boolean(successfulData);
+        const attemptedFailed = Boolean(failedData);
+
         if (successfulFailed && failedFailed) {
           services.notificationService.showDangerToast(
             i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveErrorTitle', {
               defaultMessage: 'Could not save changes',
             }),
             [successfulReason, failedReason].filter(Boolean).join('; ')
+          );
+        } else if (!attemptedSuccessful || !attemptedFailed) {
+          services.notificationService.showDangerToast(
+            i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.saveErrorTitle', {
+              defaultMessage: 'Could not save changes',
+            }),
+            successfulReason ?? failedReason
           );
         } else if (successfulFailed) {
           services.notificationService.showDangerToast(
@@ -854,7 +900,7 @@ export const useEditDataLifecycle = ({
             onPolicySelect: setSelectedIlmPolicyName,
             onPolicyInspect: (policyName: string) => setInspectedIlmPolicyName(policyName),
             canManageIlm: hasManageIlm,
-            hasExistingIlmPolicy: isNextGenIlm(dataStream),
+            hasExistingIlmPolicy: isIlmLifecyclePreferred(dataStream),
           },
     }),
     [
