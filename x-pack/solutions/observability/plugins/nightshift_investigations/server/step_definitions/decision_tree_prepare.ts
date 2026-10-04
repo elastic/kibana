@@ -19,9 +19,11 @@ const MAX_INPUT_CHARS = 100_000;
 export const decisionTreePrepareStepDefinition = ({
   getTelemetryConnectorId,
   logger,
+  isEnabled,
 }: {
   getTelemetryConnectorId: () => string | undefined;
   logger: Logger;
+  isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.decisionTreePrepare',
@@ -52,6 +54,13 @@ export const decisionTreePrepareStepDefinition = ({
     }),
     handler: async (context) => {
       const { prompt, response, agent_id: agentId, tool_calls: toolCalls } = context.input;
+
+      // The combined optimize workflow installs with Cortex or Memory, so this step runs even
+      // when the tree feature is off. `skipped` also gates the reinforcement agent steps.
+      if (isEnabled && !isEnabled()) {
+        context.logger.info('Skipped decision tree prepare (flag off)');
+        return { output: { message: '', tree_count: 0, skipped: true } };
+      }
 
       // Only the Nightshift investigator's rounds feed the decision trees: this workflow is its
       // post-execution hook, and another agent's round must not rewrite the trees.

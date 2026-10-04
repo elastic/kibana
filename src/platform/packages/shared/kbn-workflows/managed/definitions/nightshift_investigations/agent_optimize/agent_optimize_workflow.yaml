@@ -1,11 +1,12 @@
 version: '1'
 name: Nightshift Agent Optimize
 description: >
-  Post-round workflow that reuses the conversation sandbox, then runs Cortex and
-  Semantic Memory optimize in parallel. Both writers receive the same sandbox_id
-  obtain produced so they address the workspace hydrate and the bash tools used.
-  Authorization to execute this managed workflow permits its defined Memory operations;
-  the step derives storage tenancy from the trusted current-Space execution context.
+  Post-round workflow that reuses the conversation sandbox, runs Cortex and
+  Semantic Memory optimize in parallel, then distills the round into the decision
+  tree. Both writers receive the same sandbox_id obtain produced so they address the
+  workspace hydrate and the bash tools used. Authorization to execute this managed
+  workflow permits its defined Memory operations; the step derives storage tenancy
+  from the trusted current-Space execution context.
 enabled: true
 tags:
   - observability
@@ -13,6 +14,7 @@ tags:
   - investigation
   - cortex
   - semantic-memory
+  - decision-tree
 
 triggers:
   - type: manual
@@ -62,7 +64,8 @@ triggers:
           description: >
             Tool calls from the completed round (parameters). Shows the Cortex and
             Semantic Memory optimizers which services, indices, and integrations the
-            investigator queried.
+            investigator queried, and decision-tree reinforcement which
+            decision-tree files the investigator actually opened.
           items:
             type: object
             additionalProperties: true
@@ -88,7 +91,11 @@ steps:
   - name: optimize_workspaces
     type: parallel
     mode: settled
-    timeout: 120s
+    # `timeout` bounds the whole parallel, `branch-timeout` bounds one optimizer. They must not be
+    # equal: the engine measures the step timeout over the parallel, so with both at 120s the zone
+    # trips in the same tick that kills the branch and the parallel step fails outright — `settled`
+    # never reports the branch and the reinforcement tail below never runs.
+    timeout: 150s
     branch-timeout: 120s
     branches:
       - name: cortex
@@ -125,3 +132,58 @@ steps:
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
               tool_results: '${{ inputs.tool_results }}'
+
+  # Decision-tree reinforcement is a sequential phase, not a third branch: it runs an ai.agent
+  # for up to 900s, and a parallel branch has no per-branch timeout of its own — it inherits
+  # the 120s branch-timeout above, which would kill every long reinforcement run. Sequential
+  # also matches today's behavior, where Agent Builder already runs post_execution_workflow_ids
+  # one after another.
+  #
+  # These steps fail loudly on purpose. A post-execution hook that logs a failed execution
+  # cannot abort the investigation, so swallowing a failure here would report a green round
+  # that silently reinforced nothing. The reinforcement agent runs in its own conversation,
+  # so a failure is visible without taking the investigation down with it.
+  - name: prepare_turn
+    type: nightshift.decisionTreePrepare
+    with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      agent_id: '{{ inputs.agent_id }}'
+      # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
+      # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
+      tool_calls: '${{ inputs.tool_calls }}'
+
+  # Mirrors the investigation and reinforcement workflows: the reinforcement agent runs on
+  # the model the round used, with `connector_id` still the strict override for a manual run.
+  - name: resolve_model
+    type: nightshift.resolveModel
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
+
+  # Only the reinforcement workflow used to ensure this agent, and it no longer runs. Without
+  # this step a feature-disabled install would still try to run an agent that was never
+  # registered, and a trees-enabled install would fail if the agent were ever pruned.
+  - name: ensure_reinforcement_agent
+    type: nightshift.ensureInvestigationAgent
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      agent_id: significant-events.decision-tree-reinforcement
+
+  # The agent runs in its own conversation, so its own beforeAgent hook hydrates the trees
+  # into that conversation's sandbox rather than the investigator's.
+  - name: reinforce_decision_trees
+    type: ai.agent
+    agent-id: significant-events.decision-tree-reinforcement
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    plugin-id: 'nightshift_investigation_memory'
+    aggregate-by: 'nightshift'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
+    create-conversation: true
+    timeout: 900s
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      message: '{{ steps.prepare_turn.output.message }}'
