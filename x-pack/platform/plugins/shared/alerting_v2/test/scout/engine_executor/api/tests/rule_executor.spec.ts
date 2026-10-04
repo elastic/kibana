@@ -85,7 +85,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, { status: 'breached' });
 
     const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'breached',
@@ -124,7 +124,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -174,7 +174,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -214,7 +214,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -272,7 +272,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, groupCount, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, groupCount, {
         status: 'breached',
         size: groupCount,
       });
@@ -328,7 +328,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, { status: 'breached' });
 
     const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'breached',
@@ -383,7 +383,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
       status: 'breached',
     });
 
@@ -430,7 +430,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -448,7 +448,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         ],
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -493,7 +493,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -570,7 +570,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 3, {
         status: 'breached',
       });
 
@@ -631,7 +631,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -669,7 +669,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleExecutions.waitForRuns({
+    await apiServices.alertingV2.ruleRunner.waitForExecutions({
       ruleId: rule.id,
       runs: 2,
     });
@@ -707,7 +707,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -757,11 +757,11 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -803,7 +803,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -843,7 +843,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -858,7 +858,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-recovery-no-breach' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
       });
 
@@ -899,7 +899,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -908,7 +908,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-signal-no-recovery' } },
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -947,7 +947,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -956,7 +956,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-alert-no-recovery-query' } },
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -999,7 +999,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'breached' });
 
     const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'breached',
@@ -1033,7 +1033,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       ],
     });
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'recovered' });
 
     const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'recovered',
@@ -1077,7 +1077,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -1123,7 +1123,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         ],
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'recovered',
       });
 
@@ -1168,7 +1168,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1196,7 +1196,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         ],
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1240,7 +1240,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1259,7 +1259,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         },
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1308,7 +1308,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1341,7 +1341,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       // The rule must keep breaching via the continued-breach path.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, baseline + 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, baseline + 1, {
         status: 'breached',
       });
 
@@ -1406,7 +1406,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -1443,10 +1443,10 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': HOST_NO_DATA } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
       });
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'no_data' });
 
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'recovered',
@@ -1504,7 +1504,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1520,7 +1520,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': HOST } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'no_data' });
 
       const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'no_data',
@@ -1566,7 +1566,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1592,7 +1592,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       // The group must keep producing breach events...
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, baseline + 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, baseline + 1, {
         status: 'breached',
       });
 
@@ -1636,7 +1636,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       );
 
       // Wait until both groups have breached so both are tracked as active.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -1678,7 +1678,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       };
       await reIndexHostB();
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
       });
 
@@ -1698,14 +1698,13 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       await reIndexHostB();
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
               status: 'breached',
             });
             return events.filter((event) => event.data['host.name'] === 'host-partial-recovery-b')
               .length;
-          },
+          }),
           { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
         )
         .toBeGreaterThan(initialBreachCountB);
@@ -1744,7 +1743,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
 
       // Both groups must be active before we drop one of them; otherwise the
       // "recovery on first execution" race could mask either branch.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 2, {
         status: 'breached',
       });
 
@@ -1779,19 +1778,18 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       // both branches of `ClassifyAbsentGroupsStep`'s recovery classification
       // (append recovery events for absent groups alongside the run's breaches)
       // ran for the same execution.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
       });
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
               status: 'breached',
             });
             return events.filter((event) => event.data['host.name'] === 'host-mixed-execution-b')
               .length;
-          },
+          }),
           { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
         )
         .toBeGreaterThan(initialBreachCountB);
@@ -1836,11 +1834,11 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1883,7 +1881,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1909,7 +1907,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         ],
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
       });
 
@@ -1946,7 +1944,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -1955,7 +1953,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-no-breach-strategy' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
       });
 
@@ -1976,7 +1974,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleExecutions.waitForRuns({
+    await apiServices.alertingV2.ruleRunner.waitForExecutions({
       ruleId: rule.id,
       runs: 2,
     });
@@ -2007,12 +2005,12 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'breached' });
 
     await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
 
     await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
-    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutorTask.waitForTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -2029,7 +2027,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
     const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
     expect(await apiServices.alertingV2.rules.run(rule.id)).toBe(400);
-    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutorTask.waitForTaskDrained({ ruleId: rule.id });
     const after = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
     expect(after).toBe(baseline);
@@ -2059,7 +2057,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'breached',
       });
 
@@ -2081,7 +2079,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
        *      the baseline event snapshot below is stable.
        */
       await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
-      await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
+      await apiServices.alertingV2.ruleExecutorTask.waitForTaskDrained({ ruleId: rule.id });
       const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
       await apiServices.alertingV2.rules.bulkEnable({ ids: [rule.id] });
@@ -2104,10 +2102,9 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
 
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             return (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
-          },
+          }),
           { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
         )
         .toBeGreaterThan(baseline);
@@ -2144,7 +2141,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
       status: 'breached',
     });
 
@@ -2158,7 +2155,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       query: { term: { 'host.name': HOST } },
     });
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'no_data' });
 
     const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'no_data',
@@ -2201,7 +2198,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'breached' });
 
     const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'breached',
@@ -2213,7 +2210,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       query: { term: { 'host.name': HOST } },
     });
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'no_data' });
 
     const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'no_data',
@@ -2257,7 +2254,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
       status: 'breached',
     });
 
@@ -2269,7 +2266,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
     // Recovery is still on by default ('no_breach'), so we wait for the
     // recovery side of the lifecycle as the positive signal that the
     // executor processed the absence — then assert no no_data events.
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
       status: 'recovered',
     });
 
@@ -2301,11 +2298,11 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'breached' });
 
     await apiServices.alertingV2.rules.delete(rule.id);
 
-    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutorTask.waitForTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -2322,7 +2319,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
     const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
     expect(await apiServices.alertingV2.rules.run(rule.id)).toBe(404);
-    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutorTask.waitForTaskDrained({ ruleId: rule.id });
     const after = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
     expect(after).toBe(baseline);
@@ -2341,7 +2338,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleExecutions.waitForRuns({
+    await apiServices.alertingV2.ruleRunner.waitForExecutions({
       ruleId: rule.id,
       runs: 2,
     });

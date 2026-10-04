@@ -11,7 +11,6 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../../../server/lib/rule_executor/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
-import type { RunRule } from './rules_api_service';
 import { countTaskRuns } from './task_event_log';
 
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
@@ -23,15 +22,10 @@ const DEFAULT_SPACE_ID = 'default';
  */
 const RUNNING_TASK_STATUSES = ['claiming', 'running'];
 
-interface WaitForRunsParams {
+interface CountRunsParams {
   ruleId: string;
-  /** Minimum number of `task-run` events that must be observed since `since`. */
-  runs: number;
-  /**
-   * Lower bound (inclusive) for `event.start` of matching events. Defaults to
-   * the time the call was made, i.e. "wait for `runs` more ticks from now".
-   */
-  since?: Date;
+  /** Lower bound (inclusive) for `event.start` of matching events. */
+  since: Date;
   spaceId?: string;
 }
 
@@ -41,12 +35,10 @@ interface WaitForTaskDrainedParams {
 }
 
 /**
- * Test-time accessor for the per-rule alerting_v2 rule executor task. Used to
- * wait for deterministic conditions instead of sleeping by wall-clock time:
+ * Test-time accessor for the per-rule alerting_v2 rule executor task:
  *
- *   - `waitForRuns` — polls `.kibana-event-log*` for `task-run` events the
- *     executor task produces, requesting a rule run on every unmet poll since
- *     scheduled runs are at least 1m apart.
+ *   - `countRuns` — counts the `task-run` events in `.kibana-event-log*` that
+ *     the executor task produced since a point in time.
  *   - `waitForTaskDrained` — polls `.kibana_task_manager` until the executor
  *     task is no longer in `claiming`/`running` status (or until the document
  *     is gone, e.g. after rule delete).
@@ -54,23 +46,21 @@ interface WaitForTaskDrainedParams {
  * The underlying `kibana.task.id` construction (`taskType:spaceId:ruleId`) is
  * an implementation detail; tests pass `ruleId` (and optionally `spaceId`).
  */
-export interface RuleExecutionsApiService {
-  waitForRuns: (params: WaitForRunsParams) => Promise<void>;
+export interface RuleExecutorTaskApiService {
+  countRuns: (params: CountRunsParams) => Promise<number>;
   waitForTaskDrained: (params: WaitForTaskDrainedParams) => Promise<void>;
 }
 
 const buildExecutorTaskId = (ruleId: string, spaceId: string): string =>
   `${ALERTING_RULE_EXECUTOR_TASK_TYPE}:${spaceId}:${ruleId}`;
 
-export const getRuleExecutionsApiService = ({
+export const getRuleExecutorTaskApiService = ({
   log,
   esClient,
-  runRule,
 }: {
   log: ScoutLogger;
   esClient: EsClient;
-  runRule: RunRule;
-}): RuleExecutionsApiService => {
+}): RuleExecutorTaskApiService => {
   /**
    * Returns `true` when the executor task is not currently being executed:
    * either the task document is absent (after delete), or its `task.status`
@@ -92,25 +82,17 @@ export const getRuleExecutionsApiService = ({
   };
 
   return {
-    waitForRuns: ({ ruleId, runs, since, spaceId = DEFAULT_SPACE_ID }) =>
-      measurePerformanceAsync(log, 'ruleExecutions.waitForRuns', async () => {
-        const taskId = buildExecutorTaskId(ruleId, spaceId);
-        const sinceMs = (since ?? new Date()).getTime();
-
-        await expect
-          .poll(
-            async () => {
-              const count = await countTaskRuns({ esClient, taskId, sinceMs });
-              if (count < runs) await runRule(ruleId, { spaceId });
-              return count;
-            },
-            { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
-          )
-          .toBeGreaterThanOrEqual(runs);
-      }),
+    countRuns: ({ ruleId, since, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutorTask.countRuns', () =>
+        countTaskRuns({
+          esClient,
+          taskId: buildExecutorTaskId(ruleId, spaceId),
+          sinceMs: since.getTime(),
+        })
+      ),
 
     waitForTaskDrained: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
-      measurePerformanceAsync(log, 'ruleExecutions.waitForTaskDrained', async () => {
+      measurePerformanceAsync(log, 'ruleExecutorTask.waitForTaskDrained', async () => {
         const taskId = buildExecutorTaskId(ruleId, spaceId);
 
         await expect

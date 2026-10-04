@@ -49,7 +49,7 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
         buildCreateRuleData({ metadata: { name: 'get-rule-executions-smoke' } })
       );
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: rule.id, runs: 1 });
 
       const response = await apiClient.get(listRuleExecutionsUrl({ rule_ids: [rule.id] }), {
         headers: readerHeaders,
@@ -88,12 +88,12 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
         { spaceId: OTHER_SPACE_ID }
       );
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: ruleInDefaultSpace.id,
         runs: 1,
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: ruleInOtherSpace.id,
         runs: 1,
         spaceId: OTHER_SPACE_ID,

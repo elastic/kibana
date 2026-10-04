@@ -106,12 +106,12 @@ apiTest.describe(
         );
 
         // 1) Executor wrote a breach event into `.rule-events`.
-        await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
           status: 'breached',
         });
 
         // 2) Director annotated the breach with an active episode.
-        await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
           episodeStatus: 'active',
         });
 
@@ -173,7 +173,7 @@ apiTest.describe(
         // 3) Director must annotate the recovery as `inactive` before the
         //    dispatcher can fire on it (`state_transition: { recovering: { count: 0 } }`
         //    from the builder default skips the `recovering` step).
-        await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
           episodeStatus: 'inactive',
         });
 

@@ -79,7 +79,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
       status: 'breached',
     });
 
@@ -116,7 +116,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -161,10 +161,10 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'pending',
       });
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -174,10 +174,10 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-episode-id-stable' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'recovering',
       });
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
@@ -218,7 +218,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       );
 
       // 1) First lifecycle: inactive (implicit) -> active.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -235,7 +235,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-new-lifecycle' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
@@ -258,13 +258,12 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       // its episode id differs from the first lifecycle's id.
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
             return Array.from(states.values()).some(
               (doc) => doc.alert?.status === 'active' && doc.alert?.id !== firstEpisodeId
             );
-          },
+          }),
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
         )
         .toBe(true);
@@ -315,7 +314,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       //    of the episode we'll later reopen. The activate handler will
       //    reuse this episode id — reopen is continuity, not a new
       //    incident.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -335,7 +334,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-user-locked' } },
       });
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
@@ -351,7 +350,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       //    director must translate every one of those into an event
       //    that carries `episode.status: 'active'` including
       //    `status: 'recovered'` events.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'recovered',
         episodeStatus: 'active',
       });
@@ -424,7 +423,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       // Drive the rule through pending → active → recovering by breaching
       // and then stopping the breach.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -433,7 +432,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-basic-strategy' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'recovering',
       });
 
@@ -480,7 +479,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       // Wait for the active transition — by then the executor will have run
       // at least four times for this group, walking status_count 1 → 2 → 3.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -535,7 +534,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       // 1) First lifecycle: capture the initial pending event and its
       //    episode id.
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'pending',
       });
 
@@ -553,7 +552,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-pending-reset' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
@@ -573,8 +572,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
             return Array.from(states.values()).some(
               (event) =>
@@ -582,7 +580,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
                 event.alert?.id !== firstLifecycleEpisodeId &&
                 event.alert?.status_count === 1
             );
-          },
+          }),
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
         )
         .toBe(true);
@@ -614,7 +612,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
       episodeStatus: 'active',
     });
 
@@ -623,7 +621,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       query: { term: { 'host.name': 'host-inactive-no-count' } },
     });
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
       episodeStatus: 'inactive',
     });
 
@@ -665,7 +663,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -675,7 +673,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       // The episode must reach inactive eventually (after threshold is met).
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
@@ -721,7 +719,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -730,11 +728,11 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-skip-recovering' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -775,11 +773,11 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
-      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
       });
@@ -820,7 +818,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -834,7 +832,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-rebreach' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'recovering',
       });
 
@@ -865,8 +863,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
               episodeStatus: 'active',
             });
@@ -874,7 +871,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
             return events.some(
               (event) => Date.parse(event['@timestamp']) > lastRecoveringTimestamp
             );
-          },
+          }),
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
         )
         .toBe(true);
@@ -923,7 +920,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'pending',
       });
 
@@ -933,7 +930,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-pending-to-inactive' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
@@ -985,13 +982,12 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
     // Wait until both groups have produced pending events.
     await expect
       .poll(
-        async () => {
-          await apiServices.alertingV2.rules.run(rule.id);
+        apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
           const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
           return Array.from(states.values())
             .map((event) => event.alert?.status)
             .sort();
-        },
+        }),
         { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
       )
       .toStrictEqual(['pending', 'pending']);
@@ -1018,14 +1014,13 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
     await expect
       .poll(
-        async () => {
-          await apiServices.alertingV2.rules.run(rule.id);
+        apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
           const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
           return {
             a: states.get(groupHashA!)?.alert?.status,
             b: states.get(groupHashB!)?.alert?.status,
           };
-        },
+        }),
         { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
       )
       .toStrictEqual({ a: 'inactive', b: 'pending' });
@@ -1081,11 +1076,11 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(
+      await apiServices.alertingV2.ruleRunner.waitForEvents(
         rule.id,
         1,
         { episodeStatus: 'active' },
-        { runIntervalMs: TIMEFRAME_RUN_INTERVAL_MS }
+        { intervalMs: TIMEFRAME_RUN_INTERVAL_MS }
       );
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
@@ -1136,7 +1131,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -1145,11 +1140,11 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-recovering-timeframe-or' } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(
+      await apiServices.alertingV2.ruleRunner.waitForEvents(
         rule.id,
         1,
         { episodeStatus: 'inactive' },
-        { runIntervalMs: TIMEFRAME_RUN_INTERVAL_MS }
+        { intervalMs: TIMEFRAME_RUN_INTERVAL_MS }
       );
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
@@ -1204,7 +1199,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -1215,13 +1210,12 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const recoveringEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
               episodeStatus: 'recovering',
             });
             return recoveringEvents.length;
-          },
+          }),
           { timeout: POLL_TIMEOUT_MS, intervals: [TIMEFRAME_RUN_INTERVAL_MS] }
         )
         .toBeGreaterThanOrEqual(2);
@@ -1279,13 +1273,12 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       await expect
         .poll(
-          async () => {
-            await apiServices.alertingV2.rules.run(rule.id);
+          apiServices.alertingV2.ruleRunner.runThen(rule.id, async () => {
             const pendingEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
               episodeStatus: 'pending',
             });
             return pendingEvents.length;
-          },
+          }),
           { timeout: POLL_TIMEOUT_MS, intervals: [TIMEFRAME_RUN_INTERVAL_MS] }
         )
         .toBeGreaterThanOrEqual(2);
@@ -1341,11 +1334,11 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(
+      await apiServices.alertingV2.ruleRunner.waitForEvents(
         rule.id,
         1,
         { episodeStatus: 'active' },
-        { runIntervalMs: TIMEFRAME_RUN_INTERVAL_MS }
+        { intervalMs: TIMEFRAME_RUN_INTERVAL_MS }
       );
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
@@ -1402,7 +1395,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'pending',
       });
 
@@ -1411,7 +1404,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': HOST } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'no_data',
       });
 
@@ -1459,7 +1452,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
 
@@ -1468,7 +1461,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': HOST } },
       });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         status: 'no_data',
       });
 

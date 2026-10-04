@@ -8,7 +8,6 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import { expect } from '@kbn/scout/api';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type {
   AlertEpisodeStatus,
@@ -16,8 +15,6 @@ import type {
   AlertEventStatus,
   AlertEventType,
 } from '../../../../server/resources/datastreams/alert_events';
-import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
-import type { RunRule } from './rules_api_service';
 
 export interface RuleEventFilter {
   status?: AlertEventStatus;
@@ -25,11 +22,6 @@ export interface RuleEventFilter {
   episodeStatus?: AlertEpisodeStatus;
   /** Max events to return; defaults to 100. */
   size?: number;
-}
-
-export interface WaitForRuleEventsOptions {
-  /** Delay between polls, and therefore between requested runs; defaults to `POLL_INTERVAL_MS`. */
-  runIntervalMs?: number;
 }
 
 export interface RuleEventsCleanUpFilter {
@@ -46,16 +38,6 @@ export interface RuleEventsApiService {
   /** Finds an alert event by `group_hash` (used for external alerts with no `rule.id`). */
   findByGroupHash: (groupHash: string) => Promise<AlertEvent | undefined>;
   /**
-   * Polls `find(...)` until at least `min` matching events exist, requesting a
-   * rule run on every unmet poll since scheduled runs are at least 1m apart.
-   */
-  waitForAtLeast: (
-    ruleId: string,
-    min: number,
-    filter?: RuleEventFilter,
-    options?: WaitForRuleEventsOptions
-  ) => Promise<void>;
-  /**
    * Bulk-seed alert events directly into the `.rule-events` data stream.
    */
   seed: (events: AlertEvent[]) => Promise<void>;
@@ -69,11 +51,9 @@ export interface RuleEventsApiService {
 export const getRuleEventsApiService = ({
   log,
   esClient,
-  runRule,
 }: {
   log: ScoutLogger;
   esClient: EsClient;
-  runRule: RunRule;
 }): RuleEventsApiService => {
   const find: RuleEventsApiService['find'] = (ruleId, filter = {}) =>
     measurePerformanceAsync(log, 'ruleEvents.find', async () => {
@@ -132,23 +112,6 @@ export const getRuleEventsApiService = ({
       return result.hits.hits[0]?._source;
     });
 
-  const waitForAtLeast: RuleEventsApiService['waitForAtLeast'] = (
-    ruleId,
-    min,
-    filter,
-    { runIntervalMs = POLL_INTERVAL_MS } = {}
-  ) =>
-    expect
-      .poll(
-        async () => {
-          const { length } = await find(ruleId, filter);
-          if (length < min) await runRule(ruleId);
-          return length;
-        },
-        { timeout: POLL_TIMEOUT_MS, intervals: [runIntervalMs] }
-      )
-      .toBeGreaterThanOrEqual(min);
-
   const seed: RuleEventsApiService['seed'] = (events) =>
     measurePerformanceAsync(log, 'ruleEvents.seed', async () => {
       if (events.length === 0) return;
@@ -175,5 +138,5 @@ export const getRuleEventsApiService = ({
       );
     });
 
-  return { find, getLatestEpisodeStates, findByGroupHash, waitForAtLeast, seed, cleanUp };
+  return { find, getLatestEpisodeStates, findByGroupHash, seed, cleanUp };
 };

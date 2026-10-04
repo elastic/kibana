@@ -38,8 +38,9 @@ manifest lists it.
 
 Rules are created with `SCHEDULE_INTERVAL` (`1m`), the default `xpack.alerting_v2.rules.minimumScheduleInterval`. Anything shorter is rejected with `400 SCHEDULE_INTERVAL_TOO_SHORT`. A rule runs once on creation and then only every minute, so specs that depend on rule executions request them through the `_run` API:
 
-- `ruleEvents.waitForAtLeast` and `ruleExecutions.waitForRuns` call `rules.run` on every poll whose condition is not met yet.
-- Inline `expect.poll` blocks that wait for rule-produced state call `apiServices.alertingV2.rules.run(rule.id)` at the start of each iteration.
+- `ruleRunner.waitForEvents` and `ruleRunner.waitForExecutions` call `rules.run` on every poll whose condition is not met yet.
+- For other conditions, wrap the read in `ruleRunner.runThen(rule.id, read)` and pass it to `expect.poll`; every poll requests a run before reading.
+- `ruleEvents` and `ruleExecutorTask` only read; they never trigger runs.
 - `rules.run` resolves with the HTTP status. 409 (a run is already in flight) is expected while polling.
 
 Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatcher and execution-history suites, do not need `_run`.

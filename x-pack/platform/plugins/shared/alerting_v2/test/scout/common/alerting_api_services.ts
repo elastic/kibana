@@ -19,7 +19,8 @@ import {
   getDispatcherApiService,
   getMaintenanceWindowsApiService,
   getRuleChangesHistoryApiService,
-  getRuleExecutionsApiService,
+  getRuleExecutorTaskApiService,
+  getRuleRunnerApiService,
   getRulesApiService,
   getRuleSavedObjectService,
   getRuleTemplatesApiService,
@@ -33,7 +34,8 @@ import {
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
   type RuleChangesHistoryApiService,
-  type RuleExecutionsApiService,
+  type RuleExecutorTaskApiService,
+  type RuleRunnerApiService,
   type RulesApiService,
   type RuleSavedObjectService,
   type RuleEventsApiService,
@@ -57,7 +59,8 @@ export interface AlertingApiServices {
   actionPolicies: ActionPoliciesApiService;
   maintenanceWindows: MaintenanceWindowsApiService;
   sourceIndex: SourceIndexApiService;
-  ruleExecutions: RuleExecutionsApiService;
+  ruleExecutorTask: RuleExecutorTaskApiService;
+  ruleRunner: RuleRunnerApiService;
   dispatcher: DispatcherApiService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
@@ -88,12 +91,14 @@ export const buildAlertingApiServices = ({
 }): AlertingApiServices => {
   const taskManager = getTaskManagerService({ kbnClient, log });
   const rules = getRulesApiService({ kbnClient, log });
+  const ruleEvents = getRuleEventsApiService({ esClient, log });
+  const ruleExecutorTask = getRuleExecutorTaskApiService({ esClient, log });
   return {
     rules,
     ruleSavedObject: getRuleSavedObjectService({ esClient, log, config }),
     ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
-    ruleEvents: getRuleEventsApiService({ esClient, log, runRule: rules.run }),
+    ruleEvents,
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
     actionPolicies: getActionPoliciesApiService({
@@ -103,7 +108,8 @@ export const buildAlertingApiServices = ({
     }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
-    ruleExecutions: getRuleExecutionsApiService({ esClient, log, runRule: rules.run }),
+    ruleExecutorTask,
+    ruleRunner: getRuleRunnerApiService({ log, runRule: rules.run, ruleEvents, ruleExecutorTask }),
     dispatcher: getDispatcherApiService({ esClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),

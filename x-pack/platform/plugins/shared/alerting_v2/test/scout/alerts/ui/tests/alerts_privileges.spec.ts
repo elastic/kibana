@@ -81,7 +81,7 @@ test.describe(
         })
       );
       ruleId = rule.id;
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
         episodeStatus: 'active',
       });
     });
