@@ -7,6 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { EndpointError } from '../../../../../common/endpoint/errors';
+
 const MAX_AMBIGUOUS_NAME_CANDIDATES = 10;
 
 export const POLICY_ERROR_MESSAGES = {
@@ -32,14 +34,14 @@ export type PolicyWriteIdentity = Readonly<{
   version: string;
 }>;
 
-export class PolicyNotFoundError extends Error {
+export class PolicyNotFoundError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.not_found);
     this.name = 'PolicyNotFoundError';
   }
 }
 
-export class PolicyAmbiguousNameError extends Error {
+export class PolicyAmbiguousNameError extends EndpointError {
   public readonly candidates: ReadonlyArray<Readonly<{ id: string; name: string }>>;
   public readonly candidatesTruncated: boolean;
   public readonly candidatesTotal: number;
@@ -60,54 +62,62 @@ export class PolicyAmbiguousNameError extends Error {
   }
 }
 
-export class InvalidEndpointPolicyError extends Error {
+export class InvalidEndpointPolicyError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.invalid_policy);
     this.name = 'InvalidEndpointPolicyError';
   }
 }
 
-export class PolicyBaselineUnavailableError extends Error {
+export class PolicyBaselineUnavailableError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.baseline_unavailable);
     this.name = 'PolicyBaselineUnavailableError';
   }
 }
 
-export class PolicyVersionConflictError extends Error {
+export class PolicyVersionConflictError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.version_conflict);
     this.name = 'PolicyVersionConflictError';
   }
 }
 
-export class PolicyBlockedChangeError extends Error {
+export class PolicyBlockedChangeError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.blocked_change);
     this.name = 'PolicyBlockedChangeError';
   }
 }
 
-export class PolicyNoChangeError extends Error {
+export class PolicyNoChangeError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.no_change);
     this.name = 'PolicyNoChangeError';
   }
 }
 
-export class PolicyWriteRejectedError extends Error {
+export class PolicyWriteRejectedError extends EndpointError {
   constructor() {
     super(POLICY_ERROR_MESSAGES.write_rejected);
     this.name = 'PolicyWriteRejectedError';
   }
 }
 
-export class PolicyWriteUnverifiedError extends Error {
+export class PolicyWriteUnverifiedError extends EndpointError {
   public readonly before: PolicyWriteIdentity;
   public readonly observed?: PolicyWriteIdentity;
 
   constructor(before: PolicyWriteIdentity, observed?: PolicyWriteIdentity, cause?: unknown) {
-    super(POLICY_ERROR_MESSAGES.write_unverified, cause !== undefined ? { cause } : undefined);
+    super(POLICY_ERROR_MESSAGES.write_unverified);
+    if (cause !== undefined) {
+      Object.defineProperty(this, 'cause', {
+        configurable: true,
+        enumerable: false,
+        value: cause,
+        writable: true,
+      });
+    }
     this.name = 'PolicyWriteUnverifiedError';
     this.before = before;
     if (observed !== undefined) {
