@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
+import { WatchlistFilter } from './watchlist_filter';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
 import type { EntityRiskLevels } from '../../../../common/api/entity_analytics/common';
@@ -253,7 +254,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
       </FilterEntry>
 
       <FilterEntry>
-        <MultiselectFilter<string>
+        <WatchlistFilter
           title={FILTER_TITLES.watchlist}
           items={watchlistOptions.map((o) => o.id)}
           selectedItems={filters.watchlists}
@@ -263,7 +264,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
             return <ItemWithCount count={opt?.count ?? 0}>{opt?.name ?? id}</ItemWithCount>;
           }}
           disabled={isFiltersCountLoading}
-          width={220}
+          spaceId={spaceId}
         />
       </FilterEntry>
     </EuiFlexGroup>
