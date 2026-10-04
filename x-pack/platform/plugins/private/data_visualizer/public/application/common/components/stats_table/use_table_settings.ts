@@ -21,14 +21,15 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 interface UseTableSettingsReturnValue<T extends object> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
-  sorting: { sort: PropertySort };
+  sorting?: { sort: PropertySort; readOnly?: boolean };
 }
 
 export function useTableSettings<TypeOfItem extends object>(
   items: TypeOfItem[],
   pageState: DataVisualizerTableState,
   updatePageState: (update: DataVisualizerTableState) => void,
-  isEsql: boolean = false
+  isEsql: boolean = false,
+  isInteractive: boolean
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
@@ -38,12 +39,14 @@ export function useTableSettings<TypeOfItem extends object>(
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,
         pageSize: page?.size ?? pageState.pageSize,
-        sortField: (sort?.field as string) ?? pageState.sortField,
-        sortDirection: sort?.direction ?? pageState.sortDirection,
+        ...(isInteractive && {
+          sortField: (sort?.field as string) ?? pageState.sortField,
+          sortDirection: sort?.direction ?? pageState.sortDirection,
+        }),
       };
       updatePageState(result);
     },
-    [pageState, updatePageState]
+    [pageState, updatePageState, isInteractive]
   );
 
   const pagination = useMemo(
@@ -51,9 +54,9 @@ export function useTableSettings<TypeOfItem extends object>(
       pageIndex,
       pageSize,
       totalItemCount: items.length,
-      pageSizeOptions: isEsql ? [10, 25] : PAGE_SIZE_OPTIONS,
+      ...(isInteractive && { pageSizeOptions: isEsql ? [10, 25] : PAGE_SIZE_OPTIONS }),
     }),
-    [items, pageIndex, pageSize, isEsql]
+    [items, pageIndex, pageSize, isEsql, isInteractive]
   );
 
   const sorting = useMemo(
@@ -62,8 +65,9 @@ export function useTableSettings<TypeOfItem extends object>(
         field: sortField as string,
         direction: sortDirection as Direction,
       },
+      ...(!isInteractive && { readOnly: true }),
     }),
-    [sortField, sortDirection]
+    [sortField, sortDirection, isInteractive]
   );
 
   return { onTableChange, pagination, sorting };

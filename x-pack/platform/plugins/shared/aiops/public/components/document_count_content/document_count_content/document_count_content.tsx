@@ -18,6 +18,7 @@ import { DocumentCountChartRedux } from '@kbn/aiops-components';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import { useIsInteractive } from '../../../hooks/use_is_interactive';
 
 import { TotalCountHeader } from '../total_count_header';
 
@@ -32,12 +33,14 @@ export interface DocumentCountContentProps {
   baselineAnnotationStyle?: RectAnnotationSpec['style'];
   deviationAnnotationStyle?: RectAnnotationSpec['style'];
   attachmentsMenu?: React.ReactNode;
+  parentApi?: unknown;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   attachmentsMenu,
+  parentApi,
   ...docCountChartProps
 }) => {
   const { data, uiSettings, fieldFormats, charts, embeddingOrigin } = useAiopsAppContext();
@@ -46,6 +49,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
   const isCasesEmbedding = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+  const isInteractive = useIsInteractive(parentApi);
+  const nonInteractive = isCasesEmbedding || !isInteractive;
 
   const isEmbeddedInDashboardOrCases =
     embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD || isCasesEmbedding;
@@ -63,7 +68,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
         barColorOverride={barColorOverride}
         barHighlightColorOverride={barHighlightColorOverride}
         changePoint={documentCountStats.changePoint}
-        nonInteractive={isCasesEmbedding}
+        nonInteractive={nonInteractive}
         {...docCountChartProps}
       />
     );
@@ -85,6 +90,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           changePoint={documentCountStats.changePoint}
+          nonInteractive={nonInteractive}
           {...docCountChartProps}
         />
       </EuiFlexItem>

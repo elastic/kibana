@@ -32,7 +32,15 @@ import { OverviewCardView } from './overview_cards_view/overview_card_view';
 import { OverviewTableColumnSelector } from './compact_view/components/overview_table_column_selector';
 
 export const OverviewGrid = memo(
-  ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
+  ({
+    view,
+    isEmbeddable,
+    isInteractive = true,
+  }: {
+    view: OverviewView;
+    isEmbeddable?: boolean;
+    isInteractive?: boolean;
+  }) => {
     const dispatch = useDispatch();
 
     const { status, loaded: isInitialized, loading, total } = useOverviewStatusState();
@@ -56,7 +64,7 @@ export const OverviewGrid = memo(
 
     // Display no monitors found when down, up, or disabled filter produces no results
     if (status && !monitorsSortedByStatus.length && isInitialized) {
-      return <NoMonitorsFound />;
+      return <NoMonitorsFound isInteractive={isInteractive} />;
     }
 
     return (
@@ -76,35 +84,39 @@ export const OverviewGrid = memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ShowLastRunToggle />
-          </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <ShowAllSpaces />
-          </EuiFlexItem>
+          {isInteractive && (
+            <>
+              <EuiFlexItem grow={false}>
+                <ShowLastRunToggle />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ShowAllSpaces />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SortFields />
+              </EuiFlexItem>
+              {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
+              <EuiFlexItem grow={false}>
+                <GroupFields />
+              </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
-          </EuiFlexItem>
+              {!isEmbeddable ? (
+                <EuiFlexItem grow={false}>
+                  <ViewButtons />
+                </EuiFlexItem>
+              ) : null}
 
-          <EuiFlexItem grow={false}>
-            <SortFields />
-          </EuiFlexItem>
-          {view === 'compactView' ? <OverviewTableColumnSelector /> : null}
-          <EuiFlexItem grow={false}>
-            <GroupFields />
-          </EuiFlexItem>
-          {!isEmbeddable ? (
-            <EuiFlexItem grow={false}>
-              <ViewButtons />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <AutodiscoveredMonitorsTour>
-              <DisplayOptionsPopover />
-            </AutodiscoveredMonitorsTour>
-          </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AutodiscoveredMonitorsTour>
+                  <DisplayOptionsPopover />
+                </AutodiscoveredMonitorsTour>
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGroup>
         {/*
           Card view has no built-in refresh indicator, so we surface a thin
@@ -130,9 +142,13 @@ export const OverviewGrid = memo(
             monitorsSortedByStatus={monitorsSortedByStatus}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             loaded={isInitialized}
+            isInteractive={isInteractive}
           />
         ) : view === 'compactView' ? (
-          <OverviewGridCompactView setFlyoutConfigCallback={setFlyoutConfigCallback} />
+          <OverviewGridCompactView
+            setFlyoutConfigCallback={setFlyoutConfigCallback}
+            isInteractive={isInteractive}
+          />
         ) : null}
         <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
       </>

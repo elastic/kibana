@@ -217,7 +217,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         const editorContent =
-          viewMode === 'view' || !isEditing ? (
+          viewMode !== 'edit' || !isEditing ? (
             <MarkdownRenderer
               parsingPluginList={parsingPluginList}
               processingPluginList={processingPluginList}

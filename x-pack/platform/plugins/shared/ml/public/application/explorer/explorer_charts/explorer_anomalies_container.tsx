@@ -41,6 +41,7 @@ interface ExplorerAnomaliesContainerProps {
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;
   showFilterIcons: boolean;
+  isInteractive?: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -66,14 +67,17 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   chartsService,
   timeRange,
   showFilterIcons,
+  isInteractive = true,
 }) => {
   return (
     <div>
-      <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
-        <EuiFlexItem grow={false}>
-          <SelectSeverityUI severity={severity} onChange={setSeverity} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isInteractive && (
+        <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
+          <EuiFlexItem grow={false}>
+            <SelectSeverityUI severity={severity} onChange={setSeverity} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiSpacer size="m" />
       {Array.isArray(chartsData.seriesToPlot) &&
         chartsData.seriesToPlot.length === 0 &&
@@ -92,6 +96,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
           {...{
             ...chartsData,
             isEmbeddable: true,
+            isInteractive,
             severity,
             mlLocator,
             tableData,

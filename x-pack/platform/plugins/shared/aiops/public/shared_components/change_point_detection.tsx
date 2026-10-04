@@ -65,6 +65,7 @@ export interface ChangePointDetectionProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
@@ -86,6 +87,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   embeddingOrigin,
   lastReloadRequestTime,
   filtersApi,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
@@ -163,6 +165,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
+                    parentApi={parentApi}
                   />
                 </ChangePointDetectionControlsContextProvider>
               </FilterQueryContextProvider>

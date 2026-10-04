@@ -14,6 +14,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
+  apiHasDisableTriggers,
   initializeStateApi,
   initializeTitleManager,
   titleComparators,
@@ -114,6 +115,9 @@ export const getImageEmbeddableFactory = () => {
         ...embeddableApi,
         imageConfig$,
         setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
+        disableTriggers$: apiHasDisableTriggers(parentApi)
+          ? parentApi.disableTriggers$
+          : new BehaviorSubject<boolean>(false),
       };
 
       return {

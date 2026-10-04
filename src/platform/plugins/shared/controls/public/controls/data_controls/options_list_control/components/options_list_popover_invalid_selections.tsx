@@ -37,7 +37,7 @@ const optionsListPopoverInvalidSelectionsStyles = {
 };
 
 export const OptionsListPopoverInvalidSelections = () => {
-  const { componentApi, customStrings } = useOptionsListContext();
+  const { componentApi, customStrings, displaySettings } = useOptionsListContext();
   const styles = useMemoCss(optionsListPopoverInvalidSelectionsStyles);
 
   const conditionalApiSubjects: [
@@ -80,10 +80,11 @@ export const OptionsListPopoverInvalidSelections = () => {
             </div>
           </EuiScreenReaderOnly>
         ),
+        disabled: !(displaySettings.isInteractive ?? true),
       };
     });
     setSelectableOptions(options);
-  }, [fieldFormatter, invalidSelections, customStrings]);
+  }, [fieldFormatter, invalidSelections, customStrings, displaySettings]);
 
   return (
     <>

@@ -37,6 +37,7 @@ export const regionMapRenderer = {
       query,
       timeRange,
       visConfig,
+      interactive: handlers.isInteractive(),
     };
 
     render(

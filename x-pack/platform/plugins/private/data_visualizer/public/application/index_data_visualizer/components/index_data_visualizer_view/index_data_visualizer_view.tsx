@@ -252,13 +252,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
     progress,
     extendedColumns,
     overallStatsProgress,
-  } = useDataVisualizerGridData(
+  } = useDataVisualizerGridData({
     input,
     dataVisualizerListState,
     savedRandomSamplerPreference,
-    setGlobalState,
-    resolvedProjectRouting
-  );
+    onUpdate: setGlobalState,
+    projectRouting: resolvedProjectRouting,
+  });
 
   useEffect(
     () => {

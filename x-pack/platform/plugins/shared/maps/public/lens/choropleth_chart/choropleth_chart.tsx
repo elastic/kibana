@@ -30,6 +30,7 @@ interface Props extends ChoroplethChartProps {
   uiSettings: IUiSettingsClient;
   emsFileLayers: FileLayer[];
   onRenderComplete: () => void;
+  interactive?: boolean;
 }
 
 export function ChoroplethChart({
@@ -39,6 +40,7 @@ export function ChoroplethChart({
   uiSettings,
   emsFileLayers,
   onRenderComplete,
+  interactive = true,
 }: Props) {
   if (!args.regionAccessor || !args.valueAccessor) {
     return null;
@@ -127,7 +129,13 @@ export function ChoroplethChart({
     type: LAYER_TYPE.GEOJSON_VECTOR,
   } as LayerDescriptor;
 
-  return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
+  return (
+    <PassiveMap
+      passiveLayer={choroplethLayer}
+      onRenderComplete={onRenderComplete}
+      interactive={interactive}
+    />
+  );
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {

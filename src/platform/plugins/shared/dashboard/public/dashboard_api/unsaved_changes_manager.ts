@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, of, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  of,
+  type Observable,
+} from 'rxjs';
 
 import type {
   HasLastSavedChildState,
@@ -82,7 +90,10 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
-    .pipe(debounceTime(DEBOUNCE_TIME))
+    .pipe(
+      debounceTime(DEBOUNCE_TIME),
+      filter(([viewMode]) => viewMode !== 'non-interactive') // don't track unsaved changes in non-interactive mode
+    )
     .subscribe(([viewMode, dashboardChanges]) => {
       const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 

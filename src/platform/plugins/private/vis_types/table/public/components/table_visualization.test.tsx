@@ -36,6 +36,7 @@ describe('TableVisualizationComponent', () => {
     done: jest.fn(),
     uiState: 'uiState',
     event: 'event',
+    isInteractive: jest.fn(),
   } as unknown as IInterpreterRenderHandlers;
   const visData: TableVisData = {
     table: {
@@ -60,6 +61,24 @@ describe('TableVisualizationComponent', () => {
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);
     expect(comp.find('.tbvChart__splitColumns').exists()).toBeFalsy();
+  });
+
+  it('should pass isInteractive=false to TableVisBasic when handlers.isInteractive() returns false', () => {
+    const nonInteractiveHandlers = {
+      ...handlers,
+      isInteractive: jest.fn().mockReturnValue(false),
+    } as unknown as IInterpreterRenderHandlers;
+    const comp = shallow(
+      <TableVisualizationComponent
+        core={coreStartMock}
+        handlers={nonInteractiveHandlers}
+        visData={visData}
+        visConfig={visConfig}
+        renderComplete={renderComplete}
+      />
+    );
+    expect(nonInteractiveHandlers.isInteractive).toHaveBeenCalled();
+    expect(comp.find('[data-test-subj="tbvChart"]').children().prop('isInteractive')).toBe(false);
   });
 
   it('should render split table', () => {

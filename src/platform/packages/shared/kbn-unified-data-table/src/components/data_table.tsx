@@ -261,9 +261,21 @@ interface InternalUnifiedDataTableProps {
    */
   showKeyboardShortcuts?: boolean;
   /**
+   * Determines whether the display options button should be displayed
+   */
+  showDisplaySelector?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
+  /**
+   * Determines whether the columns can be resized or not
+   */
+  isResizable?: boolean;
+  /**
+   * Manage column selector control
+   */
+  isColumnSelectorEnabled?: boolean;
   /**
    * Only for ES|QL mode for now.
    * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
@@ -461,6 +473,17 @@ interface InternalUnifiedDataTableProps {
    */
   disableCellActions?: boolean;
   /**
+   * Disable column actions for the table.
+   */
+  disableColumnActions?: boolean;
+  /**
+   * Whether the table is rendered in an interactive context. When `false`, cell value rendering
+   * suppresses live, user-navigable content (e.g. links from a URL field formatter), in addition
+   * to the cell/column actions already gated by `disableCellActions`/`disableColumnActions`.
+   * Defaults to `true`.
+   */
+  isInteractive?: boolean;
+  /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
   externalCustomRenderers?: CustomCellRenderer;
@@ -592,8 +615,11 @@ const InternalUnifiedDataTable = React.forwardRef<
       showTimeCol,
       showKeyboardShortcuts = true,
       showFullScreenButton = true,
+      showDisplaySelector: showDisplaySelectorProp = true,
       sort,
       isSortEnabled = true,
+      isResizable = true,
+      isColumnSelectorEnabled = true,
       isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
@@ -644,6 +670,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdatePageIndex,
       disableCellActions = false,
       disableCellPopover = false,
+      disableColumnActions = false,
+      isInteractive = true,
       customBulkActions,
       hideDefaultBulkActions,
       shouldKeepAdHocDataViewImmutable,
@@ -995,6 +1023,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           documentsDisplayMode,
           jsonModeSettings,
           selectedColumns: columns,
+          isInteractive,
         }),
       [
         dataView,
@@ -1009,6 +1038,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         documentsDisplayMode,
         jsonModeSettings,
         columns,
+        isInteractive,
       ]
     );
 
@@ -1200,6 +1230,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataView,
           isSummaryOnlyColumn,
           isSortEnabled,
+          isResizable,
           isPlainRecord,
           services: {
             uiSettings,
@@ -1218,6 +1249,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onResize,
           sortedColumns,
           disableCellActions,
+          disableColumnActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
           documentsDisplayMode,
@@ -1235,6 +1267,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         headerRowHeightLines,
         isPlainRecord,
         isSortEnabled,
+        isResizable,
         onFilter,
         onResize,
         settings,
@@ -1246,6 +1279,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        disableColumnActions,
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
       ]
@@ -1431,10 +1465,11 @@ const InternalUnifiedDataTable = React.forwardRef<
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
       | undefined => {
       if (
-        !onUpdateDataGridDensity &&
-        !onUpdateRowHeight &&
-        !onUpdateHeaderRowHeight &&
-        !onUpdateSampleSize
+        !showDisplaySelectorProp ||
+        (!onUpdateDataGridDensity &&
+          !onUpdateRowHeight &&
+          !onUpdateHeaderRowHeight &&
+          !onUpdateSampleSize)
       ) {
         return;
       }
@@ -1468,6 +1503,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         ),
       };
     }, [
+      showDisplaySelectorProp,
       headerRowHeight,
       maxAllowedSampleSize,
       onChangeHeaderRowHeight,
@@ -1493,7 +1529,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       () => ({
         ...toolbarVisibilityDefaults,
         showSortSelector: isSortEnabled && !isJsonSourceMode,
-        showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
+        showColumnSelector: isJsonSourceMode
+          ? false
+          : isColumnSelectorEnabled && toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
@@ -1502,6 +1540,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       [
         isJsonSourceMode,
         isSortEnabled,
+        isColumnSelectorEnabled,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,

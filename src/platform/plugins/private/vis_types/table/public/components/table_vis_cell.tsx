@@ -14,12 +14,17 @@ import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FormattedColumns } from '../types';
 
 export const createTableVisCell =
-  (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent?: boolean) =>
+  (
+    rows: DatatableRow[],
+    formattedColumns: FormattedColumns,
+    autoFitRowToContent?: boolean,
+    isInteractive = true
+  ) =>
   ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
     // incoming data might change and put the current page out of bounds - check whether row actually exists
     const rowValue = rows[rowIndex]?.[columnId];
     const column = formattedColumns[columnId];
-    const content = column?.formatter.convertToReact(rowValue);
+    const content = column?.formatter.convertToReact(rowValue, { isInteractive });
 
     const cellContent = (
       <div

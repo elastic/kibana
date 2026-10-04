@@ -83,10 +83,12 @@ const UnGroupedCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
+  isInteractive = true,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
+  isInteractive?: boolean;
 }) => {
   const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends);
@@ -257,7 +259,11 @@ const UnGroupedCardView = ({
                                 data-test-subj="syntheticsOverviewGridItem"
                                 key={listIndex * rowCount + idx}
                               >
-                                <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+                                <MetricItem
+                                  monitor={monitor}
+                                  onClick={setFlyoutConfigCallback}
+                                  isInteractive={isInteractive}
+                                />
                               </EuiFlexItem>
                             ))}
                             {row.length % rowCount !== 0 &&
@@ -287,10 +293,12 @@ export const OverviewCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
+  isInteractive = true,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
+  isInteractive?: boolean;
 }) => {
   const { field: groupField } = useSelector(selectOverviewGroupBy);
   const view = useSelector(selectOverviewView);
@@ -302,13 +310,18 @@ export const OverviewCardView = ({
         monitorsSortedByStatus={monitorsSortedByStatus}
         setFlyoutConfigCallback={setFlyoutConfigCallback}
         loaded={loaded}
+        isInteractive={isInteractive}
       />
     );
   }
 
   return (
     <>
-      <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view={view} />
+      <GridItemsByGroup
+        setFlyoutConfigCallback={setFlyoutConfigCallback}
+        view={view}
+        isInteractive={isInteractive}
+      />
       <EuiSpacer size="m" />
     </>
   );

@@ -12,7 +12,7 @@ import { useUrlParams } from '../../../hooks';
 import { getClearedMonitorFilterParams } from '../../../utils/filters/clear_monitor_filter_params';
 import { notifyMonitorFiltersCleared } from './monitor_filters/monitor_filters_cleared';
 
-export function NoMonitorsFound() {
+export function NoMonitorsFound({ isInteractive = true }: { isInteractive?: boolean }) {
   return (
     <EuiEmptyPrompt
       iconType="magnify"
@@ -21,7 +21,7 @@ export function NoMonitorsFound() {
       titleSize="s"
       body={
         <EuiText size="s">
-          {NO_MONITORS_FOUND_CONTENT} <ClearFilters />
+          {NO_MONITORS_FOUND_CONTENT} {isInteractive && <ClearFilters />}
         </EuiText>
       }
     />

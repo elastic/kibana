@@ -142,7 +142,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props.data]);
 
   const firstTableRef = useRef(firstLocalTable);
-
   useEffect(() => {
     if (!pagination?.pageIndex && !pagination?.pageSize) return;
     const lastPageIndex = firstLocalTable.rows.length
@@ -350,7 +349,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         headerRowLines,
         columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
-        props.columnFilterable
+        props.columnFilterable,
+        isInteractive
       ),
     [
       bucketedColumns,
@@ -367,6 +367,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowLines,
       columnCellValueActions,
       props.columnFilterable,
+      isInteractive,
     ]
   );
 
@@ -513,6 +514,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       isDarkMode,
       getCellColor,
       props.paletteService,
+      isInteractive,
       props.args.fitRowToContent,
       props.args.density
     );
@@ -520,6 +522,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     formatters,
     columnConfig,
     isDarkMode,
+    isInteractive,
     props.args.fitRowToContent,
     props.args.density,
     props.paletteService,
@@ -679,7 +682,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
-          sorting={sorting}
+          sorting={isInteractive ? sorting : undefined}
           pagination={
             pagination && {
               ...pagination,
