@@ -7,17 +7,17 @@
 
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
-import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
   importRulesWithSuccess,
-  installFleetPackageByUpload,
+  installFleetPackage,
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
+  MOCK_PKG_VERSION,
   PREBUILT_RULE_ASSET_A,
   PREBUILT_RULE_ASSET_B,
   PREBUILT_RULE_ID_A,
@@ -137,29 +137,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('imports prebuilt rules on top of existing rules', async () => {
-      // Package installation is rate limited. A single package installation is allowed per 10 seconds.
-      await retryService.tryWithRetries(
-        'installSecurityDetectionEnginePackage',
-        async () => {
-          const securityDetectionEnginePackageBuffer = await generatePrebuiltRulesPackageBuffer({
-            packageName: PREBUILT_RULES_PACKAGE_NAME,
-            // Use a high version to avoid conflicts with real packages
-            // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
-            packageSemver: '99.0.0',
-            prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-          });
-
-          await installFleetPackageByUpload({
-            getService,
-            packageBuffer: securityDetectionEnginePackageBuffer,
-          });
-        },
-        {
-          retryCount: 5,
-          retryDelay: 5000,
-          timeout: 15000, // total timeout applied to all attempts altogether
-        }
-      );
+      // The bundled mock package carries these very assets, so installing it avoids uploading an identical one via Fleet's rate limited `install_by_upload` API.
+      await installFleetPackage({
+        getService,
+        packageName: PREBUILT_RULES_PACKAGE_NAME,
+        packageVersion: MOCK_PKG_VERSION,
+      });
       await installPrebuiltRules(es, supertest);
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
 
