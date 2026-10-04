@@ -1,0 +1,1332 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`entities grid query builders enrich queries enrichAlerts builds its query from the page rows 1`] = `
+Array [
+  "FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | WHERE \`kibana.alert.entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL AND (user.name IN (\\"alice\\", \\"bob\\") OR host.id IN (\\"h-1\\") OR user.email IN (\\"bob@corp.com\\") OR host.name IN (\\"web-1\\", \\"web-2\\") OR service.name IN (\\"payments\\")) AND (((host.id == \\"h-1\\")) OR ((host.name == \\"web-2\\") AND (TO_STRING(host.id) IS NULL OR TO_STRING(host.id) == \\"\\")) OR ((user.name == \\"alice\\") AND (host.id == \\"h-1\\") AND (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")))) OR ((user.email == \\"bob@corp.com\\") AND ((TO_STRING(event.module) IS NULL OR TO_STRING(event.module) == \\"\\") AND (TO_STRING(data_stream.dataset) IS NULL OR TO_STRING(data_stream.dataset) == \\"\\"))) OR (service.name == \\"payments\\"))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+| STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`",
+]
+`;
+
+exports[`entities grid query builders enrich queries enrichAnomalyCount builds its query from the page rows 1`] = `
+Array [
+  "SET unmapped_fields=\\"nullify\\";
+FROM .ml-anomalies-*
+| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+ _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
+| WHERE \`entity.id\` IS NOT NULL
+| WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+| STATS anomaly_count = COUNT(*) BY \`entity.id\`",
+]
+`;
+
+exports[`entities grid query builders enrich queries enrichCaseCounts builds its query from the page rows 1`] = `Array []`;
+
+exports[`entities grid query builders enrich queries enrichGroupSize builds its query from the page rows 1`] = `
+Array [
+  "FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR entity.id IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
+| WHERE group_key IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+| STATS group_size = COUNT(*) BY group_key",
+]
+`;
+
+exports[`entities grid query builders enrich queries enrichRiskScoreChange builds its query from the page rows 1`] = `
+Array [
+  "FROM risk-score.risk-score-default
+| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE host.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR user.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR service.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+| WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
+| EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
+| WHERE entity_id IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+| STATS reference_score = LAST(score, \`@timestamp\`) BY entity_id",
+]
+`;
+
+exports[`entities grid query builders sort by @timestamp builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by @timestamp builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| WHERE (@timestamp < 42) OR (@timestamp == 42 AND entity.id > \\"host:h-1\\") OR @timestamp IS NULL
+| SORT @timestamp ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by @timestamp builds the sort and count queries: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by @timestamp builds the sort and count queries: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace
+| SORT @timestamp DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by alert_count builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS alert_count = COUNT(*) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP \`entity.id\`
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by alert_count builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM (
+FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS alert_count = COUNT(*) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name, alert_count
+| WHERE (alert_count < 42) OR (alert_count == 42 AND entity.id > \\"host:h-1\\") OR alert_count IS NULL
+)
+| SORT alert_count ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by alert_count builds the sort and count queries: count 1`] = `
+"FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS alert_count = COUNT(*) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP \`entity.id\`
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by alert_count builds the sort and count queries: sort 1`] = `
+"FROM (
+FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS alert_count = COUNT(*) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, alert_count
+)
+| SORT alert_count DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by anomaly_count builds the sort and count queries with filters and a cursor: count 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM .ml-anomalies-*
+| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+ _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
+| WHERE \`entity.id\` IS NOT NULL
+| STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP \`entity.id\`
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by anomaly_count builds the sort and count queries with filters and a cursor: sort 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM (
+FROM .ml-anomalies-*
+| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+ _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
+| WHERE \`entity.id\` IS NOT NULL
+| STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name, anomaly_count
+| WHERE (anomaly_count < 42) OR (anomaly_count == 42 AND entity.id > \\"host:h-1\\") OR anomaly_count IS NULL
+)
+| SORT anomaly_count ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by anomaly_count builds the sort and count queries: count 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM .ml-anomalies-*
+| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+ _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
+| WHERE \`entity.id\` IS NOT NULL
+| STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP \`entity.id\`
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by anomaly_count builds the sort and count queries: sort 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM (
+FROM .ml-anomalies-*
+| WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+ _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+| EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
+| WHERE \`entity.id\` IS NOT NULL
+| STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, anomaly_count
+)
+| SORT anomaly_count DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by asset.criticality builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by asset.criticality builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| WHERE (asset.criticality < 42) OR (asset.criticality == 42 AND entity.id > \\"host:h-1\\") OR asset.criticality IS NULL
+| SORT asset.criticality ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by asset.criticality builds the sort and count queries: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by asset.criticality builds the sort and count queries: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace
+| SORT asset.criticality DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| WHERE (entity.EngineMetadata.Type < 42) OR (entity.EngineMetadata.Type == 42 AND entity.id > \\"host:h-1\\") OR entity.EngineMetadata.Type IS NULL
+| SORT entity.EngineMetadata.Type ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort and count queries: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort and count queries: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace
+| SORT entity.EngineMetadata.Type DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| WHERE (entity.lifecycle.first_seen < 42) OR (entity.lifecycle.first_seen == 42 AND entity.id > \\"host:h-1\\") OR entity.lifecycle.first_seen IS NULL
+| SORT entity.lifecycle.first_seen ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort and count queries: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort and count queries: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace
+| SORT entity.lifecycle.first_seen DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.name builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.name builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| WHERE (entity.name < 42) OR (entity.name == 42 AND entity.id > \\"host:h-1\\") OR entity.name IS NULL
+| SORT entity.name ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.name builds the sort and count queries: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.name builds the sort and count queries: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace
+| SORT entity.name DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") AND asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| WHERE (entity.risk.calculated_score_norm < 42) OR (entity.risk.calculated_score_norm == 42 AND entity.id > \\"host:h-1\\") OR entity.risk.calculated_score_norm IS NULL
+| SORT entity.risk.calculated_score_norm ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort and count queries: count 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort and count queries: sort 1`] = `
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace
+| SORT entity.risk.calculated_score_norm DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by group_size builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM (
+FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
+| STATS _c = COUNT(*) BY group_key
+| RENAME group_key AS \`entity.id\`
+)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by group_size builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM (
+FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
+| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
+| STATS group_size = COUNT(*) BY group_key
+| RENAME group_key AS \`entity.id\`
+)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name, group_size
+| WHERE (group_size < 42) OR (group_size == 42 AND entity.id > \\"host:h-1\\") OR group_size IS NULL
+| SORT group_size ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by group_size builds the sort and count queries: count 1`] = `
+"FROM (
+FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
+| STATS _c = COUNT(*) BY group_key
+| RENAME group_key AS \`entity.id\`
+)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by group_size builds the sort and count queries: sort 1`] = `
+"FROM (
+FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
+| STATS group_size = COUNT(*) BY group_key
+| RENAME group_key AS \`entity.id\`
+)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, group_size
+| SORT group_size DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP \`entity.id\`
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM (
+FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name, last_seen_alert
+| WHERE (last_seen_alert < 42) OR (last_seen_alert == 42 AND entity.id > \\"host:h-1\\") OR last_seen_alert IS NULL
+)
+| SORT last_seen_alert ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries: count 1`] = `
+"FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP \`entity.id\`
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries: sort 1`] = `
+"FROM (
+FROM .alerts-security.alerts-default
+| WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| FORK (
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+  (
+    WHERE \`kibana.alert.entity.id\` IS NULL
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+     _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+     _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
+     _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
+     entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_eval_entity_namespace_arm1, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == \\"aws\\", \\"aws\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"gcp\\", \\"gcp\\", MV_FIRST(TO_STRING(cloud.provider)) == \\"azure\\", \\"entra_id\\")), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+     user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+     host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+     user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+     user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+     user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+     user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+     user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+     _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+     _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+    TRUE, _euid_branch_1_formula, NULL))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+     host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+     host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+     host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+     host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+     host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+     host_euid = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
+    | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+     _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+     _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
+     _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+     entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
+    | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
+      COALESCE(user_euid, host_euid, service_euid),
+      COALESCE(host_euid, service_euid, user_euid)),
+      COALESCE(service_euid, user_euid, host_euid)))
+    | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
+  )
+| MV_EXPAND _ea_entity_id
+| WHERE _ea_entity_id IS NOT NULL
+| RENAME _ea_entity_id AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, last_seen_alert
+)
+| SORT last_seen_alert DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by risk_score_change builds the sort and count queries with filters and a cursor: count 1`] = `
+"FROM risk-score.risk-score-default
+| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
+| EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
+| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.risk.calculated_score_norm IS NOT NULL
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| EVAL risk_score_change = entity.risk.calculated_score_norm - reference_score
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name, risk_score_change
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by risk_score_change builds the sort and count queries with filters and a cursor: sort 1`] = `
+"FROM risk-score.risk-score-default
+| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
+| EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
+| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
+| WHERE \`entity.id\` IN (FROM entities-latest-default | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\") | KEEP \`entity.id\`)
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.risk.calculated_score_norm IS NOT NULL
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| EVAL risk_score_change = entity.risk.calculated_score_norm - reference_score
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, host.os.name, risk_score_change
+| WHERE (risk_score_change < 42) OR (risk_score_change == 42 AND entity.id > \\"host:h-1\\") OR risk_score_change IS NULL
+| SORT risk_score_change ASC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
+
+exports[`entities grid query builders sort by risk_score_change builds the sort and count queries: count 1`] = `
+"FROM risk-score.risk-score-default
+| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
+| EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
+| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.risk.calculated_score_norm IS NOT NULL
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| EVAL risk_score_change = entity.risk.calculated_score_norm - reference_score
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| STATS total = COUNT(*)"
+`;
+
+exports[`entities grid query builders sort by risk_score_change builds the sort and count queries: sort 1`] = `
+"FROM risk-score.risk-score-default
+| WHERE \`@timestamp\` <= NOW() - 7 day
+| WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
+| EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
+| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.risk.calculated_score_norm IS NOT NULL
+| WHERE entity.relationships.resolution.resolved_to IS NULL
+| EVAL risk_score_change = entity.risk.calculated_score_norm - reference_score
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| SORT risk_score_change DESC NULLS LAST, entity.id ASC
+| LIMIT 26"
+`;
