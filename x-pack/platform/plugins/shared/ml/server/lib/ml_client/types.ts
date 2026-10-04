@@ -43,7 +43,10 @@ export interface MlInferTrainedModelRequest extends estypes.MlInferTrainedModelR
 
 // @ts-expect-error TODO: fix after elasticsearch-js bump
 export interface MlClient
-  extends Omit<OrigMlClient, 'stopTrainedModelDeployment' | 'inferTrainedModel'> {
+  extends Omit<
+    OrigMlClient,
+    'stopTrainedModelDeployment' | 'inferTrainedModel' | 'previewDatafeed'
+  > {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
   updateTrainedModelDeployment: (
     payload: UpdateTrainedModelDeploymentRequest
@@ -60,6 +63,10 @@ export interface MlClient
     p: MlInferTrainedModelRequest,
     options?: TransportRequestOptionsWithMeta
   ) => Promise<estypes.MlInferTrainedModelResponse>;
+  previewDatafeed: <TDocument = unknown>(
+    payload?: estypes.MlPreviewDatafeedRequest,
+    options?: TransportRequestOptions
+  ) => Promise<estypes.MlPreviewDatafeedResponse<TDocument>>;
 }
 
 export type MlClientParams =
