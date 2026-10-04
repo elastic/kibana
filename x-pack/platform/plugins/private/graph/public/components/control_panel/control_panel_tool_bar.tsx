@@ -6,22 +6,36 @@
  */
 
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import type { ControlType, Workspace, WorkspaceField } from '../../types';
+import type { ControlType, WorkspaceField } from '../../types';
+import {
+  blocklistSelectedNodes,
+  deleteSelectedNodes,
+  expandSelectedNodes,
+  fillWorkspaceConnections,
+  redoWorkspace,
+  startWorkspaceLayout,
+  stopWorkspaceLayout,
+  type GraphDispatch,
+  undoWorkspace,
+  workspaceSelector,
+} from '../../state_management';
 
 interface ControlPanelToolBarProps {
-  workspace: Workspace;
   liveResponseFields: WorkspaceField[];
   onSetControl: (action: ControlType) => void;
 }
 
 export const ControlPanelToolBar = ({
-  workspace,
   onSetControl,
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
-  const haveNodes = workspace.nodes.length === 0;
+  const dispatch = useDispatch<GraphDispatch>();
+  const { isLayoutRunning, nodeIds, selectedNodeIds, undoHistory, redoHistory } =
+    useSelector(workspaceSelector);
+  const haveNodes = nodeIds.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
     defaultMessage: 'Undo',
@@ -66,35 +80,33 @@ export const ControlPanelToolBar = ({
     }
   );
 
-  const onUndoClick = () => workspace.undo();
-  const onRedoClick = () => workspace.redo();
+  const onUndoClick = () => dispatch(undoWorkspace());
+  const onRedoClick = () => dispatch(redoWorkspace());
   const onExpandButtonClick = () => {
     onSetControl('none');
-    workspace.expandSelecteds({ toFields: liveResponseFields });
+    dispatch(expandSelectedNodes(liveResponseFields));
   };
-  const onAddLinksClick = () => workspace.fillInGraph();
+  const onAddLinksClick = () => dispatch(fillWorkspaceConnections(undefined));
   const onRemoveVerticesClick = () => {
     onSetControl('none');
-    workspace.deleteSelection();
+    dispatch(deleteSelectedNodes());
   };
-  const onBlockListClick = () => workspace.blocklistSelection();
+  const onBlockListClick = () => dispatch(blocklistSelectedNodes());
   const onCustomStyleClick = () => onSetControl('style');
   const onDrillDownClick = () => onSetControl('drillDowns');
-  const onRunLayoutClick = () => workspace.runLayout();
-  const onPauseLayoutClick = () => {
-    workspace.stopLayout();
-    workspace.changeHandler();
-  };
+  const onRunLayoutClick = () => dispatch(startWorkspaceLayout());
+  const onPauseLayoutClick = () => dispatch(stopWorkspaceLayout());
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={undoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphUndo"
             iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
-            isDisabled={workspace.undoLog.length < 1}
+            isDisabled={undoHistory.length < 1}
             onClick={onUndoClick}
           />
         </EuiToolTip>
@@ -103,10 +115,11 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={redoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphRedo"
             iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
-            isDisabled={workspace.redoLog.length === 0}
+            isDisabled={redoHistory.length === 0}
             onClick={onRedoClick}
           />
         </EuiToolTip>
@@ -115,10 +128,11 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={expandButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphExpandSelection"
             iconType="plus"
             size="xs"
             aria-label={expandButtonMsg}
-            isDisabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
+            isDisabled={liveResponseFields.length === 0 || nodeIds.length === 0}
             onClick={onExpandButtonClick}
           />
         </EuiToolTip>
@@ -127,6 +141,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={addLinksButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphFillConnections"
             iconType="link"
             size="xs"
             aria-label={addLinksButtonMsg}
@@ -152,10 +167,11 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={blocklistButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphBlockSelection"
             iconType="eyeSlash"
             size="xs"
             aria-label={blocklistButtonMsg}
-            isDisabled={workspace.selectedNodes.length === 0}
+            isDisabled={selectedNodeIds.length === 0}
             onClick={onBlockListClick}
           />
         </EuiToolTip>
@@ -164,10 +180,11 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={customStyleButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphStyleSelection"
             iconType="brush"
             size="xs"
             aria-label={customStyleButtonMsg}
-            isDisabled={workspace.selectedNodes.length === 0}
+            isDisabled={selectedNodeIds.length === 0}
             onClick={onCustomStyleClick}
           />
         </EuiToolTip>
@@ -176,6 +193,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={drillDownButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="graphDrilldown"
             iconType="info"
             size="xs"
             aria-label={drillDownButtonMsg}
@@ -185,7 +203,7 @@ export const ControlPanelToolBar = ({
         </EuiToolTip>
       </EuiFlexItem>
 
-      {(workspace.nodes.length === 0 || workspace.force === null) && (
+      {(nodeIds.length === 0 || !isLayoutRunning) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={runLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -193,14 +211,14 @@ export const ControlPanelToolBar = ({
               iconType="play"
               size="xs"
               aria-label={runLayoutButtonMsg}
-              isDisabled={workspace.nodes.length === 0}
+              isDisabled={nodeIds.length === 0}
               onClick={onRunLayoutClick}
             />
           </EuiToolTip>
         </EuiFlexItem>
       )}
 
-      {workspace.force !== null && workspace.nodes.length > 0 && (
+      {isLayoutRunning && nodeIds.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={pauseLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon

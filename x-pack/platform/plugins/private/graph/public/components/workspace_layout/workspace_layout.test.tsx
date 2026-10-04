@@ -15,11 +15,12 @@ import type {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
-  Workspace,
+  RuntimeGraph,
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
-import { GraphVisualization } from '../graph_visualization';
+import { ReduxGraphVisualization as GraphVisualization } from '../graph_visualization';
+import { ControlPanel } from '../control_panel';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -32,7 +33,6 @@ jest.mock('react-router-dom', () => {
 
 describe('workspace_layout', () => {
   const defaultProps = {
-    renderCounter: 1,
     loading: false,
     savedWorkspace: { id: 'test' } as GraphWorkspaceSavedObject,
     hasFields: true,
@@ -56,8 +56,9 @@ describe('workspace_layout', () => {
         json: jest.fn(),
       }),
       reset: jest.fn(),
+      getRequests: jest.fn(() => []),
     } as unknown as RequestAdapter,
-    workspace: {} as unknown as Workspace,
+    runtimeGraph: {} as unknown as RuntimeGraph,
   };
   it('should display conflict notification if outcome is conflict', () => {
     shallow(
@@ -112,5 +113,23 @@ describe('workspace_layout', () => {
       />
     );
     expect(component.find(GraphVisualization).exists()).toBe(true);
+  });
+
+  it('rerenders the control panel when editor focus changes', () => {
+    const component = shallow(<WorkspaceLayoutComponent {...defaultProps} />);
+
+    component.find(ControlPanel).prop('selectSelected')('first-node');
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNodeId: 'first-node',
+    });
+
+    component.find(ControlPanel).prop('selectSelected')('second-node');
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNodeId: 'second-node',
+    });
   });
 });

@@ -67,6 +67,7 @@ describe('settings', () => {
           field: 'A',
           term: '1',
         },
+        id: 'blocklisted-node-1',
         label: 'blocklisted node 1',
         icon: {
           id: 'test',
@@ -85,6 +86,7 @@ describe('settings', () => {
           field: 'A',
           term: '1',
         },
+        id: 'blocklisted-node-2',
         label: 'blocklisted node 2',
         icon: {
           id: 'test',
@@ -101,6 +103,7 @@ describe('settings', () => {
 
   let subject: Rx.BehaviorSubject<jest.Mocked<SettingsWorkspaceProps>>;
   let instance: ReactWrapper;
+  let templateId: string;
 
   beforeEach(() => {
     store = createMockGraphStore({}).store;
@@ -145,10 +148,10 @@ describe('settings', () => {
     );
     store.dispatch(
       saveTemplate({
-        index: -1,
         template: initialTemplate,
       })
     );
+    templateId = store.getState().urlTemplates[0].id;
     dispatchSpy = jest.fn(store.dispatch);
     store.dispatch = dispatchSpy;
     subject = new Rx.BehaviorSubject(workspaceProps);
@@ -240,6 +243,7 @@ describe('settings', () => {
                 field: 'A',
                 term: '1',
               },
+              id: 'blocklisted-node-3',
               label: 'blocklisted node 3',
               icon: {
                 id: 'test',
@@ -298,7 +302,7 @@ describe('settings', () => {
       templateForm(0)
         .find('EuiButtonEmpty[data-test-subj="graphRemoveUrlTemplate"]')
         .simulate('click');
-      expect(dispatchSpy).toHaveBeenCalledWith(removeTemplate(initialTemplate));
+      expect(dispatchSpy).toHaveBeenCalledWith(removeTemplate(templateId));
     });
 
     it('should update url template', () => {
@@ -307,7 +311,10 @@ describe('settings', () => {
         templateForm(0).find('form').simulate('submit');
       });
       expect(dispatchSpy).toHaveBeenCalledWith(
-        saveTemplate({ index: 0, template: { ...initialTemplate, description: 'Updated title' } })
+        saveTemplate({
+          id: templateId,
+          template: { ...initialTemplate, description: 'Updated title' },
+        })
       );
     });
 
@@ -324,9 +331,13 @@ describe('settings', () => {
         templateForm(1).find('form').simulate('submit');
       });
       expect(dispatchSpy).toHaveBeenCalledWith(
-        saveTemplate({
-          index: -1,
-          template: expect.objectContaining({ description: 'Title', url: 'test-url' }),
+        expect.objectContaining({
+          type: saveTemplate({ template: initialTemplate }).type,
+          payload: expect.objectContaining({
+            id: expect.any(String),
+            isNew: true,
+            template: expect.objectContaining({ description: 'Title', url: 'test-url' }),
+          }),
         })
       );
     });

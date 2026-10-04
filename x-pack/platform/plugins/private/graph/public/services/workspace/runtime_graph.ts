@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-import type { Workspace, WorkspaceOptions } from '../../types';
+import type { RuntimeGraph } from '../../types/workspace_state';
 
-declare function createWorkspace(options: WorkspaceOptions): Workspace;
+export const createRuntimeGraph = (): RuntimeGraph => ({
+  blocklistedNodes: [],
+  nodesMap: {},
+  edgesMap: {},
+  nodes: [],
+  edges: [],
+});

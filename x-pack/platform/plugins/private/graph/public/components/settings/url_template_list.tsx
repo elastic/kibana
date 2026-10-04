@@ -10,7 +10,6 @@ import { EuiText, EuiSpacer, EuiTextAlign, EuiButton, htmlIdGenerator } from '@e
 import { i18n } from '@kbn/i18n';
 import type { SettingsStateProps } from './settings';
 import { UrlTemplateForm } from './url_template_form';
-import { useListKeys } from './use_list_keys';
 
 const generateId = htmlIdGenerator();
 
@@ -20,7 +19,6 @@ export function UrlTemplateList({
   urlTemplates,
 }: Pick<SettingsStateProps, 'removeTemplate' | 'saveTemplate' | 'urlTemplates'>) {
   const [uncommittedForms, setUncommittedForms] = useState<string[]>([]);
-  const getListKey = useListKeys(urlTemplates);
 
   function removeUncommittedForm(id: string) {
     setUncommittedForms(uncommittedForms.filter((formId) => formId !== id));
@@ -35,26 +33,29 @@ export function UrlTemplateList({
         })}
       </EuiText>
       <EuiSpacer />
-      {urlTemplates.map((template, index) => (
-        <UrlTemplateForm
-          key={getListKey(template)}
-          id={getListKey(template)}
-          initialTemplate={template}
-          onSubmit={(newTemplate) => {
-            saveTemplate({ index, template: newTemplate });
-          }}
-          onRemove={() => {
-            removeTemplate(template);
-          }}
-        />
-      ))}
+      {urlTemplates.map(({ id, ...template }) => {
+        const formId = `accordion-template-${id}`;
+        return (
+          <UrlTemplateForm
+            key={id}
+            id={formId}
+            initialTemplate={template}
+            onSubmit={(newTemplate) => {
+              saveTemplate({ id, template: newTemplate });
+            }}
+            onRemove={() => {
+              removeTemplate(id);
+            }}
+          />
+        );
+      })}
 
       {uncommittedForms.map((id) => (
         <UrlTemplateForm
           id={`accordion-new-${id}`}
           key={id}
           onSubmit={(newTemplate) => {
-            saveTemplate({ index: -1, template: newTemplate });
+            saveTemplate({ template: newTemplate });
             removeUncommittedForm(id);
           }}
           onRemove={removeUncommittedForm.bind(undefined, id)}
