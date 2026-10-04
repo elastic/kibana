@@ -35,8 +35,8 @@ spaceTest.describe(
     let seeded: SeededResponseActionsHistory | undefined;
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
-      // Endpoint host indexing installs Fleet and waits on metadata transforms.
-      spaceTest.setTimeout(600_000);
+      // Two host seeds each wait up to 4 minutes for the current index and 4 for the united index.
+      spaceTest.setTimeout(1_200_000);
       await scoutSpace.setSolutionView('security');
       seeded = await seedResponseActionsHistory({
         esClient,

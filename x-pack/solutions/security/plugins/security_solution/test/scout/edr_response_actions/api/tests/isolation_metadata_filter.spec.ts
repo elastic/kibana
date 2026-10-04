@@ -46,7 +46,8 @@ apiTest.describe(
     };
 
     apiTest.beforeAll(async ({ esClient, kbnClient, config, requestAuth, samlAuth }) => {
-      apiTest.setTimeout(600_000);
+      // Two host seeds each wait up to 4 minutes for the current index and 4 for the united index.
+      apiTest.setTimeout(1_200_000);
       const role = getResponseActionsAccessRole();
       const [{ apiKeyHeader }, { cookieHeader }] = await Promise.all([
         requestAuth.getApiKeyForCustomRole(role),

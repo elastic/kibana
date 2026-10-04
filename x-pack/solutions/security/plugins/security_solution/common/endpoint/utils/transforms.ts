@@ -284,9 +284,9 @@ async function waitForMetadataDocs({
     return false;
   };
 
-  // Poll every 5s for 3 minutes. A 20s gap lets another worker's stop consume
-  // most of the deadline before this suite starts the transform again.
-  const isReady = await waitFor(areDocsReady, 5_000, 36);
+  // Poll every 5s for 4 minutes. Another worker can stop the shared transform
+  // near the end of a shorter window, and the sync delay then needs another cycle.
+  const isReady = await waitFor(areDocsReady, 5_000, 49);
   if (!isReady) {
     throw new Error(
       `Timed out waiting for ${size} ${label} docs for agent ids [${agentIds.join(

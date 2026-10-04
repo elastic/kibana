@@ -45,10 +45,16 @@ export const captureEndpointAction = async (
   const responsePromise = page.waitForResponse(
     (response) =>
       response.request().method() === 'POST' &&
-      response.url().includes(`/api/endpoint/action/${command}`) &&
-      response.ok()
+      response.url().includes(`/api/endpoint/action/${command}`)
   );
   await submit();
-  const body = (await (await responsePromise).json()) as IsolateActionResponseBody;
+  const response = await responsePromise;
+  if (!response.ok()) {
+    const responseText = await response.text();
+    throw new Error(
+      `${command} request failed with ${response.status()}: ${responseText.slice(0, 500)}`
+    );
+  }
+  const body = (await response.json()) as IsolateActionResponseBody;
   return body.data;
 };
