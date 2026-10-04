@@ -594,7 +594,7 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
             _meta: {
               optional: true,
               description:
-                'Which step threw for this source: fetch-actors | fetch-targets | entity-write | metadata-write. Present only when outcome is "error"',
+                'Which step threw for this source. Present only when outcome is "error". Currently fetch-actors | fetch-targets | entity-write | metadata-write, but new stages may be added, so group by this field rather than enumerating it',
             },
           },
         },
