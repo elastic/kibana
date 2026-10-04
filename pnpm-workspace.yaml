@@ -1104,6 +1104,7 @@ packages:
   - 'src/platform/plugins/shared/navigation'
   - 'src/platform/plugins/shared/newsfeed'
   - 'src/platform/plugins/shared/no_data_page'
+  - 'src/platform/plugins/shared/poc_stacked_toast'
   - 'src/platform/plugins/shared/presentation_util'
   - 'src/platform/plugins/shared/saved_objects'
   - 'src/platform/plugins/shared/saved_objects_finder'
