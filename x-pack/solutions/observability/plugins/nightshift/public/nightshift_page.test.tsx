@@ -63,6 +63,7 @@ describe('NightshiftPage', () => {
           capabilities: {
             nightshift: {
               [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+              [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
               [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
             },
           },
