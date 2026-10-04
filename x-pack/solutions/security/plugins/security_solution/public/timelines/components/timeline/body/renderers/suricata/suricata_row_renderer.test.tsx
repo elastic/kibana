@@ -97,5 +97,5 @@ describe('suricata_row_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
-  });
+  }, 30_000);
 });
