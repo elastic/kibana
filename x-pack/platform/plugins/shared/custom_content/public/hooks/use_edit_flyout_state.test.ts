@@ -27,7 +27,7 @@ const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate
 const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
 const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
 
-const mockHttp = {} as unknown as HttpStart;
+const mockHttp = { basePath: { get: () => '' } } as unknown as HttpStart;
 const mockSearch = jest.fn();
 
 beforeEach(() => {
@@ -176,7 +176,7 @@ describe('useEditFlyoutState', () => {
 
       expect(mockFetchEsqlData).toHaveBeenCalled();
       expect(mockFillTemplate).toHaveBeenCalled();
-      expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>');
+      expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>', '');
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
@@ -192,7 +192,7 @@ describe('useEditFlyoutState', () => {
 
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
       expect(mockFillTemplate).not.toHaveBeenCalled();
-      expect(mockSanitizeHtml).toHaveBeenCalledWith('hello');
+      expect(mockSanitizeHtml).toHaveBeenCalledWith('hello', '');
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('hello', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });

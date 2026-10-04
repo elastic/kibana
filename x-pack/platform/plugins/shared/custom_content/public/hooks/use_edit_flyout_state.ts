@@ -182,7 +182,9 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
-        onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
+        onRunPreview(
+          applyHtmlTheme(sanitizeHtml(rawHtml, core.http.basePath.get()), colorMode, euiTheme)
+        );
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {

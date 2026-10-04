@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import DOMPurify from 'dompurify';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
 
@@ -152,10 +153,69 @@ describe('sanitizeHtml', () => {
     expect(result).not.toContain('onerror');
   });
 
-  it('removes <a> tags (FORBID_TAGS config)', () => {
-    const result = sanitizeHtml('<p>hello</p><a href="https://example.com">click</a>');
-    expect(result).not.toContain('<a');
-    expect(result).toContain('hello');
+  describe('links', () => {
+    const anchorOf = (html: string, basePath = '') => {
+      const doc = new DOMParser().parseFromString(sanitizeHtml(html, basePath), 'text/html');
+      return doc.querySelector('a');
+    };
+
+    it('keeps an internal app link, forcing top-window navigation', () => {
+      const a = anchorOf('<a href="/app/dashboards#/view/abc">go</a>');
+      expect(a?.getAttribute('href')).toBe('/app/dashboards#/view/abc');
+      expect(a?.getAttribute('target')).toBe('_top');
+      expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('prepends the base path', () => {
+      expect(anchorOf('<a href="/app/discover">go</a>', '/kbn')?.getAttribute('href')).toBe(
+        '/kbn/app/discover'
+      );
+    });
+
+    it('overrides an author-supplied target and rel', () => {
+      const a = anchorOf('<a href="/app/x" target="_blank" rel="opener">go</a>');
+      expect(a?.getAttribute('target')).toBe('_top');
+      expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+    });
+
+    it.each([
+      'https://example.com',
+      `${['java', 'script'].join('')}:alert(1)`,
+      '//example.com/app/x',
+      '/api/status',
+      '/logout',
+      '/app/%2e%2e/api/status',
+    ])('drops the href of a link to %s', (href) => {
+      const a = anchorOf(`<a href="${href}" target="_blank">go</a>`);
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('strips attributes that can trigger requests or downloads', () => {
+      const a = anchorOf(
+        '<a href="/app/x" ping="https://example.com/p" download="x" referrerpolicy="unsafe-url" hreflang="en">go</a>'
+      );
+      expect(a?.getAttributeNames().sort()).toEqual(['href', 'rel', 'target']);
+    });
+
+    it('strips the href from SVG links, including xlink:href', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="https://example.com"><text>x</text></a><a xlink:href="https://example.com"><text>y</text></a></svg>'
+      );
+      expect(html).not.toContain('example.com');
+    });
+
+    it('validates hrefs filled in from data after templating', () => {
+      expect(sanitizeHtml('<a href="//example.com/app/x">go</a>')).not.toContain('example.com');
+    });
+
+    it('does not leave its hook behind for other DOMPurify callers', () => {
+      sanitizeHtml('<a href="/app/x">go</a>');
+      const foreign = DOMPurify.sanitize('<a href="https://example.com">x</a>');
+      expect(foreign).toContain('https://example.com');
+    });
   });
 
   it('removes image-map links, which would otherwise bypass the <a> ban', () => {
