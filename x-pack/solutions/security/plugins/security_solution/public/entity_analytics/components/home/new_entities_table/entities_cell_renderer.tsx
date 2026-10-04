@@ -173,7 +173,210 @@ export interface CellHandlers {
   onAnomalyCountClick?: (row: Record<string, unknown>) => void;
 }
 
-export const renderEntityCell = (
+const nameCellCss = css`
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+`;
+
+const EntityNameCell = ({
+  value,
+  row,
+  onEntityNameClick,
+}: {
+  value: unknown;
+  row: Record<string, unknown>;
+  onEntityNameClick?: (row: Record<string, unknown>) => void;
+}) => {
+  const name = String(value ?? '—');
+  if (!onEntityNameClick) {
+    return (
+      <div css={nameCellCss}>
+        <EuiTextTruncate text={name} />
+      </div>
+    );
+  }
+  // Link wraps truncation (not the reverse): EuiTextTruncate aria-hides truncated text,
+  // so a nested link would be focusable but unreachable to screen readers.
+  return (
+    <div css={nameCellCss}>
+      <EuiLink
+        onClick={() => onEntityNameClick(row)}
+        css={css`
+          display: block;
+          width: 100%;
+          min-width: 0;
+        `}
+      >
+        <EuiTextTruncate text={name} />
+      </EuiLink>
+    </div>
+  );
+};
+
+const EntityTypeCell = ({ value }: { value: unknown }) => {
+  if (value == null) return <>{'—'}</>;
+  const entityType = value as EntityType;
+  const iconType = EntityIconByType[entityType];
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {iconType && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconType} size="s" color="subdued" aria-hidden={true} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{capitalize(entityType)}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const RiskScoreChangeCell = ({ value }: { value: unknown }) => {
+  if (value == null) return <>{'—'}</>;
+  const delta = value as number;
+  if (delta === 0) return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
+  const worse = delta > 0;
+  return (
+    <EuiText size="s">
+      <EuiTextColor color={worse ? 'danger' : 'success'}>
+        <EuiIcon type={worse ? 'sortUp' : 'sortDown'} size="s" aria-hidden={true} />
+        {` ${Math.abs(Math.round(delta))}%`}
+      </EuiTextColor>
+    </EuiText>
+  );
+};
+
+const AlertCountCell = ({
+  value,
+  row,
+  euiTheme,
+  onAlertCountClick,
+}: {
+  value: unknown;
+  row: Record<string, unknown>;
+  euiTheme: EuiThemeComputed;
+  onAlertCountClick?: (row: Record<string, unknown>) => void;
+}) => {
+  if (value == null) return <>{'—'}</>;
+  const alertCount = value as number;
+  if (alertCount === 0) return <>{'—'}</>;
+  const severities = [
+    {
+      key: 'Critical',
+      count: (row.alert_critical as number) ?? 0,
+      color: getSeverityColor('critical', euiTheme),
+    },
+    {
+      key: 'High',
+      count: (row.alert_high as number) ?? 0,
+      color: getSeverityColor('high', euiTheme),
+    },
+    {
+      key: 'Medium',
+      count: (row.alert_medium as number) ?? 0,
+      color: getSeverityColor('medium', euiTheme),
+    },
+    {
+      key: 'Low',
+      count: (row.alert_low as number) ?? 0,
+      color: getSeverityColor('low', euiTheme),
+    },
+  ].filter((s) => s.count > 0);
+  return (
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+      <EuiFlexItem style={{ pointerEvents: 'none' }}>
+        <DistributionBar stats={severities} hideLastTooltip />
+      </EuiFlexItem>
+      {onAlertCountClick ? (
+        <EuiBadge
+          color="hollow"
+          onClick={() => onAlertCountClick(row)}
+          onClickAriaLabel={i18nStrings.openAlerts}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {alertCount}
+        </EuiBadge>
+      ) : (
+        <EuiBadge color="hollow">{alertCount}</EuiBadge>
+      )}
+    </EuiFlexGroup>
+  );
+};
+
+const GroupSizeCell = ({
+  value,
+  row,
+  onGroupSizeClick,
+}: {
+  value: unknown;
+  row: Record<string, unknown>;
+  onGroupSizeClick?: (row: Record<string, unknown>) => void;
+}) =>
+  onGroupSizeClick ? (
+    <div
+      css={css`
+        display: flex;
+        overflow: hidden;
+      `}
+    >
+      <EuiLink onClick={() => onGroupSizeClick(row)} css={cellTruncateCss}>
+        {String(value ?? '—')}
+      </EuiLink>
+    </div>
+  ) : (
+    <DefaultCell value={value} />
+  );
+
+const RelativeTimeCell = ({ value }: { value: unknown }) => {
+  if (value == null) return <>{'—'}</>;
+  const m = moment(value as string);
+  return <>{m.isValid() ? m.fromNow() : String(value)}</>;
+};
+
+const AnomalyCountCell = ({
+  value,
+  row,
+  onAnomalyCountClick,
+}: {
+  value: unknown;
+  row: Record<string, unknown>;
+  onAnomalyCountClick?: (row: Record<string, unknown>) => void;
+}) => {
+  if (value == null) return <>{'—'}</>;
+  const anomalyCount = value as number;
+  if (anomalyCount === 0) return <>{'—'}</>;
+  return onAnomalyCountClick ? (
+    <EuiLink
+      onClick={() => onAnomalyCountClick(row)}
+      onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
+    >
+      {anomalyCount}
+    </EuiLink>
+  ) : (
+    <>{String(anomalyCount)}</>
+  );
+};
+
+const WatchlistsCell = ({
+  value,
+  watchlistNames,
+}: {
+  value: unknown;
+  watchlistNames: Map<string, string>;
+}) => {
+  const names = toEntitySourceArray(value).map((id) => watchlistNames.get(id) ?? id);
+  return (
+    <TruncatedBadgeList
+      values={names}
+      overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
+      textSize="s"
+      data-test-subj="entityWatchlistsValue"
+    />
+  );
+};
+
+const renderKnownEntityCell = (
   columnId: GridColumnId,
   value: unknown,
   row: Record<string, unknown>,
@@ -185,193 +388,43 @@ export const renderEntityCell = (
     handlers ?? {};
 
   switch (columnId) {
-    case 'entity.name': {
-      const name = String(value ?? '—');
-      if (!onEntityNameClick) {
-        return (
-          <div
-            css={css`
-              overflow: hidden;
-              min-width: 0;
-              width: 100%;
-            `}
-          >
-            <EuiTextTruncate text={name} />
-          </div>
-        );
-      }
-      // Link wraps truncation (not the reverse): EuiTextTruncate aria-hides truncated text,
-      // so a nested link would be focusable but unreachable to screen readers.
-      return (
-        <div
-          css={css`
-            overflow: hidden;
-            min-width: 0;
-            width: 100%;
-          `}
-        >
-          <EuiLink
-            onClick={() => onEntityNameClick(row)}
-            css={css`
-              display: block;
-              width: 100%;
-              min-width: 0;
-            `}
-          >
-            <EuiTextTruncate text={name} />
-          </EuiLink>
-        </div>
-      );
-    }
-
+    case 'entity.name':
+      return <EntityNameCell value={value} row={row} onEntityNameClick={onEntityNameClick} />;
     case 'group_size':
-      return onGroupSizeClick ? (
-        <div
-          css={css`
-            display: flex;
-            overflow: hidden;
-          `}
-        >
-          <EuiLink onClick={() => onGroupSizeClick(row)} css={cellTruncateCss}>
-            {String(value ?? '—')}
-          </EuiLink>
-        </div>
-      ) : (
-        <DefaultCell value={value} />
-      );
-
+      return <GroupSizeCell value={value} row={row} onGroupSizeClick={onGroupSizeClick} />;
     case 'last_seen_alert':
     case '@timestamp':
-    case 'entity.lifecycle.first_seen': {
-      if (value == null) return <>{'—'}</>;
-      const m = moment(value as string);
-      return <>{m.isValid() ? m.fromNow() : String(value)}</>;
-    }
-
-    case 'entity.EngineMetadata.Type': {
-      if (value == null) return <>{'—'}</>;
-      const entityType = value as EntityType;
-      const iconType = EntityIconByType[entityType];
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          {iconType && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={iconType} size="s" color="subdued" aria-hidden={true} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{capitalize(entityType)}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
+    case 'entity.lifecycle.first_seen':
+      return <RelativeTimeCell value={value} />;
+    case 'entity.EngineMetadata.Type':
+      return <EntityTypeCell value={value} />;
     case 'entity.risk.calculated_score_norm':
-      return value == null ? <>{'—'}</> : <RiskScoreCell riskScore={value as number} />;
-
-    case 'risk_score_change': {
-      if (value == null) return <>{'—'}</>;
-      const delta = value as number;
-      if (delta === 0) return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
-      const worse = delta > 0;
+      return <RiskScoreCell riskScore={value as number | undefined} />;
+    case 'risk_score_change':
+      return <RiskScoreChangeCell value={value} />;
+    case 'alert_count':
       return (
-        <EuiText size="s">
-          <EuiTextColor color={worse ? 'danger' : 'success'}>
-            <EuiIcon type={worse ? 'sortUp' : 'sortDown'} size="s" aria-hidden={true} />
-            {` ${Math.abs(Math.round(delta))}%`}
-          </EuiTextColor>
-        </EuiText>
-      );
-    }
-
-    case 'alert_count': {
-      if (value == null) return <>{'—'}</>;
-      const alertCount = value as number;
-      if (alertCount === 0) return <>{'—'}</>;
-      const severities = [
-        {
-          key: 'Critical',
-          count: (row.alert_critical as number) ?? 0,
-          color: getSeverityColor('critical', euiTheme),
-        },
-        {
-          key: 'High',
-          count: (row.alert_high as number) ?? 0,
-          color: getSeverityColor('high', euiTheme),
-        },
-        {
-          key: 'Medium',
-          count: (row.alert_medium as number) ?? 0,
-          color: getSeverityColor('medium', euiTheme),
-        },
-        {
-          key: 'Low',
-          count: (row.alert_low as number) ?? 0,
-          color: getSeverityColor('low', euiTheme),
-        },
-      ].filter((s) => s.count > 0);
-      return (
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem style={{ pointerEvents: 'none' }}>
-            <DistributionBar stats={severities} hideLastTooltip />
-          </EuiFlexItem>
-          {onAlertCountClick ? (
-            <EuiBadge
-              color="hollow"
-              onClick={() => onAlertCountClick(row)}
-              onClickAriaLabel={i18nStrings.openAlerts}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              {alertCount}
-            </EuiBadge>
-          ) : (
-            <EuiBadge color="hollow">{alertCount}</EuiBadge>
-          )}
-        </EuiFlexGroup>
-      );
-    }
-
-    case 'anomaly_count': {
-      if (value == null) return <>{'—'}</>;
-      const anomalyCount = value as number;
-      if (anomalyCount === 0) return <>{'—'}</>;
-      return onAnomalyCountClick ? (
-        <EuiLink
-          onClick={() => onAnomalyCountClick(row)}
-          onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
-        >
-          {anomalyCount}
-        </EuiLink>
-      ) : (
-        <>{String(anomalyCount)}</>
-      );
-    }
-
-    case 'case_count':
-      return value == null || (value as number) === 0 ? <>{'—'}</> : <>{String(value)}</>;
-
-    case 'entity.attributes.watchlists': {
-      const names = toEntitySourceArray(value).map((id) => watchlistNames.get(id) ?? id);
-      return (
-        <TruncatedBadgeList
-          values={names}
-          overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
-          textSize="s"
-          data-test-subj="entityWatchlistsValue"
+        <AlertCountCell
+          value={value}
+          row={row}
+          euiTheme={euiTheme}
+          onAlertCountClick={onAlertCountClick}
         />
       );
-    }
-
+    case 'anomaly_count':
+      return <AnomalyCountCell value={value} row={row} onAnomalyCountClick={onAnomalyCountClick} />;
+    case 'case_count':
+      return value == null || (value as number) === 0 ? <>{'—'}</> : <>{String(value)}</>;
+    case 'entity.attributes.watchlists':
+      return <WatchlistsCell value={value} watchlistNames={watchlistNames} />;
     case 'asset.criticality':
       return (
         <AssetCriticalityBadge
           criticalityLevel={(value as CriticalityLevelWithUnassigned) ?? 'unassigned'}
         />
       );
-
     case 'entity.source':
       return <EntitySourceValue values={toEntitySourceArray(value)} textSize="s" />;
-
     case 'entity.relationships.resolution.resolved_to':
       return <DefaultCell value={value} />;
   }
@@ -379,7 +432,7 @@ export const renderEntityCell = (
   return assertNever(columnId);
 };
 
-export const renderGridCell = (
+export const renderEntityCell = (
   columnId: string,
   value: unknown,
   row: Record<string, unknown>,
@@ -390,5 +443,5 @@ export const renderGridCell = (
   if (!isGridColumnId(columnId)) {
     return <DefaultCell value={value} />;
   }
-  return renderEntityCell(columnId, value, row, watchlistNames, euiTheme, handlers);
+  return renderKnownEntityCell(columnId, value, row, watchlistNames, euiTheme, handlers);
 };

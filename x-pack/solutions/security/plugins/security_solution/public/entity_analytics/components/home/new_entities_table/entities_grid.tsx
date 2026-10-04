@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { useEntityGridData } from './use_entity_grid_data';
 import { useEntityChildren } from './use_entity_children';
 import { PAGE_SIZE_OPTIONS } from './common';
-import { renderGridCell, RowActionsCell } from './entities_cell_renderer';
+import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
 import { ExpandedEntityRow } from './entities_expanded_row';
 import { AdditionalControls } from '../entities_table/additional_controls';
 import { DataViewContext } from '../entities_table';
@@ -113,7 +113,7 @@ const RenderEntityGridCell: RenderCellValue = (cellProps) => {
     cellProps as typeof cellProps & EntityGridCellContext;
   const row = rows[rowIndex - pageIndex * pageSize];
   if (!row) return null;
-  return renderGridCell(columnId, row[columnId], row, watchlistNames, euiTheme, cellHandlers);
+  return renderEntityCell(columnId, row[columnId], row, watchlistNames, euiTheme, cellHandlers);
 };
 
 const EntityGridExpanderHeader = () => (

@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiDataGridCustomBodyProps, EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
-import { renderGridCell } from './entities_cell_renderer';
+import { renderEntityCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
 
 interface ChildTreeConnectorProps {
@@ -102,7 +102,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                     }
                   `}
                 >
-                  {renderGridCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
+                  {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
                 </div>
               </div>
             </div>
@@ -131,7 +131,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
               }
             `}
           >
-            {renderGridCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
+            {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
           </div>
         );
       })}
