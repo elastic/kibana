@@ -155,6 +155,8 @@ const mergeFailureReasons = (target: Map<string, number>, source: Map<string, nu
   }
 };
 
+const LOOKUP_DOC_VALUE_FIELDS = ['entity.id', 'entity.relationships.resolution.resolved_to'];
+
 const fetchNextEntityStorePage = async ({
   crudClient,
   entityTypes,
@@ -171,8 +173,25 @@ const fetchNextEntityStorePage = async ({
     ],
     size: LOOKUP_BUILD_PAGE_SIZE,
     searchAfter,
-    source: ['entity.id', 'entity.relationships.resolution.resolved_to'],
+    docValueFields: LOOKUP_DOC_VALUE_FIELDS,
+    disableSource: true,
   });
+
+const docValueResultsToSources = (
+  docValueResults: Array<Record<string, unknown[]> | undefined>
+): EntityStoreLookupSource[] =>
+  docValueResults.map((f) => ({
+    entity: {
+      id: (f?.['entity.id'] as string[] | undefined)?.[0],
+      relationships: {
+        resolution: {
+          resolved_to: (
+            f?.['entity.relationships.resolution.resolved_to'] as string[] | undefined
+          )?.[0],
+        },
+      },
+    },
+  }));
 
 export const buildLookupIndex = async ({
   esClient,
@@ -217,11 +236,12 @@ export const buildLookupIndex = async ({
       };
     }
 
-    const { entities, nextSearchAfter } = await fetchNextEntityStorePage({
+    const { fields: docValueResults, nextSearchAfter } = await fetchNextEntityStorePage({
       crudClient,
       entityTypes,
       searchAfter,
     });
+    const entities = docValueResultsToSources(docValueResults ?? []);
     entitiesIterated += entities.length;
     searchAfter = nextSearchAfter;
     if (
