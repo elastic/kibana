@@ -40,6 +40,9 @@ import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { DashboardChangeHistoryProvider } from './dashboard_change_history_provider';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { dashboardQueryClient } from '../services/dashboard_query_client';
 
 /**
  * Props for the {@link DashboardRenderer} component.

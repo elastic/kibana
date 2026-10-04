@@ -81,7 +81,7 @@ export const createChangeHistoryHttpAdapter = (
           query,
           signal,
         });
-
+        console.log({ body });
         const mapped = mapListResponse(body);
         const mapListItem = config.mapListItem;
 
@@ -94,6 +94,7 @@ export const createChangeHistoryHttpAdapter = (
           items: mapped.items.map((item) => mapListItem(item)),
         };
       } catch (error) {
+        console.log({ error });
         throw mapHttpError(error);
       }
     },
@@ -104,7 +105,7 @@ export const createChangeHistoryHttpAdapter = (
       }
 
       const path = replaceEventId(replaceObjectId(config.detailPath, objectId), changeId);
-
+      console.log({ path });
       try {
         const body = await config.http.get<unknown>(path, { signal });
         return config.mapDetail ? config.mapDetail(body) : (body as ChangeHistoryDetail);
