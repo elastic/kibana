@@ -18,6 +18,21 @@ import { i18n } from '@kbn/i18n';
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountLabel',
+  {
+    defaultMessage: 'Service account',
+  }
+);
+
+export const SERVICE_ACCOUNT_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccountHelp',
+  {
+    defaultMessage:
+      'The worker runs as this account. Select one before turning the worker on. A worker that is already on keeps running until you save an account for it.',
+  }
+);
+
 export const ENABLED_SWITCH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.enabledSwitch',
   {

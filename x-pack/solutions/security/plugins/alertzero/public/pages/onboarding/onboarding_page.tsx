@@ -30,8 +30,8 @@ import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
+import type { AlertZeroStartDependencies } from '../../types';
 import { workerName } from '../watches/workers/translations';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
@@ -48,14 +48,14 @@ interface Props {
 export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
-  } = useKibana<CoreStart>();
+    services: { application, security },
+  } = useKibana<CoreStart & AlertZeroStartDependencies>();
 
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
 
-  const currentUserEmail = useCurrentUser();
+  const [serviceAccountId, setServiceAccountId] = useState<string | undefined>();
 
   // Intersect the server-returned worker list with the catalog so skill-gated workers
   // absent from the response are not shown as toggles (or counted toward the minimum).
@@ -78,6 +78,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
+    serviceAccountId,
     () => history.push('/watches'),
     onSavingChange
   );
@@ -205,7 +206,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         data-test-subj="alertZeroOnboardingBeforeYouEnable"
       >
         <ul>
-          <li>{i18n.beforeYouEnableRunsAs(currentUserEmail)}</li>
+          <li>{i18n.BEFORE_YOU_ENABLE_RUNS_AS}</li>
           <li>{i18n.BEFORE_YOU_ENABLE_LLM}</li>
           <li>
             <em>{i18n.BEFORE_YOU_ENABLE_PRIVILEGE}</em>
@@ -216,12 +217,34 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
       <EuiSpacer size="l" />
 
+      {security?.uiApi ? (
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="m"
+          data-test-subj="alertZeroOnboardingServiceAccount"
+        >
+          <EuiText size="s">
+            <strong>{i18n.SERVICE_ACCOUNT_LABEL}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          {security.uiApi.components.getServiceAccountPicker({
+            selectedId: serviceAccountId,
+            onSelect: (account) => setServiceAccountId(account?.id),
+          })}
+        </EuiPanel>
+      ) : null}
+
+      <EuiSpacer size="l" />
+
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             isLoading={isSaving}
-            disabled={availableWorkerIds.length === 0 || enabledCount === 0}
+            disabled={
+              availableWorkerIds.length === 0 || enabledCount === 0 || serviceAccountId == null
+            }
             onClick={handleEnableAndContinue}
             data-test-subj="alertZeroOnboardingEnableButton"
           >

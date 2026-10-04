@@ -232,7 +232,10 @@ export class AlertZeroPublicPlugin
               { client: queryClient },
               React.createElement(
                 AccessBoundary,
-                { availability$: this.availability$ },
+                {
+                  availability$: this.availability$,
+                  serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+                },
                 React.createElement(Component, props)
               )
             )
@@ -288,7 +291,10 @@ export class AlertZeroPublicPlugin
             { client: queryClient },
             React.createElement(
               AccessBoundary,
-              { availability$: this.availability$ },
+              {
+                availability$: this.availability$,
+                serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+              },
               React.createElement(ProposedActionsSlot, props)
             )
           )
@@ -460,7 +466,14 @@ export class AlertZeroPublicPlugin
         React.createElement(
           KibanaContextProvider,
           { services },
-          React.createElement(AccessBoundary, { availability$: this.availability$ }, children)
+          React.createElement(
+            AccessBoundary,
+            {
+              availability$: this.availability$,
+              serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+            },
+            children
+          )
         );
       return { default: Boundary };
     });

@@ -12,13 +12,25 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Absent until an admin selects an account. Omitted from YAML rather than written empty. */
+  serviceAccountId?: string;
 }
+
+const renderRunAs = (yaml: string, serviceAccountId: string | undefined): string => {
+  const runAsLine = serviceAccountId ? `  run_as: ${JSON.stringify(serviceAccountId)}\n` : '';
+  const runAsBlock = serviceAccountId
+    ? `settings:\n  run_as: ${JSON.stringify(serviceAccountId)}\n`
+    : '';
+  return yaml
+    .replaceAll('  __WORKER_RUN_AS_LINE__:\n', runAsLine)
+    .replaceAll('__WORKER_RUN_AS_BLOCK__:\n', runAsBlock);
+};
 
 export const renderCommonWorkerYaml = (
   yaml: string,
-  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
+  { settingsVersion, autonomyLevel, serviceAccountId }: CommonWorkerTemplateValues
 ): string =>
-  yaml
+  renderRunAs(yaml, serviceAccountId)
     .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
 

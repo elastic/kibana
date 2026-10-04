@@ -44,14 +44,20 @@ export const BEFORE_YOU_ENABLE_TITLE = i18n.translate(
   { defaultMessage: 'Before you enable' }
 );
 
-export const beforeYouEnableRunsAs = (email: string | undefined) =>
-  i18n.translate('xpack.alertzero.onboarding.beforeYouEnable.runsAs', {
+export const BEFORE_YOU_ENABLE_RUNS_AS = i18n.translate(
+  'xpack.alertzero.onboarding.beforeYouEnable.runsAs',
+  {
     defaultMessage:
-      'Workers run as you{emailSuffix}. Anything they do is attributed to this account.',
-    values: {
-      emailSuffix: email ? ` ( ${email} )` : '',
-    },
-  });
+      'Workers run as the service account you select. Anything they do is attributed to that account.',
+  }
+);
+
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountLabel',
+  {
+    defaultMessage: 'Service account',
+  }
+);
 
 export const BEFORE_YOU_ENABLE_LLM = i18n.translate(
   'xpack.alertzero.onboarding.beforeYouEnable.llm',

@@ -13,6 +13,7 @@ tags:
   - watch
   - watch-floor
 
+__WORKER_RUN_AS_BLOCK__:
 triggers:
   - type: alert
   # Keep manual for desk testing without a rule execution.

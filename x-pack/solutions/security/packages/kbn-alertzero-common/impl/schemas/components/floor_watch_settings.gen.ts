@@ -17,8 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert
- * as a false positive. Alerts below this threshold require human review.
+ * Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert as a false positive. Alerts below this threshold require human review.
  */
 export const AutoCloseConfidenceScoreMinThreshold = lazySchema(() => z.number().min(0).max(1));
 export type AutoCloseConfidenceScoreMinThreshold = z.infer<
@@ -26,8 +25,7 @@ export type AutoCloseConfidenceScoreMinThreshold = z.infer<
 >;
 
 /**
- * Complete Worker-specific settings for the Alert Triage Worker, owned by Floor Watch.
- * Sent whole on write; a replacement missing a field is rejected.
+ * Complete Worker-specific settings for the Alert Triage Worker, owned by Floor Watch. Sent whole on write; a replacement missing a field is rejected.
  */
 export const AlertTriageWorkerExtras = lazySchema(() =>
   z

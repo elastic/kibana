@@ -29,6 +29,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AlertZeroStartDependencies } from '../../../types';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
@@ -88,8 +89,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
-  } = useKibana<CoreStart>();
+    services: { application, security },
+  } = useKibana<CoreStart & AlertZeroStartDependencies>();
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
   const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
@@ -98,6 +99,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
+  // A worker that is already on can be turned off. Turning one on requires an account.
+  const cannotEnable = !enabled && !settings.serviceAccountId;
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -239,7 +242,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled}
+      disabled={controlsDisabled || cannotEnable}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
@@ -282,6 +285,18 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             <p>{error}</p>
           </EuiText>
         </>
+      ) : null}
+      {security?.uiApi ? (
+        <SettingRow
+          label={settingsI18n.SERVICE_ACCOUNT_LABEL}
+          labelHelp={settingsI18n.SERVICE_ACCOUNT_HELP}
+          data-test-subj={`alertZeroServiceAccountRow-${worker.id}`}
+        >
+          {security.uiApi.components.getServiceAccountPicker({
+            selectedId: settings.serviceAccountId,
+            onSelect: (account) => onSettingsChange({ serviceAccountId: account?.id ?? null }),
+          })}
+        </SettingRow>
       ) : null}
       <SettingRow
         label={settingsI18n.AUTONOMY_SECTION_TITLE}
