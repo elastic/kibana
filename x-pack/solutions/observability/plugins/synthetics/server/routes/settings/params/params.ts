@@ -7,56 +7,75 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { z } from '@kbn/zod';
-import { optionalRouteId } from '../../zod_query';
-import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
+import { routeId } from '../../zod_query';
+import type {
+  RouteContext,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRouteHandler,
+} from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
-const RequestParamsSchema = z.strictObject({
-  id: optionalRouteId,
+type ParamsResponse =
+  | SyntheticsParams[]
+  | SyntheticsParamsReadonly[]
+  | SyntheticsParams
+  | SyntheticsParamsReadonly;
+
+const getParamsHandler: SyntheticsRouteHandler<ParamsResponse, { id?: string }> = async (
+  routeContext
+) => {
+  const { savedObjectsClient, request, response, spaceId } = routeContext;
+  try {
+    const { id: paramId } = request.params;
+
+    if (await canReadDecryptedParams(routeContext)) {
+      return getDecryptedParams(routeContext, paramId);
+    } else {
+      if (paramId) {
+        const savedObject = await savedObjectsClient.get<SyntheticsParamsReadonly>(
+          syntheticsParamType,
+          paramId
+        );
+        return toClientResponse(savedObject);
+      }
+
+      return findAllParams(routeContext);
+    }
+  } catch (error) {
+    if (error.output?.statusCode === 404) {
+      return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
+    }
+
+    throw error;
+  }
+};
+
+export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamsResponse> = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.PARAMS,
+  validate: {},
+  handler: getParamsHandler,
 });
 
-type RequestParams = z.infer<typeof RequestParamsSchema>;
+const RequestParamsSchema = z.strictObject({
+  id: routeId,
+});
 
-export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsParams[] | SyntheticsParamsReadonly[] | SyntheticsParams | SyntheticsParamsReadonly,
-  RequestParams
+export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
+  ParamsResponse,
+  z.infer<typeof RequestParamsSchema>
 > = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.PARAMS + '/{id?}',
+  path: SYNTHETICS_API_URLS.PARAMS + '/{id}',
   validate: {},
   validation: {
     request: {
       params: RequestParamsSchema,
     },
   },
-  handler: async (routeContext) => {
-    const { savedObjectsClient, request, response, spaceId } = routeContext;
-    try {
-      const { id: paramId } = request.params;
-
-      if (await canReadDecryptedParams(routeContext)) {
-        return getDecryptedParams(routeContext, paramId);
-      } else {
-        if (paramId) {
-          const savedObject = await savedObjectsClient.get<SyntheticsParamsReadonly>(
-            syntheticsParamType,
-            paramId
-          );
-          return toClientResponse(savedObject);
-        }
-
-        return findAllParams(routeContext);
-      }
-    } catch (error) {
-      if (error.output?.statusCode === 404) {
-        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
-      }
-
-      throw error;
-    }
-  },
+  handler: getParamsHandler,
 });
 
 const canReadDecryptedParams = async (routeContext: RouteContext) => {
