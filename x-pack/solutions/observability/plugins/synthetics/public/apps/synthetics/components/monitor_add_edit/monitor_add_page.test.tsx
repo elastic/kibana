@@ -91,6 +91,7 @@ describe('MonitorAddPage', () => {
         loading: false,
         error: undefined,
         refetch: jest.fn(),
+        paramsOmitted: false,
       });
     let history: ReturnType<typeof render>['history'];
 
@@ -119,6 +120,7 @@ describe('MonitorAddPage', () => {
         loading: false,
         error: undefined,
         refetch: jest.fn(),
+        paramsOmitted: false,
       });
     const history = createMemoryHistory({
       initialEntries: ['/add-monitor?returnAppId=observabilityOnboarding&returnPath=%3F'],
@@ -167,5 +169,35 @@ describe('MonitorAddPage', () => {
 
     // error
     expect(getByText('Unable to load testing locations')).toBeInTheDocument();
+  });
+
+  it('warns when parameters are omitted from a clone', async () => {
+    const useCloneMonitorSpy = jest
+      .spyOn(useCloneMonitorModule, 'useCloneMonitor')
+      .mockReturnValue({
+        data: { name: 'Source monitor', params: '' },
+        status: 'success' as any,
+        loading: false,
+        error: undefined,
+        refetch: jest.fn(),
+        paramsOmitted: true,
+      } as any);
+
+    const { findByText } = render(<MonitorAddPage />, {
+      state: {
+        serviceLocations: {
+          locations: [{ id: 'us_central', label: 'US Central' }],
+          locationsLoaded: true,
+          loading: false,
+        },
+      },
+    });
+
+    expect(
+      await findByText(
+        'Parameter values were omitted because you do not have permission to read them.'
+      )
+    ).toBeInTheDocument();
+    useCloneMonitorSpy.mockRestore();
   });
 });

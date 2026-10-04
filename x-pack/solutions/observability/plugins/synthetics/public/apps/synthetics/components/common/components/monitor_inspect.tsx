@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiBasicTable,
@@ -37,6 +38,7 @@ import type {
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
 import type {
   MonitorInspectResponse,
   PackagePolicyLink,
@@ -63,8 +65,13 @@ interface InspectorProps {
 export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
   const registerHeader = useRegisterInspectMonitorHeader();
+  const { application } = useKibana().services;
+  const canRevealParams = canRevealParameterValues({
+    canSave: Boolean(application?.capabilities.uptime.save),
+    canReadParamValues: Boolean(application?.capabilities.uptime.canReadParamValues),
+  });
 
-  const [hideParams, setHideParams] = useState(() => !isDev);
+  const [hideParams, setHideParams] = useState(() => !isDev || !canRevealParams);
   const [asJson, setAsJson] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -96,7 +103,11 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
     };
   }, [isValid, registerHeader]);
 
-  const { data, loading, error } = useFetcher(() => {
+  const {
+    data,
+    loading: isLoading,
+    error: inspectError,
+  } = useFetcher(() => {
     if (isInspecting) {
       return inspectMonitorAPI({
         hideParams,
@@ -120,14 +131,16 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiSwitch
-                compressed
-                label={HIDE_PARAMS}
-                checked={hideParams}
-                onChange={(e) => setHideParams(e.target.checked)}
-              />
-            </EuiFlexItem>
+            {canRevealParams && (
+              <EuiFlexItem>
+                <EuiSwitch
+                  compressed
+                  label={HIDE_PARAMS}
+                  checked={hideParams}
+                  onChange={(e) => setHideParams(e.target.checked)}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiSwitch
                 compressed
@@ -139,7 +152,7 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
-          {!loading && data ? (
+          {!isLoading && data ? (
             <>
               <EuiCodeBlock
                 language={asJson ? 'json' : 'yaml'}
@@ -163,10 +176,10 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
                 </>
               )}
             </>
-          ) : loading && !error ? (
+          ) : isLoading && !inspectError ? (
             <LoadingState />
           ) : (
-            <p>{error?.message}</p>
+            <p>{inspectError?.message}</p>
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

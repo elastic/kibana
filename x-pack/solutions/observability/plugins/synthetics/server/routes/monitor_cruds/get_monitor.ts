@@ -14,6 +14,8 @@ import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { maskMonitorParams } from '../../../common/utils/mask_monitor_params';
+import { canRevealParameterValues } from '../../../common/utils/can_reveal_parameter_values';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -40,18 +42,31 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     try {
       const { internal } = request.query;
 
-      const canSave =
-        (
-          await coreStart?.capabilities.resolveCapabilities(request, {
-            capabilityPath: 'uptime.*',
-          })
-        ).uptime.save ?? false;
+      const capabilities = await coreStart?.capabilities.resolveCapabilities(request, {
+        capabilityPath: 'uptime.*',
+      });
+      const canSave = Boolean(capabilities?.uptime?.save);
+      const canRevealParams = canRevealParameterValues({
+        canSave,
+        canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
+      });
 
-      if (Boolean(canSave)) {
+      if (canSave) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+        const normalizedMonitor = !canRevealParams
+          ? {
+              ...monitor.normalizedMonitor,
+              attributes: {
+                ...monitor.normalizedMonitor.attributes,
+                [ConfigKey.PARAMS]: maskMonitorParams(
+                  monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
+                ),
+              },
+            }
+          : monitor.normalizedMonitor;
         return {
-          ...mapSavedObjectToMonitor({ monitor: monitor.normalizedMonitor, internal }),
+          ...mapSavedObjectToMonitor({ monitor: normalizedMonitor, internal }),
           spaceId,
           spaces: monitor.decryptedMonitor.namespaces,
         };
