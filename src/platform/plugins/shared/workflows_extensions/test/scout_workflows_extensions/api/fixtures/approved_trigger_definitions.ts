@@ -191,6 +191,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'd7e515158ccc9d49d7e8d07d7f0c9eb4911adc6ae7819e67f59d612742d9b7d9',
   },
   {
+    id: 'security.detectionRulesCreated',
+    schemaHash: '172f9d6023998fd3b7ace63ad17d673d93775f8a69afdc4820052c0f0c5e64dd',
+  },
+  {
     id: 'security.noteCreated',
     schemaHash: 'ea5ae619dc62034662d523423d67601c66b1e67bdf89ab38425bd20990de5e30',
   },

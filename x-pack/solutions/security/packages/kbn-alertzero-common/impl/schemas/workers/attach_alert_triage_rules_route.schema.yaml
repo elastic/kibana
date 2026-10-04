@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Attach rules to the Alert Triage Worker API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/workers/system-security-floor-alert-triage/rules/_attach:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttachAlertTriageRules
+      description: >-
+        Attaches the Alert Triage Worker's rule action to detection rules in the request's space,
+        but only while that space's Worker is enabled. A Worker that is not enabled, or an
+        unavailable AlertZero or rule-attachment service, is reported as a typed outcome with a
+        200 response rather than an error, so a caller can tell "nothing to do" from a failure.
+        Rules that already carry the action are left alone. The caller needs rule write access
+        and runs the attach as themselves.
+      summary: Attach rules to the Alert Triage Worker
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - target
+                    - ruleIds
+                  properties:
+                    target:
+                      type: string
+                      enum:
+                        - ids
+                    ruleIds:
+                      type: array
+                      minItems: 1
+                      maxItems: 2000
+                      description: Saved object ids of the rules to attach.
+                      items:
+                        type: string
+                        minLength: 1
+                        maxLength: 512
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - target
+                  properties:
+                    target:
+                      type: string
+                      enum:
+                        - all_unattached
+                      description: Attach every rule that does not carry the action yet.
+              discriminator:
+                propertyName: target
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    required:
+                      - outcome
+                    properties:
+                      outcome:
+                        type: string
+                        enum:
+                          - worker_disabled
+                          - worker_unavailable
+                        description: >-
+                          worker_disabled: the Worker is not installed or not enabled in this space.
+                          worker_unavailable: AlertZero or the rule-attachment service cannot be used here.
+                  - type: object
+                    required:
+                      - outcome
+                      - matched
+                      - updated
+                    properties:
+                      outcome:
+                        type: string
+                        enum:
+                          - attached
+                      matched:
+                        type: integer
+                        minimum: 0
+                        description: >-
+                          Rules found: for the ids target, the requested ids that still match a rule
+                          (ids of rules deleted since the request was made are ignored), or the
+                          unattached rules found for the all_unattached target.
+                      updated:
+                        type: integer
+                        minimum: 0
+                        description: Rules that did not carry the action and now do.
+                      skippedRuleCount:
+                        type: integer
+                        minimum: 0
+                        description: >-
+                          Rules the caller cannot edit (machine learning rules without ML access),
+                          left untouched. Only reported for the all_unattached target.

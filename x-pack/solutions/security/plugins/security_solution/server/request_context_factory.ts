@@ -40,6 +40,7 @@ import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
+import type { SecuritySolutionEventBus } from './events/event_bus';
 
 export interface IRequestContextFactory {
   create(
@@ -60,6 +61,7 @@ interface ConstructorOptions {
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
   productFeaturesService: ProductFeaturesService;
+  eventBus?: SecuritySolutionEventBus;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -209,6 +211,8 @@ export class RequestContextFactory implements IRequestContextFactory {
           analytics: core.analytics,
           userProfile: coreStart.userProfile,
           logger: options.logger,
+          eventBus: options.eventBus,
+          request,
         });
       }),
 

@@ -21,6 +21,8 @@ export interface ImportRulesOptions {
 
 export interface ImportRuleSuccess {
   rule_id: string;
+  /** True when the import created the rule, false when it overwrote an existing one. */
+  isNew: boolean;
   telemetry: RuleLifecycleTelemetryData;
 }
 

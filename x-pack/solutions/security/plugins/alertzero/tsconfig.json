@@ -7,6 +7,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/security-plugin-types-server",
+    "@kbn/security-solution-features",
     "@kbn/security-plugin",
     "@kbn/agentic-investigations-common",
     "@kbn/core",

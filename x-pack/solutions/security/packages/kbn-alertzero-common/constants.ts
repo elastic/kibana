@@ -214,6 +214,21 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
 ] as const;
 
 /**
+ * The trigger the workflow that attaches the Worker to new rules subscribes to. Registered by
+ * security_solution, which this plugin cannot import, so the id is repeated here; a test in
+ * security_solution fails if the two drift.
+ */
+export const SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID =
+  'security.detectionRulesCreated' as const;
+
+/**
+ * Attaches the Alert Triage Worker's rule action to rules, only while the Worker is enabled in the
+ * request's space. Called by the managed workflow that attaches rules created after enable.
+ */
+export const ALERTZERO_ALERT_TRIAGE_ATTACH_RULES_URL =
+  `${ALERTZERO_WORKERS_URL}/${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}/rules/_attach` as const;
+
+/**
  * Hunt Watch's two feature children (tagged `security` + `continuous-threat-hunt`),
  * dispatched by the tagged Worker above. `find_or_create_investigation` and the hunt
  * child itself stay untagged Worker-branch plumbing and have no id here.

@@ -6,11 +6,15 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { RULE_TUNING_DEFAULT_EXTRAS } from '@kbn/alertzero-common';
+import {
+  RULE_TUNING_DEFAULT_EXTRAS,
+  SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID,
+} from '@kbn/alertzero-common';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ALERTZERO_PROPOSAL_WORKFLOW_IDS,
@@ -30,7 +34,7 @@ const makeState = (spaceId: string) => ({
   documentVersion: 1,
 });
 
-const createDependencies = () => {
+const createDependencies = ({ isAttachTriggerRegistered = true } = {}) => {
   const client = {
     install: jest.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
     uninstall: jest.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
@@ -42,6 +46,11 @@ const createDependencies = () => {
   };
   const workflowsExtensions = {
     initManagedWorkflowsClient: jest.fn(async () => client),
+    getTriggerDefinition: jest.fn((triggerId: string) =>
+      isAttachTriggerRegistered && triggerId === SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID
+        ? { id: triggerId }
+        : undefined
+    ),
   } as unknown as WorkflowsExtensionsServerPluginStart;
   const logger = loggerMock.create();
   return { client, workflowsExtensions, logger };
@@ -67,6 +76,47 @@ describe('initializeManagedWorkflows', () => {
       expect.objectContaining({ workflowIdSuffix: expect.any(String) })
     );
     expect(client.ready).toHaveBeenCalledTimes(1);
+  });
+
+  describe('the workflow that attaches the Worker to new rules', () => {
+    // Its trigger belongs to security_solution. Installing it without that trigger would fail
+    // validation, and a failed global install stops reconciliation of every AlertZero workflow.
+    it('is installed when its trigger is registered', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).toHaveBeenCalledWith(
+        ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID,
+        expect.objectContaining({ spaceId: GLOBAL_WORKFLOW_SPACE_ID })
+      );
+    });
+
+    it('is skipped, and nothing else is affected, when its trigger is not registered', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies({
+        isAttachTriggerRegistered: false,
+      });
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      const installedIds = client.install.mock.calls.map(([id]) => id);
+      expect(installedIds).not.toContain(ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID);
+      expect(installedIds).toEqual(
+        [
+          ...ALERTZERO_RULE_WORKFLOW_IDS,
+          ...ALERTZERO_ACTION_WORKFLOW_IDS,
+          ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+          ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+          ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+          ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+          ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
+        ].filter((id) => id !== ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID)
+      );
+      expect(client.ready).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID)
+      );
+    });
   });
 
   it('does not reconcile when a required rule workflow install fails', async () => {
