@@ -51,6 +51,7 @@ import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertz
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerSecurityInvestigationsAiIndex } from './context_engine/security_investigations_ai_index';
 import { registerStepDefinitions } from './step_types';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
@@ -114,6 +115,7 @@ export class AlertZeroPlugin
       agentBuilder,
       proposals,
       agenticInvestigations,
+      contextEngine,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -135,6 +137,7 @@ export class AlertZeroPlugin
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
+    registerSecurityInvestigationsAiIndex(contextEngine, this.logger.get('ai_index'));
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();

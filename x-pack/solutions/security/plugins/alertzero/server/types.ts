@@ -23,6 +23,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
@@ -93,6 +94,11 @@ export interface AlertZeroSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  /**
+   * Optional. Registers the investigations AI index the managed workers write
+   * knowledge indicators into. Absent when the context engine plugin is disabled.
+   */
+  contextEngine?: ContextEnginePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;

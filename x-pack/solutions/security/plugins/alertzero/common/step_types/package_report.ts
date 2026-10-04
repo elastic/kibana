@@ -12,9 +12,6 @@ import { z } from '@kbn/zod/v4';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
-/** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
-export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
-
 const boundedId = z.string().trim().min(1).max(256);
 
 export const packageReportInputSchema = z.object({

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  SECURITY_INVESTIGATIONS_AI_INDEX_ID,
+  SECURITY_INVESTIGATIONS_AI_INDEX_ID_TOKEN,
+} from './security_investigations_ai_index';
 import type { ManagedWorkflowTemplateValues } from '../../types';
 
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
@@ -14,14 +18,26 @@ export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValue
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
 }
 
+/**
+ * Substitutes the shared investigations AI index id. Worker settings placeholders
+ * are substituted only when values are given, so a static definition can render
+ * the index id alone.
+ */
 export const renderCommonWorkerYaml = (
   yaml: string,
-  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
-): string =>
-  yaml
-    .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
-    .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
-
+  values?: CommonWorkerTemplateValues
+): string => {
+  const result = yaml.replaceAll(
+    SECURITY_INVESTIGATIONS_AI_INDEX_ID_TOKEN,
+    SECURITY_INVESTIGATIONS_AI_INDEX_ID
+  );
+  if (!values) {
+    return result;
+  }
+  return result
+    .replaceAll('__WORKER_SETTINGS_VERSION__', String(values.settingsVersion))
+    .replaceAll('__WORKER_AUTONOMY_LEVEL__', values.autonomyLevel);
+};
 /**
  * Values for the subset of Workers that own a scheduled trigger. Kept out of
  * CommonWorkerTemplateValues because alert- and event-driven Workers have no schedule at all.
