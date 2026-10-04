@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQueries, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
@@ -28,6 +28,17 @@ import {
 } from './common';
 import type { QueryArgs, EsqlRunner, Row } from './common';
 import { ENRICH_FNS } from './columns/registry';
+
+const isMapEntriesEqual = (
+  prev: ReadonlyMap<string, Row[]>,
+  next: ReadonlyMap<string, Row[]>
+): boolean => {
+  if (prev.size !== next.size) return false;
+  for (const [entityId, rows] of next) {
+    if (prev.get(entityId) !== rows) return false;
+  }
+  return true;
+};
 
 const ENTITY_CHILDREN_QUERY_KEY = 'entity-children';
 const ENTITY_CHILDREN_ENRICH_QUERY_KEY = 'entity-children-enrich';
@@ -180,14 +191,18 @@ export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenO
     }),
   });
 
-  const childMap = useMemo(() => {
-    const map = new Map<string, Row[]>();
-    expandedIdList.forEach((entityId, i) => {
-      const rows = enrichQueries[i]?.data ?? shellQueries[i]?.data;
-      if (rows) map.set(entityId, rows);
-    });
-    return map;
-  }, [expandedIdList, shellQueries, enrichQueries]);
+  // useQueries returns a new array every render; keep the Map stable unless row data actually changes.
+  const childMapRef = useRef(new Map<string, Row[]>());
+  const nextChildMap = new Map<string, Row[]>();
+  expandedIdList.forEach((entityId, i) => {
+    const rows = enrichQueries[i]?.data ?? shellQueries[i]?.data;
+    if (rows) nextChildMap.set(entityId, rows);
+  });
+  const prevChildMap = childMapRef.current;
+  if (!isMapEntriesEqual(prevChildMap, nextChildMap)) {
+    childMapRef.current = nextChildMap;
+  }
+  const childMap = childMapRef.current;
 
   const fetchingIds = useMemo(() => {
     const set = new Set<string>();
