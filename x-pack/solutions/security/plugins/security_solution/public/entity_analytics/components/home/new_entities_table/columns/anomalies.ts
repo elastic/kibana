@@ -6,8 +6,10 @@
  */
 
 import {
+  entityIdsOf,
+  getEntityId,
+  getNumber,
   ANOMALY_COUNT_FIELD,
-  ENTITY_ID_FIELD,
   ML_ANOMALY_INDICES,
   buildEuidStages,
   buildForeignSortQueries,
@@ -61,17 +63,15 @@ const enrichAnomalyCount = async (
 ): Promise<void> => {
   if (skip.has(ANOMALY_COUNT_FIELD)) return;
 
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  const entityIds = entityIdsOf(pageRows);
   if (!entityIds.length) return;
 
   const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, entityIds)));
   if (!rows) return;
 
-  const byId = new Map(
-    rows.map((r) => [r[ENTITY_ID_FIELD] as string, r[ANOMALY_COUNT_FIELD] as number])
-  );
+  const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));
   for (const row of pageRows) {
-    row[ANOMALY_COUNT_FIELD] = byId.get(row[ENTITY_ID_FIELD] as string) ?? 0;
+    row[ANOMALY_COUNT_FIELD] = byId.get(getEntityId(row)) ?? 0;
   }
 };
 
@@ -82,6 +82,7 @@ export const anomalyCountColumn = {
   displayAsText: 'Anomalies',
   initialWidth: 120,
   isSortable: true,
+  sortKind: 'foreign',
   isExpandable: false,
   buildSortQuery: (args) => buildAnomalyCountQueries(args).sort,
   buildCountQuery: (args) => buildAnomalyCountQueries(args).count,

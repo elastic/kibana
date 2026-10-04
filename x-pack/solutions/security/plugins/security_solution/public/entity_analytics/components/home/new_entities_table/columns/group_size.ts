@@ -6,6 +6,10 @@
  */
 
 import {
+  entityIdsOf,
+  getEntityId,
+  getNumber,
+  getString,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FILTER,
   GROUP_SIZE_FIELD,
@@ -89,19 +93,19 @@ const enrichGroupSize = async (
 ): Promise<void> => {
   if (skip.has(GROUP_SIZE_FIELD)) return;
 
-  const entityIds = [...new Set(pageRows.map((r) => r[ENTITY_ID_FIELD] as string))].filter(Boolean);
+  const entityIds = [...new Set(entityIdsOf(pageRows))];
   if (!entityIds.length) return;
 
   const rows = await nullOnFailure(runQuery(buildGroupSizeEnrichQuery(args, entityIds)));
   if (!rows) return;
 
   const byGroupKey = new Map(
-    rows.map((r) => [r.group_key as string, r[GROUP_SIZE_FIELD] as number])
+    rows.map((r) => [getString(r, 'group_key'), getNumber(r, GROUP_SIZE_FIELD)])
   );
   for (const row of pageRows) {
     // A target row matches its group key and gets the member count. An alias row is
     // never a group key, so it gets 1: it is a single record.
-    row[GROUP_SIZE_FIELD] = byGroupKey.get(row[ENTITY_ID_FIELD] as string) ?? 1;
+    row[GROUP_SIZE_FIELD] = byGroupKey.get(getEntityId(row)) ?? 1;
   }
 };
 
@@ -112,6 +116,7 @@ export const groupSizeColumn = {
   displayAsText: 'Records',
   initialWidth: 100,
   isSortable: true,
+  sortKind: 'foreign',
   isExpandable: false,
   buildSortQuery: buildGroupSizeSortQuery,
   buildCountQuery: buildGroupSizeCountQuery,

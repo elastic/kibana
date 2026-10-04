@@ -6,7 +6,10 @@
  */
 
 import {
-  ENTITY_ID_FIELD,
+  entityIdsOf,
+  getEntityId,
+  getNumber,
+  getString,
   ENTITY_TYPE_FILTER,
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
@@ -85,16 +88,18 @@ const enrichRiskScoreChange = async (
 ): Promise<void> => {
   if (skip.has(RISK_SCORE_CHANGE_FIELD)) return;
 
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  const entityIds = entityIdsOf(pageRows);
   if (!entityIds.length) return;
 
   const rows = await nullOnFailure(runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds)));
   if (!rows) return;
 
-  const byId = new Map(rows.map((r) => [r.entity_id as string, r.reference_score as number]));
+  const byId = new Map(
+    rows.map((r) => [getString(r, 'entity_id'), getNumber(r, 'reference_score')])
+  );
   for (const row of pageRows) {
-    const currentScore = row[RISK_SCORE_NORM_FIELD] as number | null;
-    const referenceScore = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
+    const currentScore = getNumber(row, RISK_SCORE_NORM_FIELD) ?? null;
+    const referenceScore = byId.get(getEntityId(row)) ?? null;
     row[RISK_SCORE_CHANGE_FIELD] =
       currentScore != null && referenceScore != null ? currentScore - referenceScore : null;
   }
@@ -107,6 +112,7 @@ export const riskScoreChangeColumn = {
   displayAsText: 'Risk score change',
   initialWidth: 140,
   isSortable: true,
+  sortKind: 'foreign',
   isExpandable: false,
   buildSortQuery: buildRiskScoreChangeSortQuery,
   buildCountQuery: buildRiskScoreChangeCountQuery,

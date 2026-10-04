@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
-import { ALL_COLUMNS_LIST, ENRICH_FNS } from './registry';
+import { ENRICH_FNS, SORTABLE_COLUMNS } from './registry';
 import { alertCountColumn } from './alerts';
 
 const NOW = new Date('2026-10-04T12:00:00.000Z');
@@ -59,10 +59,6 @@ const PAGE_ROWS: readonly Row[] = [
   },
 ];
 
-const SORTABLE_COLUMNS = ALL_COLUMNS_LIST.filter(
-  ({ buildSortQuery, buildCountQuery }) => buildSortQuery && buildCountQuery
-);
-
 const createRunContext = (runQuery: RunContext['runQuery']): RunContext => {
   const http = httpServiceMock.createSetupContract();
   http.post.mockResolvedValue({});
@@ -92,8 +88,8 @@ describe('entities grid query builders', () => {
       it('builds the sort and count queries', () => {
         const args: QueryArgs = { ...BASE_ARGS, sort: { field: sortField, direction: 'desc' } };
 
-        expect(buildSortQuery?.(args)).toMatchSnapshot('sort');
-        expect(buildCountQuery?.(args)).toMatchSnapshot('count');
+        expect(buildSortQuery(args)).toMatchSnapshot('sort');
+        expect(buildCountQuery(args)).toMatchSnapshot('count');
       });
 
       it('builds the sort and count queries with filters and a cursor', () => {
@@ -104,8 +100,8 @@ describe('entities grid query builders', () => {
           cursor: cursorFor(sortField),
         };
 
-        expect(buildSortQuery?.(args)).toMatchSnapshot('sort');
-        expect(buildCountQuery?.(args)).toMatchSnapshot('count');
+        expect(buildSortQuery(args)).toMatchSnapshot('sort');
+        expect(buildCountQuery(args)).toMatchSnapshot('count');
       });
     }
   );

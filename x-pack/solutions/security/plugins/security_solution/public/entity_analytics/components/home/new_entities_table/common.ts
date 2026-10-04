@@ -14,6 +14,8 @@ import {
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { isAbortError } from '../../../../common/utils/exceptions';
 
@@ -65,11 +67,13 @@ export type RowsMode = 'resolved' | 'individual';
 export type Row = Record<string, unknown>;
 export type EsqlRunner = (q: string) => Promise<Row[]>;
 export type SortDir = 'asc' | 'desc';
+/** A sort column value in a cursor. Sort columns hold strings, numbers or null. */
+export type SortValue = string | number | null;
 
 export interface PageCursor {
   sortField: string;
   sortDirection: SortDir;
-  sortValue: unknown;
+  sortValue: SortValue;
   entityId: string;
 }
 
@@ -110,16 +114,29 @@ export type EnrichFn = (
   ctx: RunContext
 ) => Promise<void>;
 
-export interface ColumnDataHandlers {
-  /** Builds the paginated ES|QL query used to fetch a page of rows when this column is the active sort. */
-  buildSortQuery?: (args: QueryArgs) => string;
-  /** Builds the ES|QL query used to count total matching rows for pagination when this column is the active sort. */
-  buildCountQuery?: (args: QueryArgs) => string;
-  /** Runs after a page fetch to enrich rows with data that cannot be expressed in a single ES|QL query (e.g. alert counts via a separate request). */
+interface ColumnBase extends EuiDataGridColumn {
+  /** Fills computed columns of the page rows after the sort query. */
   enrichPage?: EnrichFn;
 }
 
-export interface ColumnDescriptor extends EuiDataGridColumn, ColumnDataHandlers {}
+export interface SortableColumn extends ColumnBase {
+  isSortable: true;
+  /** `native`: the sort field is on the entity doc. `foreign`: STATS computes the sort value. */
+  sortKind: 'native' | 'foreign';
+  /** Builds the query for one page of rows plus one, sorted by this column. */
+  buildSortQuery: (args: QueryArgs) => string;
+  /** Builds the query for the total row count when this column is the sort. */
+  buildCountQuery: (args: QueryArgs) => string;
+}
+
+export interface UnsortableColumn extends ColumnBase {
+  isSortable: false;
+}
+
+export type ColumnDescriptor = SortableColumn | UnsortableColumn;
+
+export const isSortableColumn = (column: ColumnDescriptor): column is SortableColumn =>
+  column.isSortable;
 
 // ── index name helpers ────────────────────────────────────────────────────────
 
@@ -190,14 +207,35 @@ export const buildSearchIdInClause = (
       ]
     : [];
 
-export const toRows = (raw: { columns: Array<{ name: string }>; values: unknown[][] }): Row[] =>
-  raw.values.map((row) => Object.fromEntries(raw.columns.map((col, i) => [col.name, row[i]])));
+export const toRows = ({
+  columns,
+  values,
+}: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
+  values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
-export const esqlResponseToRows = (result: unknown): Row[] =>
-  toRows(
-    (result as { rawResponse: { columns: Array<{ name: string }>; values: unknown[][] } })
-      .rawResponse
-  );
+// ── row readers ──────────────────────────────────────────────────────────────
+
+/** Reads a string field of a row; `undefined` when it is absent or not a string. */
+export const getString = (row: Row, field: string): string | undefined => {
+  const value = row[field];
+  return typeof value === 'string' ? value : undefined;
+};
+
+/** Reads a number field of a row; `undefined` when it is absent or not a number. */
+export const getNumber = (row: Row, field: string): number | undefined => {
+  const value = row[field];
+  return typeof value === 'number' ? value : undefined;
+};
+
+export const getEntityId = (row: Row): string | undefined => getString(row, ENTITY_ID_FIELD);
+
+/** Entity ids of the rows, without rows that have no id. */
+export const entityIdsOf = (rows: readonly Row[]): string[] =>
+  rows.flatMap((row) => getEntityId(row) ?? []);
+
+/** Narrows a sort column value for a cursor. */
+export const toSortValue = (value: unknown): SortValue =>
+  typeof value === 'string' || typeof value === 'number' ? value : null;
 
 /** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
 export const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
@@ -206,19 +244,22 @@ export const createEsqlRunner = (
   searchService: DataPublicPluginStart['search'],
   signal?: AbortSignal
 ): EsqlRunner => {
-  return async (query) =>
-    esqlResponseToRows(
-      await lastValueFrom(
-        searchService.search(
-          { params: { query } },
-          {
-            abortSignal: signal,
-            strategy: 'esql_async',
-            projectRouting: ESQL_PROJECT_ROUTING,
-          }
-        )
+  return async (query) => {
+    const { rawResponse } = await lastValueFrom(
+      searchService.search<
+        IKibanaSearchRequest<{ query: string }>,
+        IKibanaSearchResponse<ESQLSearchResponse>
+      >(
+        { params: { query } },
+        {
+          abortSignal: signal,
+          strategy: 'esql_async',
+          projectRouting: ESQL_PROJECT_ROUTING,
+        }
       )
     );
+    return toRows(rawResponse);
+  };
 };
 
 /** ISO timestamp at the start of the time range. Alert and anomaly queries filter on it. */

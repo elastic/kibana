@@ -5,28 +5,67 @@
  * 2.0.
  */
 
-import { useState } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import type { TimeRange, RowsMode, EntityGridResponse, QueryArgs, Row, PageCursor } from './common';
+import type {
+  TimeRange,
+  RowsMode,
+  EntityGridResponse,
+  QueryArgs,
+  Row,
+  PageCursor,
+  SortDir,
+} from './common';
 import {
   decodeCursor,
   encodeCursor,
-  ENTITY_ID_FIELD,
+  entityIdsOf,
+  getEntityId,
+  getNumber,
   GROUP_SIZE_FIELD,
   enrichEntityRows,
   createEsqlRunner,
+  toSortValue,
 } from './common';
-import { ALL_COLUMNS_LIST, ENRICH_FNS } from './columns/registry';
+import { ENRICH_FNS, findSortableColumn } from './columns/registry';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
   { defaultMessage: 'Error loading entities table' }
 );
+
+// ── query keys ────────────────────────────────────────────────────────────────
+
+/** Inputs that every grid query depends on. */
+interface GridQueryScope {
+  sortField: string;
+  searchExpression?: string;
+  entityExpression?: string;
+  timeRange: TimeRange;
+  rowsMode: RowsMode;
+  concreteEntityIndexName: string | null;
+  spaceId: string;
+}
+
+/**
+ * Query keys of the grid. The count key has no sort direction, page or cursor,
+ * so the total is fetched once per sort field and filters.
+ */
+const entityGridKeys = {
+  shell: (
+    scope: GridQueryScope,
+    page: { sortDirection: SortDir; pageIndex: number; pageSize: number; keepFieldsKey: string }
+  ) => ['entity-grid', 'shell', { ...scope, ...page }] as const,
+  count: (scope: GridQueryScope) => ['entity-grid', 'count', scope] as const,
+  enrich: (
+    scope: GridQueryScope,
+    page: { sortDirection: SortDir; entityIdsKey: string; shellUpdatedAt: number }
+  ) => ['entity-grid', 'enrich', { ...scope, ...page }] as const,
+};
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -37,19 +76,16 @@ const buildNextCursor = (pageRows: Row[], args: QueryArgs, hasNextPage: boolean)
   return encodeCursor({
     sortField: args.sort.field,
     sortDirection: args.sort.direction,
-    sortValue: lastRow[args.sort.field] ?? null,
-    entityId: (lastRow[ENTITY_ID_FIELD] as string) ?? '',
+    sortValue: toSortValue(lastRow[args.sort.field]),
+    entityId: getEntityId(lastRow) ?? '',
   });
 };
-
-const pageEntityIdsKey = (rows: Row[] | undefined): string =>
-  (rows ?? []).map((r) => r[ENTITY_ID_FIELD] as string).join('\0');
 
 // ── hook ──────────────────────────────────────────────────────────────────────
 
 export interface UseEntityGridDataOptions {
   sortField: string;
-  sortDirection: 'asc' | 'desc';
+  sortDirection: SortDir;
   pageIndex: number;
   pageSize: number;
   searchExpression?: string;
@@ -80,25 +116,34 @@ export const useEntityGridData = ({
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
   const concreteEntityIndexName = resolvedIndex?.indexName ?? null;
 
-  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
-
   const keepFieldsKey = (keepFields ?? []).join('\0');
+  const sortColumn = findSortableColumn(sortField);
 
+  const scope: GridQueryScope = {
+    sortField,
+    searchExpression,
+    entityExpression,
+    timeRange,
+    rowsMode,
+    concreteEntityIndexName,
+    spaceId,
+  };
   const shellKey = (index: number) =>
-    [
-      'entity-grid-fe',
-      sortField,
-      sortDirection,
-      index,
-      pageSize,
-      searchExpression,
-      entityExpression,
-      timeRange,
-      rowsMode,
-      concreteEntityIndexName,
-      spaceId,
-      keepFieldsKey,
-    ] as const;
+    entityGridKeys.shell(scope, { sortDirection, pageIndex: index, pageSize, keepFieldsKey });
+
+  /** Query arguments for the resolved index; call only when the index is known. */
+  const buildArgs = (indexName: string, cursor: PageCursor | null): QueryArgs => ({
+    namespace: spaceId,
+    timeRange,
+    sort: { field: sortField, direction: sortDirection },
+    cursor,
+    pageSize,
+    rowsMode,
+    concreteEntityIndexName: indexName,
+    searchExpression,
+    entityExpression,
+    keepFields,
+  });
 
   // Page N's cursor is page N-1's cached next_cursor. If the user jumps ahead,
   // fetch the first page we don't have until we reach pageIndex.
@@ -118,51 +163,23 @@ export const useEntityGridData = ({
         null;
   const cursor: PageCursor | null = cursorStr ? decodeCursor(cursorStr) : null;
 
-  const shellQueryKey = shellKey(fetchPageIndex);
-
-  const countQueryKey = [
-    'entity-grid-fe-count',
-    sortField,
-    searchExpression,
-    entityExpression,
-    timeRange,
-    rowsMode,
-    concreteEntityIndexName,
-    spaceId,
-  ] as const;
-
   const shellQuery = useQuery(
-    shellQueryKey,
+    shellKey(fetchPageIndex),
     async ({ signal }): Promise<EntityGridResponse> => {
       if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
+      if (!sortColumn) throw new Error(`Column ${sortField} is not sortable`);
 
-      const runQuery = createEsqlRunner(searchService, signal);
-
-      const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
-      const { buildSortQuery } = col ?? {};
-      if (!buildSortQuery) throw new Error(`No sort handler for column: ${sortField}`);
-
-      const args: QueryArgs = {
-        namespace: spaceId,
-        timeRange,
-        sort: { field: sortField, direction: sortDirection },
-        cursor,
-        pageSize,
-        rowsMode,
-        concreteEntityIndexName,
-        searchExpression,
-        entityExpression,
-        keepFields,
-      };
-
-      const allRows = await runQuery(buildSortQuery(args));
+      const args = buildArgs(concreteEntityIndexName, cursor);
+      const allRows = await createEsqlRunner(
+        searchService,
+        signal
+      )(sortColumn.buildSortQuery(args));
       const hasNextPage = allRows.length > pageSize;
       const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
-      const nextCursor = buildNextCursor(pageRows, args, hasNextPage);
 
       return {
         entities: pageRows,
-        next_cursor: nextCursor,
+        next_cursor: buildNextCursor(pageRows, args, hasNextPage),
         total: null,
       };
     },
@@ -171,36 +188,21 @@ export const useEntityGridData = ({
       // Keep painting the last page while the next shell key loads (page/sort/filter).
       // Count stays strict below so pagination totals don't lag behind the tile/filter.
       keepPreviousData: true,
-      onSuccess: () => setUpdatedAt(Date.now()),
     }
   );
 
   const countQuery = useQuery(
-    countQueryKey,
+    entityGridKeys.count(scope),
     async ({ signal }): Promise<number> => {
       if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
+      if (!sortColumn) throw new Error(`Column ${sortField} is not sortable`);
 
-      const runQuery = createEsqlRunner(searchService, signal);
-
-      const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
-      const { buildCountQuery } = col ?? {};
-      if (!buildCountQuery) throw new Error(`No count handler for column: ${sortField}`);
-
-      const args: QueryArgs = {
-        namespace: spaceId,
-        timeRange,
-        sort: { field: sortField, direction: sortDirection },
-        cursor: null,
-        pageSize,
-        rowsMode,
-        concreteEntityIndexName,
-        searchExpression,
-        entityExpression,
-        keepFields,
-      };
-
-      const [countRow] = await runQuery(buildCountQuery(args));
-      return (countRow?.total as number) ?? 0;
+      const args = buildArgs(concreteEntityIndexName, null);
+      const [countRow] = await createEsqlRunner(
+        searchService,
+        signal
+      )(sortColumn.buildCountQuery(args));
+      return (countRow && getNumber(countRow, 'total')) ?? 0;
     },
     {
       enabled: !!concreteEntityIndexName,
@@ -212,48 +214,26 @@ export const useEntityGridData = ({
 
   const isCurrentPage = fetchPageIndex === pageIndex;
   const shellRows = isCurrentPage ? shellQuery.data?.entities : undefined;
-  const entityIdsKey = pageEntityIdsKey(shellRows);
 
   const enrichQuery = useQuery(
-    [
-      'entity-grid-fe-enrich',
-      entityIdsKey,
-      sortField,
+    entityGridKeys.enrich(scope, {
       sortDirection,
-      searchExpression,
-      entityExpression,
-      timeRange,
-      rowsMode,
-      concreteEntityIndexName,
-      spaceId,
-      shellQuery.dataUpdatedAt,
-    ],
+      entityIdsKey: entityIdsOf(shellRows ?? []).join('\0'),
+      shellUpdatedAt: shellQuery.dataUpdatedAt,
+    }),
     async ({ signal }): Promise<Row[]> => {
-      if (!concreteEntityIndexName) return [];
-      const shell = queryClient.getQueryData<EntityGridResponse>(shellQueryKey);
-      const pageRows = shell?.entities;
-      if (!pageRows) return [];
+      if (!concreteEntityIndexName || !shellRows) return [];
 
-      const runQuery = createEsqlRunner(searchService, signal);
-
-      const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
-      const skip = new Set<string>([...(col ? [col.id] : [])]);
+      const skip = new Set<string>([sortField]);
       if (rowsMode === 'individual') skip.add(GROUP_SIZE_FIELD);
 
-      const args: QueryArgs = {
-        namespace: spaceId,
-        timeRange,
-        sort: { field: sortField, direction: sortDirection },
-        cursor,
-        pageSize,
-        rowsMode,
-        concreteEntityIndexName,
-        searchExpression,
-        entityExpression,
-        keepFields,
-      };
-
-      return enrichEntityRows(pageRows, args, skip, { runQuery, http, signal }, ENRICH_FNS);
+      return enrichEntityRows(
+        shellRows,
+        buildArgs(concreteEntityIndexName, cursor),
+        skip,
+        { runQuery: createEsqlRunner(searchService, signal), http, signal },
+        ENRICH_FNS
+      );
     },
     {
       enabled:
@@ -263,7 +243,6 @@ export const useEntityGridData = ({
         !shellQuery.isPreviousData &&
         shellRows != null,
       keepPreviousData: true,
-      onSuccess: () => setUpdatedAt(Date.now()),
     }
   );
 
@@ -279,6 +258,7 @@ export const useEntityGridData = ({
       ? shellRows
       : enrichQuery.data ?? shellRows) ?? [];
   const total = countQuery.data ?? (rows.length > 0 ? pageIndex * pageSize + rows.length : 0);
+  const updatedAt = Math.max(shellQuery.dataUpdatedAt, enrichQuery.dataUpdatedAt) || null;
 
   return {
     rows,

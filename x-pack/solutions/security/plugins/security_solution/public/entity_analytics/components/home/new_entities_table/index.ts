@@ -29,7 +29,15 @@ export {
   CHILD_ROWS_COLUMNS,
 } from './columns/registry';
 export type { GridColumnId } from './columns/registry';
-export { RESOLUTION_GROUPING_ID, PAGE_SIZE_OPTIONS, toList, joinAnd } from './common';
+export {
+  RESOLUTION_GROUPING_ID,
+  PAGE_SIZE_OPTIONS,
+  ENTITY_TYPE_FIELD,
+  toList,
+  joinAnd,
+  getEntityId,
+  getString,
+} from './common';
 export type { EntityGridResponse } from './common';
 export {
   buildEntityFilterClauses,

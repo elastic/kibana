@@ -6,7 +6,7 @@
  */
 
 import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
-import { ENTITY_ID_FIELD, nullOnFailure } from '../common';
+import { entityIdsOf, getEntityId, nullOnFailure } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 
 export const CASE_COUNT_FIELD = 'case_count';
@@ -32,10 +32,11 @@ const enrichCaseCounts = async (
   _skip: Set<string>,
   ctx: RunContext
 ): Promise<void> => {
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  const entityIds = entityIdsOf(pageRows);
   const counts = await batchCaseCounts(ctx, entityIds);
   for (const row of pageRows) {
-    row[CASE_COUNT_FIELD] = counts.get(row[ENTITY_ID_FIELD] as string) ?? 0;
+    const entityId = getEntityId(row);
+    row[CASE_COUNT_FIELD] = (entityId ? counts.get(entityId) : undefined) ?? 0;
   }
 };
 

@@ -10,9 +10,10 @@ import {
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
 import {
+  entityIdsOf,
+  getEntityId,
   ALERT_COUNT_FIELD,
   ALLOWED_ENTITY_TYPES,
-  ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
   LAST_SEEN_ALERT_FIELD,
   alertsIndexOf,
@@ -158,7 +159,7 @@ const enrichAlerts = async (
   skip: Set<string>,
   { runQuery }: RunContext
 ): Promise<void> => {
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  const entityIds = entityIdsOf(pageRows);
   if (!entityIds.length) return;
 
   const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
@@ -167,9 +168,9 @@ const enrichAlerts = async (
   );
   if (!rows) return;
 
-  const byId = new Map(rows.map((r) => [r[ENTITY_ID_FIELD] as string, r]));
+  const byId = new Map(rows.map((r) => [getEntityId(r), r]));
   for (const row of pageRows) {
-    const alerts = byId.get(row[ENTITY_ID_FIELD] as string);
+    const alerts = byId.get(getEntityId(row));
     if (!skip.has(LAST_SEEN_ALERT_FIELD)) {
       row[LAST_SEEN_ALERT_FIELD] = alerts?.[LAST_SEEN_ALERT_FIELD] ?? null;
     }
@@ -186,6 +187,7 @@ export const alertCountColumn = {
   displayAsText: 'Alerts',
   initialWidth: 100,
   isSortable: true,
+  sortKind: 'foreign',
   isExpandable: false,
   buildSortQuery: (args) => buildAlertCountQueries(args).sort,
   buildCountQuery: (args) => buildAlertCountQueries(args).count,
@@ -197,6 +199,7 @@ export const lastSeenAlertColumn = {
   displayAsText: 'Last alert',
   initialWidth: 180,
   isSortable: true,
+  sortKind: 'foreign',
   isExpandable: false,
   buildSortQuery: (args) => buildLastSeenAlertQueries(args).sort,
   buildCountQuery: (args) => buildLastSeenAlertQueries(args).count,

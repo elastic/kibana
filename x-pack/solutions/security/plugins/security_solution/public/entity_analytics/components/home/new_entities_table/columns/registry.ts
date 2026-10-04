@@ -21,7 +21,8 @@ import {
   firstSeenColumn,
   lastSeenColumn,
 } from './native';
-import type { ColumnDescriptor, EnrichFn } from '../common';
+import { isSortableColumn } from '../common';
+import type { ColumnDescriptor, EnrichFn, SortableColumn } from '../common';
 
 /*
  * How the entities grid loads a page:
@@ -36,8 +37,9 @@ import type { ColumnDescriptor, EnrichFn } from '../common';
  *
  * Terms used in this folder:
  * - Native sort: the sort field is on the entity doc. One query on the entity index.
- * - Foreign sort: the sort value comes from another index (alerts, risk scores,
- *   anomalies). STATS computes it per entity.id, then LOOKUP JOIN adds the entity doc.
+ * - Foreign sort: STATS computes the sort value per entity.id, from another index
+ *   (alerts, risk scores, anomalies) or from resolution groups (group size).
+ *   LOOKUP JOIN then adds the entity doc.
  * - Page rows: the entity rows of the current page.
  * - Stamped alert: an alert with `kibana.alert.entity.id`. An unstamped alert has no
  *   such field; its EUIDs come from the raw user, host and service fields.
@@ -77,6 +79,16 @@ export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID
 
 // `ALL_COLUMNS` typed as `readonly ColumnDescriptor[]` for runtime access (`.find`, `.map`).
 export const ALL_COLUMNS_LIST: readonly ColumnDescriptor[] = ALL_COLUMNS;
+
+export const SORTABLE_COLUMNS: readonly SortableColumn[] =
+  ALL_COLUMNS_LIST.filter(isSortableColumn);
+
+const SORTABLE_COLUMNS_BY_ID: ReadonlyMap<string, SortableColumn> = new Map(
+  SORTABLE_COLUMNS.map((column) => [column.id, column])
+);
+
+export const findSortableColumn = (id: string): SortableColumn | undefined =>
+  SORTABLE_COLUMNS_BY_ID.get(id);
 
 // Resolved rows: entities grouped by identity; shows "Records" count, hides "Resolved to".
 export const RESOLVED_ROWS_COLUMNS = ALL_COLUMNS.filter(
