@@ -45,11 +45,11 @@ import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { TaskRunnerFactory } from '../task_runner';
 import type { RuleTypeRegistry } from '../types';
-import { createBackfillError } from './lib';
+import { createBackfillError, getBackfillActions } from './lib';
 import { SCHEDULE_TRUNCATED_WARNING } from './lib/calculate_schedule';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
-import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
+import type { DenormalizedAction } from '../rules_client';
 import type { Gap } from '../lib/rule_gaps/gap';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
@@ -711,30 +711,9 @@ async function extractRuleActions({
     return { hasUnsupportedActions: false, actions: [], references: [] };
   }
 
-  const ruleLevelNotifyWhen = rule.notifyWhen;
-  const normalizedActions = [];
-  for (const action of rule.actions) {
-    // if action level frequency is not defined and rule level notifyWhen is, set the action level frequency
-    if (!action.frequency && ruleLevelNotifyWhen) {
-      normalizedActions.push({
-        ...action,
-        frequency: { notifyWhen: ruleLevelNotifyWhen, summary: false, throttle: null },
-      });
-    } else {
-      normalizedActions.push(action);
-    }
-  }
+  const { actions: backfillActions, hasUnsupportedActions } = getBackfillActions(rule);
 
-  const hasUnsupportedActions = normalizedActions.some(
-    (action) => action.frequency?.notifyWhen !== 'onActiveAlert'
-  );
-
-  const allActions = [
-    ...normalizedActions.filter((action) => action.frequency?.notifyWhen === 'onActiveAlert'),
-    ...(rule.systemActions ?? []),
-  ] as NormalizedAlertActionWithGeneratedValues[];
-
-  const { references, actions } = await denormalizeActions(actionsClient, allActions);
+  const { references, actions } = await denormalizeActions(actionsClient, backfillActions);
 
   return { hasUnsupportedActions, actions, references };
 }
