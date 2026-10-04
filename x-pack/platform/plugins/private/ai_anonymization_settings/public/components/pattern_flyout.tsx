@@ -50,9 +50,16 @@ const entityTypeOptions = CUSTOM_PATTERN_ENTITY_CLASSES.map((entityClass) => ({
   inputDisplay: entityClass,
 }));
 
-/** The tester's side-by-side editors need more room than EuiModal's shrink-to-fit default. */
+const TESTER_MODAL_MAX_WIDTH = 1600;
+
+/**
+ * The tester's side-by-side editors need more room than EuiModal's shrink-to-fit default: take
+ * 80% of the viewport, capped at `TESTER_MODAL_MAX_WIDTH`. EuiModal sizes itself with logical
+ * `inline-size` properties (including a 400px `min-inline-size`), so those are what we override.
+ */
 const testerModalStyles = css`
-  width: min(1100px, 90vw);
+  inline-size: 80vw;
+  min-inline-size: min(80vw, ${TESTER_MODAL_MAX_WIDTH}px);
 `;
 
 export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
@@ -256,6 +263,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
           onClose={() => setIsTesterOpen(false)}
           aria-labelledby={testerModalTitleId}
           data-test-subj="aiAnonymizationSettingsPatternFlyoutTesterModal"
+          maxWidth={TESTER_MODAL_MAX_WIDTH}
           css={testerModalStyles}
         >
           <EuiModalHeader>
