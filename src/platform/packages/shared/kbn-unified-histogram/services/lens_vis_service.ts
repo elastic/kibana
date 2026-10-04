@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { isEqual } from 'lodash';
+import { isEqual, mapValues } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
   appendToESQLQuery,
@@ -40,7 +40,11 @@ import {
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getRepresentativeQuery } from '@kbn/lens-common';
-import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
+import type {
+  TextBasedPersistedState,
+  TextBasedPrivateState,
+  XYVisualizationState as XYConfiguration,
+} from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -73,6 +77,21 @@ function resolveLensDataView(dataSource: DataSource): DataView | undefined {
     ? dataSource.getDataView()
     : getRegisteredEsqlDataView(dataSource);
 }
+
+/** Aligns rebuilt ES|QL layers and runtime references with the Data View stored in the chart. */
+const alignTextBasedLayersWithDataView = (
+  state: TextBasedPersistedState & Partial<Pick<TextBasedPrivateState, 'indexPatternRefs'>>,
+  dataViewId: string
+): TextBasedPersistedState => ({
+  ...state,
+  layers: mapValues(state.layers, (layer) => ({ ...layer, index: dataViewId })),
+  ...(state.indexPatternRefs && {
+    indexPatternRefs: state.indexPatternRefs.map((reference) => ({
+      ...reference,
+      id: dataViewId,
+    })),
+  }),
+});
 
 interface Services {
   data: DataPublicPluginStart;
@@ -817,6 +836,16 @@ export class LensVisService {
         suggestion,
         dataView,
       }) as TypedLensByValueInput['attributes'];
+
+      const { textBased } = attributes.state.datasourceStates;
+      if (dataSource.kind === 'esql' && textBased && dataView.id) {
+        // The DataSource refactor introduced query-specific ES|QL IDs, so reused suggestions can retain an older ID.
+        // Align their layers and references with the current spec in adHocDataViews.
+        attributes.state.datasourceStates.textBased = alignTextBasedLayersWithDataView(
+          textBased,
+          dataView.id
+        );
+      }
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
         attributes.title = i18n.translate('unifiedHistogram.lensTitle', {

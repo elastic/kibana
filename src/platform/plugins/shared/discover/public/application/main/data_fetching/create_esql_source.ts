@@ -34,7 +34,8 @@ export async function createEsqlSource({
     projectRouting,
     http,
     timeRange,
-    esqlVariables,
+    // Use one representation for no variables so execution and reload produce the same source ID.
+    esqlVariables: esqlVariables?.length ? esqlVariables : undefined,
     timeFieldName,
   });
 }
