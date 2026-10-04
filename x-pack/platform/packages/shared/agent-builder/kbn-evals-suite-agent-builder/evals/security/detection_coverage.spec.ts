@@ -6,7 +6,9 @@
  */
 
 import { expect } from '@playwright/test';
+import { createHash } from 'crypto';
 import { tags } from '@kbn/scout';
+import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
@@ -31,6 +33,9 @@ import { COVERAGE_RULE_NAMES, seedDetectionCoverageFixtures } from './detection_
  * 3. **Action discipline** (deterministic). The skill decides and never mutates: it has
  *    no write tools, so an enable/install verdict must end in a link, never in a claim
  *    that something was changed.
+ *
+ * Suites 1 and 3 run on an agent pinned to three skills, so skill routing cannot fail them.
+ * Routing is scored only in suite 2, on the default agent.
  *
  * Requirements for the eval target Kibana:
  * - `dexAiSkillFindRules` and `dexAiSkillRecommendPrebuiltRules`, because this skill
@@ -63,6 +68,14 @@ const CREATE_RULE_TOOL_ID = 'security.create_detection_rule';
 const REDIRECT_TOOL_ID = 'security.build_redirect_url';
 
 const FLEET_BULK_INSTALL_PATH = '/api/fleet/epm/packages/_bulk';
+const AGENTS_API_BASE_PATH = '/api/agent_builder/agents';
+
+/** At most `SMALL_SKILL_THRESHOLD` (3) skills, so the skill router is skipped. */
+const COVERAGE_SKILL_IDS = [
+  'detection-coverage',
+  'find-security-rules',
+  'recommend-prebuilt-rules',
+];
 
 /** Every verdict the skill may return; asserting "exactly one" needs the whole set. */
 const ALL_VERDICTS = [
@@ -137,8 +150,9 @@ evaluate.describe(
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
     let teardown: (() => Promise<void>) | undefined;
+    let coverageAgentId: string | undefined;
 
-    evaluate.beforeAll(async ({ kbnClient, log }) => {
+    evaluate.beforeAll(async ({ kbnClient, fetch, connector, log }) => {
       log.info('[detection-coverage eval] installing bundled security_detection_engine package');
       await kbnClient.request({
         path: FLEET_BULK_INSTALL_PATH,
@@ -149,16 +163,50 @@ evaluate.describe(
       });
       const seeded = await seedDetectionCoverageFixtures({ kbnClient, log });
       teardown = seeded.cleanup;
+
+      // Agent ids are capped at 64 chars; one agent per model project.
+      const connectorHash = createHash('sha256').update(connector.id).digest('hex').slice(0, 8);
+      const agentId = `eval_det_cov_${connectorHash}_${Date.now().toString(36)}`;
+      await fetch(AGENTS_API_BASE_PATH, {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          id: agentId,
+          name: 'Eval: detection coverage',
+          description: 'Evaluation agent pinned to the detection-coverage skill family.',
+          configuration: {
+            // Default agent's static tools, plus the create tool so "never called" is a real check.
+            tools: [{ tool_ids: [...defaultAgentToolIds, CREATE_RULE_TOOL_ID] }],
+            skill_ids: COVERAGE_SKILL_IDS,
+          },
+        }),
+      });
+      coverageAgentId = agentId;
+      log.info(`[detection-coverage eval] created pinned eval agent ${agentId}`);
     });
 
-    evaluate.afterAll(async () => {
+    evaluate.afterAll(async ({ fetch, log }) => {
       await teardown?.();
+      if (!coverageAgentId) return;
+      try {
+        await fetch(`${AGENTS_API_BASE_PATH}/${encodeURIComponent(coverageAgentId)}`, {
+          method: 'DELETE',
+          version: '2023-10-31',
+        });
+      } catch (error) {
+        log.warning(
+          `[detection-coverage eval] failed to delete eval agent ${coverageAgentId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
     });
 
     evaluate(
       'an enabled exact match returns covered_enabled and names that rule',
       async ({ chatClient }) => {
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message: 'I need detection for PowerShell encoded commands on Windows endpoints.',
@@ -180,6 +228,7 @@ evaluate.describe(
       'a disabled exact match returns covered_disabled and points at the rule page',
       async ({ chatClient }) => {
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message: 'We need to detect lateral movement over SMB between Windows hosts.',
@@ -203,6 +252,7 @@ evaluate.describe(
       // Trap: two enabled fixtures carry T1059, but neither detects a Linux Python
       // reverse shell. A technique-level match here would hide a real gap.
       const response = await chatClient.converse({
+        options: { agentId: coverageAgentId },
         messages: [
           {
             message: 'I need detection for Python reverse shells on Linux servers.',
@@ -213,18 +263,18 @@ evaluate.describe(
       expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
       const verdicts = verdictsMentioned(answerOf(response));
       expect(verdicts).toHaveLength(1);
+      // Naming a close rule is expected, so only the verdict is asserted.
       expect(
         ['no_coverage', 'prebuilt_available'],
         'a Linux Python reverse shell is not covered by the Windows T1059 fixtures'
       ).toContain(verdicts[0]);
-      expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.powershell)).toBe(false);
-      expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.officeCmd)).toBe(false);
     });
 
     evaluate(
-      'a rule that is close but too narrow returns no_coverage and names the close rule',
+      'a rule that is close but too narrow is not coverage and is named',
       async ({ chatClient }) => {
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message: 'We need detection for kubectl exec into pods in production namespaces.',
@@ -233,9 +283,13 @@ evaluate.describe(
         });
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
-        // A too-narrow rule is not coverage: the verdict is no_coverage, but the close rule
-        // must be named so the analyst can decide to widen it instead of creating a duplicate.
-        expectSingleVerdict(answerOf(response), 'no_coverage');
+        // Elastic ships an all-namespace kubectl exec rule, so `prebuilt_available` is valid too.
+        const verdicts = verdictsMentioned(answerOf(response));
+        expect(verdicts).toHaveLength(1);
+        expect(
+          ['no_coverage', 'prebuilt_available'],
+          'a staging-only rule does not cover production namespaces'
+        ).toContain(verdicts[0]);
         expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.kubectlStaging)).toBe(true);
       }
     );
@@ -244,6 +298,7 @@ evaluate.describe(
       'an uninstalled prebuilt rule returns prebuilt_available and is checked against installed rules first',
       async ({ chatClient }) => {
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message:
@@ -265,6 +320,7 @@ evaluate.describe(
 
     evaluate('decides without mutating: no write tool is ever called', async ({ chatClient }) => {
       const response = await chatClient.converse({
+        options: { agentId: coverageAgentId },
         messages: [
           {
             message: 'We need to detect lateral movement over SMB. Just enable whatever covers it.',

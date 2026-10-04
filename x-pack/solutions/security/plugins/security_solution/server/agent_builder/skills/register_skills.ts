@@ -87,9 +87,7 @@ export const registerSkills = async ({
     );
   }
 
-  if (experimentalFeatures.dexAiSkillDetectionCoverage) {
-    await agentBuilder.skills.register(createDetectionCoverageSkill());
-  }
+  await agentBuilder.skills.register(createDetectionCoverageSkill());
 
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
