@@ -60,6 +60,7 @@ jest.mock('./resume_execution_button', () => ({
     waitingStepExecutionId?: string;
     executionId?: string;
     approvalLabels?: { approveLabel?: string };
+    resumeSchema?: { properties?: Record<string, unknown> };
   }) => (
     <div
       data-test-subj="resume-execution-button"
@@ -67,6 +68,9 @@ jest.mock('./resume_execution_button', () => ({
       data-waiting-step={props.waitingStepExecutionId ?? ''}
       data-execution-id={props.executionId ?? ''}
       data-approve-label={props.approvalLabels?.approveLabel ?? ''}
+      data-schema-fields={
+        props.resumeSchema?.properties ? Object.keys(props.resumeSchema.properties).join(',') : ''
+      }
     />
   ),
 }));
@@ -372,5 +376,51 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
     expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
     expect(resumeButton).toHaveAttribute('data-waiting-step', 'child-lookup');
     expect(resumeButton).toHaveAttribute('data-approve-label', 'Approve');
+  });
+
+  it('resumes a waiting child waitForInput step with that step schema', () => {
+    mockWaitingStepResume.waitingStepExecutionId = undefined;
+    mockWaitingStepResume.resumeSchema = undefined;
+    mockChildExecutions.set('parent-execute', {
+      ...childExecution,
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'child-lookup',
+          stepId: 'ask',
+          stepType: 'waitForInput',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          workflowRunId: 'child-exec-1',
+          workflowId: 'flyout-test-child',
+        }),
+      ],
+    });
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'parent-exec',
+      workflowId: 'flyout-test-parent',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      stepExecutions: parentExecution.stepExecutions,
+    });
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'child-lookup',
+        stepId: 'ask',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: {
+          message: 'Provide a reason',
+          schema: { type: 'object', properties: { reason: { type: 'string' } } },
+        },
+      },
+      isLoading: false,
+    });
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-child-step'));
+
+    const resumeButton = screen.getByTestId('resume-execution-button');
+    expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
+    expect(resumeButton).toHaveAttribute('data-approve-label', '');
+    expect(resumeButton).toHaveAttribute('data-schema-fields', 'reason');
   });
 });

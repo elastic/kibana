@@ -56,6 +56,17 @@ export function resumeMessageForStepExecution(
   return typeof message === 'string' && message.length > 0 ? message : undefined;
 }
 
+/** JSON Schema copied onto a selected waitForInput step, including one that belongs to a child run. */
+export function resumeSchemaForStepExecution(
+  step: { input?: unknown } | undefined
+): JsonModelSchemaType | undefined {
+  const schema = waitingStepInput(step?.input)?.schema;
+  if (schema == null || typeof schema !== 'object' || Array.isArray(schema)) {
+    return undefined;
+  }
+  return schema as JsonModelSchemaType;
+}
+
 /** Approve/Reject labels for a selected wait step, including one that belongs to a child run. */
 export function approvalLabelsForStepExecution(step: {
   stepType?: string;

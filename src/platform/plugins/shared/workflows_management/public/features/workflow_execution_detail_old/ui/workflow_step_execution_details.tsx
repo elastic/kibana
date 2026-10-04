@@ -37,7 +37,11 @@ import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
-import { approvalLabelsForStepExecution } from '../../workflow_execution_detail/model/use_waiting_step_resume';
+import {
+  approvalLabelsForStepExecution,
+  resumeMessageForStepExecution,
+  resumeSchemaForStepExecution,
+} from '../../workflow_execution_detail/model/use_waiting_step_resume';
 import {
   type ApprovalLabels,
   ResumeExecutionButton,
@@ -100,6 +104,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     );
 
     const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+    const isOwnWaitingStep = stepExecution?.id === waitingStepExecutionId;
 
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
@@ -332,10 +337,18 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             executionId={resumeExecutionId ?? workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
                             stepStartedAt={stepExecution?.startedAt}
-                            resumeMessage={resumeMessage}
-                            resumeSchema={resumeSchema}
+                            resumeMessage={
+                              isOwnWaitingStep
+                                ? resumeMessage
+                                : resumeMessageForStepExecution(stepExecution)
+                            }
+                            resumeSchema={
+                              isOwnWaitingStep
+                                ? resumeSchema
+                                : resumeSchemaForStepExecution(stepExecution)
+                            }
                             approvalLabels={
-                              stepExecution?.id === waitingStepExecutionId
+                              isOwnWaitingStep
                                 ? approvalLabels
                                 : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
                             }

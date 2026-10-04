@@ -96,6 +96,7 @@ import { useStepExecution } from '../model/use_step_execution';
 import {
   approvalLabelsForStepExecution,
   resumeMessageForStepExecution,
+  resumeSchemaForStepExecution,
   useWaitingStepResume,
 } from '../model/use_waiting_step_resume';
 
@@ -1111,7 +1112,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                               ? resumeMessageForStepExecution(selectedStepForResume ?? undefined)
                               : resumeMessage
                           }
-                          resumeSchema={resumeSchema}
+                          resumeSchema={
+                            resumeSelectedChildStep
+                              ? resumeSchemaForStepExecution(selectedStepForResume ?? undefined)
+                              : resumeSchema
+                          }
                           approvalLabels={
                             resumeSelectedChildStep
                               ? approvalLabelsForStepExecution(selectedStepForResume ?? {})
