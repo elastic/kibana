@@ -53,6 +53,7 @@ describe('convertSecurityApi', () => {
         create: jest.fn(),
         bindWorkload: jest.fn(),
         unbindWorkload: jest.fn(),
+        unbindWorkloadForDeletion: jest.fn(),
         getWorkloadBinding: jest.fn(),
         withScopedRequestForWorkload: jest.fn(),
       },

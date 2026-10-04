@@ -178,6 +178,7 @@ describe('SecurityService', function () {
           getWorkloadBinding: jest.fn().mockResolvedValue(null),
           bindWorkload: jest.fn(),
           unbindWorkload: jest.fn(),
+          unbindWorkloadForDeletion: jest.fn(),
           withScopedRequestForWorkload: jest.fn(),
         };
         setup.registerSecurityDelegate({

@@ -228,6 +228,57 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
   });
 
+  describe('#unbindWorkloadForDeletion', () => {
+    const DELETION = { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'service-account-id' };
+
+    it('removes the verified binding in the space it was given, without a privilege check', async () => {
+      await expect(
+        bindings.unbindWorkloadForDeletion(PLUGIN_ID, { ...DELETION, spaceId: 'marketing' })
+      ).resolves.toBe(true);
+
+      expect(store.getVerified).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
+      expect(store.delete).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
+      expect(checkPrivileges).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        'Unbound the service account from deleted workload [rule/rule-id] of plugin [alerting] in space [marketing] without a user request'
+      );
+    });
+
+    it('resolves false without deleting when the workload has no binding', async () => {
+      store.getVerified.mockResolvedValue(null);
+
+      await expect(bindings.unbindWorkloadForDeletion(PLUGIN_ID, DELETION)).resolves.toBe(false);
+      expect(store.delete).not.toHaveBeenCalled();
+    });
+
+    it('refuses to remove a binding that names another account', async () => {
+      store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'another-account' }));
+
+      await expect(bindings.unbindWorkloadForDeletion(PLUGIN_ID, DELETION)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(store.delete).not.toHaveBeenCalled();
+    });
+
+    it('refuses to remove a binding that fails integrity verification', async () => {
+      store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
+
+      await expect(bindings.unbindWorkloadForDeletion(PLUGIN_ID, DELETION)).rejects.toThrowError(
+        'failed integrity verification'
+      );
+      expect(store.delete).not.toHaveBeenCalled();
+    });
+
+    it('ignores extra fields a caller forwards', async () => {
+      await bindings.unbindWorkloadForDeletion(PLUGIN_ID, {
+        ...DELETION,
+        pluginId: 'another-plugin',
+      } as never);
+
+      expect(store.delete).toHaveBeenCalledWith(COORDINATES);
+    });
+  });
+
   describe('#getBinding', () => {
     it('scopes the lookup to the plugin Core supplied', async () => {
       await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).resolves.toEqual(binding());
@@ -448,6 +499,14 @@ describe('ServiceAccountWorkloadBindings', () => {
         'unbindWorkload',
         (api: ServiceAccountWorkloadBindings) =>
           api.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD),
+      ],
+      [
+        'unbindWorkloadForDeletion',
+        (api: ServiceAccountWorkloadBindings) =>
+          api.unbindWorkloadForDeletion(PLUGIN_ID, {
+            ...WORKLOAD_IN_SPACE,
+            expectedServiceAccountId: 'sa',
+          }),
       ],
       [
         'getBinding',

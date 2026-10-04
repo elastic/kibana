@@ -25,12 +25,17 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
+import type { IndexWorkflowDocumentOptions } from './workflow_occ_types';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import * as workflowDeletion from '../api/lib/workflow_deletion';
-import { disableAllWorkflows as disableAllWorkflowsLib } from '../api/lib/workflow_disable_all';
+import {
+  disableAllWorkflows as disableAllWorkflowsLib,
+  mutateWorkflowToDisabled,
+} from '../api/lib/workflow_disable_all';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 jest.mock('../lib/log_workflow_changes', () => ({
@@ -3945,5 +3950,236 @@ describe('service account mutation race regressions', () => {
         serviceAccountId: 'account-b',
       })
     );
+  });
+});
+
+describe('managed orphan cleanup without a request', () => {
+  const ORPHAN = { managedBy: 'removedPlugin', definitionId: 'system-orphan' };
+
+  const setup = ({ runAs = 'account-a' }: { runAs?: string } = {}) => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    bindings.unbindWorkloadForDeletion.mockResolvedValue(true);
+    const getWorkflowExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+      executionQueryService: {
+        getWorkflowExecutions,
+      } as unknown as WorkflowExecutionQueryService,
+    });
+    const source = makeSource({
+      managed: true,
+      managedBy: ORPHAN.managedBy,
+      originManagedWorkflowId: ORPHAN.definitionId,
+      yaml: 'name: Test Workflow\nenabled: true',
+      definition: {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: runAs ? { run_as: runAs } : {},
+      },
+    });
+    client.search.mockResolvedValue({
+      hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
+    });
+    client.index.mockResolvedValue({ result: 'updated', _seq_no: 6, _primary_term: 1 });
+    return {
+      core,
+      bindings,
+      client,
+      source,
+      getWorkflowExecutions,
+      service: new WorkflowCrudService(deps),
+    };
+  };
+
+  describe('deleteManagedOrphan', () => {
+    it('releases the expected binding, then deletes the observed revision', async () => {
+      const { core, bindings, client, service } = setup();
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        true
+      );
+
+      expect(bindings.unbindWorkloadForDeletion).toHaveBeenCalledWith({
+        workloadType: 'workflow',
+        workloadId: 'system-orphan',
+        spaceId: 'default',
+        expectedServiceAccountId: 'account-a',
+      });
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 5, if_primary_term: 1 })
+      );
+      const { delete: deleteDocument } = core.elasticsearch.client.asInternalUser;
+      expect(deleteDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'system-orphan', if_seq_no: 6, if_primary_term: 1 })
+      );
+      expect(bindings.unbindWorkloadForDeletion.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteDocument.mock.invocationCallOrder[0]
+      );
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('deletes an unbound orphan without touching bindings', async () => {
+      const { core, bindings, service } = setup({ runAs: '' });
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        true
+      );
+
+      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalled();
+    });
+
+    it('resolves false when the workflow is already gone', async () => {
+      const { client, bindings, service } = setup();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        false
+      );
+      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
+    });
+
+    it('keeps the binding of an orphan with running executions', async () => {
+      const { core, bindings, client, getWorkflowExecutions, service } = setup();
+      getWorkflowExecutions.mockResolvedValue({ total: 1, results: [] });
+
+      await expect(
+        service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)
+      ).rejects.toBeInstanceOf(WorkflowConflictError);
+      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
+      expect(client.index).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+    });
+
+    it('does not delete when the binding names another account', async () => {
+      const { core, bindings, client, service } = setup();
+      bindings.unbindWorkloadForDeletion.mockRejectedValue(new Error('binding mismatch'));
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).rejects.toThrow(
+        'binding mismatch'
+      );
+      expect(client.index).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { managed: false },
+      { managedBy: 'ownerPlugin' },
+      { originManagedWorkflowId: 'system-other' },
+      { spaceId: 'other-space' },
+    ])('refuses a workflow that no longer matches the sweep snapshot %j', async (changed) => {
+      const { bindings, client, source, service } = setup();
+      Object.assign(source, changed);
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).rejects.toThrow(
+        'observed'
+      );
+      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('disableManagedOrphan', () => {
+    it('disables a bound orphan with OCC without a request or binding change', async () => {
+      const { core, bindings, client, service } = setup();
+
+      await service.disableManagedOrphan('system-orphan', 'default', ORPHAN);
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'system-orphan',
+          if_seq_no: 5,
+          if_primary_term: 1,
+          document: expect.objectContaining({
+            enabled: false,
+            yaml: expect.stringContaining('enabled: false'),
+            definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+          }),
+        })
+      );
+      expect(bindings.getWorkloadBinding).not.toHaveBeenCalled();
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('refuses a workflow that no longer matches the sweep snapshot', async () => {
+      const { client, source, service } = setup();
+      source.managedBy = 'ownerPlugin';
+
+      await expect(
+        service.disableManagedOrphan('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('observed');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    const writeDisabled = (
+      { service, source }: ReturnType<typeof setup>,
+      overrides: Partial<WorkflowProperties> = {},
+      options: Partial<IndexWorkflowDocumentOptions> = {}
+    ) =>
+      service.indexWorkflowDocument(
+        'system-orphan',
+        { ...applyWorkflowVersion(mutateWorkflowToDisabled(source), source), ...overrides },
+        {
+          ifSeqNo: 5,
+          ifPrimaryTerm: 1,
+          previousDocument: source,
+          managedOrphanDisable: ORPHAN,
+          ...options,
+        }
+      );
+
+    it('accepts exactly the disable transformation', async () => {
+      const context = setup();
+      await expect(writeDisabled(context)).resolves.toEqual({ seqNo: 6, primaryTerm: 1 });
+    });
+
+    it.each([
+      ['another field change', { name: 'Renamed' }, {}],
+      [
+        'a changed run_as',
+        {
+          definition: {
+            version: '1',
+            name: 'Test Workflow',
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            steps: [],
+            settings: { run_as: 'account-b' },
+          },
+        },
+        {},
+      ],
+      ['a request', {}, { request: httpServerMock.createKibanaRequest() }],
+      ['missing OCC', {}, { ifPrimaryTerm: undefined }],
+      ['a create', {}, { create: true }],
+    ] as const)('rejects a write with %s', async (_name, overrides, options) => {
+      const context = setup();
+      await expect(
+        writeDisabled(context, overrides as Partial<WorkflowProperties>, options)
+      ).rejects.toThrow('observed');
+      expect(context.client.index).not.toHaveBeenCalled();
+    });
+
+    it('keeps the normal disable path gated for bound workflows', async () => {
+      const { client, service } = setup();
+
+      await expect(service.disableWorkflow('system-orphan', 'default')).rejects.toThrow(
+        'authenticated request'
+      );
+      expect(client.index).not.toHaveBeenCalled();
+    });
   });
 });

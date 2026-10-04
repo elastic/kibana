@@ -13,6 +13,7 @@ import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadDeletionParams,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-server';
@@ -48,6 +49,11 @@ export interface ServiceAccountWorkloadBindingsApi {
     pluginId: string,
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
+  ): Promise<boolean>;
+
+  unbindWorkloadForDeletion(
+    pluginId: string,
+    params: ServiceAccountWorkloadDeletionParams
   ): Promise<boolean>;
 
   getBinding(
@@ -177,6 +183,33 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       // otherwise leave a binding behind with nothing to show for it.
       this.logger.warn(
         `Unbinding matched no binding for workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
+      );
+    }
+
+    return deleted;
+  }
+
+  async unbindWorkloadForDeletion(
+    pluginId: string,
+    params: ServiceAccountWorkloadDeletionParams
+  ): Promise<boolean> {
+    this.ensureAvailable();
+
+    // No request means no privilege check, so this path may only ever remove the exact binding the
+    // caller observed: a verified binding naming another account is a concurrent rebind to respect.
+    const coordinates = this.toCoordinates(pluginId, params);
+    const binding = await this.store.getVerified(coordinates);
+    if (!binding) return false;
+    if (binding.serviceAccountId !== params.expectedServiceAccountId) {
+      throw Boom.forbidden(
+        'The workload binding does not match the expected service account; refusing to remove it.'
+      );
+    }
+
+    const deleted = await this.store.delete(coordinates);
+    if (deleted) {
+      this.logger.info(
+        `Unbound the service account from deleted workload [${coordinates.workloadType}/${coordinates.workloadId}] of plugin [${pluginId}] in space [${coordinates.spaceId}] without a user request`
       );
     }
 

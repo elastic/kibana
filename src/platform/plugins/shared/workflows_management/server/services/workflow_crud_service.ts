@@ -42,14 +42,18 @@ import type { WorkflowCrudDeps } from './types';
 import { assertWorkflowOperation } from './workflow_access_control';
 import type {
   IndexWorkflowDocumentOptions,
+  ManagedWorkflowOrphan,
   ReadModifyWriteWorkflowDocumentParams,
   VersionedWorkflowDocument,
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 import {
+  ensureManagedOrphanDisablePreservesBinding,
+  ensureManagedOrphanUnchanged,
   ensureManagedWorkflowUpgradePreservesBinding,
   ensureWorkflowServiceAccountMutationAuthorized,
+  releaseManagedOrphanBinding,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
 import {
@@ -295,6 +299,10 @@ export class WorkflowCrudService {
 
       return { seqNo: response._seq_no, primaryTerm: response._primary_term };
     };
+    if (options?.managedOrphanDisable) {
+      ensureManagedOrphanDisablePreservesBinding({ document, previous, options });
+      return write();
+    }
     if (options?.managedWorkflowUpgrade) {
       if (!bindings) throw new Error('Service account bindings are unavailable.');
       await ensureManagedWorkflowUpgradePreservesBinding({
@@ -335,7 +343,8 @@ export class WorkflowCrudService {
     spaceId: string,
     maxRetries?: number,
     getOptions?: WorkflowDocumentGetOptions,
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    managedOrphanDisable?: ManagedWorkflowOrphan
   ): OccWriter<WorkflowProperties> {
     const resolvedMaxRetries = maxRetries ?? DEFAULT_MAX_RETRIES;
     let previousDocument: WorkflowProperties | undefined;
@@ -359,6 +368,7 @@ export class WorkflowCrudService {
           ifPrimaryTerm,
           request,
           previousDocument,
+          managedOrphanDisable,
         }),
       logger: this.deps.logger,
       maxRetries: resolvedMaxRetries,
@@ -1325,6 +1335,67 @@ export class WorkflowCrudService {
       getOptions: { includeDeleted: true },
     });
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+  }
+
+  /** Disables a managed orphan without a request; the write may only turn `enabled` off. */
+  async disableManagedOrphan(
+    id: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<void> {
+    await this.runOccWrite(id, async () => {
+      const writer = this.getReadModifyWriteOccWriter(
+        spaceId,
+        undefined,
+        { includeDeleted: true },
+        undefined,
+        orphan
+      );
+      await writer.readModifyWrite({
+        id,
+        mutate: (existing) => applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing),
+      });
+    });
+    await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+  }
+
+  /**
+   * Force-deletes a managed orphan without a request, first releasing its service account
+   * binding. Resolves to whether a workflow was deleted.
+   */
+  async deleteManagedOrphan(
+    id: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<boolean> {
+    const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, {
+      includeDeleted: true,
+    });
+    if (!versioned) return false;
+    const source = ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
+    const accountId = source.definition?.settings?.run_as;
+    if (accountId) {
+      const bindings = this.deps.getServiceAccountBindings?.();
+      if (!bindings) throw new Error('Service account bindings are unavailable.');
+      const executions = await this.deps.executionQueryService.getWorkflowExecutions(
+        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+        spaceId
+      );
+      if (executions.total > 0) {
+        throw new WorkflowConflictError(
+          `Cannot force-delete workflow with running executions: ${id}`,
+          id
+        );
+      }
+      // Unbinding first fails closed: if the delete below loses a race, the workflow still names
+      // `run_as` but has no binding, so it cannot run until the next sweep removes it.
+      await releaseManagedOrphanBinding({ bindings, workflowId: id, spaceId, accountId });
+    }
+    const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
+    if (result.deleted !== 1) {
+      throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
+    }
+    return true;
   }
 
   async disableAllWorkflows(

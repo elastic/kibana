@@ -81,6 +81,7 @@ describe('getDefaultSecurityImplementation', () => {
     it.each([
       'bindWorkload',
       'unbindWorkload',
+      'unbindWorkloadForDeletion',
       'getWorkloadBinding',
       'withScopedRequestForWorkload',
     ] as const)('%s rejects', async (method) => {

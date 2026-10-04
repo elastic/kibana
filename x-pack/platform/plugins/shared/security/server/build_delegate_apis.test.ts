@@ -346,6 +346,17 @@ describe('buildSecurityApi', () => {
       );
     });
 
+    it('delegates unbindWorkloadForDeletion', async () => {
+      const params = { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'service-account-id' };
+
+      await api.serviceAccounts.unbindWorkloadForDeletion('alerting', params);
+
+      expect(serviceAccounts!.workloads.unbindWorkloadForDeletion).toHaveBeenCalledWith(
+        'alerting',
+        params
+      );
+    });
+
     it('delegates getBinding and returns its result', async () => {
       const binding = { pluginId: 'alerting' } as never;
       serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
@@ -388,6 +399,14 @@ describe('buildSecurityApi', () => {
             httpServerMock.createKibanaRequest(),
             WORKLOAD
           ),
+      ],
+      [
+        'unbindWorkloadForDeletion',
+        () =>
+          api.serviceAccounts.unbindWorkloadForDeletion('alerting', {
+            ...WORKLOAD_IN_SPACE,
+            expectedServiceAccountId: 'sa',
+          }),
       ],
       [
         'getWorkloadBinding',

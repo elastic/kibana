@@ -50,6 +50,7 @@ export const serviceAccountsServiceMock = {
         boundAt: '2026-08-21T00:00:00.000Z',
       }),
       unbindWorkload: jest.fn().mockResolvedValue(true),
+      unbindWorkloadForDeletion: jest.fn().mockResolvedValue(true),
       getBinding: jest.fn().mockResolvedValue(null),
       withScopedRequest: jest.fn().mockImplementation(async (_pluginId, _params, fn) =>
         fn(

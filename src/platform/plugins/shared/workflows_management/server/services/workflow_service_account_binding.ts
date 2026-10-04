@@ -13,7 +13,9 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 
-import type { IndexWorkflowDocumentOptions } from './workflow_occ_types';
+import type { IndexWorkflowDocumentOptions, ManagedWorkflowOrphan } from './workflow_occ_types';
+import { mutateWorkflowToDisabled } from '../api/lib/workflow_disable_all';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 type Bindings = WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
@@ -187,4 +189,79 @@ export const ensureManagedWorkflowUpgradePreservesBinding = async ({
   if (binding?.serviceAccountId !== accountId) {
     throw Boom.forbidden('The managed workflow service account binding is missing or has changed.');
   }
+};
+
+const isObservedManagedOrphan = (
+  document: WorkflowProperties | null | undefined,
+  orphan: ManagedWorkflowOrphan,
+  spaceId: string
+): document is WorkflowProperties =>
+  !!document?.managed &&
+  document.spaceId === spaceId &&
+  (document.managedBy ?? null) === orphan.managedBy &&
+  (document.originManagedWorkflowId ?? null) === orphan.definitionId;
+
+/** Authorizes the orphan sweep to delete a workflow it observed, without a user request. */
+export const ensureManagedOrphanUnchanged = ({
+  document,
+  orphan,
+  spaceId,
+}: {
+  document: WorkflowProperties | null;
+  orphan: ManagedWorkflowOrphan;
+  spaceId: string;
+}): WorkflowProperties => {
+  if (!isObservedManagedOrphan(document, orphan, spaceId)) {
+    throw Boom.forbidden(
+      'Managed orphan cleanup may only delete the managed workflow the sweep observed.'
+    );
+  }
+  return document;
+};
+
+/** Authorizes the orphan sweep to disable a workflow it observed, leaving its identity unchanged. */
+export const ensureManagedOrphanDisablePreservesBinding = ({
+  document,
+  previous,
+  options,
+}: {
+  document: WorkflowProperties;
+  previous: WorkflowProperties | null;
+  options: IndexWorkflowDocumentOptions;
+}): void => {
+  const orphan = options.managedOrphanDisable;
+  if (
+    !orphan ||
+    options.request ||
+    options.create ||
+    options.ifSeqNo == null ||
+    options.ifPrimaryTerm == null ||
+    !isObservedManagedOrphan(previous, orphan, document.spaceId) ||
+    !isEqual(document, applyWorkflowVersion(mutateWorkflowToDisabled(previous), previous))
+  ) {
+    throw Boom.forbidden(
+      'Managed orphan cleanup may only disable the managed workflow the sweep observed.'
+    );
+  }
+};
+
+/** Releases the binding of a managed orphan that is about to be deleted without a user request. */
+export const releaseManagedOrphanBinding = async ({
+  bindings,
+  workflowId,
+  spaceId,
+  accountId,
+}: {
+  bindings: Bindings;
+  workflowId: string;
+  spaceId: string;
+  accountId: string;
+}): Promise<void> => {
+  if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
+  await bindings.unbindWorkloadForDeletion({
+    workloadType: 'workflow',
+    workloadId: workflowId,
+    spaceId,
+    expectedServiceAccountId: accountId,
+  });
 };
