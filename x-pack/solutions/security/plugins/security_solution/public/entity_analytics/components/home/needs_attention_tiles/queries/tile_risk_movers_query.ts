@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../use_time_range_param';
+import type { TimeRange } from '../../new_entities_table';
 
 /**
  * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
@@ -56,6 +56,6 @@ export const buildRiskMoversCountQuery = (
     `| WHERE entity.name IS NOT NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
+    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
   ].join('\n');
 };

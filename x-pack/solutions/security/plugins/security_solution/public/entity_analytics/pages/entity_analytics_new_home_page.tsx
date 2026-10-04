@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
+import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { isNoneGroup } from '@kbn/grouping';
+import type { EntityType } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EntitySearchBar } from '../components/home/entity_search_bar';
@@ -26,12 +31,34 @@ import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_pr
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { useTimeRangeParam } from '../components/home/use_time_range_param';
+import { DataViewContext } from '../components/home/entities_table';
 import {
-  useEntityFiltersParam,
-  getEntityFilterTerms,
-} from '../components/home/use_entity_filters_param';
+  EntitiesGroups,
+  EntitiesGrid,
+  useEntityAnalyticsUrlState,
+  useEntityGridFilters,
+  RAW_VIEW_COLUMNS,
+  RESOLVED_VIEW_COLUMNS,
+  toList,
+  joinAnd,
+} from '../components/home/new_entities_table';
+import type {
+  RowActions,
+  CellHandlers,
+  EntityFilters,
+} from '../components/home/new_entities_table';
+import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
+import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
+import {
+  EntityType as SecurityEntityType,
+  EntityTypeToIdentifierField,
+} from '../../../common/entity_analytics/types';
+import { createDataProviders } from '../../app/actions/add_to_timeline/data_provider';
+import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_investigate_in_timeline';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
+import type { ESBoolQuery } from '../../../common/typed_json';
 import {
   useAlertBasedTiles,
   useEntitiesWithAnomaliesCount,
@@ -42,19 +69,44 @@ import {
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
   EMPTY_ENTITY_IDS,
-  type ActiveFilter,
   type SignalCardData,
+  type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
-import {
-  DataViewContext,
-  useEntityURLState,
-  DEFAULT_ENTITIES_TABLE_CONFIG,
-  DEFAULT_ENTITIES_TABLE_SORT,
-  type EntitiesBaseURLQuery,
-  EntitiesTableSection,
-  type URLQuery,
-} from '../components/home/entities_table';
-import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
+
+const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
+
+/** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
+const MAX_TILE_FILTER_ENTITY_IDS = 1000;
+
+const VIEW_BY_OPTIONS = [
+  {
+    key: 'resolved',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.viewBy.resolvedLabel', {
+      defaultMessage: 'Resolved entities',
+    }),
+  },
+  {
+    key: 'raw',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.viewBy.rawLabel', {
+      defaultMessage: 'Raw records',
+    }),
+  },
+];
+
+const GROUP_BY_OPTIONS = [
+  {
+    key: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.groupBy.resolutionLabel', {
+      defaultMessage: 'Resolution',
+    }),
+  },
+  {
+    key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.groupBy.entityTypeLabel', {
+      defaultMessage: 'Entity type',
+    }),
+  },
+];
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.home.pageTitle', {
   defaultMessage: 'Entity Analytics',
@@ -65,29 +117,66 @@ const MANAGEMENT_LABEL = i18n.translate(
   { defaultMessage: 'Management' }
 );
 
-const combineFilters = (
-  parts: Array<QueryDslQueryContainer | null | undefined>
-): QueryDslQueryContainer | undefined => {
-  const active = parts.filter((p): p is QueryDslQueryContainer => p !== null && p !== undefined);
-  if (!active.length) return undefined;
-  return { bool: { filter: active } };
+const GROUP_BY_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.groupBySelector.title',
+  { defaultMessage: 'Group by' }
+);
+
+const VIEW_BY_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.viewBySelector.title',
+  { defaultMessage: 'View by' }
+);
+
+const buildCombinedFilter = (
+  esFilter: ESBoolQuery | undefined,
+  entityFilters: EntityFilters,
+  view: 'resolved' | 'raw',
+  tileFilter?: QueryDslQueryContainer | null
+) => {
+  const filterClauses: QueryDslQueryContainer[] = [
+    ...(esFilter ? [esFilter] : []),
+    ...(entityFilters.entityTypes.length
+      ? [{ terms: { 'entity.EngineMetadata.Type': entityFilters.entityTypes } }]
+      : []),
+    ...(entityFilters.riskLevels.length
+      ? [{ terms: { 'entity.risk.calculated_level': entityFilters.riskLevels } }]
+      : []),
+    ...(entityFilters.assetCriticality.length
+      ? [{ terms: { 'asset.criticality': entityFilters.assetCriticality } }]
+      : []),
+    ...(entityFilters.watchlists.length
+      ? [{ terms: { 'entity.attributes.watchlists': entityFilters.watchlists } }]
+      : []),
+    ...(entityFilters.dataSources.length
+      ? [{ terms: { 'entity.source': entityFilters.dataSources } }]
+      : []),
+    ...(tileFilter ? [tileFilter] : []),
+  ];
+  const mustNotClauses =
+    view === 'resolved'
+      ? [{ exists: { field: 'entity.relationships.resolution.resolved_to' } }]
+      : [];
+  return filterClauses.length || mustNotClauses.length
+    ? { bool: { filter: filterClauses, must: [], must_not: mustNotClauses, should: [] } }
+    : undefined;
 };
 
-export const toTermsFilter = (ids: string[]): QueryDslQueryContainer | null => {
-  if (ids.length === 0) return null;
+/** DSL counterpart of the tile ES|QL clause (grouping buckets use this path). */
+const buildTileFilter = (ids: string[], view: 'resolved' | 'raw'): QueryDslQueryContainer => {
+  if (!ids.length) return { match_none: {} };
+  if (view === 'raw') {
+    return {
+      bool: {
+        should: [
+          { terms: { 'entity.id': ids } },
+          { terms: { 'entity.relationships.resolution.resolved_to': ids } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+  }
   return { terms: { 'entity.id': ids } };
 };
-
-const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
-  query,
-  filters,
-  pageFilters: [],
-  sort: DEFAULT_ENTITIES_TABLE_SORT,
-  pageIndex: 0,
-});
-
-/** ES `terms` queries fail above 65,536 values; keep the table well under that. */
-const MAX_CARD_FILTER_ENTITY_IDS = 1000;
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
@@ -98,8 +187,148 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   } = useEntityStoreDataView(spaceId);
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
+  const { addWarning } = useAppToasts();
+  const {
+    openEntityFlyout,
+    openEntityResolution,
+    openEntityAlertsInsights,
+    openEntityAnomalyInsights,
+    openEntityGraphView,
+  } = useFlyoutApi();
+  const { investigateInTimeline } = useInvestigateInTimeline();
+  const euidApi = useEntityStoreEuidApi();
+  const {
+    timeRange,
+    setTimeRange,
+    entityFilters,
+    setEntityFilters,
+    view: viewBy,
+    setView: setViewBy,
+    sortField,
+    sortDirection,
+    setSort,
+    pageIndex,
+    pageSize,
+    setPage,
+    setPageSize,
+    activeTile,
+    setActiveTile,
+  } = useEntityAnalyticsUrlState();
+
+  const activeColumns = viewBy === 'raw' ? RAW_VIEW_COLUMNS : RESOLVED_VIEW_COLUMNS;
+
+  const onEntityNameClick = useCallback(
+    (row: Record<string, unknown>) => {
+      const entityId = row['entity.id'] as string;
+      const entityName = row['entity.name'] as string | undefined;
+      const engineType = row['entity.EngineMetadata.Type'] as string | undefined;
+      if (!entityId) return;
+      openEntityFlyout({
+        entityId,
+        entityName,
+        engineType,
+        scopeId: ENTITY_TABLE_SCOPE_ID,
+        contextID: ENTITY_TABLE_SCOPE_ID,
+        origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+      });
+    },
+    [openEntityFlyout]
+  );
+
+  const onGroupSizeClick = useCallback(
+    (row: Record<string, unknown>) => {
+      const entityId = row['entity.id'] as string;
+      const entityName = row['entity.name'] as string;
+      const entityType = row['entity.EngineMetadata.Type'] as EntityType;
+      if (!entityId) return;
+      openEntityResolution({
+        entityId,
+        entityName,
+        entityType,
+        scopeId: ENTITY_TABLE_SCOPE_ID,
+      });
+    },
+    [openEntityResolution]
+  );
+
+  const onAlertCountClick = useCallback(
+    (row: Record<string, unknown>) => {
+      const entityId = row['entity.id'] as string;
+      const entityName = row['entity.name'] as string;
+      const rawType = row['entity.EngineMetadata.Type'] as string;
+      if (!entityId) return;
+      const entityType =
+        rawType === 'host'
+          ? SecurityEntityType.host
+          : rawType === 'user'
+          ? SecurityEntityType.user
+          : SecurityEntityType.generic;
+      const value = entityType === SecurityEntityType.generic ? entityId : entityName;
+      openEntityAlertsInsights({ entityType, value, entityId, scopeId: ENTITY_TABLE_SCOPE_ID });
+    },
+    [openEntityAlertsInsights]
+  );
+
+  const onAnomalyCountClick = useCallback(
+    (row: Record<string, unknown>) => {
+      const entityId = row['entity.id'] as string;
+      const entityName = row['entity.name'] as string;
+      const rawType = row['entity.EngineMetadata.Type'] as string;
+      if (!entityId || (rawType !== 'host' && rawType !== 'user')) return;
+      const entityType = rawType === 'host' ? SecurityEntityType.host : SecurityEntityType.user;
+      openEntityAnomalyInsights({ entityType, value: entityName, entityId });
+    },
+    [openEntityAnomalyInsights]
+  );
+
+  const cellHandlers = useMemo<CellHandlers>(
+    () => ({ onEntityNameClick, onGroupSizeClick, onAlertCountClick, onAnomalyCountClick }),
+    [onEntityNameClick, onGroupSizeClick, onAlertCountClick, onAnomalyCountClick]
+  );
+
+  const rowActions = useMemo<RowActions>(
+    () => ({
+      onInvestigateInTimeline: (row) => {
+        const entityType = row['entity.EngineMetadata.Type'] as SecurityEntityType | undefined;
+        const entityName = row['entity.name'] as string | undefined;
+        if (!entityName || !entityType) return;
+        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(entityType, row);
+        if (kqlFilter) {
+          investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
+          return;
+        }
+        const field = EntityTypeToIdentifierField[entityType] ?? 'entity.id';
+        const dataProviders = createDataProviders({
+          contextId: ENTITY_TABLE_SCOPE_ID,
+          field,
+          values: entityName,
+        });
+        if (dataProviders?.length) investigateInTimeline({ dataProviders });
+      },
+      onOpenEntityGraph: (row) => {
+        const entityId = row['entity.id'] as string;
+        const entityName = row['entity.name'] as string;
+        if (!entityId) return;
+        openEntityGraphView({
+          entityId,
+          entityName,
+          scopeId: ENTITY_TABLE_SCOPE_ID,
+          onShowEntity: ({ engineType, entityId: relatedId, entityName: relatedName }) => {
+            openEntityFlyout({
+              engineType,
+              entityId: relatedId,
+              entityName: relatedName,
+              scopeId: ENTITY_TABLE_SCOPE_ID,
+            });
+          },
+        });
+      },
+    }),
+    [euidApi, investigateInTimeline, openEntityGraphView, openEntityFlyout]
+  );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
+  const { searchExpression, entityExpression } = useEntityGridFilters();
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -116,19 +345,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     return map;
   }, [watchlistsData]);
 
-  const { addWarning } = useAppToasts();
-  const [timeRange, setTimeRange] = useTimeRangeParam();
-  const [viewBy] = useState<'resolved' | 'raw'>('resolved');
-  const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
+  const [groupsSelected, setGroupsSelected] = useState<string[]>(['none']);
+  const [groupingPageIndex, setGroupingPageIndex] = useState(0);
+  const [groupingPageSize, setGroupingPageSize] = useState(25);
 
-  const { entityFilters, setEntityFilters } = useEntityFiltersParam();
+  const isGroupSelected = !isNoneGroup(groupsSelected);
 
-  const baseFilter = useMemo(
-    () => combineFilters([esFilter, ...getEntityFilterTerms(entityFilters)]),
-    [esFilter, entityFilters]
-  );
-
-  const resolvedSpaceId = spaceId ?? 'default';
   const { data: entityStoreStatusData, isLoading: entityStoreStatusLoading } =
     useEntityStoreStatus();
   const entityStoreDisabled =
@@ -139,6 +361,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   // is known to be running so we do not query a missing entities-latest alias.
   const skipTileQueries =
     !spaceId || entityStoreStatusLoading || entityStoreDisabled || entityStoreInstalling;
+
+  const resolvedSpaceId = spaceId ?? 'default';
 
   const {
     alertsCount,
@@ -195,17 +419,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     skip: skipTileQueries,
   });
 
-  const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
-    setActiveFilter((prev) =>
-      prev?.cardId === cardId ? null : { type: 'card', cardId, label: cardId }
-    );
-  }, []);
+  const handleFilterForTile = useCallback(
+    (tileId: SignalCardId) => {
+      setActiveTile(activeTile === tileId ? null : tileId);
+    },
+    [activeTile, setActiveTile]
+  );
 
   const selectedEntityIds = useMemo(() => {
-    if (!activeFilter || activeFilter.type !== 'card') {
+    if (!activeTile) {
       return EMPTY_ENTITY_IDS;
     }
-    switch (activeFilter.cardId) {
+    switch (activeTile) {
       case 'entitiesWithAlerts':
         return alertsEntityIds;
       case 'entitiesWithAnomalies':
@@ -222,7 +447,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         return EMPTY_ENTITY_IDS;
     }
   }, [
-    activeFilter,
+    activeTile,
     alertsEntityIds,
     anomaliesEntityIds,
     riskMoversEntityIds,
@@ -231,39 +456,90 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     newEntityEntityIds,
   ]);
 
-  const cardFilter = useMemo((): QueryDslQueryContainer | null => {
-    if (!activeFilter || activeFilter.type !== 'card') return null;
-    // Always return a terms filter when a card is active — an empty array matches nothing,
-    // keeping the table consistent with the tile (0 shown) rather than falling back to all entities.
-    const ids =
-      selectedEntityIds.length > MAX_CARD_FILTER_ENTITY_IDS
-        ? selectedEntityIds.slice(0, MAX_CARD_FILTER_ENTITY_IDS)
-        : selectedEntityIds;
-    return { terms: { 'entity.id': ids } };
-  }, [activeFilter, selectedEntityIds]);
+  const cappedTileEntityIds = useMemo(() => {
+    if (!activeTile) return null;
+    return selectedEntityIds.length > MAX_TILE_FILTER_ENTITY_IDS
+      ? selectedEntityIds.slice(0, MAX_TILE_FILTER_ENTITY_IDS)
+      : selectedEntityIds;
+  }, [activeTile, selectedEntityIds]);
+
+  const tileWhereExpression = useMemo(() => {
+    if (cappedTileEntityIds == null) return undefined;
+    // Always constrain when a tile is active — empty list matches nothing so the
+    // table stays consistent with a 0-count tile rather than falling back to all entities.
+    if (!cappedTileEntityIds.length) return 'false';
+    const list = toList(cappedTileEntityIds);
+    // Tiles emit resolved (effective) ids. Resolved view: parent rows only.
+    // Raw view: parent + members of those identities.
+    return viewBy === 'raw'
+      ? `(entity.id IN (${list}) OR entity.relationships.resolution.resolved_to IN (${list}))`
+      : `entity.id IN (${list})`;
+  }, [cappedTileEntityIds, viewBy]);
+
+  const tileFilter = useMemo((): QueryDslQueryContainer | null => {
+    if (cappedTileEntityIds == null) return null;
+    return buildTileFilter(cappedTileEntityIds, viewBy);
+  }, [cappedTileEntityIds, viewBy]);
+
+  const combinedFilter = useMemo(
+    () => buildCombinedFilter(esFilter, entityFilters, viewBy, tileFilter),
+    [esFilter, entityFilters, viewBy, tileFilter]
+  );
+
+  const groupingState = useMemo<EntityURLStateResult>(
+    () => ({
+      query: (combinedFilter as ESBoolQuery | undefined) ?? {
+        bool: { filter: [], must: [], should: [], must_not: [] },
+      },
+      setUrlQuery: () => {},
+      pageSize: groupingPageSize,
+      pageIndex: groupingPageIndex,
+      onChangePage: setGroupingPageIndex,
+      onChangeItemsPerPage: setGroupingPageSize,
+      sort: [],
+      filters: [],
+      onSort: () => {},
+      onResetFilters: () => {},
+      getRowsFromPages: () => [],
+    }),
+    [combinedFilter, groupingPageSize, groupingPageIndex]
+  );
+
+  const gridEntityExpression = useMemo(
+    () => joinAnd(entityExpression, tileWhereExpression),
+    [entityExpression, tileWhereExpression]
+  );
 
   useUpdateEffect(() => {
-    if (!activeFilter || selectedEntityIds.length <= MAX_CARD_FILTER_ENTITY_IDS) {
+    setPage(0);
+  }, [searchExpression, gridEntityExpression, setPage]);
+
+  useUpdateEffect(() => {
+    setGroupingPageIndex(0);
+  }, [tileWhereExpression, searchExpression, entityExpression, viewBy]);
+
+  useUpdateEffect(() => {
+    if (!activeTile || selectedEntityIds.length <= MAX_TILE_FILTER_ENTITY_IDS) {
       return;
     }
     addWarning({
       title: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitTitle',
+        'xpack.securitySolution.entityAnalytics.home.tiles.tileFilterLimitTitle',
         {
           defaultMessage: 'Table shows {limit} of {count} entities',
-          values: { limit: MAX_CARD_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
+          values: { limit: MAX_TILE_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
         }
       ),
       text: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitDescription',
+        'xpack.securitySolution.entityAnalytics.home.tiles.tileFilterLimitDescription',
         {
           defaultMessage:
             'The table is limited to {limit} entities from this tile. Narrow the time range or filters to see a smaller set.',
-          values: { limit: MAX_CARD_FILTER_ENTITY_IDS },
+          values: { limit: MAX_TILE_FILTER_ENTITY_IDS },
         }
       ),
     });
-  }, [activeFilter, selectedEntityIds.length, addWarning]);
+  }, [activeTile, selectedEntityIds.length, addWarning]);
 
   const signalCards = useMemo(
     (): SignalCardData[] => [
@@ -464,6 +740,60 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
+  const groupBySelectorElement = (
+    <GroupSelector
+      groupingId="ea-new-home-group-by"
+      groupsSelected={groupsSelected}
+      onGroupChange={(key) => {
+        setGroupsSelected((prev) => {
+          if (key === 'none') return ['none'];
+          const cleaned = prev.filter((g) => g !== 'none');
+          if (cleaned.includes(key)) {
+            const next = cleaned.filter((g) => g !== key);
+            return next.length ? next : ['none'];
+          }
+          return [...cleaned, key];
+        });
+      }}
+      options={GROUP_BY_OPTIONS.filter(
+        (o) => !(viewBy === 'resolved' && o.key === ENTITY_GROUPING_OPTIONS.RESOLUTION)
+      )}
+      fields={isDataViewLoading ? [] : dataView.fields.getAll()}
+      title={GROUP_BY_SELECTOR_TITLE}
+      maxGroupingLevels={3}
+      settings={{ hideCustomFieldOption: false }}
+    />
+  );
+
+  const viewBySelectorElement = (
+    <GroupSelector
+      groupingId="ea-new-home-view-by"
+      groupsSelected={[viewBy]}
+      onGroupChange={(key) => {
+        const nextView = key as 'resolved' | 'raw';
+        setViewBy(nextView);
+        if (nextView === 'resolved') {
+          setGroupsSelected((prev) => {
+            const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
+            return filtered.length ? filtered : ['none'];
+          });
+        }
+      }}
+      options={VIEW_BY_OPTIONS}
+      fields={[]}
+      title={VIEW_BY_SELECTOR_TITLE}
+      maxGroupingLevels={1}
+      settings={{ hideNoneOption: true, hideCustomFieldOption: true }}
+    />
+  );
+
+  const viewControls = (
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false}>{viewBySelectorElement}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{groupBySelectorElement}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   const menu = useMemo<AppHeaderMenu>(
     () => ({
       items: [
@@ -478,22 +808,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [getSecuritySolutionUrl]
   );
 
-  const dataViewContextValue = useMemo(
-    () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
-    [dataView, isDataViewLoading]
-  );
-
-  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling) {
-    return <EuiLoadingSpinner size="l" />;
-  }
+  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling) return <PageLoader />;
   if (isDataViewError) return <DataViewErrorComponent />;
   if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
   return (
     <>
-      <AppHeader title={PAGE_TITLE} menu={menu} spacing="flush" />
+      <Global
+        styles={css`
+          body.euiDataGrid__restrictBody .entityAnalyticsPageHeader,
+          body.euiDataGrid__restrictBody .entityAnalyticsSearchSection {
+            display: none;
+          }
+        `}
+      />
+      <div className="entityAnalyticsPageHeader">
+        <AppHeader title={PAGE_TITLE} menu={menu} spacing="flush" />
+      </div>
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
+          className="entityAnalyticsSearchSection"
           css={css`
             padding-block-start: ${euiTheme.size.s};
             display: flex;
@@ -501,6 +835,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             height: 100%;
           `}
         >
+          {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
           <div
             css={css`
               margin-inline-start: -${euiTheme.size.s};
@@ -512,79 +847,78 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               onTimeRangeChange={setTimeRange}
             />
           </div>
+
           <EuiSpacer size="s" />
+
           <EntityFiltersBar
             filters={entityFilters}
             onFiltersChange={setEntityFilters}
             spaceId={spaceId}
             view={viewBy}
-            esFilter={combineFilters([esFilter, cardFilter])}
+            esFilter={esFilter}
             watchlistNames={watchlistNames}
           />
+
           <EuiSpacer size="m" />
-          <SignalCards
-            activeFilter={activeFilter}
-            cards={signalCards}
-            onFilterForCard={handleFilterForCard}
-          />
-          <EuiSpacer size="m" />
-          <EuiPanel
-            hasBorder
+
+          <div
             css={css`
-              padding-inline: ${euiTheme.size.s};
+              padding-inline: ${euiTheme.size.base};
             `}
           >
-            <DataViewContext.Provider value={dataViewContextValue}>
-              <EntityAnalyticsEntitiesTableContent
-                baseFilter={baseFilter}
-                cardFilter={cardFilter}
+            <SignalCards
+              activeTile={activeTile}
+              cards={signalCards}
+              onFilterForTile={handleFilterForTile}
+            />
+          </div>
+        </div>
+
+        <EuiSpacer size="m" />
+
+        <div
+          css={css`
+            padding-inline: ${euiTheme.size.base};
+            padding-block-end: ${euiTheme.size.base};
+          `}
+        >
+          <DataViewContext.Provider value={{ dataView, dataViewIsLoading: isDataViewLoading }}>
+            {isGroupSelected ? (
+              <EntitiesGroups
+                state={groupingState}
+                groupsSelected={groupsSelected}
+                timeRange={timeRange}
+                watchlistNames={watchlistNames}
+                view={viewBy}
+                tileWhereExpression={tileWhereExpression}
+                groupSelectorComponent={viewControls}
+                cellHandlers={cellHandlers}
+                rowActions={rowActions}
               />
-            </DataViewContext.Provider>
-          </EuiPanel>
+            ) : (
+              <EntitiesGrid
+                columns={activeColumns}
+                view={viewBy}
+                timeRange={timeRange}
+                watchlistNames={watchlistNames}
+                searchExpression={searchExpression}
+                entityExpression={gridEntityExpression}
+                cellHandlers={cellHandlers}
+                rowActions={rowActions}
+                groupSelectorComponent={viewControls}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSortChange={setSort}
+                pageIndex={pageIndex}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+              />
+            )}
+          </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
-};
-
-const EntityAnalyticsEntitiesTableContent = ({
-  baseFilter,
-  cardFilter,
-}: {
-  baseFilter?: QueryDslQueryContainer;
-  cardFilter: QueryDslQueryContainer | null;
-}) => {
-  const urlState = useEntityURLState({
-    paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
-    defaultQuery: getDefaultQuery,
-  });
-
-  const onChangePageRef = useRef(urlState.onChangePage);
-  onChangePageRef.current = urlState.onChangePage;
-  const filterResetKey = `${JSON.stringify(baseFilter ?? null)}|${JSON.stringify(cardFilter)}`;
-  useUpdateEffect(() => {
-    onChangePageRef.current(0);
-  }, [filterResetKey]);
-
-  const state = useMemo(() => {
-    const extraFilters = (
-      [baseFilter ?? null, cardFilter] as Array<QueryDslQueryContainer | null>
-    ).filter((f): f is QueryDslQueryContainer => f !== null && f !== undefined);
-
-    if (!extraFilters.length) return urlState;
-
-    return {
-      ...urlState,
-      query: {
-        ...urlState.query,
-        bool: {
-          ...urlState.query?.bool,
-          filter: [...(urlState.query?.bool?.filter ?? []), ...extraFilters],
-        },
-      },
-    };
-  }, [urlState, baseFilter, cardFilter]);
-
-  return <EntitiesTableSection state={state} config={DEFAULT_ENTITIES_TABLE_CONFIG} />;
 };

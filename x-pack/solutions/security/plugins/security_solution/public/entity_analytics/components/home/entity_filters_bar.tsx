@@ -33,7 +33,7 @@ import {
   EntitySourceValue,
   toEntitySourceArray,
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
-import type { EntityFilters } from './use_entity_filters_param';
+import type { EntityFilters } from './new_entities_table';
 import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
 export { toBucketMap } from './use_entity_filter_bar_counts';
 
@@ -156,7 +156,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
     ...filters.watchlists
       .filter((id) => !watchlistNames.has(id))
       .map((id) => ({ id, name: id, count: counts.watchlists[id] ?? 0 })),
-  ];
+  ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
