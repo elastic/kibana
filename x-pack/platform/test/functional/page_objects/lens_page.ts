@@ -250,8 +250,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
         // Re-select on failure because EUI drops the option click under load, and the filter text
         // setElement leaves behind makes both its own check and the input read back as `field`.
-        await retry.tryWithRetries(
-          `configureDimension - select field [${field}]`,
+        await retry.try(
           async () => {
             await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
             await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
@@ -260,8 +259,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
               return committedLabel === field;
             });
           },
-          { retryCount: 3, timeout: 60_000 },
-          async () => comboBox.clearInputField('indexPattern-dimension-field')
+          {
+            description: `configureDimension - select field [${field}]`,
+            timeout: 60_000,
+            onFailureBlock: async () => comboBox.clearInputField('indexPattern-dimension-field'),
+          }
         );
       }
 
