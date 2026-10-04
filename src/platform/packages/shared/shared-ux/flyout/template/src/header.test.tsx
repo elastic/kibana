@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
@@ -65,6 +65,25 @@ describe('FlyoutTemplate header title icon and description', () => {
 
     const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
     expect(title.id).toMatch(/^flyoutTemplateTitle/);
+  });
+
+  it('renders a link title inside the H3 heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    expect(within(title).getByRole('link', { name: 'Alert details' })).toHaveAttribute(
+      'href',
+      '#details'
+    );
+    expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
+    expect(title).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
   });
 
   const body = (
@@ -183,6 +202,18 @@ describe('FlyoutTemplate header blocks', () => {
     Array.from({ length: count }, (_, index) => (
       <FlyoutTemplate.Header.Badge key={index}>{`Badge ${index + 1}`}</FlyoutTemplate.Header.Badge>
     ));
+
+  it('derives the meta and info block test subjects from the header test subject', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.MetaBlock title="Owner">Platform</FlyoutTemplate.Header.MetaBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Risk score">90</FlyoutTemplate.Header.InfoBlock>
+      </>
+    );
+
+    expect(screen.getByTestId('myFlyoutHeaderMetaBlocks')).toHaveTextContent('Platform');
+    expect(screen.getByTestId('myFlyoutHeaderInfoBlocks')).toHaveTextContent('90');
+  });
 
   it('renders a MetaBlock as a title/value pair', () => {
     renderHeader(
