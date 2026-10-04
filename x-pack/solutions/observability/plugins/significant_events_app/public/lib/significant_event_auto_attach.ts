@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { combineLatest, EMPTY, filter, Subscription, switchMap } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
@@ -83,18 +82,15 @@ export const createSignificantEventAttachmentIdRegenerationSubscription = ({
   );
 
   subscription.add(
-    agentBuilder.events.ui.activeConversation$
-      .pipe(
-        switchMap((conversation) =>
-          conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
-        ),
-        filter(isRoundCompleteEvent)
-      )
-      .subscribe((event) => {
-        if (event.data.attachments?.some(({ id }) => id === draftAttachmentId.current)) {
-          draftAttachmentId.next();
-        }
-      })
+    agentBuilder.events.ui.activeConversation$.subscribe((activeConversation) => {
+      if (
+        activeConversation?.conversation?.attachments?.some(
+          ({ id }) => id === draftAttachmentId.current
+        )
+      ) {
+        draftAttachmentId.next();
+      }
+    })
   );
 
   return subscription;
