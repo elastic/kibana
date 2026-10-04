@@ -29,6 +29,8 @@ import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/de
 import { DETECTION_RULE_DUPLICATE_EVENT } from '../../../../../telemetry/event_based/events';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
+import { SecuritySolutionEventBus } from '../../../../../../events/event_bus';
+import type { DetectionRulesCreatedPayload } from '../../../../../../events/types';
 import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 import { duplicateExceptions as _duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 
@@ -873,6 +875,70 @@ describe('Perform bulk action route', () => {
         DETECTION_RULE_DUPLICATE_EVENT.eventType,
         expect.objectContaining({ ruleType: 'query' })
       );
+    });
+
+    describe('detectionRulesCreated trigger', () => {
+      let eventBus: SecuritySolutionEventBus;
+      let busServer: ReturnType<typeof serverMock.create>;
+      let events: Array<{ payload: DetectionRulesCreatedPayload; requestSeen: unknown }>;
+
+      beforeEach(() => {
+        eventBus = new SecuritySolutionEventBus();
+        events = [];
+        eventBus.onDetectionRulesCreated((event) => {
+          events.push({ payload: event.payload, requestSeen: event.request });
+        });
+        busServer = serverMock.create();
+        performBulkActionRoute(busServer.router, ml, eventBus);
+      });
+
+      const duplicateRequest = (query?: Record<string, string>) =>
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          body: getPerformBulkActionDuplicateSchemaMock(),
+          ...(query ? { query } : {}),
+        });
+
+      it('emits one event for the duplicated rule, carrying the saved object id', async () => {
+        const response = await busServer.inject(
+          duplicateRequest(),
+          requestContextMock.convertContext(context)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(events).toHaveLength(1);
+        expect(events[0].payload).toEqual({
+          ids: [mockRule.id],
+          types: [mockRule.params.type],
+          tags: mockRule.tags,
+          totalCount: 1,
+          source: 'duplicate',
+        });
+        // The workflow runs as whoever sent this request, so the event must carry it.
+        expect(events[0].requestSeen).toMatchObject({
+          route: { path: DETECTION_ENGINE_RULES_BULK_ACTION },
+        });
+      });
+
+      // A dry run validates without saving, so no rule exists to attach anything to.
+      it('does not emit for a dry run', async () => {
+        await busServer.inject(
+          duplicateRequest({ dry_run: 'true' }),
+          requestContextMock.convertContext(context)
+        );
+
+        expect(clients.rulesClient.create).not.toHaveBeenCalled();
+        expect(events).toHaveLength(0);
+      });
+
+      it('does not emit when creating the duplicate fails', async () => {
+        clients.rulesClient.create.mockRejectedValue(new Error('create failed'));
+
+        await busServer.inject(duplicateRequest(), requestContextMock.convertContext(context));
+
+        expect(events).toHaveLength(0);
+      });
     });
 
     it('creates the duplicate rule with empty exceptions when include_exceptions is false', async () => {

@@ -71,6 +71,7 @@ export async function createRules({
       });
       pending.set(id, {
         rule_id: rule.rule_id,
+        isNew: true,
         telemetry: {
           id,
           type: rule.type,

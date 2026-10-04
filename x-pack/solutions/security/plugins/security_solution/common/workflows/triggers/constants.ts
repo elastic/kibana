@@ -14,6 +14,12 @@ export const MAX_ASSIGNEE_UID_LENGTH = 256;
 export const MAX_USERNAME_LENGTH = 256;
 export const MAX_TAGS_PER_OPERATION = 100;
 export const MAX_ASSIGNEES_PER_OPERATION = 100;
+/**
+ * Upper bound of rules in one `security.detectionRulesCreated` event. Creations larger than this are
+ * split into several events (never truncated) because consumers need every rule id.
+ */
+export const MAX_RULES_PER_TRIGGER = 2000;
+export const MAX_TAGS_PER_RULES_EVENT = 1000;
 
 export const workflowStatusEnum = z.enum(['open', 'acknowledged', 'in-progress', 'closed']);
 

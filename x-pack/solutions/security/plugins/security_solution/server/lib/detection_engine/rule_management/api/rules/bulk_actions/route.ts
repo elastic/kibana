@@ -17,6 +17,8 @@ import type {
   GapReasonType,
 } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { emitDetectionRulesCreatedInChunks } from '../../../../../../workflows/triggers/emit_rules_created';
+import type { SecuritySolutionEventBus } from '../../../../../../events/event_bus';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -175,7 +177,8 @@ const deleteOrphanedExceptions = async ({
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -414,6 +417,21 @@ export const performBulkActionRoute = (
               created = bulkActionOutcome.results
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
+
+              // A dry run validates without saving, so only real duplicates fire the trigger.
+              if (eventBus && !isDryRun) {
+                emitDetectionRulesCreatedInChunks({
+                  eventBus,
+                  request,
+                  rules: created.map(({ id, params, tags }) => ({
+                    id,
+                    type: params.type,
+                    tags,
+                  })),
+                  source: 'duplicate',
+                  logger,
+                });
+              }
               break;
             }
             case BulkActionTypeEnum.export: {
