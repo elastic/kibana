@@ -15,6 +15,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: true,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -34,6 +35,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [{ error: { status_code: 400, message: 'some message' } }],
         exceptions_errors: [],
@@ -53,6 +55,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [{ error: { status_code: 400, message: 'some message' } }],
@@ -72,6 +75,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -94,6 +98,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [
@@ -116,6 +121,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: -1,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -137,6 +143,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -158,6 +165,7 @@ describe('Import rules schema', () => {
       const payload: Omit<ImportRulesResponse, 'success'> & { success: string } = {
         success: 'hello',
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -181,6 +189,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -202,6 +211,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse & { invalid_field: string } = {
         success: true,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         invalid_field: 'invalid_data',
@@ -225,6 +235,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -247,6 +258,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -266,6 +278,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -290,6 +303,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -311,6 +325,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -331,6 +346,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -354,6 +370,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        unchanged_count: 0,
         rules_count: 0,
         errors: [],
         exceptions_errors: [],

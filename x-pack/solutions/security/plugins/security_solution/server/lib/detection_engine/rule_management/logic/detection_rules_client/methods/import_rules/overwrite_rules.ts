@@ -11,6 +11,7 @@ import type {
   RulesClient,
 } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { isEqual } from 'lodash';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import type { RuleParams } from '../../../../../rule_schema';
@@ -72,24 +73,21 @@ export async function overwriteRules({
       updated = { ...updated, rule_source: ruleSource, immutable };
 
       const requestedEnabled = rule.enabled ?? existingRule.enabled;
-      if (!existingRule.enabled && requestedEnabled) {
-        toEnable.push(existingRule.id);
-      } else if (existingRule.enabled && !requestedEnabled) {
-        toDisable.push(existingRule.id);
-      }
+      const telemetry = { id: existingRule.id, type: rule.type, rule_source: ruleSource };
+      const data = convertRuleResponseToAlertingRule(updated, actionsClient);
+      const unchanged =
+        existingRule.enabled === requestedEnabled &&
+        isEqual(convertRuleResponseToAlertingRule(existingRule, actionsClient), data);
 
-      pending.set(existingRule.id, {
-        rule_id: rule.rule_id,
-        telemetry: {
-          id: existingRule.id,
-          type: rule.type,
-          rule_source: ruleSource,
-        },
-      });
-      bulkInputs.push({
-        id: existingRule.id,
-        data: convertRuleResponseToAlertingRule(updated, actionsClient),
-      });
+      if (unchanged) {
+        successes.push({ rule_id: rule.rule_id, outcome: 'unchanged', telemetry });
+      } else {
+        if (existingRule.enabled !== requestedEnabled) {
+          (requestedEnabled ? toEnable : toDisable).push(existingRule.id);
+        }
+        pending.set(existingRule.id, { rule_id: rule.rule_id, outcome: 'updated', telemetry });
+        bulkInputs.push({ id: existingRule.id, data });
+      }
     } catch (e) {
       errors.push(
         createRuleImportErrorObject({

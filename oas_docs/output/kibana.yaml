@@ -29131,7 +29131,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -29145,7 +29145,7 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are overwritten.
+        - description: Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in the response's `unchanged_count`.
           in: query
           name: overwrite
           required: false
@@ -29204,6 +29204,7 @@ paths:
                     rules_count: 1
                     success: true
                     success_count: 1
+                    unchanged_count: 0
               schema:
                 additionalProperties: false
                 type: object
@@ -29242,6 +29243,10 @@ paths:
                   success_count:
                     minimum: 0
                     type: integer
+                  unchanged_count:
+                    description: Number of successfully imported rules that had no changes and were not written. Included in `success_count`.
+                    minimum: 0
+                    type: integer
                 required:
                   - exceptions_success
                   - exceptions_success_count
@@ -29249,6 +29254,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - unchanged_count
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings

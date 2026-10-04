@@ -229,6 +229,7 @@ export const importRulesRoute = (
           const importRulesResponse: ImportRulesResponse = {
             success: errors.length === 0,
             success_count: successes.length,
+            unchanged_count: successes.filter(({ outcome }) => outcome === 'unchanged').length,
             rules_count: rules.length,
             errors,
             exceptions_errors: exceptionsErrors,

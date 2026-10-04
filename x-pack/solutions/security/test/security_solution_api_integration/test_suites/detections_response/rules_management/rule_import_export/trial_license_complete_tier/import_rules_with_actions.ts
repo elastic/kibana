@@ -8,7 +8,13 @@
 import expect from 'expect';
 import { v4 as uuid } from 'uuid';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '../../../utils';
+import {
+  binaryToString,
+  getCustomQueryRuleParams,
+  importRules,
+  importRulesWithSuccess,
+  parseNdJson,
+} from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
@@ -40,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     const testImportingInSpace = (kibanaSpaceId?: string) => {
       describe('rules with action connectors', () => {
-        it('import a rule with an action connector', async () => {
+        it('import a rule with an action connector and skip an untouched re-import of its export', async () => {
           const webHookConnectorParams = getWebHookConnectorParams();
           const connectorId = await createConnector(
             supertest,
@@ -76,6 +82,24 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           expect(importedRule.actions[0]).toMatchObject(ACTION);
+
+          const { body: exportBody } = await detectionsApi
+            .exportRules({ query: {}, body: null }, kibanaSpaceId)
+            .expect(200)
+            .parse(binaryToString);
+          const exportedRules = parseNdJson(exportBody).filter(
+            (line): line is Record<string, unknown> =>
+              typeof line === 'object' && line !== null && 'rule_id' in line
+          );
+
+          const reimport = await importRules({
+            getService,
+            rules: exportedRules,
+            overwrite: true,
+            spaceId: kibanaSpaceId,
+          });
+
+          expect(reimport).toMatchObject({ success: true, success_count: 1, unchanged_count: 1 });
         });
 
         it('imports multiple rules with action connectors in bulk', async () => {
@@ -245,6 +269,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(overwriteImportResponseBody).toMatchObject({
             success: true,
             success_count: 1,
+            unchanged_count: 0,
             rules_count: 1,
             errors: [],
             action_connectors_success: true,

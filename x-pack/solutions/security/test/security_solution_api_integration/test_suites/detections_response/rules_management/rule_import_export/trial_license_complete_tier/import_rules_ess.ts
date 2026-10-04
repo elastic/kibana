@@ -18,6 +18,7 @@ import {
   combineToNdJson,
   getCustomQueryRuleParams,
   getMLRuleParams,
+  importRules,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -36,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('should migrate legacy actions in existing rule if overwrite is set to true', async () => {
+    it('should migrate legacy actions on overwrite, but not on an unchanged re-import', async () => {
       const ruleToOverwrite = getCustomQueryRuleParams({
         rule_id: 'rule-1',
         interval: '1h', // action frequency can't be shorter than the schedule interval
@@ -60,6 +61,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(createdRule.id);
+
+      // An unchanged re-import is skipped, legacy actions are not migrated until later when changes are made
+      const { actions } = await fetchRule(supertest, { ruleId: 'rule-1' });
+      const reimport = await importRules({
+        getService,
+        rules: [{ ...ruleToOverwrite, actions }],
+        overwrite: true,
+      });
+
+      expect(reimport).toMatchObject({ success_count: 1, unchanged_count: 1 });
+      expect((await getLegacyActionSO(es)).hits.hits.length).toBe(1);
 
       const ndjson = combineToNdJson(
         getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'some other name' })

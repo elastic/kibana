@@ -15,10 +15,12 @@ import { getQueryRuleParams, getEqlRuleParams } from '../../../rule_schema/mocks
 import {
   DETECTION_RULE_INSTALL_EVENT,
   DETECTION_RULE_DUPLICATE_EVENT,
+  DETECTION_RULE_IMPORT_EVENT,
 } from '../../../../telemetry/event_based/events';
 import {
   sendRuleLifecycleTelemetryEvent,
   sendRuleDuplicateTelemetryEvent,
+  sendRuleImportTelemetryEvents,
 } from './rule_lifecycle_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceSetup =>
@@ -157,6 +159,66 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
     expect(() => {
       sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
     }).not.toThrow();
+  });
+});
+
+describe('sendRuleImportTelemetryEvents', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test.each(['created', 'updated', 'unchanged'] as const)(
+    'reports the lifecycle fields plus outcome "%s"',
+    (outcome) => {
+      const analytics = mockAnalytics();
+      const rule = { ...getRulesSchemaMock(), rule_source: { type: 'internal' as const }, outcome };
+
+      sendRuleImportTelemetryEvents(analytics, [rule]);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_IMPORT_EVENT.eventType, {
+        ruleId: rule.id,
+        ruleType: 'query',
+        isPrebuilt: false,
+        isCustomized: false,
+        outcome,
+      });
+    }
+  );
+
+  test('reports one event per rule', () => {
+    const analytics = mockAnalytics();
+    const rules = [
+      { ...getRulesSchemaMock(), id: 'rule-1', outcome: 'created' as const },
+      { ...getRulesSchemaMock(), id: 'rule-2', outcome: 'unchanged' as const },
+    ];
+
+    sendRuleImportTelemetryEvents(analytics, rules);
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_IMPORT_EVENT.eventType,
+      expect.objectContaining({ ruleId: 'rule-1', outcome: 'created' })
+    );
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_IMPORT_EVENT.eventType,
+      expect.objectContaining({ ruleId: 'rule-2', outcome: 'unchanged' })
+    );
+  });
+
+  test('does not throw and logs via logger.debug when analytics.reportEvent throws', () => {
+    const analytics = mockAnalytics();
+    const logger = mockLogger();
+    const rule = { ...getRulesSchemaMock(), outcome: 'created' as const };
+
+    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+      throw new Error('Analytics service error');
+    });
+
+    expect(() => sendRuleImportTelemetryEvents(analytics, [rule], logger)).not.toThrow();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Failed to send ${DETECTION_RULE_IMPORT_EVENT.eventType} telemetry`,
+      expect.any(Error)
+    );
   });
 });
 
