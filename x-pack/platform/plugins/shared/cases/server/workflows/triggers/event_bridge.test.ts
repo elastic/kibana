@@ -107,6 +107,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseStatusUpdatedTriggerId, {
       caseId: 'case-1',
       owner: 'securitySolution',
+      paused: false,
       previousStatus: 'in-progress',
       status: 'closed',
     });

@@ -332,6 +332,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
+          countPausedCases={data.countPausedCases ?? null}
           onFilterChanged={onFilterChangedCallback}
           availableSolutions={hasOwner ? [] : availableSolutions}
           hiddenStatuses={hiddenStatuses}
@@ -362,6 +363,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
               countOpenCases={data.countOpenCases}
               countInProgressCases={data.countInProgressCases}
               countClosedCases={data.countClosedCases}
+              countPausedCases={data.countPausedCases}
               mttr={data.mttr}
               isLoading={isLoadingCases}
             />

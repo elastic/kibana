@@ -95,7 +95,9 @@ export const setStatusStepDefinition = (
   createServerStepDefinition({
     ...setStatusStepCommonDefinition,
     handler: createUpdateSingleCaseStepHandler<SetStatusStepInput>(getCasesClient, (input) => ({
-      status: input.status,
+      ...(input.status != null && { status: input.status }),
+      ...(input.status_key != null && { status_key: input.status_key }),
+      ...(input.pause_reason != null && { pause_reason: input.pause_reason }),
     })),
   });
 

@@ -9,41 +9,39 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { Status } from '@kbn/cases-components';
-import type { CaseStatuses } from '../../../common/types/domain';
-import { statuses } from './config';
+import type { CaseStatusConfiguration } from '../../../common/types/domain';
 import { STATUS } from '../case_view/translations';
 
 interface Props {
-  selectedStatus: CaseStatuses;
-  onStatusChange: (status: CaseStatuses) => void;
+  statuses: CaseStatusConfiguration[];
+  selectedStatusKey: string;
+  onStatusChange: (status: CaseStatusConfiguration) => void;
   isLoading: boolean;
   isDisabled: boolean;
 }
 
 export const StatusSelector: React.FC<Props> = ({
-  selectedStatus,
+  statuses,
+  selectedStatusKey,
   onStatusChange,
   isLoading,
   isDisabled,
 }) => {
-  const caseStatuses = Object.keys(statuses) as CaseStatuses[];
-  const options: Array<EuiSuperSelectOption<CaseStatuses>> = caseStatuses.map((status) => {
-    return {
-      value: status,
-      inputDisplay: (
-        <EuiFlexGroup
-          gutterSize="xs"
-          alignItems={'center'}
-          responsive={false}
-          data-test-subj={`case-status-selection-${status}`}
-        >
-          <EuiFlexItem grow={false}>
-            <Status status={status} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    };
-  });
+  const options: Array<EuiSuperSelectOption<string>> = statuses.map((status) => ({
+    value: status.key,
+    inputDisplay: (
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems={'center'}
+        responsive={false}
+        data-test-subj={`case-status-selection-${status.key}`}
+      >
+        <EuiFlexItem grow={false}>
+          <Status status={status.category} label={status.label} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  }));
 
   return (
     <EuiSuperSelect
@@ -51,8 +49,13 @@ export const StatusSelector: React.FC<Props> = ({
       fullWidth={true}
       isLoading={isLoading}
       options={options}
-      valueOfSelected={selectedStatus}
-      onChange={onStatusChange}
+      valueOfSelected={selectedStatusKey}
+      onChange={(key) => {
+        const status = statuses.find((item) => item.key === key);
+        if (status) {
+          onStatusChange(status);
+        }
+      }}
       data-test-subj="case-status-selection"
       aria-label={STATUS}
     />

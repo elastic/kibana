@@ -25,6 +25,8 @@ export const initialConfiguration: CasesConfigurationUI = {
   owner: '',
   observableTypes: [],
   extractObservables: false,
+  statuses: [],
+  pauseReasons: [],
 };
 
 export const getConfigurationByOwner = ({

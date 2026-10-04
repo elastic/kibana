@@ -20,6 +20,7 @@ export const AllCasesURLQueryParamsRt = rt.exact(
     search: rt.string,
     severity: rt.array(CaseSeverityRt),
     status: rt.array(CaseStatusRt),
+    statusKey: rt.array(rt.string),
     tags: rt.array(rt.string),
     category: rt.array(rt.string),
     assignees: rt.array(rt.union([rt.string, rt.null])),

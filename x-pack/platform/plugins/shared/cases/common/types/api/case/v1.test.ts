@@ -22,6 +22,8 @@ import {
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
   MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_CASE_STATUSES,
+  MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -1311,5 +1313,57 @@ describe('CasesBulkGetResponseRt', () => {
     const result = CasesBulkGetResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
+  });
+});
+
+describe('status_key', () => {
+  describe('CasesFindRequestRt', () => {
+    it('accepts a single status key', () => {
+      const request = { status_key: 'awaiting_customer', owner: 'cases' };
+
+      expect(CasesFindRequestRt.decode(request)).toStrictEqual({ _tag: 'Right', right: request });
+    });
+
+    it('accepts an array of status keys', () => {
+      const request = { status_key: ['awaiting_customer', 'closed'], owner: 'cases' };
+
+      expect(CasesFindRequestRt.decode(request)).toStrictEqual({ _tag: 'Right', right: request });
+    });
+
+    it(`rejects more than ${MAX_CASE_STATUSES} status keys`, () => {
+      const result = CasesFindRequestRt.decode({
+        status_key: new Array(MAX_CASE_STATUSES + 1).fill('open'),
+      });
+
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+  });
+
+  describe('CasePatchRequestRt', () => {
+    const defaultRequest = { id: 'basic-case-id', version: 'WzQ3LDFd' };
+
+    it('accepts a status key', () => {
+      const request = { ...defaultRequest, status_key: 'awaiting_customer' };
+
+      expect(CasePatchRequestRt.decode(request)).toStrictEqual({ _tag: 'Right', right: request });
+    });
+
+    it('rejects a status key with invalid characters', () => {
+      const result = CasePatchRequestRt.decode({
+        ...defaultRequest,
+        status_key: 'Awaiting Customer',
+      });
+
+      expect(PathReporter.report(result).join()).toContain('Key must be lower case');
+    });
+
+    it(`rejects a status key longer than ${MAX_CASE_STATUS_KEY_LENGTH} characters`, () => {
+      const result = CasePatchRequestRt.decode({
+        ...defaultRequest,
+        status_key: 'a'.repeat(MAX_CASE_STATUS_KEY_LENGTH + 1),
+      });
+
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
   });
 });

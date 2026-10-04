@@ -102,6 +102,8 @@ export interface CasesSearchStats {
   };
   /** Average of `duration` (seconds) across the matching cases; null when none has closed. */
   mttr: number | null;
+  /** Cases in a status that pauses time tracking; only computed when such statuses exist. */
+  paused?: number;
 }
 
 export interface GetTagsArgs {

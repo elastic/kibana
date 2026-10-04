@@ -20,7 +20,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
@@ -58,6 +63,39 @@ describe('create', () => {
         caseId: caseSO.id,
         owner: caseSO.attributes.owner,
       });
+    });
+  });
+
+  describe('Status key', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('lands new cases on the default open status when custom statuses are enabled', async () => {
+      clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: true } };
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({ status: CaseStatuses.open, status_key: 'open' }),
+        })
+      );
+    });
+
+    it('does not write a status key when custom statuses are disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: false } };
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.not.objectContaining({ status_key: expect.anything() }),
+        })
+      );
     });
   });
 

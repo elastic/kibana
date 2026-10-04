@@ -202,6 +202,7 @@ describe('CasesTableFilters ', () => {
         ],
         "severity": Array [],
         "status": Array [],
+        "statusKey": Array [],
         "tags": Array [],
         "to": "now",
       }
@@ -343,6 +344,7 @@ describe('CasesTableFilters ', () => {
         ],
         "severity": Array [],
         "status": Array [],
+        "statusKey": Array [],
         "tags": Array [],
         "to": "now",
       }

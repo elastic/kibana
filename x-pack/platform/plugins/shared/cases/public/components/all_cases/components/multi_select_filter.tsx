@@ -44,9 +44,13 @@ const fromRawOptionsToEuiSelectableOptions = <T extends string, K extends string
   options: Array<FilterOption<T, K>>,
   selectedOptionKeys: string[]
 ): Array<FilterOption<T, K>> => {
-  return options.map(({ key, label }) => {
-    const selectableOption: FilterOption<T, K> = { label, key };
-    if (selectedOptionKeys.includes(key)) {
+  return options.map(({ key, label, isGroupLabel }) => {
+    const selectableOption: FilterOption<T, K> = {
+      label,
+      key,
+      ...(isGroupLabel && { isGroupLabel }),
+    };
+    if (!isGroupLabel && selectedOptionKeys.includes(key)) {
       selectableOption.checked = 'on';
     }
     selectableOption['data-test-subj'] = `options-filter-popover-item-${key.split(' ').join('-')}`;
@@ -129,6 +133,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   const showActiveOptionsNumber = !hideActiveOptionsNumber;
   const isInvalid = Boolean(limit && limitReachedMessage && selectedOptionKeys.length >= limit);
   const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptionKeys);
+  const selectableOptionsCount = options.filter((option) => !option.isGroupLabel).length;
 
   useEffect(() => {
     const newSelectedOptions = selectedOptionKeys.filter((selectedOptionKey) =>
@@ -172,7 +177,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             iconType={buttonIconType || 'chevronSingleDown'}
             onClick={toggleIsPopoverOpen}
             isSelected={isPopoverOpen}
-            numFilters={showActiveOptionsNumber ? options.length : undefined}
+            numFilters={showActiveOptionsNumber ? selectableOptionsCount : undefined}
             hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
             numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
           >
@@ -233,7 +238,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
                 border-bottom: ${euiTheme.border.thin};
               `}
             >
-              <EuiTextColor color="subdued">{i18n.OPTIONS(options.length)}</EuiTextColor>
+              <EuiTextColor color="subdued">{i18n.OPTIONS(selectableOptionsCount)}</EuiTextColor>
             </div>
             <EuiSpacer size="xs" />
             {list}

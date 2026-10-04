@@ -211,6 +211,12 @@ export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
+export const MAX_CASE_STATUSES_PER_CATEGORY = 10 as const;
+export const MAX_CASE_STATUSES = 30 as const; // MAX_CASE_STATUSES_PER_CATEGORY x 3 categories
+export const MAX_CASE_STATUS_KEY_LENGTH = 50 as const;
+export const MAX_CASE_STATUS_LABEL_LENGTH = 50 as const;
+export const MAX_CASE_PAUSE_REASONS = 10 as const;
+export const MAX_CASE_PAUSE_REASON_LENGTH = 50 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connector-generated case ids are 64-char SHA-256 digests and bulk_create accepts arbitrary ids
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
@@ -556,6 +562,15 @@ export const CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE =
 export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as const;
 
 export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
+
+/**
+ * Custom statuses. One event per confirmed status change or settings edit; each carries the
+ * category and whether a custom status is involved, never the label or key.
+ */
+export const CASES_STATUS_CHANGED_EVENT_TYPE = 'cases_status_changed' as const;
+
+export const CASES_STATUS_CONFIGURATION_EDITED_EVENT_TYPE =
+  'cases_status_configuration_edited' as const;
 
 /**
  * Field Library management events. One confirmed UI write each, never a total — see

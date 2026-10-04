@@ -49,6 +49,10 @@ const StatusInfoRt = rt.strict({
    */
   inProgressDuration: rt.number,
   /**
+   * Duration the case was in statuses that pause time tracking, in milliseconds
+   */
+  pausedDuration: rt.number,
+  /**
    * The ISO string representation of the dates the case was reopened
    */
   reopenDates: rt.array(rt.string),

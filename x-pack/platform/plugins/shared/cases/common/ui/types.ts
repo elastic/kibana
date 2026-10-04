@@ -94,6 +94,9 @@ export interface CasesUiConfigType {
   runWorkflows: {
     enabled: boolean;
   };
+  customStatuses: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -171,6 +174,8 @@ export type CasesConfigurationUI = Pick<
   | 'owner'
   | 'observableTypes'
   | 'extractObservables'
+  | 'statuses'
+  | 'pauseReasons'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -195,6 +200,8 @@ export interface SystemFilterOptions {
   searchFields: string[];
   severity: CaseSeverity[];
   status: CaseStatuses[];
+  /** Configured status keys; used instead of `status` when custom statuses are on */
+  statusKey: string[];
   tags: string[];
   assignees: Array<string | null>;
   reporters: User[];

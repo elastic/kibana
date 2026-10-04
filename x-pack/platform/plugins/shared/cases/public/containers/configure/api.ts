@@ -126,6 +126,8 @@ const convertConfigureResponseToCasesConfigure = (
     owner,
     observableTypes,
     extractObservables,
+    statuses,
+    pauseReasons,
   } = configuration;
 
   return {
@@ -139,5 +141,7 @@ const convertConfigureResponseToCasesConfigure = (
     owner,
     observableTypes,
     extractObservables,
+    statuses,
+    pauseReasons,
   };
 };

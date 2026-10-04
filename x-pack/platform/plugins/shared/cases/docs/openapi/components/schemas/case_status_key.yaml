@@ -1,0 +1,7 @@
+type: string
+nullable: true
+description: >
+  The key of the configured status the case is in. Configured statuses are grouped under the
+  built-in statuses, which `status` continues to report. Null for cases last updated before
+  statuses were configured. Technical preview.
+example: awaiting_customer

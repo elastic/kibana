@@ -9,6 +9,7 @@ import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { getEffectiveStatuses, getPausingStatusKeys } from '../../../common/utils/statuses';
 import type {
   CasesFindRequestWithCustomFields,
   CasesFindResponse,
@@ -50,6 +51,7 @@ export const find = async (
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
       .map((config) => config.customFields)
       .flat();
+    const statuses = configurations.flatMap((config) => getEffectiveStatuses(config.statuses));
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -97,6 +99,7 @@ export const find = async (
       reporters: paramArgs.reporters,
       sortField: paramArgs.sortField,
       status: paramArgs.status,
+      status_key: paramArgs.status_key,
       severity: paramArgs.severity,
       owner: paramArgs.owner,
       from: paramArgs.from,
@@ -109,19 +112,23 @@ export const find = async (
     const statusStatsOptions = constructQueryOptions({
       ...options,
       status: undefined,
+      status_key: undefined,
       customFieldsConfiguration,
+      statuses,
       authorizationFilter,
     });
 
     const caseQueryOptions = constructQueryOptions({
       ...options,
       customFieldsConfiguration,
+      statuses,
       authorizationFilter,
     });
 
     const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
+    const pausingStatusKeys = getPausingStatusKeys(statuses);
 
-    const [cases, statusStats] = await Promise.all([
+    const [cases, statusStats, countPausedCases] = await Promise.all([
       caseService.findCasesGroupedByID({
         caseOptions: {
           ...paramArgs,
@@ -133,6 +140,18 @@ export const find = async (
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,
       }),
+      pausingStatusKeys.length > 0
+        ? caseService.countCases({
+            searchOptions: constructQueryOptions({
+              ...options,
+              status: undefined,
+              status_key: pausingStatusKeys,
+              customFieldsConfiguration,
+              statuses,
+              authorizationFilter,
+            }),
+          })
+        : undefined,
     ]);
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
@@ -145,6 +164,7 @@ export const find = async (
       countOpenCases: statusStats.open,
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
+      countPausedCases,
     });
 
     return decodeOrThrow(CasesFindResponseRt)(res);

@@ -1,0 +1,14 @@
+type: array
+description: >
+  The reasons an analyst can pick from when moving a case to a status that pauses time tracking.
+  At least one is required while any enabled status pauses time tracking.
+  Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+maxItems: 10
+items:
+  type: string
+  maxLength: 50
+example:
+  - Awaiting customer
+  - Awaiting vendor
+  - Awaiting another team
+  - Scheduled work

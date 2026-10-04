@@ -138,6 +138,8 @@ describe('configure', () => {
         },
       ],
       extractObservables: true,
+      statuses: [],
+      pauseReasons: [],
     };
 
     it('has expected attributes in request', () => {
@@ -224,6 +226,8 @@ describe('configure', () => {
         },
       ],
       extractObservables: true,
+      statuses: [],
+      pauseReasons: [],
     };
 
     it('has expected attributes in request', () => {

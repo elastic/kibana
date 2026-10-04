@@ -162,10 +162,27 @@ export const CaseAttributesRt = rt.intersection([
   rt.exact(
     rt.partial({
       incremental_id: rt.union([rt.number, rt.null]),
+      /**
+       * Key of the configured status; null means the category's built-in status
+       */
+      status_key: rt.union([rt.string, rt.null]),
       in_progress_at: rt.union([rt.string, rt.null]),
       time_to_acknowledge: rt.union([rt.number, rt.null]),
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
+      /**
+       * Set while the case sits in a status that pauses time tracking
+       */
+      paused_at: rt.union([rt.string, rt.null]),
+      /**
+       * Seconds spent in pausing statuses, left out of duration and the time-to metrics
+       */
+      time_paused: rt.union([rt.number, rt.null]),
+      pause_reason: rt.union([rt.string, rt.null]),
+      /**
+       * The status key the case was paused from; Resume returns it there
+       */
+      resume_to_status_key: rt.union([rt.string, rt.null]),
       template: rt.union([rt.null, CaseTemplate]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
@@ -204,14 +221,17 @@ export const AttachmentTotalsRt = rt.strict({
   userComments: rt.number,
 });
 
-export const RelatedCaseRt = rt.strict({
-  id: rt.string,
-  title: rt.string,
-  description: rt.string,
-  status: CaseStatusRt,
-  createdAt: rt.string,
-  totals: AttachmentTotalsRt,
-});
+export const RelatedCaseRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    title: rt.string,
+    description: rt.string,
+    status: CaseStatusRt,
+    createdAt: rt.string,
+    totals: AttachmentTotalsRt,
+  }),
+  rt.exact(rt.partial({ status_key: rt.union([rt.string, rt.null]) })),
+]);
 
 export const SimilarityRt = rt.strict({
   typeKey: rt.string,

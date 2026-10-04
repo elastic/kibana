@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import { getBuiltInStatuses } from '../../../../../../common/utils/statuses';
 
 import { useCloseCaseFlow } from './use_close_case_flow';
 import { basicCase } from '../../../../../containers/mock';
@@ -24,6 +25,7 @@ jest.mock('../../../use_on_refresh_case_view_page');
 
 const mockHandleUpdateCaseStatus = jest.fn();
 const mockOpenCloseCaseModal = jest.fn();
+const [openStatus, inProgressStatus, closedStatus] = getBuiltInStatuses();
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -44,12 +46,16 @@ describe('useCloseCaseFlow', () => {
   });
 
   it('calls onUpdateField for non-closed statuses', () => {
-    const { result } = renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), {
-      wrapper,
-    });
+    const { result } = renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      {
+        wrapper,
+      }
+    );
 
     act(() => {
-      result.current.onStatusChanged(CaseStatuses.open);
+      result.current.onStatusChanged(openStatus);
     });
 
     expect(onUpdateField).toHaveBeenCalledWith({ key: 'status', value: CaseStatuses.open });
@@ -57,12 +63,16 @@ describe('useCloseCaseFlow', () => {
   });
 
   it('calls onUpdateField for in-progress status', () => {
-    const { result } = renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), {
-      wrapper,
-    });
+    const { result } = renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      {
+        wrapper,
+      }
+    );
 
     act(() => {
-      result.current.onStatusChanged(CaseStatuses['in-progress']);
+      result.current.onStatusChanged(inProgressStatus);
     });
 
     expect(onUpdateField).toHaveBeenCalledWith({
@@ -73,16 +83,37 @@ describe('useCloseCaseFlow', () => {
   });
 
   it('opens close case modal when status is closed', () => {
-    const { result } = renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), {
-      wrapper,
-    });
+    const { result } = renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      {
+        wrapper,
+      }
+    );
 
     act(() => {
-      result.current.onStatusChanged(CaseStatuses.closed);
+      result.current.onStatusChanged(closedStatus);
     });
 
     expect(onUpdateField).not.toHaveBeenCalled();
     expect(mockOpenCloseCaseModal).toHaveBeenCalled();
+  });
+
+  it('applies the picked closed status once a close reason is given', () => {
+    const { result } = renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      { wrapper }
+    );
+
+    act(() => {
+      result.current.onStatusChanged(closedStatus);
+    });
+
+    const { onCloseCase } = (useCloseCaseModal as jest.Mock).mock.calls.at(-1)[0];
+    onCloseCase('duplicate');
+
+    expect(mockHandleUpdateCaseStatus).toHaveBeenCalledWith([basicCase], closedStatus, 'duplicate');
   });
 
   it('returns closeCaseModal from useCloseCaseModal', () => {
@@ -92,9 +123,13 @@ describe('useCloseCaseFlow', () => {
       closeCaseModal: mockModal,
     });
 
-    const { result } = renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), {
-      wrapper,
-    });
+    const { result } = renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      {
+        wrapper,
+      }
+    );
 
     expect(result.current.closeCaseModal).toBe(mockModal);
   });
@@ -102,7 +137,11 @@ describe('useCloseCaseFlow', () => {
   it('passes canSyncCloseReasonToAlerts to useCloseCaseModal', () => {
     (useCanSyncCloseReasonToAlerts as jest.Mock).mockReturnValue(true);
 
-    renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), { wrapper });
+    renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      { wrapper }
+    );
 
     expect(useCloseCaseModal).toHaveBeenCalledWith(
       expect.objectContaining({ canSyncCloseReasonToAlerts: true })
@@ -110,12 +149,18 @@ describe('useCloseCaseFlow', () => {
   });
 
   it('configures useStatusAction with case status and refresh callback', () => {
-    renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), { wrapper });
+    renderHook(
+      () =>
+        useCloseCaseFlow({ caseData: basicCase, onUpdateField, entryPoint: 'case_view_header' }),
+      { wrapper }
+    );
 
     expect(useStatusAction).toHaveBeenCalledWith(
       expect.objectContaining({
         isDisabled: false,
+        entryPoint: 'case_view_header',
         selectedStatus: basicCase.status,
+        selectedStatusKey: basicCase.statusKey,
       })
     );
   });

@@ -13,7 +13,7 @@ import {
   CustomFieldToggleTypeRt,
   CustomFieldNumberTypeRt,
 } from '../custom_field/v1';
-import { CaseBaseOptionalFieldsRt } from '../case/v1';
+import { CaseBaseOptionalFieldsRt, CaseStatusRt } from '../case/v1';
 import { CaseObservableTypeRt } from '../observable/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -76,6 +76,36 @@ export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
 export const ObservableTypesConfigurationRt = rt.array(CaseObservableTypeRt);
 
+export const CaseStatusConfigurationRt = rt.intersection([
+  rt.strict({
+    /**
+     * Immutable identifier; the built-in entries use the `CaseStatuses` values as keys
+     */
+    key: rt.string,
+    label: rt.string,
+    /**
+     * The built-in status this entry belongs to. Drives every status-dependent behavior.
+     */
+    category: CaseStatusRt,
+    order: rt.number,
+    /**
+     * Target of writes that only specify the category (legacy clients, close-by-pushing, connectors)
+     */
+    isDefault: rt.boolean,
+    disabled: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * Time spent in this status is left out of the case's duration and time-to metrics
+       */
+      pausesTimeTracking: rt.boolean,
+    })
+  ),
+]);
+
+export const CaseStatusesConfigurationRt = rt.array(CaseStatusConfigurationRt);
+
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({
     /**
@@ -132,6 +162,14 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * Whether to extract observables from the case
    */
   extractObservables: rt.boolean,
+  /**
+   * Statuses configured for the case. Empty means the three built-in statuses.
+   */
+  statuses: CaseStatusesConfigurationRt,
+  /**
+   * Reasons an analyst picks from when moving a case to a status that pauses time tracking
+   */
+  pauseReasons: rt.array(rt.string),
 });
 
 export const CasesConfigureBasicRt = rt.intersection([
@@ -179,3 +217,5 @@ export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
 export type ObservableTypesConfiguration = rt.TypeOf<typeof ObservableTypesConfigurationRt>;
 export type ObservableTypeConfiguration = rt.TypeOf<typeof CaseObservableTypeRt>;
+export type CaseStatusConfiguration = rt.TypeOf<typeof CaseStatusConfigurationRt>;
+export type CaseStatusesConfiguration = rt.TypeOf<typeof CaseStatusesConfigurationRt>;

@@ -15,6 +15,7 @@ import {
   modelVersion7,
   modelVersion8,
   modelVersion9,
+  modelVersion11,
 } from '.';
 
 describe('Model versions', () => {
@@ -248,6 +249,23 @@ describe('Model versions', () => {
                   },
                 },
                 "type": "object",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 11', () => {
+    it('returns version 11 changes correctly', () => {
+      expect(modelVersion11.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "status_key": Object {
+                "type": "keyword",
               },
             },
             "type": "mappings_addition",

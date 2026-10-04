@@ -104,6 +104,8 @@ const basicConfigFields = {
     },
   ],
   extractObservables: true,
+  statuses: [],
+  pauseReasons: [],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -256,6 +258,8 @@ describe('CaseConfigureService', () => {
               },
             ],
             "owner": "securitySolution",
+            "pauseReasons": Array [],
+            "statuses": Array [],
             "templates": Array [
               Object {
                 "caseFields": null,
@@ -609,6 +613,8 @@ describe('CaseConfigureService', () => {
               },
             ],
             "owner": "securitySolution",
+            "pauseReasons": Array [],
+            "statuses": Array [],
             "templates": Array [
               Object {
                 "caseFields": null,

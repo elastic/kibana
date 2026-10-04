@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { isEmpty, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
@@ -20,6 +21,7 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CaseCustomField,
+  CaseStatusesConfiguration,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -30,6 +32,12 @@ import type {
 } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
+import {
+  findStatusByKey,
+  getBuiltInStatuses,
+  getDefaultStatus,
+  getEffectiveStatuses,
+} from '../../../common/utils/statuses';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
@@ -400,6 +408,179 @@ const validOrUndefined = (value: string | undefined | null): string | undefined 
   return value;
 };
 
+/**
+ * The statuses a case of this owner can be in. With the flag off the stored list is ignored so
+ * cases keep landing on the built-in statuses.
+ */
+export const getConfiguredStatuses = ({
+  configuration,
+  customStatusesEnabled,
+}: {
+  configuration?: { statuses?: CaseStatusesConfiguration };
+  customStatusesEnabled: boolean;
+}): CaseStatusesConfiguration =>
+  customStatusesEnabled ? getEffectiveStatuses(configuration?.statuses) : getBuiltInStatuses();
+
+/**
+ * Turns the `status` and `status_key` of a request into what gets persisted: `status` always
+ * holds the category; `status_key` is only written while custom statuses are enabled.
+ */
+export const resolveStatusForUpdate = ({
+  status,
+  statusKey,
+  statuses,
+  customStatusesEnabled,
+}: {
+  status?: CaseStatuses;
+  statusKey?: string;
+  statuses: CaseStatusesConfiguration;
+  customStatusesEnabled: boolean;
+}): { status: CaseStatuses; status_key?: string } | undefined => {
+  if (statusKey != null) {
+    if (!customStatusesEnabled) {
+      throw Boom.badRequest('Custom statuses are not enabled');
+    }
+
+    const configured = findStatusByKey(statuses, statusKey);
+
+    if (configured == null || configured.disabled) {
+      throw Boom.badRequest(`Unknown status key: ${statusKey}`);
+    }
+
+    if (status != null && status !== configured.category) {
+      throw Boom.badRequest(
+        `The status "${status}" does not match the category of the status key "${statusKey}"`
+      );
+    }
+
+    return { status: configured.category, status_key: statusKey };
+  }
+
+  if (status == null) {
+    return;
+  }
+
+  if (!customStatusesEnabled) {
+    return { status };
+  }
+
+  return { status, status_key: getDefaultStatus(statuses, status)?.key ?? status };
+};
+
+export type PauseFields = Pick<
+  CaseAttributes,
+  'paused_at' | 'time_paused' | 'pause_reason' | 'resume_to_status_key'
+>;
+
+/**
+ * Starts, continues, or ends the pause that goes with a status change. Time in a status that
+ * pauses time tracking accumulates into `time_paused`, which the closing metrics subtract.
+ *
+ * - Moving to a pausing status requires a configured reason and remembers where the case came
+ *   from so Resume can take it back.
+ * - Moving between two pausing statuses keeps the pause running; a new reason replaces the old.
+ * - Leaving a pausing status, including by closing, adds the interval to `time_paused`.
+ * - Reopening a closed case starts over with no paused time, like the other timing metrics.
+ */
+export const getPauseFieldsForUpdate = ({
+  originalCase,
+  targetStatusKey,
+  targetCategory,
+  pauseReason,
+  statuses,
+  pauseReasons,
+  customStatusesEnabled,
+  stateTransitionTimestamp,
+}: {
+  originalCase: Pick<
+    CaseAttributes,
+    'status' | 'status_key' | 'paused_at' | 'time_paused' | 'pause_reason'
+  >;
+  /** The resolved `status_key` of the update, undefined when the status does not change */
+  targetStatusKey?: string;
+  targetCategory?: CaseStatuses;
+  pauseReason?: string;
+  statuses: CaseStatusesConfiguration;
+  pauseReasons: string[];
+  customStatusesEnabled: boolean;
+  stateTransitionTimestamp: string;
+}): Partial<PauseFields> | undefined => {
+  if (!customStatusesEnabled) {
+    if (pauseReason != null) {
+      throw Boom.badRequest('Custom statuses are not enabled');
+    }
+    return;
+  }
+
+  const assertKnownReason = (reason: string) => {
+    if (!pauseReasons.includes(reason)) {
+      throw Boom.badRequest(`Unknown pause reason: ${reason}`);
+    }
+  };
+
+  const wasPaused = originalCase.paused_at != null;
+  const target = targetStatusKey != null ? findStatusByKey(statuses, targetStatusKey) : undefined;
+
+  if (target == null) {
+    if (pauseReason == null) {
+      return;
+    }
+    if (!wasPaused) {
+      throw Boom.badRequest(
+        'A pause reason can only be set when moving a case to a status that pauses time tracking'
+      );
+    }
+    assertKnownReason(pauseReason);
+    return { pause_reason: pauseReason };
+  }
+
+  if (target.pausesTimeTracking) {
+    if (pauseReason != null) {
+      assertKnownReason(pauseReason);
+    }
+    if (wasPaused) {
+      return pauseReason != null ? { pause_reason: pauseReason } : undefined;
+    }
+    if (pauseReason == null) {
+      throw Boom.badRequest(`A pause reason is required when moving a case to "${target.label}"`);
+    }
+    return {
+      paused_at: stateTransitionTimestamp,
+      pause_reason: pauseReason,
+      resume_to_status_key:
+        originalCase.status_key ??
+        getDefaultStatus(statuses, originalCase.status)?.key ??
+        originalCase.status,
+    };
+  }
+
+  if (pauseReason != null) {
+    throw Boom.badRequest(`The status "${target.label}" does not pause time tracking`);
+  }
+
+  const reopened =
+    originalCase.status === CaseStatuses.closed && targetCategory !== CaseStatuses.closed;
+
+  if (wasPaused) {
+    const pausedFor = Math.max(
+      Math.floor(
+        (new Date(stateTransitionTimestamp).getTime() -
+          new Date(originalCase.paused_at as string).getTime()) /
+          1000
+      ),
+      0
+    );
+    return {
+      paused_at: null,
+      pause_reason: null,
+      resume_to_status_key: null,
+      time_paused: reopened ? 0 : (originalCase.time_paused ?? 0) + pausedFor,
+    };
+  }
+
+  return reopened && (originalCase.time_paused ?? 0) > 0 ? { time_paused: 0 } : undefined;
+};
+
 export const getClosedInfoForUpdate = ({
   user,
   status,
@@ -484,11 +665,14 @@ export const getTimingMetricsForUpdate = ({
   createdAt,
   inProgressAt,
   stateTransitionTimestamp,
+  timePaused = 0,
 }: {
   status?: CaseStatuses;
   createdAt: string;
   stateTransitionTimestamp: string;
   inProgressAt?: string | null;
+  /** Seconds spent in statuses that pause time tracking, left out of the closing metrics */
+  timePaused?: number | null;
 }):
   | Partial<Pick<CaseAttributes, 'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve'>>
   | undefined => {
@@ -524,9 +708,11 @@ export const getTimingMetricsForUpdate = ({
           inProgressAtMillis
         )
       ) {
-        const timeToResolve = calculateTimeDifferenceInSeconds(
-          stateTransitionTimestampMillis,
-          createdAtMillis
+        const paused = Math.max(timePaused ?? 0, 0);
+        const timeToResolve = Math.max(
+          calculateTimeDifferenceInSeconds(stateTransitionTimestampMillis, createdAtMillis) -
+            paused,
+          0
         );
 
         const timeToAcknowledge =
@@ -536,7 +722,13 @@ export const getTimingMetricsForUpdate = ({
 
         const timeToInvestigate =
           inProgressAtMillis != null
-            ? calculateTimeDifferenceInSeconds(stateTransitionTimestampMillis, inProgressAtMillis)
+            ? Math.max(
+                calculateTimeDifferenceInSeconds(
+                  stateTransitionTimestampMillis,
+                  inProgressAtMillis
+                ) - paused,
+                0
+              )
             : 0;
 
         return {
@@ -566,9 +758,11 @@ const calculateTimeDifferenceInSeconds = (endTime: number, startTime: number) =>
 export const getDurationInSeconds = ({
   closedAt,
   createdAt,
+  timePaused = 0,
 }: {
   closedAt: string;
   createdAt: CaseAttributes['created_at'];
+  timePaused?: number | null;
 }) => {
   try {
     if (createdAt != null && closedAt != null) {
@@ -576,7 +770,8 @@ export const getDurationInSeconds = ({
       const closedAtMillis = new Date(closedAt).getTime();
 
       if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
-        return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
+        const elapsed = Math.floor((closedAtMillis - createdAtMillis) / 1000);
+        return { duration: Math.max(elapsed - Math.max(timePaused ?? 0, 0), 0) };
       }
     }
   } catch (err) {
@@ -588,13 +783,15 @@ export const getDurationForUpdate = ({
   status,
   closedAt,
   createdAt,
+  timePaused,
 }: {
   closedAt: string;
   createdAt: CaseAttributes['created_at'];
   status?: CaseStatuses;
+  timePaused?: number | null;
 }): Pick<CaseAttributes, 'duration'> | undefined => {
   if (status && status === CaseStatuses.closed) {
-    return getDurationInSeconds({ createdAt, closedAt });
+    return getDurationInSeconds({ createdAt, closedAt, timePaused });
   }
 
   if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {

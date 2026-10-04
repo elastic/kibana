@@ -34,6 +34,7 @@ export const CasesMetricsFeatureFieldSchema = z.union([
 const StatusInfoSchema = z.object({
   openDuration: z.number(),
   inProgressDuration: z.number(),
+  pausedDuration: z.number(),
   reopenDates: z.array(z.string()),
 });
 

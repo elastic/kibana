@@ -125,6 +125,13 @@ describe('buildCaseDoc', () => {
     );
   });
 
+  it('mirrors status_key and defaults it to null', () => {
+    expect(buildCaseDoc(fullCaseSO()).case.status_key).toBeNull();
+    expect(buildCaseDoc(fullCaseSO({ status_key: 'awaiting_customer' })).case.status_key).toBe(
+      'awaiting_customer'
+    );
+  });
+
   it('passes customFields through as-is (matches SO shape)', () => {
     const doc = buildCaseDoc(fullCaseSO());
     expect(doc.case.customFields).toEqual([{ key: 'cf', type: 'text', value: 'x' }]);

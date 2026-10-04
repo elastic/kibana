@@ -23,17 +23,53 @@ describe('StatusActionButton', () => {
     isLoading: false,
     onStatusChanged,
   };
-  const mountComponent = (props = defaultProps) =>
+  const mountComponent = (props: React.ComponentProps<typeof StatusActionButton> = defaultProps) =>
     mount(
       <TestProviders>
         <StatusActionButton {...props} />
       </TestProviders>
     );
 
+  it('names the default status of the next category', () => {
+    const wrapper = mountComponent();
+
+    expect(wrapper.find(`button[data-test-subj="case-view-status-action-button"]`).text()).toBe(
+      'Mark as In progress'
+    );
+  });
+
   it('it renders', async () => {
     const wrapper = mountComponent();
 
     expect(wrapper.find(`[data-test-subj="case-view-status-action-button"]`).exists()).toBeTruthy();
+  });
+
+  it('offers Resume to the remembered status while the case is paused', () => {
+    const onResume = jest.fn();
+    const wrapper = mountComponent({
+      ...defaultProps,
+      status: CaseStatuses['in-progress'],
+      resumeStatus: {
+        key: 'in-progress',
+        label: 'Investigating',
+        category: CaseStatuses['in-progress'],
+        order: 1,
+        isDefault: true,
+        disabled: false,
+      },
+      onResume,
+    });
+    const button = wrapper.find(`button[data-test-subj="case-view-status-action-button"]`);
+
+    expect(button.text()).toBe('Resume');
+    expect(button.prop('aria-label')).toBe('Resume to Investigating');
+    expect(
+      wrapper.find(`[data-test-subj="case-view-status-action-button"]`).first().prop('iconType')
+    ).toBe('play');
+
+    button.simulate('click');
+    expect(onResume).toHaveBeenCalled();
+    expect(onStatusChanged).not.toHaveBeenCalled();
   });
 
   describe('Button icons', () => {

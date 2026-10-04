@@ -119,6 +119,71 @@ describe('ConfigureCasesRedesign', () => {
     expect(screen.getByTestId('cases-observable-types-section')).toBeInTheDocument();
   });
 
+  describe('custom statuses', () => {
+    const enableCustomStatuses = () => {
+      const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
+      useCasesConfig.mockReturnValue({
+        attachmentsEnabled: false,
+        chatEnabled: false,
+        templatesEnabled: false,
+        customStatusesEnabled: true,
+      });
+    };
+
+    it('does not render the statuses section while the flag is off', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('cases-settings-panel')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-statuses-section')).not.toBeInTheDocument();
+    });
+
+    it('renders the statuses section with the built-in statuses when the flag is on', async () => {
+      enableCustomStatuses();
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('cases-statuses-section')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-statuses-experimental-badge')).toBeInTheDocument();
+      expect(screen.getAllByTestId(/^case-status-row-/)).toHaveLength(3);
+    });
+
+    it('hides the statuses section without the settings privilege', async () => {
+      enableCustomStatuses();
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('cases-settings-panel')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-statuses-section')).not.toBeInTheDocument();
+    });
+
+    it('persists a new status under the chosen category', async () => {
+      enableCustomStatuses();
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('case-statuses-add-in-progress'));
+      await userEvent.type(
+        await screen.findByTestId('case-status-label-input'),
+        'Awaiting customer'
+      );
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statuses: expect.arrayContaining([
+            expect.objectContaining({
+              key: 'awaiting_customer',
+              label: 'Awaiting customer',
+              category: 'in-progress',
+              isDefault: false,
+              disabled: false,
+            }),
+          ]),
+        }),
+        expect.anything()
+      );
+    });
+  });
+
   describe('when templates v2 is disabled', () => {
     // The beforeEach default mocks templatesEnabled: false; the v2 templates /
     // field-library pages are unregistered in that state, so the settings page

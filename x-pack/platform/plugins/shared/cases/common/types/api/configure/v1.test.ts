@@ -27,6 +27,8 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_CASE_STATUSES,
+  MAX_CASE_STATUS_LABEL_LENGTH,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -42,6 +44,7 @@ import {
   NumberCustomFieldConfigurationRt,
   TemplateConfigurationRt,
   ObservableTypesConfigurationRt,
+  CaseStatusesConfigurationRt,
 } from './v1';
 import {
   CaseConfigureRequestParamsSchema,
@@ -1235,5 +1238,54 @@ describe('configure', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual([{ key: 'observable_key_1', label: 'Observable Label 1' }]);
     });
+  });
+});
+
+describe('CaseStatusesConfigurationRt', () => {
+  const status = {
+    key: 'awaiting_customer',
+    label: 'Awaiting customer',
+    category: 'in-progress',
+    order: 1,
+    isDefault: false,
+    disabled: false,
+  };
+
+  it('decodes a valid configuration', () => {
+    expect(CaseStatusesConfigurationRt.decode([status])).toStrictEqual({
+      _tag: 'Right',
+      right: [status],
+    });
+  });
+
+  it('removes foo:bar attributes from statuses', () => {
+    expect(CaseStatusesConfigurationRt.decode([{ ...status, foo: 'bar' }])).toStrictEqual({
+      _tag: 'Right',
+      right: [status],
+    });
+  });
+
+  it('rejects a key with invalid characters', () => {
+    const result = CaseStatusesConfigurationRt.decode([{ ...status, key: 'Awaiting Customer' }]);
+    expect(PathReporter.report(result).join()).toContain('Key must be lower case');
+  });
+
+  it(`rejects a label longer than ${MAX_CASE_STATUS_LABEL_LENGTH} characters`, () => {
+    const result = CaseStatusesConfigurationRt.decode([
+      { ...status, label: 'a'.repeat(MAX_CASE_STATUS_LABEL_LENGTH + 1) },
+    ]);
+    expect(PathReporter.report(result).join()).not.toContain('No errors!');
+  });
+
+  it('rejects an unknown category', () => {
+    const result = CaseStatusesConfigurationRt.decode([{ ...status, category: 'pending' }]);
+    expect(PathReporter.report(result).join()).not.toContain('No errors!');
+  });
+
+  it(`rejects more than ${MAX_CASE_STATUSES} statuses`, () => {
+    const result = CaseStatusesConfigurationRt.decode(
+      new Array(MAX_CASE_STATUSES + 1).fill(status)
+    );
+    expect(PathReporter.report(result).join()).not.toContain('No errors!');
   });
 });

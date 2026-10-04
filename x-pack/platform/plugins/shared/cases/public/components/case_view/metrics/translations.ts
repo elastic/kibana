@@ -43,6 +43,13 @@ export const CASE_IN_PROGRESS_DURATION = i18n.translate(
   }
 );
 
+export const CASE_PAUSED_DURATION = i18n.translate(
+  'xpack.cases.caseView.metrics.lifespan.pausedDuration',
+  {
+    defaultMessage: 'Paused duration',
+  }
+);
+
 export const CASE_OPEN_DURATION = i18n.translate(
   'xpack.cases.caseView.metrics.lifespan.openDuration',
   {
