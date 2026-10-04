@@ -69,8 +69,6 @@ export interface UseEntityGridDataOptions {
   sortDirection: 'asc' | 'desc';
   pageIndex: number;
   pageSize: number;
-  cursors: Array<string | null>;
-  onNextCursor: (pageIndex: number, cursor: string) => void;
   searchExpression?: string;
   entityExpression?: string;
   timeRange: TimeRange;
@@ -82,8 +80,6 @@ export const useEntityGridData = ({
   sortDirection,
   pageIndex,
   pageSize,
-  cursors,
-  onNextCursor,
   searchExpression,
   entityExpression,
   timeRange,
@@ -101,25 +97,40 @@ export const useEntityGridData = ({
 
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
 
-  const cursorStr = cursors[pageIndex] ?? null;
+  const shellKey = (index: number) =>
+    [
+      'entity-grid-fe',
+      sortField,
+      sortDirection,
+      index,
+      pageSize,
+      searchExpression,
+      entityExpression,
+      timeRange,
+      rowsMode,
+      concreteEntityIndexName,
+      spaceId,
+    ] as const;
+
+  // Page N's cursor is page N-1's cached next_cursor. If the user jumps ahead,
+  // fetch the first page we don't have until we reach pageIndex.
+  let fetchPageIndex = pageIndex;
+  for (let i = 0; i < pageIndex; i++) {
+    const cached = queryClient.getQueryData<EntityGridResponse>(shellKey(i));
+    if (cached == null || cached.next_cursor == null) {
+      fetchPageIndex = i;
+      break;
+    }
+  }
+
+  const cursorStr =
+    fetchPageIndex === 0
+      ? null
+      : queryClient.getQueryData<EntityGridResponse>(shellKey(fetchPageIndex - 1))?.next_cursor ??
+        null;
   const cursor: PageCursor | null = cursorStr ? decodeCursor(cursorStr) : null;
 
-  // Filter expressions (search bar, URL filters, NAT card IN-list, …) are part of every
-  // key so shell + count + enrich all invalidate together when tiles/filters change.
-  const shellQueryKey = [
-    'entity-grid-fe',
-    sortField,
-    sortDirection,
-    pageIndex,
-    pageSize,
-    cursorStr,
-    searchExpression,
-    entityExpression,
-    timeRange,
-    rowsMode,
-    concreteEntityIndexName,
-    spaceId,
-  ] as const;
+  const shellQueryKey = shellKey(fetchPageIndex);
 
   const countQueryKey = [
     'entity-grid-fe-count',
@@ -167,16 +178,11 @@ export const useEntityGridData = ({
       };
     },
     {
-      enabled: !!concreteEntityIndexName,
+      enabled: !!concreteEntityIndexName && (fetchPageIndex === 0 || cursorStr != null),
       // Keep painting the last page while the next shell key loads (page/sort/filter).
       // Count stays strict below so pagination totals don't lag behind the tile/filter.
       keepPreviousData: true,
-      onSuccess: (result) => {
-        if (result.next_cursor && !cursors[pageIndex + 1]) {
-          onNextCursor(pageIndex + 1, result.next_cursor);
-        }
-        setUpdatedAt(Date.now());
-      },
+      onSuccess: () => setUpdatedAt(Date.now()),
     }
   );
 
@@ -213,7 +219,8 @@ export const useEntityGridData = ({
     }
   );
 
-  const shellRows = shellQuery.data?.entities;
+  const isCurrentPage = fetchPageIndex === pageIndex;
+  const shellRows = isCurrentPage ? shellQuery.data?.entities : undefined;
   const entityIdsKey = pageEntityIdsKey(shellRows);
 
   const enrichQuery = useQuery(
@@ -257,7 +264,8 @@ export const useEntityGridData = ({
       return enrichEntityRows(pageRows, args, skip, { runQuery, http }, ENRICH_FNS);
     },
     {
-      enabled: !!concreteEntityIndexName && shellQuery.isSuccess && shellRows != null,
+      enabled:
+        isCurrentPage && !!concreteEntityIndexName && shellQuery.isSuccess && shellRows != null,
       onSuccess: () => setUpdatedAt(Date.now()),
     }
   );
@@ -270,10 +278,11 @@ export const useEntityGridData = ({
     total: countQuery.data ?? 0,
     updatedAt,
     isFetching:
+      !isCurrentPage ||
       shellQuery.isFetching ||
       enrichQuery.isFetching ||
       countQuery.isFetching ||
       !concreteEntityIndexName,
-    isLastPage: shellQuery.data != null && shellQuery.data.next_cursor == null,
+    isLastPage: isCurrentPage && shellQuery.data != null && shellQuery.data.next_cursor == null,
   };
 };
