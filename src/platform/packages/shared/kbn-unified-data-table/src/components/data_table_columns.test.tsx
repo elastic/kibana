@@ -41,6 +41,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -66,6 +67,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -91,6 +93,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -123,6 +126,7 @@ describe('Data table columns', function () {
           services: {
             uiSettings: servicesMock.uiSettings,
             toastNotifications: servicesMock.toastNotifications,
+            uiActions: servicesMock.uiActions,
           },
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -155,6 +159,7 @@ describe('Data table columns', function () {
           services: {
             uiSettings: servicesMock.uiSettings,
             toastNotifications: servicesMock.toastNotifications,
+            uiActions: servicesMock.uiActions,
           },
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -196,6 +201,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -226,6 +232,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -258,6 +265,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -287,6 +295,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -316,6 +325,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -345,6 +355,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -379,6 +390,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -408,6 +420,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -440,6 +453,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -473,6 +487,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
@@ -556,6 +571,7 @@ describe('Data table columns', function () {
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
