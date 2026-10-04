@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { UnknownAttachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  getLatestVersion,
+  type UnknownAttachment,
+  type VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 
-/**
- * Projects a conversation attachment into the flat shape attachment UI definitions render from.
- *
- * Always returns an attachment. `current_version` can point at a version that is no longer
- * stored, so the lowest one still present stands in; with no versions at all the attachment keeps
- * its identity and carries no data, which every `getLabel` already tolerates.
- */
+/** Maps a stored `VersionedAttachment` to the `UnknownAttachment` shape expected by attachment UI definitions. */
 export const toRenderAttachment = (attachment: VersionedAttachment): UnknownAttachment => {
   const version = getLatestVersion(attachment) ?? attachment.versions[0];
-
   return {
     id: attachment.id,
     type: attachment.type,

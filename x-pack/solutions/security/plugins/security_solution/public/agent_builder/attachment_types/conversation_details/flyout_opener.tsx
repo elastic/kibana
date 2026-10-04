@@ -6,24 +6,22 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';
 import { useDataViewManagerStatus } from '../../../data_view_manager/hooks/use_data_view_manager_status';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
+import { FlyoutSessionContextProvider } from '../../../flyout_v2/session_context';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
-/** The app shell normally does this; without it the opened flyout spins forever. */
 const DataViewManagerBootstrap = () => {
   const initDataViewManager = useInitDataViewManager();
   const status = useDataViewManagerStatus();
 
   useEffect(() => {
-    // Only from `pristine`. The init listener reports failure by dispatching `error` and showing
-    // a toast, so retrying on `error` would spin: init, fail, toast, init again, for as long as
-    // the summary stays mounted.
     if (status === 'pristine') {
       initDataViewManager([]);
     }
@@ -32,66 +30,69 @@ const DataViewManagerBootstrap = () => {
   return null;
 };
 
-const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => {
+const OpenFlyoutOnMount = ({
+  resolveDescriptor,
+}: {
+  resolveDescriptor: () => Promise<FlyoutDescriptor | null>;
+}) => {
   const api = useFlyoutApi();
   const hasOpened = useRef(false);
 
   useEffect(() => {
-    if (hasOpened.current) {
-      return;
-    }
+    if (hasOpened.current) return;
     hasOpened.current = true;
-    openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY);
-  }, [descriptor, api]);
+    resolveDescriptor().then((descriptor) => {
+      if (descriptor) {
+        openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY);
+      }
+    });
+  }, [resolveDescriptor, api]);
 
   return null;
 };
 
-export interface AttachmentSummaryFlyoutOpenerProps {
-  descriptor: FlyoutDescriptor;
+export interface ConversationDetailsFlyoutOpenerProps {
+  resolveDescriptor: () => Promise<FlyoutDescriptor | null>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
 /**
- * The summary renders outside the Security app shell, so `useFlyoutApi`'s dependencies are
- * re-established with `flyoutProviders` — the bundle the flyouts themselves use, as the rule
- * preview attachment does.
+ * Resolves the Security app bundle (Redux store + services), then opens the appropriate flyout
+ * on mount. The `historyKey` binds it to the investigation details flyout's session so the
+ * Back button returns to the investigation.
  */
-export const AttachmentSummaryFlyoutOpener = ({
-  descriptor,
+export const ConversationDetailsFlyoutOpener = ({
+  resolveDescriptor,
   resolveSecurityCanvasContext,
-}: AttachmentSummaryFlyoutOpenerProps) => {
+}: ConversationDetailsFlyoutOpenerProps) => {
   const [bundle, setBundle] = useState<SecurityCanvasEmbeddedBundle>();
 
   useEffect(() => {
     let isMounted = true;
     resolveSecurityCanvasContext()
       .then((resolved) => {
-        if (isMounted) {
-          setBundle(resolved);
-        }
+        if (isMounted) setBundle(resolved);
       })
       .catch((error) => {
-        // Mounted out of view, so there is nowhere to surface this; the row just does not open.
-        window.console.warn('Attachment summary drill-down could not start Security', error);
+        window.console.warn('Investigation attachment flyout could not start Security', error);
       });
     return () => {
       isMounted = false;
     };
   }, [resolveSecurityCanvasContext]);
 
-  if (!bundle) {
-    return null;
-  }
+  if (!bundle) return null;
 
   return flyoutProviders({
     services: bundle.kibanaServices,
     store: bundle.store,
     children: (
-      <>
+      <FlyoutSessionContextProvider
+        value={{ session: 'start', historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY }}
+      >
         <DataViewManagerBootstrap />
-        <OpenFlyoutOnMount descriptor={descriptor} />
-      </>
+        <OpenFlyoutOnMount resolveDescriptor={resolveDescriptor} />
+      </FlyoutSessionContextProvider>
     ),
   });
 };

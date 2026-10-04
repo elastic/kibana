@@ -23,6 +23,8 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { AttackPill } from './attack_pill';
 
 import {
   APP_UI_ID,
@@ -95,6 +97,11 @@ const DEFAULT_LABEL = i18n.translate(
   {
     defaultMessage: 'Attack Discovery',
   }
+);
+
+const ATTACK_PILL_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attackDiscoveryAttachment.pillLabel',
+  { defaultMessage: '1 attack' }
 );
 
 const DETAILS_TITLE = i18n.translate(
@@ -223,8 +230,12 @@ export const AttackDiscoveryInlineContent = ({
 
 export const createAttackDiscoveryAttachmentDefinition = ({
   getUrlForApp,
+  getSpaceId,
+  resolveSecurityCanvasContext,
 }: {
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  getSpaceId: () => Promise<string>;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<AttackDiscoveryAttachment> => ({
   getActionButtons: ({ attachment }) =>
     getAttackDiscoveryActionButtons({ attachment, getUrlForApp }),
@@ -232,17 +243,33 @@ export const createAttackDiscoveryAttachmentDefinition = ({
   getIcon: () => ICON,
   getLabel: getAttackDiscoveryLabel,
   renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
+  renderConversationDetailsContent: ({ attachment }) => (
+    <AttackPill
+      attachment={attachment}
+      getSpaceId={getSpaceId}
+      label={ATTACK_PILL_LABEL}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+    />
+  ),
 });
 
 export const registerAttackDiscoveryAttachment = ({
   attachments,
   getUrlForApp,
+  getSpaceId,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  getSpaceId: () => Promise<string>;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.attackDiscovery,
-    createAttackDiscoveryAttachmentDefinition({ getUrlForApp })
+    createAttackDiscoveryAttachmentDefinition({
+      getUrlForApp,
+      getSpaceId,
+      resolveSecurityCanvasContext,
+    })
   );
 };

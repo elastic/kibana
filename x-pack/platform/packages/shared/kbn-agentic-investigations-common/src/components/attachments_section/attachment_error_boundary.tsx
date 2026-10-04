@@ -7,23 +7,20 @@
 
 import React from 'react';
 
-interface DrilldownErrorBoundaryState {
+interface State {
   hasError: boolean;
 }
 
-/** Keeps a drill-down failure from taking down the surface hosting the summary. */
-export class DrilldownErrorBoundary extends React.Component<
-  React.PropsWithChildren<{}>,
-  DrilldownErrorBoundaryState
-> {
-  public state: DrilldownErrorBoundaryState = { hasError: false };
+/** Prevents a broken attachment pill from taking down the rest of the Attachments section. */
+export class AttachmentErrorBoundary extends React.Component<React.PropsWithChildren<{}>, State> {
+  public state: State = { hasError: false };
 
-  public static getDerivedStateFromError(): DrilldownErrorBoundaryState {
+  public static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
   public componentDidCatch(error: Error) {
-    window.console.warn('Attachment summary drill-down failed to render', error);
+    window.console.warn('Attachment conversation-details renderer failed', error);
   }
 
   public render() {

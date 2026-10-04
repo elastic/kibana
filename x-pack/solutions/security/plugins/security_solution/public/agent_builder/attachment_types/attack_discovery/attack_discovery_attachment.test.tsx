@@ -12,6 +12,7 @@ import type {
   GetActionButtonsParams,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
 import { APP_UI_ID, SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -50,11 +51,19 @@ const makeAttachment = (
 const renderInline = (data: AttackDiscoveryAttachment['data']) =>
   render(<AttackDiscoveryInlineContent attachment={makeAttachment(data)} isSidebar={false} />);
 
+const getSpaceId = jest.fn().mockResolvedValue('default');
+const resolveSecurityCanvasContext =
+  jest.fn() as unknown as () => Promise<SecurityCanvasEmbeddedBundle>;
 const getUrlForApp = jest.fn(
   (appId: string, { path }: { path?: string } = {}) => `/base/app/${appId}${path ?? ''}`
 );
 
-const createDefinition = () => createAttackDiscoveryAttachmentDefinition({ getUrlForApp });
+const createDefinition = () =>
+  createAttackDiscoveryAttachmentDefinition({
+    getUrlForApp,
+    getSpaceId,
+    resolveSecurityCanvasContext,
+  });
 
 const getActionButtons = (data: AttackDiscoveryAttachment['data']) =>
   createDefinition().getActionButtons?.({
@@ -115,13 +124,17 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
     expect(element.type).toBe(AttackDiscoveryInlineContent);
   });
 
+  it('provides renderConversationDetailsContent', () => {
+    const definition = createDefinition();
+
+    expect(definition.renderConversationDetailsContent).toBeDefined();
+  });
+
   describe('getActionButtons', () => {
     beforeEach(() => {
       getUrlForApp.mockClear();
     });
 
-    // The legacy deep link resolves the discovery from either Attack Discovery index of the
-    // active space.
     it('links to the discovery through the Attack Discovery deep link', () => {
       getActionButtons({ id: 'discovery-1' });
 
@@ -136,7 +149,6 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
       expect(button).toEqual(
         expect.objectContaining({
           href: `/base/app/${APP_UI_ID}/attack_discovery?id=discovery-1`,
-          // In the sidebar the action renders icon-only, so the icon must be a real EUI icon.
           icon: 'external',
           label: 'Open in Attacks',
           openInNewTab: true,
@@ -145,7 +157,6 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
       );
     });
 
-    // The anchor navigates; a handler that also navigated would open the page twice.
     it('does not navigate from the click handler', () => {
       const [button] = getActionButtons({ id: 'discovery-1' });
 
@@ -193,7 +204,12 @@ describe('registerAttackDiscoveryAttachment', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
-    registerAttackDiscoveryAttachment({ attachments, getUrlForApp });
+    registerAttackDiscoveryAttachment({
+      attachments,
+      getUrlForApp,
+      getSpaceId,
+      resolveSecurityCanvasContext,
+    });
 
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.attackDiscovery,
@@ -202,6 +218,7 @@ describe('registerAttackDiscoveryAttachment', () => {
         getIcon: expect.any(Function),
         getLabel: expect.any(Function),
         renderInlineContent: expect.any(Function),
+        renderConversationDetailsContent: expect.any(Function),
       })
     );
   });

@@ -106,8 +106,8 @@ export const registerAgenticInvestigationTemplateUI = ({
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyOverviewSlot
             conversation={conversation}
-            attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+            attachmentsService={attachmentsService}
           />
         </Suspense>
       );

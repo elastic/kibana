@@ -60,11 +60,18 @@ const makeUiSettings = () =>
     get: jest.fn(),
   } as unknown as IUiSettingsClient);
 
+const resolveSecurityCanvasContext = jest.fn();
+
 const renderInlineContent = (rule: Record<string, unknown>) => {
   const aiRuleCreation = new AiRuleCreationService();
   const application = makeApplication();
   const uiSettings = makeUiSettings();
-  const definition = createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings });
+  const definition = createRuleAttachmentDefinition({
+    application,
+    aiRuleCreation,
+    uiSettings,
+    resolveSecurityCanvasContext,
+  });
   const Renderer = definition.renderInlineContent!;
   return render(
     <Renderer
@@ -986,7 +993,12 @@ describe('RuleInlineContent integration', () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
     const uiSettings = makeUiSettings();
-    const definition = createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings });
+    const definition = createRuleAttachmentDefinition({
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    });
     const Renderer = definition.renderInlineContent!;
     const { container } = render(
       <Renderer
@@ -1024,6 +1036,7 @@ describe('RuleInlineContent integration', () => {
       application,
       aiRuleCreation,
       uiSettings: makeUiSettings(),
+      resolveSecurityCanvasContext,
     });
     const Renderer = definition.renderInlineContent!;
     const { container } = render(
@@ -1140,6 +1153,7 @@ describe('RuleInlineContent integration', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
       const Renderer = definition.renderInlineContent!;
       return render(

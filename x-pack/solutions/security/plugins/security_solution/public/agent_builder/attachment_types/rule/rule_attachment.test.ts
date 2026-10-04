@@ -50,6 +50,8 @@ const makeUiSettings = (esqlEnabled = true) =>
     }),
   } as unknown as IUiSettingsClient);
 
+const resolveSecurityCanvasContext = jest.fn();
+
 describe('createRuleAttachmentDefinition', () => {
   let aiRuleCreation: AiRuleCreationService;
 
@@ -66,6 +68,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
       expect(definition.getActionButtons).toEqual(expect.any(Function));
     });
@@ -80,6 +83,7 @@ describe('createRuleAttachmentDefinition', () => {
         application: makeApplication(canEdit),
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
       return definition.getActionButtons!({
         attachment: {
@@ -125,6 +129,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
 
       expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
@@ -141,6 +146,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
 
       const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -160,6 +166,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
 
       const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -183,6 +190,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
       const label = definition.getLabel(
         makeAttachment(JSON.stringify(validRule), 'My Rule') as never
@@ -196,6 +204,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
       const label = definition.getLabel(makeAttachment(JSON.stringify(validRule)) as never);
       expect(label).toBe('Test Rule');
@@ -207,6 +216,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext,
       });
       const label = definition.getLabel(makeAttachment('invalid') as never);
       expect(label).toBe('Security Rule');

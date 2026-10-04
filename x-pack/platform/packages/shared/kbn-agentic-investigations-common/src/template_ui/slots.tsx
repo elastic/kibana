@@ -35,21 +35,21 @@ interface InvestigationSlotProps {
 
 export interface OverviewSlotProps extends InvestigationSlotProps {
   /**
-   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
-   * attachment registry cannot be reached from ambient context.
-   */
-  attachmentsService: AttachmentServiceStartContract;
-  /**
    * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /**
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
+   */
+  attachmentsService: AttachmentServiceStartContract;
 }
 
 export const OverviewSlot = ({
   conversation,
-  attachmentsService,
   renderProposedActions,
+  attachmentsService,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}

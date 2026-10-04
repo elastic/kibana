@@ -14,6 +14,7 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
   UserPrivilegesContext,
   initialUserPrivilegesState,
@@ -23,6 +24,7 @@ import { extractRulesCapabilities } from '../../../common/utils/rules_capabiliti
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { RuleInlineContent } from './rule_inline_content';
 import { buildRuleActionButtons } from './rule_action_buttons';
+import { RulePill } from './rule_pill';
 import {
   type RuleAttachment,
   getRuleName,
@@ -36,15 +38,22 @@ export const registerRuleAttachment = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.rule,
-    createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings })
+    createRuleAttachmentDefinition({
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    })
   );
 };
 
@@ -52,10 +61,12 @@ export const createRuleAttachmentDefinition = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<RuleAttachment> => {
   // `RuleInlineContent` only reads `rulesPrivileges.rules.read`, so derive privileges once from the
   // already-loaded capabilities instead of mounting the fetching `UserPrivilegesProvider` per card
@@ -100,5 +111,12 @@ export const createRuleAttachmentDefinition = ({
         return [];
       }
     },
+    renderConversationDetailsContent: ({ attachment }) => (
+      <RulePill
+        attachment={attachment}
+        application={application}
+        resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+      />
+    ),
   };
 };
