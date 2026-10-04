@@ -118,7 +118,7 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
     importableAndExportable: true,
     visibleInManagement: false,
     getTitle: (so) => so.attributes.name,
-    icon: 'casesApp',
+    icon: 'briefcase',
   },
 };
 
