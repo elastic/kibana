@@ -85,4 +85,35 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     ];
     tacticIds.forEach((id) => expect(skill.content).toContain(id));
   });
+
+  describe('tool-discipline guards', () => {
+    const getContent = () => {
+      const { getStartServices, logger, ml } = createDeps();
+      return createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml }).content;
+    };
+
+    it('pins the provided-data short-circuit guard', () => {
+      const content = getContent();
+      expect(content).toContain('already answers the question');
+      expect(content).toContain('Do not re-call a tool');
+    });
+
+    it('pins the forbidden speculative core tools guard', () => {
+      const content = getContent();
+      expect(content).toMatch(/Never call `platform\.core\./);
+      expect(content).toContain('platform.core.search');
+      expect(content).toContain('platform.core.execute_esql');
+    });
+
+    it('pins the bounded corroboration guard', () => {
+      const content = getContent();
+      expect(content).toContain('One survey, one shortlist, one deepen pass');
+      expect(content).toContain('Do not re-run the same `security.find_prebuilt_rules` filter');
+    });
+
+    it('pins the no post-answer calls guard', () => {
+      const content = getContent();
+      expect(content).toContain('make no further tool calls');
+    });
+  });
 });
