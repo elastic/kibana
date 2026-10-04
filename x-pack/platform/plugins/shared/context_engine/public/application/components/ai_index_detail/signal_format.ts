@@ -127,13 +127,21 @@ export const signalSummary = (signal: Signal): string => {
   }
 
   if (sentences.length === 0) {
-    // Fallback so the summary is never blank.
+    // Fallback so the summary is never blank. `row_count` is optional: a tool
+    // result dropped by the traces mapping (keyword ignore_above) yields an
+    // unknown count, which must not be rendered as `NaN` rows.
     sentences.push(
-      i18n.translate('xpack.contextEngine.aiIndexDetail.signals.summary.fallback', {
-        defaultMessage:
-          'A {kind} tool call against {target} returned {rowCount, plural, one {# row} other {# rows}}.',
-        values: { kind, target, rowCount: data.returned.row_count },
-      })
+      data.returned.row_count === undefined
+        ? i18n.translate('xpack.contextEngine.aiIndexDetail.signals.summary.fallbackUnknownRows', {
+            defaultMessage:
+              'A {kind} tool call against {target} completed; the number of rows returned is unknown.',
+            values: { kind, target },
+          })
+        : i18n.translate('xpack.contextEngine.aiIndexDetail.signals.summary.fallback', {
+            defaultMessage:
+              'A {kind} tool call against {target} returned {rowCount, plural, one {# row} other {# rows}}.',
+            values: { kind, target, rowCount: data.returned.row_count },
+          })
     );
   }
 

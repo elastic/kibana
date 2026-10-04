@@ -6,6 +6,7 @@
  */
 
 import { build, parseFromClause, parseReturned, queryKindFor, SIGNAL_PRODUCER } from './transform';
+import { classify } from './classify';
 import type { AgentInfo, ExecuteToolSpan } from './transform';
 
 describe('parseFromClause', () => {
@@ -74,20 +75,20 @@ describe('parseReturned', () => {
     expect(parseReturned(result)).toEqual({ columns: ['id'], row_count: 1 });
   });
 
-  it('returns an empty result for invalid JSON', () => {
-    expect(parseReturned('not json')).toEqual({ columns: [], row_count: 0 });
+  it('returns undefined for invalid JSON (unknown, not zero)', () => {
+    expect(parseReturned('not json')).toBeUndefined();
   });
 
-  it('returns an empty result for undefined/null/empty input', () => {
-    expect(parseReturned(undefined)).toEqual({ columns: [], row_count: 0 });
-    expect(parseReturned(null)).toEqual({ columns: [], row_count: 0 });
-    expect(parseReturned('')).toEqual({ columns: [], row_count: 0 });
+  it('returns undefined for undefined/null/empty input (unknown, not zero)', () => {
+    expect(parseReturned(undefined)).toBeUndefined();
+    expect(parseReturned(null)).toBeUndefined();
+    expect(parseReturned('')).toBeUndefined();
   });
 
-  it('returns an empty result for a non-ES|QL tool result', () => {
+  it('returns undefined for a non-ES|QL tool result (unknown, not zero)', () => {
     expect(
       parseReturned(JSON.stringify({ results: [{ type: 'other', data: { ok: true } }] }))
-    ).toEqual({ columns: [], row_count: 0 });
+    ).toBeUndefined();
   });
 });
 
@@ -162,6 +163,38 @@ describe('build', () => {
     const [signal] = build({ toolRows: [toolRow()], convAgent: new Map() });
     expect((signal.data as Record<string, unknown>).ai_index_id).toBeUndefined();
     expect((signal as unknown as Record<string, unknown>).ai_index_id).toBeUndefined();
+  });
+
+  it('treats a NULL tool result as unknown row_count (keyword ignore_above drop)', () => {
+    // Reproduces the live 2026-09-15 VP cluster case: a result attr serialized longer
+    // than 1024 chars is not indexed by the traces mapping, so the ES|QL read yields
+    // NULL although the query returned rows. The signal must carry row_count
+    // undefined — never 0 — and classify must not tag empty_retrieval.
+    const row = toolRow();
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.arguments'] =
+      JSON.stringify({
+        query: 'FROM ai-index-idx-vp-knowledge | LIMIT 5',
+      });
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.result'] = null;
+    const [signal] = build({ toolRows: [row], convAgent: new Map() });
+    expect(signal.data.query_kind).toBe('ki_retrieval');
+    expect(signal.data.returned).toEqual({});
+    expect(classify(signal)).toEqual([]);
+  });
+
+  it('reports row_count 0 for a genuinely empty successful query', () => {
+    const row = toolRow();
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.arguments'] =
+      JSON.stringify({
+        query: 'FROM ai-index-idx-vp-knowledge | WHERE kind == "none"',
+      });
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.result'] =
+      JSON.stringify({
+        results: [{ type: 'esqlResults', data: { columns: [], values: [] } }],
+      });
+    const [signal] = build({ toolRows: [row], convAgent: new Map() });
+    expect(signal.data.returned.row_count).toBe(0);
+    expect(classify(signal)).toEqual(['empty_retrieval']);
   });
 
   it('falls back to an unknown user agent when the round has no invoke_agent span', () => {
