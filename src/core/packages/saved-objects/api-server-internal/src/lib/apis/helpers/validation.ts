@@ -9,9 +9,13 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  ModelVersionIdentifier,
+} from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsTypeValidator,
+  getLatestModelVersion,
   modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
@@ -27,6 +31,7 @@ export class ValidationHelper {
   private logger: Logger;
   private kibanaVersion: string;
   private typeValidatorMap: Record<string, SavedObjectsTypeValidator> = {};
+  private updateValidatorMap: Record<string, SavedObjectsTypeValidator | null> = {};
 
   constructor({
     registry,
@@ -99,6 +104,42 @@ export class ValidationHelper {
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
+  }
+
+  /** Validate a merged, migrated doc against the latest model version's `update` schema, if any. */
+  public validateObjectForUpdate(type: string, doc: SavedObjectSanitizedDoc) {
+    const validator = this.getUpdateValidator(type);
+    if (!validator) {
+      return;
+    }
+    try {
+      validator.validate(doc);
+    } catch (error) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
+    }
+  }
+
+  private getUpdateValidator(type: string): SavedObjectsTypeValidator | null {
+    if (!(type in this.updateValidatorMap)) {
+      const savedObjectType = this.registry.getType(type);
+      const modelVersions =
+        typeof savedObjectType?.modelVersions === 'function'
+          ? savedObjectType.modelVersions()
+          : savedObjectType?.modelVersions ?? {};
+      const latestModelVersion = savedObjectType ? getLatestModelVersion(savedObjectType) : 0;
+      const updateSchema =
+        modelVersions[String(latestModelVersion) as ModelVersionIdentifier]?.schemas?.update;
+
+      this.updateValidatorMap[type] = updateSchema
+        ? new SavedObjectsTypeValidator({
+            logger: this.logger.get('type-validator'),
+            type,
+            validationMap: { [modelVersionToVirtualVersion(latestModelVersion)]: updateSchema },
+            defaultVersion: this.kibanaVersion,
+          })
+        : null;
+    }
+    return this.updateValidatorMap[type];
   }
 
   private getTypeValidator(type: string): SavedObjectsTypeValidator {

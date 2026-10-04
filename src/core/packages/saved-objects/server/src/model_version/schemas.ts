@@ -37,6 +37,11 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
    * Allows for validating properties using @kbn/config-schema validations
    */
   create?: SavedObjectsValidationSpec;
+  /**
+   * The schema applied to the merged document when updating a document of the current version
+   * via `update` or `bulkUpdate`. When absent, updates are not validated.
+   */
+  update?: SavedObjectsValidationSpec;
 }
 
 export interface SavedObjectsFullModelVersionSchemaDefinitions {
@@ -60,6 +65,11 @@ export interface SavedObjectsFullModelVersionSchemaDefinitions {
    * Allows for validating properties using @kbn/config-schema validations
    */
   create: SavedObjectsValidationSpec;
+  /**
+   * The schema applied to the merged document when updating a document of the current version
+   * via `update` or `bulkUpdate`. When absent, updates are not validated.
+   */
+  update?: SavedObjectsValidationSpec;
 }
 
 /**
