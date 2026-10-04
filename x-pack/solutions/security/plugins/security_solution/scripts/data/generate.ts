@@ -42,6 +42,7 @@ import {
   huntRuleId,
   indexAndInstallPack,
   legacyHuntRuleId,
+  legacyDottedPackIndexName,
   legacyPackIndexName,
   packIndexName,
   packTag,
@@ -53,6 +54,11 @@ import {
   seedThreatIntelForPacks,
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
 } from './lib/threat_intel_fixtures';
+import {
+  cleanPackHostCorrelation,
+  seedPackHostCorrelation,
+  PACK_HOST_CORRELATION_CONFIGS,
+} from './lib/pack_host_correlation';
 import { listPacks } from './packs';
 import {
   generateAndIndexAttackDiscoveries,
@@ -584,14 +590,13 @@ const cleanGeneratedData = async ({
             packHuntRuleIds.push(legacyHuntRuleId(packId, hunt.name));
           }
           const dataStream = pack.eventSources[0]?.dataStream ?? 'unknown';
+          // Alerts over a data stream record the backing index (`.ds-<stream>-<date>-<gen>`) as
+          // their ancestor; pack alerts are matched by rule id and tags above, so the stream
+          // name here only covers the stream itself.
+          ancestorIndices.push(packIndexName({ dataStream }));
           for (const suffix of suffixes) {
             ancestorIndices.push(
-              packIndexName({
-                packId,
-                dataStream,
-                endMs,
-                dateSuffixOverride: suffix,
-              })
+              legacyDottedPackIndexName({ dataStream, endMs, dateSuffixOverride: suffix })
             );
             ancestorIndices.push(
               legacyPackIndexName({
@@ -1087,6 +1092,18 @@ export const cli = () => {
             log,
             packIds: packIds.length > 0 ? packIds : undefined,
           });
+          for (const packId of packIds) {
+            const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
+            if (hostCorrelationConfig) {
+              await cleanPackHostCorrelation({
+                esClient,
+                log,
+                startMs,
+                endMs,
+                config: hostCorrelationConfig,
+              });
+            }
+          }
         }
 
         const fileSets = listEpisodeFileSets(episodes);
@@ -1137,6 +1154,13 @@ export const cli = () => {
           });
           assertPackProvenanceAuthored(result.pack);
           packResults.push(result);
+        }
+
+        for (const packId of packIds) {
+          const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
+          if (hostCorrelationConfig) {
+            await seedPackHostCorrelation({ esClient, log, endMs, config: hostCorrelationConfig });
+          }
         }
 
         if (threatIntel) {

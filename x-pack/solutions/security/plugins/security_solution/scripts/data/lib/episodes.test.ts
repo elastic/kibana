@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { loadEpisode, readNdjson } from './episodes';
+import { loadEpisode, readNdjson, stampEpisodeCloudAccountIds } from './episodes';
 
 describe('episodes fixtures', () => {
   const createdFiles: string[] = [];
@@ -115,5 +115,43 @@ describe('episodes fixtures', () => {
     await expect(
       loadEpisode({ episodeId: 'epX', dataPath, alertsPath }, { validateFixtures: false })
     ).resolves.toMatchObject({ episodeId: 'epX' });
+  });
+});
+
+describe('stampEpisodeCloudAccountIds', () => {
+  it('stamps cloud.account.id onto ep1 docs', () => {
+    const doc: Record<string, unknown> = { host: { name: 'h' } };
+    stampEpisodeCloudAccountIds(doc, 'ep1');
+    expect(doc.cloud).toEqual({ account: { id: '123456789012' } });
+  });
+
+  it('leaves docs from other episodes untouched', () => {
+    const doc: Record<string, unknown> = { host: { name: 'h' } };
+    stampEpisodeCloudAccountIds(doc, 'ep2');
+    expect(doc.cloud).toBeUndefined();
+  });
+
+  it('preserves existing cloud fields and other host/user fields', () => {
+    const doc: Record<string, unknown> = {
+      host: { name: 'WIN-ANALYST01' },
+      user: { name: 'dev-user' },
+      cloud: { provider: 'aws', region: 'us-east-1' },
+    };
+    stampEpisodeCloudAccountIds(doc, 'ep1');
+    expect(doc.cloud).toEqual({
+      provider: 'aws',
+      region: 'us-east-1',
+      account: { id: '123456789012' },
+    });
+    expect(doc.host).toEqual({ name: 'WIN-ANALYST01' });
+    expect(doc.user).toEqual({ name: 'dev-user' });
+  });
+
+  it('does not clobber an existing cloud.account when re-stamped', () => {
+    const doc: Record<string, unknown> = {
+      cloud: { account: { id: 'preexisting' }, provider: 'aws' },
+    };
+    stampEpisodeCloudAccountIds(doc, 'ep1');
+    expect(doc.cloud).toEqual({ provider: 'aws', account: { id: '123456789012' } });
   });
 });
