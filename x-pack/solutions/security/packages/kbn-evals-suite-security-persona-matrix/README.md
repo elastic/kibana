@@ -28,3 +28,18 @@ designed for multi-model comparison and persona-driven reporting.
 ## Fixtures
 
 - **Chrysalis alerts** — seeds 3 sample alerts before evaluation, cleaned up after
+
+## Seed profiles (`SEED_PROFILE`)
+
+- **`minimal` (default)** - 3 sample alerts + 1 rule. Matches the published matrix runs; scores are directly comparable with them.
+- **`parity`** - 97-doc snapshot of the original `chrysalis-sim` benchmark dataset (5-stage APT chain: needle/noise alerts, endpoint telemetry, Rapid7 IOCs, on-call schedule) across 8 indices, from `fixtures/chrysalis_parity_docs.ts`. Timestamps are re-stamped relative to run time. Use for apples-to-apples comparison against the original benchmark. Scores under `parity` are NOT comparable with `minimal` runs - the environment differs by design.
+
+### Prerequisites for `SEED_PROFILE=parity`
+
+Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. On a fresh stack, run once before the suite:
+
+```bash
+curl -u <creds> -X POST "<kibana>/api/security/entity_store/install" -H "kbn-xsrf: x" -H "Content-Type: application/json" -d "{}"
+```
+
+The store auto-starts after install (`.entities.v2.latest.security_default`). Without it, those examples hard-fail on tool-availability checks.
