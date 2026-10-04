@@ -15,11 +15,12 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 /**
  * Deleting is irreversible, so it is held to a higher bar than archiving: it
  * needs the Nightshift configure privilege, not just manage. A flat
- * `requiredPrivileges` array requires every entry, so this is the configure
- * privilege *and* the read the store is gated on.
+ * `requiredPrivileges` array requires every entry.
  */
 export const memoryDeletePrivileges = [
-  { allRequired: [NIGHTSHIFT_API_PRIVILEGES.configure, 'agentBuilder:read'] },
+  NIGHTSHIFT_API_PRIVILEGES.configure,
+  NIGHTSHIFT_API_PRIVILEGES.manage,
+  'agentBuilder:read',
 ];
 
 /**
