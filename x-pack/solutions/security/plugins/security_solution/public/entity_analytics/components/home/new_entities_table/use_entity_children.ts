@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueries, useQueryClient, type QueryFunctionContext } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -28,21 +28,13 @@ import {
 import type { QueryArgs, Row } from './common';
 import { ENRICH_FNS } from './columns/registry';
 
-const isMapEntriesEqual = (
-  prev: ReadonlyMap<string, Row[]>,
-  next: ReadonlyMap<string, Row[]>
-): boolean => {
-  if (prev.size !== next.size) return false;
-  for (const [entityId, rows] of next) {
-    if (prev.get(entityId) !== rows) return false;
-  }
-  return true;
-};
+/** `[entityId, shell dataUpdatedAt, enrich dataUpdatedAt]` of one expanded entity. */
+type ChildDataVersion = [string, number, number];
 
 const ENTITY_CHILDREN_QUERY_KEY = 'entity-children';
 const ENTITY_CHILDREN_ENRICH_QUERY_KEY = 'entity-children-enrich';
 const CHILDREN_STALE_TIME_MS = 60_000;
-const CHILDREN_GC_TIME_MS = 5 * 60_000;
+const CHILDREN_CACHE_TIME_MS = 5 * 60_000;
 
 /** Expand is structural: always the full resolution group, never re-applying table filters. */
 const getEntityChildrenQueryKey = (
@@ -52,6 +44,12 @@ const getEntityChildrenQueryKey = (
   keepFieldsKey: string
 ) =>
   [ENTITY_CHILDREN_QUERY_KEY, entityId, timeRange, concreteEntityIndexName, keepFieldsKey] as const;
+
+/** The enrich key repeats the shell key and the shell data time, so it refetches on new shell data. */
+const getEntityChildrenEnrichQueryKey = (
+  shellKey: ReturnType<typeof getEntityChildrenQueryKey>,
+  shellUpdatedAt: number
+) => [ENTITY_CHILDREN_ENRICH_QUERY_KEY, ...shellKey.slice(1), shellUpdatedAt] as const;
 
 const buildChildQuery = (
   namespace: string,
@@ -178,7 +176,7 @@ export const useEntityChildren = ({
       },
       enabled: !!fetchParams,
       staleTime: CHILDREN_STALE_TIME_MS,
-      gcTime: CHILDREN_GC_TIME_MS,
+      cacheTime: CHILDREN_CACHE_TIME_MS,
       retry: false,
     })),
   });
@@ -193,14 +191,7 @@ export const useEntityChildren = ({
         keepFieldsKey
       );
       return {
-        queryKey: [
-          ENTITY_CHILDREN_ENRICH_QUERY_KEY,
-          entityId,
-          timeRange,
-          concreteEntityIndexName ?? '',
-          keepFieldsKey,
-          shell?.dataUpdatedAt ?? 0,
-        ],
+        queryKey: getEntityChildrenEnrichQueryKey(shellKey, shell?.dataUpdatedAt ?? 0),
         queryFn: ({ signal }: QueryFunctionContext) => {
           if (!fetchParams) throw new Error('entity store index not resolved');
           const rows = queryClient.getQueryData<Row[]>(shellKey) ?? shell?.data;
@@ -209,37 +200,44 @@ export const useEntityChildren = ({
         },
         enabled: !!fetchParams && shell?.isSuccess === true,
         staleTime: CHILDREN_STALE_TIME_MS,
-        gcTime: CHILDREN_GC_TIME_MS,
+        cacheTime: CHILDREN_CACHE_TIME_MS,
         retry: false,
       };
     }),
   });
 
-  // useQueries returns a new array every render; keep the Map stable unless row data actually changes.
-  const childMapRef = useRef(new Map<string, Row[]>());
-  const nextChildMap = new Map<string, Row[]>();
-  expandedIdList.forEach((entityId, i) => {
-    const rows = enrichQueries[i]?.data ?? shellQueries[i]?.data;
-    if (rows) nextChildMap.set(entityId, rows);
-  });
-  const prevChildMap = childMapRef.current;
-  if (!isMapEntriesEqual(prevChildMap, nextChildMap)) {
-    childMapRef.current = nextChildMap;
-  }
-  const childMap = childMapRef.current;
-
-  const fetchingIds = useMemo(() => {
-    const set = new Set<string>();
-    expandedIdList.forEach((entityId, i) => {
-      if (shellQueries[i]?.isFetching || enrichQueries[i]?.isFetching) set.add(entityId);
-    });
-    return set;
-  }, [expandedIdList, shellQueries, enrichQueries]);
-
-  const isChildFetching = useCallback(
-    (entityId: string) => fetchingIds.has(entityId),
-    [fetchingIds]
+  // useQueries returns new arrays every render. This key changes only when child data
+  // changes, so the Map below (and the grid context that holds it) stays stable.
+  const childDataKey = JSON.stringify(
+    expandedIdList.map(
+      (entityId, i): ChildDataVersion => [
+        entityId,
+        shellQueries[i]?.dataUpdatedAt ?? 0,
+        enrichQueries[i]?.dataUpdatedAt ?? 0,
+      ]
+    )
   );
+
+  const childMap = useMemo(() => {
+    const map = new Map<string, Row[]>();
+    const versions: ChildDataVersion[] = JSON.parse(childDataKey);
+    for (const [entityId, shellUpdatedAt] of versions) {
+      const shellKey = getEntityChildrenQueryKey(
+        entityId,
+        timeRange,
+        concreteEntityIndexName ?? '',
+        keepFieldsKey
+      );
+      const rows =
+        queryClient.getQueryData<Row[]>(
+          getEntityChildrenEnrichQueryKey(shellKey, shellUpdatedAt)
+        ) ?? queryClient.getQueryData<Row[]>(shellKey);
+      if (rows) map.set(entityId, rows);
+    }
+    return map;
+  }, [childDataKey, queryClient, timeRange, concreteEntityIndexName, keepFieldsKey]);
+
+  const isAnyChildFetching = [...shellQueries, ...enrichQueries].some((q) => q.isFetching);
 
   const prefetchChildren = useCallback(
     (entityId: string) => {
@@ -264,5 +262,5 @@ export const useEntityChildren = ({
     void queryClient.removeQueries({ queryKey: [ENTITY_CHILDREN_ENRICH_QUERY_KEY] });
   }, [queryClient]);
 
-  return { childMap, isChildFetching, prefetchChildren, resetChildren };
+  return { childMap, isAnyChildFetching, prefetchChildren, resetChildren };
 };

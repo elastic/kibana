@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
 import moment from 'moment';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
@@ -29,7 +28,9 @@ import {
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
+import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
+import { getNumber } from './common';
 import { isGridColumnId, type GridColumnId } from './columns/registry';
 import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
 import { RiskScoreCell } from '../entities_table/risk_score_cell';
@@ -68,6 +69,67 @@ const i18nStrings = {
     { defaultMessage: 'Open alerts' }
   ),
 };
+
+const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
+  [EntityType.host]: i18n.translate('xpack.securitySolution.entityAnalytics.home.entityType.host', {
+    defaultMessage: 'Host',
+  }),
+  [EntityType.user]: i18n.translate('xpack.securitySolution.entityAnalytics.home.entityType.user', {
+    defaultMessage: 'User',
+  }),
+  [EntityType.service]: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.home.entityType.service',
+    { defaultMessage: 'Service' }
+  ),
+  [EntityType.generic]: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.home.entityType.generic',
+    { defaultMessage: 'Generic' }
+  ),
+};
+
+const ENTITY_TYPE_VALUES: readonly string[] = Object.values(EntityType);
+const isEntityType = (value: unknown): value is EntityType =>
+  typeof value === 'string' && ENTITY_TYPE_VALUES.includes(value);
+
+const CRITICALITY_VALUES: readonly string[] = ValidCriticalityLevels;
+const isCriticalityLevel = (value: unknown): value is CriticalityLevelWithUnassigned =>
+  typeof value === 'string' && CRITICALITY_VALUES.includes(value);
+
+/** Severity counts filled by the alerts enrich query, in display order. */
+const ALERT_SEVERITIES = [
+  {
+    key: 'critical',
+    field: 'alert_critical',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.critical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  {
+    key: 'high',
+    field: 'alert_high',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.high', {
+      defaultMessage: 'High',
+    }),
+  },
+  {
+    key: 'medium',
+    field: 'alert_medium',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    key: 'low',
+    field: 'alert_low',
+    label: i18n.translate('xpack.securitySolution.entityAnalytics.home.alertSeverity.low', {
+      defaultMessage: 'Low',
+    }),
+  },
+] as const;
+
+const noPointerEventsCss = css`
+  pointer-events: none;
+`;
 
 const cellTruncateCss = css`
   overflow: hidden;
@@ -215,9 +277,8 @@ const EntityNameCell = ({
 };
 
 const EntityTypeCell = ({ value }: { value: unknown }) => {
-  if (value == null) return <>{'—'}</>;
-  const entityType = value as EntityType;
-  const iconType = EntityIconByType[entityType];
+  if (!isEntityType(value)) return <>{value == null ? '—' : String(value)}</>;
+  const iconType = EntityIconByType[value];
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {iconType && (
@@ -226,15 +287,15 @@ const EntityTypeCell = ({ value }: { value: unknown }) => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{capitalize(entityType)}</EuiText>
+        <EuiText size="s">{ENTITY_TYPE_LABELS[value]}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 const RiskScoreChangeCell = ({ value }: { value: unknown }) => {
-  if (value == null) return <>{'—'}</>;
-  const delta = value as number;
+  if (typeof value !== 'number') return <>{'—'}</>;
+  const delta = value;
   if (delta === 0) return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
   const worse = delta > 0;
   return (
@@ -258,34 +319,17 @@ const AlertCountCell = ({
   euiTheme: EuiThemeComputed;
   onAlertCountClick?: (row: Record<string, unknown>) => void;
 }) => {
-  if (value == null) return <>{'—'}</>;
-  const alertCount = value as number;
-  if (alertCount === 0) return <>{'—'}</>;
-  const severities = [
-    {
-      key: 'Critical',
-      count: (row.alert_critical as number) ?? 0,
-      color: getSeverityColor('critical', euiTheme),
-    },
-    {
-      key: 'High',
-      count: (row.alert_high as number) ?? 0,
-      color: getSeverityColor('high', euiTheme),
-    },
-    {
-      key: 'Medium',
-      count: (row.alert_medium as number) ?? 0,
-      color: getSeverityColor('medium', euiTheme),
-    },
-    {
-      key: 'Low',
-      count: (row.alert_low as number) ?? 0,
-      color: getSeverityColor('low', euiTheme),
-    },
-  ].filter((s) => s.count > 0);
+  if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
+  const alertCount = value;
+  const severities = ALERT_SEVERITIES.map(({ key, label, field }) => ({
+    key,
+    label,
+    count: getNumber(row, field) ?? 0,
+    color: getSeverityColor(key, euiTheme),
+  })).filter((s) => s.count > 0);
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-      <EuiFlexItem style={{ pointerEvents: 'none' }}>
+      <EuiFlexItem css={noPointerEventsCss}>
         <DistributionBar stats={severities} hideLastTooltip />
       </EuiFlexItem>
       {onAlertCountClick ? (
@@ -330,8 +374,8 @@ const GroupSizeCell = ({
 
 const RelativeTimeCell = ({ value }: { value: unknown }) => {
   if (value == null) return <>{'—'}</>;
-  const m = moment(value as string);
-  return <>{m.isValid() ? m.fromNow() : String(value)}</>;
+  const m = typeof value === 'string' || typeof value === 'number' ? moment(value) : null;
+  return <>{m?.isValid() ? m.fromNow() : String(value)}</>;
 };
 
 const AnomalyCountCell = ({
@@ -343,9 +387,8 @@ const AnomalyCountCell = ({
   row: Record<string, unknown>;
   onAnomalyCountClick?: (row: Record<string, unknown>) => void;
 }) => {
-  if (value == null) return <>{'—'}</>;
-  const anomalyCount = value as number;
-  if (anomalyCount === 0) return <>{'—'}</>;
+  if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
+  const anomalyCount = value;
   return onAnomalyCountClick ? (
     <EuiLink
       onClick={() => onAnomalyCountClick(row)}
@@ -399,7 +442,7 @@ const renderKnownEntityCell = (
     case 'entity.EngineMetadata.Type':
       return <EntityTypeCell value={value} />;
     case 'entity.risk.calculated_score_norm':
-      return <RiskScoreCell riskScore={value as number | undefined} />;
+      return <RiskScoreCell riskScore={typeof value === 'number' ? value : undefined} />;
     case 'risk_score_change':
       return <RiskScoreChangeCell value={value} />;
     case 'alert_count':
@@ -414,13 +457,13 @@ const renderKnownEntityCell = (
     case 'anomaly_count':
       return <AnomalyCountCell value={value} row={row} onAnomalyCountClick={onAnomalyCountClick} />;
     case 'case_count':
-      return value == null || (value as number) === 0 ? <>{'—'}</> : <>{String(value)}</>;
+      return value == null || value === 0 ? <>{'—'}</> : <>{String(value)}</>;
     case 'entity.attributes.watchlists':
       return <WatchlistsCell value={value} watchlistNames={watchlistNames} />;
     case 'asset.criticality':
       return (
         <AssetCriticalityBadge
-          criticalityLevel={(value as CriticalityLevelWithUnassigned) ?? 'unassigned'}
+          criticalityLevel={isCriticalityLevel(value) ? value : 'unassigned'}
         />
       );
     case 'entity.source':

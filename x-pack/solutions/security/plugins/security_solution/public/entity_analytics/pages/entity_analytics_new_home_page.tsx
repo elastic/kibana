@@ -18,11 +18,10 @@ import {
   type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
-import { Global, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNoneGroup } from '@kbn/grouping';
-import type { EntityType } from '@kbn/entity-store/public';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { EntityType, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PageLoader } from '../../common/components/page_loader';
@@ -50,6 +49,9 @@ import {
   RESOLVED_ROWS_COLUMNS,
   toList,
   joinAnd,
+  getEntityId,
+  getString,
+  ENTITY_TYPE_FIELD,
 } from '../components/home/new_entities_table';
 import type {
   RowActions,
@@ -90,7 +92,25 @@ const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
 /** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
 const MAX_TILE_FILTER_ENTITY_IDS = 1000;
 
-const ROWS_OPTIONS = [
+const GROUP_BY_SETTINGS = { hideCustomFieldOption: false };
+
+const hiddenCss = css`
+  display: none;
+`;
+
+const isStoreEntityType = (value: unknown): value is EntityType =>
+  EntityType.safeParse(value).success;
+
+/** Host and user keep their type; every other entity type opens as generic. */
+const toSecurityEntityType = (
+  rawType: string | undefined
+): SecurityEntityType.host | SecurityEntityType.user | SecurityEntityType.generic => {
+  if (rawType === 'host') return SecurityEntityType.host;
+  if (rawType === 'user') return SecurityEntityType.user;
+  return SecurityEntityType.generic;
+};
+
+const ROWS_OPTIONS: ReadonlyArray<LabeledOption<RowsMode>> = [
   {
     key: 'resolved',
     label: i18n.translate('xpack.securitySolution.entityAnalytics.home.rows.resolvedLabel', {
@@ -218,13 +238,15 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     setActiveTile,
   } = useEntityAnalyticsUrlState();
 
+  const [isGridFullScreen, setIsGridFullScreen] = useState(false);
+
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
   const onEntityNameClick = useCallback(
     (row: Record<string, unknown>) => {
-      const entityId = row['entity.id'] as string;
-      const entityName = row['entity.name'] as string | undefined;
-      const engineType = row['entity.EngineMetadata.Type'] as string | undefined;
+      const entityId = getEntityId(row);
+      const entityName = getString(row, 'entity.name');
+      const engineType = getString(row, ENTITY_TYPE_FIELD);
       if (!entityId) return;
       openEntityFlyout({
         entityId,
@@ -240,10 +262,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const onGroupSizeClick = useCallback(
     (row: Record<string, unknown>) => {
-      const entityId = row['entity.id'] as string;
-      const entityName = row['entity.name'] as string;
-      const entityType = row['entity.EngineMetadata.Type'] as EntityType;
-      if (!entityId) return;
+      const entityId = getEntityId(row);
+      const entityName = getString(row, 'entity.name') ?? '';
+      const entityType = row[ENTITY_TYPE_FIELD];
+      if (!entityId || !isStoreEntityType(entityType)) return;
       openEntityResolution({
         entityId,
         entityName,
@@ -256,16 +278,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const onAlertCountClick = useCallback(
     (row: Record<string, unknown>) => {
-      const entityId = row['entity.id'] as string;
-      const entityName = row['entity.name'] as string;
-      const rawType = row['entity.EngineMetadata.Type'] as string;
+      const entityId = getEntityId(row);
+      const entityName = getString(row, 'entity.name') ?? '';
       if (!entityId) return;
-      const entityType =
-        rawType === 'host'
-          ? SecurityEntityType.host
-          : rawType === 'user'
-          ? SecurityEntityType.user
-          : SecurityEntityType.generic;
+      const entityType = toSecurityEntityType(getString(row, ENTITY_TYPE_FIELD));
       const value = entityType === SecurityEntityType.generic ? entityId : entityName;
       openEntityAlertsInsights({ entityType, value, entityId, scopeId: ENTITY_TABLE_SCOPE_ID });
     },
@@ -274,11 +290,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const onAnomalyCountClick = useCallback(
     (row: Record<string, unknown>) => {
-      const entityId = row['entity.id'] as string;
-      const entityName = row['entity.name'] as string;
-      const rawType = row['entity.EngineMetadata.Type'] as string;
-      if (!entityId || (rawType !== 'host' && rawType !== 'user')) return;
-      const entityType = rawType === 'host' ? SecurityEntityType.host : SecurityEntityType.user;
+      const entityId = getEntityId(row);
+      const entityName = getString(row, 'entity.name') ?? '';
+      const entityType = toSecurityEntityType(getString(row, ENTITY_TYPE_FIELD));
+      if (!entityId || entityType === SecurityEntityType.generic) return;
       openEntityAnomalyInsights({ entityType, value: entityName, entityId });
     },
     [openEntityAnomalyInsights]
@@ -292,9 +307,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const rowActions = useMemo<RowActions>(
     () => ({
       onInvestigateInTimeline: (row) => {
-        const entityType = row['entity.EngineMetadata.Type'] as SecurityEntityType | undefined;
-        const entityName = row['entity.name'] as string | undefined;
-        if (!entityName || !entityType) return;
+        const entityType = row[ENTITY_TYPE_FIELD];
+        const entityName = getString(row, 'entity.name');
+        if (!entityName || !isStoreEntityType(entityType)) return;
         const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(entityType, row);
         if (kqlFilter) {
           investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
@@ -309,8 +324,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         if (dataProviders?.length) investigateInTimeline({ dataProviders });
       },
       onOpenEntityGraph: (row) => {
-        const entityId = row['entity.id'] as string;
-        const entityName = row['entity.name'] as string;
+        const entityId = getEntityId(row);
+        const entityName = getString(row, 'entity.name') ?? '';
         if (!entityId) return;
         openEntityGraphView({
           entityId,
@@ -745,55 +760,76 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
-  const groupBySelectorElement = (
-    <GroupSelector
-      groupingId="ea-new-home-group-by"
-      groupsSelected={groupsSelected}
-      onGroupChange={(key) => {
+  const onGroupChange = useCallback((key: string) => {
+    setGroupsSelected((prev) => {
+      if (key === 'none') return ['none'];
+      const cleaned = prev.filter((g) => g !== 'none');
+      if (cleaned.includes(key)) {
+        const next = cleaned.filter((g) => g !== key);
+        return next.length ? next : ['none'];
+      }
+      return [...cleaned, key];
+    });
+  }, []);
+
+  const onRowsModeChange = useCallback(
+    (next: RowsMode) => {
+      setRowsMode(next);
+      if (next === 'resolved') {
         setGroupsSelected((prev) => {
-          if (key === 'none') return ['none'];
-          const cleaned = prev.filter((g) => g !== 'none');
-          if (cleaned.includes(key)) {
-            const next = cleaned.filter((g) => g !== key);
-            return next.length ? next : ['none'];
-          }
-          return [...cleaned, key];
+          const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
+          return filtered.length ? filtered : ['none'];
         });
-      }}
-      options={GROUP_BY_OPTIONS.filter(
+      }
+    },
+    [setRowsMode]
+  );
+
+  const groupByOptions = useMemo(
+    () =>
+      GROUP_BY_OPTIONS.filter(
         (o) => !(rowsMode === 'resolved' && o.key === ENTITY_GROUPING_OPTIONS.RESOLUTION)
-      )}
-      fields={isDataViewLoading ? [] : dataView.fields.getAll()}
-      title={GROUP_BY_SELECTOR_TITLE}
-      maxGroupingLevels={3}
-      settings={{ hideCustomFieldOption: false }}
-    />
+      ),
+    [rowsMode]
+  );
+  const groupByFields = useMemo(
+    () => (isDataViewLoading ? [] : dataView.fields.getAll()),
+    [isDataViewLoading, dataView]
   );
 
-  const rowsSelectorElement = (
-    <LabeledOptionSelector
-      title={ROWS_SELECTOR_TITLE}
-      options={ROWS_OPTIONS}
-      selectedKey={rowsMode}
-      onChange={(key) => {
-        const next = key as RowsMode;
-        setRowsMode(next);
-        if (next === 'resolved') {
-          setGroupsSelected((prev) => {
-            const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
-            return filtered.length ? filtered : ['none'];
-          });
-        }
-      }}
-      data-test-subj="eaRowsModeSelector"
-    />
+  // Memoized: the grid toolbar rebuilds whenever this element changes.
+  const tableControls = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <LabeledOptionSelector
+            title={ROWS_SELECTOR_TITLE}
+            options={ROWS_OPTIONS}
+            selectedKey={rowsMode}
+            onChange={onRowsModeChange}
+            data-test-subj="eaRowsModeSelector"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <GroupSelector
+            groupingId="ea-new-home-group-by"
+            groupsSelected={groupsSelected}
+            onGroupChange={onGroupChange}
+            options={groupByOptions}
+            fields={groupByFields}
+            title={GROUP_BY_SELECTOR_TITLE}
+            maxGroupingLevels={3}
+            settings={GROUP_BY_SETTINGS}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [rowsMode, onRowsModeChange, groupsSelected, onGroupChange, groupByOptions, groupByFields]
   );
 
-  const tableControls = (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false}>{rowsSelectorElement}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{groupBySelectorElement}</EuiFlexItem>
-    </EuiFlexGroup>
+  const dataViewContextValue = useMemo(
+    () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
+    [dataView, isDataViewLoading]
   );
 
   if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling)
@@ -803,26 +839,21 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <Global
-        styles={css`
-          body.euiDataGrid__restrictBody .entityAnalyticsPageHeader,
-          body.euiDataGrid__restrictBody .entityAnalyticsSearchSection {
-            display: none;
-          }
-        `}
-      />
-      <div className="entityAnalyticsPageHeader">
+      <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
         <EntityAnalyticsHomeHeader />
       </div>
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           className="entityAnalyticsSearchSection"
-          css={css`
-            padding-block-start: ${euiTheme.size.s};
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-          `}
+          css={[
+            css`
+              padding-block-start: ${euiTheme.size.s};
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+            `,
+            isGridFullScreen && hiddenCss,
+          ]}
         >
           {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
           <div
@@ -871,7 +902,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             padding-block-end: ${euiTheme.size.base};
           `}
         >
-          <DataViewContext.Provider value={{ dataView, dataViewIsLoading: isDataViewLoading }}>
+          <DataViewContext.Provider value={dataViewContextValue}>
             {isGroupSelected ? (
               <EntitiesGroups
                 state={groupingState}
@@ -902,6 +933,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 pageSize={pageSize}
                 onPageChange={setPage}
                 onPageSizeChange={setPageSize}
+                onFullScreenChange={setIsGridFullScreen}
               />
             )}
           </DataViewContext.Provider>
@@ -912,27 +944,27 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 };
 
-interface LabeledOption {
-  key: string;
+interface LabeledOption<K extends string> {
+  key: K;
   label: string;
   description?: string;
 }
 
-interface LabeledOptionSelectorProps {
+interface LabeledOptionSelectorProps<K extends string> {
   title: string;
-  options: ReadonlyArray<LabeledOption>;
-  selectedKey: string;
-  onChange: (key: string) => void;
+  options: ReadonlyArray<LabeledOption<K>>;
+  selectedKey: K;
+  onChange: (key: K) => void;
   'data-test-subj'?: string;
 }
 
-const LabeledOptionSelector: React.FC<LabeledOptionSelectorProps> = ({
+const LabeledOptionSelector = <K extends string>({
   title,
   options,
   selectedKey,
   onChange,
   'data-test-subj': dataTestSubj,
-}) => {
+}: LabeledOptionSelectorProps<K>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const selected = options.find((o) => o.key === selectedKey);
   const buttonLabel = selected?.label ?? selectedKey;
@@ -972,6 +1004,7 @@ const LabeledOptionSelector: React.FC<LabeledOptionSelectorProps> = ({
   return (
     <EuiPopover
       data-test-subj={dataTestSubj ?? 'labeledOptionSelector'}
+      aria-label={title}
       button={
         <EuiButtonEmpty
           data-test-subj="labeled-option-selector-button"

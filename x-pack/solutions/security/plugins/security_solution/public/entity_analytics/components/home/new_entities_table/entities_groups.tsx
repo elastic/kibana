@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { convertFiltersToESQLExpression } from '@kbn/esql-utils';
 import { GroupWrapper } from '@kbn/cloud-security-posture';
@@ -17,7 +17,7 @@ import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../entities_tabl
 import { EntitiesGrid } from './entities_grid';
 import { CHILD_ROWS_COLUMNS } from './columns/registry';
 import { RISK_SCORE_NORM_FIELD } from './common';
-import type { RowsMode } from './common';
+import type { RowsMode, SortDir } from './common';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
 
@@ -151,6 +151,8 @@ interface GroupContentProps {
   rowActions?: RowActions;
 }
 
+const LEAF_PAGE_SIZE_OPTIONS = [5, 10, 25];
+
 const mergeFilters = (current: Filter[], parentJson: string | undefined): Filter[] => [
   ...current,
   ...(parentJson ? (JSON.parse(parentJson) as Filter[]) : []),
@@ -174,6 +176,8 @@ const GroupContent: React.FC<GroupContentProps> = ({
     const merged = processGroupFilters(mergeFilters(currentGroupFilters, parentGroupFilters));
     return (
       <GroupWithLocalPagination
+        // A new group resets this level's local pagination.
+        key={selectedGroupOptions[groupingLevel]}
         state={state}
         groupingLevel={groupingLevel + 1}
         selectedGroup={selectedGroupOptions[groupingLevel]}
@@ -248,10 +252,6 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
     groupingId: GROUPED_VIEW_GROUPING_ID,
   });
 
-  useEffect(() => {
-    setPageIndex(0);
-  }, [selectedGroup]);
-
   return (
     <GroupWrapper
       data={groupData}
@@ -308,11 +308,11 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   rowActions,
 }) => {
   const [sortField, setSortField] = useState(RISK_SCORE_NORM_FIELD);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortDirection, setSortDirection] = useState<SortDir>('desc');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
 
-  const handleSortChange = useCallback((field: string, dir: 'asc' | 'desc') => {
+  const handleSortChange = useCallback((field: string, dir: SortDir) => {
     setSortField(field);
     setSortDirection(dir);
     setPageIndex(0);
@@ -339,7 +339,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   return (
     <EntitiesGrid
       columns={CHILD_ROWS_COLUMNS}
-      pageSizeOptions={[5, 10, 25]}
+      pageSizeOptions={LEAF_PAGE_SIZE_OPTIONS}
       searchExpression={searchExpression}
       entityExpression={entityExpression}
       timeRange={timeRange}

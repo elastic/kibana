@@ -7,7 +7,12 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { EuiDataGridCustomBodyProps, EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
+import type {
+  EuiDataGridColumn,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridStyleCellPaddings,
+  EuiThemeComputed,
+} from '@elastic/eui';
 import { renderEntityCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
 
@@ -19,6 +24,8 @@ interface ChildTreeConnectorProps {
 interface ExpandedEntityRowProps {
   child: Record<string, unknown>;
   isLast: boolean;
+  /** Grid density, so child rows match the height of grid rows. */
+  cellPadding: EuiDataGridStyleCellPaddings;
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
   columns: EuiDataGridColumn[];
   euiTheme: EuiThemeComputed;
@@ -26,118 +33,113 @@ interface ExpandedEntityRowProps {
   handlers?: CellHandlers;
 }
 
+/** EUI grid row heights for the compact (s), normal (m) and expanded (l) densities. */
+const ROW_HEIGHT_PX: Record<EuiDataGridStyleCellPaddings, number> = { s: 25, m: 37, l: 41 };
+
+const cellPaddingBlock = (
+  euiTheme: EuiThemeComputed,
+  cellPadding: EuiDataGridStyleCellPaddings
+): string => {
+  if (cellPadding === 's') return euiTheme.size.xs;
+  if (cellPadding === 'l') return euiTheme.size.s;
+  return '6px';
+};
+
 export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
   child,
   isLast,
+  cellPadding,
   visCols,
   columns,
   euiTheme,
   watchlistNames,
   handlers,
-}) => (
-  <div
-    role="row"
-    className="euiDataGridRow"
-    css={css`
-      inline-size: fit-content;
-      min-inline-size: 100%;
-      height: 37px; /* matches EUI normal density */
-      background: ${euiTheme.colors.body};
-
-      .euiDataGrid--paddingSmall & {
-        height: 25px; /* EUI compact density */
-      }
-
-      .euiDataGrid--paddingLarge & {
-        height: 41px; /* EUI expanded density */
-      }
-    `}
-  >
+}) => {
+  const paddingBlock = cellPaddingBlock(euiTheme, cellPadding);
+  return (
     <div
+      role="row"
+      className="euiDataGridRow"
       css={css`
-        display: flex;
-        height: 100%;
+        inline-size: fit-content;
+        min-inline-size: 100%;
+        height: ${ROW_HEIGHT_PX[cellPadding]}px;
+        background: ${euiTheme.colors.body};
       `}
     >
-      {visCols.map((col) => {
-        const colDef = columns.find((c) => c.id === col.id);
-        if (!colDef) {
-          const width = 'width' in col && typeof col.width === 'number' ? col.width : 36;
-          return <div key={col.id} style={{ width, flexShrink: 0 }} />;
-        }
+      <div
+        css={css`
+          display: flex;
+          height: 100%;
+        `}
+      >
+        {visCols.map((col) => {
+          const colDef = columns.find((c) => c.id === col.id);
+          if (!colDef) {
+            const width = 'width' in col && typeof col.width === 'number' ? col.width : 36;
+            return <div key={col.id} style={{ width, flexShrink: 0 }} />;
+          }
 
-        const w = colDef.initialWidth ?? 150;
-        const value = child[col.id];
+          const w = colDef.initialWidth ?? 150;
+          const value = child[col.id];
 
-        if (col.id === 'entity.name') {
+          if (col.id === 'entity.name') {
+            return (
+              <div
+                key={col.id}
+                role="gridcell"
+                style={{ width: w, flexShrink: 0, overflow: 'hidden' }}
+              >
+                <div
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    height: 100%;
+                    overflow: hidden;
+                  `}
+                >
+                  <ExpandedEntityTreeConnector isLast={isLast} euiTheme={euiTheme} />
+                  <div
+                    title={typeof value === 'string' ? value : undefined}
+                    css={css`
+                      flex: 1;
+                      min-width: 0;
+                      overflow: hidden;
+                      padding: ${paddingBlock} ${euiTheme.size.m} ${paddingBlock}
+                        ${euiTheme.size.xs};
+                    `}
+                  >
+                    {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div
               key={col.id}
               role="gridcell"
-              style={{ width: w, flexShrink: 0, overflow: 'hidden' }}
+              style={{
+                width: w,
+                flexShrink: 0,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+              css={css`
+                padding: ${paddingBlock};
+              `}
             >
-              <div
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  height: 100%;
-                  overflow: hidden;
-                `}
-              >
-                <ExpandedEntityTreeConnector isLast={isLast} euiTheme={euiTheme} />
-                <div
-                  title={typeof value === 'string' ? value : undefined}
-                  css={css`
-                    flex: 1;
-                    min-width: 0;
-                    overflow: hidden;
-                    padding: 6px ${euiTheme.size.m} 6px ${euiTheme.size.xs};
-                    .euiDataGrid--paddingSmall & {
-                      padding: ${euiTheme.size.xs} ${euiTheme.size.m} ${euiTheme.size.xs}
-                        ${euiTheme.size.xs};
-                    }
-                    .euiDataGrid--paddingLarge & {
-                      padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.s}
-                        ${euiTheme.size.xs};
-                    }
-                  `}
-                >
-                  {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
-                </div>
-              </div>
+              {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
             </div>
           );
-        }
-
-        return (
-          <div
-            key={col.id}
-            role="gridcell"
-            style={{
-              width: w,
-              flexShrink: 0,
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            css={css`
-              padding: 6px;
-              .euiDataGrid--paddingSmall & {
-                padding: ${euiTheme.size.xs};
-              }
-              .euiDataGrid--paddingLarge & {
-                padding: ${euiTheme.size.s};
-              }
-            `}
-          >
-            {renderEntityCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
-          </div>
-        );
-      })}
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ExpandedEntityTreeConnector: React.FC<ChildTreeConnectorProps> = ({ isLast, euiTheme }) => (
   <div
