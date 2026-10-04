@@ -27,6 +27,7 @@ interface ApprovalContentHeaderProps {
    * {@link ProposedActionStatusBadge}'s own defaults.
    */
   badge?: ProposedActionStatusBadgeProps;
+  showStatusBadge?: boolean;
   /** Category/reversibility line, or the decider's name and time once decided/deciding. */
   caption?: React.ReactNode;
   title: string;
@@ -34,7 +35,7 @@ interface ApprovalContentHeaderProps {
 }
 
 export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
-  ({ badge, caption, title, titleId }) => {
+  ({ badge, showStatusBadge = true, caption, title, titleId }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -50,9 +51,11 @@ export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <ProposedActionStatusBadge {...badge} />
-          </EuiFlexItem>
+          {showStatusBadge && (
+            <EuiFlexItem grow={false}>
+              <ProposedActionStatusBadge {...badge} />
+            </EuiFlexItem>
+          )}
           {caption && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
