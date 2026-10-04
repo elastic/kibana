@@ -10,6 +10,7 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiProgress,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
   type EuiDataGridCustomBodyProps,
@@ -32,6 +33,11 @@ import type { Row, RowsMode } from './common';
 const GRID_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.ariaLabel',
   { defaultMessage: 'Entity analytics grid' }
+);
+
+const EMPTY_GRID_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.emptyMessage',
+  { defaultMessage: 'No records match the current filters' }
 );
 
 const expandRowLabel = (isExpanded: boolean) =>
@@ -255,52 +261,72 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     }: EuiDataGridCustomBodyProps) => (
       <>
         {headerRow}
-        {(rows as Row[]).map((row, i) => {
-          const absoluteIndex = visibleRowData.startRow + i;
-          const entityId = row['entity.id'] as string;
-          const isExpanded = expandedIds.has(entityId);
-          const children = isExpanded ? childMap.get(entityId) ?? [] : [];
-          return (
-            <React.Fragment key={entityId ?? i}>
-              <div
-                role="row"
-                className="euiDataGridRow"
-                css={css`
-                  inline-size: fit-content;
-                  min-inline-size: 100%;
-                  border-block-end: ${euiTheme.border.thin};
-                `}
-              >
+        {(rows as Row[]).length === 0 ? (
+          <div
+            role="row"
+            className="euiDataGridRow"
+            css={css`
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-inline-size: 100%;
+              min-block-size: ${euiTheme.size.xxxl};
+              padding: ${euiTheme.size.m};
+              border-block-end: ${euiTheme.border.thin};
+            `}
+          >
+            <EuiText size="s" color="subdued">
+              {EMPTY_GRID_MESSAGE}
+            </EuiText>
+          </div>
+        ) : (
+          (rows as Row[]).map((row, i) => {
+            const absoluteIndex = visibleRowData.startRow + i;
+            const entityId = row['entity.id'] as string;
+            const isExpanded = expandedIds.has(entityId);
+            const children = isExpanded ? childMap.get(entityId) ?? [] : [];
+            return (
+              <React.Fragment key={entityId ?? i}>
                 <div
+                  role="row"
+                  className="euiDataGridRow"
                   css={css`
-                    display: flex;
+                    inline-size: fit-content;
+                    min-inline-size: 100%;
+                    border-block-end: ${euiTheme.border.thin};
                   `}
                 >
-                  {visCols.map((col, ci) => (
-                    <Cell
-                      colIndex={ci}
-                      visibleRowIndex={absoluteIndex}
-                      key={`${entityId}-${col.id}`}
-                    />
-                  ))}
+                  <div
+                    css={css`
+                      display: flex;
+                    `}
+                  >
+                    {visCols.map((col, ci) => (
+                      <Cell
+                        colIndex={ci}
+                        visibleRowIndex={absoluteIndex}
+                        key={`${entityId}-${col.id}`}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              {children.map((child, childIdx) => (
-                <ExpandedEntityRow
-                  key={`${entityId}-child-${childIdx}`}
-                  child={child}
-                  isLast={childIdx === children.length - 1}
-                  visCols={visCols}
-                  columns={columns}
-                  euiTheme={euiTheme}
-                  watchlistNames={watchlistNames}
-                  handlers={cellHandlers}
-                  rowActions={rowActions}
-                />
-              ))}
-            </React.Fragment>
-          );
-        })}
+                {children.map((child, childIdx) => (
+                  <ExpandedEntityRow
+                    key={`${entityId}-child-${childIdx}`}
+                    child={child}
+                    isLast={childIdx === children.length - 1}
+                    visCols={visCols}
+                    columns={columns}
+                    euiTheme={euiTheme}
+                    watchlistNames={watchlistNames}
+                    handlers={cellHandlers}
+                    rowActions={rowActions}
+                  />
+                ))}
+              </React.Fragment>
+            );
+          })
+        )}
         {footerRow}
       </>
     ),
