@@ -199,7 +199,10 @@ describe('createElasticDefendPolicyManagementSkill', () => {
 
     expect(truncationRule).toContain('When `name_string_truncated` is true');
     expect(truncationRule).toContain(
-      'later get, compare, rollout status, or assess `idOrName` calls must pass `policy.id`, not the presented `name`'
+      'a later get call passes `policy.id` as `idOrName` inside `selector`'
+    );
+    expect(truncationRule).toContain(
+      'compare, rollout status, and assess `idOrName` calls must pass `policy.id`, not the presented `name`'
     );
     expect(truncationRule).toContain('the truncated name is not an exact stored name');
   });
