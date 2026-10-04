@@ -26,6 +26,7 @@ import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasMoreSubmenu, getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
+import { MAX_NAV_SHORTCUT_ITEMS, useNavShortcuts } from '../hooks/use_nav_shortcuts';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
@@ -127,6 +128,8 @@ export const Navigation = ({
     (items.overflowItems?.length ?? 0) > 0
   );
 
+  const { visible: shortcutsVisible } = useNavShortcuts(visibleMenuItems);
+
   const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
   const hasMoreMenu = allOverflowItems.length > 0;
 
@@ -190,6 +193,9 @@ export const Navigation = ({
                         isNew={getIsNewPrimary(item.id)}
                         onClick={() => handleItemClick(item)}
                         {...itemProps}
+                        shortcutNumber={
+                          shortcutsVisible && index < MAX_NAV_SHORTCUT_ITEMS ? index + 1 : undefined
+                        }
                       >
                         {item.label}
                       </SideNav.PrimaryMenu.Item>
