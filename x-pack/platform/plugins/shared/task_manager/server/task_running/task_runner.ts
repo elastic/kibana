@@ -645,11 +645,23 @@ export class TaskManagerRunner implements TaskRunner {
   private validateResult(
     result?: SuccessfulRunResult | FailedRunResult | void
   ): Result<SuccessfulRunResult, FailedRunResult> {
-    return isFailedRunResult(result)
-      ? asErr({ ...result, error: result.error })
-      : asOk({
-          ...(result || EMPTY_RUN_RESULT),
-        });
+    if (isFailedRunResult(result)) {
+      return asErr({ ...result, error: result.error });
+    }
+
+    const successful: SuccessfulRunResult = { ...(result || EMPTY_RUN_RESULT) };
+
+    // A recurring task must not yield: fail the run (keeping the task on its
+    // schedule) instead of persisting an ambiguous yield/schedule combination.
+    if (successful.shouldYieldTask && this.instance.task.schedule) {
+      const error = new Error(
+        `Task ${this} returned a yield result but yield is only supported for ad-hoc tasks. The run is treated as failed and the task stays on its schedule.`
+      );
+      this.logger.error(error.message, { tags: [this.taskType, this.id, 'task:yield'] });
+      return asErr({ error, state: successful.state });
+    }
+
+    return asOk(successful);
   }
 
   private shouldTryToScheduleRetry(): boolean {
@@ -728,6 +740,7 @@ export class TaskManagerRunner implements TaskRunner {
           runAt,
           schedule: reschedule,
           state,
+          params,
           attempts = 0,
           shouldDeleteTask,
           shouldDisableTask,
@@ -756,6 +769,7 @@ export class TaskManagerRunner implements TaskRunner {
                 this.logger
               ),
             state,
+            ...(params !== undefined ? { params } : {}),
             schedule: updatedTaskSchedule,
             attempts,
             status: TaskStatus.Idle,
@@ -899,7 +913,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
+      async ({ runAt, schedule, taskRunError, shouldYieldTask }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
 
@@ -949,8 +963,22 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               taskTiming,
               EventLogOutcomes.success,
-              `Task ${this.taskType} "${this.id}" completed successfully.`
+              shouldYieldTask
+                ? `Task ${this.taskType} "${this.id}" yielded.`
+                : `Task ${this.taskType} "${this.id}" completed successfully.`
             );
+
+            if (shouldYieldTask) {
+              this.logger.debug(
+                `Task ${this} yielded and will resume at ${(runAt ?? new Date()).toISOString()}.`,
+                { tags: [this.taskType, this.id, 'task:yield'] }
+              );
+              this.usageCounter?.incrementCounter({
+                counterName: 'taskManagerTaskYielded',
+                counterType: 'taskManagerTaskRunner',
+                incrementBy: 1,
+              });
+            }
           }
         } catch (err) {
           this.onTaskEvent(

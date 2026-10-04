@@ -279,6 +279,43 @@ Normal tasks will wait a default amount of 5m before trying again and every subs
 
 Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their next scheduled run.
 
+### Yielding an ad-hoc task
+
+An ad-hoc task that returns without `runAt` or `schedule` is deleted when the run finishes. Long-running work that needs to pause — wait for input, finish a step, or give other tasks the capacity slot — can yield instead. The current run ends, the same task document stays in the index with the returned state and params, and Task Manager claims it again at `runAt`.
+
+Yield is ad-hoc only. A recurring task that returns a yield result fails as unrecoverable.
+
+```js
+import { getYieldTaskRunResult } from '@kbn/task-manager-plugin/server';
+
+taskManager.registerTaskDefinitions({
+  myTask: {
+    createTaskRunner({ taskInstance }) {
+      return {
+        async run() {
+          const phase = taskInstance.state.phase ?? 'start';
+          if (phase === 'start') {
+            // Omit delay to become eligible on the next claim cycle.
+            // Pass delay: '5m' to wait before the task can be claimed again.
+            return getYieldTaskRunResult({
+              state: { phase: 'resume' },
+              params: { step: 2 },
+              delay: '30s',
+            });
+          }
+
+          return { state: {} };
+        },
+      };
+    },
+  },
+});
+```
+
+`runSoon(taskId)` wakes a yielded task before its delay elapses. The task id, stored API key, and user scope are unchanged across yields, and `attempts` resets to 0 because a yield is a successful run.
+
+Note: a yielded task is a regular `idle` task with a future `runAt`. If event-driven resume becomes a primary use case (yield until an external signal instead of a timestamp), a future iteration may introduce a dedicated task status (e.g. `waiting`) so suspended tasks are queryable and excluded from time-based claiming; that requires changes to claim queries, mappings, and monitoring, and is intentionally out of scope here.
+
 ### Force failing a task
 
 If you wish to purposely fail a task, you can throw an error of any kind and the retry logic will apply.
