@@ -20,6 +20,10 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/changelog.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/event_log.sh",
     "mayChangeFiles": true
   },
