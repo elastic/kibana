@@ -70,6 +70,7 @@ import type {
 import {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isAttackAttachmentType,
   isCommentAttachmentType,
   isUnifiedReferenceAttachmentRequest,
   getIndexFromMetadata,
@@ -335,6 +336,19 @@ export const getEventInfoFromComments = (
     return acc;
   }, []);
 
+/**
+ * Same as {@link getAlertInfoFromComments}, but for attacks (`security.attack`). Kept separate
+ * from the alert helper so attacks never inflate alert counts or the case alerts table.
+ */
+export const getAttackInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isAttackAttachmentType, strict));
+    return acc;
+  }, []);
+
 export type NewCommentArgs = AttachmentRequestV2 & {
   createdDate: string;
   owner: string;
@@ -454,6 +468,25 @@ export function createAlertUpdateStatusRequest({
   closingReason?: string;
 }): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status, closingReason }));
+}
+
+/**
+ * Same as {@link createAlertUpdateStatusRequest}, but for attacks (`security.attack`).
+ */
+export function createAttackUpdateStatusRequest({
+  comment,
+  status,
+  closingReason,
+}: {
+  comment: AttachmentRequestV2;
+  status: CaseStatuses;
+  closingReason?: string;
+}): UpdateAlertStatusRequest[] {
+  return getAttackInfoFromComments([comment]).map((attack) => ({
+    ...attack,
+    status,
+    closingReason,
+  }));
 }
 
 /**

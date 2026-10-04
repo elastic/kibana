@@ -186,7 +186,7 @@ type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServ
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: FakeAttachmentService = lazyObject({
     getter: createAttachmentGetterServiceMock(),
-    bulkDelete: jest.fn(),
+    bulkDelete: jest.fn().mockResolvedValue([]),
     create: jest.fn(),
     bulkCreate: jest.fn(),
     update: jest.fn(),

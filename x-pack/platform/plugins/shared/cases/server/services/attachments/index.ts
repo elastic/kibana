@@ -402,10 +402,18 @@ export class AttachmentService {
     }
   }
 
-  public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs) {
+  /**
+   * Deletes the given attachment saved objects.
+   *
+   * Core's `bulkDelete` reports per-object failures through `statuses` instead of throwing, so the
+   * ids whose delete genuinely failed (i.e. not a 404, which just means the object is already
+   * gone) are returned to the caller. Callers that need an all-or-nothing guarantee must inspect
+   * them; the ones that only need best-effort cleanup can ignore the return value.
+   */
+  public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs): Promise<string[]> {
     try {
       if (savedObjectIds.length <= 0) {
-        return;
+        return [];
       }
 
       this.context.log.debug(`Attempting to DELETE attachments ${savedObjectIds}`);
@@ -447,6 +455,8 @@ export class AttachmentService {
       this.mirrorSafely(() =>
         this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(idsToMirror)
       );
+
+      return [...failedIds];
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
