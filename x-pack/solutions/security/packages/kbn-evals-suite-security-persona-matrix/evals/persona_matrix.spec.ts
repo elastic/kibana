@@ -38,13 +38,28 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   });
 
   evaluate('all 21 examples', async ({ evaluateDataset, log }) => {
-    log.info(`Running persona matrix evaluation with ${personaMatrixDataset.length} examples`);
+    const examplesFilter = process.env.EVAL_EXAMPLES
+      ?.split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+    const examples = examplesFilter
+      ? personaMatrixDataset.filter((ex) => examplesFilter.includes(ex.id))
+      : personaMatrixDataset;
+    if (examples.length === 0) {
+      throw new Error(`EVAL_EXAMPLES matched no examples: ${examplesFilter?.join(',')}`);
+    }
+
+    log.info(
+      `Running persona matrix evaluation with ${examples.length} examples${
+        examplesFilter ? ` (filtered: ${examplesFilter.join(',')})` : ''
+      }`
+    );
 
     await evaluateDataset({
       dataset: {
         name: DATASET_NAME,
         description: DATASET_DESCRIPTION,
-        examples: personaMatrixDataset,
+        examples,
       },
     });
 
