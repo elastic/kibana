@@ -13,10 +13,18 @@ import { useConversationContext } from './conversation_context';
 
 const mockUseParams = jest.fn();
 const mockUseLocation = jest.fn();
+const mockHistory: {
+  location: { pathname: string; search: string; state?: object };
+  replace: jest.Mock;
+} = {
+  location: { pathname: '/', search: '' },
+  replace: jest.fn(),
+};
 
 jest.mock('react-router-dom', () => ({
   useParams: () => mockUseParams(),
   useLocation: () => mockUseLocation(),
+  useHistory: () => mockHistory,
 }));
 
 jest.mock('@kbn/react-query', () => ({
@@ -150,5 +158,70 @@ describe('RoutedConversationsProvider — attachment lifecycle', () => {
     );
 
     expect(capture.attachments).toEqual(restored);
+  });
+});
+
+describe('RoutedConversationsProvider — scroll to attachment', () => {
+  let scrollToAttachment: unknown;
+  let clearScrollToAttachment: (() => void) | undefined;
+  const ScrollTargetReader = () => {
+    ({ scrollToAttachment, clearScrollToAttachment } = useConversationContext());
+    return null;
+  };
+
+  beforeEach(() => {
+    scrollToAttachment = undefined;
+    clearScrollToAttachment = undefined;
+    mockHistory.replace.mockClear();
+    mockUseParams.mockReturnValue({ conversationId: 'conv-1', agentId: 'agent-1' });
+  });
+
+  it('exposes the attachment to scroll to from the search params', () => {
+    mockUseLocation.mockReturnValue({
+      state: {},
+      search: '?scrollToAttachmentId=att-1&scrollToAttachmentVersion=2',
+    });
+
+    render(
+      <RoutedConversationsProvider>
+        <ScrollTargetReader />
+      </RoutedConversationsProvider>
+    );
+
+    expect(scrollToAttachment).toEqual({ id: 'att-1', version: 2 });
+  });
+
+  it('clears the scroll-to-attachment params from the URL, keeping the rest', () => {
+    const location = {
+      pathname: '/agents/agent-1/conversations/conv-1',
+      search: '?openConversationDetails=true&scrollToAttachmentId=att-1',
+      state: { entryPointSource: 'direct' },
+    };
+    mockUseLocation.mockReturnValue(location);
+    mockHistory.location = location;
+
+    render(
+      <RoutedConversationsProvider>
+        <ScrollTargetReader />
+      </RoutedConversationsProvider>
+    );
+    clearScrollToAttachment?.();
+
+    expect(mockHistory.replace).toHaveBeenCalledWith({
+      ...location,
+      search: 'openConversationDetails=true',
+    });
+  });
+
+  it('exposes nothing without the search params', () => {
+    mockUseLocation.mockReturnValue({ state: {}, search: '' });
+
+    render(
+      <RoutedConversationsProvider>
+        <ScrollTargetReader />
+      </RoutedConversationsProvider>
+    );
+
+    expect(scrollToAttachment).toBeUndefined();
   });
 });

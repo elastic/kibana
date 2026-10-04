@@ -62,6 +62,12 @@ export interface ConversationTemplateUIContext {
     conversationId: string;
     agentId: string;
     openDetails?: boolean;
+    /**
+     * Scrolls to this attachment once the conversation has loaded. Only attachments rendered
+     * inline in the timeline can be targeted; without a version, the latest inline occurrence is
+     * used. If the attachment is not in the timeline, the view stays at the bottom.
+     */
+    attachment?: { id: string; version?: number };
   }) => Promise<void>;
 }
 
