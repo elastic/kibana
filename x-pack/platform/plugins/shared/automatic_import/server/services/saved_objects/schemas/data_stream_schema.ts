@@ -7,6 +7,13 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { SupportedFieldType } from '../../../../common/field_type_compatibility';
+import {
+  MAX_FIELD_NAME_LENGTH,
+  MAX_FIELD_TYPE_LENGTH,
+  MAX_FIELD_TYPE_OVERRIDES,
+  SUPPORTED_FIELD_TYPES,
+} from '../../../../common/field_type_compatibility';
 import { INPUT_TYPES, TASK_STATUSES } from '../constants';
 import { MAX_ID_LENGTH, MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constants';
 
@@ -83,5 +90,19 @@ export const dataStreamSchemaV1 = schema.object({
         schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
       ),
     })
+  ),
+});
+
+export const fieldTypeOverrideSchema = schema.object({
+  name: schema.string({ minLength: 1, maxLength: MAX_FIELD_NAME_LENGTH }),
+  type: schema.oneOf(
+    SUPPORTED_FIELD_TYPES.map((type) => schema.literal(type)) as [Type<SupportedFieldType>]
+  ),
+  original_type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }),
+});
+
+export const dataStreamSchemaV2 = dataStreamSchemaV1.extends({
+  field_type_overrides: schema.maybe(
+    schema.arrayOf(fieldTypeOverrideSchema, { maxSize: MAX_FIELD_TYPE_OVERRIDES })
   ),
 });

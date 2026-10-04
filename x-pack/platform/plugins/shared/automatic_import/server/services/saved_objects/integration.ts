@@ -10,6 +10,7 @@ import {
   integrationSchemaV1,
   integrationSchemaV2,
   integrationSchemaV3,
+  integrationSchemaV4,
 } from './schemas/integration_schema';
 import { INTEGRATION_SAVED_OBJECT_TYPE } from './constants';
 
@@ -80,6 +81,13 @@ export const integrationSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: integrationSchemaV3.extends({}, { unknowns: 'ignore' }),
         create: integrationSchemaV3,
+      },
+    },
+    4: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: integrationSchemaV4.extends({}, { unknowns: 'ignore' }),
+        create: integrationSchemaV4,
       },
     },
   },

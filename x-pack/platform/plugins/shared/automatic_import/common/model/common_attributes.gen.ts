@@ -26,21 +26,23 @@ export const InputType = lazySchema(() =>
     /**
      * The name of the input type
      */
-    name: z.enum([
-      'aws-cloudwatch',
-      'aws-s3',
-      'azure-blob-storage',
-      'azure-eventhub',
-      'cloudfoundry',
-      'filestream',
-      'gcp-pubsub',
-      'gcs',
-      'http_endpoint',
-      'journald',
-      'kafka',
-      'tcp',
-      'udp',
-    ]),
+    name: z
+      .enum([
+        'aws-cloudwatch',
+        'aws-s3',
+        'azure-blob-storage',
+        'azure-eventhub',
+        'cloudfoundry',
+        'filestream',
+        'gcp-pubsub',
+        'gcs',
+        'http_endpoint',
+        'journald',
+        'kafka',
+        'tcp',
+        'udp',
+      ])
+      .describe('The name of the input type'),
   })
 );
 export type InputType = z.infer<typeof InputType>;
@@ -53,19 +55,19 @@ export const DataStream = lazySchema(() =>
     /**
      * The ID of the data stream
      */
-    dataStreamId: SafeIdentifier,
+    dataStreamId: SafeIdentifier.describe('The ID of the data stream'),
     /**
      * The title of the data stream
      */
-    title: NonEmptyString,
+    title: NonEmptyString.describe('The title of the data stream'),
     /**
      * The description of the data stream
      */
-    description: NonEmptyString,
+    description: NonEmptyString.describe('The description of the data stream'),
     /**
      * The input types of the data stream
      */
-    inputTypes: z.array(InputType).max(100),
+    inputTypes: z.array(InputType).max(100).describe('The input types of the data stream'),
   })
 );
 export type DataStream = z.infer<typeof DataStream>;
@@ -79,23 +81,27 @@ export const Integration = lazySchema(() =>
       /**
        * The ID of the integration
        */
-      integrationId: SafeIdentifier,
+      integrationId: SafeIdentifier.describe('The ID of the integration'),
       /**
        * The data streams of the integration
        */
-      dataStreams: z.array(DataStream).max(10).optional(),
+      dataStreams: z
+        .array(DataStream)
+        .max(10)
+        .optional()
+        .describe('The data streams of the integration'),
       /**
        * The logo of the integration
        */
-      logo: z.string().max(100000).optional(),
+      logo: z.string().max(100000).optional().describe('The logo of the integration'),
       /**
        * The description of the integration
        */
-      description: NonEmptyString,
+      description: NonEmptyString.describe('The description of the integration'),
       /**
        * The title of the integration
        */
-      title: NonEmptyString,
+      title: NonEmptyString.describe('The title of the integration'),
     })
     .strict()
 );
@@ -117,11 +123,13 @@ export const OriginalSource = lazySchema(() =>
     /**
      * The type of the original source
      */
-    sourceType: OriginalSourceType,
+    sourceType: OriginalSourceType.describe('The type of the original source'),
     /**
      * The value of the original source (e.g. index name or filename)
      */
-    sourceValue: NonEmptyString,
+    sourceValue: NonEmptyString.describe(
+      'The value of the original source (e.g. index name or filename)'
+    ),
   })
 );
 export type OriginalSource = z.infer<typeof OriginalSource>;
@@ -144,27 +152,31 @@ export const DataStreamResponse = lazySchema(() =>
     /**
      * The ID of the data stream
      */
-    dataStreamId: NonEmptyString,
+    dataStreamId: NonEmptyString.describe('The ID of the data stream'),
     /**
      * The title of the data stream
      */
-    title: NonEmptyString,
+    title: NonEmptyString.describe('The title of the data stream'),
     /**
      * The description of the data stream
      */
-    description: NonEmptyString,
+    description: NonEmptyString.describe('The description of the data stream'),
     /**
      * The input types of the data stream
      */
-    inputTypes: z.array(InputType).max(100),
+    inputTypes: z.array(InputType).max(100).describe('The input types of the data stream'),
     /**
      * The status of the data stream
      */
-    status: TaskStatus,
+    status: TaskStatus.describe('The status of the data stream'),
     /**
      * The current phase of the data stream generation workflow
      */
-    phase: z.string().max(64).optional(),
+    phase: z
+      .string()
+      .max(64)
+      .optional()
+      .describe('The current phase of the data stream generation workflow'),
   })
 );
 export type DataStreamResponse = z.infer<typeof DataStreamResponse>;
@@ -177,47 +189,68 @@ export const IntegrationResponse = lazySchema(() =>
     /**
      * The ID of the integration
      */
-    integrationId: NonEmptyString,
+    integrationId: NonEmptyString.describe('The ID of the integration'),
     /**
      * The title of the integration
      */
-    title: NonEmptyString,
+    title: NonEmptyString.describe('The title of the integration'),
     /**
      * The logo of the integration
      */
-    logo: z.string().max(100000).optional(),
+    logo: z.string().max(100000).optional().describe('The logo of the integration'),
     /**
      * The description of the integration
      */
-    description: NonEmptyString,
+    description: NonEmptyString.describe('The description of the integration'),
     /**
      * The version of the integration
      */
-    version: SemVer.optional(),
+    version: SemVer.optional().describe('The version of the integration'),
     /**
      * The ID of the connector associated with this integration
      */
-    connectorId: z.string().max(256).optional(),
+    connectorId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('The ID of the connector associated with this integration'),
     /**
      * The username of the user who created the integration
      */
-    createdBy: z.string().max(512).optional(),
+    createdBy: z
+      .string()
+      .max(512)
+      .optional()
+      .describe('The username of the user who created the integration'),
     /**
      * The profile UID of the user who created the integration
      */
-    createdByProfileUid: UUID.optional(),
+    createdByProfileUid: UUID.optional().describe(
+      'The profile UID of the user who created the integration'
+    ),
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStreamResponse),
+    dataStreams: z.array(DataStreamResponse).describe('The data streams of the integration'),
     /**
      * The categories of the integration
      */
-    categories: z.array(z.string().max(100)).optional(),
+    categories: z
+      .array(z.string().max(100))
+      .optional()
+      .describe('The categories of the integration'),
     /**
      * The status of the integration
      */
-    status: TaskStatus,
+    status: TaskStatus.describe('The status of the integration'),
+    /**
+     * Data stream IDs included in the most recently approved package.
+     */
+    lastApprovedDataStreamIds: z
+      .array(SafeIdentifier)
+      .max(100)
+      .optional()
+      .describe('Data stream IDs included in the most recently approved package.'),
   })
 );
 export type IntegrationResponse = z.infer<typeof IntegrationResponse>;
@@ -230,39 +263,51 @@ export const AllIntegrationsResponseIntegration = lazySchema(() =>
     /**
      * The ID of the integration
      */
-    integrationId: NonEmptyString,
+    integrationId: NonEmptyString.describe('The ID of the integration'),
     /**
      * The title of the integration
      */
-    title: NonEmptyString,
+    title: NonEmptyString.describe('The title of the integration'),
     /**
      * The logo of the integration (base64 encoded SVG)
      */
-    logo: z.string().max(100000).optional(),
+    logo: z
+      .string()
+      .max(100000)
+      .optional()
+      .describe('The logo of the integration (base64 encoded SVG)'),
     /**
      * The number of data streams of the integration
      */
-    totalDataStreamCount: z.number().int(),
+    totalDataStreamCount: z
+      .number()
+      .int()
+      .describe('The number of data streams of the integration'),
     /**
      * The number of successful data streams of the integration
      */
-    successfulDataStreamCount: z.number().int(),
+    successfulDataStreamCount: z
+      .number()
+      .int()
+      .describe('The number of successful data streams of the integration'),
     /**
      * The version of the integration
      */
-    version: SemVer.optional(),
+    version: SemVer.optional().describe('The version of the integration'),
     /**
      * The username of the user who created the integration
      */
-    createdBy: NonEmptyString,
+    createdBy: NonEmptyString.describe('The username of the user who created the integration'),
     /**
      * The profile UID of the user who created the integration
      */
-    createdByProfileUid: UUID.optional(),
+    createdByProfileUid: UUID.optional().describe(
+      'The profile UID of the user who created the integration'
+    ),
     /**
      * The status of the integration
      */
-    status: TaskStatus,
+    status: TaskStatus.describe('The status of the integration'),
   })
 );
 export type AllIntegrationsResponseIntegration = z.infer<typeof AllIntegrationsResponseIntegration>;
@@ -276,11 +321,11 @@ export const LangSmithOptions = lazySchema(() =>
       /**
        * The project name.
        */
-      projectName: z.string().max(512),
+      projectName: z.string().max(512).describe('The project name.'),
       /**
        * The apiKey to use for tracing.
        */
-      apiKey: z.string().max(256),
+      apiKey: z.string().max(256).describe('The apiKey to use for tracing.'),
     })
     .strict()
 );
