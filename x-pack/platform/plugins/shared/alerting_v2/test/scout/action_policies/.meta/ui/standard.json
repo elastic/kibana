@@ -1,5 +1,5 @@
 {
-  "sha1": "0258cd7246241dca2ab923bf30f429d28fbce9db",
+  "sha1": "6c6ab6c65660f5b2b737af94b41ef010c667a897",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,7 +30,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
@@ -49,7 +50,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
         "line": 97,
-        "column": 32
+        "column": 26
       }
     },
     {
