@@ -6,19 +6,18 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import axios from 'axios';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import { generateKeyPairSync, createSign } from 'crypto';
+import { createServer } from 'http';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import AdmZip from 'adm-zip';
 import { ArtifactService } from './artifact';
 
-jest.mock('axios');
-
 describe('ArtifactService', () => {
+  const nativeFetch = global.fetch;
   const url = 'http://localhost:3000';
   const requestTimeout = 10_000;
-  const mockedAxios = axios as jest.Mocked<typeof axios>;
+  const mockedFetch = jest.spyOn(global, 'fetch');
   const logger = loggingSystemMock.createLogger();
   const defaultClusterInfo: InfoResponse = {
     name: 'elasticsearch',
@@ -51,7 +50,44 @@ describe('ArtifactService', () => {
   });
 
   beforeEach(() => {
-    mockedAxios.get.mockReset();
+    mockedFetch.mockReset();
+  });
+
+  it.each(['manifest', 'artifact'])('should time out while reading the %s body', async (stage) => {
+    jest.useFakeTimers();
+    try {
+      const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
+        url,
+        pubKey,
+        requestTimeout,
+      });
+      if (stage === 'artifact') {
+        const zip = createManifestZipPackage(
+          JSON.stringify({ artifacts: { [artifactName]: { relative_url: '/artifact.json' } } })
+        );
+        mockedFetch.mockResolvedValueOnce(new Response(new Uint8Array(zip.toBuffer())));
+      }
+      mockedFetch.mockImplementationOnce(async (_input, init) => {
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              init?.signal?.addEventListener('abort', () => {
+                controller.error(new Error('Response body aborted'));
+              });
+            },
+          })
+        );
+      });
+
+      const result = expect(artifactService.getArtifact(artifactName)).rejects.toThrow(
+        'Response body aborted'
+      );
+      await jest.advanceTimersByTimeAsync(requestTimeout);
+      await result;
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('should fail when manifest is not found', async () => {
@@ -61,7 +97,7 @@ describe('ArtifactService', () => {
       requestTimeout,
     });
 
-    mockedAxios.get.mockImplementationOnce(() => Promise.resolve({ status: 404 }));
+    mockedFetch.mockResolvedValueOnce(new Response(null, { status: 404 }));
 
     await expect(artifactService.getArtifact(artifactName)).rejects.toThrow(ManifestNotFoundError);
   });
@@ -88,7 +124,7 @@ describe('ArtifactService', () => {
 
     const result = await artifactService.getArtifact(artifactName);
     expect(result).toBeDefined();
-    expect(mockedAxios.get.mock.calls[0][0]).toBe(
+    expect(mockedFetch.mock.calls[0][0].toString()).toBe(
       `${url}/downloads/kibana/manifest/artifacts-${version}.zip`
     );
   });
@@ -115,7 +151,7 @@ describe('ArtifactService', () => {
 
     const result = await artifactService.getArtifact(artifactName);
     expect(result).toBeDefined();
-    expect(mockedAxios.get.mock.calls[0][0]).toBe(
+    expect(mockedFetch.mock.calls[0][0].toString()).toBe(
       `${url}/downloads/kibana/manifest/artifacts-${version}.zip`
     );
   });
@@ -146,7 +182,7 @@ describe('ArtifactService', () => {
   });
 
   it('should retrieve and return artifact content when the artifact exists in the manifest', async () => {
-    const content = 'artifact content';
+    const content = { indices_threshold: 100 };
     const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
       url,
       pubKey,
@@ -167,7 +203,51 @@ describe('ArtifactService', () => {
 
     const result = await artifactService.getArtifact(artifactName);
     expect(result).toBeDefined();
-    expect(result.data as string).toBe(content);
+    expect(result.data).toEqual(content);
+  });
+
+  it('should support credentials embedded in the CDN URL', async () => {
+    mockedFetch.mockImplementation(nativeFetch);
+    const content = { indices_threshold: 100 };
+    const zip = createManifestZipPackage(
+      JSON.stringify({
+        artifacts: {
+          [artifactName]: {
+            relative_url: '/downloads/artifacts/telemetry-buffer-and-batch-sizes-v1.json',
+          },
+        },
+      })
+    );
+    const authorizationHeaders: Array<string | undefined> = [];
+    const server = createServer((request, response) => {
+      authorizationHeaders.push(request.headers.authorization);
+      response.writeHead(200);
+      response.end(request.url?.includes('/manifest/') ? zip.toBuffer() : JSON.stringify(content));
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+
+    try {
+      const address = server.address();
+      if (!address || typeof address === 'string') {
+        throw new Error('Expected the test server to listen on a TCP port');
+      }
+      const artifactService = new ArtifactService(logger, createClusterInfoWithVersion(), {
+        url: `http://user:pass@127.0.0.1:${address.port}`,
+        pubKey,
+        requestTimeout,
+      });
+
+      await expect(artifactService.getArtifact(artifactName)).resolves.toEqual({
+        data: content,
+        modified: true,
+      });
+      expect(authorizationHeaders).toEqual(['Basic dXNlcjpwYXNz', 'Basic dXNlcjpwYXNz']);
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve()))
+      );
+    }
   });
 
   it('should cache manifest and use If-None-Match header for subsequent requests to avoid redundant downloads', async () => {
@@ -188,33 +268,27 @@ describe('ArtifactService', () => {
     );
 
     const fakeEtag = '123';
-    const axiosResponse = {
-      status: 200,
-      data: zip.toBuffer(),
-      headers: { etag: fakeEtag },
-    };
-
     // first request: download the .zip, second request: get the artifact, third request: check if the artifact is modified
     // and since the status is 304, it shouldn't download the artifact again.
-    mockedAxios.get
-      .mockImplementationOnce(() => Promise.resolve(axiosResponse))
-      .mockImplementationOnce(() => Promise.resolve({ status: 200, data: {} }))
-      .mockImplementationOnce(() => Promise.resolve({ status: 304 }));
+    mockedFetch
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array(zip.toBuffer()), { status: 200, headers: { etag: fakeEtag } })
+      )
+      .mockResolvedValueOnce(new Response('{}', { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 304 }));
 
     let manifest = await artifactService.getArtifact(artifactName);
     expect(manifest).not.toBeFalsy();
     expect(manifest.modified).toEqual(true);
-    expect(mockedAxios.get.mock.calls.length).toBe(2);
+    expect(mockedFetch.mock.calls.length).toBe(2);
 
     manifest = await artifactService.getArtifact(artifactName);
     expect(manifest).not.toBeFalsy();
     expect(manifest.modified).toEqual(false);
-    expect(mockedAxios.get.mock.calls.length).toBe(3);
+    expect(mockedFetch.mock.calls.length).toBe(3);
 
-    const [_url, config] = mockedAxios.get.mock.calls[2];
-    const headers = config?.headers ?? {};
-    expect(headers).not.toBeFalsy();
-    expect(headers['If-None-Match']).toEqual(fakeEtag);
+    const [_url, init] = mockedFetch.mock.calls[2];
+    expect(new Headers(init?.headers).get('If-None-Match')).toEqual(fakeEtag);
   });
 
   it('should throw an error when manifest signature verification fails with mismatched public key', async () => {
@@ -258,23 +332,10 @@ describe('ArtifactService', () => {
     };
   }
 
-  function setupMockResponses(manifestZipContent: Buffer, artifactContent: string = '') {
-    mockedAxios.get
-      .mockImplementationOnce(() => {
-        return Promise.resolve({
-          status: 200,
-          data: manifestZipContent,
-          headers: {},
-          config: { responseType: 'arraybuffer' },
-        });
-      })
-      .mockImplementationOnce(() => {
-        return Promise.resolve({
-          status: 200,
-          data: artifactContent,
-          headers: {},
-        });
-      });
+  function setupMockResponses(manifestZipContent: Buffer, artifactContent: unknown = {}) {
+    mockedFetch
+      .mockResolvedValueOnce(new Response(new Uint8Array(manifestZipContent), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(artifactContent), { status: 200 }));
   }
 
   function signManifestContent(manifestJson: string): Buffer {

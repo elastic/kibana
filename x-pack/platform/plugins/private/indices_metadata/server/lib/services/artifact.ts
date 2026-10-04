@@ -7,7 +7,6 @@
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import axios from 'axios';
 import { createVerify } from 'crypto';
 import AdmZip from 'adm-zip';
 import { cloneDeep } from 'lodash';
@@ -52,39 +51,54 @@ export class ArtifactService {
   public async getArtifact(name: string): Promise<Manifest> {
     this.logger.debug('Getting artifact', { name } as LogMeta);
 
-    return axios
-      .get(this.getManifestUrl(), {
-        headers: this.headers(name),
-        timeout: this.cdnConfig?.requestTimeout,
-        validateStatus: (status) => status < 500,
-        responseType: 'arraybuffer',
-      })
-      .then(async (response) => {
-        switch (response.status) {
-          case 200:
-            const manifest = {
-              data: await this.getManifest(name, response.data),
-              modified: true,
-            };
-            // only update etag if we got a valid manifest
-            if (response.headers && response.headers.etag) {
-              const cacheEntry = {
-                manifest: { ...manifest, modified: false },
-                etag: response.headers?.etag ?? '',
-              };
-              this.cache.set(name, cacheEntry);
-            }
-            return cloneDeep(manifest);
-          case 304:
-            return cloneDeep(this.getCachedManifest(name));
-          case 404:
-            // just in case, remove the entry
-            this.cache.delete(name);
-            throw new ManifestNotFoundError(this.manifestUrl!);
-          default:
-            throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    const requestUrl = new URL(this.getManifestUrl());
+    const { username, password } = requestUrl;
+    requestUrl.username = '';
+    requestUrl.password = '';
+    const headers = new Headers(this.headers(name));
+    if ((username || password) && !headers.has('authorization')) {
+      const credentials = `${decodeURIComponent(username)}:${decodeURIComponent(password)}`;
+      headers.set('authorization', `Basic ${Buffer.from(credentials).toString('base64')}`);
+    }
+    const controller = new AbortController();
+    const timeout = this.cdnConfig?.requestTimeout
+      ? setTimeout(() => controller.abort(), this.cdnConfig.requestTimeout)
+      : undefined;
+    let response: Response;
+    let data: ArrayBuffer;
+    try {
+      response = await fetch(requestUrl, { headers, signal: controller.signal });
+      data = await response.arrayBuffer();
+    } finally {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    }
+    switch (response.status) {
+      case 200:
+        const manifest = {
+          data: await this.getManifest(name, Buffer.from(data)),
+          modified: true,
+        };
+        // only update etag if we got a valid manifest
+        const etag = response.headers.get('etag');
+        if (etag) {
+          const cacheEntry = {
+            manifest: { ...manifest, modified: false },
+            etag,
+          };
+          this.cache.set(name, cacheEntry);
         }
-      });
+        return cloneDeep(manifest);
+      case 304:
+        return cloneDeep(this.getCachedManifest(name));
+      case 404:
+        // just in case, remove the entry
+        this.cache.delete(name);
+        throw new ManifestNotFoundError(this.manifestUrl!);
+      default:
+        throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    }
   }
 
   private getManifestUrl() {
@@ -124,8 +138,31 @@ export class ArtifactService {
     const artifact = manifest.artifacts[name];
     if (artifact) {
       const url = `${this.cdnConfig?.url}${artifact.relative_url}`;
-      const artifactResponse = await axios.get(url, { timeout: this.cdnConfig?.requestTimeout });
-      return artifactResponse.data;
+      const requestUrl = new URL(url);
+      const { username, password } = requestUrl;
+      requestUrl.username = '';
+      requestUrl.password = '';
+      const headers = new Headers();
+      if ((username || password) && !headers.has('authorization')) {
+        const credentials = `${decodeURIComponent(username)}:${decodeURIComponent(password)}`;
+        headers.set('authorization', `Basic ${Buffer.from(credentials).toString('base64')}`);
+      }
+      const controller = new AbortController();
+      const timeout = this.cdnConfig?.requestTimeout
+        ? setTimeout(() => controller.abort(), this.cdnConfig.requestTimeout)
+        : undefined;
+      try {
+        const response = await fetch(requestUrl, { headers, signal: controller.signal });
+        if (!response.ok) {
+          await response.body?.cancel();
+          throw Error(`Failed to download artifact, unexpected status code: ${response.status}`);
+        }
+        return await response.json();
+      } finally {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+      }
     } else {
       throw new ArtifactNotFoundError(name);
     }
