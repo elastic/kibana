@@ -193,10 +193,6 @@ export const roundToEvents = (
   ];
 };
 
-/**
- * Converts a rounds-based conversation into a timeline, on read. Maps each round with
- * {@link roundToEvents}, in round order.
- */
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 

@@ -563,8 +563,6 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  /** User feedback for this round, if submitted. */
-  feedback?: ConversationRoundFeedback;
   /**
    * Set when the round's last execution ended without an outcome (failed or aborted). The round
    * is `completed` with an empty `response.message`; the steps completed before the interruption
@@ -759,6 +757,8 @@ export interface Conversation {
   events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
+  /** Per-execution feedback submitted by the user. Keyed by execution id. */
+  feedback?: Record<string, ConversationRoundFeedback>;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

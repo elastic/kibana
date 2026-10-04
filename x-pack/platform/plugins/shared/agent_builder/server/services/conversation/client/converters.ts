@@ -278,7 +278,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   };
 
   const events =
-    isEventsNative && storedEvents && storedEvents.length > 0
+    isEventsNative && storedEvents != null && storedEvents.length > 0
       ? storedEvents
       : roundsToEvents(conversation);
 

@@ -49,6 +49,7 @@ const renderContent = (
   conversationId: string | undefined,
   conversationAttachments?: VersionedAttachment[]
 ): React.ReactNode => {
+  const { executionId } = item;
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -81,7 +82,8 @@ const renderContent = (
   const steps = completed?.steps ?? item.steps;
   const response = completed?.response ?? { message: item.response?.message ?? '' };
   const isAwaiting = isAwaitingPromptTurn(item);
-  const hasContent = steps.length > 0 || response.message !== '';
+  const hasContent =
+    steps.length > 0 || response.message !== '' || Boolean(completed?.response?.structured_output);
 
   if (!isAwaiting && !hasContent) {
     return null;
@@ -100,6 +102,7 @@ const renderContent = (
           conversationAttachments={conversationAttachments}
           attachmentRefs={item.attachmentRefs}
           triggerAttachmentRefs={completed ? item.triggerAttachmentRefs : undefined}
+          executionId={executionId}
         />
       )}
       {isAwaiting && promptRequestedEventId && (

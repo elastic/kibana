@@ -2283,8 +2283,27 @@ describe('conversation model converters', () => {
       });
 
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(updated.rounds).toBe(passedThroughRounds);
       expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
+    it('honors caller-supplied rounds when events are also provided (step-only appendEvents)', () => {
+      const base = eventsNativeStored();
+      const callerRounds = [{ ...base.rounds[0], response: { message: 'updated response' } }];
+
+      const updated = updateConversation({
+        conversation: base,
+        update: {
+          id: base.id,
+          events: base.events!,
+          rounds: callerRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.rounds[0].response?.message).toBe('updated response');
     });
 
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {

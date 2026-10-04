@@ -46,19 +46,7 @@ const storageSettings = {
       updated_at: types.date({}),
       conversation_rounds: types.object({
         dynamic: false,
-        properties: {
-          feedback: types.object({
-            dynamic: false,
-            properties: {
-              vote: types.keyword({}),
-              chips: types.keyword({}),
-              comment: types.text({}),
-              submitted_at: types.date({}),
-              connector_id: types.keyword({}),
-              model: types.keyword({}),
-            },
-          }),
-        },
+        properties: {},
       }),
       events: types.nested({
         properties: {
