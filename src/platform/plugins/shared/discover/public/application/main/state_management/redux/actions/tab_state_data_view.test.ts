@@ -28,6 +28,8 @@ import {
 } from '../../../../../__mocks__/data_view_complex';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import * as tabStateActions from './tab_state';
+import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
+import { FetchStatus } from '../../../../types';
 import { selectDataSourceProfileId } from '../runtime_state';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -568,6 +570,45 @@ describe('tab_state_data_view actions', () => {
 
       expect(result).toBeUndefined();
       expect(createSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('applyEsqlControlVariables', () => {
+    it('requests the fetch and loading state before the ES|QL source is resolved', async () => {
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { esql: 'FROM logs | WHERE host == ?host' } },
+        })
+      );
+      type ResolveResult = Awaited<ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>>;
+      let resolveSource: (result: ResolveResult) => void = () => {};
+      const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockReturnValue(
+        new Promise<ResolveResult>((resolve) => {
+          resolveSource = resolve;
+        })
+      );
+      const { dataStateContainer$, currentDataView$ } = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      );
+      const dataStateContainer = dataStateContainer$.getValue()!;
+      const fetchSpy = jest.spyOn(dataStateContainer, 'fetch').mockImplementation(() => {});
+
+      const result = internalState.dispatch(
+        internalStateActions.applyEsqlControlVariables({ tabId, esqlVariables: [] })
+      );
+
+      expect(fetchSpy).toHaveBeenCalled();
+      expect(dataStateContainer.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+      expect(currentDataView$.getValue()).not.toBe(dataViewMock);
+
+      resolveSource({ esqlSource: {} as ResolveResult['esqlSource'], dataView: dataViewMock });
+      await result;
+
+      expect(currentDataView$.getValue()).toBe(dataViewMock);
+      resolveSpy.mockRestore();
     });
   });
 });

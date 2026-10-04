@@ -1157,3 +1157,132 @@ describe('test getDataStateContainer', () => {
     });
   });
 });
+
+describe('source resolution', () => {
+  const setupSourceResolution = () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const getNextSearchSessionIdSpy = jest.spyOn(
+      stateContainer.searchSessionManager,
+      'getNextSearchSessionId'
+    );
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    const unsubscribe = dataState.subscribe();
+    let resolveSource: () => void = () => {};
+    let rejectSource: (error: Error) => void = () => {};
+    const sourceResolution = dataState.runSourceResolution(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          resolveSource = resolve;
+          rejectSource = reject;
+        })
+    );
+    return {
+      dataState,
+      getNextSearchSessionIdSpy,
+      unsubscribe,
+      sourceResolution,
+      resolveSource: () => resolveSource(),
+      rejectSource: (error: Error) => rejectSource(error),
+    };
+  };
+
+  // Waits for the debounced fetch$ to emit, so the fetch is held
+  const waitForHeldFetch = () => new Promise((resolve) => setTimeout(resolve, 150));
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFetchDocuments.mockResolvedValue({ records: [] });
+  });
+
+  test('holds a fetch until the pending source resolution is done', async () => {
+    const { dataState, getNextSearchSessionIdSpy, unsubscribe, resolveSource } =
+      setupSourceResolution();
+
+    dataState.refetch$.next(undefined);
+    await waitForHeldFetch();
+    expect(getNextSearchSessionIdSpy).not.toHaveBeenCalled();
+
+    resolveSource();
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(getNextSearchSessionIdSpy).toHaveBeenCalledTimes(1);
+
+    unsubscribe();
+  });
+
+  test('combines fetches requested during the source resolution into one', async () => {
+    const { dataState, getNextSearchSessionIdSpy, unsubscribe, resolveSource } =
+      setupSourceResolution();
+
+    dataState.refetch$.next(undefined);
+    dataState.refetch$.next(undefined);
+    dataState.refetch$.next(undefined);
+    resolveSource();
+
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(getNextSearchSessionIdSpy).toHaveBeenCalledTimes(1);
+
+    unsubscribe();
+  });
+
+  test('runs the held fetch when the source resolution fails', async () => {
+    const { dataState, getNextSearchSessionIdSpy, unsubscribe, sourceResolution, rejectSource } =
+      setupSourceResolution();
+
+    dataState.refetch$.next(undefined);
+    rejectSource(new Error('resolution failed'));
+
+    await expect(sourceResolution).rejects.toThrow('resolution failed');
+    await waitFor(() => {
+      expect(getNextSearchSessionIdSpy).toHaveBeenCalledTimes(1);
+    });
+
+    unsubscribe();
+  });
+
+  test('cancel drops the held fetch and ends the documents loading state', async () => {
+    const { dataState, getNextSearchSessionIdSpy, unsubscribe, resolveSource } =
+      setupSourceResolution();
+
+    dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING, result: [] });
+    dataState.refetch$.next(undefined);
+    await waitForHeldFetch();
+    dataState.cancel();
+
+    expect(dataState.data$.documents$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+
+    resolveSource();
+    await waitForHeldFetch();
+    expect(getNextSearchSessionIdSpy).not.toHaveBeenCalled();
+
+    unsubscribe();
+  });
+
+  test('isLatest is false for a resolution replaced by a newer one', async () => {
+    const { dataState, unsubscribe, resolveSource } = setupSourceResolution();
+    let isFirstLatest: () => boolean = () => true;
+    let resolveFirst: () => void = () => {};
+    const firstResolution = dataState.runSourceResolution((isLatest) => {
+      isFirstLatest = isLatest;
+      return new Promise<void>((resolve) => {
+        resolveFirst = resolve;
+      });
+    });
+    let isSecondLatest: () => boolean = () => false;
+    const secondResolution = dataState.runSourceResolution(async (isLatest) => {
+      isSecondLatest = isLatest;
+    });
+
+    resolveSource();
+    resolveFirst();
+    await Promise.all([firstResolution, secondResolution]);
+
+    expect(isFirstLatest()).toBe(false);
+    expect(isSecondLatest()).toBe(true);
+
+    unsubscribe();
+  });
+});
