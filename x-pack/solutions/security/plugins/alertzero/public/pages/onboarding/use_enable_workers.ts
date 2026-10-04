@@ -26,7 +26,12 @@ export const useEnableWorkers = (
   workerIds: readonly string[],
   workerEnabled: WorkerEnabledMap,
   onSuccess?: () => void,
-  onSavingChange?: (saving: boolean) => void
+  onSavingChange?: (saving: boolean) => void,
+  /**
+   * Written onto every patched worker, including workers left disabled.
+   * `undefined` leaves the stored account alone. `null` clears it so the worker runs as the current user.
+   */
+  serviceAccountId?: string | null
 ) => {
   const queryClient = useQueryClient();
   const { services } = useKibana<CoreStart>();
@@ -53,12 +58,21 @@ export const useEnableWorkers = (
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
     const results = await Promise.allSettled(
-      idsToUpdate.map((id) =>
-        services.http!.patch(buildWorkerUrl(id), {
+      idsToUpdate.map((id) => {
+        const worker = cached.workers.find((candidate) => candidate.id === id);
+        const body =
+          serviceAccountId === undefined
+            ? { enabled: workerEnabled[id] }
+            : {
+                enabled: workerEnabled[id],
+                settingsRevision: worker?.settingsRevision ?? null,
+                settings: { serviceAccountId },
+              };
+        return services.http!.patch(buildWorkerUrl(id), {
           version: API_VERSIONS.internal.v1,
-          body: JSON.stringify({ enabled: workerEnabled[id] }),
-        })
-      )
+          body: JSON.stringify(body),
+        });
+      })
     );
     setIsSaving(false);
 

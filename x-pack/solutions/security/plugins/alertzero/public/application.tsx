@@ -17,6 +17,7 @@ import { AccessBoundary } from './components/access_boundary';
 import type { SubscriptionAvailability } from '../common/availability';
 import { AppChromeLayout } from './components/app_chrome';
 import type { AlertZeroStartDependencies } from './types';
+import { mergeKibanaServices } from './kibana_services';
 import { AlertZeroRoutes } from './routes';
 import { getSharedAppQueryClient } from './shared_app_query_client';
 
@@ -52,7 +53,7 @@ export const renderApp = async ({
    * for `services.http` and `services.notifications`.
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+    <KibanaContextProvider services={mergeKibanaServices(coreStart, startDeps)}>
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>

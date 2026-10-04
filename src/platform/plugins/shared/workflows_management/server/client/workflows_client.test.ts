@@ -198,6 +198,34 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
+  it('forwards an optional request so a user save can bind a service account', async () => {
+    const service = createMockWorkflowsService();
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      { available: true } as WorkflowsManagementConfig,
+      logger
+    );
+    const client = await provider('testPlugin');
+    const options = { spaceId: 'default', values: { recipient: 'World' } };
+    const mockRequest = {} as KibanaRequest;
+
+    await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, options);
+    expect(service.installManagedWorkflow).toHaveBeenLastCalledWith(
+      EXAMPLE_MANAGED_WORKFLOW_ID,
+      options,
+      'testPlugin',
+      undefined
+    );
+
+    await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, options, mockRequest);
+    expect(service.installManagedWorkflow).toHaveBeenLastCalledWith(
+      EXAMPLE_MANAGED_WORKFLOW_ID,
+      options,
+      'testPlugin',
+      mockRequest
+    );
+  });
+
   it('should delegate requestless managed workflow status checks when available', async () => {
     const getManagedWorkflowStatus = jest.fn().mockResolvedValue({ status: 'intact' });
     const service = createMockWorkflowsService({ getManagedWorkflowStatus });

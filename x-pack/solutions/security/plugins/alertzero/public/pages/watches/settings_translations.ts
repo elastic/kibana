@@ -124,6 +124,27 @@ export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Autonomy level' }
 );
 
+export const SERVICE_ACCOUNT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccount.label',
+  { defaultMessage: 'Run as' }
+);
+
+export const SERVICE_ACCOUNT_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccount.help',
+  { defaultMessage: 'Choose a service account, or run as the current user.' }
+);
+
+export const SERVICE_ACCOUNT_CURRENT_USER = i18n.translate(
+  'xpack.alertzero.watches.settings.serviceAccount.currentUser',
+  { defaultMessage: 'Current user' }
+);
+
+export const serviceAccountSelectAriaLabel = (workerName: string) =>
+  i18n.translate('xpack.alertzero.watches.settings.serviceAccount.ariaLabel', {
+    defaultMessage: 'Service account for {workerName}',
+    values: { workerName },
+  });
+
 /* -------------------------------------------------------------------------- */
 /* Trigger row and Workers empty state                                        */
 /* -------------------------------------------------------------------------- */

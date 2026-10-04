@@ -48,24 +48,47 @@ const renderPage = ({
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   serverWorkers = ALL_WORKERS_RESPONSE,
   security,
+  serviceAccountsEnabled = false,
+  serviceAccounts = [],
 }: {
   canWrite?: boolean;
   httpPatch?: jest.Mock;
-  serverWorkers?: { workers: Array<{ id: string; enabled: boolean }> };
-  security?: { authc: { getCurrentUser: jest.Mock } };
+  serverWorkers?: {
+    workers: Array<{ id: string; enabled: boolean; settingsRevision?: number | null }>;
+  };
+  security?: {
+    authc: { getCurrentUser: jest.Mock };
+    serviceAccounts?: { isEnabled: () => boolean };
+  };
+  serviceAccountsEnabled?: boolean;
+  serviceAccounts?: Array<{ id: string; name: string; enabled: boolean; assumable: boolean }>;
 } = {}) => {
   const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
+  coreStart.security.serviceAccounts.isEnabled.mockReturnValue(serviceAccountsEnabled);
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
-  // interceptable per-test.
-  const httpGet = jest.fn().mockResolvedValue(serverWorkers);
+  // interceptable per-test. The account list is a separate route.
+  const httpGet = jest.fn().mockImplementation((path: string) => {
+    if (path.includes('/internal/security/service_account')) {
+      return Promise.resolve({ serviceAccounts });
+    }
+    return Promise.resolve(serverWorkers);
+  });
   const core = {
     ...coreStart,
     http: { ...coreStart.http, get: httpGet, patch: httpPatch },
-    ...(security ? { security } : {}),
+    ...(security
+      ? {
+          security: {
+            ...coreStart.security,
+            ...security,
+            serviceAccounts: security.serviceAccounts ?? coreStart.security.serviceAccounts,
+          },
+        }
+      : {}),
   };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
@@ -267,6 +290,96 @@ describe('OnboardingPage', () => {
       expect(httpPatch).toHaveBeenCalledWith(
         expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
         expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
+      );
+    });
+
+    it('hides the run-as control when service accounts are disabled', () => {
+      renderPage({ canWrite: true });
+      expect(
+        screen.queryByTestId('alertZeroServiceAccountSelect-onboarding')
+      ).not.toBeInTheDocument();
+    });
+
+    it('writes the current user onto every worker, including one left off', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      renderPage({
+        canWrite: true,
+        httpPatch,
+        serviceAccountsEnabled: true,
+        security: {
+          authc: { getCurrentUser: jest.fn().mockResolvedValue({ email: 'test@example.com' }) },
+        },
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('alertZeroOnboardingBeforeYouEnable')).toHaveTextContent(
+          'Every worker runs as you ( test@example.com ), including workers you leave off.'
+        )
+      );
+
+      const toggles = screen.getAllByRole('switch');
+      fireEvent.click(toggles[1]);
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      await waitFor(() => expect(httpPatch).toHaveBeenCalledTimes(6));
+      expect(httpPatch).toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+        expect.objectContaining({
+          body: JSON.stringify({
+            enabled: false,
+            settingsRevision: null,
+            settings: { serviceAccountId: null },
+          }),
+        })
+      );
+      expect(httpPatch).toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+        expect.objectContaining({
+          body: JSON.stringify({
+            enabled: true,
+            settingsRevision: null,
+            settings: { serviceAccountId: null },
+          }),
+        })
+      );
+    });
+
+    it('writes the selected account onto every worker and updates the callout', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: false } });
+      renderPage({
+        canWrite: true,
+        httpPatch,
+        serviceAccountsEnabled: true,
+        serviceAccounts: [
+          {
+            id: 'kibana/alertzero-worker',
+            name: 'alertzero-worker',
+            enabled: true,
+            assumable: true,
+          },
+        ],
+      });
+
+      const select = await screen.findByTestId('alertZeroServiceAccountSelect-onboarding');
+      fireEvent.change(select, { target: { value: 'kibana/alertzero-worker' } });
+
+      expect(screen.getByText(/runs as alertzero-worker/)).toBeInTheDocument();
+
+      const toggles = screen.getAllByRole('switch');
+      fireEvent.click(toggles[1]);
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      await waitFor(() =>
+        expect(httpPatch).toHaveBeenCalledWith(
+          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+          expect.objectContaining({
+            body: JSON.stringify({
+              enabled: false,
+              settingsRevision: null,
+              settings: { serviceAccountId: 'kibana/alertzero-worker' },
+            }),
+          })
+        )
       );
     });
   });

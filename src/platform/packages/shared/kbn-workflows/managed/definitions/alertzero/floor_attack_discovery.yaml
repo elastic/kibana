@@ -9,6 +9,7 @@ tags:
   - watch
   - watch-floor
 settings:
+  __WORKER_RUN_AS_LINE__
   # This worker is installed per space, so the key needs no space component.
   #
   # `cancel-in-progress` with max 1: the newest discoveries are the ones worth

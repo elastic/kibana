@@ -280,6 +280,7 @@ export class WorkersService {
         spaceId,
         workflowIdSuffix: spaceId,
         values: applied.values,
+        request,
       });
       status = await managedWorkflows.getWorkflowStatus(registration.id, {
         spaceId,
@@ -315,6 +316,7 @@ export class WorkersService {
           spaceId,
           workflowIdSuffix: spaceId,
           values: registration.settings.createDefaultValues(),
+          request,
         });
         status = await managedWorkflows.getWorkflowStatus(registration.id, {
           spaceId,

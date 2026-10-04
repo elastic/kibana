@@ -71,13 +71,22 @@ export const WorkerSettings = lazySchema(() =>
       extras: WorkerSettingsExtras.optional().describe(
         'Omitted for Workers that declare no Worker-specific settings.'
       ),
+      /**
+       * Service account this Worker runs as. Omitted to run as the current user.
+       */
+      serviceAccountId: z
+        .string()
+        .min(1)
+        .max(1024)
+        .optional()
+        .describe('Service account this Worker runs as. Omitted to run as the current user.'),
     })
     .strict()
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;
 
 /**
- * Settings patch; the editable subset of WorkerSettings with the same names and nesting. Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored extras, supplied must be the complete valid object for this Worker and replaces the stored one. There is no deep merge and `null` has no special meaning.
+ * Settings patch; the editable subset of WorkerSettings with the same names and nesting. Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored extras, supplied must be the complete valid object for this Worker and replaces the stored one. There is no deep merge. `serviceAccountId` is the one field where null is meaningful: null clears the stored account.
  */
 export const WorkerSettingsWrite = lazySchema(() =>
   z
@@ -85,6 +94,18 @@ export const WorkerSettingsWrite = lazySchema(() =>
       autonomy: WatchAutonomyLevel.optional(),
       scheduleInterval: WorkerScheduleInterval.optional(),
       extras: WorkerSettingsExtras.optional(),
+      /**
+       * Omitted keeps the stored account. A string replaces it. Null clears it so the Worker runs as the current user.
+       */
+      serviceAccountId: z
+        .string()
+        .min(1)
+        .max(1024)
+        .nullable()
+        .optional()
+        .describe(
+          'Omitted keeps the stored account. A string replaces it. Null clears it so the Worker runs as the current user.'
+        ),
     })
     .strict()
 );

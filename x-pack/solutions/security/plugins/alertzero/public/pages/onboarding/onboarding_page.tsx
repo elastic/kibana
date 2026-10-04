@@ -13,6 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
   EuiPanel,
@@ -32,6 +33,8 @@ import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_f
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { ServiceAccountField } from '../watches/components/service_account_field';
+import * as settingsI18n from '../watches/settings_translations';
 import { workerName } from '../watches/workers/translations';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
@@ -48,12 +51,13 @@ interface Props {
 export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
+    services: { application, security },
   } = useKibana<CoreStart>();
 
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
+  const serviceAccountsEnabled = security?.serviceAccounts?.isEnabled() ?? false;
 
   const currentUserEmail = useCurrentUser();
 
@@ -75,11 +79,14 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
   const history = useHistory();
   const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
+  const [serviceAccountId, setServiceAccountId] = useState<string | null>(null);
+  const [serviceAccountName, setServiceAccountName] = useState<string | undefined>();
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
     () => history.push('/watches'),
-    onSavingChange
+    onSavingChange,
+    serviceAccountsEnabled ? serviceAccountId : undefined
   );
 
   const enabledCount = availableWorkerIds.filter((id) => workerEnabled[id]).length;
@@ -196,6 +203,30 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         )}
       </EuiPanel>
 
+      {serviceAccountsEnabled && onboardingWorkers.length > 0 ? (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFormRow
+            label={settingsI18n.SERVICE_ACCOUNT_LABEL}
+            helpText={i18n.ONBOARDING_SERVICE_ACCOUNT_HELP}
+            fullWidth
+          >
+            <ServiceAccountField
+              workerId="onboarding"
+              workerName={settingsI18n.SERVICE_ACCOUNT_LABEL}
+              ariaLabel={i18n.ONBOARDING_SERVICE_ACCOUNT_ARIA_LABEL}
+              current={serviceAccountId ?? undefined}
+              fullWidth
+              isDisabled={isSaving}
+              onChange={(nextId, nextName) => {
+                setServiceAccountId(nextId);
+                setServiceAccountName(nextName);
+              }}
+            />
+          </EuiFormRow>
+        </>
+      ) : null}
+
       <EuiSpacer size="m" />
 
       <EuiCallOut
@@ -205,7 +236,13 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         data-test-subj="alertZeroOnboardingBeforeYouEnable"
       >
         <ul>
-          <li>{i18n.beforeYouEnableRunsAs(currentUserEmail)}</li>
+          <li>
+            {serviceAccountsEnabled
+              ? serviceAccountId
+                ? i18n.beforeYouEnableRunsAsServiceAccount(serviceAccountName ?? serviceAccountId)
+                : i18n.beforeYouEnableRunsAsCurrentUser(currentUserEmail)
+              : i18n.beforeYouEnableRunsAs(currentUserEmail)}
+          </li>
           <li>{i18n.BEFORE_YOU_ENABLE_LLM}</li>
           <li>
             <em>{i18n.BEFORE_YOU_ENABLE_PRIVILEGE}</em>

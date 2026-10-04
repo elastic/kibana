@@ -91,6 +91,9 @@ describe('AlertZero schema smoke tests', () => {
       }).success
     ).toBe(true);
     expect(WorkerSettingsWrite.safeParse({ extras: { anything: true } }).success).toBe(true);
+    expect(WorkerSettingsWrite.safeParse({ serviceAccountId: 'account-a' }).success).toBe(true);
+    expect(WorkerSettingsWrite.safeParse({ serviceAccountId: null }).success).toBe(true);
+    expect(WorkerSettingsWrite.safeParse({ serviceAccountId: '' }).success).toBe(false);
   });
 
   it('closes the Detection-owned Rule Tuning extras', () => {
