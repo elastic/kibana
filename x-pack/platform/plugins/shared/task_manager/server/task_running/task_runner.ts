@@ -731,6 +731,7 @@ export class TaskManagerRunner implements TaskRunner {
           attempts = 0,
           shouldDeleteTask,
           shouldDisableTask,
+          priority,
         }: SuccessfulRunResult & { attempts: number }) => {
           if (shouldDeleteTask) {
             // set the status to failed so task will get deleted
@@ -757,6 +758,7 @@ export class TaskManagerRunner implements TaskRunner {
               ),
             state,
             schedule: updatedTaskSchedule,
+            ...(priority !== undefined ? { priority } : {}),
             attempts,
             status: TaskStatus.Idle,
           });

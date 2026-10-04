@@ -11,7 +11,7 @@ import moment from 'moment';
 import { TaskScheduling } from './task_scheduling';
 import { asOk } from './lib/result_type';
 import type { ConcreteTaskInstance } from './task';
-import { TaskStatus } from './task';
+import { TaskPriority, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
 import { mockLogger } from './test_utils';
@@ -1271,6 +1271,47 @@ describe('TaskScheduling', () => {
   });
 
   describe('runSoon', () => {
+    test.each([
+      [TaskPriority.Standard, TaskPriority.UserInteractive, TaskPriority.UserInteractive],
+      [TaskPriority.UserInteractive, TaskPriority.Standard, TaskPriority.Standard],
+      [TaskPriority.UserInteractive, undefined, TaskPriority.UserInteractive],
+    ])('updates priority from %s with override %s to %s', async (priority, override, expected) => {
+      const task = taskManagerMock.createTask({
+        status: TaskStatus.Idle,
+        priority,
+        version: 'original-version',
+      });
+      mockTaskStore.get.mockResolvedValueOnce(task);
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.runSoon(task.id, { priority: override });
+
+      expect(mockTaskStore.update).toHaveBeenCalledTimes(1);
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        {
+          ...task,
+          priority: expected,
+          runAt: new Date(),
+          scheduledAt: new Date(),
+        },
+        { validate: false }
+      );
+    });
+
+    test.each([TaskStatus.Claiming, TaskStatus.Running])(
+      'does not promote a task with status %s',
+      async (status) => {
+        const task = taskManagerMock.createTask({ status, priority: TaskPriority.Standard });
+        mockTaskStore.get.mockResolvedValueOnce(task);
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+        await expect(
+          taskScheduling.runSoon(task.id, { priority: TaskPriority.UserInteractive })
+        ).rejects.toBeInstanceOf(TaskAlreadyRunningError);
+        expect(mockTaskStore.update).not.toHaveBeenCalled();
+      }
+    );
+
     test('resolves when the task update succeeds', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
@@ -1334,21 +1375,24 @@ describe('TaskScheduling', () => {
       );
     });
 
-    test('reports 409 conflict errors via the conflict flag without throwing', async () => {
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    test.each([undefined, { priority: TaskPriority.UserInteractive }])(
+      'reports 409 conflicts without throwing (options: %p)',
+      async (options) => {
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.get.mockResolvedValueOnce(
-        taskManagerMock.createTask({ id, status: TaskStatus.Idle })
-      );
-      mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
+        mockTaskStore.get.mockResolvedValueOnce(
+          taskManagerMock.createTask({ id, status: TaskStatus.Idle })
+        );
+        mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
-      const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id, forced: false, conflict: true });
-      expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
-        'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
-      );
-    });
+        const result = await taskScheduling.runSoon(id, options);
+        expect(result).toEqual({ id, forced: false, conflict: true });
+        expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
+          'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
+        );
+      }
+    );
 
     test('rejects when the task is being claimed', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';

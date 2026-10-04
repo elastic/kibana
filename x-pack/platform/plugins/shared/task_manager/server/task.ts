@@ -179,6 +179,8 @@ export interface RunContext {
  */
 
 export type SuccessfulRunResult = {
+  /** Overrides the task priority when rescheduling after a successful run. */
+  priority?: TaskPriority;
   /**
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.

@@ -14,6 +14,7 @@ import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   TaskStatus,
+  type TaskPriority,
   type ApiKeyOptions,
   type ConcreteTaskInstance,
   type IntervalSchedule,
@@ -78,6 +79,11 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+export interface RunSoonOptions {
+  force?: boolean;
+  priority?: TaskPriority;
+}
+
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
@@ -307,13 +313,12 @@ export class TaskScheduling {
     return flatten(batches);
   }
 
-  /**
-   * Run task.
-   *
-   * @param taskId - The task being scheduled.
-   * @returns {Promise<RunSoonResult>}
-   */
-  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+  /** Makes a task eligible to run now, optionally updating its priority in the same version-checked write. */
+  public async runSoon(
+    taskId: string,
+    options: boolean | RunSoonOptions = {}
+  ): Promise<RunSoonResult> {
+    const { force = false, priority } = typeof options === 'boolean' ? { force: options } : options;
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
@@ -349,6 +354,7 @@ export class TaskScheduling {
           status: TaskStatus.Idle,
           scheduledAt: new Date(),
           runAt: new Date(),
+          ...(priority !== undefined ? { priority } : {}),
         },
         { validate: false }
       );
