@@ -214,6 +214,14 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
 ] as const;
 
 /**
+ * The trigger the workflow that attaches the Worker to new rules subscribes to. Registered by
+ * security_solution, which this plugin cannot import, so the id is repeated here; a test in
+ * security_solution fails if the two drift.
+ */
+export const SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID =
+  'security.detectionRulesCreated' as const;
+
+/**
  * Attaches the Alert Triage Worker's rule action to rules, only while the Worker is enabled in the
  * request's space. Called by the managed workflow that attaches rules created after enable.
  */
