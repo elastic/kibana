@@ -1,0 +1,9 @@
+type: object
+nullable: true
+additionalProperties: true
+description: >
+  Type-specific content for the attachment. Required for value attachment types, such as
+  comments. For the `comment` type, this is an object with a `content` string of up to 30,000
+  characters.
+example:
+  content: A new comment.

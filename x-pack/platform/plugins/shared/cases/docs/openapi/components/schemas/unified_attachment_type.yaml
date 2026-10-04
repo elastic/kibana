@@ -1,0 +1,7 @@
+type: string
+description: >
+  The attachment type. The type must be registered in Kibana and determines the accepted shape
+  of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`,
+  `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`.
+  Legacy attachment types such as `user` or `alert` are not accepted.
+example: comment
