@@ -8,9 +8,7 @@
  {{> disclaimer}}
 
 import { z, lazySchema } from '@kbn/zod/v4';
-{{#if useZodHelpers}}
 import { isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
-{{/if}}
 
 {{#each imports}}
 import {
