@@ -24,6 +24,8 @@ export const createServiceMapSkill = () =>
     name: 'service-map',
     basePath: 'skills/observability',
     description: serviceMapDescription,
+    selectorInstructions:
+      'Show APM service maps based on real observability trace data from OTel/APM instrumentation. Use only when the user asks to visualize live service-to-service dependencies or service topology tracked by APM. Do NOT use for generic node graphs, custom topology diagrams, or dependency visualizations built from arbitrary user data — use graph-creation for those.',
     content: serviceMapContent,
     getRegistryTools: () => SERVICE_MAP_TOOL_IDS,
   });

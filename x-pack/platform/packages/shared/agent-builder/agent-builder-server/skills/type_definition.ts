@@ -162,6 +162,17 @@ export interface SkillDefinition<
    * Can be used to expose tools which are specific to the skill.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+
+  /**
+   * Optional description used exclusively by the pre-selector (the fast-model call that filters
+   * skills before the main agent prompt is assembled). When present, the pre-selector uses this
+   * instead of `description`, allowing skill owners to provide disambiguation language, negative
+   * scope qualifiers, or domain boundaries without changing the description the main model sees.
+   *
+   * Keep it focused on WHERE this skill applies vs. similar skills — the pre-selector already
+   * has the full `description` as a fallback if this field is absent.
+   */
+  selectorInstructions?: string;
 }
 
 export interface ReferencedContent {

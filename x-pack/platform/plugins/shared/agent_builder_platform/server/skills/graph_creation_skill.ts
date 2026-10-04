@@ -15,6 +15,8 @@ export const graphCreationSkill = defineSkillType({
   basePath: 'skills/platform/visualization',
   description:
     'Visualize topology, node/entity relationships, or dependency graphs inline in the conversation by rendering data as React Flow nodes and edges. Not for charts, metrics, or dashboard panels.',
+  selectorInstructions:
+    'Create inline node/edge graphs, custom topology diagrams, and dependency visualizations from arbitrary user-supplied data — not backed by APM or observability traces. Use when the user wants a generic graph rendered in the conversation from their own data (services, hosts, resources, relationships, cloud accounts). Do NOT use for charts, metrics, or dashboard panels. Do NOT use when the topology is based on live APM/OTel trace data — use observability.service-map for that.',
   content: `## When to Use This Skill
 
 Use this skill **only** when the user specifically asks to visualize topology, nodes, or entity relationships **inline in the conversation**, for example:

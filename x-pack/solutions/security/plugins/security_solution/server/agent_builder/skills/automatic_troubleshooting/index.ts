@@ -208,6 +208,11 @@ Use exact terms from the user's request and queried endpoint evidence when calli
       'a policy not taking effect or not being enforced; protection not blocking; unexpected quarantine or allow behavior; ' +
       'policy response failures; or failures involving protection updates, trusted applications, exceptions, blocklists, ' +
       'antivirus compatibility, and endpoint event output.',
+    selectorInstructions:
+      'Use when Elastic Defend is not behaving as expected: protection not blocking, policy not enforcing, exceptions or allowlists not being applied, ' +
+      'quarantine happening despite exclusions, endpoint health degraded, or any case where a policy setting exists but is not taking effect on enrolled agents. ' +
+      'This is the troubleshooting skill for Elastic Defend symptoms. ' +
+      'For reading or changing policy settings themselves, use elastic-defend-policy-management.',
     content: systemInstructions,
     referencedContent: [
       {

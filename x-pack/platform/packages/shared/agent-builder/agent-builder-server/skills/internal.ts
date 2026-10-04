@@ -89,4 +89,11 @@ export interface InternalSkillDefinition {
    * filtered from registry queries (`has`, `get`, `list`, `bulkGet`).
    */
   isAvailable?: (context: AvailabilityContext) => MaybePromise<AvailabilityResult>;
+
+  /**
+   * Optional description used exclusively by the pre-selector. When present,
+   * replaces `description` in the pre-selector skill catalog so skill owners
+   * can provide disambiguation text without changing the main-model description.
+   */
+  selectorInstructions?: string;
 }

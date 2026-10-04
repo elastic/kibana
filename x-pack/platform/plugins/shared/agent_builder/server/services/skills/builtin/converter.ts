@@ -31,4 +31,5 @@ export const convertBuiltinSkill = ({
   isAvailable: skill.availability
     ? (ctx) => cache.getOrCompute(skill.id, skill.availability!, ctx)
     : undefined,
+  selectorInstructions: skill.selectorInstructions,
 });

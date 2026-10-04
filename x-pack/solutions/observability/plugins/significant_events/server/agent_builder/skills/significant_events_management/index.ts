@@ -22,6 +22,9 @@ export const significantEventsManagementSkill = defineSkillType({
   name: 'significant-events-management',
   basePath: 'skills/platform/streams',
   description,
+  selectorInstructions:
+    'Use to search, create, or update significant events in Streams — notable infrastructure occurrences tracked with lifecycle state. ' +
+    'Also use when querying what the system has recorded about an infrastructure component, its event history, baseline behavior patterns, or normal operational state.',
   content,
   getRegistryTools: () => [
     SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
