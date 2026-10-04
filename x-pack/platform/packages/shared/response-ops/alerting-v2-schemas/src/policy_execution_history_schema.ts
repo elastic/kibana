@@ -125,8 +125,8 @@ const MAX_WORKFLOWS_PER_ITEM = 100;
 // emit one event referencing thousands of rules; the response only carries a
 // bounded sample and clients rely on `total_rule_count` for the true count.
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
-// Cap for the embedded `episodes` array in each item.
-export const MAX_EMBEDDED_EPISODES_PER_ITEM = 50;
+// Cap for the embedded `alerts` array in each item.
+export const MAX_EMBEDDED_ALERTS_PER_ITEM = 50;
 
 const episodeRefSchema = z.object({ id: z.string() });
 
@@ -138,10 +138,10 @@ export const policyExecutionHistoryItemSchema = z
     alert_count: z.number(),
     alerts: z
       .array(episodeRefSchema)
-      .max(MAX_EMBEDDED_EPISODES_PER_ITEM)
+      .max(MAX_EMBEDDED_ALERTS_PER_ITEM)
       .optional()
       .describe(
-        'Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.'
+        'Alert ids referenced by this event, bounded to MAX_EMBEDDED_ALERTS_PER_ITEM. Use `alert_count` for the true total.'
       ),
     action_group_count: z.number(),
     rules: z

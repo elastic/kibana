@@ -8,7 +8,7 @@
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
-  MAX_EMBEDDED_EPISODES_PER_ITEM,
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
   type DispatchFailureReason,
   type PolicyExecutionHistoryItem,
   type SearchMatchCounts,
@@ -154,7 +154,7 @@ export function buildExecutionHistoryItem(
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
   const episodeIds = (dispatcher.episode_ids ?? []).filter(isString);
-  const episodes = episodeIds.slice(0, MAX_EMBEDDED_EPISODES_PER_ITEM).map((id) => ({ id }));
+  const episodes = episodeIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
 
   const failureReason = dispatcher.failure_reason;
   const errorMessage = event.error?.message;
