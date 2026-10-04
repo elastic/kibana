@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
   const endpointTestresources = getService('endpointTestResources');
   const kbnServer = getService('kibanaServer');
+  const retry = getService('retry');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
@@ -121,11 +122,23 @@ Loading endpoint data into space_b`);
 
     describe(`Host Metadata List API: ${HOST_METADATA_LIST_ROUTE}`, () => {
       it('should retrieve list with only metadata for hosts in current space', async () => {
-        const { body } = await adminSupertest
-          .get(addSpaceIdToPath('/', dataSpaceA.spaceId, HOST_METADATA_LIST_ROUTE))
-          .on('error', createSupertestErrorLogger(log))
-          .send()
-          .expect(200);
+        let body: Record<string, any> = {};
+
+        // The continuous united-metadata transform can transiently drop the .fleet-agents join
+        // after the load-time gate, so poll the read until it converges before asserting.
+        await retry.waitForWithTimeout(
+          'host metadata list to report the space_a host',
+          60_000,
+          async () => {
+            ({ body } = await adminSupertest
+              .get(addSpaceIdToPath('/', dataSpaceA.spaceId, HOST_METADATA_LIST_ROUTE))
+              .on('error', createSupertestErrorLogger(log))
+              .send()
+              .expect(200));
+
+            return body.total === 1;
+          }
+        );
 
         expect(body.total).to.eql(1);
         expect(body.data[0].metadata.agent.id).to.eql(dataSpaceA.hosts[0].agent.id);
@@ -177,14 +190,24 @@ Loading endpoint data into space_b`);
 
     describe(`Agent Status API: ${AGENT_STATUS_ROUTE}`, () => {
       it('should return status for an agent in current space', async () => {
-        const { body } = await adminSupertest
-          .get(addSpaceIdToPath('/', dataSpaceA.spaceId, AGENT_STATUS_ROUTE))
-          .query({ agentIds: [dataSpaceA.hosts[0].agent.id] })
-          .set('elastic-api-version', '1')
-          .set('x-elastic-internal-origin', 'kibana')
-          .on('error', createSupertestErrorLogger(log))
-          .send()
-          .expect(200);
+        let body: Record<string, any> = {};
+
+        await retry.waitForWithTimeout(
+          'agent status to report the space_a agent as found',
+          60_000,
+          async () => {
+            ({ body } = await adminSupertest
+              .get(addSpaceIdToPath('/', dataSpaceA.spaceId, AGENT_STATUS_ROUTE))
+              .query({ agentIds: [dataSpaceA.hosts[0].agent.id] })
+              .set('elastic-api-version', '1')
+              .set('x-elastic-internal-origin', 'kibana')
+              .on('error', createSupertestErrorLogger(log))
+              .send()
+              .expect(200));
+
+            return body.data[dataSpaceA.hosts[0].agent.id].found === true;
+          }
+        );
 
         expect(body.data[dataSpaceA.hosts[0].agent.id].found).to.eql(true);
       });
