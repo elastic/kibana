@@ -46,7 +46,16 @@ triggers:
           type: array
           description: >
             Tool calls from the completed round. Used to see which decision-tree
-            files the investigator actually opened.
+            files the investigator actually opened, and replayed to the
+            reinforcement agent as tool messages.
+          items:
+            type: object
+            additionalProperties: true
+        tool_results:
+          type: array
+          description: >
+            Results of the completed round's tool calls, keyed by tool_call_id.
+            Replayed to the reinforcement agent as the tool result messages.
           items:
             type: object
             additionalProperties: true
@@ -59,7 +68,6 @@ steps:
   - name: prepare_turn
     type: nightshift.decisionTreePrepare
     with:
-      prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
       agent_id: '{{ inputs.agent_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
@@ -82,18 +90,19 @@ steps:
     with:
       agent_id: significant-events.decision-tree-reinforcement
 
-  # The agent runs in its own conversation, so its own beforeAgent hook hydrates the
-  # trees into that conversation's sandbox rather than the investigator's.
+  # The investigator's round is replayed as conversation history, so the agent sees each tool
+  # call and its result as real tool messages rather than a transcript pasted into one message.
+  # The run gets its own conversation id, so its beforeAgent hook hydrates the trees into that
+  # conversation's sandbox rather than the investigator's.
   - name: reinforce_decision_trees
-    type: ai.agent
-    agent-id: significant-events.decision-tree-reinforcement
-    connector-id: '{{ steps.resolve_model.output.connector_id }}'
-    plugin-id: 'nightshift_investigation_memory'
-    aggregate-by: 'nightshift'
-    product-solution: 'observability'
-    product-feature: 'nightshift'
-    create-conversation: true
-    timeout: 900s
+    type: nightshift.decisionTreeReinforce
     if: '${{ steps.prepare_turn.output.skipped == false }}'
     with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      round_id: '{{ inputs.round_id }}'
       message: '{{ steps.prepare_turn.output.message }}'
+      turn_kind: '{{ steps.prepare_turn.output.turn_kind }}'
+      connector_id: '{{ steps.resolve_model.output.connector_id }}'
+      tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'

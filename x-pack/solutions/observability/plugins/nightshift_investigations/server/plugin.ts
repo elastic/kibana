@@ -46,6 +46,7 @@ import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/mem
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
+import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { registerCortexTelemetryEvents } from './telemetry';
@@ -381,6 +382,9 @@ export class NightshiftInvestigationsPlugin
               getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
               logger: decisionTreeLogger,
             })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
+            decisionTreeReinforceStepDefinition({ getAgentBuilder: () => this.agentBuilder })
           );
         }
       }
