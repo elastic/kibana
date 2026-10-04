@@ -40,8 +40,8 @@ export const AttachmentPatchRequestSchemaV2 = z.union([
   UnifiedAttachmentPutRequestSchema.and(z.object({ id: z.string() })),
 ]);
 
-export const BulkCreateAttachmentsRequestSchemaV2 = limitedArraySchema({
-  codec: AttachmentRequestSchemaV2,
+export const BulkCreateUnifiedAttachmentsRequestSchema = limitedArraySchema({
+  codec: UnifiedAttachmentPayloadSchema,
   min: 0,
   max: MAX_BULK_CREATE_ATTACHMENTS,
   fieldName: 'attachments',
@@ -72,7 +72,9 @@ export const BulkGetUnifiedAttachmentsResponseSchema = z.object({
 
 export type AttachmentRequestV2 = z.infer<typeof AttachmentRequestSchemaV2>;
 export type AttachmentPatchRequestV2 = z.infer<typeof AttachmentPatchRequestSchemaV2>;
-export type BulkCreateAttachmentsRequestV2 = z.infer<typeof BulkCreateAttachmentsRequestSchemaV2>;
+export type BulkCreateUnifiedAttachmentsRequest = z.infer<
+  typeof BulkCreateUnifiedAttachmentsRequestSchema
+>;
 export type BulkGetUnifiedAttachmentsRequest = z.infer<
   typeof BulkGetUnifiedAttachmentsRequestSchema
 >;

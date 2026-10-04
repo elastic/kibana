@@ -35,8 +35,7 @@ export interface AddArgs {
 export interface BulkCreateArgs {
   caseId: string;
   /**
-   * Unified payloads only. Callers with mixed wire shapes convert first via
-   * toUnifiedAttachmentRequest.
+   * Unified payloads only.
    */
   attachments: UnifiedAttachmentPayload[];
 }

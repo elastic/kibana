@@ -11,15 +11,19 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 import type { Case } from '@kbn/cases-plugin/common';
-import { COMMENT_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import {
-  CaseStatuses,
   AttachmentType,
-  ExternalReferenceStorageType,
+  COMMENT_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  isUnifiedCommentAttachment,
+} from '@kbn/cases-plugin/common';
+import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import type {
+  UnifiedAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
   defaultUser,
@@ -91,6 +95,22 @@ const unifiedOtherAttachmentReq = {
   owner: 'securitySolutionFixture',
 };
 
+// User actions persist the legacy shape, regardless of the unified shape sent on the wire.
+const toLegacyUserActionPayload = (attachment: UnifiedAttachmentPayload) => {
+  if (isUnifiedCommentAttachment(attachment)) {
+    return { type: 'user', comment: attachment.data.content, owner: attachment.owner };
+  }
+
+  const { attachmentId, metadata, owner } = attachment as UnifiedReferenceAttachmentPayload;
+  return {
+    type: 'alert',
+    alertId: attachmentId,
+    index: metadata?.index,
+    rule: metadata?.rule,
+    owner,
+  };
+};
+
 // `getAllComments` reads through the cases_fixture route, which projects to the legacy shape.
 const legacyAlertCommentOnlyId3 = {
   ...postCommentAlertMultipleIdsReq,
@@ -107,7 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validateCommentsIgnoringOrder = (
     comments: Case['comments'],
-    attachments: BulkCreateAttachmentsRequestV2
+    attachments: AttachmentRequestV2[]
   ) => {
     expect(comments?.length).to.eql(attachments.length);
 
@@ -184,9 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
             action: 'create',
             created_by: defaultUser,
             payload: {
-              comment: {
-                ...attachments[index],
-              },
+              comment: toLegacyUserActionPayload(attachments[index]),
             },
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
@@ -206,16 +224,16 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [getUnifiedFilesAttachmentReq(), getUnifiedFilesAttachmentReq()],
           });
 
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
-          const secondFileAttachment =
-            caseWithAttachments.comments![1] as ExternalReferenceSOAttachmentPayload;
+          const firstFileAttachment = caseWithAttachments.comments![0] as unknown as {
+            metadata: { files: unknown[] };
+          };
+          const secondFileAttachment = caseWithAttachments.comments![1] as unknown as {
+            metadata: { files: unknown[] };
+          };
 
           expect(caseWithAttachments.totalComment).to.be(2);
-          for (const fileAttachment of [firstFileAttachment, secondFileAttachment]) {
-            expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
-            expect(fileAttachment.externalReferenceStorage.soType).to.be(FILE_SO_TYPE);
-          }
+          expect(firstFileAttachment.metadata.files).to.eql(fileAttachmentMetadata.files);
+          expect(secondFileAttachment.metadata.files).to.eql(fileAttachmentMetadata.files);
         });
 
         it('should bulk create 100 file attachments', async () => {
@@ -1195,7 +1213,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [{ ...postCommentAlertReq, alertId, index }],
+            params: [buildUnifiedAlertReq('securitySolutionFixture', { alertId, index })],
             expectedHttpCode: 400,
           });
         });

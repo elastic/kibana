@@ -8,10 +8,14 @@
 import { useKibana, useToasts } from './lib/kibana';
 import { TestProviders } from './mock';
 import { useCasesToast } from './use_cases_toast';
-import { alertComment, basicComment, mockCase } from '../containers/mock';
+import { mockCase } from '../containers/mock';
 import type { SupportedCaseAttachment } from '../types';
 import { renderHook } from '@testing-library/react';
-import { OWNER_INFO } from '../../common/constants';
+import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '../../common/constants/attachments';
 import { useApplication } from './lib/kibana/use_application';
 
 jest.mock('./lib/kibana');
@@ -20,6 +24,19 @@ jest.mock('./lib/kibana/use_application');
 const useToastsMock = useToasts as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useApplicationMock = useApplication as jest.Mock;
+
+const unifiedAlert: SupportedCaseAttachment = {
+  type: SECURITY_ALERT_ATTACHMENT_TYPE,
+  owner: SECURITY_SOLUTION_OWNER,
+  attachmentId: 'alert-id-1',
+  metadata: { index: 'alert-index' },
+};
+
+const unifiedComment: SupportedCaseAttachment = {
+  type: COMMENT_ATTACHMENT_TYPE,
+  owner: SECURITY_SOLUTION_OWNER,
+  data: { content: 'a comment' },
+};
 
 describe('Use cases toast hook', () => {
   const successMock = jest.fn();
@@ -90,35 +107,17 @@ describe('Use cases toast hook', () => {
         validateTitle('Custom title');
       });
 
-      it('should display the alert sync title when called with an alert attachment (1 alert)', () => {
+      it('should display the alert sync title when called with multiple alert attachments', () => {
         const { result } = renderHook(
           () => {
             return useCasesToast();
           },
           { wrapper: TestProviders }
         );
-        result.current.showSuccessAttach({
-          theCase: mockCase,
-          attachments: [alertComment as SupportedCaseAttachment],
-        });
-        validateTitle('An alert was added to "Another horrible breach!!"');
-      });
-
-      it('should display the alert sync title when called with an alert attachment (multiple alerts)', () => {
-        const { result } = renderHook(
-          () => {
-            return useCasesToast();
-          },
-          { wrapper: TestProviders }
-        );
-        const alert = {
-          ...alertComment,
-          alertId: ['1234', '54321'],
-        } as SupportedCaseAttachment;
 
         result.current.showSuccessAttach({
           theCase: mockCase,
-          attachments: [alert],
+          attachments: [unifiedAlert, { ...unifiedAlert, attachmentId: 'alert-id-2' }],
         });
         validateTitle('Alerts were added to "Another horrible breach!!"');
       });
@@ -130,11 +129,6 @@ describe('Use cases toast hook', () => {
           },
           { wrapper: TestProviders }
         );
-        const unifiedAlert = {
-          ...alertComment,
-          type: 'security.alert',
-          attachmentId: 'alert-id-1',
-        } as unknown as SupportedCaseAttachment;
 
         result.current.showSuccessAttach({
           theCase: mockCase,
@@ -150,15 +144,9 @@ describe('Use cases toast hook', () => {
           },
           { wrapper: TestProviders }
         );
-        const unifiedAlert = {
-          ...alertComment,
-          type: 'security.alert',
-          attachmentId: ['alert-id-1', 'alert-id-2'],
-        } as unknown as SupportedCaseAttachment;
-
         result.current.showSuccessAttach({
           theCase: mockCase,
-          attachments: [unifiedAlert],
+          attachments: [{ ...unifiedAlert, attachmentId: ['alert-id-1', 'alert-id-2'] }],
         });
         validateTitle('Alerts were added to "Another horrible breach!!"');
       });
@@ -172,7 +160,7 @@ describe('Use cases toast hook', () => {
         );
         result.current.showSuccessAttach({
           theCase: mockCase,
-          attachments: [basicComment as SupportedCaseAttachment],
+          attachments: [unifiedComment],
         });
         validateTitle('Case Another horrible breach!! updated');
       });
@@ -205,7 +193,7 @@ describe('Use cases toast hook', () => {
         );
         result.current.showSuccessAttach({
           theCase: { ...mockCase, settings: { syncAlerts: true } },
-          attachments: [alertComment as SupportedCaseAttachment],
+          attachments: [unifiedAlert],
         });
         validateContent("Alert statuses were synced with the case's status.");
       });
@@ -222,7 +210,7 @@ describe('Use cases toast hook', () => {
             ...mockCase,
             settings: { ...mockCase.settings, syncAlerts: false, extractObservables: false },
           },
-          attachments: [alertComment as SupportedCaseAttachment],
+          attachments: [unifiedAlert],
         });
         const mockParams = successMock.mock.calls[0][0];
         expect(mockParams.text).toBeUndefined();
