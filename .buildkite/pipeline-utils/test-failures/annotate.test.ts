@@ -98,6 +98,25 @@ describe('Annotate', () => {
         '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> <https://github.com/some/failure/link/1234|[2 failures]> OSS CI Group #1 / test should fail'
       );
     });
+
+    it('should omit failures that should not alert Slack', () => {
+      const nonAlertingFailure = {
+        ...mockFailure,
+        name: 'non-alerting Scout failure',
+        alertSlack: false,
+      };
+      const annotation = getSlackMessage([mockFailure, nonAlertingFailure], {});
+
+      expect(annotation).toEqual(
+        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> OSS CI Group #1 / test should fail'
+      );
+    });
+
+    it('should not create a message when no failures should alert Slack', () => {
+      mockFailure.alertSlack = false;
+
+      expect(getSlackMessage([mockFailure], mockArtifacts)).toBeUndefined();
+    });
   });
 
   describe('getPrComment', () => {

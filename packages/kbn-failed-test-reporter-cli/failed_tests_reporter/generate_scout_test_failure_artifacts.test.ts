@@ -94,5 +94,13 @@ describe('generateScoutTestFailureArtifacts', () => {
     const artifact = readArtifactFor('suite - untracked failure');
     expect(artifact).not.toHaveProperty('githubIssue');
     expect(artifact).not.toHaveProperty('failureCount');
+    expect(artifact).not.toHaveProperty('alertSlack');
+  });
+
+  it('marks failure artifacts that should not alert Slack', async () => {
+    await generateScoutTestFailureArtifacts({ log, bkMeta: {}, alertSlack: false });
+
+    const artifact = readArtifactFor('suite - untracked failure');
+    expect(artifact.alertSlack).toBe(false);
   });
 });
