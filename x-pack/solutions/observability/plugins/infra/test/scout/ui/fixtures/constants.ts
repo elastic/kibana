@@ -98,8 +98,6 @@ export const CONTAINER_NAMES = Array.from(
   (_, i) => `container-cont-${i}`
 );
 
-export const CONTAINER_METADATA_FIELD = 'container.id';
-
 export const DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME = 'Containers Default View';
 
 export const DATE_WITH_POD_DATA_FROM = '2024-04-01T18:20:00.000Z';
