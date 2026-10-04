@@ -721,6 +721,31 @@ describe('sendMessage', () => {
     ).rejects.toThrow();
   });
 
+  it('accepts up to 500 combined recipients and rejects more', () => {
+    const addresses = (prefix: string, count: number) =>
+      Array.from({ length: count }, (_, i) => `${prefix}${i}@example.com`);
+    const { input } = GmailConnector.actions.sendMessage;
+    const base = { subject: 'Hi', body: 'body' };
+
+    expect(input.safeParse({ ...base, to: addresses('to', 500) }).success).toBe(true);
+    expect(
+      input.safeParse({
+        ...base,
+        to: addresses('to', 300),
+        cc: addresses('cc', 150),
+        bcc: addresses('bcc', 50),
+      }).success
+    ).toBe(true);
+    expect(
+      input.safeParse({
+        ...base,
+        to: addresses('to', 300),
+        cc: addresses('cc', 150),
+        bcc: addresses('bcc', 51),
+      }).success
+    ).toBe(false);
+  });
+
   it('throws Gmail API error when present', async () => {
     mockClient.post.mockRejectedValue({
       response: { data: { error: { code: 403, message: 'Forbidden' } } },

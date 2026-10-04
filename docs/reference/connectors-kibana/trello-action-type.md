@@ -86,7 +86,7 @@ Get card comments
 Search
 :   Searches across Trello boards and cards by keyword. Supports operators such as
     `board:"Board Name"`, `label:red`, `member:username`, `due:week`, and `is:open`.
-    - **Query** (required): The search query string (maximum 2000 characters).
+    - **Query** (required): The search query string (maximum 16384 characters).
     - **Model types** (optional): Comma-separated result types to include: `cards`, `boards`,
       `members`, `organizations`. Defaults to `cards,boards`.
     - **Board IDs** (optional): Comma-separated board IDs to restrict the search scope.

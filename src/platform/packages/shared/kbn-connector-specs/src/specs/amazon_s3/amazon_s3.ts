@@ -32,9 +32,19 @@ const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
 
 // S3 limits: bucket names are 3-63 characters, object keys up to 1024 bytes.
 const BUCKET_NAME_MAX_LENGTH = 63;
-const OBJECT_KEY_MAX_LENGTH = 1024;
+const OBJECT_KEY_MAX_BYTES = 1024;
 const REGION_MAX_LENGTH = 64;
 const CONTINUATION_TOKEN_MAX_LENGTH = 2048;
+// ListObjectsV2 returns at most 1,000 keys per page: https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
+const LIST_OBJECTS_MAX_KEYS = 1000;
+
+const objectKeyField = () =>
+  z
+    .string()
+    .max(OBJECT_KEY_MAX_BYTES)
+    .refine((key) => Buffer.byteLength(key, 'utf8') <= OBJECT_KEY_MAX_BYTES, {
+      message: `Must not exceed the ${OBJECT_KEY_MAX_BYTES}-byte (UTF-8) S3 object key limit.`,
+    });
 
 export const AmazonS3: ConnectorSpec = {
   metadata: {
@@ -136,9 +146,7 @@ export const AmazonS3: ConnectorSpec = {
             .describe(
               'The region of the S3 bucket. If not specified, will attempt to auto-detect. Example: "us-west-2".'
             ),
-          prefix: z
-            .string()
-            .max(OBJECT_KEY_MAX_LENGTH)
+          prefix: objectKeyField()
             .optional()
             .describe(
               'An optional prefix to filter object keys (file paths) in the bucket. Use this to list objects under a specific folder path. Example: "logs/2024/" to list only objects in that path.'
@@ -154,11 +162,12 @@ export const AmazonS3: ConnectorSpec = {
             .number()
             .int()
             .positive()
+            .max(LIST_OBJECTS_MAX_KEYS)
             .optional()
             .describe(
-              'Maximum number of object keys to return in a single page. Defaults to 1000. Maximum allowed is 1000.'
+              `Maximum number of object keys to return in a single page. Defaults to ${LIST_OBJECTS_MAX_KEYS}. Maximum allowed is ${LIST_OBJECTS_MAX_KEYS}.`
             )
-            .default(1000),
+            .default(LIST_OBJECTS_MAX_KEYS),
         })
       ),
       handler: async (ctx, input: ActionListBucketObjectsInput) => {
@@ -187,10 +196,8 @@ export const AmazonS3: ConnectorSpec = {
             .describe(
               'The name of the S3 bucket containing the file to download. Example: "my-app-data".'
             ),
-          key: z
-            .string()
+          key: objectKeyField()
             .min(1)
-            .max(OBJECT_KEY_MAX_LENGTH)
             .describe(
               'The key (full path) of the file to download from the S3 bucket. Example: "reports/2024/summary.pdf".'
             ),

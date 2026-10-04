@@ -172,6 +172,25 @@ describe('MicrosoftTeams', () => {
     });
   });
 
+  describe.each([
+    ['sendChannelMessage', { teamId: 'team-1', channelId: 'channel-1' }],
+    ['sendChatMessage', { chatId: 'chat-1' }],
+    ['updateMessage', { chatId: 'chat-1', messageId: 'message-1' }],
+  ] as const)('%s content size', (action, target) => {
+    const isValid = (content: string) =>
+      MicrosoftTeams.actions[action].input.safeParse({ ...target, content }).success;
+
+    it('accepts 102,400 bytes of ASCII content', () => {
+      expect(isValid('a'.repeat(102_400))).toBe(true);
+      expect(isValid('a'.repeat(102_401))).toBe(false);
+    });
+
+    it('measures multibyte content in UTF-8 bytes', () => {
+      expect(isValid('é'.repeat(51_200))).toBe(true);
+      expect(isValid('é'.repeat(51_201))).toBe(false);
+    });
+  });
+
   describe('listJoinedTeams action', () => {
     it('should list joined teams', async () => {
       const mockResponse = {

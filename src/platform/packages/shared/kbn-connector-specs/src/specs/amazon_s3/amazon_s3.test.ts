@@ -329,6 +329,21 @@ describe('AmazonS3', () => {
     });
   });
 
+  describe.each([
+    ['downloadFile', 'key'],
+    ['listBucketObjects', 'prefix'],
+  ] as const)('%s %s length', (action, field) => {
+    const isValid = (value: string) =>
+      AmazonS3.actions[action].input.safeParse({ bucket: 'my-bucket', [field]: value }).success;
+
+    it('is bounded at the 1024-byte S3 object key limit, measured in UTF-8', () => {
+      expect(isValid('k'.repeat(1024))).toBe(true);
+      expect(isValid('k'.repeat(1025))).toBe(false);
+      expect(isValid('é'.repeat(512))).toBe(true);
+      expect(isValid('é'.repeat(513))).toBe(false);
+    });
+  });
+
   // ===========================================================================
   // test handler
   // ===========================================================================

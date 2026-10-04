@@ -84,6 +84,8 @@ export const FigmaConnector: ConnectorSpec = {
             .describe('Comma-separated node IDs to retrieve specific nodes (e.g. "1:2,1:3")'),
           depth: z
             .number()
+            .int()
+            .min(1)
             .optional()
             .describe(
               'Tree depth: 1 = pages only, 2 = pages + top-level objects; omit for full tree'

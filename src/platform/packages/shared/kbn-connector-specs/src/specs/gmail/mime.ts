@@ -22,6 +22,8 @@
  *   RFC 5322's 998-octet limit, which real MTAs enforce.
  * - Non-ASCII subjects are encoded as RFC 2047 `=?UTF-8?B?…?=` encoded-words,
  *   chunked on code-point boundaries and folded with CRLF + space.
+ * - Address lists are folded between addresses, so hundreds of recipients never
+ *   produce a header line over the 998-octet limit.
  * - No attachments / multipart — out of scope for v1.
  */
 
@@ -47,6 +49,30 @@ const assertSingleLineHeader = (name: string, value: string): void => {
 };
 
 const isAsciiPrintable = (value: string): boolean => !/[^\x20-\x7E]/.test(value);
+
+/** RFC 5322 §2.1.1 recommends header lines of at most 78 characters. */
+const FOLD_LINE_LENGTH = 78;
+
+/**
+ * Formats an address header, folding with CRLF + space between addresses once a
+ * line would exceed 78 characters. An address longer than that gets its own line,
+ * which stays under 998 octets because addr-specs are capped at 320 characters.
+ */
+const formatAddressHeader = (name: string, addresses: string[]): string => {
+  const prefix = `${name}:`;
+  const lines: string[] = [];
+  let line = prefix;
+  addresses.forEach((address, index) => {
+    const token = ` ${address}${index < addresses.length - 1 ? ',' : ''}`;
+    if (line !== prefix && line.length + token.length > FOLD_LINE_LENGTH) {
+      lines.push(line);
+      line = '';
+    }
+    line += token;
+  });
+  lines.push(line);
+  return lines.join('\r\n');
+};
 
 /**
  * Encodes a header value as one or more RFC 2047 base64 encoded-words when it
@@ -131,7 +157,7 @@ export const buildRawMessage = ({
       return;
     }
     addresses.forEach((address) => assertSingleLineHeader(name, address));
-    headers.push(`${name}: ${addresses.join(', ')}`);
+    headers.push(formatAddressHeader(name, addresses));
   };
 
   addAddressHeader('To', to);

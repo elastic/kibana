@@ -30,9 +30,9 @@ The Brave Search connector has the following action:
 
 Web Search
 :   Search the web using Brave Search API.
-    - **Query** (required): The search query string.
+    - **Query** (required): The search query string (maximum 400 characters and 50 words).
     - **Count** (optional): Number of results to return (1-20, default: 10).
-    - **Offset** (optional): Result offset for pagination (default: 0).
+    - **Offset** (optional): Zero-based page offset for pagination, in pages of **Count** results (0-9, default: 0).
 
 ## Connector networking configuration [brave-search-connector-networking-configuration]
 

@@ -9,19 +9,37 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// Server default for max_allowed_packet, which bounds a single SQL statement; servers may raise it.
+// https://dev.mysql.com/doc/refman/8.4/en/packet-too-large.html
+const MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES = 64 * 1024 * 1024;
+// https://dev.mysql.com/doc/refman/8.4/en/column-count-limit.html
+const MYSQL_MAX_COLUMNS_PER_TABLE = 4096;
+// A COM_QUERY packet carries a 1-byte command ahead of the statement text.
+const MYSQL_COM_QUERY_HEADER_BYTES = 1;
+
+const sqlStatementField = () =>
+  z
+    .string()
+    .min(1)
+    .max(MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES)
+    .refine(
+      (sql) =>
+        Buffer.byteLength(sql, 'utf8') + MYSQL_COM_QUERY_HEADER_BYTES <=
+        MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES,
+      {
+        message: `SQL must fit MySQL's default ${MYSQL_DEFAULT_MAX_ALLOWED_PACKET_BYTES}-byte max_allowed_packet.`,
+      }
+    );
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
 
 export const QueryInputSchema = lazySchema(() =>
   z.object({
-    sql: z
-      .string()
-      .min(1)
-      .max(10000)
-      .describe(
-        'Read-only SQL SELECT or WITH query to execute. Include a LIMIT clause to bound results (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 100). Do not include a trailing semicolon.'
-      ),
+    sql: sqlStatementField().describe(
+      'Read-only SQL SELECT or WITH query to execute. Include a LIMIT clause to bound results (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 100). Do not include a trailing semicolon.'
+    ),
   })
 );
 export type QueryInput = z.infer<typeof QueryInputSchema>;
@@ -77,7 +95,7 @@ export const SearchRowsInputSchema = lazySchema(() =>
     columns: z
       .array(z.string().min(1).max(64))
       .min(1)
-      .max(50)
+      .max(MYSQL_MAX_COLUMNS_PER_TABLE)
       .describe(
         'Column names to search in (e.g. ["name", "email", "notes"]). At least one column is required. Use describeTable to discover available columns.'
       ),
@@ -102,13 +120,9 @@ export type SearchRowsInput = z.infer<typeof SearchRowsInputSchema>;
 
 export const ExecuteSqlInputSchema = lazySchema(() =>
   z.object({
-    sql: z
-      .string()
-      .min(1)
-      .max(10000)
-      .describe(
-        'SQL statement to execute. Any statement type is permitted (SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, etc.). Use with caution — this action is unrestricted.'
-      ),
+    sql: sqlStatementField().describe(
+      'SQL statement to execute. Any statement type is permitted (SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, etc.). Use with caution — this action is unrestricted.'
+    ),
   })
 );
 export type ExecuteSqlInput = z.infer<typeof ExecuteSqlInputSchema>;

@@ -162,6 +162,28 @@ describe('HubSpotConnector', () => {
     });
   });
 
+  describe('searchCrmObjects limit bounds', () => {
+    const isValid = (input: Record<string, unknown>) =>
+      HubSpotConnector.actions.searchCrmObjects.input.safeParse({
+        objectType: 'contacts',
+        ...input,
+      }).success;
+
+    it.each([
+      [{ limit: 100 }, true],
+      [{ limit: 101 }, false],
+      [{ query: 'acme', limit: 101 }, true],
+      [{ query: 'acme', limit: 200 }, true],
+      [{ query: 'acme', limit: 201 }, false],
+      [{ query: 'acme', limit: 100, includeAssociatedDeals: true }, true],
+      [{ query: 'acme', limit: 101, includeAssociatedDeals: true }, false],
+      [{ limit: 0 }, false],
+      [{ limit: 1.5 }, false],
+    ])('%j valid=%s', (input, expected) => {
+      expect(isValid(input)).toBe(expected);
+    });
+  });
+
   describe('getCrmObject action', () => {
     it('should fetch a contact by ID', async () => {
       const mockResponse = {

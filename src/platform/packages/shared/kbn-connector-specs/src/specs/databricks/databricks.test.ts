@@ -143,6 +143,19 @@ describe('Databricks', () => {
     });
   });
 
+  describe.each(['runQuery', 'executeStatement'] as const)('%s statement size', (action) => {
+    const maxBytes = 16 * 1024 * 1024;
+    const isValid = (statement: string) =>
+      Databricks.actions[action].input.safeParse({ statement }).success;
+
+    it('is bounded at 16 MiB of UTF-8', () => {
+      expect(isValid('x'.repeat(maxBytes))).toBe(true);
+      expect(isValid('x'.repeat(maxBytes + 1))).toBe(false);
+      expect(isValid('é'.repeat(maxBytes / 2))).toBe(true);
+      expect(isValid('é'.repeat(maxBytes / 2 + 1))).toBe(false);
+    });
+  });
+
   describe('validateUrls', () => {
     it('validates the serverUrl field', () => {
       expect(Databricks.validateUrls?.fields).toContain('serverUrl');

@@ -9,6 +9,21 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// GitHub rejects issue and pull request titles longer than 256 characters.
+const GITHUB_TITLE_MAX_LENGTH = 256;
+// https://docs.github.com/en/rest/issues/assignees#add-assignees-to-an-issue
+const GITHUB_MAX_ASSIGNEES = 10;
+// GitHub raised the per-PR requested reviewer limit from 15 to 100 (not in the REST reference).
+const GITHUB_MAX_REQUESTED_REVIEWERS = 100;
+// GitHub documents no limit on commit titles or messages.
+const COMMIT_TITLE_MAX_LENGTH = 1024;
+const COMMIT_MESSAGE_MAX_LENGTH = 65536;
+// https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents accepts files up to 100 MB.
+const GITHUB_CONTENTS_MAX_FILE_BYTES = 100 * 1024 * 1024;
+// https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onworkflow_dispatchinputs
+const WORKFLOW_DISPATCH_MAX_INPUTS = 25;
+const WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD = 65535;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -270,11 +285,11 @@ export const CreateIssueInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    title: z.string().min(1).max(200).describe('Issue title'),
+    title: z.string().min(1).max(GITHUB_TITLE_MAX_LENGTH).describe('Issue title'),
     body: z.string().max(65536).optional().describe('Issue body in Markdown'),
     assignees: z
       .array(z.string().max(200))
-      .max(25)
+      .max(GITHUB_MAX_ASSIGNEES)
       .optional()
       .describe('Logins of users to assign to this issue'),
     labels: z
@@ -303,12 +318,12 @@ export const UpdateIssueInputSchema = lazySchema(() =>
       owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
       repo: z.string().min(1).max(200).describe('Repository name'),
       issueNumber: z.number().describe('Issue number to update'),
-      title: z.string().min(1).max(200).optional().describe('New issue title'),
+      title: z.string().min(1).max(GITHUB_TITLE_MAX_LENGTH).optional().describe('New issue title'),
       body: z.string().max(65536).optional().describe('New issue body in Markdown'),
       state: z.enum(['open', 'closed']).optional().describe('New issue state: "open" or "closed"'),
       assignees: z
         .array(z.string().max(200))
-        .max(25)
+        .max(GITHUB_MAX_ASSIGNEES)
         .optional()
         .describe('Logins to assign (replaces all existing assignees)'),
       labels: z
@@ -342,7 +357,7 @@ export const CreatePullRequestInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    title: z.string().min(1).max(200).describe('Pull request title'),
+    title: z.string().min(1).max(GITHUB_TITLE_MAX_LENGTH).describe('Pull request title'),
     head: z
       .string()
       .min(1)
@@ -368,12 +383,12 @@ export const MergePullRequestInputSchema = lazySchema(() =>
     pullNumber: z.number().describe('Pull request number'),
     commitTitle: z
       .string()
-      .max(200)
+      .max(COMMIT_TITLE_MAX_LENGTH)
       .optional()
       .describe('Title for the merge commit (not used with the rebase method)'),
     commitMessage: z
       .string()
-      .max(2000)
+      .max(COMMIT_MESSAGE_MAX_LENGTH)
       .optional()
       .describe('Extra detail appended to the automatic commit message'),
     mergeMethod: z
@@ -407,7 +422,7 @@ export const AddAssigneeInputSchema = lazySchema(() =>
     assignees: z
       .array(z.string().max(200))
       .min(1)
-      .max(25)
+      .max(GITHUB_MAX_ASSIGNEES)
       .describe('Logins of users to add as assignees'),
   })
 );
@@ -441,11 +456,21 @@ export const CreateOrUpdateFileInputSchema = lazySchema(() =>
         message: 'path must not contain empty, ".", or ".." segments',
       })
       .describe('File path within the repository (e.g. "src/README.md")'),
-    message: z.string().min(1).max(2000).describe('Commit message for this file change'),
+    message: z
+      .string()
+      .min(1)
+      .max(COMMIT_MESSAGE_MAX_LENGTH)
+      .describe('Commit message for this file change'),
     content: z
       .string()
       .min(1)
-      .max(100000)
+      .max(Math.ceil(GITHUB_CONTENTS_MAX_FILE_BYTES / 3) * 4)
+      .refine(
+        (value) => Buffer.from(value, 'base64').byteLength <= GITHUB_CONTENTS_MAX_FILE_BYTES,
+        {
+          message: `File must not exceed ${GITHUB_CONTENTS_MAX_FILE_BYTES} bytes once decoded`,
+        }
+      )
       .describe('New file contents, Base64-encoded (required by the GitHub API)'),
     sha: z
       .string()
@@ -469,7 +494,12 @@ export const UpdatePullRequestInputSchema = lazySchema(() =>
       owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
       repo: z.string().min(1).max(200).describe('Repository name'),
       pullNumber: z.number().describe('Pull request number to update'),
-      title: z.string().min(1).max(200).optional().describe('New title for the pull request'),
+      title: z
+        .string()
+        .min(1)
+        .max(GITHUB_TITLE_MAX_LENGTH)
+        .optional()
+        .describe('New title for the pull request'),
       body: z.string().max(65536).optional().describe('New description in Markdown'),
       state: z.enum(['open', 'closed']).optional().describe('New state: "open" or "closed"'),
       base: z
@@ -505,12 +535,12 @@ export const RequestReviewersInputSchema = lazySchema(() =>
       pullNumber: z.number().describe('Pull request number'),
       reviewers: z
         .array(z.string().max(200))
-        .max(25)
+        .max(GITHUB_MAX_REQUESTED_REVIEWERS)
         .optional()
         .describe('Logins of individual users to request reviews from'),
       teamReviewers: z
         .array(z.string().max(200))
-        .max(25)
+        .max(GITHUB_MAX_REQUESTED_REVIEWERS)
         .optional()
         .describe('Team slugs to request reviews from (slug only, without the org prefix)'),
     })
@@ -519,6 +549,14 @@ export const RequestReviewersInputSchema = lazySchema(() =>
         (v.reviewers !== undefined && v.reviewers.length > 0) ||
         (v.teamReviewers !== undefined && v.teamReviewers.length > 0),
       { message: 'At least one of reviewers or teamReviewers must be provided and non-empty' }
+    )
+    .refine(
+      ({ reviewers = [], teamReviewers = [] }) =>
+        reviewers.length + teamReviewers.length <= GITHUB_MAX_REQUESTED_REVIEWERS,
+      {
+        message: `reviewers and teamReviewers must total at most ${GITHUB_MAX_REQUESTED_REVIEWERS}`,
+        path: ['reviewers'],
+      }
     )
 );
 export type RequestReviewersInput = z.infer<typeof RequestReviewersInputSchema>;
@@ -534,9 +572,12 @@ export const TriggerWorkflowInputSchema = lazySchema(() =>
       .describe('Workflow file name (e.g. "ci.yml") or numeric workflow ID'),
     ref: z.string().min(1).max(200).describe('Branch name or tag to run the workflow on'),
     inputs: z
-      .record(z.string().max(200), z.string().max(2000))
-      .refine((v) => Object.keys(v).length <= 25, {
-        message: 'inputs must have at most 25 entries',
+      .record(z.string().max(200), z.string().max(WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD))
+      .refine((v) => Object.keys(v).length <= WORKFLOW_DISPATCH_MAX_INPUTS, {
+        message: `inputs must have at most ${WORKFLOW_DISPATCH_MAX_INPUTS} entries`,
+      })
+      .refine((v) => JSON.stringify(v).length <= WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD, {
+        message: `inputs must serialize to at most ${WORKFLOW_DISPATCH_MAX_INPUTS_PAYLOAD} characters`,
       })
       .optional()
       .describe(

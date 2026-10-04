@@ -11,7 +11,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // https://docs.snowflake.com/en/sql-reference/identifiers-syntax
 const MAX_IDENTIFIER_LENGTH = 255;
-const MAX_STATEMENT_LENGTH = 100_000;
+// https://docs.snowflake.com/en/user-guide/query-size-limits
+const MAX_QUERY_TEXT_BYTES = 1024 * 1024;
 const MAX_BINDING_VALUE_LENGTH = 1_048_576;
 const MAX_BINDING_KEY_LENGTH = 10;
 // https://docs.snowflake.com/en/sql-reference/parameters#query-tag
@@ -56,19 +57,25 @@ const BindingValueSchema = lazySchema(() =>
   })
 );
 
+const StatementSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_QUERY_TEXT_BYTES)
+    .refine((statement) => Buffer.byteLength(statement, 'utf8') <= MAX_QUERY_TEXT_BYTES, {
+      message: `Statement must not exceed Snowflake's ${MAX_QUERY_TEXT_BYTES} byte (1 MB) query text size limit`,
+    })
+);
+
 // ---------------------------------------------------------------------------
 // executeStatement
 // ---------------------------------------------------------------------------
 
 export const ExecuteStatementInputSchema = lazySchema(() =>
   z.object({
-    statement: z
-      .string()
-      .min(1)
-      .max(MAX_STATEMENT_LENGTH)
-      .describe(
-        'SQL statement to execute. Supports any Snowflake SQL including SELECT, INSERT, UPDATE, DELETE, CREATE, etc. Use "?" placeholders for bind variables and provide values via the bindings parameter. Multiple statements can be separated by semicolons when multiStatementCount is set.'
-      ),
+    statement: StatementSchema.describe(
+      'SQL statement to execute (up to 1 MB). Supports any Snowflake SQL including SELECT, INSERT, UPDATE, DELETE, CREATE, etc. Use "?" placeholders for bind variables and provide values via the bindings parameter. Multiple statements can be separated by semicolons when multiStatementCount is set; the 1 MB limit applies to the whole string.'
+    ),
     timeout: z
       .number()
       .int()
@@ -137,13 +144,9 @@ export type ExecuteStatementInput = z.infer<typeof ExecuteStatementInputSchema>;
 
 export const RunQueryInputSchema = lazySchema(() =>
   z.object({
-    statement: z
-      .string()
-      .min(1)
-      .max(MAX_STATEMENT_LENGTH)
-      .describe(
-        'Read-only SQL statement to run. Only SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN are accepted. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected. Use "?" placeholders for bind variables and provide values via the bindings parameter. Single-statement only — semicolon-delimited multi-statement submissions are rejected.'
-      ),
+    statement: StatementSchema.describe(
+      'Read-only SQL statement to run (up to 1 MB). Only SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN are accepted. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected. Use "?" placeholders for bind variables and provide values via the bindings parameter. Single-statement only — semicolon-delimited multi-statement submissions are rejected.'
+    ),
     timeout: z
       .number()
       .int()

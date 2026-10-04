@@ -81,7 +81,10 @@ const SLACK_MAX_MESSAGE_TEXT_LENGTH = 40000;
 const SLACK_MAX_INVITE_USERS = 1000;
 const SLACK_MAX_INVITE_USERS_LENGTH = SLACK_MAX_INVITE_USERS * (SLACK_MAX_ID_LENGTH + 1);
 
-const SLACK_MAX_CONVERSATIONS_LIST_LIMIT = 1000;
+// Slack's cursor-paginated list methods (conversations.list, users.conversations,
+// conversations.history, users.list) document `limit` as "under 1000" / "max of 999".
+const SLACK_MAX_CURSOR_PAGE_LIMIT = 999;
+const SLACK_MAX_CONVERSATIONS_LIST_LIMIT = SLACK_MAX_CURSOR_PAGE_LIMIT;
 const SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT = SLACK_MAX_CONVERSATIONS_LIST_LIMIT;
 const SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES = 10;
 const SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES = 100;
@@ -269,7 +272,7 @@ export const SlackCreateConversationInputSchema = lazySchema(() =>
       .min(1)
       .max(SLACK_MAX_CHANNEL_NAME_LENGTH)
       .describe(
-        'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.'
+        `Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be ${SLACK_MAX_CHANNEL_NAME_LENGTH} characters or fewer.`
       ),
     isPrivate: z
       .boolean()
@@ -297,7 +300,7 @@ export const SlackInviteToConversationInputSchema = lazySchema(() =>
 );
 export type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
 
-const SLACK_MAX_HISTORY_LIMIT = 1000;
+const SLACK_MAX_HISTORY_LIMIT = SLACK_MAX_CURSOR_PAGE_LIMIT;
 const SLACK_DEFAULT_HISTORY_LIMIT = 100;
 
 export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
@@ -433,7 +436,7 @@ export const SlackLookupUserByEmailInputSchema = lazySchema(() =>
 );
 export type SlackLookupUserByEmailInput = z.infer<typeof SlackLookupUserByEmailInputSchema>;
 
-const SLACK_MAX_USERS_LIST_LIMIT = 1000;
+const SLACK_MAX_USERS_LIST_LIMIT = SLACK_MAX_CURSOR_PAGE_LIMIT;
 const SLACK_DEFAULT_USERS_LIST_LIMIT = 200;
 
 export const SlackListUsersInputSchema = lazySchema(() =>

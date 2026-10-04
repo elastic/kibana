@@ -346,6 +346,26 @@ describe('MysqlConnector', () => {
     });
   });
 
+  describe.each(['query', 'executeSql'])('%s statement size', (action) => {
+    const maxAllowedPacket = 64 * 1024 * 1024;
+    const isValid = (sql: string) =>
+      MysqlConnector.actions[action].input.safeParse({ sql }).success;
+
+    it('accepts a statement that fits max_allowed_packet with the COM_QUERY command byte', () => {
+      expect(isValid(`SELECT '${'a'.repeat(maxAllowedPacket - 1 - "SELECT ''".length)}'`)).toBe(
+        true
+      );
+    });
+
+    it('rejects a statement one byte over max_allowed_packet', () => {
+      expect(isValid(`SELECT '${'a'.repeat(maxAllowedPacket - "SELECT ''".length)}'`)).toBe(false);
+    });
+
+    it('measures multibyte statements in UTF-8 bytes', () => {
+      expect(isValid(`SELECT '${'é'.repeat(maxAllowedPacket / 2)}'`)).toBe(false);
+    });
+  });
+
   describe('test handler', () => {
     it('returns a success message when the connection works', async () => {
       const { ctx, pool } = makeContextWithPool();

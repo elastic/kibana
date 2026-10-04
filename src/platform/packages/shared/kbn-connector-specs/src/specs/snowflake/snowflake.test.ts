@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { Snowflake } from './snowflake';
+import { ExecuteStatementInputSchema, RunQueryInputSchema } from './types';
 
 const ACCOUNT_URL = 'https://myorg-myaccount.snowflakecomputing.com';
 
@@ -868,6 +869,28 @@ describe('Snowflake', () => {
           query: 'hello',
         })
       ).rejects.toThrow('Service not found');
+    });
+  });
+
+  describe('statement size limit', () => {
+    const ONE_MB = 1024 * 1024;
+
+    it.each([
+      ['executeStatement', ExecuteStatementInputSchema],
+      ['runQuery', RunQueryInputSchema],
+    ])('%s accepts a statement of exactly 1 MB', (_, schema) => {
+      const statement = `SELECT '${'a'.repeat(ONE_MB - 9)}'`;
+      expect(statement.length).toBe(ONE_MB);
+      expect(schema.safeParse({ statement }).success).toBe(true);
+    });
+
+    it.each([
+      ['executeStatement', ExecuteStatementInputSchema],
+      ['runQuery', RunQueryInputSchema],
+    ])('%s rejects a statement over 1 MB in UTF-8 bytes', (_, schema) => {
+      const statement = `SELECT '${'é'.repeat(ONE_MB / 2)}'`;
+      expect(statement.length).toBeLessThan(ONE_MB);
+      expect(schema.safeParse({ statement }).success).toBe(false);
     });
   });
 });

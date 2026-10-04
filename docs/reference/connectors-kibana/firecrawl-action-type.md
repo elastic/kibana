@@ -35,7 +35,7 @@ The Firecrawl connector has the following actions:
     - `url` (required): The URL to scrape.
     - `formats` (optional): Output formats: `markdown`, `html`, `links`, `screenshot`, `extract`. Defaults to Markdown.
     - `onlyMainContent` (optional): Return only main content, excluding navigation and footer elements. Defaults to true.
-    - `waitFor` (optional): Delay in milliseconds before fetching (useful for JavaScript-rendered pages).
+    - `waitFor` (optional): Delay in milliseconds before fetching (useful for JavaScript-rendered pages). Maximum 60000.
 
 `search`
 :   Search the web and optionally get full content from results.

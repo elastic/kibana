@@ -18,6 +18,8 @@ import { z } from '@kbn/zod/v4';
 const OUTLOOK_MAX_ID_LENGTH = 1024;
 const OUTLOOK_MAX_QUERY_LENGTH = 2000;
 const OUTLOOK_MAX_ORDERBY_LENGTH = 100;
+// https://learn.microsoft.com/en-us/graph/api/user-list-messages
+const GRAPH_LIST_MESSAGES_MAX_TOP = 1000;
 
 export const SearchMessagesInputSchema = z.object({
   query: z
@@ -51,9 +53,11 @@ export const ListMessagesInputSchema = z.object({
   top: z
     .number()
     .min(1)
-    .max(100)
+    .max(GRAPH_LIST_MESSAGES_MAX_TOP)
     .default(20)
-    .describe('Maximum number of messages to return (1–100, default 20).'),
+    .describe(
+      `Maximum number of messages to return (1–${GRAPH_LIST_MESSAGES_MAX_TOP}, default 20).`
+    ),
   filter: z
     .string()
     .max(OUTLOOK_MAX_QUERY_LENGTH)

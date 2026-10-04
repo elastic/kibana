@@ -105,13 +105,13 @@ Get attachment
 Create record {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Insert a new record into any {{sn}} table. Returns the created record including its `sys_id` and record number. For ITSM incidents, use Create incident; for security incidents, use Create security incident; for ITOM events, use Create event. Use this action for all other tables.
     - `table` (required): The table to insert the record into.
-    - `fields` (required): Key-value map of {{sn}} field names to values for the new record (for example, `{"short_description": "VPN issue", "impact": "2"}`). At least one field required; maximum 100 fields.
+    - `fields` (required): Key-value map of {{sn}} field names to values for the new record (for example, `{"short_description": "VPN issue", "impact": "2"}`). At least one field required; maximum 1000 fields.
 
 Update record {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Update an existing record in any {{sn}} table by its `sys_id`. Provide only the fields that need to change — the connector leaves all other fields untouched. Returns the full updated record. For ITSM incidents, use Update incident.
     - `table` (required): The table containing the record.
     - `sysId` (required): The `sys_id` of the record to update.
-    - `fields` (required): Key-value map of field names to their new values. At least one field required; maximum 100 fields.
+    - `fields` (required): Key-value map of field names to their new values. At least one field required; maximum 1000 fields.
 
 Create incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new ITSM incident in {{sn}}. Returns the created incident including its `sys_id` and incident number (for example, `INC0012345`). Use Query users to resolve names to `sys_id` values for `caller_id` and `assigned_to`. Use Get choices to discover valid values for `category`, `impact`, and `urgency`.

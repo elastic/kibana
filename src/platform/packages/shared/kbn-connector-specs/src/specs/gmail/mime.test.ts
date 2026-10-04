@@ -71,6 +71,33 @@ describe('buildRawMessage', () => {
     expect(headerLines[0]).toBe('To: a@example.com, b@example.com');
   });
 
+  it('folds long address lists between addresses so no line exceeds 998 octets', () => {
+    const to = Array.from({ length: 500 }, (_, i) => `${'a'.repeat(300)}${i}@example.com`);
+    const { message, headerLines } = decodeRaw(buildRawMessage({ to, subject: 'Hi', body: 'b' }));
+
+    expect(message.split('\r\n').every((line) => Buffer.byteLength(line) <= 998)).toBe(true);
+    const toLines = headerLines.slice(
+      0,
+      headerLines.findIndex((l) => l.startsWith('Subject:'))
+    );
+    expect(toLines[0].startsWith('To: ')).toBe(true);
+    expect(toLines.slice(1).every((l) => l.startsWith(' '))).toBe(true);
+    expect(toLines.join('').slice('To: '.length).split(', ')).toEqual(to);
+  });
+
+  it('packs short addresses onto lines of at most 78 characters', () => {
+    const to = Array.from({ length: 30 }, (_, i) => `user${i}@example.com`);
+    const { headerLines } = decodeRaw(buildRawMessage({ to, subject: 'Hi', body: 'b' }));
+    const toLines = headerLines.slice(
+      0,
+      headerLines.findIndex((l) => l.startsWith('Subject:'))
+    );
+
+    expect(toLines.length).toBeGreaterThan(1);
+    expect(toLines.every((l) => l.length <= 78)).toBe(true);
+    expect(toLines.join('').slice('To: '.length).split(', ')).toEqual(to);
+  });
+
   it('includes Cc and Bcc when provided, in header order To/Cc/Bcc', () => {
     const { headerLines } = decodeRaw(
       buildRawMessage({

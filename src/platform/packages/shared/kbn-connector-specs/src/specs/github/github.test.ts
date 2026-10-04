@@ -443,6 +443,72 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('input bounds', () => {
+    const repo = { owner: 'elastic', repo: 'kibana' };
+
+    it('accepts titles up to the 256 characters GitHub allows', () => {
+      expect(() => parse('createIssue', { ...repo, title: 'a'.repeat(256) })).not.toThrow();
+      expect(() => parse('createIssue', { ...repo, title: 'a'.repeat(257) })).toThrow();
+      expect(() =>
+        parse('createPullRequest', { ...repo, title: 'a'.repeat(256), head: 'f', base: 'main' })
+      ).not.toThrow();
+    });
+
+    it('limits assignees to the 10 GitHub allows', () => {
+      const logins = (n: number) => Array.from({ length: n }, (_, i) => `user${i}`);
+      expect(() =>
+        parse('addAssignee', { ...repo, issueNumber: 1, assignees: logins(10) })
+      ).not.toThrow();
+      expect(() =>
+        parse('addAssignee', { ...repo, issueNumber: 1, assignees: logins(11) })
+      ).toThrow();
+    });
+
+    it('accepts merge commit messages longer than 2,000 characters', () => {
+      expect(() =>
+        parse('mergePullRequest', { ...repo, pullNumber: 1, commitMessage: 'a'.repeat(10000) })
+      ).not.toThrow();
+    });
+
+    it('accepts Base64 content larger than 100,000 characters', () => {
+      expect(() =>
+        parse('createOrUpdateFile', {
+          ...repo,
+          path: 'big.txt',
+          message: 'add',
+          content: 'A'.repeat(1_500_000),
+        })
+      ).not.toThrow();
+    });
+
+    it('bounds file contents at 100 MB once Base64-decoded', () => {
+      const write = (bytes: number) =>
+        GithubConnector.actions.createOrUpdateFile.input.safeParse({
+          ...repo,
+          path: 'big.bin',
+          message: 'add',
+          content: Buffer.alloc(bytes).toString('base64'),
+        }).success;
+      const maxBytes = 100 * 1024 * 1024;
+      expect(write(maxBytes)).toBe(true);
+      expect(write(maxBytes + 1)).toBe(false);
+    });
+
+    it('bounds workflow_dispatch inputs by the 65,535 character payload of all inputs together', () => {
+      const dispatch = (inputs: Record<string, string>) =>
+        GithubConnector.actions.triggerWorkflow.input.safeParse({
+          ...repo,
+          workflowId: 'ci.yml',
+          ref: 'main',
+          inputs,
+        }).success;
+      const overhead = JSON.stringify({ payload: '' }).length;
+      expect(dispatch({ payload: 'a'.repeat(65_535 - overhead) })).toBe(true);
+      expect(dispatch({ payload: 'a'.repeat(65_536 - overhead) })).toBe(false);
+      expect(dispatch({ first: 'a'.repeat(40_000), second: 'b'.repeat(40_000) })).toBe(false);
+    });
+  });
+
   describe('listTools action', () => {
     it('returns the list of available tools', async () => {
       const result = await GithubConnector.actions.listTools.handler(mockContext, {});
@@ -834,6 +900,19 @@ describe('GithubConnector', () => {
           pullNumber: 42,
         })
       ).toThrow();
+    });
+
+    it('bounds users and teams together by the 100 requested reviewers allowed per pull request', () => {
+      const request = (users: number, teams: number) =>
+        GithubConnector.actions.requestReviewers.input.safeParse({
+          owner: 'elastic',
+          repo: 'kibana',
+          pullNumber: 42,
+          reviewers: Array.from({ length: users }, (_, i) => `user-${i}`),
+          teamReviewers: Array.from({ length: teams }, (_, i) => `team-${i}`),
+        }).success;
+      expect(request(50, 50)).toBe(true);
+      expect(request(60, 60)).toBe(false);
     });
   });
 

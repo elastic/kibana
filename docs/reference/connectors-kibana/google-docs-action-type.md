@@ -47,7 +47,7 @@ Read document
 Update document
 :   Apply one or more batch updates to a Google Doc. Supports replacing text, applying text and paragraph styles, managing bullet lists, inserting and deleting tables and table rows, inserting inline images, and managing named ranges.
     - `document_id` (required): The ID of the Google Doc to update.
-    - `requests` (required): Array of batch update request objects (1 to 100). Each object must contain exactly one operation key. Multiple requests are applied atomically in order. See the [Google Docs batchUpdate reference](https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/batchUpdate) for the full list of supported operations.
+    - `requests` (required): Array of batch update request objects (1 to 10,000, up to 10 MB serialized). Each object must contain exactly one operation key. Multiple requests are applied atomically in order. See the [Google Docs batchUpdate reference](https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/batchUpdate) for the full list of supported operations.
 
     Use `replaceAllText` for text replacement — it requires no index arithmetic and is the safest approach.
 

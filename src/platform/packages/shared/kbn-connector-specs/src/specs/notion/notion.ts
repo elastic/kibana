@@ -80,6 +80,8 @@ export const NotionConnector: ConnectorSpec = {
             ),
           pageSize: z
             .number()
+            .int()
+            .min(1)
             .max(100)
             .default(10)
             .describe(
@@ -189,6 +191,8 @@ export const NotionConnector: ConnectorSpec = {
             ),
           pageSize: z
             .number()
+            .int()
+            .min(1)
             .max(100)
             .default(10)
             .describe(
