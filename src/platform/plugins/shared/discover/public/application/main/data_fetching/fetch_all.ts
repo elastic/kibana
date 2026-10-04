@@ -28,6 +28,7 @@ import {
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import type {
+  DataDocumentsMsg,
   DataMain$,
   DataMsg,
   SavedSearchData,
@@ -120,6 +121,7 @@ export function fetchAll(
       result: dataSubjects.totalHits$.getValue().result,
     });
 
+    const fetchStartTime = performance.now();
     const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
@@ -211,11 +213,18 @@ export function fetchAll(
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
       })
-      // Only the document query should send its errors to main$, to cause the full Discover app
-      // to get into an error state. The other queries will not cause all of Discover to error out
-      // but their errors will be shown in-place (e.g. of the chart).
+      // Only the document query should send its errors to main$, to put Discover into an error state.
+      // Depending on how long the request took, the layout shows that error full page or in the
+      // documents panel. The other queries show their errors in-place (e.g. of the chart).
       .catch((e) => {
-        sendErrorMsg(dataSubjects.documents$, e, { query });
+        sendErrorMsg<DataDocumentsMsg>(dataSubjects.documents$, e, {
+          query,
+          errorAfterMs: performance.now() - fetchStartTime,
+        });
+        if (isEsqlQuery) {
+          // ES|QL total hits are derived from the documents response, so they fail with it
+          sendErrorMsg(dataSubjects.totalHits$, e);
+        }
         sendErrorMsg(dataSubjects.main$, e);
       });
 
