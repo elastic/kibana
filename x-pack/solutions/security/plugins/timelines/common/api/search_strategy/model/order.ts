@@ -6,6 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { Direction } from '../../../search_strategy';
+import { Direction } from '@kbn/securitysolution-timeline-common';
 
 export const order = z.enum([Direction.asc, Direction.desc]);
