@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
+import {
+  getEuidEsqlFilterBasedOnDocument,
+  getEuidSourceFields,
+} from '@kbn/entity-store/common/domain/euid';
 import {
   ALERT_COUNT_FIELD,
   ALLOWED_ENTITY_TYPES,
@@ -36,23 +39,56 @@ const ALERT_OPEN_STATUS_FILTER =
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
   typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
 
+/** Raw identity fields every per-row euid clause matches on with `==`. */
+const IDENTITY_SOURCE_FIELDS = [
+  ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
+];
+
+const stringValuesOf = (value: unknown): string[] =>
+  [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
+
 /**
- * OR of per-row identity filters for the unstamped alert branch. Uses existing euid
- * helpers against page rows (identity fields kept via ENTITY_FIELDS). Duplicate clauses
- * are deduped. Rows that cannot produce a clause are omitted — we never widen to bare
- * `kibana.alert.entity.id IS NULL`.
+ * `field IN (...)` over the identity values of `rows`. A superset of their euid clauses that
+ * Lucene can push down; the clauses alone cannot be pushed because they cast fields with
+ * `TO_STRING`, which forces a scan of every unstamped alert in the window.
  */
-const buildLegacyIdentityClause = (pageRows: Row[]): string | undefined => {
+const buildIdentityPrefilter = (rows: Row[]): string | undefined => {
+  const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
+    const values = [...new Set(rows.flatMap((row) => stringValuesOf(row[field])))];
+    return values.length ? [`${field} IN (${toList(values)})`] : [];
+  });
+  return parts.length ? parts.join(' OR ') : undefined;
+};
+
+interface LegacyIdentityFilters {
+  legacyIdentityClause: string;
+  legacyIdentityPrefilter?: string;
+}
+
+/**
+ * OR of per-row identity filters for the unstamped alert branch, plus its pushable
+ * prefilter. Uses existing euid helpers against page rows (identity fields kept via
+ * ENTITY_FIELDS). Duplicate clauses are deduped. Rows that cannot produce a clause are
+ * omitted — we never widen to bare `kibana.alert.entity.id IS NULL`.
+ */
+const buildLegacyIdentityFilters = (pageRows: Row[]): LegacyIdentityFilters | undefined => {
   const clauses = new Set<string>();
+  const matchedRows: Row[] = [];
   for (const row of pageRows) {
     const entityType = row[ENTITY_TYPE_FIELD];
     if (isAllowedEntityType(entityType)) {
       const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
-      if (clause) clauses.add(clause);
+      if (clause) {
+        clauses.add(clause);
+        matchedRows.push(row);
+      }
     }
   }
   if (clauses.size === 0) return undefined;
-  return [...clauses].join(' OR ');
+  return {
+    legacyIdentityClause: [...clauses].join(' OR '),
+    legacyIdentityPrefilter: buildIdentityPrefilter(matchedRows),
+  };
 };
 
 // ── query builders: last_seen_alert sort ──────────────────────────────────────
@@ -172,7 +208,7 @@ const buildAlertEnrichQuery = (
   alertsIndex: string,
   entityIds: readonly string[],
   cutoff: string,
-  legacyIdentityClause?: string
+  legacyIdentity?: LegacyIdentityFilters
 ): string => {
   const ids = toList(entityIds);
   return [
@@ -181,7 +217,7 @@ const buildAlertEnrichQuery = (
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
     ...buildAlertEuidPipeline({
       stampedEntityIds: entityIds,
-      legacyIdentityClause,
+      ...legacyIdentity,
     }),
     `| WHERE \`entity.id\` IN (${ids})`,
     `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`), ${ALERT_COUNT_FIELD} = COUNT(*) BY \`entity.id\`, severity = \`kibana.alert.severity\``,
@@ -235,14 +271,14 @@ const enrichAlerts = async (
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   if (!entityIds.length) return;
 
-  const legacyIdentityClause = buildLegacyIdentityClause(pageRows);
+  const legacyIdentity = buildLegacyIdentityFilters(pageRows);
 
   const rows = await runQuery(
     buildAlertEnrichQuery(
       alertsIndexOf(namespace),
       entityIds,
       alertLookbackCutoff(timeRange),
-      legacyIdentityClause
+      legacyIdentity
     )
   ).catch((err) => {
     if (isAbortError(err)) throw err;

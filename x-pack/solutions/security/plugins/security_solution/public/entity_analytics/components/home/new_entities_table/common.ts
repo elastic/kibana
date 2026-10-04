@@ -298,6 +298,11 @@ export interface AlertEuidPipelineOptions {
    * not scan the full unstamped alert set.
    */
   legacyIdentityClause?: string;
+  /**
+   * Lucene-pushable superset of `legacyIdentityClause`. Emitted as its own top-level
+   * conjunct: nested inside the clause's parentheses, ES|QL no longer pushes it down.
+   */
+  legacyIdentityPrefilter?: string;
 }
 
 /**
@@ -312,7 +317,7 @@ export interface AlertEuidPipelineOptions {
  * MV_EXPAND makes `entity.id` scalar so STATS / LOOKUP JOIN keys stay single-valued.
  */
 export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): string[] => {
-  const { stampedEntityIds, legacyIdentityClause } = options;
+  const { stampedEntityIds, legacyIdentityClause, legacyIdentityPrefilter } = options;
   const idsList = stampedEntityIds?.length ? toList(stampedEntityIds) : undefined;
   const keepCols = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
 
@@ -335,7 +340,12 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
   if (idsList != null && legacyIdentityClause == null) {
     derivedWhere = 'WHERE false';
   } else if (legacyIdentityClause != null) {
-    derivedWhere = `WHERE \`kibana.alert.entity.id\` IS NULL AND (${legacyIdentityClause})`;
+    const conjuncts = [
+      '`kibana.alert.entity.id` IS NULL',
+      ...(legacyIdentityPrefilter ? [`(${legacyIdentityPrefilter})`] : []),
+      `(${legacyIdentityClause})`,
+    ];
+    derivedWhere = `WHERE ${conjuncts.join(' AND ')}`;
   } else {
     derivedWhere = 'WHERE `kibana.alert.entity.id` IS NULL';
   }
