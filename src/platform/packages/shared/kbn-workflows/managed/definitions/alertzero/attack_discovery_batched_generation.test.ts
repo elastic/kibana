@@ -22,6 +22,7 @@ interface ParsedStep {
   'branch-timeout'?: string;
   concurrency?: number;
   foreach?: string;
+  if?: string;
   mode?: string;
   status?: string;
   steps?: ParsedStep[];
@@ -337,6 +338,18 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       });
     });
 
+    // Persistence writes only when the model produced attacks. A zero count must
+    // not search an index that was never created.
+    it('searches only when attacks were generated', () => {
+      expect(fetch().if).toBe('${{ steps.aggregate.output.discoveries_generated > 0 }}');
+    });
+
+    // `ignore_unavailable` also hides an index the caller cannot read. Leaving it
+    // unset makes that 403 fail the run instead of looking like a quiet run.
+    it('fails the run when the search is not authorized', () => {
+      expect(fetch().with?.ignore_unavailable).toBeUndefined();
+    });
+
     // The run step's `execution_uuid` is written to each persisted document as
     // `kibana.alert.rule.execution.uuid`, so this scopes the query to exactly
     // this run — no time window, so concurrent runs cannot bleed into it.
@@ -357,6 +370,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       const names = parsed.steps?.map(({ name }) => name) ?? [];
 
       expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('generate_batches'));
+    });
+
+    it('runs after the generated count, which gates the search', () => {
+      const names = parsed.steps?.map(({ name }) => name) ?? [];
+
+      expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('aggregate'));
     });
   });
 
@@ -406,7 +425,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
 
     it('emits the persisted documents rather than the branch outputs', () => {
       expect(step('emit_result').with?.attack_discoveries).toBe(
-        "${{ steps.fetch_discoveries.output.hits.hits | map: '_source' }}"
+        "${{ steps.fetch_discoveries.output.hits.hits | default: steps.aggregate.output.no_discoveries | map: '_source' }}"
       );
     });
 
