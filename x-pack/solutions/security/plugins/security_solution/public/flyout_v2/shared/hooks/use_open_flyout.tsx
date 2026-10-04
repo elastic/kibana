@@ -27,11 +27,21 @@ import { getStoredFlyoutWidth, setStoredFlyoutWidth } from './use_flyout_width';
  * opened event fires immediately and a matching closed event (with the dwell time) fires once the
  * returned `OverlayRef`'s `onClose` resolves.
  */
+export interface OpenFlyoutOptions {
+  /**
+   * When false, open at `properties.size` instead of the persisted Security flyout width.
+   * Use this when the flyout must match another flyout's named size, such as the conversation
+   * details flyout.
+   */
+  persistWidth?: boolean;
+}
+
 export type OpenFlyout = (
   children: ReactNode,
   properties: OverlaySystemFlyoutOpenOptions,
   meta?: FlyoutTelemetryMeta,
-  sessionOverride?: MainFlyoutSession
+  sessionOverride?: MainFlyoutSession,
+  options?: OpenFlyoutOptions
 ) => OverlayRef;
 
 /**
@@ -50,7 +60,7 @@ export const useOpenFlyout = (): OpenFlyout => {
   const { session: mainSession, historyKey } = useFlyoutSessionContext();
 
   return useCallback(
-    (children, properties, meta, sessionOverride) => {
+    (children, properties, meta, sessionOverride, options) => {
       const session = sessionOverride ?? mainSession;
       // Seed the flyout's push/overlay mode from the persisted preference (read
       // fresh at open time), unless the caller pinned an explicit `type`. The
@@ -66,7 +76,9 @@ export const useOpenFlyout = (): OpenFlyout => {
       // back to it, and `onResize` persists the width whenever the user resizes — composing with,
       // rather than overwriting, any `onResize` the caller supplied.
       const persistsWidth =
-        properties.session !== 'inherit' && meta?.surface !== FLYOUT_SURFACE.TOOL;
+        options?.persistWidth !== false &&
+        properties.session !== 'inherit' &&
+        meta?.surface !== FLYOUT_SURFACE.TOOL;
       // Child flyouts are always overlays and don't own a persisted width, so the settings menu
       // (push/overlay toggle + reset size) is inert for them — the header hides the gear entirely.
       const isChildFlyout = properties.session === 'inherit';

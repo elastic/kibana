@@ -12,6 +12,8 @@ import type {
   AttachmentUIDefinition,
   AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { renderInvestigationTimelineDetails } from './overview_link';
 import type { InvestigationTimelineAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -25,13 +27,18 @@ const LazyInvestigationTimelineInlineContent = React.lazy(() =>
   }))
 );
 
-export const createInvestigationTimelineAttachmentDefinition =
-  (): AttachmentUIDefinition<InvestigationTimelineAttachment> => ({
-    getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
-    getIcon: () => 'timeline',
-    renderInlineContent: (props: AttachmentRenderProps<InvestigationTimelineAttachment>) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
-        <LazyInvestigationTimelineInlineContent {...props} />
-      </React.Suspense>
-    ),
-  });
+export const createInvestigationTimelineAttachmentDefinition = ({
+  resolveSecurityCanvasContext,
+}: {
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}): AttachmentUIDefinition<InvestigationTimelineAttachment> => ({
+  getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
+  getIcon: () => 'timeline',
+  renderInlineContent: (props: AttachmentRenderProps<InvestigationTimelineAttachment>) => (
+    <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+      <LazyInvestigationTimelineInlineContent {...props} />
+    </React.Suspense>
+  ),
+  renderConversationDetailsContent: ({ attachment }) =>
+    renderInvestigationTimelineDetails(attachment, resolveSecurityCanvasContext),
+});

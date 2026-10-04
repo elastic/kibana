@@ -25,10 +25,8 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { createImpactAttachmentDefinition } from './impact';
-import {
-  createAlertSummaryRows,
-  createAlertsSummaryRows,
-} from './attachment_summary_drilldown/create_details_drilldown';
+import { createInvestigationIocsAttachmentDefinition } from './investigation_iocs';
+import { createInvestigationTimelineAttachmentDefinition } from './investigation_timeline';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -67,9 +65,8 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 /**
  * Registers the baseline attachment UI definitions:
- *   - `security.alert` — label, icon, and the attachment summary drill-down. The drill-down is
- *     lazy behind a click, so this stays eager: the summary reads labels on first paint.
- *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
+ *   - `security.alert` — label and icon.
+ *   - `security.alerts` — label and icon. A batch names a set of alerts.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
@@ -78,19 +75,12 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 export const registerAttachmentUiDefinitions = ({
   attachments,
   resolveSecurityCanvasContext,
-  getSpaceId,
-  data,
 }: {
   attachments: AttachmentServiceStartContract;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-  getSpaceId: () => Promise<string>;
-  data: DataPublicPluginStart;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
-    renderConversationDetailsContent: createAlertSummaryRows({
-      resolveSecurityCanvasContext,
-    }),
   });
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
@@ -106,53 +96,43 @@ export const registerAttachmentUiDefinitions = ({
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
-      renderConversationDetailsContent: createAlertsSummaryRows({
-        resolveSecurityCanvasContext,
-        getSpaceId,
-        search: data.search.search,
-      }),
     }
   );
 };
 
 /**
  * Registers the `security.investigation.timeline` attachment renderer
- * (chronological event table for forensic artifacts).
+ * (chronological event table for forensic artifacts). The event table stays behind React.lazy.
  */
 export const registerInvestigationTimelineAttachment = ({
   attachments,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
-  void import(
-    /* webpackChunkName: "security_investigation_timeline_attachment" */
-    './investigation_timeline'
-  ).then(({ createInvestigationTimelineAttachmentDefinition }) => {
-    attachments.addAttachmentType(
-      SecurityAgentBuilderAttachments.investigationTimeline,
-      createInvestigationTimelineAttachmentDefinition()
-    );
-  });
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.investigationTimeline,
+    createInvestigationTimelineAttachmentDefinition({ resolveSecurityCanvasContext })
+  );
 };
 
 /**
  * Registers the `security.investigation.iocs` attachment renderer
- * (category table of indicator badges for forensic artifacts).
+ * (category table of indicator badges for forensic artifacts). The category table stays behind
+ * React.lazy.
  */
 export const registerInvestigationIocsAttachment = ({
   attachments,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
-  void import(
-    /* webpackChunkName: "security_investigation_iocs_attachment" */
-    './investigation_iocs'
-  ).then(({ createInvestigationIocsAttachmentDefinition }) => {
-    attachments.addAttachmentType(
-      SecurityAgentBuilderAttachments.investigationIocs,
-      createInvestigationIocsAttachmentDefinition()
-    );
-  });
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.investigationIocs,
+    createInvestigationIocsAttachmentDefinition({ resolveSecurityCanvasContext })
+  );
 };
 
 /**

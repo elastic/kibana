@@ -7,7 +7,12 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
+import {
+  registerAttachmentUiDefinitions,
+  registerImpactAttachment,
+  registerInvestigationIocsAttachment,
+  registerInvestigationTimelineAttachment,
+} from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -16,15 +21,11 @@ describe('registerAttachmentUiDefinitions', () => {
   } as unknown as AttachmentServiceStartContract;
 
   const resolveSecurityCanvasContext = jest.fn();
-  const getSpaceId = jest.fn().mockResolvedValue('default');
-  const mockData = { search: { search: jest.fn() } };
 
   const register = () =>
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       resolveSecurityCanvasContext,
-      getSpaceId,
-      data: mockData as never,
     });
 
   beforeEach(() => {
@@ -72,23 +73,71 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(entityCall).toBeUndefined();
   });
 
-  it('registers a renderConversationDetailsContent for security.alert', () => {
+  it('registers security.alert with label and icon only (no drilldown)', () => {
     register();
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    expect(alertCall![1].renderConversationDetailsContent).toBeDefined();
+    expect(alertCall![1].renderConversationDetailsContent).toBeUndefined();
+    expect(alertCall![1].getLabel).toBeDefined();
+    expect(alertCall![1].getIcon).toBeDefined();
   });
 
-  it('registers a renderConversationDetailsContent for security.alerts', () => {
+  it('registers security.alerts with label and icon only (no drilldown)', () => {
     register();
 
     const alertsCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
     );
     expect(alertsCall).toBeDefined();
-    expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
+    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
+    expect(alertsCall![1].getLabel).toBeDefined();
+    expect(alertsCall![1].getIcon).toBeDefined();
+  });
+});
+
+describe('registerInvestigationTimelineAttachment', () => {
+  it('registers the timeline attachment synchronously', () => {
+    const addAttachmentType = jest.fn();
+    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
+
+    registerInvestigationTimelineAttachment({
+      attachments,
+      resolveSecurityCanvasContext: jest.fn(),
+    });
+
+    expect(addAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.investigationTimeline,
+      expect.objectContaining({
+        getLabel: expect.any(Function),
+        getIcon: expect.any(Function),
+        renderInlineContent: expect.any(Function),
+        renderConversationDetailsContent: expect.any(Function),
+      })
+    );
+  });
+});
+
+describe('registerInvestigationIocsAttachment', () => {
+  it('registers the indicators attachment synchronously', () => {
+    const addAttachmentType = jest.fn();
+    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
+
+    registerInvestigationIocsAttachment({
+      attachments,
+      resolveSecurityCanvasContext: jest.fn(),
+    });
+
+    expect(addAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.investigationIocs,
+      expect.objectContaining({
+        getLabel: expect.any(Function),
+        getIcon: expect.any(Function),
+        renderInlineContent: expect.any(Function),
+        renderConversationDetailsContent: expect.any(Function),
+      })
+    );
   });
 });
 

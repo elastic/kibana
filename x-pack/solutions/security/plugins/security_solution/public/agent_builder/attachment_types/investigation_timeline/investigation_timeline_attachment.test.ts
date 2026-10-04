@@ -18,7 +18,9 @@ const makeAttachment = (
 });
 
 describe('createInvestigationTimelineAttachmentDefinition', () => {
-  const definition = createInvestigationTimelineAttachmentDefinition();
+  const definition = createInvestigationTimelineAttachmentDefinition({
+    resolveSecurityCanvasContext: jest.fn(),
+  });
 
   it('uses the timeline icon', () => {
     expect(definition.getIcon?.()).toBe('timeline');
@@ -36,5 +38,9 @@ describe('createInvestigationTimelineAttachmentDefinition', () => {
 
   it('registers an inline renderer', () => {
     expect(typeof definition.renderInlineContent).toBe('function');
+  });
+
+  it('registers a conversation details renderer', () => {
+    expect(typeof definition.renderConversationDetailsContent).toBe('function');
   });
 });

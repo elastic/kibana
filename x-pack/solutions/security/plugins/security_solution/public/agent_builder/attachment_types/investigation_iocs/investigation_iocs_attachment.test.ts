@@ -16,7 +16,9 @@ const makeAttachment = (data: InvestigationIocsAttachmentData): InvestigationIoc
 });
 
 describe('createInvestigationIocsAttachmentDefinition', () => {
-  const definition = createInvestigationIocsAttachmentDefinition();
+  const definition = createInvestigationIocsAttachmentDefinition({
+    resolveSecurityCanvasContext: jest.fn(),
+  });
 
   it('uses the flag icon', () => {
     expect(definition.getIcon?.()).toBe('flag');
@@ -34,5 +36,9 @@ describe('createInvestigationIocsAttachmentDefinition', () => {
 
   it('registers an inline renderer', () => {
     expect(typeof definition.renderInlineContent).toBe('function');
+  });
+
+  it('registers a conversation details renderer', () => {
+    expect(typeof definition.renderConversationDetailsContent).toBe('function');
   });
 });

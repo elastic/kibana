@@ -85,6 +85,7 @@ describe('InvestigationIocsInlineContent', () => {
       {
         id: 'shas',
         typeLabel: 'SHA256',
+        shortLabel: 'SHAs',
         items: [{ value: 'abc123' }],
       },
     ]);

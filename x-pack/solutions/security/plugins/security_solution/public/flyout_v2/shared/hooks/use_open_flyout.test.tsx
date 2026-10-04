@@ -124,6 +124,24 @@ describe('useOpenFlyout', () => {
     );
   });
 
+  it('keeps the caller size when width persistence is disabled', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start', maxWidth: false }, undefined, undefined, {
+      persistWidth: false,
+    });
+
+    const properties = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(properties.size).toBe('s');
+    expect(properties.maxWidth).toBe(false);
+    expect(properties.defaultSize).toBeUndefined();
+    expect(properties.onResize).toBeUndefined();
+  });
+
   it('does not persist or restore a width for tool flyouts', () => {
     // A saved width exists, but tool flyouts must ignore it (they can open side-by-side).
     mockStorage.get.mockImplementation((key: string) =>

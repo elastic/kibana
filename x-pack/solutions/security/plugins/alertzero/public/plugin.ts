@@ -426,6 +426,8 @@ export class AlertZeroPublicPlugin
                 null,
                 React.createElement(LazyProposedActionsSlot, props)
               ),
+            getSecurityAppUrl: (path) =>
+              core.application.getUrlForApp('securitySolutionUI', { path }),
           });
 
           registerEscalationTemplateUI({

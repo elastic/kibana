@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Conversation } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentServiceStartContract,
   ConversationTemplateServiceStartContract,
@@ -135,6 +136,38 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     );
 
     expect(await screen.findByText('proposed actions for conversation-1')).toBeInTheDocument();
+  });
+
+  it('renders the attachments overview from the tab attachments service', async () => {
+    const { contract } = createFakeService();
+    const attachment: VersionedAttachment = {
+      id: 'attachment-1',
+      type: 'security.alerts',
+      versions: [
+        {
+          version: 1,
+          data: { alertIds: ['alert-1'] },
+          created_at: '2026-09-01T10:00:00.000Z',
+          content_hash: 'a',
+        },
+      ],
+      current_version: 1,
+    };
+    register(contract, { getSecurityAppUrl: (path) => `/app/security${path}` });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent
+        conversation={{ ...conversation, attachments: [attachment] }}
+        isOpenedFromChat={false}
+      />
+    );
+
+    expect(await screen.findByRole('link', { name: /1 alert/ })).toBeInTheDocument();
   });
 
   it('omits the proposed actions section when no renderer is supplied', async () => {
