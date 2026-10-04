@@ -15,6 +15,8 @@ import {
   ALERTZERO_PROPOSAL_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
+import { SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -37,12 +39,27 @@ export const initializeManagedWorkflows = async ({
 
   // AlertZero action catalog entries install alongside the rule workflows:
   // all are global and static.
+  // A managed workflow is validated against the triggers registered when it is installed, and a
+  // failed global install stops reconciliation of every AlertZero workflow. The attach workflow's
+  // trigger belongs to security_solution, so it is only installed where that trigger exists.
+  const isAttachWorkflowInstallable =
+    workflowsExtensions.getTriggerDefinition(SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID) !==
+    undefined;
+  if (!isAttachWorkflowInstallable) {
+    logger.info(
+      `Skipping managed AlertZero workflow "${ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID}": trigger "${SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID}" is not registered`
+    );
+  }
   const globalWorkflowIds = [
     ...ALERTZERO_RULE_WORKFLOW_IDS,
     ...ALERTZERO_ACTION_WORKFLOW_IDS,
     ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
     ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
-    ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+    ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS.filter(
+      (id) =>
+        id !== ALERTZERO_FLOOR_ALERT_TRIAGE_ATTACH_NEW_RULES_WORKFLOW_ID ||
+        isAttachWorkflowInstallable
+    ),
     ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
     ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
   ] as const;
