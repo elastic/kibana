@@ -13,7 +13,7 @@ steps:
     label: Comment with job URL on issue
     agents:
       provider: gcp
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       machineType: n2-standard-2
     timeout_in_minutes: 5
