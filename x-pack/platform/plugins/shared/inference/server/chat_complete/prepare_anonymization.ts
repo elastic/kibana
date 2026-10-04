@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type {
   AnonymizationRule,
+  AnonymizationFailureMode,
   ChatCompleteAnonymizationTarget,
   ChatCompleteOptions,
 } from '@kbn/inference-common';
@@ -31,6 +32,7 @@ interface PrepareAnonymizationOptions {
   usePersistentReplacements?: boolean;
   requireReplacementsEncryptionKey?: boolean;
   saltPromise?: Promise<string | undefined>;
+  onFailurePromise?: Promise<AnonymizationFailureMode>;
   resolveEffectivePolicy?: (
     target?: ChatCompleteAnonymizationTarget
   ) => Promise<EffectivePolicy | undefined>;
@@ -39,6 +41,13 @@ interface PrepareAnonymizationOptions {
   messages: ChatCompleteOptions['messages'];
 }
 
+/**
+ * Anonymizes a request's system prompt and messages. The `resolveEffectivePolicy`, `saltPromise`,
+ * and persistent-replacements (`replacementsId`) inputs belong to the dormant policy-service
+ * implementation (`ANONYMIZATION_FEATURE_ACTIVE = false`, see `plugin.ts`) and are never set in
+ * practice; only the `anonymizationRules` from the `ai:anonymizationSettings` uiSetting are live.
+ * With no enabled rules, nothing is anonymized and the rest of the pipeline is a no-op.
+ */
 export const prepareAnonymization = async ({
   namespace,
   logger,
@@ -50,12 +59,14 @@ export const prepareAnonymization = async ({
   usePersistentReplacements = true,
   requireReplacementsEncryptionKey = false,
   saltPromise,
+  onFailurePromise,
   resolveEffectivePolicy,
   metadata,
   system,
   messages,
 }: PrepareAnonymizationOptions) => {
   const salt = await saltPromise;
+  const onFailure = (await onFailurePromise) ?? 'block';
   const effectivePolicy = await resolveEffectivePolicy?.(metadata?.anonymization?.target);
   if (!usePersistentReplacements) {
     const anonymization = await anonymizeMessages({
@@ -66,6 +77,8 @@ export const prepareAnonymization = async ({
       esClient,
       salt: salt ?? undefined,
       effectivePolicy,
+      onFailure,
+      logger,
     });
     return { anonymization, replacementsId: undefined, effectivePolicy };
   }
@@ -114,6 +127,8 @@ export const prepareAnonymization = async ({
     esClient,
     salt: salt ?? undefined,
     effectivePolicy,
+    onFailure,
+    logger,
     knownReplacements: (existingReplacements?.replacements ?? []).filter(
       (r): r is { anonymized: string; original: string } =>
         typeof r.anonymized === 'string' && typeof r.original === 'string'
