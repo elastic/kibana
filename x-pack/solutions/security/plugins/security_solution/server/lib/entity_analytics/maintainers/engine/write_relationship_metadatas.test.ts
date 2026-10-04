@@ -333,8 +333,17 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        logger,
+        records,
+        baseContext,
+        '[accesses][okta]'
+      );
       expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringMatching(/^\[accesses\]\[okta\] Failed to append /)
+      );
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining(
           'security_exception (1, status 403): action unauthorized for service account'
@@ -352,9 +361,17 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        logger,
+        records,
+        baseContext,
+        '[accesses][okta]'
+      );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith('Failed to append 1 of 1 relationship metadata.');
+      expect(logger.error).toHaveBeenCalledWith(
+        '[accesses][okta] Failed to append 1 of 1 relationship metadata.'
+      );
     });
 
     it('logs at info level (not error) when bulkAppend returns no failures', async () => {
@@ -367,8 +384,17 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        logger,
+        records,
+        baseContext,
+        '[accesses][okta]'
+      );
       expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        '[accesses][okta] Appended 1 relationship metadata to metadata datastream'
+      );
     });
   });
 });

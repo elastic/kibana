@@ -14,6 +14,8 @@ export interface RelationshipMaintainerSourceResult {
   qualified: number;
   /** Terminal state for this integration's run. */
   outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  /** Entity writes that landed in the store for this integration. */
+  applied: number;
 }
 
 /**

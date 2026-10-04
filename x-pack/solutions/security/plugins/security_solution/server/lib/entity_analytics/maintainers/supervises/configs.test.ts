@@ -35,13 +35,18 @@ const EXPECTED_SOURCE_BY_ID: Record<string, { entitySources: string[]; namespace
     entitySources: ['entityanalytics_entra_id', 'entityanalytics_entra_id.user'],
     namespace: 'entra_id',
   },
+  sailpoint_identity_sc: {
+    entitySources: ['sailpoint_identity_sc', 'sailpoint_identity_sc.identities'],
+    namespace: 'sailpoint_identity_sc',
+  },
 };
 
 describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the expected IDP integrations and workday (okta + entra_id + workday)', () => {
+  it('ships exactly the expected IDP integrations and workday (okta + entra_id + sailpoint + workday)', () => {
     expect(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'entityanalytics_entra_id',
       'entityanalytics_okta',
+      'sailpoint_identity_sc',
       'workday',
     ]);
   });
@@ -140,6 +145,22 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       // field, and requires a namespace-suffixed user EUID shape.
       expect(query).toContain(`targetEntityId != "user:@${namespace}"`);
       expect(query).toContain('targetEntityId RLIKE ".+:.+@.+"');
+    }
+  );
+
+  it.each(rawIdentifiersConfigs)(
+    '$id: override query drops empty-string raw identifiers right after the expand, before building the EUID',
+    (config) => {
+      const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
+      const query = buildTargetsPerActorQuery(config, 'default');
+      // Some integrations emit "" for a missing value (SailPoint's CEL does for a
+      // report without an email); a raw "" is not null, so the IS NOT NULL gates
+      // let it through and it must be excluded explicitly.
+      const expandIdx = query.indexOf('MV_EXPAND rawTargetKey');
+      const emptyFilterIdx = query.indexOf('WHERE rawTargetKey != ""');
+      const concatIdx = query.indexOf(`CONCAT("user:", rawTargetKey, "@${namespace}")`);
+      expect(emptyFilterIdx).toBeGreaterThan(expandIdx);
+      expect(emptyFilterIdx).toBeLessThan(concatIdx);
     }
   );
 
@@ -293,12 +314,17 @@ describe('workday (log-inverted) supervises config', () => {
       (c): c is OverrideRelationshipIntegrationConfig => c.id === 'workday'
     )!;
 
-  it('is registered alongside the two IDP configs', () => {
+  it('is registered alongside the entity-index configs', () => {
     expect(
       buildSupervisesConfigs()
         .map((c) => c.id)
         .sort()
-    ).toEqual(['entityanalytics_entra_id', 'entityanalytics_okta', 'workday']);
+    ).toEqual([
+      'entityanalytics_entra_id',
+      'entityanalytics_okta',
+      'sailpoint_identity_sc',
+      'workday',
+    ]);
   });
 
   it('reads the workday user log data stream, not the entity index', () => {
