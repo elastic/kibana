@@ -90,18 +90,18 @@ describe('ShowAlertButton', () => {
         },
       },
     });
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
   });
 
-  it('opens the new document flyout (from index) when the new flyout is enabled (non-EASE)', () => {
+  it('opens the new document flyout (from pattern) when the new flyout is enabled (non-EASE)', () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowAlertButton {...props} />);
     fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
 
-    expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
+    expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
       documentId: 'alert-id',
       indexName: 'alert-index',
       renderCellActions: casesCellActionRenderer,
@@ -119,7 +119,7 @@ describe('ShowAlertButton', () => {
     render(<ShowAlertButton {...props} ruleName="My Detection Rule" />);
     fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
 
-    expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+    expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Alert: My Detection Rule' })
     );
   });
@@ -140,7 +140,7 @@ describe('ShowAlertButton', () => {
         },
       },
     });
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
     // EASE path does not report the document flyout telemetry event
     expect(mockReportEvent).not.toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
@@ -155,6 +155,6 @@ describe('ShowAlertButton', () => {
       tabId: 'alerts',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
   });
 });

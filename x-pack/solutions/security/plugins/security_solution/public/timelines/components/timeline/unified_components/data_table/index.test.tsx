@@ -202,7 +202,7 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
+    'opens the new document flyout (from pattern) when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
@@ -212,7 +212,7 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+        expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
           expect.objectContaining({
             documentId: mockTimelineData[0]._id,
             indexName: mockTimelineData[0].ecs._index,
@@ -237,10 +237,10 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalled();
+        expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalled();
       });
 
-      const { renderCellActions } = jest.mocked(flyoutApi.openDocumentFlyoutFromIndex).mock
+      const { renderCellActions } = jest.mocked(flyoutApi.openDocumentFlyoutFromPattern).mock
         .calls[0][0];
 
       // Even when a cell passes an empty scopeId, the bound timeline scope must win so Filter

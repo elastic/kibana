@@ -77,19 +77,19 @@ describe('ShowEventButton', () => {
         },
       },
     });
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
   });
 
-  it('opens the new document flyout (from index) when the new flyout is enabled', () => {
+  it('opens the new document flyout (from pattern) when the new flyout is enabled', () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowEventButton {...props} />);
     const button = screen.getByTestId('comment-action-show-event-action-id');
     fireEvent.click(button);
 
-    expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
+    expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
       documentId: 'event-id',
       indexName: 'event-index',
       renderCellActions: casesCellActionRenderer,

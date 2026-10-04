@@ -92,6 +92,6 @@ describe('SessionViewDetails', () => {
     lastOnJumpToEvent?.(event);
 
     expect(onJumpToEvent).toHaveBeenCalledWith(event);
-    expect(flyoutApi.openDocumentFlyoutFromIndexAsChild).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPatternAsChild).not.toHaveBeenCalled();
   });
 });

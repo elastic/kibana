@@ -49,7 +49,7 @@ export interface InsightsSectionProps {
 export const InsightsSection = memo(
   ({ hit, renderCellActions, onAlertUpdated }: InsightsSectionProps) => {
     const {
-      openDocumentFlyoutFromIndexAsChild,
+      openDocumentFlyoutFromPatternAsChild,
       openDocumentEntities,
       openDocumentCorrelations,
       openDocumentThreatIntelligence,
@@ -84,9 +84,13 @@ export const InsightsSection = memo(
       openDocumentThreatIntelligence({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_THREAT_INTEL });
     }, [openDocumentThreatIntelligence, hit]);
 
+    // Resolve related documents by *pattern* (routing the search at the index) rather than by
+    // concrete `_index`, so cross-cluster / outside-data-view correlations resolve. Alert backing
+    // indices are converted to their alias inside the wrapper. See
+    // https://github.com/elastic/kibana/issues/286323.
     const onShowAlert = useCallback(
       (id: string, indexName: string, title?: string) =>
-        openDocumentFlyoutFromIndexAsChild({
+        openDocumentFlyoutFromPatternAsChild({
           documentId: id,
           indexName,
           renderCellActions,
@@ -94,7 +98,7 @@ export const InsightsSection = memo(
           origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
           title,
         }),
-      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
+      [openDocumentFlyoutFromPatternAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowEntitiesDetails = useCallback(

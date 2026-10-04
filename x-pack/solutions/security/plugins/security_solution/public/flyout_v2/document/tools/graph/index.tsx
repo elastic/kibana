@@ -54,21 +54,25 @@ export const GraphDetails = memo(
     const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const {
-      openDocumentFlyoutFromIndexAsChild,
+      openDocumentFlyoutFromPatternAsChild,
       openNetworkFlyoutAsChild,
       openEntityDetailsAsChild,
     } = useFlyoutApi();
 
+    // Resolve the node's document by *pattern* (routing the search at the index) rather than by
+    // concrete `_index`, so cross-cluster / outside-data-view documents resolve. Alert backing
+    // indices are converted to their alias inside the wrapper. See
+    // https://github.com/elastic/kibana/issues/286323.
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string) =>
-        openDocumentFlyoutFromIndexAsChild({
+        openDocumentFlyoutFromPatternAsChild({
           documentId,
           indexName,
           renderCellActions,
           onAlertUpdated,
           origin: FLYOUT_ORIGIN.GRAPH_DOCUMENT_NODE,
         }),
-      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
+      [openDocumentFlyoutFromPatternAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowNetwork = useCallback(

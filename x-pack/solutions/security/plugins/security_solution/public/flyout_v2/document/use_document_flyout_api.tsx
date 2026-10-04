@@ -228,6 +228,13 @@ export interface DocumentFlyoutApi {
    * (for callers that don't know the concrete `_index`, e.g. notes).
    */
   openDocumentFlyoutFromPattern: (params: OpenDocumentFlyoutParams) => void;
+  /**
+   * Opens the document details flyout (resolving from an index *pattern*, i.e. routing the search at
+   * the index) as a child of the currently open flyout. The pattern equivalent of
+   * `openDocumentFlyoutFromIndexAsChild`, for child callers whose document may live outside the local
+   * data view (cross-cluster / cross-project) — e.g. a node click in the analyzer or graph tool.
+   */
+  openDocumentFlyoutFromPatternAsChild: (params: OpenDocumentFlyoutParams) => void;
   /** Opens the analyzer tools flyout for a document. */
   openAnalyzer: (params: OpenAnalyzerParams) => void;
   /** Opens the session view tools flyout for a document. */
@@ -298,6 +305,31 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       dataTestSubj?: string
     ) => (
       <DocumentFlyoutWrapper
+        documentId={documentId}
+        indexName={indexName}
+        renderCellActions={renderCellActions}
+        onAlertUpdated={onAlertUpdated}
+        dataTestSubj={dataTestSubj}
+      />
+    ),
+    []
+  );
+
+  // Builds the document flyout content (resolved from an index *pattern*), shared by both the main
+  // and child open methods. Only the `session` differs between them, so it is kept private here and
+  // callers pick `openDocumentFlyoutFromPattern` (main) or `openDocumentFlyoutFromPatternAsChild`
+  // (child).
+  const buildFromPatternContent = useCallback(
+    (
+      {
+        documentId,
+        indexName,
+        renderCellActions = cellActionRenderer,
+        onAlertUpdated = noop,
+      }: OpenDocumentFlyoutParams,
+      dataTestSubj?: string
+    ) => (
+      <DocumentFlyoutWrapperFromPattern
         documentId={documentId}
         indexName={indexName}
         renderCellActions={renderCellActions}
@@ -388,27 +420,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   );
 
   const openDocumentFlyoutFromPattern = useCallback(
-    ({
-      documentId,
-      indexName,
-      renderCellActions = cellActionRenderer,
-      onAlertUpdated = noop,
-      origin,
-      title,
-    }: OpenDocumentFlyoutParams) => {
+    (params: OpenDocumentFlyoutParams) => {
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
-        documentId,
-        indexName: indexName ?? '',
+        documentId: params.documentId,
+        indexName: params.indexName ?? '',
       });
       const onClose = buildOnClose(null);
       open(
-        <DocumentFlyoutWrapperFromPattern
-          documentId={documentId}
-          indexName={indexName}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={onAlertUpdated}
-        />,
+        buildFromPatternContent(params),
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
@@ -416,18 +436,69 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           // Fall back to the bare "Alert" label so EUI's managed flyout never shows
           // "Unknown Flyout" in its navigation history. Callers may supply a richer
           // title (e.g. "Alert: <rule name>") if they know it at call time.
-          title: title ?? getAlertHistoryTitle(),
+          title: params.title ?? getAlertHistoryTitle(),
           onClose,
         },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,
           session: sessionMode,
-          origin,
+          origin: params.origin,
         }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
+    [
+      open,
+      buildFromPatternContent,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+      sessionMode,
+      writeOnOpen,
+      buildOnClose,
+    ]
+  );
+
+  const openDocumentFlyoutFromPatternAsChild = useCallback(
+    (params: OpenDocumentFlyoutParams) => {
+      // Read the parent descriptor from the URL before appending the child so we know what to
+      // restore to when the child closes (e.g. the analyzer that opened this document as a child).
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen(
+        {
+          kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
+          documentId: params.documentId,
+          indexName: params.indexName ?? '',
+        },
+        'inherit'
+      );
+      const onClose = buildOnClose(parentDescriptor);
+      open(
+        buildFromPatternContent(params, CHILD_DOCUMENT_FLYOUT_TEST_ID),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          title: buildFlyoutNavTitle(params.title ?? getAlertHistoryTitle()),
+          onClose,
+        },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin: params.origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
+    },
+    [
+      open,
+      buildFromPatternContent,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+      readFirstDescriptor,
+      writeOnOpen,
+      buildOnClose,
+    ]
   );
 
   const openAnalyzer = useCallback(
@@ -799,6 +870,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
+      openDocumentFlyoutFromPatternAsChild,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
@@ -813,6 +885,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
+      openDocumentFlyoutFromPatternAsChild,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
