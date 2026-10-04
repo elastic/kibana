@@ -158,7 +158,7 @@ upload_test_server_log() {
   fi
 
   echo "--- Uploading test server log"
-  buildkite-agent artifact upload "$SCOUT_SERVER_LOG"
+  buildkite-agent artifact upload "$SCOUT_SERVER_LOG" || echo "Failed to upload $SCOUT_SERVER_LOG"
 }
 
 # Start the Scout test server in the background and wait for it to become ready
@@ -188,7 +188,6 @@ start_server() {
       echo "Test server exited unexpectedly. Last 50 lines of log:"
       tail -n 50 "$SCOUT_SERVER_LOG" 2>/dev/null || true
       wait "$SCOUT_SERVER_PID" || true
-      upload_test_server_log
       exit 1
     fi
     sleep 1
@@ -196,7 +195,6 @@ start_server() {
 
   echo "Timed out waiting for test server to be ready. Last 50 lines of log:"
   tail -n 50 "$SCOUT_SERVER_LOG" 2>/dev/null || true
-  upload_test_server_log
   exit 1
 }
 
@@ -208,9 +206,7 @@ stop_server() {
     wait "$SCOUT_SERVER_PID" 2>/dev/null || true
   fi
 
-  if [[ ${#FAILED[@]} -gt 0 ]]; then
-    upload_test_server_log
-  fi
+  upload_test_server_log
 }
 
 # Run Playwright tests for a single config and categorize the result as passed or failed
