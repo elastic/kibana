@@ -36,6 +36,10 @@ export interface KillSuspendProcessActionResultProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * @deprecated
+ */
 export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResultProps>(
   ({ action: _action, agentId: _agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const action = _action as ActionDetails<

@@ -11,13 +11,13 @@ import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@el
 import type { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { reduce } from 'lodash';
-import { ActionResponseOutputs } from './action_response_outputs';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { OUTPUT_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
+import { ResponseActionResults } from '../../response_action';
 
 const emptyValue = getEmptyValue();
 
@@ -178,7 +178,11 @@ export const ActionsLogExpandedTray = memo<{
         description: (
           // codeblock for output
           <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-            <ActionResponseOutputs action={action} data-test-subj={getTestId('output')} />
+            <ResponseActionResults
+              action={action}
+              textSize="xs"
+              data-test-subj={getTestId('output')}
+            />
           </StyledEuiCodeBlock>
         ),
       },

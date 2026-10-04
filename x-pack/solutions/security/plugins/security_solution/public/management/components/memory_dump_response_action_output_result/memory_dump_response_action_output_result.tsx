@@ -49,6 +49,10 @@ export interface MemoryDumpResponseActionOutputResultProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * @deprecated
+ */
 export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActionOutputResultProps>(
   ({ action, agentId: _agentId, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const agentId = _agentId || action.agents[0];
