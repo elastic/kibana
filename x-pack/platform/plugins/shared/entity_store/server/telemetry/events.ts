@@ -146,6 +146,8 @@ interface EntityMaintainerRunSummarySource {
   outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
   /** Entity writes that landed in the store for this source */
   applied?: number;
+  /** Which step threw. Present only when outcome is "error" */
+  failedStage?: string;
 }
 
 interface EntityMaintainerRunSummaryBreakdown {
@@ -585,6 +587,14 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
             _meta: {
               optional: true,
               description: 'Entity writes that landed in the store for this source',
+            },
+          },
+          failedStage: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description:
+                'Which step threw for this source: fetch-actors | fetch-targets | entity-write | metadata-write. Present only when outcome is "error"',
             },
           },
         },

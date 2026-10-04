@@ -1599,163 +1599,195 @@ describe('runRelationshipMaintainer', () => {
       });
     });
 
-    it('logs a prefixed error identifying the entity write as the failing stage', async () => {
-      const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate } = makeClients();
-      const logger = loggerMock.create();
+    describe('failedStage attribution', () => {
+      const oneActorOneTarget = (esql: jest.Mock) => {
+        esql.mockResolvedValueOnce({
+          columns: [
+            { name: 'actorUserId', type: 'keyword' },
+            { name: 'accesses_frequently', type: 'keyword' },
+            { name: 'accesses_infrequently', type: 'keyword' },
+          ],
+          values: [['user:alice@corp', ['host:H1'], null]],
+        });
+      };
 
-      search.mockResolvedValueOnce(
-        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
-      );
-      esql.mockResolvedValueOnce({
-        columns: [
-          { name: 'actorUserId', type: 'keyword' },
-          { name: 'accesses_frequently', type: 'keyword' },
-          { name: 'accesses_infrequently', type: 'keyword' },
-        ],
-        values: [['user:alice@corp', ['host:H1'], null]],
-      });
-      bulkUpdate.mockRejectedValueOnce(new Error('bulk boom'));
-
-      await runRelationshipMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        entityMetadataClient,
-        relationshipsClient,
-        integrations: [baseConfig],
-        maintainerName: 'communicates_with',
+      const collect = (): RelationshipMaintainerTelemetryCollector => ({
+        sources: [],
+        relationshipTypeApplied: {},
       });
 
-      const messages = logger.error.mock.calls.map(([m]) => m);
-      expect(messages).toContainEqual(
-        '[communicates_with][elastic_defend] Entity write failed: bulk boom'
-      );
-    });
+      it('attributes the failure to fetch-actors when the composite agg throws', async () => {
+        const { esClient, search } = makeEsClient();
+        const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
+        const collector = collect();
 
-    it('logs a target-validation search rejection once, labelled as the entity write stage', async () => {
-      const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate } = makeClients();
-      const logger = loggerMock.create();
+        search.mockRejectedValueOnce(new Error('search boom'));
 
-      search
-        .mockResolvedValueOnce(successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }]))
-        .mockRejectedValueOnce(new Error('validation boom'));
-      esql.mockResolvedValueOnce({
-        columns: [
-          { name: 'actorUserId', type: 'keyword' },
-          { name: 'accesses_frequently', type: 'keyword' },
-          { name: 'accesses_infrequently', type: 'keyword' },
-        ],
-        values: [['user:alice@corp', ['host:H1'], null]],
+        await runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          entityMetadataClient,
+          relationshipsClient,
+          integrations: [baseConfig],
+          maintainerName: 'communicates_with',
+          telemetryCollector: collector,
+        });
+
+        expect(collector.sources[0]).toMatchObject({
+          outcome: 'error',
+          failedStage: 'fetch-actors',
+        });
       });
 
-      await runRelationshipMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        entityMetadataClient,
-        relationshipsClient,
-        integrations: [{ ...baseConfig, validateTargetIds: true }],
-        maintainerName: 'communicates_with',
+      it('attributes the failure to fetch-targets when the ES|QL query throws', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
+        const collector = collect();
+
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
+        );
+        esql.mockRejectedValueOnce(new Error('esql boom'));
+
+        await runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          entityMetadataClient,
+          relationshipsClient,
+          integrations: [baseConfig],
+          maintainerName: 'communicates_with',
+          telemetryCollector: collector,
+        });
+
+        expect(collector.sources[0]).toMatchObject({
+          outcome: 'error',
+          failedStage: 'fetch-targets',
+        });
       });
 
-      const messages = logger.error.mock.calls.map(([m]) => m);
-      expect(messages).toHaveLength(1);
-      expect(messages[0]).toContain('[communicates_with][elastic_defend] Entity write failed:');
-      expect(messages[0]).toContain('Target ID validation failed on chunk 1/1');
-      expect(messages[0]).toContain('validation boom');
-      expect(bulkUpdate).not.toHaveBeenCalled();
-    });
+      it('attributes the failure to entity-write when the bulk update throws', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate } = makeClients();
+        const collector = collect();
 
-    it('logs a prefixed error identifying the metadata write as the failing stage', async () => {
-      const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
-      const logger = loggerMock.create();
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
+        );
+        oneActorOneTarget(esql);
+        bulkUpdate.mockRejectedValueOnce(new Error('bulk boom'));
 
-      search.mockResolvedValueOnce(
-        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
-      );
-      esql.mockResolvedValueOnce({
-        columns: [
-          { name: 'actorUserId', type: 'keyword' },
-          { name: 'accesses_frequently', type: 'keyword' },
-          { name: 'accesses_infrequently', type: 'keyword' },
-        ],
-        values: [['user:alice@corp', ['host:H1'], null]],
-      });
-      bulkAppend.mockRejectedValueOnce(new Error('metadata boom'));
+        await runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          entityMetadataClient,
+          relationshipsClient,
+          integrations: [baseConfig],
+          maintainerName: 'communicates_with',
+          telemetryCollector: collector,
+        });
 
-      await runRelationshipMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        entityMetadataClient,
-        relationshipsClient,
-        integrations: [baseConfig],
-        maintainerName: 'communicates_with',
+        expect(collector.sources[0]).toMatchObject({
+          outcome: 'error',
+          failedStage: 'entity-write',
+        });
       });
 
-      const messages = logger.error.mock.calls.map(([m]) => m);
-      expect(messages).toContainEqual(
-        '[communicates_with][elastic_defend] Metadata write failed: metadata boom'
-      );
-      // The entity write is a distinct stage and did not fail here.
-      expect(messages).not.toContainEqual(expect.stringContaining('Entity write failed'));
-    });
+      it('attributes a target-validation search rejection to entity-write, not fetch-actors', async () => {
+        // The validation lookup is an esClient.search inside writeEntityIds — the
+        // same API the actor fetch uses. Attribution must follow the call site,
+        // not the API, or operators chase the wrong stage.
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate } = makeClients();
+        const collector = collect();
 
-    it('logs a prefixed error identifying the actor fetch as the failing stage', async () => {
-      const { esClient, search } = makeEsClient();
-      const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const logger = loggerMock.create();
+        search
+          .mockResolvedValueOnce(successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }]))
+          .mockRejectedValueOnce(new Error('validation boom'));
+        oneActorOneTarget(esql);
 
-      search.mockRejectedValueOnce(new Error('search boom'));
+        await runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          entityMetadataClient,
+          relationshipsClient,
+          integrations: [{ ...baseConfig, validateTargetIds: true }],
+          maintainerName: 'communicates_with',
+          telemetryCollector: collector,
+        });
 
-      await runRelationshipMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        entityMetadataClient,
-        relationshipsClient,
-        integrations: [baseConfig],
-        maintainerName: 'communicates_with',
+        expect(collector.sources[0]).toMatchObject({
+          outcome: 'error',
+          failedStage: 'entity-write',
+        });
+        expect(bulkUpdate).not.toHaveBeenCalled();
       });
 
-      const messages = logger.error.mock.calls.map(([m]) => m);
-      expect(messages).toEqual([
-        '[communicates_with][elastic_defend] Fetch actors failed: search boom',
-      ]);
-    });
+      it('attributes the failure to metadata-write when the metadata append throws', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
+        const collector = collect();
 
-    it('logs a prefixed error identifying the target fetch as the failing stage', async () => {
-      const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
-      const logger = loggerMock.create();
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
+        );
+        oneActorOneTarget(esql);
+        bulkAppend.mockRejectedValueOnce(new Error('metadata boom'));
 
-      search.mockResolvedValueOnce(
-        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
-      );
-      esql.mockRejectedValueOnce(new Error('esql boom'));
+        await runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          entityMetadataClient,
+          relationshipsClient,
+          integrations: [baseConfig],
+          maintainerName: 'communicates_with',
+          telemetryCollector: collector,
+        });
 
-      await runRelationshipMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        entityMetadataClient,
-        relationshipsClient,
-        integrations: [baseConfig],
-        maintainerName: 'communicates_with',
+        // The entity write landed before the metadata write threw, so the stage
+        // label is what separates "nothing was written" from "the history is
+        // incomplete" — `applied` alone cannot say which.
+        expect(collector.sources[0]).toMatchObject({
+          outcome: 'error',
+          failedStage: 'metadata-write',
+          applied: 1,
+        });
       });
 
-      const messages = logger.error.mock.calls.map(([m]) => m);
-      expect(messages).toEqual([
-        '[communicates_with][elastic_defend] Fetch targets failed: esql boom',
-      ]);
+      it('omits failedStage for a source that did not fail', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
+        const collector = collect();
+
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
+        );
+        oneActorOneTarget(esql);
+
+        await runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          entityMetadataClient,
+          relationshipsClient,
+          integrations: [baseConfig],
+          maintainerName: 'communicates_with',
+          telemetryCollector: collector,
+        });
+
+        expect(collector.sources[0].outcome).toBe('producing');
+        expect(collector.sources[0]).not.toHaveProperty('failedStage');
+      });
     });
 
     it('records outcome: index_missing when actor index does not exist', async () => {
