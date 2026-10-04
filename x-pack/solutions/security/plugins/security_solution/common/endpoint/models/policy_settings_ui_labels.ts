@@ -189,3 +189,26 @@ export const POLICY_PROTECTION_UPDATES_LABEL = {
     defaultMessage: 'Protection updates',
   }),
 } as const;
+
+export const POLICY_PROTECTION_FAMILY_TITLES: Readonly<
+  Record<'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection', string>
+> = {
+  malware: i18n.translate('xpack.securitySolution.endpoint.policy.details.malware', {
+    defaultMessage: 'Malware',
+  }),
+  ransomware: i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
+    defaultMessage: 'Ransomware',
+  }),
+  memory_protection: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.memory_protection',
+    {
+      defaultMessage: 'Memory threat',
+    }
+  ),
+  behavior_protection: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.behavior_protection',
+    {
+      defaultMessage: 'Malicious behavior',
+    }
+  ),
+};

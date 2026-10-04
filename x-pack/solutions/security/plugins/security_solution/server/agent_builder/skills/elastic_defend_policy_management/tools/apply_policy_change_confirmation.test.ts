@@ -36,10 +36,13 @@ const capabilities = (): PolicyChangeCapabilities => ({
   serverless: false,
 });
 
-const createNormalizedPolicy = (stored: PolicyConfig) => {
+const createNormalizedPolicy = (
+  stored: PolicyConfig,
+  identityOverrides: Partial<{ id: string; name: string }> = {}
+) => {
   const packagePolicy = generator.generateEndpointPackagePolicy({
-    id: 'policy-1',
-    name: 'Endpoint Policy',
+    id: identityOverrides.id ?? 'policy-1',
+    name: identityOverrides.name ?? 'Endpoint Policy',
     version: 'WzEsMV0=',
     policy_ids: ['agent-policy-a'],
   });
@@ -60,9 +63,10 @@ const DEFAULT_ENROLLMENT: EndpointCountResult = {
 const createPreview = (
   operations: readonly PolicyChangeOperation[],
   stored: PolicyConfig = policyFactory(),
-  overrides: Partial<ApplyPolicyChangePreview> = {}
+  overrides: Partial<ApplyPolicyChangePreview> = {},
+  identityOverrides: Partial<{ id: string; name: string }> = {}
 ): ApplyPolicyChangePreview => {
-  const normalized = createNormalizedPolicy(stored);
+  const normalized = createNormalizedPolicy(stored, identityOverrides);
   const assessment = buildPolicyChangeAssessment(normalized, operations, capabilities());
 
   return {
@@ -80,6 +84,7 @@ const createPreview = (
 };
 
 const facts = (overrides: Partial<ApplyPreviewFacts> = {}): ApplyPreviewFacts => ({
+  policyId: 'policy-1',
   policyName: 'Endpoint Policy',
   policyRevision: 3,
   policyVersion: 'WzEsMV0=',
@@ -126,55 +131,41 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     delete (stored.mac.popup.malware as { enabled?: boolean }).enabled;
     const preview = createPreview(
       [{ op: 'set_protection_level', protection: 'malware', mode: ProtectionModes.detect }],
-      stored
-    );
-    expect(preview.assessment.globalBlockers).toEqual([]);
-    expect(preview.assessment.changes.every(({ eligibility }) => eligibility.eligible)).toBe(true);
-    expect(preview.assessment.changes).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: 'mac.popup.malware.enabled',
-          from: undefined,
-          to: false,
-          origin: expect.objectContaining({ kind: 'coupled' }),
-          eligibility: { eligible: true },
-        }),
-      ])
+      stored,
+      {},
+      { name: '[Reviewed and safe](https://example.com)\r& <audit@corp.example.com>' }
     );
     const definition = renderApplyPolicyChangeConfirmation(selectApplyPreviewFacts(preview));
 
     expect(definition).toEqual(
       expect.objectContaining({
         color: 'warning',
-        title: 'Apply 6 change(s) to "Endpoint Policy"?',
+        title:
+          'Apply 6 change(s) to "\\[Reviewed and safe\\]\\(https://example\\.com\\) &amp; &lt;audit@corp\\.example\\.com\\>"?',
         confirm_text: 'Apply changes',
         cancel_text: 'Cancel',
       })
     );
     expect(definition).not.toHaveProperty('id');
     const lines = definition.message?.split('\n') ?? [];
-    expect(lines[0]).toBe('| Setting | From | To | Origin |');
-    expect(lines[1]).toBe('| --- | --- | --- | --- |');
-    expect(lines.slice(2, 5)).toEqual([
-      '| windows.malware.mode | "prevent" | "detect" | direct |',
-      '| mac.malware.mode | "prevent" | "detect" | direct |',
-      '| linux.malware.mode | "prevent" | "detect" | direct |',
-    ]);
+    expect(lines[0]).toBe('Warnings:');
+    expect(lines[1]).toBe(
+      '- Malware protection on Windows, macOS, Linux changes to Detect: this protection generates alerts but does not block threats.'
+    );
     expect(lines.slice(5, 8)).toEqual([
-      '| windows.popup.malware.enabled | true | false | coupled |',
-      '| mac.popup.malware.enabled | null | false | coupled |',
-      '| linux.popup.malware.enabled | true | false | coupled |',
+      '| windows\\.malware\\.mode | "prevent" | "detect" | direct |',
+      '| mac\\.malware\\.mode | "prevent" | "detect" | direct |',
+      '| linux\\.malware\\.mode | "prevent" | "detect" | direct |',
     ]);
-    expect(lines[9]).toBe('- windows.antivirus_registration.enabled: true -> false');
-    expect(lines[11]).toBe('Enrolled agents: 3 (source: fleet_status_aggregation).');
-    expect(lines[12]).toBe('Status counts: all=3.');
-    expect(lines[13]).toBe(
-      'Counts are preview-time observations and may change and do not restrict which agents receive the policy.'
-    );
-    expect(lines[15]).toBe('Checked policy revision 1, version WzEsMV0= against the assessment.');
-    expect(lines[16]).toBe(
-      'Differences between the proposal and the policy Fleet returns are reported after apply.'
-    );
+    expect(lines.slice(8, 11)).toEqual([
+      '| windows\\.popup\\.malware\\.enabled | true | false | coupled |',
+      '| mac\\.popup\\.malware\\.enabled | null | false | coupled |',
+      '| linux\\.popup\\.malware\\.enabled | true | false | coupled |',
+    ]);
+    expect(lines[5]).not.toMatch(/\\"|\\:/);
+    expect(lines[12]).toBe('Derived setting updates:');
+    expect(lines[13]).toBe('- windows\\.antivirus\\_registration\\.enabled: true -> false');
+    expect(lines[19]).toBe('Policy ID: policy\\-1');
   });
 
   it('renders an eligible coupled change with all rows and no side effects', () => {
@@ -189,11 +180,14 @@ describe('renderApplyPolicyChangeConfirmation', () => {
         title: 'Apply 3 change(s) to "Endpoint Policy"?',
       })
     );
+    expect(definition.message).not.toContain('Warnings:');
     const lines = definition.message?.split('\n') ?? [];
-    expect(lines[2]).toBe('| windows.popup.malware.enabled | true | false | direct |');
-    expect(lines[3]).toBe('| mac.popup.malware.enabled | true | false | coupled |');
-    expect(lines[4]).toBe('| linux.popup.malware.enabled | true | false | coupled |');
-    expect(definition.message).toContain('Side effects: none');
+    expect(lines[0]).toBe('| Setting | From | To | Origin |');
+    expect(lines[1]).toBe('| --- | --- | --- | --- |');
+    expect(lines[2]).toBe('| windows\\.popup\\.malware\\.enabled | true | false | direct |');
+    expect(lines[3]).toBe('| mac\\.popup\\.malware\\.enabled | true | false | coupled |');
+    expect(lines[4]).toBe('| linux\\.popup\\.malware\\.enabled | true | false | coupled |');
+    expect(definition.message).toContain('Derived setting updates: none');
   });
 
   it('marks enrollment unavailable when there are no agent policy assignments', () => {

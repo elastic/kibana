@@ -7,10 +7,12 @@
 
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import moment from 'moment';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import {
   ProtectionModes,
+  PolicyOperatingSystem,
   DeviceControlAccessLevel,
   type PolicyConfig,
 } from '../../../../../../common/endpoint/types';
@@ -181,5 +183,72 @@ describe('buildPolicyChangeAssessment', () => {
 
     expect(assessment.changes[0]?.eligibility).toEqual({ eligible: true });
     expect(assessment.globalBlockers).toEqual([{ reason: 'managed_policy_not_writable' }]);
+  });
+
+  it('returns one protection_weakened advisory listing every OS when malware is turned off', () => {
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(policyFactory()),
+      [{ op: 'set_protection_enabled', protection: 'malware', enabled: false }],
+      capabilities()
+    );
+
+    expect(assessment.advisories).toEqual([
+      {
+        code: 'protection_weakened',
+        protection: 'malware',
+        os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+        to: 'off',
+        text: 'Malware protection on Windows, macOS, Linux is turned off: this protection no longer detects or blocks threats.',
+      },
+    ]);
+  });
+
+  it('lists only the OS whose protection mode weakens for set_protection_level', () => {
+    const stored = policyFactory();
+    stored.windows.malware.mode = ProtectionModes.prevent;
+    stored.mac.malware.mode = ProtectionModes.off;
+    stored.linux.malware.mode = ProtectionModes.detect;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_protection_level', protection: 'malware', mode: ProtectionModes.detect }],
+      capabilities()
+    );
+
+    expect(assessment.advisories).toEqual([
+      {
+        code: 'protection_weakened',
+        protection: 'malware',
+        os: [PolicyOperatingSystem.windows],
+        to: 'detect',
+        text: 'Malware protection on Windows changes to Detect: this protection generates alerts but does not block threats.',
+      },
+    ]);
+  });
+
+  it('advises a stale protection-updates pin only when the pinned date is at least 30 days old', () => {
+    const stale = moment.utc().subtract(45, 'days').format('YYYY-MM-DD');
+    const fresh = moment.utc().subtract(10, 'days').format('YYYY-MM-DD');
+
+    const staleAssessment = buildPolicyChangeAssessment(
+      createPolicy(policyFactory()),
+      [{ op: 'set_field', path: 'global_manifest_version', value: stale }],
+      capabilities()
+    );
+    const freshAssessment = buildPolicyChangeAssessment(
+      createPolicy(policyFactory()),
+      [{ op: 'set_field', path: 'global_manifest_version', value: fresh }],
+      capabilities()
+    );
+
+    expect(staleAssessment.advisories).toEqual([
+      {
+        code: 'global_manifest_version_stale',
+        value: stale,
+        ageDays: 45,
+        text: `Protection artifacts pinned to ${stale} are 45 days old. Elastic recommends keeping protection artifacts up to date. After 18 months, protection artifacts expire and cannot be rolled back.`,
+      },
+    ]);
+    expect(freshAssessment.advisories).toEqual([]);
   });
 });
