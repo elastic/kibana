@@ -1,0 +1,5 @@
+every: "6h"
+autonomy: "assisted"
+"analysisWindowDays":21
+"fpCountThreshold":4
+"fpRateThresholdPct":80

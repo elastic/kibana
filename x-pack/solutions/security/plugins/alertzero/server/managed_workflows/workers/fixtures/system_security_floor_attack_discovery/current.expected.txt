@@ -1,0 +1,3 @@
+every: "5d"
+scheduleInterval: "5d"
+autonomy: "supervised"

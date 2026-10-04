@@ -1,0 +1,4 @@
+every: "6h"
+autonomy: "assisted"
+"lookbackDays":30
+"maxGapsPerRun":10

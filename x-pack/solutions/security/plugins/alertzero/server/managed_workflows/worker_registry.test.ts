@@ -12,10 +12,9 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   WATCH_TAG,
 } from '@kbn/alertzero-common';
-import { WorkflowSchema } from '@kbn/workflows';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
-import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import { workerRegistry } from './worker_registry';
+import { renderedWorkflowInstallFailure } from './test_utils';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
@@ -160,11 +159,10 @@ describe('workerRegistry', () => {
         throw new Error(`Worker "${catalog.id}" is not registered`);
       }
       // The managed definitions test validates triggers loosely, so it cannot catch a `with.every`
-      // the engine would reject. This is the assertion that does.
+      // the engine would reject. Install stores `valid`, which is stricter than a successful parse.
       const yaml = getYamlTemplate(catalog.id)(registration.settings.createDefaultValues());
-      const result = parseWorkflowYamlToJSON(yaml, WorkflowSchema);
 
-      expect(result.success ? null : result.error).toBeNull();
+      expect(renderedWorkflowInstallFailure(yaml)).toBeUndefined();
     }
   );
 
@@ -182,7 +180,7 @@ describe('workerRegistry', () => {
       const parsed = parse(yaml) as { triggers?: Array<{ with?: { every?: string } }> };
 
       expect(parsed.triggers?.[0]?.with?.every).toBe(scheduleInterval);
-      expect(parseWorkflowYamlToJSON(yaml, WorkflowSchema).success).toBe(true);
+      expect(renderedWorkflowInstallFailure(yaml)).toBeUndefined();
     }
   );
 });

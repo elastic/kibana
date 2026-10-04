@@ -1,0 +1,9 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "assisted",
+  "scheduleInterval": "6h",
+  "extras": {
+    "lookbackDays": 30,
+    "maxGapsPerRun": 10
+  }
+}
