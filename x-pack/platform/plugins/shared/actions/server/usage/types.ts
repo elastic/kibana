@@ -14,6 +14,8 @@ export interface ActionsUsage {
   count_total: number;
   count_by_type: Record<string, number>;
   count_gen_ai_provider_types: Record<string, number>;
+  count_by_auth_type: Record<string, number>;
+  count_by_type_and_auth_type: Record<string, Record<string, number>>;
   count_active_total: number;
   count_active_alert_history_connectors: number;
   count_active_by_type: Record<string, number>;
@@ -64,6 +66,92 @@ export const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_ac
     elastic_cloud: { type: 'long' },
     other: { type: 'long' },
     ses: { type: 'long' },
+  };
+
+export const byAuthTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_auth_type'] = {
+  DYNAMIC_KEY: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using this authentication type.' },
+  },
+  none: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using no authentication.' },
+  },
+  bearer: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using bearer authentication.' },
+  },
+  bearer_with_tls: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using bearer authentication with TLS.' },
+  },
+  basic: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using basic authentication.' },
+  },
+  api_key_header: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using API key header authentication.' },
+  },
+  api_key_query: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using API key query authentication.' },
+  },
+  oauth_client_credentials: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using OAuth client credentials.' },
+  },
+  oauth_authorization_code: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using OAuth authorization code.' },
+  },
+  oauth_client_credentials_private_key_jwt: {
+    type: 'long',
+    _meta: {
+      description: 'Number of connectors using OAuth client credentials with private key JWT.',
+    },
+  },
+  ears: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using Elastic Authentication Redirect Service.' },
+  },
+  pfx_certificate: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using PFX certificate authentication.' },
+  },
+  crt_certificate: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using CRT certificate authentication.' },
+  },
+  aws_credentials: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using AWS credentials.' },
+  },
+  gcp_service_account: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using a GCP service account.' },
+  },
+  azure_shared_key: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using an Azure shared key.' },
+  },
+  kubernetes_gke: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using GKE authentication.' },
+  },
+  kubernetes_eks: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using EKS authentication.' },
+  },
+  kubernetes_aks: {
+    type: 'long',
+    _meta: { description: 'Number of connectors using AKS authentication.' },
+  },
+};
+
+export const byTypeAndAuthTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type_and_auth_type'] =
+  {
+    DYNAMIC_KEY: byAuthTypeSchema,
   };
 
 export interface ConnectorUsageReport {
