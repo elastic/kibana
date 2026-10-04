@@ -28,7 +28,7 @@ export const threshold: SavedObjectsType = {
     defaultSearchField: 'name',
     displayName: 'threshold explorer view',
     getTitle: getThresholdExplorerViewTitle,
-    icon: 'metricsApp',
+    icon: 'chartGauge',
     importableAndExportable: true,
   },
   mappings: {
