@@ -102,3 +102,56 @@ Follow existing patterns in the target area first; below are common defaults.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
 - Only comment exported functions with one concise sentence and non-trivial code paths.
+
+## Pull Requests
+
+Stacked PRs are enabled for this repository. Prefer a stack of small, focused PRs over a single large one.
+
+### When to stack
+
+Create a stack when the change:
+- Has a natural layering order — e.g., shared types → server implementation → UI — where each layer can be reviewed independently and later layers depend on earlier ones landing first.
+- Crosses domain boundaries (multiple `kibana.jsonc` owners) and each part stands on its own.
+- Would otherwise exceed ~400 lines added or ~20 files changed (published research consistently shows review defect-detection drops at ~400 lines; Kibana's own PR data shows engagement collapses well before 1,000).
+
+Do not create artificially small slices that have no standalone meaning.
+
+### How to create a stack
+
+Each PR after the first targets the *previous branch*, not `main`:
+
+```bash
+# Layer 1 — targets main
+git checkout -b feat/my-feature-part-1
+# ... implement layer 1 ...
+git push -u origin feat/my-feature-part-1
+gh pr create --base main --title "feat: part 1 — <description>"
+
+# Layer 2 — targets the layer 1 branch
+git checkout feat/my-feature-part-1
+git checkout -b feat/my-feature-part-2
+# ... implement layer 2 ...
+git push -u origin feat/my-feature-part-2
+gh pr create --base feat/my-feature-part-1 --title "feat: part 2 — <description>"
+```
+
+When a PR in the stack merges, GitHub automatically retargets the next PR in the stack to `main`. Because Kibana uses squash merges, cascade a rebase down through every downstream branch in order — saving each branch's old tip before rebasing it, then using that saved SHA to rebase its child:
+
+```bash
+# After part-1 merges — rebase part-2, then use its old tip to rebase part-3
+git fetch origin
+old_b=$(git rev-parse feat/my-feature-part-2)
+git rebase --onto origin/main feat/my-feature-part-1 feat/my-feature-part-2
+git push --force-with-lease origin feat/my-feature-part-2
+git rebase --onto feat/my-feature-part-2 $old_b feat/my-feature-part-3
+git push --force-with-lease origin feat/my-feature-part-3
+
+# After part-2 merges — part-3 was already rebased onto part-2, so a simple --onto suffices
+git fetch origin
+git rebase --onto origin/main feat/my-feature-part-2 feat/my-feature-part-3
+git push --force-with-lease origin feat/my-feature-part-3
+```
+
+The `$old_b` step is critical for stacks of three or more: once part-2 is rebased and force-pushed, it no longer shares ancestry with part-3, so using the pre-rebase tip as the exclusion boundary is the only way to correctly identify which commits belong only to part-3.
+
+Include the stack position in each PR description, e.g. `2 of 3 — depends on #N`.
