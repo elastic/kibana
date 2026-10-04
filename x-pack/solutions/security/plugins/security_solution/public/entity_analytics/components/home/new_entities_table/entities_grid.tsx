@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiButtonIcon,
   EuiDataGrid,
@@ -13,7 +22,12 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  type EuiDataGridCellValueElementProps,
+  type EuiDataGridControlColumn,
   type EuiDataGridCustomBodyProps,
+  type EuiDataGridStyle,
+  type EuiThemeComputed,
+  type RenderCellValue,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +54,19 @@ const EMPTY_GRID_MESSAGE = i18n.translate(
   { defaultMessage: 'No records match the current filters' }
 );
 
+const EXPANDER_HEADER_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.expanderColumnAriaLabel',
+  { defaultMessage: 'Expand group' }
+);
+
+const GRID_STYLE: EuiDataGridStyle = {
+  border: 'horizontal',
+  header: 'underline',
+  cellPadding: 'm',
+  fontSize: 'm',
+  stripes: false,
+};
+
 const expandRowLabel = (isExpanded: boolean) =>
   isExpanded
     ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseRowAriaLabel', {
@@ -49,219 +76,108 @@ const expandRowLabel = (isExpanded: boolean) =>
         defaultMessage: 'Expand group',
       });
 
-export interface EntitiesGridProps {
-  columns: ColumnDescriptor[];
-  rowsMode: RowsMode;
-  timeRange: TimeRange;
-  watchlistNames: Map<string, string>;
-  sortField: string;
-  sortDirection: 'asc' | 'desc';
-  onSortChange: (field: string, direction: 'asc' | 'desc') => void;
+/** EUI `cellContext` — must stay stable on expand or every cell remounts. */
+interface EntityGridCellContext {
+  rows: Row[];
   pageIndex: number;
   pageSize: number;
-  onPageChange: (index: number) => void;
-  onPageSizeChange: (size: number) => void;
-  searchExpression?: string;
-  entityExpression?: string;
+  watchlistNames: Map<string, string>;
+  euiTheme: EuiThemeComputed;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
-  /** When provided, shows the full toolbar with controls. */
-  groupSelectorComponent?: React.ReactNode;
-  pageSizeOptions?: number[];
 }
 
-export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
-  columns,
-  rowsMode,
-  timeRange,
-  watchlistNames,
-  sortField,
-  sortDirection,
-  onSortChange,
-  pageIndex,
-  pageSize,
-  onPageChange,
-  onPageSizeChange,
-  searchExpression,
-  entityExpression,
-  cellHandlers,
-  rowActions,
-  groupSelectorComponent,
-  pageSizeOptions = PAGE_SIZE_OPTIONS,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const isIndividualRows = rowsMode === 'individual';
-  const showToolbar = groupSelectorComponent !== undefined;
+/** Custom-body / expander React context — expand state lives here, not in cellContext. */
+interface EntityGridView extends EntityGridCellContext {
+  expandedIds: ReadonlySet<string>;
+  childMap: Map<string, Row[]>;
+  columns: ColumnDescriptor[];
+  prefetchChildren: (entityId: string) => void;
+  toggleExpandedId: (entityId: string) => void;
+}
 
-  // ── pagination cursors ────────────────────────────────────────────────────
-  const [cursors, setCursors] = useState<Array<string | null>>([null]);
-  const [targetPageIndex, setTargetPageIndex] = useState<number | null>(null);
+const EntityGridBodyContext = createContext<EntityGridView | null>(null);
 
-  // ── expansion (URL-persisted) ─────────────────────────────────────────────
-  const {
-    expandedIds: expandedIdList,
-    toggleExpandedId,
-    clearExpandedIds,
-  } = useEntityAnalyticsUrlState();
-  const expandedIds = useMemo(() => new Set(expandedIdList), [expandedIdList]);
-  const { childMap, isChildFetching, prefetchChildren, resetChildren } = useEntityChildren({
-    expandedIds,
-    timeRange,
-  });
+const useEntityGridView = (): EntityGridView => {
+  const value = useContext(EntityGridBodyContext);
+  if (!value) {
+    throw new Error('EntityGridBodyContext is missing');
+  }
+  return value;
+};
 
-  // ── column visibility ─────────────────────────────────────────────────────
-  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
-
-  const resetCursors = useCallback(() => {
-    setCursors([null]);
-    setTargetPageIndex(null);
-  }, []);
-
-  const resetPagination = useCallback(() => {
-    onPageChange(0);
-    resetCursors();
-  }, [onPageChange, resetCursors]);
-
-  // Filter / time range: reset cursor pagination only — keep expanded rows.
-  // View switch: clear expansion (different row model) and child cache.
-  const isFirstRender = useRef(true);
-  const prevRowsRef = useRef(rowsMode);
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      prevRowsRef.current = rowsMode;
-      return;
-    }
-    resetPagination();
-    if (prevRowsRef.current !== rowsMode) {
-      prevRowsRef.current = rowsMode;
-      clearExpandedIds();
-      resetChildren();
-    }
-  }, [
-    searchExpression,
-    entityExpression,
-    rowsMode,
-    timeRange,
-    resetPagination,
-    clearExpandedIds,
-    resetChildren,
-  ]);
-
-  // Sync visible columns when the column set changes (e.g. rowsMode switch).
-  const prevColumnsRef = useRef(columns);
-  useEffect(() => {
-    if (prevColumnsRef.current === columns) return;
-    prevColumnsRef.current = columns;
-    setVisibleColumns(columns.map((c) => c.id));
-  }, [columns]);
-
-  // ── data ──────────────────────────────────────────────────────────────────
-  const onNextCursor = useCallback((idx: number, cursor: string) => {
-    setCursors((prev) => {
-      const next = [...prev];
-      next[idx] = cursor;
-      return next;
-    });
-  }, []);
-
-  const { rows, total, updatedAt, isFetching, isLastPage } = useEntityGridData({
-    sortField,
-    sortDirection,
-    pageIndex,
-    pageSize,
-    cursors,
-    onNextCursor,
-    searchExpression,
-    entityExpression,
-    timeRange,
-    rowsMode,
-  });
-
-  // Chain-fetch forward when user jumps beyond loaded pages.
-  useEffect(() => {
-    if (targetPageIndex == null) return;
-    if (pageIndex >= targetPageIndex || isLastPage) {
-      setTargetPageIndex(null);
-      return;
-    }
-    const nextPage = pageIndex + 1;
-    if (cursors[nextPage] != null) onPageChange(nextPage);
-  }, [cursors, pageIndex, targetPageIndex, isLastPage, onPageChange]);
-
-  // ── column handlers ───────────────────────────────────────────────────────
-  const onAddColumn = useCallback(
-    (columnId: string) => setVisibleColumns((prev) => [...prev, columnId]),
-    []
+const RenderEntityGridCell: RenderCellValue = (cellProps) => {
+  const { rowIndex, columnId } = cellProps;
+  const { rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, rowActions } =
+    cellProps as typeof cellProps & EntityGridCellContext;
+  const row = rows[rowIndex - pageIndex * pageSize];
+  if (!row) return null;
+  return renderEntityCell(
+    columnId as GridColumnId,
+    row[columnId],
+    row,
+    watchlistNames,
+    euiTheme,
+    cellHandlers,
+    rowActions
   );
-  const onRemoveColumn = useCallback(
-    (columnId: string) => setVisibleColumns((prev) => prev.filter((id) => id !== columnId)),
-    []
-  );
-  const onResetColumns = useCallback(() => setVisibleColumns(columns.map((c) => c.id)), [columns]);
+};
 
-  // ── renderers ─────────────────────────────────────────────────────────────
-  const renderCellValue = useCallback(
-    (cellProps: { rowIndex: number; columnId: string }) => {
-      const { rowIndex, columnId } = cellProps;
-      const row = rows[rowIndex - pageIndex * pageSize];
-      if (!row) return null;
-      return renderEntityCell(
-        columnId as GridColumnId,
-        row[columnId],
-        row,
-        watchlistNames,
-        euiTheme,
-        cellHandlers,
-        rowActions
-      );
-    },
-    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, rowActions]
-  );
+const EntityGridExpanderHeader = () => (
+  <span className="euiScreenReaderOnly">{EXPANDER_HEADER_LABEL}</span>
+);
 
-  const expanderColumn = useMemo(
-    () => ({
-      id: 'expander',
-      width: 36,
-      headerCellRender: () => null,
-      rowCellRender: (rowCellProps: { rowIndex: number }) => {
-        const { rowIndex } = rowCellProps;
-        const row = rows[rowIndex - pageIndex * pageSize];
-        if (!row) return null;
-        const entityId = row['entity.id'] as string;
-        const groupSize = (row['group_size'] as number) ?? 1;
-        if (groupSize <= 1) return null;
-        const isExpanded = expandedIds.has(entityId);
-        const label = expandRowLabel(isExpanded);
-        return (
-          <EuiToolTip content={label} disableScreenReaderOutput>
-            <EuiButtonIcon
-              size="xs"
-              color="text"
-              aria-label={label}
-              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-              onMouseEnter={() => prefetchChildren(entityId)}
-              onFocus={() => prefetchChildren(entityId)}
-              onClick={() => toggleExpandedId(entityId)}
-            />
-          </EuiToolTip>
-        );
-      },
-    }),
-    [rows, pageIndex, pageSize, expandedIds, prefetchChildren, toggleExpandedId]
+const EntityGridExpanderCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  const { rows, pageIndex, pageSize, expandedIds, prefetchChildren, toggleExpandedId } =
+    useEntityGridView();
+  const row = rows[rowIndex - pageIndex * pageSize];
+  if (!row) return null;
+  const entityId = row['entity.id'] as string;
+  const groupSize = (row['group_size'] as number) ?? 1;
+  if (groupSize <= 1) return null;
+  const isExpanded = expandedIds.has(entityId);
+  const label = expandRowLabel(isExpanded);
+  return (
+    <EuiToolTip content={label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        size="xs"
+        color="text"
+        aria-label={label}
+        iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+        onMouseEnter={() => prefetchChildren(entityId)}
+        onFocus={() => prefetchChildren(entityId)}
+        onClick={() => toggleExpandedId(entityId)}
+      />
+    </EuiToolTip>
   );
+};
 
-  const renderCustomGridBody = useCallback(
-    ({
-      Cell,
-      visibleColumns: visCols,
-      visibleRowData,
-      headerRow,
-      footerRow,
-    }: EuiDataGridCustomBodyProps) => (
+const EXPANDER_COLUMN: EuiDataGridControlColumn = {
+  id: 'expander',
+  width: 36,
+  headerCellRender: EntityGridExpanderHeader,
+  rowCellRender: EntityGridExpanderCell,
+};
+
+const NO_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
+const EXPANDER_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [EXPANDER_COLUMN];
+
+const EntityGridCustomBody = memo(
+  ({
+    Cell,
+    visibleColumns: visCols,
+    visibleRowData,
+    headerRow,
+    footerRow,
+  }: EuiDataGridCustomBodyProps) => {
+    const { euiTheme } = useEuiTheme();
+    const { rows, expandedIds, childMap, columns, watchlistNames, cellHandlers, rowActions } =
+      useEntityGridView();
+
+    return (
       <>
         {headerRow}
-        {(rows as Row[]).length === 0 ? (
+        {rows.length === 0 ? (
           <div
             role="row"
             className="euiDataGridRow"
@@ -280,7 +196,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
             </EuiText>
           </div>
         ) : (
-          (rows as Row[]).map((row, i) => {
+          rows.map((row, i) => {
             const absoluteIndex = visibleRowData.startRow + i;
             const entityId = row['entity.id'] as string;
             const isExpanded = expandedIds.has(entityId);
@@ -329,9 +245,91 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         )}
         {footerRow}
       </>
-    ),
-    [rows, expandedIds, childMap, columns, euiTheme, watchlistNames, cellHandlers, rowActions]
+    );
+  }
+);
+EntityGridCustomBody.displayName = 'EntityGridCustomBody';
+
+export interface EntitiesGridProps {
+  columns: ColumnDescriptor[];
+  rowsMode: RowsMode;
+  timeRange: TimeRange;
+  watchlistNames: Map<string, string>;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+  onSortChange: (field: string, direction: 'asc' | 'desc') => void;
+  pageIndex: number;
+  pageSize: number;
+  onPageChange: (index: number) => void;
+  onPageSizeChange: (size: number) => void;
+  searchExpression?: string;
+  entityExpression?: string;
+  cellHandlers?: CellHandlers;
+  rowActions?: RowActions;
+  /** When provided, shows the full toolbar with controls. */
+  groupSelectorComponent?: React.ReactNode;
+  pageSizeOptions?: number[];
+}
+
+export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
+  columns,
+  rowsMode,
+  timeRange,
+  watchlistNames,
+  sortField,
+  sortDirection,
+  onSortChange,
+  pageIndex,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  searchExpression,
+  entityExpression,
+  cellHandlers,
+  rowActions,
+  groupSelectorComponent,
+  pageSizeOptions = PAGE_SIZE_OPTIONS,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const isIndividualRows = rowsMode === 'individual';
+  const showToolbar = groupSelectorComponent !== undefined;
+
+  const { expandedIds: expandedIdList, toggleExpandedId } = useEntityAnalyticsUrlState();
+  const expandedIds = useMemo(() => new Set(expandedIdList), [expandedIdList]);
+  const { childMap, isChildFetching, prefetchChildren } = useEntityChildren({
+    expandedIds,
+    timeRange,
+  });
+
+  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
+
+  const prevColumnsRef = useRef(columns);
+  useEffect(() => {
+    if (prevColumnsRef.current === columns) return;
+    prevColumnsRef.current = columns;
+    setVisibleColumns(columns.map((c) => c.id));
+  }, [columns]);
+
+  const { rows, total, updatedAt, isFetching } = useEntityGridData({
+    sortField,
+    sortDirection,
+    pageIndex,
+    pageSize,
+    searchExpression,
+    entityExpression,
+    timeRange,
+    rowsMode,
+  });
+
+  const onAddColumn = useCallback(
+    (columnId: string) => setVisibleColumns((prev) => [...prev, columnId]),
+    []
   );
+  const onRemoveColumn = useCallback(
+    (columnId: string) => setVisibleColumns((prev) => prev.filter((id) => id !== columnId)),
+    []
+  );
+  const onResetColumns = useCallback(() => setVisibleColumns(columns.map((c) => c.id)), [columns]);
 
   const sorting = useMemo(
     () => ({
@@ -340,30 +338,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         const col = cols.find((c) => c.id !== sortField) ?? cols[0];
         if (!col) return;
         onSortChange(col.id, col.direction);
-        resetCursors();
       },
     }),
-    [sortField, sortDirection, onSortChange, resetCursors]
-  );
-
-  const handleChangePage = useCallback(
-    (nextPageIndex: number) => {
-      if (cursors[nextPageIndex] !== undefined) {
-        onPageChange(nextPageIndex);
-      } else {
-        setTargetPageIndex(nextPageIndex);
-        onPageChange(cursors.length - 1);
-      }
-    },
-    [cursors, onPageChange]
-  );
-
-  const handleChangeItemsPerPage = useCallback(
-    (newSize: number) => {
-      onPageSizeChange(newSize);
-      resetCursors();
-    },
-    [onPageSizeChange, resetCursors]
+    [sortField, sortDirection, onSortChange]
   );
 
   const isChildrenFetching = useMemo(
@@ -371,10 +348,99 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     [expandedIds, isChildFetching]
   );
 
-  // Expanded child rows use static `initialWidth`s; keep parent columns fixed so they stay aligned.
   const gridColumns = useMemo(
     () => columns.map((col) => ({ ...col, isResizable: false })),
     [columns]
+  );
+
+  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      pageSizeOptions,
+      onChangePage: onPageChange,
+      onChangeItemsPerPage: onPageSizeChange,
+    }),
+    [pageIndex, pageSize, pageSizeOptions, onPageChange, onPageSizeChange]
+  );
+
+  const toolbarVisibility = useMemo(
+    () =>
+      showToolbar
+        ? {
+            showColumnSelector: true,
+            showSortSelector: false,
+            showDisplaySelector: true,
+            showKeyboardShortcuts: true,
+            additionalControls: {
+              left: {
+                prepend: (
+                  <AdditionalControls
+                    total={total}
+                    title={isIndividualRows ? 'records' : 'entities'}
+                    columns={visibleColumns}
+                    onAddColumn={onAddColumn}
+                    onRemoveColumn={onRemoveColumn}
+                    onResetColumns={onResetColumns}
+                    showFieldsButton={false}
+                  />
+                ),
+                append:
+                  updatedAt != null ? (
+                    <div
+                      css={css`
+                        border-inline-start: ${euiTheme.border.thin};
+                        padding-inline-start: ${euiTheme.size.s};
+                      `}
+                    >
+                      <LastUpdated updatedAt={updatedAt} />
+                    </div>
+                  ) : null,
+              },
+              right: groupSelectorComponent,
+            },
+          }
+        : false,
+    [
+      showToolbar,
+      total,
+      isIndividualRows,
+      visibleColumns,
+      onAddColumn,
+      onRemoveColumn,
+      onResetColumns,
+      updatedAt,
+      euiTheme.border.thin,
+      euiTheme.size.s,
+      groupSelectorComponent,
+    ]
+  );
+
+  const cellContext = useMemo(
+    (): EntityGridCellContext => ({
+      rows,
+      pageIndex,
+      pageSize,
+      watchlistNames,
+      euiTheme,
+      cellHandlers,
+      rowActions,
+    }),
+    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, rowActions]
+  );
+
+  const gridView = useMemo(
+    (): EntityGridView => ({
+      ...cellContext,
+      expandedIds,
+      childMap,
+      columns,
+      prefetchChildren,
+      toggleExpandedId,
+    }),
+    [cellContext, expandedIds, childMap, columns, prefetchChildren, toggleExpandedId]
   );
 
   return (
@@ -387,67 +453,24 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       {(isFetching || isChildrenFetching) && (
         <EuiProgress size="xs" color="accent" position="absolute" />
       )}
-      <EuiDataGrid
-        aria-label={GRID_ARIA_LABEL}
-        leadingControlColumns={!isIndividualRows ? [expanderColumn] : []}
-        columns={gridColumns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={total}
-        renderCellValue={renderCellValue}
-        renderCustomGridBody={renderCustomGridBody}
-        sorting={sorting}
-        pagination={{
-          pageIndex,
-          pageSize,
-          pageSizeOptions,
-          onChangePage: handleChangePage,
-          onChangeItemsPerPage: handleChangeItemsPerPage,
-        }}
-        toolbarVisibility={
-          showToolbar
-            ? {
-                showColumnSelector: true,
-                showSortSelector: false,
-                showDisplaySelector: true,
-                showKeyboardShortcuts: true,
-                additionalControls: {
-                  left: {
-                    prepend: (
-                      <AdditionalControls
-                        total={total}
-                        title={isIndividualRows ? 'records' : 'entities'}
-                        columns={visibleColumns}
-                        onAddColumn={onAddColumn}
-                        onRemoveColumn={onRemoveColumn}
-                        onResetColumns={onResetColumns}
-                        showFieldsButton={false}
-                      />
-                    ),
-                    append:
-                      updatedAt != null ? (
-                        <div
-                          css={css`
-                            border-inline-start: ${euiTheme.border.thin};
-                            padding-inline-start: ${euiTheme.size.s};
-                          `}
-                        >
-                          <LastUpdated updatedAt={updatedAt} />
-                        </div>
-                      ) : null,
-                  },
-                  right: groupSelectorComponent,
-                },
-              }
-            : false
-        }
-        gridStyle={{
-          border: 'horizontal',
-          header: 'underline',
-          cellPadding: 'm',
-          fontSize: 'm',
-          stripes: false,
-        }}
-      />
+      <EntityGridBodyContext.Provider value={gridView}>
+        <EuiDataGrid
+          aria-label={GRID_ARIA_LABEL}
+          leadingControlColumns={
+            isIndividualRows ? NO_LEADING_CONTROL_COLUMNS : EXPANDER_LEADING_CONTROL_COLUMNS
+          }
+          columns={gridColumns}
+          columnVisibility={columnVisibility}
+          rowCount={total}
+          renderCellValue={RenderEntityGridCell}
+          cellContext={cellContext}
+          renderCustomGridBody={EntityGridCustomBody}
+          sorting={sorting}
+          pagination={pagination}
+          toolbarVisibility={toolbarVisibility}
+          gridStyle={GRID_STYLE}
+        />
+      </EntityGridBodyContext.Provider>
     </div>
   );
 };
