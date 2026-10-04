@@ -115,7 +115,13 @@ export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
   clientLogo: NO_CLIENT_LOGO,
   redirect: {
     type: RedirectUriType.LOCAL,
-    uris: [{ value: 'http://localhost/callback' }, { value: 'http://localhost/oauth/callback' }],
+    uris: [
+      { value: 'http://localhost/callback' },
+      { value: 'http://localhost/oauth/callback' },
+      { value: 'http://127.0.0.1/' },
+      { value: 'http://127.0.0.1/callback' },
+      { value: 'http://127.0.0.1/oauth/callback' },
+    ],
   },
   isConfidential: false,
 };
