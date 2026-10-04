@@ -132,6 +132,31 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
+  it('creates package policies only for the given private location', async () => {
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    client.privateLocationAPI.createPackagePolicies = jest
+      .fn()
+      .mockResolvedValue({ created: [], failed: [] });
+    const monitorOnTwoLocations = {
+      ...monitor,
+      locations: [
+        { id: 'loc-0', isServiceManaged: false },
+        { id: 'loc-1', isServiceManaged: false },
+        { id: 'loc-0', isServiceManaged: true },
+      ],
+    } as unknown as MonitorFields;
+
+    await client.addPrivateLocationPackagePolicies({
+      monitors: [{ monitor: monitorOnTwoLocations, id: 'test-id-1' }],
+      locationId: 'loc-0',
+      allPrivateLocations: privateLocations,
+      spaceId: 'test-space',
+    });
+
+    const [[configs]] = (client.privateLocationAPI.createPackagePolicies as jest.Mock).mock.calls;
+    expect(configs[0].config.locations).toEqual([{ id: 'loc-0', isServiceManaged: false }]);
+  });
+
   it('should edit a monitor', async () => {
     locations[1].isServiceManaged = false;
 
