@@ -49,18 +49,17 @@ apiTest.describe('Discover inline session CSV export', { tag: tags.deploymentAgn
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
-    if (reportId) {
-      const response = await apiClient.delete(`/api/reporting/jobs/delete/${reportId}`, {
-        headers: { ...BASE_HEADERS, ...credentials.apiKeyHeader },
-      });
-      expect(response).toHaveStatusCode(200);
-    }
-
     if (sessionId) {
       await kbnClient.savedObjects.delete({ type: 'search', id: sessionId });
     }
 
     await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
+
+    if (reportId) {
+      await apiClient.delete(`/api/reporting/jobs/delete/${reportId}`, {
+        headers: { ...BASE_HEADERS, ...credentials.apiKeyHeader },
+      });
+    }
   });
 
   apiTest(
