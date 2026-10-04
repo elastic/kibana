@@ -14,6 +14,7 @@ import { TimelineEventType, EventActorType } from '@kbn/agent-builder-common';
 import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationMetadataUpdatedTriggerId,
+  ConversationUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
@@ -117,6 +118,30 @@ describe('registerConversationWorkflowEventBridge', () => {
       templateId: 'proposal',
       parentId: 'parent-conv',
       changedFields: ['decision'],
+    });
+  });
+
+  it('forwards a conversation update to the generic trigger', async () => {
+    eventBus.emitConversationUpdated(request, {
+      conversationId: 'conv-1',
+      templateId: 'investigation',
+      changeKinds: ['event'],
+      eventTypes: ['user_message'],
+      changedFields: [],
+      contentChange: true,
+      summaryOnly: false,
+    });
+
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, {
+      conversationId: 'conv-1',
+      templateId: 'investigation',
+      changeKinds: ['event'],
+      eventTypes: ['user_message'],
+      changedFields: [],
+      contentChange: true,
+      summaryOnly: false,
     });
   });
 

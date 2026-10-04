@@ -12,6 +12,11 @@ import { ConversationMetadataUpdatedTriggerId } from '@kbn/agent-builder-common'
 
 export { ConversationMetadataUpdatedTriggerId };
 export {
+  ConversationUpdatedTriggerId,
+  conversationUpdatedEventSchema,
+  conversationUpdatedTriggerCommonDefinition,
+} from './conversation_updated';
+export {
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
