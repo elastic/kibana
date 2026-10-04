@@ -95,6 +95,16 @@ export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkl
 }
 
 /**
+ * Parameters for removing the binding of a workload that is being deleted without a request.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadDeletionParams extends ServiceAccountWorkloadCoordinates {
+  /** Refuse to remove a verified binding that points to another account. */
+  expectedServiceAccountId: string;
+}
+
+/**
  * Parameters for binding a service account to a workload. The binding is created in the space of
  * the request, and the returned {@link ServiceAccountWorkloadBinding} reports which space that
  * was, for a caller that has to name it again later.

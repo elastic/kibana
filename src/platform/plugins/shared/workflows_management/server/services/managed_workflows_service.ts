@@ -31,6 +31,7 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import type { ManagedWorkflowOrphan } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import { applyWorkflowVersion } from '../lib/workflow_version';
@@ -690,20 +691,13 @@ export class ManagedWorkflowsService {
     spaceId: string,
     reason: 'orphan_cleanup' | 'ready_reconciliation'
   ): Promise<void> {
+    const orphan: ManagedWorkflowOrphan = {
+      managedBy: source.managedBy ?? null,
+      definitionId: source.originManagedWorkflowId ?? null,
+    };
     let deleted = false;
     try {
-      const result = await this.deps.crudService.deleteWorkflows([workflowId], spaceId, {
-        force: true,
-      });
-      deleted = result.successfulIds?.includes(workflowId) ?? false;
-      if (!deleted) {
-        const failure = result.failures.find((item) => item.id === workflowId);
-        this.logger.error(
-          `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}': ${
-            failure?.error ?? 'not deleted'
-          }`
-        );
-      }
+      deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
     } catch (error) {
       this.logger.error(
         `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
@@ -722,14 +716,18 @@ export class ManagedWorkflowsService {
         reason,
       });
     } else {
-      await this.disableUndeletedOrphan(workflowId, spaceId);
+      await this.disableUndeletedOrphan(workflowId, spaceId, orphan);
     }
   }
 
   /** Stops new runs of an orphan that could not be deleted, so a later sweep can remove it. */
-  private async disableUndeletedOrphan(workflowId: string, spaceId: string): Promise<void> {
+  private async disableUndeletedOrphan(
+    workflowId: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<void> {
     try {
-      await this.deps.crudService.disableWorkflow(workflowId, spaceId);
+      await this.deps.crudService.disableManagedOrphan(workflowId, spaceId, orphan);
     } catch (error) {
       this.logger.error(
         `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,

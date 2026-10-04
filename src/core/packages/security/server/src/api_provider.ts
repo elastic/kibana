@@ -12,6 +12,7 @@ import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadDeletionParams,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
@@ -91,6 +92,17 @@ export interface ServiceAccountsServiceContract
     pluginId: string,
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
+  ): Promise<boolean>;
+
+  /**
+   * Removes the binding of a workload that is being deleted without a request, in the given space.
+   * @param pluginId - The id of the plugin that owns the workload.
+   * @param params - The workload coordinates and the account its binding is expected to name.
+   * @returns Whether a binding existed and was removed.
+   */
+  unbindWorkloadForDeletion(
+    pluginId: string,
+    params: ServiceAccountWorkloadDeletionParams
   ): Promise<boolean>;
 
   /**

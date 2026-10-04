@@ -71,6 +71,10 @@ export const createPluginScopedServiceAccounts = ({
       ensureValid(params);
       return await delegate.unbindWorkload(pluginId, request, params);
     },
+    unbindWorkloadForDeletion: async (params) => {
+      ensureValid(params);
+      return await delegate.unbindWorkloadForDeletion(pluginId, params);
+    },
     getWorkloadBinding: async (params) => {
       ensureValid(params);
       return await delegate.getWorkloadBinding(pluginId, params);

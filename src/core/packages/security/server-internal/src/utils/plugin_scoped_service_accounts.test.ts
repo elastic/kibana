@@ -14,12 +14,14 @@ import { createPluginScopedServiceAccounts } from './plugin_scoped_service_accou
 
 const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
 const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
+const WORKLOAD_FOR_DELETION = { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'sa-1' };
 
 const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
   isEnabled: jest.fn().mockReturnValue(true),
   create: jest.fn(),
   bindWorkload: jest.fn(),
   unbindWorkload: jest.fn(),
+  unbindWorkloadForDeletion: jest.fn(),
   getWorkloadBinding: jest.fn(),
   withScopedRequestForWorkload: jest.fn(),
 });
@@ -51,6 +53,7 @@ describe('createPluginScopedServiceAccounts', () => {
       'getWorkloadBinding',
       'isEnabled',
       'unbindWorkload',
+      'unbindWorkloadForDeletion',
       'withScopedRequestForWorkload',
     ]);
   });
@@ -71,6 +74,18 @@ describe('createPluginScopedServiceAccounts', () => {
 
       await scopedTo('alerting').unbindWorkload(request, WORKLOAD);
       expect(delegate.unbindWorkload).toHaveBeenCalledWith('alerting', request, WORKLOAD);
+    });
+
+    it('unbinds a deleted workload with the plugin id first', async () => {
+      delegate.unbindWorkloadForDeletion.mockResolvedValue(true);
+
+      await expect(
+        scopedTo('alerting').unbindWorkloadForDeletion(WORKLOAD_FOR_DELETION)
+      ).resolves.toBe(true);
+      expect(delegate.unbindWorkloadForDeletion).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_FOR_DELETION
+      );
     });
 
     it('gets a binding with the plugin id first', async () => {
@@ -115,6 +130,15 @@ describe('createPluginScopedServiceAccounts', () => {
           scoped.unbindWorkload(httpServerMock.createKibanaRequest(), unregistered),
       ],
       [
+        'unbindWorkloadForDeletion',
+        (scoped: ReturnType<typeof scopedTo>) =>
+          scoped.unbindWorkloadForDeletion({
+            ...unregistered,
+            spaceId: 'default',
+            expectedServiceAccountId: 'sa-1',
+          }),
+      ],
+      [
         'getWorkloadBinding',
         (scoped: ReturnType<typeof scopedTo>) =>
           scoped.getWorkloadBinding({ ...unregistered, spaceId: 'default' }),
@@ -129,6 +153,7 @@ describe('createPluginScopedServiceAccounts', () => {
 
       expect(delegate.bindWorkload).not.toHaveBeenCalled();
       expect(delegate.unbindWorkload).not.toHaveBeenCalled();
+      expect(delegate.unbindWorkloadForDeletion).not.toHaveBeenCalled();
       expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
       expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
     });
@@ -155,6 +180,11 @@ describe('createPluginScopedServiceAccounts', () => {
             }),
         ],
         [
+          'unbindWorkloadForDeletion',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.unbindWorkloadForDeletion({ ...WORKLOAD_FOR_DELETION, workloadId }),
+        ],
+        [
           'getWorkloadBinding',
           (scoped: ReturnType<typeof scopedTo>) =>
             scoped.getWorkloadBinding({ ...WORKLOAD_IN_SPACE, workloadId }),
@@ -169,6 +199,7 @@ describe('createPluginScopedServiceAccounts', () => {
     const expectNoDelegateCalls = () => {
       expect(delegate.bindWorkload).not.toHaveBeenCalled();
       expect(delegate.unbindWorkload).not.toHaveBeenCalled();
+      expect(delegate.unbindWorkloadForDeletion).not.toHaveBeenCalled();
       expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
       expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
     };
