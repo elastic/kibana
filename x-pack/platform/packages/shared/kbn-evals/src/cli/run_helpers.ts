@@ -31,8 +31,10 @@ import {
   isExportProfileImplicitLocal,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
+import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
+import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -51,7 +53,8 @@ const shellQuote = (value: string): string => {
 export const formatEvalCliCommand = (args: string[]): string =>
   ['node', 'scripts/evals', ...args.map((a) => (a.includes(' ') ? shellQuote(a) : a))].join(' ');
 
-const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
+/** Finds a suite by id, refreshing discovery once before failing with the available ids. */
+export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
   const suites = resolveEvalSuites(repoRoot, log);
   const match = suites.find((suite) => suite.id === suiteId);
   if (match) return match;
@@ -196,6 +199,21 @@ export const resolveEvalSuite = async (
 export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined => {
   try {
     return parseSpaceIds(flagsReader.string('space-ids'));
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+};
+
+/** Reads `--concurrency`, failing on a bad flag or `EVAL_CONCURRENCY` before a stack boots. */
+export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefined => {
+  try {
+    const concurrency = parseConcurrency(flagsReader.string('concurrency'), '--concurrency');
+    if (concurrency !== undefined) {
+      return String(concurrency);
+    }
+    // Without the flag, EVAL_CONCURRENCY passes through untouched to the Playwright config.
+    getConcurrencyFromEnv();
+    return undefined;
   } catch (error) {
     throw createFlagError(error instanceof Error ? error.message : String(error));
   }
@@ -404,6 +422,11 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_REPETITIONS = repetitions;
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    envOverrides.EVAL_CONCURRENCY = concurrency;
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
@@ -476,9 +499,21 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    runArgs.push('--concurrency', concurrency);
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     runArgs.push('--space-ids', spaceIds.join(','));
+  }
+
+  for (const flag of ['scout-arch', 'scout-domain']) {
+    const value = flagsReader.string(flag);
+    if (value) {
+      runArgs.push(`--${flag}`, value);
+    }
   }
 
   if (skipServer) {
@@ -488,6 +523,16 @@ export const buildEvalRunArgs = ({
   return runArgs;
 };
 
+/** The Scout arch/domain for a run: `--scout-arch` / `--scout-domain`, else the suite's. */
+export const resolveEvalScoutTarget = (
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition
+): ScoutTarget =>
+  resolveScoutTarget(suite, {
+    arch: flagsReader.string('scout-arch'),
+    domain: flagsReader.string('scout-domain'),
+  });
+
 export const evalRunFlags: FlagOptions = {
   string: [
     'suite',
@@ -495,6 +540,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
+    'concurrency',
     'space-ids',
     'grep',
     'profile',
@@ -502,6 +548,8 @@ export const evalRunFlags: FlagOptions = {
     'export-profile',
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
+    'scout-arch',
+    'scout-domain',
   ],
   boolean: ['skip-server', 'dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },

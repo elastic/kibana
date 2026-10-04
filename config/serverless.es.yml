@@ -92,9 +92,6 @@ xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
 
-# Search Notebooks
-xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
-
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 

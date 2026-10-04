@@ -12,15 +12,19 @@
  */
 
 import {
+  assessRelevanceBodySchema,
   assessRelevanceResponseSchema,
+  attributeAlertsEvidenceBodySchema,
   classifySeverityResponseSchema,
   createThreatReportResponseSchema,
+  enrichReportCoreResponseSchema,
   enrichTaxonomyResponseSchema,
   extractDiamondResponseSchema,
   extractIocsResponseSchema,
   findThreatReportsResponseSchema,
   getThreatReportResponseSchema,
   listSourcesResponseSchema,
+  persistReportFieldsBodySchema,
   readinessResponseSchema,
   updateSourceResponseSchema,
 } from '.';
@@ -33,6 +37,12 @@ const assessRelevancePayload = {
   primary_links: ['https://vendor.test/report'],
   has_original_commentary: true,
   reason: 'Original Volt Typhoon IR with IOCs and TTPs.',
+  context: {
+    mode: 'full',
+    original_chars: 1_000,
+    selected_chars: 1_000,
+    coverage: 1,
+  },
 };
 
 const extractIocsPayload = {
@@ -58,6 +68,10 @@ const extractDiamondPayload = {
   model_id: 'test-connector',
   extracted_at: '2026-09-18T00:00:00.000Z',
   extraction_mode: 'single_call',
+  context_mode: 'full',
+  context_coverage: 1,
+  context_chars: 1_000,
+  source_chars: 1_000,
   report_id: 'default:abc',
 };
 
@@ -66,6 +80,38 @@ const enrichTaxonomyPayload = {
   regions: ['europe'],
   relevance: 0.75,
   diamond_suitable: true,
+};
+
+const enrichReportCorePayload = {
+  categories: ['malware'],
+  regions: ['global'],
+  relevance: 0.9,
+  diamond_suitable: true,
+  severity: { level: 'high', score: 75, rationale: 'Confirmed malware campaign.' },
+  ...extractIocsPayload,
+  anchor_iocs: extractIocsPayload.iocs,
+  promotable_count: 1,
+  adjudication: {
+    provider: 'semantic_model',
+    reviewed: 1,
+    approved: 1,
+    downgraded: 0,
+    deterministic_references: 0,
+    deferred_unreviewed: 0,
+  },
+  behaviors: [
+    {
+      id: 'behavior-id',
+      technique_id: 'T1059.003',
+      description: 'Executes commands through Windows Command Shell.',
+      telemetry_targets: ['process'],
+      confidence: 0.9,
+      llm_confidence: 0.9,
+    },
+  ],
+  artifacts: [{ type: 'malware_family', value: 'ExampleRAT', context: 'Payload family' }],
+  context: { mode: 'full', original_chars: 1_000, selected_chars: 1_000, coverage: 1 },
+  model_id: 'test-connector',
 };
 
 const classifySeverityPayload = {
@@ -155,6 +201,21 @@ describe('threat intel response schemas', () => {
     );
   });
 
+  it('returns the validated enrich_report_core success payload', () => {
+    expect(enrichReportCoreResponseSchema.validate(enrichReportCorePayload)).toEqual(
+      enrichReportCorePayload
+    );
+  });
+
+  it('accepts an empty optional URL from workflow interpolation', () => {
+    expect(
+      assessRelevanceBodySchema.validate({
+        text: 'Threat report',
+        url: '',
+      }).url
+    ).toBe('');
+  });
+
   it('returns the validated classify_severity success payload', () => {
     expect(classifySeverityResponseSchema.validate(classifySeverityPayload)).toEqual(
       classifySeverityPayload
@@ -189,5 +250,55 @@ describe('threat intel response schemas', () => {
 
   it('returns the validated update_source success payload', () => {
     expect(updateSourceResponseSchema.validate(updateSourcePayload)).toEqual(updateSourcePayload);
+  });
+
+  describe('index validators', () => {
+    it('rejects a persist_report_fields index outside .kibana-threat-reports', () => {
+      expect(() =>
+        persistReportFieldsBodySchema.validate({
+          index: '.kibana',
+          id: 'default:abc',
+          doc: {},
+        })
+      ).toThrow(/must target \.kibana-threat-reports/);
+    });
+
+    it('accepts a persist_report_fields index targeting .kibana-threat-reports', () => {
+      expect(() =>
+        persistReportFieldsBodySchema.validate({
+          index: '.kibana-threat-reports',
+          id: 'default:abc',
+          doc: {},
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an attribute_alerts_evidence index outside .kibana-threat-reports', () => {
+      expect(() =>
+        attributeAlertsEvidenceBodySchema.validate({
+          index: '.alerts-security.alerts-default',
+          id: 'default:abc',
+          window: '7d',
+          computedAt: '2026-09-18T00:00:00.000Z',
+          iocMatchHits: 1,
+          techniqueOverlapHits: 1,
+          alertHitsTotal: 2,
+        })
+      ).toThrow(/must target \.kibana-threat-reports/);
+    });
+
+    it('accepts an attribute_alerts_evidence index targeting .kibana-threat-reports', () => {
+      expect(() =>
+        attributeAlertsEvidenceBodySchema.validate({
+          index: '.kibana-threat-reports',
+          id: 'default:abc',
+          window: '7d',
+          computedAt: '2026-09-18T00:00:00.000Z',
+          iocMatchHits: 1,
+          techniqueOverlapHits: 1,
+          alertHitsTotal: 2,
+        })
+      ).not.toThrow();
+    });
   });
 });

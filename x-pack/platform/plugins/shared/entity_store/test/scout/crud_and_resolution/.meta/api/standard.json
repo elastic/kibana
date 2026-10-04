@@ -1,5 +1,5 @@
 {
-  "sha1": "450235000fc212dca1dfa90a3e8808f8713fa2f8",
+  "sha1": "7add42eb4baaf54f122b19edc56aebba08d00399",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 86,
+        "line": 94,
         "column": 7
       }
     },
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 107,
-        "column": 8
+        "line": 115,
+        "column": 50
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 140,
-        "column": 8
+        "line": 148,
+        "column": 50
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 161,
-        "column": 13
+        "line": 168,
+        "column": 87
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 200,
-        "column": 26
+        "line": 207,
+        "column": 13
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 247,
-        "column": 7
+        "line": 262,
+        "column": 24
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 290,
-        "column": 9
+        "line": 298,
+        "column": 16
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 338,
-        "column": 23
+        "line": 346,
+        "column": 18
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 379,
-        "column": 57
+        "line": 388,
+        "column": 13
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 433,
-        "column": 14
+        "line": 441,
+        "column": 9
       }
     },
     {
@@ -176,8 +176,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 445,
-        "column": 63
+        "line": 454,
+        "column": 61
+      }
+    },
+    {
+      "id": "1f74745923a4dea-3a999d5d73138c7",
+      "title": "Automated resolution integration tests Windows SID bridge links several local entities on different hosts to Active Directory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 472,
+        "column": 11
+      }
+    },
+    {
+      "id": "1f74745923a4dea-0fa4804426d08fc",
+      "title": "Automated resolution integration tests Windows SID bridge links two local entities sharing a domain SID before the Active Directory user arrives",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 518,
+        "column": 24
       }
     },
     {
@@ -192,13 +224,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 464,
-        "column": 17
+        "line": 578,
+        "column": 16
       }
     },
     {
-      "id": "1f74745923a4dea-e6f67952fd801be",
-      "title": "Automated resolution integration tests CrowdStrike SID bridge links CrowdStrike to Active Directory",
+      "id": "1f74745923a4dea-63fb87dfe1dd85d",
+      "title": "Automated resolution integration tests CrowdStrike SID bridge does not link leftover crowdstrike-namespace entities when left at the default (disabled)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -208,13 +240,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 485,
-        "column": 13
+        "line": 600,
+        "column": 20
       }
     },
     {
-      "id": "1f74745923a4dea-8da26b1670c058e",
-      "title": "Automated resolution integration tests UPN cross-field bridge links microsoft_365 user.id to entra_id user.name",
+      "id": "1f74745923a4dea-84d8b9e1d155351",
+      "title": "Automated resolution integration tests CrowdStrike SID bridge links leftover crowdstrike-namespace entities to Active Directory when enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -224,8 +256,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 504,
-        "column": 18
+        "line": 622,
+        "column": 11
+      }
+    },
+    {
+      "id": "1f74745923a4dea-19236124134cf26",
+      "title": "Automated resolution integration tests UPN cross-field bridge does not link when left at the default (disabled)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 657,
+        "column": 20
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a58935b54b01e80",
+      "title": "Automated resolution integration tests UPN cross-field bridge links microsoft_365 user.id to entra_id user.name when enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 683,
+        "column": 26
       }
     },
     {
@@ -240,8 +304,56 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 527,
-        "column": 23
+        "line": 721,
+        "column": 20
+      }
+    },
+    {
+      "id": "1f74745923a4dea-6f5281fdef4c5a8",
+      "title": "Automated resolution integration tests Well-known SIDs on local entities are not bridged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 747,
+        "column": 8
+      }
+    },
+    {
+      "id": "1f74745923a4dea-5221402b802e04e",
+      "title": "Automated resolution integration tests Linux UID values on local entities do not enter the SID match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 776,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a60a5ba89574fb1",
+      "title": "Automated resolution integration tests SID bridge links a local entity created by extraction to Active Directory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 801,
+        "column": 13
       }
     },
     {
@@ -256,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 552,
-        "column": 23
+        "line": 879,
+        "column": 26
       }
     },
     {
@@ -640,8 +752,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
-        "line": 59,
+        "line": 63,
         "column": 38
+      }
+    },
+    {
+      "id": "19c1c7c5e6ccaf3-cfa314913d63e61",
+      "title": "Entity Store History Snapshot history snapshot: deletes indices older than retention using the date in the index name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
+        "line": 215,
+        "column": 7
       }
     },
     {
@@ -898,6 +1026,22 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 349,
         "column": 3
+      }
+    },
+    {
+      "id": "fc8fec24ce63075-f8c198fdf451522",
+      "title": "Entity Store Status API tests hides non-priority internal config and cursor state from the public response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/status_api.spec.ts",
+        "line": 42,
+        "column": 16
       }
     }
   ]

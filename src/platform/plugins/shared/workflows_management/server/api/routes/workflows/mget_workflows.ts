@@ -72,11 +72,11 @@ export function registerMgetWorkflowsRoute(deps: RouteDependencies) {
           }
           const spaceId = spaces.getSpaceId(request);
           const { ids, source } = request.body;
-          const workflowsForAuthorization = await api.getWorkflowsByIds(ids, spaceId);
+          const workflowsForAuthorization = await api.getWorkflowsByIds(ids, spaceId, request);
           workflowsForAuthorization.forEach((workflow) =>
             assertCanReadManagedWorkflow(request, workflow)
           );
-          const workflows = await api.getWorkflowsSourceByIds(ids, spaceId, source);
+          const workflows = await api.getWorkflowsSourceByIds(ids, spaceId, source, request);
           audit.logWorkflowMget(request, {
             requestedCount: ids.length,
             returnedCount: workflows.length,

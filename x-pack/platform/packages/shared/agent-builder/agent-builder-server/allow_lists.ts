@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -30,6 +31,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
+
+  // Proposals
+  'platform.proposals.revise',
 
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
@@ -58,7 +62,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Security Solution
   `${internalNamespaces.security}.alertzero.actions.list`,
-  `${internalNamespaces.security}.alertzero.proposals.revise`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -116,7 +119,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'custom_content_update_panel',
 
   // Platform – Context Engine
-  `${internalNamespaces.platformContextEngine}.save_automation`,
+  contextEngineAutomationTools.installAutomationTemplate,
+  contextEngineAutomationTools.saveAutomation,
+  contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
@@ -126,10 +131,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_write_file',
 
   // Nightshift – Decision trees
-  'submit_optimizer_result',
-  'record_system_learning',
-  'record_tool_learning',
-  'record_remediation',
+  'nightshift_submit_optimizer_result',
+  'nightshift_record_system_learning',
+  'nightshift_record_tool_learning',
+  'nightshift_record_remediation',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -171,8 +176,7 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
  */
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
-  `${internalNamespaces.platformSignificantEvents}.investigation-type`,
-  `${internalNamespaces.platformSignificantEvents}.deductive-investigation-type`,
+  `${internalNamespaces.platformNightshift}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
@@ -197,6 +201,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'visualization-creation',
   'graph-creation',
   'agent-builder-traces',
+  'proposal-management',
 
   // Platform – Cases
   'cases-management',
@@ -207,7 +212,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'action-policy-management',
 
   // Platform – Dashboard
-  'dashboard-management',
+  'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',
@@ -252,6 +257,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'alert-triage',
   'detection-rule-edit',
+  'alertzero-action-discovery',
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
@@ -272,7 +278,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-workflow-troubleshooting',
 
   // O11Y
-  'observability.rca',
   'observability.investigation',
   'observability.service-map',
   'observability.investigate-service-map',
@@ -358,12 +363,13 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
+  'platform.alerting.alert',
   'platform.alerting.rule',
   'platform.alerting.action_policy',
-  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
+  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
@@ -386,6 +392,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – AlertZero (Hunt Watch)
   // gated behind xpack.alertzero.enabled
   'security.threat',
+  'security.significant_security_event',
 
   // Observability
   'observability.ai_insight',

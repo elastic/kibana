@@ -14,6 +14,7 @@ import datemath from '@kbn/datemath';
 import type { Client } from '@elastic/elasticsearch';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
+import { COMMENT_ATTACHMENT_TYPE, buildAlertCaseAttachment } from '@kbn/cases-plugin/common';
 
 import { createEsClient, createKbnClient } from './lib/clients';
 import type { EpisodeDocs, EpisodeFileSet, ScaledDoc } from './lib/episodes';
@@ -302,15 +303,16 @@ const createCasesFromAttackDiscoveries = async ({
     const caseId = created.data.id;
     const attachments = [
       {
-        comment: buildAttackDiscoveryCaseComment(d),
-        type: 'user',
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: buildAttackDiscoveryCaseComment(d) },
         owner: 'securitySolution',
       },
       ...d.alertIds.map((alertId) => ({
-        alertId,
-        index: alertsIndex,
-        rule: { id: null, name: null },
-        type: 'alert',
+        ...buildAlertCaseAttachment('securitySolution', {
+          alertId,
+          index: alertsIndex,
+          rule: { id: null, name: null },
+        }),
         owner: 'securitySolution',
       })),
     ];
