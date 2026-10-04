@@ -149,6 +149,7 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
+    security: {} as any,
     taskManager,
     inference,
     conversationService: conversationService as any,
