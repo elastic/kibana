@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { SyntheticsServerSetup } from '../types';
 import {
   DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+  PACKAGE_POLICY_SCAN_PAGE_SIZE,
   bumpAgentPolicyRevisions,
   deletePackagePolicies,
   findLeftoverPackagePolicies,
@@ -52,6 +53,7 @@ const makeServer = ({
   deleteMock = jest.fn().mockResolvedValue([]),
   bumpRevisionMock = jest.fn().mockResolvedValue(undefined),
   spaceIdsByPolicy = {} as Record<string, string[]>,
+  agentPolicyIdsFor = (_packagePolicyId: string): string[] | undefined => undefined,
 } = {}) => {
   const logger = loggerMock.create();
   const esClient = {} as ElasticsearchClient;
@@ -75,8 +77,14 @@ const makeServer = ({
       ids.map(({ id }) => ({ id, space_ids: spaceIdsByPolicy[id] ?? [] }))
     ),
   };
+  const getByIDs = jest.fn(async (_soClient: unknown, ids: string[]) =>
+    ids.flatMap((id) => {
+      const policyIds = agentPolicyIdsFor(id);
+      return policyIds ? [{ id, policy_ids: policyIds }] : [];
+    })
+  );
   const fleet = {
-    packagePolicyService: { delete: deleteMock, fetchAllItemIds },
+    packagePolicyService: { delete: deleteMock, fetchAllItemIds, getByIDs },
     agentPolicyService,
   };
   const server = {
@@ -112,6 +120,7 @@ const makeServer = ({
     logger,
     reads,
     fetchAllItemIds,
+    getByIDs,
     deleteMock,
     bumpRevisionMock,
     asScopedToNamespace,
@@ -247,6 +256,23 @@ describe('findLeftoverPackagePolicies', () => {
       expect.objectContaining({ kuery: getFilterForTestNowRun(true), spaceIds: ['*'] })
     );
   });
+
+  it('reads policies and monitors in large id-only pages', async () => {
+    const { server, soClient, fetchAllItemIds } = makeServer();
+
+    await findLeftoverPackagePolicies(server, soClient);
+
+    expect(fetchAllItemIds).toHaveBeenCalledWith(
+      soClient,
+      expect.objectContaining({ perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE })
+    );
+    expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['id', 'locations', 'origin'],
+        perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
+      })
+    );
+  });
 });
 
 describe('deletePackagePolicies', () => {
@@ -288,16 +314,33 @@ describe('deletePackagePolicies', () => {
     });
   });
 
-  it('bumps each batch before deleting the next so an interrupted run cannot strand it', async () => {
+  it('reads the agent policies of the package policies to delete in every space', async () => {
+    const { server, soClient, esClient, getByIDs } = makeServer();
+
+    await deletePackagePolicies(['p-1', 'p-2'], soClient, esClient, server);
+
+    expect(getByIDs).toHaveBeenCalledTimes(1);
+    expect(getByIDs).toHaveBeenCalledWith(soClient, ['p-1', 'p-2'], {
+      ignoreMissing: true,
+      spaceIds: ['*'],
+      fields: ['policy_ids', 'policy_id'],
+    });
+  });
+
+  it('bumps an agent policy once, after the last batch holding its package policies', async () => {
     const order: string[] = [];
     const deleteMock = jest.fn().mockImplementation((_so, _es, batch: string[]) => {
       order.push(`delete:${batch.length}`);
       return Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])));
     });
-    const bumpRevisionMock = jest.fn().mockImplementation(async () => {
-      order.push('bump');
+    const bumpRevisionMock = jest.fn().mockImplementation(async (_so, _es, policyId) => {
+      order.push(`bump:${policyId}`);
     });
-    const { server, soClient, esClient } = makeServer({ deleteMock, bumpRevisionMock });
+    const { server, soClient, esClient } = makeServer({
+      deleteMock,
+      bumpRevisionMock,
+      agentPolicyIdsFor: () => ['agent-a'],
+    });
     const ids = Array.from(
       { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50 },
       (_, i) => `p-${i}`
@@ -307,10 +350,59 @@ describe('deletePackagePolicies', () => {
 
     expect(order).toEqual([
       `delete:${DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE}`,
-      'bump',
       'delete:50',
-      'bump',
+      'bump:agent-a',
     ]);
+  });
+
+  it('groups deletes by agent policy and bumps each one as soon as its deletes are done', async () => {
+    const order: string[] = [];
+    const agentPolicyOf = (id: string) => (Number(id.split('-')[1]) % 2 ? 'agent-b' : 'agent-a');
+    const deleteMock = jest.fn().mockImplementation((_so, _es, batch: string[]) => {
+      order.push(`delete:${[...new Set(batch.map(agentPolicyOf))].join()}`);
+      return Promise.resolve(batch.map((id) => deleted(id, [agentPolicyOf(id)])));
+    });
+    const bumpRevisionMock = jest.fn().mockImplementation(async (_so, _es, policyId) => {
+      order.push(`bump:${policyId}`);
+    });
+    const { server, soClient, esClient } = makeServer({
+      deleteMock,
+      bumpRevisionMock,
+      agentPolicyIdsFor: (id) => [agentPolicyOf(id)],
+    });
+    // interleaved, so unsorted batches would each hold both agent policies
+    const ids = Array.from(
+      { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE * 2 },
+      (_, i) => `p-${i}`
+    );
+
+    await deletePackagePolicies(ids, soClient, esClient, server);
+
+    expect(order).toEqual(['delete:agent-a', 'bump:agent-a', 'delete:agent-b', 'bump:agent-b']);
+  });
+
+  it('still bumps what was already deleted when a later batch fails', async () => {
+    const deleteMock = jest
+      .fn()
+      .mockImplementationOnce((_so, _es, batch: string[]) =>
+        Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])))
+      )
+      .mockRejectedValueOnce(new Error('fleet unavailable'));
+    const { server, soClient, esClient, bumpRevisionMock } = makeServer({
+      deleteMock,
+      agentPolicyIdsFor: () => ['agent-a'],
+    });
+    const ids = Array.from(
+      { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50 },
+      (_, i) => `p-${i}`
+    );
+
+    await expect(deletePackagePolicies(ids, soClient, esClient, server)).rejects.toThrow(
+      'fleet unavailable'
+    );
+
+    expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
+    expect(bumpRevisionMock.mock.calls[0][2]).toBe('agent-a');
   });
 
   it('bumps only agent policies whose package policies were actually deleted', async () => {
@@ -334,7 +426,10 @@ describe('deletePackagePolicies', () => {
       controller.abort();
       return Promise.resolve(batch.map((id) => deleted(id, ['agent-a'])));
     });
-    const { server, soClient, esClient, bumpRevisionMock } = makeServer({ deleteMock });
+    const { server, soClient, esClient, bumpRevisionMock } = makeServer({
+      deleteMock,
+      agentPolicyIdsFor: () => ['agent-a'],
+    });
     const ids = Array.from(
       { length: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE + 50 },
       (_, i) => `p-${i}`
