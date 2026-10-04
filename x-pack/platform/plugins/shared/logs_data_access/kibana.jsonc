@@ -10,6 +10,7 @@
     "id": "logsDataAccess",
     "server": true,
     "browser": true,
+    "configPath": ["xpack", "logsDataAccess"],
     "requiredPlugins": [
       "data",
       "dataViews"

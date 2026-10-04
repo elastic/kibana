@@ -6,3 +6,4 @@
  */
 
 export type * from './services/log_sources_service/types';
+export type * from './services/semantic_log_search/types';

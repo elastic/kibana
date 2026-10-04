@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-semantic-log-search",
+  "owner": "@elastic/obs-signals-logs-team",
+  "group": "observability",
+  "visibility": "private"
+}
