@@ -39,6 +39,10 @@ export const COLLAPSE_ALL = i18n.translate('xpack.sessionView.collapseAll', {
   defaultMessage: 'Collapse all',
 });
 
+export const EXPAND_ALL = i18n.translate('xpack.sessionView.expandAll', {
+  defaultMessage: 'Expand all',
+});
+
 export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
@@ -56,7 +60,8 @@ export interface ProcessDeps {
   onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
-  handleCollapseProcessTree?: () => void;
+  isTreeCollapsed?: boolean;
+  handleToggleProcessTree?: () => void;
 
   trackEvent(name: SessionViewTelemetryKey): void;
 }
@@ -81,7 +86,8 @@ export function ProcessTreeNode({
   onJumpToOutput,
   loadPreviousButton,
   loadNextButton,
-  handleCollapseProcessTree,
+  isTreeCollapsed = false,
+  handleToggleProcessTree,
   trackEvent,
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
@@ -282,6 +288,8 @@ export function ProcessTreeNode({
 
   const promptText = `${workingDirectory ?? ''} ${args?.join(' ')}`;
 
+  const toggleTreeLabel = isTreeCollapsed ? EXPAND_ALL : COLLAPSE_ALL;
+
   return (
     <div>
       <div
@@ -312,12 +320,12 @@ export function ProcessTreeNode({
               <b css={styles.darkText}>{userName}</b>
               <Nbsp />
               <span css={styles.jumpToTop}>
-                <EuiToolTip title={COLLAPSE_ALL}>
+                <EuiToolTip title={toggleTreeLabel}>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="fold"
-                    onClick={handleCollapseProcessTree}
-                    aria-label={COLLAPSE_ALL}
+                    iconType={isTreeCollapsed ? 'unfold' : 'fold'}
+                    onClick={handleToggleProcessTree}
+                    aria-label={toggleTreeLabel}
                   />
                 </EuiToolTip>
               </span>
