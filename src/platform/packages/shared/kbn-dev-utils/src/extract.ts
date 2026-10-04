@@ -13,6 +13,7 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
+import execa from 'execa';
 import * as tar from 'tar';
 import type { ZipFile, Entry } from 'yauzl';
 import Yauzl from 'yauzl';
@@ -63,11 +64,20 @@ export async function extract({
   await Fs.mkdir(targetDir, { recursive: true });
 
   if (archivePath.endsWith('.tar') || archivePath.endsWith('.tar.gz')) {
-    return await tar.extract({
-      file: archivePath,
-      cwd: targetDir,
-      stripComponents,
-    });
+    try {
+      await execa('tar', [
+        '--extract',
+        '--file',
+        archivePath,
+        '--directory',
+        targetDir,
+        `--strip-components=${stripComponents}`,
+      ]);
+    } catch {
+      // native tar is unavailable or failed, fall back to the JavaScript implementation
+      await tar.extract({ file: archivePath, cwd: targetDir, stripComponents });
+    }
+    return;
   }
 
   if (!archivePath.endsWith('.zip')) {
