@@ -717,6 +717,47 @@ describe('JsonModelSchema', () => {
     }
   });
 
+  it('should accept additionalProperties as a value schema (typed map)', () => {
+    const inputs = {
+      properties: {
+        rules: {
+          type: 'object',
+          additionalProperties: {
+            type: 'object',
+            properties: { name: { type: 'string' } },
+            required: ['name'],
+            additionalProperties: false,
+          },
+        },
+      },
+    };
+    const result = JsonModelSchema.safeParse(inputs);
+    expect(result.success).toBe(true);
+  });
+
+  it('keeps a map-only inputs schema on the manual trigger', () => {
+    const inputs = {
+      type: 'object' as const,
+      additionalProperties: { type: 'string' as const },
+    };
+    const result = WorkflowSchema.safeParse({
+      name: 'test-workflow',
+      triggers: [{ type: 'manual', inputs }],
+      steps: [
+        {
+          name: 'process',
+          type: 'http',
+          with: { url: 'https://api.example.com' },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.triggers[0]).toEqual(expect.objectContaining({ inputs }));
+    }
+  });
+
   it('should validate a nested JSON Schema inputs object', () => {
     const inputs = {
       properties: {
@@ -769,6 +810,18 @@ describe('JsonModelSchema', () => {
     };
     const result = JsonModelSchema.safeParse(inputs);
     expect(result.success).toBe(false);
+  });
+
+  it('should accept a property with only additionalProperties and no type', () => {
+    const inputs = {
+      properties: {
+        tags: {
+          additionalProperties: { type: 'string' },
+        },
+      },
+    };
+    const result = JsonModelSchema.safeParse(inputs);
+    expect(result.success).toBe(true);
   });
 
   it('should accept new JSON Schema object format for inputs', () => {

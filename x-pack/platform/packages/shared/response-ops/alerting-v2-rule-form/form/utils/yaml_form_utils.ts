@@ -26,6 +26,7 @@ import { parse, stringify } from 'yaml';
 import type { FormValues, StateTransition, RuleQuery, RuleNoData, RuleRecovery } from '../types';
 import {
   apiStateTransitionToFormStateTransition,
+  attachPhaseOperator,
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
@@ -98,17 +99,23 @@ const serializeStateTransition = (
   recoveryEnabled: boolean
 ): ApiStateTransition | undefined => {
   if (!st) return undefined;
-  const pending = {
-    ...(st.pendingCount != null ? { count: st.pendingCount } : {}),
-    ...(st.pendingTimeframe != null ? { timeframe: st.pendingTimeframe } : {}),
-  };
+  const pending = attachPhaseOperator(
+    {
+      ...(st.pendingCount != null ? { count: st.pendingCount } : {}),
+      ...(st.pendingTimeframe != null ? { timeframe: st.pendingTimeframe } : {}),
+    },
+    st.pendingOperator
+  );
   // The request mapper drops these when the rule never recovers on its own, so
   // emitting them here would preview a delay that the save silently discards.
   const recovering = recoveryEnabled
-    ? {
-        ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
-        ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
-      }
+    ? attachPhaseOperator(
+        {
+          ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
+          ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
+        },
+        st.recoveringOperator
+      )
     : {};
   const out: ApiStateTransition = {
     ...(Object.keys(pending).length ? { pending } : {}),
@@ -352,7 +359,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       values: null,
       error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidStateTransitionError', {
         defaultMessage:
-          'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe.',
+          'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe. operator must be "and" or "or", and only when both are set.',
       }),
     };
   }

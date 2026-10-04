@@ -37,7 +37,7 @@ interface ActionPolicyFormFlyoutProps {
    * Receives the raw form state so the host can create the workflows and build the payload
    */
   onSave?: (values: ActionPolicyFormState) => void | Promise<void>;
-  onUpdate?: (id: string, values: ActionPolicyFormState, version: string) => void | Promise<void>;
+  onUpdate?: (id: string, values: ActionPolicyFormState) => void | Promise<void>;
   isLoading?: boolean;
   initialValues?: ActionPolicyResponse;
 }

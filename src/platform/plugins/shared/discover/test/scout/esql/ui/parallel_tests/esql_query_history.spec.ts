@@ -30,7 +30,7 @@ spaceTest.describe('Discover ES|QL query history', { tag: tags.deploymentAgnosti
   });
 
   spaceTest('loads and re-runs a query picked from the history', async ({ pageObjects }) => {
-    const { discover, dataGrid } = pageObjects;
+    const { discover, dataGrid, esqlEditor } = pageObjects;
 
     // Seed the history, then move the editor onto a different query so restoring
     // the first one is observable.
@@ -39,8 +39,9 @@ spaceTest.describe('Discover ES|QL query history', { tag: tags.deploymentAgnosti
     expect(await discover.getEsqlQueryValue()).toBe(CURRENT_QUERY);
     await expect(dataGrid.getColumnHeader('@timestamp')).toBeVisible();
 
-    await discover.toggleEsqlHistoryPanel();
-    await discover.runEsqlHistoryQuery(HISTORY_QUERY);
+    await esqlEditor.toggleHistoryPanel();
+    await esqlEditor.runHistoryQuery(HISTORY_QUERY);
+    await discover.waitUntilSearchingHasFinished();
 
     expect(await discover.getEsqlQueryValue()).toBe(HISTORY_QUERY);
     // The dropped column proves the query was re-run, not just loaded into the editor.
