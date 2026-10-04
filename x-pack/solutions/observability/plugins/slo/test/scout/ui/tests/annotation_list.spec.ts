@@ -9,6 +9,9 @@ import { euiSelectors, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
+// One test now carries the whole lifecycle, so it needs the budget of the four it replaces.
+const TEST_TIMEOUT = 3 * 60 * 1000;
+
 test.describe(
   'Annotations List',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -18,66 +21,72 @@ test.describe(
       await pageObjects.annotations.goto();
     });
 
-    test('create an annotation', async ({ page, pageObjects }) => {
-      await pageObjects.annotations.clickCreateAnnotation();
-      await page.getByTestId('annotationTitle').fill('Test annotation');
-      await page.getByTestId('annotationTitle').blur();
-      await page.getByTestId('annotationMessage').fill('Test annotation description');
-      await page.getByTestId('annotationMessage').blur();
-      await page.getByTestId('annotationTags').click();
-      await page.getByTestId('sloSelector').getByTestId('comboBoxSearchInput').click();
-      await page.click('text="All SLOs"');
-      await page.getByTestId('annotationSaveButton').click();
-      await page.getByTestId('toastCloseButton').click();
-      await expect(
-        page.locator('[data-test-subj="annotation-marker-body"]:has-text("Test annotation")')
-      ).toBeVisible();
-      await expect(page.locator(euiSelectors.basicTable.ROW_SELECTOR)).toHaveCount(1);
-      await page.locator('.echAnnotation__marker').hover();
-      await expect(
-        page.locator(
-          '[data-test-subj="annotation-tooltip-description"]:has-text("Test annotation description")'
-        )
-      ).toBeVisible();
-    });
+    test('creates, displays, updates and deletes an annotation', async ({ page, pageObjects }) => {
+      test.setTimeout(TEST_TIMEOUT);
 
-    test('Go to SLOs and check that annotation is displayed', async ({ page, pageObjects }) => {
-      await pageObjects.slo.openFromSideMenu();
-      await page.click('text="Test Stack SLO"');
-      await page.testSubj
-        .locator('sliChartPanel')
-        .locator('.echChartContent')
-        .scrollIntoViewIfNeeded();
+      await test.step('create the annotation', async () => {
+        await pageObjects.annotations.clickCreateAnnotation();
+        await page.getByTestId('annotationTitle').fill('Test annotation');
+        await page.getByTestId('annotationTitle').blur();
+        await page.getByTestId('annotationMessage').fill('Test annotation description');
+        await page.getByTestId('annotationMessage').blur();
+        await page.getByTestId('annotationTags').click();
+        await page.getByTestId('sloSelector').getByTestId('comboBoxSearchInput').click();
+        await page.click('text="All SLOs"');
+        await page.getByTestId('annotationSaveButton').click();
+        await page.getByTestId('toastCloseButton').click();
+        await expect(
+          page.locator('[data-test-subj="annotation-marker-body"]:has-text("Test annotation")')
+        ).toBeVisible();
+        await expect(page.locator(euiSelectors.basicTable.ROW_SELECTOR)).toHaveCount(1);
+        await page.locator('.echAnnotation__marker').hover();
+        await expect(
+          page.locator(
+            '[data-test-subj="annotation-tooltip-description"]:has-text("Test annotation description")'
+          )
+        ).toBeVisible();
+      });
 
-      await expect(
-        page.testSubj.locator('sliChartPanel').locator('[data-testid="echAnnotationMarker"]')
-      ).toHaveText('Test annotation');
-    });
+      await test.step('display the annotation on the SLO detail chart', async () => {
+        await pageObjects.slo.openFromSideMenu();
+        await page.click('text="Test Stack SLO"');
+        await page.testSubj
+          .locator('sliChartPanel')
+          .locator('.echChartContent')
+          .scrollIntoViewIfNeeded();
 
-    test('update annotation', async ({ page }) => {
-      await page.getByRole('button', { name: 'Test annotation description' }).click();
-      await page.getByTestId('annotationTitle').fill('Updated annotation');
-      await page.getByTestId('annotationTitle').blur();
-      await page.getByTestId('annotationMessage').fill('Updated annotation description');
-      await page.getByTestId('annotationMessage').blur();
-      await page.getByTestId('annotationSaveButton').click();
-      await page.getByTestId('toastCloseButton').click();
-      await expect(
-        page.locator('[data-test-subj="annotation-marker-body"]:has-text("Updated annotation")')
-      ).toBeVisible();
-      await page.getByRole('button', { name: 'Updated annotation description' }).hover();
-      await expect(
-        page.locator(
-          '[data-test-subj="annotation-tooltip-description"]:has-text("Updated annotation description")'
-        )
-      ).toBeVisible();
-    });
+        await expect(
+          page.testSubj.locator('sliChartPanel').locator('[data-testid="echAnnotationMarker"]')
+        ).toHaveText('Test annotation');
+      });
 
-    test('delete annotation', async ({ page }) => {
-      await page.getByRole('button', { name: 'Updated annotation description' }).click();
-      await page.getByTestId('annotationDeleteButton').click();
-      await page.getByTestId('toastCloseButton').click();
-      await expect(page.locator('.echAnnotation__marker')).toHaveCount(0);
+      await test.step('update the annotation', async () => {
+        await pageObjects.annotations.goto();
+        await page.getByRole('button', { name: 'Test annotation description' }).click();
+        await page.getByTestId('annotationTitle').fill('Updated annotation');
+        await page.getByTestId('annotationTitle').blur();
+        await page.getByTestId('annotationMessage').fill('Updated annotation description');
+        await page.getByTestId('annotationMessage').blur();
+        await page.getByTestId('annotationSaveButton').click();
+        await page.getByTestId('toastCloseButton').click();
+        await expect(
+          page.locator('[data-test-subj="annotation-marker-body"]:has-text("Updated annotation")')
+        ).toBeVisible();
+        await page.getByRole('button', { name: 'Updated annotation description' }).hover();
+        await expect(
+          page.locator(
+            '[data-test-subj="annotation-tooltip-description"]:has-text("Updated annotation description")'
+          )
+        ).toBeVisible();
+      });
+
+      await test.step('delete the annotation', async () => {
+        await pageObjects.annotations.goto();
+        await page.getByRole('button', { name: 'Updated annotation description' }).click();
+        await page.getByTestId('annotationDeleteButton').click();
+        await page.getByTestId('toastCloseButton').click();
+        await expect(page.locator('.echAnnotation__marker')).toHaveCount(0);
+      });
     });
   }
 );
