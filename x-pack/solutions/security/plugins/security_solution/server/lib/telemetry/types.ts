@@ -455,6 +455,10 @@ export interface TimelineTelemetryTemplate {
 
 export interface ValueListMetaData {
   total_list_count: number;
+  // storage breakdown: how many value lists use the new per-list lookup index vs the
+  // legacy shared data stream. legacy_list_count is derived as total minus lookup.
+  lookup_list_count: number;
+  legacy_list_count: number;
   types: Array<{
     type: string;
     count: number;
@@ -465,6 +469,8 @@ export interface ValueListMetaData {
   }>;
   included_in_exception_lists_count: number;
   used_in_indicator_match_rule_count: number;
+  // indicator-match rules whose threat index points at a per-list lookup index
+  used_in_indicator_match_rule_via_lookup_count: number;
 }
 
 export interface ValueListResponseAggregation {
@@ -499,6 +505,12 @@ export interface ValueListExceptionListResponseAggregation {
 export interface ValueListIndicatorMatchResponseAggregation {
   aggregations: {
     vl_used_in_indicator_match_rule_count: { value: number };
+  };
+}
+
+export interface ValueListStorageResponseAggregation {
+  aggregations: {
+    lookup_list_count: { value: number };
   };
 }
 
@@ -577,6 +589,8 @@ export interface ValueListResponse {
   itemMetricsResponse: ValueListItemsResponseAggregation;
   exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
   indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+  indicatorMatchLookupMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+  storageMetricsResponse: ValueListStorageResponseAggregation;
 }
 
 export type Nullable<T> = T | null | undefined;

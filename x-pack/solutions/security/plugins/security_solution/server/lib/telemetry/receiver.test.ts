@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TelemetryReceiver } from './receiver';
 import type { TelemetryQueryConfiguration } from './types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('TelemetryReceiver', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -200,6 +201,79 @@ describe('TelemetryReceiver', () => {
       const filters = queryArg?.query?.bool?.filter!! as any[];
       expect(filters[0].terms['process.entity_id']).toEqual(nodeIds);
       expect(filters).toHaveLength(3);
+    });
+  });
+
+  describe('fetchValueListMetaData', () => {
+    const STREAM = '.items-default';
+    const ALIAS = '.items-default-my-list';
+    const INDEX = '.value-list-v2-default-my-list';
+    let getDataStream: jest.Mock;
+
+    beforeEach(() => {
+      getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: STREAM }] });
+      mockEsClient = {
+        indices: { getDataStream },
+        search: jest.fn().mockResolvedValue({
+          aggregations: {
+            alias: { buckets: [{ key: ALIAS }] },
+            index: { buckets: [{ key: INDEX }] },
+          },
+          hits: { hits: [] },
+        }),
+      } as unknown as jest.Mocked<ElasticsearchClient>;
+      // eslint-disable-next-line dot-notation
+      receiver['_esClient'] = mockEsClient;
+    });
+
+    // the two indicator match rule queries share an aggregation name; the legacy one
+    // filters with `must`, the lookup one with `should`
+    const indicatorMatchQueries = (): {
+      legacy: estypes.SearchRequest | undefined;
+      lookup: estypes.SearchRequest | undefined;
+    } => {
+      const requests = mockEsClient.search.mock.calls
+        .map((call) => call[0] as estypes.SearchRequest | undefined)
+        .filter(
+          (request): request is estypes.SearchRequest =>
+            request?.aggs?.vl_used_in_indicator_match_rule_count != null
+        );
+      expect(requests).toHaveLength(2);
+      return {
+        legacy: requests.find((request) => request.query?.bool?.must != null),
+        lookup: requests.find((request) => request.query?.bool?.should != null),
+      };
+    };
+
+    it('counts a rule as legacy only when it reads a shared items stream and no lookup list', async () => {
+      await receiver.fetchValueListMetaData(0);
+
+      expect(getDataStream).toHaveBeenCalledWith(expect.objectContaining({ name: '.items-*' }));
+      const { legacy, lookup } = indicatorMatchQueries();
+      // a pattern such as `.items-*` names no lookup list, so no clause counts it as one
+      const readsLookupList = [
+        { prefix: { 'alert.params.threatIndex': '.value-list' } },
+        { terms: { 'alert.params.threatIndex': [ALIAS, INDEX] } },
+      ];
+      expect(legacy?.query?.bool?.must).toEqual([
+        { terms: { 'alert.params.threatIndex': [STREAM] } },
+      ]);
+      expect(legacy?.query?.bool?.must_not).toEqual(readsLookupList);
+      expect(lookup?.query?.bool?.should).toEqual(readsLookupList);
+      expect(lookup?.query?.bool?.minimum_should_match).toBe(1);
+    });
+
+    it('counts no legacy reader when the item streams cannot be listed', async () => {
+      getDataStream.mockRejectedValue(new Error('no privilege'));
+
+      await receiver.fetchValueListMetaData(0);
+
+      const { legacy } = indicatorMatchQueries();
+      expect(legacy?.query?.bool?.must).toEqual([{ match_none: {} }]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Error fetching value list item data streams',
+        expect.anything()
+      );
     });
   });
 });

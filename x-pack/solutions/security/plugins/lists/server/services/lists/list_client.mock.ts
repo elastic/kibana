@@ -74,6 +74,7 @@ export class ListClientMock extends ListClient {
 export const getListClientMock = (): ListClient => {
   const mock = new ListClientMock({
     config: {
+      enableLookupIndices: false,
       importBufferSize: IMPORT_BUFFER_SIZE,
       importTimeout: IMPORT_TIMEOUT,
       listIndex: LIST_INDEX,

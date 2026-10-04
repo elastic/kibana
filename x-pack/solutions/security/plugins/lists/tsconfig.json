@@ -46,7 +46,9 @@
     "@kbn/react-query",
     "@kbn/security-solution-features",
     "@kbn/kql",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
+    "@kbn/task-manager-plugin",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }
