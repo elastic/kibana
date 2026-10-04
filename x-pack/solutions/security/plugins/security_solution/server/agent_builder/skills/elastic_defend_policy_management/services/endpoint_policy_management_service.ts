@@ -35,7 +35,11 @@ import type { ClassifiedPolicyUsage } from './classify_policy_usage';
 import { classifyPolicyUsage } from './classify_policy_usage';
 import { countEndpoints } from './count_endpoints';
 import type { FieldReferenceResult } from './field_reference';
-import { lookupFieldReference } from './field_reference';
+import {
+  lookupFieldReference,
+  parseGetPolicyFieldReferenceParams,
+  searchFieldReference,
+} from './field_reference';
 import type { PolicyRolloutStatus } from './read_policy_rollout_status';
 import { readPolicyRolloutStatus } from './read_policy_rollout_status';
 import type { ListPoliciesDto, ListPolicyItem } from './list_endpoint_policies';
@@ -85,7 +89,7 @@ export interface EndpointPolicyManagementService {
   comparePolicies(from: PolicyRef, to: PolicyRef): Promise<PolicyComparison>;
   assessPolicyChange(input: AssessPolicyChangeParams): Promise<AssessPolicyChangeDto>;
   getPolicyRolloutStatus(reference: Readonly<{ idOrName: string }>): Promise<PolicyRolloutStatus>;
-  getPolicyFieldReference(input: Readonly<{ path: string }>): Promise<FieldReferenceResult>;
+  getPolicyFieldReference(rawParams: unknown): Promise<FieldReferenceResult>;
   previewApplyPolicyChange(rawParams: unknown): Promise<ApplyPolicyChangePreview>;
   applyPolicyChange(
     rawParams: unknown,
@@ -217,9 +221,12 @@ export const createEndpointPolicyManagementService = ({
       return readPolicyRolloutStatus(access, endpointAppContextService, { packagePolicy }, request);
     },
 
-    getPolicyFieldReference: async ({ path }) => {
+    getPolicyFieldReference: async (rawParams) => {
       await requireAccess(ENDPOINT_POLICY_READ_REQUIRED_AUTHZ);
-      return lookupFieldReference(path);
+      const selector = parseGetPolicyFieldReferenceParams(rawParams);
+      return 'path' in selector
+        ? lookupFieldReference(selector.path)
+        : searchFieldReference(selector.keywords, selector.os);
     },
 
     previewApplyPolicyChange: (rawParams) =>

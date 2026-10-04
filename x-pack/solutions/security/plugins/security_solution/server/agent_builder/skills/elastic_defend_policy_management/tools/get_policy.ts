@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { policyReferenceInputSchema, toPolicyRef } from '../domain/input_schemas';
@@ -31,7 +31,35 @@ export const GET_POLICY_TOOL_ID = 'security.policy_management.get_policy';
 
 const GET_POLICY_MAX_RESULT_TOKENS = 12_000;
 
-export const getPolicySchema = policyReferenceInputSchema;
+const getPolicyIdOrNameSelectorSchema = z
+  .object({
+    idOrName: policyReferenceInputSchema.shape.idOrName
+      .unwrap()
+      .describe(
+        'User-supplied live policy identity: saved-object id or exact full stored endpoint policy name in the current space, or a returned policy id. A creation preset does not select the live policy. Valid: {"selector":{"idOrName":"Example policy"}}. Do not send null, an empty string, or placeholder text. These examples are not a policy selection. A presented name with name_string_truncated true is display-only; pass the policy id as later idOrName.'
+      ),
+  })
+  .strict();
+
+const getPolicyPresetSelectorSchema = z
+  .object({
+    preset: policyReferenceInputSchema.shape.preset
+      .unwrap()
+      .describe(
+        'An explicitly requested deployment baseline (EDRComplete, NGAV, EDREssential, DataCollection), not a live policy. Valid: {"selector":{"preset":"EDRComplete"}}. Do not send null or placeholder text. These examples are not a policy selection.'
+      ),
+  })
+  .strict();
+
+export const getPolicySchema = z
+  .object({
+    selector: z
+      .union([getPolicyIdOrNameSelectorSchema, getPolicyPresetSelectorSchema])
+      .describe(
+        'Exactly one selector object. {"selector":{"idOrName":"Example policy"}} selects a live policy id or exact stored name; {"selector":{"preset":"EDRComplete"}} selects an explicitly requested deployment baseline. The selector object carries exactly one required property. Invalid: {"idOrName":"Example policy"}, {"selector":{"idOrName":"Example policy","preset":"EDRComplete"}}, and {"selector":{}}. Do not send idOrName or preset at the root, both properties in one selector, null, or placeholder text. These examples are not a policy selection.'
+      ),
+  })
+  .strict();
 
 type PresentedGetPolicyFallback = Readonly<{
   policy: PresentedPolicyIdentity;
@@ -76,7 +104,7 @@ const presentGetPolicy = (
       policy: identity,
       normalizedHash,
       config: trimmed.value,
-      ...(trimmed.summary !== undefined ? { config_truncation: trimmed.summary } : {}),
+      ...(trimmed.summary === undefined ? {} : { config_truncation: trimmed.summary }),
     };
   };
 
@@ -105,7 +133,7 @@ const presentGetPolicyBaseline = (
       normalizedHash,
       summary: baseline.summary,
       config: trimmed.value,
-      ...(trimmed.summary !== undefined ? { config_truncation: trimmed.summary } : {}),
+      ...(trimmed.summary === undefined ? {} : { config_truncation: trimmed.summary }),
     };
   };
 
@@ -129,8 +157,11 @@ export const createGetPolicyTool = ({
     getStartServices,
     id: GET_POLICY_TOOL_ID,
     description:
-      'Get one Elastic Defend endpoint policy by saved-object id or exact name in the current space, ' +
-      "or pass a preset (EDRComplete, NGAV, EDREssential, DataCollection) to read this deployment's default configuration for that preset. " +
+      'Get one Elastic Defend endpoint policy. Pass exactly one required selector object. ' +
+      '{"selector":{"idOrName":"Example policy"}}: a user-supplied saved-object id or exact full stored name in the current space, or a returned policy id. A creation preset does not select the live policy. ' +
+      '{"selector":{"preset":"EDRComplete"}}: an explicitly requested deployment baseline (EDRComplete, NGAV, EDREssential, DataCollection). A live identity does not select a baseline. ' +
+      'The selector object carries exactly one property. Invalid: {"idOrName":"Example policy"} and {"selector":{"idOrName":"Example policy","preset":"EDRComplete"}}. Do not send idOrName or preset at the root, both properties in one selector, null, or placeholder values. These examples are not a policy selection. ' +
+      "A preset reads this deployment's default configuration for that preset. " +
       "A preset result is this deployment's baseline default, not a best-practice recommendation, " +
       'and reports the resolved environment (license, cloud, telemetryOptedIn; telemetryOptedIn "unresolved" means the deployment default for telemetry is unconfirmed), ' +
       'a protection-mode summary, and the normalized baseline config. ' +
@@ -143,7 +174,7 @@ export const createGetPolicyTool = ({
     schema: getPolicySchema,
     maxResultTokens: GET_POLICY_MAX_RESULT_TOKENS,
     run: async (reference: z.infer<typeof getPolicySchema>, service) => {
-      const ref = toPolicyRef(reference);
+      const ref = toPolicyRef(reference.selector);
 
       if (ref.type === 'baseline') {
         return presentGetPolicyBaseline(await service.getPolicyBaseline(ref.preset));

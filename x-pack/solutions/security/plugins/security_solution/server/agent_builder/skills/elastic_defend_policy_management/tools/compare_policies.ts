@@ -40,12 +40,29 @@ export const COMPARE_POLICIES_TOOL_ID = 'security.policy_management.compare_poli
 const COMPARE_DIFF_DISPLAY_CAP = 50;
 const COMPARE_POLICIES_MAX_RESULT_TOKENS = 12_000;
 
+const comparePoliciesIdOrNameSelectorSchema = z
+  .object({
+    idOrName: policyReferenceInputSchema.shape.idOrName.unwrap(),
+  })
+  .strict();
+
+const comparePoliciesPresetSelectorSchema = z
+  .object({
+    preset: policyReferenceInputSchema.shape.preset.unwrap(),
+  })
+  .strict();
+
+const comparePoliciesSideSchema = z.union([
+  comparePoliciesIdOrNameSelectorSchema,
+  comparePoliciesPresetSelectorSchema,
+]);
+
 export const comparePoliciesSchema = z.object({
-  from: policyReferenceInputSchema.describe(
-    'Source side of the comparison: either a live policy (idOrName) or a deployment baseline (preset).'
+  from: comparePoliciesSideSchema.describe(
+    'Source side of the comparison: pass exactly one selector object, either {"idOrName":"Example policy"} for a user-supplied live policy ID or exact full stored policy name in the current space, or {"preset":"EDRComplete"} for a deployment baseline. Do not send both properties.'
   ),
-  to: policyReferenceInputSchema.describe(
-    'Target side of the comparison: either a live policy (idOrName) or a deployment baseline (preset).'
+  to: comparePoliciesSideSchema.describe(
+    'Target side of the comparison: pass exactly one selector object, either {"idOrName":"Example policy"} for a user-supplied live policy ID or exact full stored policy name in the current space, or {"preset":"EDRComplete"} for a deployment baseline. Do not send both properties.'
   ),
 });
 
