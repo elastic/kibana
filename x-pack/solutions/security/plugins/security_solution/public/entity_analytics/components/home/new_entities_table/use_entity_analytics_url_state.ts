@@ -18,7 +18,8 @@ import {
   PAGE_SIZE_OPTIONS,
   TIME_RANGE_OPTIONS,
 } from './common';
-import type { RowsMode, TimeRange } from './common';
+import type { RowsMode, SortDir, TimeRange } from './common';
+import { findSortableColumn } from './columns/registry';
 import { isSignalCardId, type SignalCardId } from '../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
@@ -65,12 +66,19 @@ export const MAX_EXPANDED_ENTITY_IDS = 20;
 // ── defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULTS = {
-  timeRange: '30d' as TimeRange,
-  rowsMode: 'resolved' as RowsMode,
+  timeRange: '30d',
+  rowsMode: 'resolved',
   sortField: RISK_SCORE_NORM_FIELD,
-  sortDirection: 'desc' as const,
+  sortDirection: 'desc',
   pageIndex: 0,
   pageSize: PAGE_SIZE_OPTIONS[0],
+} as const satisfies {
+  timeRange: TimeRange;
+  rowsMode: RowsMode;
+  sortField: string;
+  sortDirection: SortDir;
+  pageIndex: number;
+  pageSize: number;
 };
 
 // ── validators ────────────────────────────────────────────────────────────────
@@ -82,7 +90,12 @@ const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
 const isTimeRange = (v: string | null): v is TimeRange =>
   TIME_RANGE_OPTIONS.includes(v as TimeRange);
 const isRowsMode = (v: string | null): v is RowsMode => v === 'resolved' || v === 'individual';
-const isSortDir = (v: string | null): v is 'asc' | 'desc' => v === 'asc' || v === 'desc';
+const isSortDir = (v: string | null): v is SortDir => v === 'asc' || v === 'desc';
+/** Group size has no meaning for individual rows, so it is not a valid sort there. */
+const isValidSortField = (field: string | null, rowsMode: RowsMode): field is string =>
+  field != null &&
+  findSortableColumn(field) != null &&
+  !(rowsMode === 'individual' && field === GROUP_SIZE_FIELD);
 const isNonNegativeInt = (v: string | null): boolean =>
   v != null && /^\d+$/.test(v) && Number(v) >= 0;
 const isPageSize = (v: string | null): boolean =>
@@ -122,7 +135,7 @@ export interface EntityAnalyticsUrlState {
   timeRange: TimeRange;
   rowsMode: RowsMode;
   sortField: string;
-  sortDirection: 'asc' | 'desc';
+  sortDirection: SortDir;
   pageIndex: number;
   pageSize: number;
   entityFilters: EntityFilters;
@@ -136,7 +149,7 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setTimeRange: (val: TimeRange) => void;
   setRowsMode: (val: RowsMode) => void;
   /** Resets page to 0. */
-  setSort: (field: string, direction: 'asc' | 'desc') => void;
+  setSort: (field: string, direction: SortDir) => void;
   setPage: (index: number) => void;
   /** Resets page to 0. */
   setPageSize: (size: number) => void;
@@ -175,8 +188,11 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     ensure(PARAM.ROWS_MODE, isRowsMode, DEFAULTS.rowsMode);
     ensure(PARAM.SORT_DIR, isSortDir, DEFAULTS.sortDirection);
     ensure(PARAM.PAGE_SIZE, isPageSize, DEFAULTS.pageSize);
-    if (!params.get(PARAM.SORT_FIELD)) {
+    const rowsModeParam = params.get(PARAM.ROWS_MODE);
+    const normalizedRowsMode = isRowsMode(rowsModeParam) ? rowsModeParam : DEFAULTS.rowsMode;
+    if (!isValidSortField(params.get(PARAM.SORT_FIELD), normalizedRowsMode)) {
       params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
+      params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
       dirty = true;
     }
     // eaPage is omitted when 0 (cleaner URLs); only reject a present invalid value.
@@ -211,13 +227,16 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [rawRowsMode]
   );
 
+  // An invalid sort field reads as the default until the effect above fixes the URL.
   const rawSortField = p.get(PARAM.SORT_FIELD);
-  const sortField = useMemo(() => rawSortField || DEFAULTS.sortField, [rawSortField]);
+  const isSortFieldValid = isValidSortField(rawSortField, rowsMode);
+  const sortField = isSortFieldValid ? rawSortField : DEFAULTS.sortField;
 
   const rawSortDir = p.get(PARAM.SORT_DIR);
   const sortDirection = useMemo(
-    (): 'asc' | 'desc' => (isSortDir(rawSortDir) ? rawSortDir : DEFAULTS.sortDirection),
-    [rawSortDir]
+    (): SortDir =>
+      isSortFieldValid && isSortDir(rawSortDir) ? rawSortDir : DEFAULTS.sortDirection,
+    [isSortFieldValid, rawSortDir]
   );
 
   const rawPage = p.get(PARAM.PAGE);
@@ -263,7 +282,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     (patch: (params: URLSearchParams) => void, { replace = false }: { replace?: boolean } = {}) => {
       const params = new URLSearchParams(history.location.search);
       patch(params);
-      const next = { ...history.location, search: params.toString() };
+      const nextSearch = params.toString();
+      // A no-op push would add a duplicate history entry, so Back would seem to do nothing.
+      if (nextSearch === new URLSearchParams(history.location.search).toString()) return;
+      const next = { ...history.location, search: nextSearch };
       if (replace) history.replace(next);
       else history.push(next);
     },
@@ -292,7 +314,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [update]
   );
   const setSort = useCallback(
-    (field: string, direction: 'asc' | 'desc') =>
+    (field: string, direction: SortDir) =>
       update((params) => {
         params.set(PARAM.SORT_FIELD, field);
         params.set(PARAM.SORT_DIR, direction);
@@ -357,7 +379,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       }),
     [update]
   );
-  const resetPage = useCallback(() => update((params) => params.delete(PARAM.PAGE)), [update]);
+  const resetPage = useCallback(
+    () => update((params) => params.delete(PARAM.PAGE), { replace: true }),
+    [update]
+  );
 
   const toggleExpandedId = useCallback(
     (entityId: string) =>

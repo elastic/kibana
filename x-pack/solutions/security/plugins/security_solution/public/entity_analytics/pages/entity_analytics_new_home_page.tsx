@@ -213,6 +213,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     pageSize,
     setPage,
     setPageSize,
+    resetPage,
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
@@ -512,9 +513,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [entityExpression, tileWhereExpression]
   );
 
+  // Query bar changes do not go through the URL setters, so reset the page here.
+  // resetPage replaces the entry and skips no-op updates, so Back still works.
   useUpdateEffect(() => {
-    setPage(0);
-  }, [searchExpression, gridEntityExpression, setPage]);
+    resetPage();
+  }, [searchExpression, gridEntityExpression, resetPage]);
 
   useUpdateEffect(() => {
     setGroupingPageIndex(0);
