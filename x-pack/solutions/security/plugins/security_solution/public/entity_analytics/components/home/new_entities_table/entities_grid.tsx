@@ -16,10 +16,11 @@ import React, {
   useState,
 } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiDataGrid,
+  EuiEmptyPrompt,
   EuiProgress,
-  EuiText,
   EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
@@ -32,6 +33,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useResetEntityGridFilters } from './use_entity_grid_filters';
 import { useEntityGridData } from './use_entity_grid_data';
 import { useEntityChildren } from './use_entity_children';
 import { PAGE_SIZE_OPTIONS } from './common';
@@ -64,6 +66,11 @@ const INDIVIDUAL_ROWS_TOTAL_TITLE = i18n.translate(
 const EMPTY_GRID_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.emptyMessage',
   { defaultMessage: 'No records match the current filters' }
+);
+
+const RESET_FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.resetFiltersButton',
+  { defaultMessage: 'Reset' }
 );
 
 const EXPANDER_HEADER_LABEL = i18n.translate(
@@ -206,28 +213,22 @@ const EntityGridCustomBody = memo(
     const { euiTheme } = useEuiTheme();
     const { rows, expandedIds, childMap, columns, watchlistNames, cellHandlers } =
       useEntityGridView();
+    const onResetFilters = useResetEntityGridFilters();
 
     return (
       <>
         {headerRow}
         {rows.length === 0 ? (
-          <div
-            role="row"
-            className="euiDataGridRow"
-            css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              min-inline-size: 100%;
-              min-block-size: ${euiTheme.size.xxxl};
-              padding: ${euiTheme.size.m};
-              border-block-end: ${euiTheme.border.thin};
-            `}
-          >
-            <EuiText size="s" color="subdued">
-              {EMPTY_GRID_MESSAGE}
-            </EuiText>
-          </div>
+          <EuiEmptyPrompt
+            color="transparent"
+            body={<p>{EMPTY_GRID_MESSAGE}</p>}
+            paddingSize="l"
+            actions={
+              <EuiButton size="s" color="primary" fill onClick={onResetFilters}>
+                {RESET_FILTERS_LABEL}
+              </EuiButton>
+            }
+          />
         ) : (
           rows.map((row, i) => {
             const absoluteIndex = visibleRowData.startRow + i;

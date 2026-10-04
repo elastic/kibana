@@ -139,6 +139,8 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setEntityFilters: (filters: EntityFilters) => void;
   /** Resets page to 0. Pass null to clear. */
   setActiveTile: (tile: SignalCardId | null) => void;
+  /** Clears entity filters, active tile, and sort (foreign sorts can yield 0 rows). */
+  resetGridQuery: () => void;
   resetPage: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;
@@ -331,6 +333,21 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       }),
     [update]
   );
+  const resetGridQuery = useCallback(
+    () =>
+      update((params) => {
+        params.delete(PARAM.ENTITY_TYPES);
+        params.delete(PARAM.RISK_LEVELS);
+        params.delete(PARAM.ASSET_CRITICALITY);
+        params.delete(PARAM.WATCHLISTS);
+        params.delete(PARAM.DATA_SOURCES);
+        params.delete(PARAM.ACTIVE_TILE);
+        params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
+        params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
+        params.delete(PARAM.PAGE);
+      }),
+    [update]
+  );
   const resetPage = useCallback(() => update((params) => params.delete(PARAM.PAGE)), [update]);
 
   const toggleExpandedId = useCallback(
@@ -370,6 +387,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     setPageSize,
     setEntityFilters,
     setActiveTile,
+    resetGridQuery,
     resetPage,
     toggleExpandedId,
     clearExpandedIds,
