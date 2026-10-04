@@ -7,11 +7,13 @@
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiComboBox,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
@@ -25,6 +27,7 @@ import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { contextEngineQueryKeys } from '../../hooks/query_keys';
+import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { AiIndexDetailPanelEmptyPrompt } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
@@ -43,6 +46,7 @@ interface ConnectorsTabContentProps {
   onComboFocus: () => void;
   createConnectorButton: React.ReactNode;
   canCreateConnector: boolean;
+  canReadConnectors: boolean;
 }
 
 const ConnectorsTabContent = ({
@@ -55,6 +59,7 @@ const ConnectorsTabContent = ({
   onComboFocus,
   createConnectorButton,
   canCreateConnector,
+  canReadConnectors,
 }: ConnectorsTabContentProps) => {
   if (isError) {
     return (
@@ -84,6 +89,25 @@ const ConnectorsTabContent = ({
 
   return (
     <div data-test-subj="contextConnectorsTab">
+      {!canReadConnectors && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.contextEngine.sourcePicker.connectors.missingReadPrivilege',
+              {
+                defaultMessage:
+                  'You need Actions and Connectors read access to search and select connectors.',
+              }
+            )}
+            data-test-subj="contextConnectorsMissingReadPrivilegeCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFormRow
         fullWidth
         label={
@@ -93,10 +117,12 @@ const ConnectorsTabContent = ({
           />
         }
         helpText={
-          <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.connectors.fieldHelp"
-            defaultMessage="Start typing to search, then select a connector from the list."
-          />
+          canReadConnectors ? (
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.fieldHelp"
+              defaultMessage="Start typing to search, then select a connector from the list."
+            />
+          ) : undefined
         }
       >
         <EuiComboBox
@@ -105,6 +131,7 @@ const ConnectorsTabContent = ({
           sortMatchesBy="startsWith"
           selectedOptions={[]}
           isClearable={false}
+          isDisabled={!canReadConnectors}
           noSuggestions={showEmptyPrompt}
           aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.comboAriaLabel', {
             defaultMessage: 'Select a connector',
@@ -128,7 +155,7 @@ const ConnectorsTabContent = ({
           <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {showEmptyPrompt && (
+      {canReadConnectors && showEmptyPrompt && (
         <AiIndexDetailPanelEmptyPrompt
           paddingSize="none"
           iconType="plugs"
@@ -162,11 +189,12 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
   } = useKibana();
 
   const canCreateConnector = application?.capabilities.actions?.save === true;
+  const canReadConnectors = useCanReadConnectors();
 
   const shouldLoadConnectors = hasFocused || searchValue.trim().length > 0;
 
   const { connectors, isLoading, isError } = useDataConnectors({
-    enabled: shouldLoadConnectors,
+    enabled: shouldLoadConnectors && canReadConnectors,
   });
 
   const handleSearchChange = useCallback((search: string) => {
@@ -194,6 +222,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
   );
 
   const showEmptyPrompt =
+    canReadConnectors &&
     shouldLoadConnectors &&
     !isLoading &&
     !isError &&
@@ -248,22 +277,23 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
     [handleCloseCreateFlyout, handleConnectorCreated, isCreateFlyoutOpen, triggersActionsUi]
   );
 
-  const createConnectorButton = canCreateConnector ? (
-    <EuiButtonEmpty
-      iconType="plusCircle"
-      onClick={openCreateFlyout}
-      data-test-subj="contextCreateConnectorButton"
-      {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
-        action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
-      })}
-    >
-      <FormattedMessage
-        id="xpack.contextEngine.sourcePicker.connectors.createButton"
-        defaultMessage="Create connector"
-      />
-    </EuiButtonEmpty>
-  ) : null;
+  const createConnectorButton =
+    canCreateConnector && canReadConnectors ? (
+      <EuiButtonEmpty
+        iconType="plusCircle"
+        onClick={openCreateFlyout}
+        data-test-subj="contextCreateConnectorButton"
+        {...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+          action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
+        })}
+      >
+        <FormattedMessage
+          id="xpack.contextEngine.sourcePicker.connectors.createButton"
+          defaultMessage="Create connector"
+        />
+      </EuiButtonEmpty>
+    ) : null;
 
   return (
     <>
@@ -277,6 +307,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
         onComboFocus={() => setHasFocused(true)}
         createConnectorButton={createConnectorButton}
         canCreateConnector={canCreateConnector}
+        canReadConnectors={canReadConnectors}
       />
       {createConnectorFlyout}
     </>
