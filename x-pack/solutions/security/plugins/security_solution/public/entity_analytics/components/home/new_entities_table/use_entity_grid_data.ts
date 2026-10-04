@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import type {
-  TimeRange,
-  RowsMode,
-  EntityGridResponse,
-  QueryArgs,
-  Row,
-  EsqlRunner,
-  PageCursor,
-} from './common';
+import type { TimeRange, RowsMode, EntityGridResponse, QueryArgs, Row, PageCursor } from './common';
 import {
   decodeCursor,
   encodeCursor,
-  esqlResponseToRows,
   ENTITY_ID_FIELD,
   GROUP_SIZE_FIELD,
   enrichEntityRows,
+  createEsqlRunner,
 } from './common';
 import { ALL_COLUMNS_LIST, ENRICH_FNS } from './columns/registry';
 
@@ -54,13 +44,6 @@ const buildNextCursor = (pageRows: Row[], args: QueryArgs, hasNextPage: boolean)
 
 const pageEntityIdsKey = (rows: Row[] | undefined): string =>
   (rows ?? []).map((r) => r[ENTITY_ID_FIELD] as string).join('\0');
-
-const createRunQuery = (searchService: DataPublicPluginStart['search']): EsqlRunner => {
-  return async (query) =>
-    esqlResponseToRows(
-      await lastValueFrom(searchService.search({ params: { query } }, { strategy: 'esql_async' }))
-    );
-};
 
 // ── hook ──────────────────────────────────────────────────────────────────────
 
@@ -150,10 +133,10 @@ export const useEntityGridData = ({
 
   const shellQuery = useQuery(
     shellQueryKey,
-    async (): Promise<EntityGridResponse> => {
+    async ({ signal }): Promise<EntityGridResponse> => {
       if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
 
-      const runQuery = createRunQuery(searchService);
+      const runQuery = createEsqlRunner(searchService, signal);
 
       const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
       const { buildSortQuery } = col ?? {};
@@ -194,10 +177,10 @@ export const useEntityGridData = ({
 
   const countQuery = useQuery(
     countQueryKey,
-    async (): Promise<number> => {
+    async ({ signal }): Promise<number> => {
       if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
 
-      const runQuery = createRunQuery(searchService);
+      const runQuery = createEsqlRunner(searchService, signal);
 
       const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
       const { buildCountQuery } = col ?? {};
@@ -245,13 +228,13 @@ export const useEntityGridData = ({
       spaceId,
       shellQuery.dataUpdatedAt,
     ],
-    async (): Promise<Row[]> => {
+    async ({ signal }): Promise<Row[]> => {
       if (!concreteEntityIndexName) return [];
       const shell = queryClient.getQueryData<EntityGridResponse>(shellQueryKey);
       const pageRows = shell?.entities;
       if (!pageRows) return [];
 
-      const runQuery = createRunQuery(searchService);
+      const runQuery = createEsqlRunner(searchService, signal);
 
       const col = ALL_COLUMNS_LIST.find((c) => c.id === sortField);
       const skip = new Set<string>([...(col ? [col.id] : [])]);
@@ -270,7 +253,7 @@ export const useEntityGridData = ({
         keepFields,
       };
 
-      return enrichEntityRows(pageRows, args, skip, { runQuery, http }, ENRICH_FNS);
+      return enrichEntityRows(pageRows, args, skip, { runQuery, http, signal }, ENRICH_FNS);
     },
     {
       enabled:

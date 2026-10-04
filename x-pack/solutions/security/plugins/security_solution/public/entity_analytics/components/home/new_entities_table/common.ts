@@ -13,6 +13,8 @@ import {
 } from '@kbn/entity-store/common/domain/euid';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { lastValueFrom } from 'rxjs';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -97,6 +99,7 @@ export interface QueryArgs {
 export interface RunContext {
   runQuery: EsqlRunner;
   http: HttpSetup;
+  signal?: AbortSignal;
 }
 
 export type EnrichFn = (
@@ -188,6 +191,18 @@ export const esqlResponseToRows = (result: unknown): Row[] =>
     (result as { rawResponse: { columns: Array<{ name: string }>; values: unknown[][] } })
       .rawResponse
   );
+
+export const createEsqlRunner = (
+  searchService: DataPublicPluginStart['search'],
+  signal?: AbortSignal
+): EsqlRunner => {
+  return async (query) =>
+    esqlResponseToRows(
+      await lastValueFrom(
+        searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+      )
+    );
+};
 
 export const alertLookbackCutoff = (range: TimeRange): string =>
   new Date(Date.now() - TIME_RANGE_DAYS[range] * MS_PER_DAY).toISOString();

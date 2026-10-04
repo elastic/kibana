@@ -19,6 +19,7 @@ import {
   buildCursorClause,
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
+import { isAbortError } from '../../../../../common/utils/exceptions';
 
 // ── query builders: group_size sort ──────────────────────────────────────────
 // Inner FROM is the entity index, so searchFilters can stay in WHERE (KQL legal).
@@ -101,7 +102,10 @@ const enrichGroupSize = async (
   const entityIds = [...new Set(pageRows.map((r) => r[ENTITY_ID_FIELD] as string))].filter(Boolean);
   if (!entityIds.length) return;
 
-  const rows = await runQuery(buildGroupSizeEnrichQuery(namespace, entityIds)).catch(() => null);
+  const rows = await runQuery(buildGroupSizeEnrichQuery(namespace, entityIds)).catch((err) => {
+    if (isAbortError(err)) throw err;
+    return null;
+  });
   if (!rows) return;
 
   const byGroupKey = new Map(

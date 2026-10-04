@@ -335,7 +335,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
 
-  const catalogIdSet = useMemo(() => new Set(columns.map((c) => c.id)), [columns]);
   const keepFields = useMemo(
     () => visibleColumns.filter((id) => !isGridColumnId(id)),
     [visibleColumns]

@@ -22,6 +22,7 @@ import {
   buildCursorClause,
 } from '../common';
 import type { QueryArgs, RunContext, Row, TimeRange, ColumnDescriptor } from '../common';
+import { isAbortError } from '../../../../../common/utils/exceptions';
 
 const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
 
@@ -97,7 +98,10 @@ const enrichRiskScoreChange = async (
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   const rows = await runQuery(
     buildReferenceScoreEnrichQuery(namespace, entityIds, timeRange)
-  ).catch(() => null);
+  ).catch((err) => {
+    if (isAbortError(err)) throw err;
+    return null;
+  });
   if (!rows) return;
 
   const byId = new Map(rows.map((r) => [r.entity_id as string, r.reference_score as number]));

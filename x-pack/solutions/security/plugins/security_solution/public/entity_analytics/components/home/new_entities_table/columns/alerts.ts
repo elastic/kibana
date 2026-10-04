@@ -26,6 +26,7 @@ import {
   buildAlertEuidPipeline,
 } from '../common';
 import type { QueryArgs, Row, RunContext, ColumnDescriptor } from '../common';
+import { isAbortError } from '../../../../../common/utils/exceptions';
 
 const alertsIndexOf = (namespace: string) => `.alerts-security.alerts-${namespace}`;
 
@@ -243,7 +244,10 @@ const enrichAlerts = async (
       alertLookbackCutoff(timeRange),
       legacyIdentityClause
     )
-  ).catch(() => null);
+  ).catch((err) => {
+    if (isAbortError(err)) throw err;
+    return null;
+  });
   if (!rows) return;
 
   const byId = buildAlertBuckets(rows);

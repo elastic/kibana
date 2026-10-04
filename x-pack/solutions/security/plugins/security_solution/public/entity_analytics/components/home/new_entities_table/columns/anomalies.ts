@@ -22,6 +22,7 @@ import {
   buildEuidStages,
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
+import { isAbortError } from '../../../../../common/utils/exceptions';
 
 const ML_ANOMALY_INDICES = '.ml-anomalies-*';
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
@@ -114,7 +115,10 @@ const enrichAnomalyCount = async (
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   if (!entityIds.length) return;
 
-  const rows = await runQuery(buildAnomalyCountEnrichQuery(args, entityIds)).catch(() => null);
+  const rows = await runQuery(buildAnomalyCountEnrichQuery(args, entityIds)).catch((err) => {
+    if (isAbortError(err)) throw err;
+    return null;
+  });
   if (!rows) return;
 
   const byId = new Map(

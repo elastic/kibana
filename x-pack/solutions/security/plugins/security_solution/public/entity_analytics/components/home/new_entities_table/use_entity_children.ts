@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQueries, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -23,10 +22,10 @@ import {
   RISK_SCORE_NORM_FIELD,
   buildKeepClause,
   enrichEntityRows,
-  esqlResponseToRows,
+  createEsqlRunner,
   esc,
 } from './common';
-import type { QueryArgs, EsqlRunner, Row } from './common';
+import type { QueryArgs, Row } from './common';
 import { ENRICH_FNS } from './columns/registry';
 
 const isMapEntriesEqual = (
@@ -76,6 +75,7 @@ interface FetchEntityChildrenParams {
   searchService: DataPublicPluginStart['search'];
   http: HttpSetup;
   keepFields?: readonly string[];
+  signal?: AbortSignal;
 }
 
 const fetchEntityChildrenShell = async ({
@@ -83,11 +83,9 @@ const fetchEntityChildrenShell = async ({
   spaceId,
   searchService,
   keepFields,
+  signal,
 }: FetchEntityChildrenParams): Promise<Row[]> => {
-  const runQuery: EsqlRunner = async (query) =>
-    esqlResponseToRows(
-      await lastValueFrom(searchService.search({ params: { query } }, { strategy: 'esql_async' }))
-    );
+  const runQuery = createEsqlRunner(searchService, signal);
 
   const rows = await runQuery(buildChildQuery(spaceId, entityId, keepFields));
   for (const row of rows) row[GROUP_SIZE_FIELD] = 1;
@@ -96,12 +94,16 @@ const fetchEntityChildrenShell = async ({
 
 const enrichEntityChildren = async (
   rows: Row[],
-  { timeRange, spaceId, concreteEntityIndexName, searchService, http }: FetchEntityChildrenParams
+  {
+    timeRange,
+    spaceId,
+    concreteEntityIndexName,
+    searchService,
+    http,
+    signal,
+  }: FetchEntityChildrenParams
 ): Promise<Row[]> => {
-  const runQuery: EsqlRunner = async (query) =>
-    esqlResponseToRows(
-      await lastValueFrom(searchService.search({ params: { query } }, { strategy: 'esql_async' }))
-    );
+  const runQuery = createEsqlRunner(searchService, signal);
 
   const args: QueryArgs = {
     namespace: spaceId,
@@ -117,7 +119,7 @@ const enrichEntityChildren = async (
     rows,
     args,
     new Set<string>([GROUP_SIZE_FIELD]),
-    { runQuery, http },
+    { runQuery, http, signal },
     ENRICH_FNS
   );
 };
@@ -170,9 +172,9 @@ export const useEntityChildren = ({
         concreteEntityIndexName ?? '',
         keepFieldsKey
       ),
-      queryFn: () => {
+      queryFn: ({ signal }) => {
         if (!fetchParams) throw new Error('entity store index not resolved');
-        return fetchEntityChildrenShell({ ...fetchParams, entityId });
+        return fetchEntityChildrenShell({ ...fetchParams, entityId, signal });
       },
       enabled: !!fetchParams,
       staleTime: CHILDREN_STALE_TIME_MS,
@@ -199,11 +201,11 @@ export const useEntityChildren = ({
           keepFieldsKey,
           shell?.dataUpdatedAt ?? 0,
         ],
-        queryFn: () => {
+        queryFn: ({ signal }) => {
           if (!fetchParams) throw new Error('entity store index not resolved');
           const rows = queryClient.getQueryData<Row[]>(shellKey) ?? shell?.data;
           if (!rows) return [];
-          return enrichEntityChildren(rows, { ...fetchParams, entityId });
+          return enrichEntityChildren(rows, { ...fetchParams, entityId, signal });
         },
         enabled: !!fetchParams && shell?.isSuccess === true,
         staleTime: CHILDREN_STALE_TIME_MS,
@@ -249,7 +251,7 @@ export const useEntityChildren = ({
           fetchParams.concreteEntityIndexName,
           keepFieldsKey
         ),
-        queryFn: () => fetchEntityChildrenShell({ ...fetchParams, entityId }),
+        queryFn: ({ signal }) => fetchEntityChildrenShell({ ...fetchParams, entityId, signal }),
         staleTime: CHILDREN_STALE_TIME_MS,
       });
     },
