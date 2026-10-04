@@ -119,7 +119,7 @@ deploy() {
 
     echo "Write to vault..."
 
-    set_in_legacy_vault "$VAULT_KEY_NAME" \
+    set_deployment_credentials "$VAULT_KEY_NAME" \
      username="$PROJECT_USERNAME" \
      password="$PROJECT_PASSWORD" \
      id="$PROJECT_ID"
@@ -143,7 +143,7 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
-  VAULT_READ_COMMAND=$(print_legacy_vault_read "$VAULT_KEY_NAME")
+  VAULT_READ_COMMAND=$(print_deployment_credentials_read "$VAULT_KEY_NAME")
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment

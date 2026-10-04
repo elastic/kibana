@@ -10,11 +10,11 @@ source .buildkite/scripts/common/vault_fns.sh
 # ./deployment_credentials.sh print <key-path>
 
 if [[ "${1:-}" == "set" ]]; then
-  set_in_legacy_vault "${@:2}"
+  set_deployment_credentials "${@:2}"
 elif [[ "${1:-}" == "unset" ]]; then
-  unset_in_legacy_vault "${@:2}"
+  unset_deployment_credentials "${@:2}"
 elif [[ "${1:-}" == "print" ]]; then
-  print_legacy_vault_read "${2}"
+  print_deployment_credentials_read "${2}"
 else
   echo "Unknown command: $1"
   exit 1
