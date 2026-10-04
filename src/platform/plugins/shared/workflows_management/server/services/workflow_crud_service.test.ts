@@ -3996,13 +3996,14 @@ describe('managed orphan cleanup without a request', () => {
       bindings,
       client,
       source,
+      deps,
       getWorkflowExecutions,
       service: new WorkflowCrudService(deps),
     };
   };
 
   describe('deleteManagedOrphan', () => {
-    it('releases the expected binding, then deletes the observed revision', async () => {
+    it('deletes the observed revision, then releases the expected binding', async () => {
       const { core, bindings, client, service } = setup();
 
       await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
@@ -4022,8 +4023,8 @@ describe('managed orphan cleanup without a request', () => {
       expect(deleteDocument).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'system-orphan', if_seq_no: 6, if_primary_term: 1 })
       );
-      expect(bindings.unbindWorkloadForDeletion.mock.invocationCallOrder[0]).toBeLessThan(
-        deleteDocument.mock.invocationCallOrder[0]
+      expect(deleteDocument.mock.invocationCallOrder[0]).toBeLessThan(
+        bindings.unbindWorkloadForDeletion.mock.invocationCallOrder[0]
       );
       expect(bindings.unbindWorkload).not.toHaveBeenCalled();
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
@@ -4050,27 +4051,41 @@ describe('managed orphan cleanup without a request', () => {
       expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
     });
 
-    it('keeps the binding of an orphan with running executions', async () => {
+    it('keeps the binding when a run is found after the disable', async () => {
       const { core, bindings, client, getWorkflowExecutions, service } = setup();
       getWorkflowExecutions.mockResolvedValue({ total: 1, results: [] });
 
       await expect(
         service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)
       ).rejects.toBeInstanceOf(WorkflowConflictError);
-      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
-      expect(client.index).not.toHaveBeenCalled();
+
+      // The disable write, then the restore of the original document.
+      expect(client.index).toHaveBeenCalledTimes(2);
       expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
     });
 
-    it('does not delete when the binding names another account', async () => {
-      const { core, bindings, client, service } = setup();
-      bindings.unbindWorkloadForDeletion.mockRejectedValue(new Error('binding mismatch'));
+    it('keeps the binding when a concurrent save wins the guarded delete', async () => {
+      const { core, bindings, service } = setup();
+      core.elasticsearch.client.asInternalUser.delete.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
 
       await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).rejects.toThrow(
-        'binding mismatch'
+        'version conflict'
       );
-      expect(client.index).not.toHaveBeenCalled();
-      expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkloadForDeletion).not.toHaveBeenCalled();
+    });
+
+    it('reports the delete and warns when the binding cannot be released', async () => {
+      const { core, bindings, deps, service } = setup();
+      bindings.unbindWorkloadForDeletion.mockRejectedValue(new Error('binding mismatch'));
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        true
+      );
+      expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalled();
+      expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('binding mismatch'));
     });
 
     it.each([

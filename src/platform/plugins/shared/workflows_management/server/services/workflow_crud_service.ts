@@ -1360,8 +1360,8 @@ export class WorkflowCrudService {
   }
 
   /**
-   * Force-deletes a managed orphan without a request, first releasing its service account
-   * binding. Resolves to whether a workflow was deleted.
+   * Force-deletes a managed orphan without a request, then releases its service account binding.
+   * Resolves to whether a workflow was deleted.
    */
   async deleteManagedOrphan(
     id: string,
@@ -1374,26 +1374,26 @@ export class WorkflowCrudService {
     if (!versioned) return false;
     const source = ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
     const accountId = source.definition?.settings?.run_as;
-    if (accountId) {
-      const bindings = this.deps.getServiceAccountBindings?.();
-      if (!bindings) throw new Error('Service account bindings are unavailable.');
-      const executions = await this.deps.executionQueryService.getWorkflowExecutions(
-        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-        spaceId
-      );
-      if (executions.total > 0) {
-        throw new WorkflowConflictError(
-          `Cannot force-delete workflow with running executions: ${id}`,
-          id
-        );
-      }
-      // Unbinding first fails closed: if the delete below loses a race, the workflow still names
-      // `run_as` but has no binding, so it cannot run until the next sweep removes it.
-      await releaseManagedOrphanBinding({ bindings, workflowId: id, spaceId, accountId });
-    }
+    const bindings = this.deps.getServiceAccountBindings?.();
+    if (accountId && !bindings) throw new Error('Service account bindings are unavailable.');
+
+    // Disables, re-checks executions, then deletes only this revision. The binding is released
+    // afterwards so a retained run or a concurrently saved revision never loses its identity.
     const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
     if (result.deleted !== 1) {
       throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
+    }
+
+    if (accountId && bindings) {
+      try {
+        await releaseManagedOrphanBinding({ bindings, workflowId: id, spaceId, accountId });
+      } catch (error) {
+        this.deps.logger.warn(
+          `Deleted managed workflow orphan '${id}' in space '${spaceId}', but could not release its service account binding: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
     }
     return true;
   }
