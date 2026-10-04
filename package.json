@@ -1550,7 +1550,7 @@
     "langsmith": "0.7.1",
     "liquidjs": "10.28.0",
     "lodash": "4.18.1",
-    "lru-cache": "11.5.2",
+    "lru-cache": "11.5.3",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
