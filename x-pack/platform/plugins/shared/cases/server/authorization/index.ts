@@ -15,6 +15,9 @@ import {
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_TASK_SAVED_OBJECT,
+  CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  CASE_TASK_COMMENT_SAVED_OBJECT,
 } from '../../common/constants';
 import type { Verbs, OperationDetails } from './types';
 import { ReadOperations, WriteOperations } from './types';
@@ -356,6 +359,139 @@ const AttachmentOperations = {
   },
 };
 
+// Tasks reuse the case privileges: read, update (create/edit/reorder/apply), delete.
+// Task lists reuse the settings privilege, like the configuration.
+const ACCESS_TASK_OPERATION: CasesSupportedOperations = 'getCase';
+
+const TaskOperations = {
+  [ReadOperations.GetTask]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TASK_OPERATION,
+    action: 'case_task_get',
+    verbs: accessVerbs,
+    docType: 'task',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+  [ReadOperations.FindTasks]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TASK_OPERATION,
+    action: 'case_task_find',
+    verbs: accessVerbs,
+    docType: 'tasks',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+  [WriteOperations.CreateTask]: {
+    ecsType: EVENT_TYPES.creation,
+    name: WriteOperations.UpdateCase as const,
+    action: 'case_task_create',
+    verbs: createVerbs,
+    docType: 'task',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateTask]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.UpdateCase as const,
+    action: 'case_task_update',
+    verbs: updateVerbs,
+    docType: 'task',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteTask]: {
+    ecsType: EVENT_TYPES.deletion,
+    name: WriteOperations.DeleteCase as const,
+    action: 'case_task_delete',
+    verbs: deleteVerbs,
+    docType: 'task',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+  [WriteOperations.ReorderTasks]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.UpdateCase as const,
+    action: 'case_task_reorder',
+    verbs: updateVerbs,
+    docType: 'tasks',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+  [WriteOperations.ApplyTaskTemplate]: {
+    ecsType: EVENT_TYPES.creation,
+    name: WriteOperations.UpdateCase as const,
+    action: 'case_task_apply_template',
+    verbs: createVerbs,
+    docType: 'tasks',
+    savedObjectType: CASE_TASK_SAVED_OBJECT,
+  },
+};
+
+const TaskCommentOperations = {
+  [ReadOperations.GetTaskComments]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.GetComment as const,
+    action: 'case_task_comment_get',
+    verbs: accessVerbs,
+    docType: 'task comments',
+    savedObjectType: CASE_TASK_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.CreateTaskComment]: {
+    ecsType: EVENT_TYPES.creation,
+    name: WriteOperations.CreateComment as const,
+    action: 'case_task_comment_create',
+    verbs: createVerbs,
+    docType: 'task comment',
+    savedObjectType: CASE_TASK_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteTaskComment]: {
+    ecsType: EVENT_TYPES.deletion,
+    name: WriteOperations.DeleteComment as const,
+    action: 'case_task_comment_delete',
+    verbs: deleteVerbs,
+    docType: 'task comment',
+    savedObjectType: CASE_TASK_COMMENT_SAVED_OBJECT,
+  },
+};
+
+const TaskTemplateOperations = {
+  [ReadOperations.GetTaskTemplate]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TASK_OPERATION,
+    action: 'case_task_template_get',
+    verbs: accessVerbs,
+    docType: 'task template',
+    savedObjectType: CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindTaskTemplates]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TASK_OPERATION,
+    action: 'case_task_template_find',
+    verbs: accessVerbs,
+    docType: 'task templates',
+    savedObjectType: CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  },
+  [WriteOperations.CreateTaskTemplate]: {
+    ecsType: EVENT_TYPES.creation,
+    name: WriteOperations.CreateConfiguration as const,
+    action: 'case_task_template_create',
+    verbs: createVerbs,
+    docType: 'task template',
+    savedObjectType: CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  },
+  [WriteOperations.UpdateTaskTemplate]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.UpdateConfiguration as const,
+    action: 'case_task_template_update',
+    verbs: updateVerbs,
+    docType: 'task template',
+    savedObjectType: CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteTaskTemplate]: {
+    ecsType: EVENT_TYPES.deletion,
+    name: WriteOperations.UpdateConfiguration as const,
+    action: 'case_task_template_delete',
+    verbs: deleteVerbs,
+    docType: 'task template',
+    savedObjectType: CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  },
+};
+
 /**
  * Definition of all APIs within the cases backend.
  */
@@ -364,6 +500,9 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   ...TemplateOperations,
   ...ConfigurationOperations,
   ...AttachmentOperations,
+  ...TaskOperations,
+  ...TaskCommentOperations,
+  ...TaskTemplateOperations,
   [ReadOperations.GetTags]: {
     ecsType: EVENT_TYPES.access,
     name: ReadOperations.GetTags as const,

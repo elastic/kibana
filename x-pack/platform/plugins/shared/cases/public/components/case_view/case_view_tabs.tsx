@@ -11,7 +11,7 @@ import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
-import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
+import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB, TASKS_TAB } from './translations';
 import { type CaseUI } from '../../../common';
 import {
   ATTACHMENT_TAB_ALIASES,
@@ -22,6 +22,9 @@ import {
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useAttachmentsTabClickedEBT } from '../../analytics/use_attachments_tab_ebt';
+import { useGetCaseTasks } from '../../containers/use_case_tasks';
+import { isTaskFinished } from '../tasks/tasks_table';
+import { COMPLETION_ARIA as TASKS_COMPLETION_ARIA } from '../tasks/translations';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -40,8 +43,15 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
 
   const { euiTheme } = useEuiTheme();
 
-  const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
-    useCasesFeatures();
+  const {
+    observablesAuthorized: canShowObservableTabs,
+    isObservablesFeatureEnabled,
+    tasksAuthorized,
+  } = useCasesFeatures();
+
+  const { data: tasksData } = useGetCaseTasks(caseData.id, { enabled: tasksAuthorized });
+  const totalTasks = tasksData?.tasks.length ?? 0;
+  const completedTasks = tasksData?.tasks.filter(isTaskFinished).length ?? 0;
 
   const { data: similarCasesData } = useGetSimilarCases({
     caseId: caseData.id,
@@ -80,8 +90,34 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
+      ...(tasksAuthorized
+        ? [
+            {
+              id: CASE_VIEW_PAGE_TABS.TASKS,
+              name: TASKS_TAB,
+              badge: (
+                <AttachmentsBadge
+                  isActive={activeTab === CASE_VIEW_PAGE_TABS.TASKS}
+                  euiTheme={euiTheme}
+                  count={totalTasks === 0 ? 0 : `${completedTasks}/${totalTasks}`}
+                  aria-label={TASKS_COMPLETION_ARIA(completedTasks, totalTasks)}
+                  dataTestSubj="case-view-tasks-badge"
+                />
+              ),
+            },
+          ]
+        : []),
     ],
-    [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]
+    [
+      activeTab,
+      euiTheme,
+      isAttachmentsTabActive,
+      completedTasks,
+      totalTasks,
+      similarCasesData?.total,
+      tasksAuthorized,
+      totalAttachments,
+    ]
   );
 
   const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();

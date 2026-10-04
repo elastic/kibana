@@ -198,6 +198,10 @@ export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.simil
   defaultMessage: 'Similar cases',
 });
 
+export const TASKS_TAB = i18n.translate('xpack.cases.caseView.tabs.tasks', {
+  defaultMessage: 'Tasks',
+});
+
 export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.caseView.editAssigneesAriaLabel',
   {

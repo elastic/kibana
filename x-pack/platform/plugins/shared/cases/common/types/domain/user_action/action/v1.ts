@@ -32,6 +32,10 @@ export const UserActionTypes = {
   extended_fields: 'extended_fields',
   template: 'template',
   workflow: 'workflow',
+  create_task: 'create_task',
+  update_task: 'update_task',
+  delete_task: 'delete_task',
+  apply_task_template: 'apply_task_template',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

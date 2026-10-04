@@ -440,4 +440,16 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: fieldLibrarySolutionTelemetrySchema,
     main: fieldLibrarySolutionTelemetrySchema,
   },
+  tasks: {
+    total: long,
+    byStatus: {
+      open: long,
+      inProgress: long,
+      completed: long,
+      cancelled: long,
+    },
+    casesWithTasks: long,
+    fromTaskList: long,
+    taskLists: long,
+  },
 };

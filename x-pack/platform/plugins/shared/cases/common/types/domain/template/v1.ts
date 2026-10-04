@@ -13,6 +13,7 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TITLE_LENGTH,
+  MAX_TASK_LISTS_PER_TEMPLATE,
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
 import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
@@ -172,6 +173,8 @@ export const ParsedTemplateDefinitionSchema = z.object({
   connector: CaseConnectorWithoutNameSchema.optional(),
   /** Default case settings (syncAlerts / extractObservables) applied when creating a case. */
   settings: TemplateSettingsSchema.optional(),
+  /** Ids of task lists whose tasks are added to a case created from this template. */
+  task_lists: z.array(z.string().min(1)).max(MAX_TASK_LISTS_PER_TEMPLATE).optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(

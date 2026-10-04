@@ -40,6 +40,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Internal routes
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
+    loadTestFile(require.resolve('./internal/tasks'));
 
     // Common
     loadTestFile(require.resolve('../common'));

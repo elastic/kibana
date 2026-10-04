@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { CASE_TASKS_REORDER_URL } from '../../../../common/constants';
+import type { taskApiV1 } from '../../../../common/types/api';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+
+export const reorderTasksRoute = createCasesRoute({
+  method: 'put',
+  path: CASE_TASKS_REORDER_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
+  routerOptions: {
+    access: 'internal',
+    summary: 'Reorder the tasks of a case',
+  },
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const casesClient = await (await context.cases).getCasesClient();
+      const { task_ids: taskIds } = request.body as taskApiV1.TasksReorderRequest;
+      await casesClient.tasks.reorder(request.params.case_id, taskIds);
+      return response.noContent();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to reorder the tasks of a case in route: ${error}`,
+        error,
+      });
+    }
+  },
+});
