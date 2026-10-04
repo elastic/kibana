@@ -258,8 +258,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(value).to.eql('.es()');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/244933
-      describe.skip('dynamic suggestions for argument values', () => {
+      describe('dynamic suggestions for argument values', () => {
         describe('.es()', () => {
           it('should show index pattern suggestions for index argument', async () => {
             await monacoEditor.setCodeEditorValue('');
@@ -279,6 +278,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               '.es(index=logstash-*, timefield=',
               'timelionCodeEditor'
             );
+            // wait for date fields to load
+            await common.sleep(500);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
