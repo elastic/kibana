@@ -200,6 +200,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'data-exploration',
   'visualization-creation',
   'graph-creation',
+  'change-point-detection',
   'agent-builder-traces',
   'proposal-management',
 

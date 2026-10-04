@@ -13,7 +13,15 @@
 
 import { orderBy } from 'lodash';
 import type { FormBasedPersistedState } from '@kbn/lens-common';
+import { parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import type { LensAttributes } from '../../../../types';
+import type { APIAdHocDataView } from '../../../../transforms/columns/types';
+import {
+  LENS_DEFAULT_TIME_FIELD,
+  LENS_ESQL_ANNOTATION_DATA_VIEW_ID_SUFFIX,
+  LENS_XY_ANNOTATION_LAYER_SUFFIX,
+} from '../../../../transforms/constants';
+import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
 import type { IdRemapping } from './common';
@@ -182,6 +190,66 @@ const alignIds: NormalizerConfig<XYAttributes> = {
     return attributes;
   },
 };
+
+/**
+ * Mirrors the companion regular data view that `fromAPItoLensState` adds for annotation
+ * layers on ES|QL charts. The API form has no data_source for manual annotations, so a
+ * state → API → state round trip always re-derives this view.
+ */
+function alignEsqlAnnotationCompanionDataView(attributes: XYAttributes) {
+  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+  const esqlQuery = textBasedLayers.find((layer) => layer.query?.esql)?.query?.esql;
+  const adHocDataViews = attributes.state.adHocDataViews ?? {};
+  const hasEsqlDataView = Object.values(adHocDataViews).some(
+    (dataView) => (dataView as { type?: string }).type === 'esql'
+  );
+  if (!esqlQuery || !hasEsqlDataView) {
+    return;
+  }
+
+  const viz = attributes.state.visualization as { layers?: Array<Record<string, unknown>> };
+  const annotationLayers = (viz.layers ?? []).filter(
+    (layer) =>
+      layer.layerType === 'annotations' &&
+      layer.persistanceType !== 'byReference' &&
+      layer.annotationGroupId == null
+  );
+  if (annotationLayers.length === 0) {
+    return;
+  }
+
+  const index = textBasedLayers
+    .map((layer) => layer.index)
+    .map((layerIndex) => adHocDataViews[layerIndex ?? '']?.title)
+    .find((title): title is string => typeof title === 'string');
+  if (!index) {
+    return;
+  }
+
+  const regularDataView: APIAdHocDataView = {
+    type: 'adHocDataView',
+    index,
+    timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery) || LENS_DEFAULT_TIME_FIELD,
+  };
+  const annotationDataViewId = `${generateAdHocDataViewId(regularDataView)}${LENS_ESQL_ANNOTATION_DATA_VIEW_ID_SUFFIX}`;
+  attributes.state.adHocDataViews = {
+    ...adHocDataViews,
+    [annotationDataViewId]: {
+      ...getAdHocDataViewSpec(regularDataView),
+      id: annotationDataViewId,
+    },
+  };
+
+  const refs = [...(attributes.state.internalReferences ?? [])];
+  for (const layer of annotationLayers) {
+    layer.indexPatternId = annotationDataViewId;
+    const name = `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layer.layerId}`;
+    if (!refs.some((ref) => ref.name === name && ref.id === annotationDataViewId)) {
+      refs.push({ id: annotationDataViewId, name, type: 'index-pattern' });
+    }
+  }
+  attributes.state.internalReferences = refs;
+}
 
 // Drop/normalize legacy properties and add defaults to match transform output
 const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
@@ -516,6 +584,11 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         (ref) => !droppedLayerIds.has(ref.name.replace('indexpattern-datasource-layer-', ''))
       );
     }
+
+    // ES|QL charts route annotation layers to a companion regular ad-hoc data view so Lens
+    // does not initialize an ES|QL text-based context for them. The API omits that data view
+    // (manual annotations have no data_source), and fromAPIFormat re-derives it.
+    alignEsqlAnnotationCompanionDataView(attributes);
 
     // External index-pattern refs with raw index-pattern IDs (e.g. "logs-*") that match
     // an adHocDataViews entry are treated as adhoc by the transform and dropped from external refs.

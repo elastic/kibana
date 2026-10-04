@@ -10,6 +10,7 @@
 import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type {
+  AnnotationLayerESQLType,
   AnnotationLayerType,
   DataLayerType,
   LayerTypeESQL,
@@ -44,7 +45,9 @@ export function getIdForLayer(layer: XYLayer, i: number) {
   return `${layer.type}_${i}`;
 }
 
-export function isAPIAnnotationLayer(layer: XYLayer): layer is AnnotationLayerType {
+export function isAPIAnnotationLayer(
+  layer: XYLayer
+): layer is AnnotationLayerType | AnnotationLayerESQLType {
   return XY_ANNOTATION_LAYER_TYPES.some((annotationType) => annotationType === layer.type);
 }
 
