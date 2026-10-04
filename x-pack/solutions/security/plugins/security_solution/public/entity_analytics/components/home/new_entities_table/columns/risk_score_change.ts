@@ -98,6 +98,8 @@ const enrichRiskScoreChange = async (
   if (skip.has(RISK_SCORE_CHANGE_FIELD)) return;
 
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  if (!entityIds.length) return;
+
   const rows = await runQuery(
     buildReferenceScoreEnrichQuery(namespace, entityIds, timeRange)
   ).catch((err) => {
