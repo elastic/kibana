@@ -72,6 +72,11 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       owner: {
         type: 'keyword',
       },
+      // Added in model version 2: allows counting/cardinality of workflow tag configurations
+      // in telemetry. Tag values are never reported — only existence and count.
+      workflowTags: {
+        type: 'keyword',
+      },
       /*
       updated_at: {
         type: 'date',
@@ -99,6 +104,22 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
   modelVersions: {
     '1': {
       changes: [],
+      schemas: {
+        forwardCompatibility: (attrs) => attrs,
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            // Allows existence/cardinality aggregations over workflow tag configurations in telemetry.
+            // Tag values are never reported — only whether tags are set and how many.
+            workflowTags: { type: 'keyword' },
+          },
+        },
+      ],
       schemas: {
         forwardCompatibility: (attrs) => attrs,
         create: schema.object({}, { unknowns: 'allow' }),

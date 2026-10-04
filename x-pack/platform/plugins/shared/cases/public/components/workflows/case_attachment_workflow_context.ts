@@ -17,6 +17,8 @@ export type CaseAttachmentWorkflowContextValue =
   | {
       status: 'available';
       caseId: string;
+      /** Solution owner reported with the run telemetry, resolved inside the Cases tree. */
+      owner: string;
       /**
        * Builds a Cases-routed executor for this case. The executor's services are resolved by the
        * provider, inside the Cases tree, so surfaces owned by other plugins can call it from their own tree.

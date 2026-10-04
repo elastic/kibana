@@ -365,6 +365,42 @@ export interface CasesTelemetry {
   };
   templates: TemplatesTelemetry;
   fieldLibrary: FieldLibraryTelemetry;
+  workflows: {
+    /** Total and time-bucketed workflow run counts (one per case per execution). */
+    runs: Count;
+    /** Number of distinct cases that have had at least one workflow run. */
+    totalCasesWithRuns: number;
+    /** Cardinality of distinct usernames that have triggered a workflow from a case. */
+    totalUniqueUsers: number;
+    /**
+     * Breakdown of runs by origin surface. `unattributed` is the residual: runs whose origin was
+     * absent (cases-list bulk runs) plus any run with an unrecognised origin type. Derived as
+     * `max(0, total − sum(attributed buckets))`.
+     *
+     * The client EBT event carries the same dimension as `origin_type` but with a `cases.` prefix
+     * on each attributed value (e.g. `cases.observable` here becomes `observable`).
+     */
+    byOriginType: {
+      case: number;
+      observable: number;
+      observables: number;
+      attachment: number;
+      attachments: number;
+      unattributed: number;
+    };
+    /**
+     * Breakdown of attachment-origin runs (`byOriginType.attachment` + `byOriginType.attachments`)
+     * by attachment type. `other` is the residual for any other registered attachment type that
+     * supports workflow origins.
+     */
+    byAttachmentType: {
+      alert: number;
+      event: number;
+      other: number;
+    };
+    /** Number of case configurations that have at least one workflow tag set. */
+    configurationsWithWorkflowTags: number;
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
