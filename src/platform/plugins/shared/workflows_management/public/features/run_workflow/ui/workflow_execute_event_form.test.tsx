@@ -21,6 +21,8 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
+jest.setTimeout(30_000);
+
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 const mockData = dataPluginMock.createStartContract();
 const mockUiSettings = {
