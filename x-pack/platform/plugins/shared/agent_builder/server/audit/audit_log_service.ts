@@ -14,9 +14,11 @@ import { asError } from '../utils/as_error';
 import {
   AgentBuilderAuditAction,
   agentAuditEvent,
+  conversationAuditEvent,
   skillAuditEvent,
   toolAuditEvent,
   type AgentAuditEventParams,
+  type ConversationAuditEventParams,
   type SkillAuditEventParams,
   type ToolAuditEventParams,
 } from './audit_events';
@@ -54,6 +56,19 @@ export class AuditLogService {
         error: asError(error),
       });
     }
+  }
+
+  logConversationCreated(
+    request: KibanaRequest,
+    params: Omit<ConversationAuditEventParams, 'action'>
+  ): void {
+    this.log(
+      request,
+      conversationAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+      })
+    );
   }
 
   logAgentCreated(request: KibanaRequest, params: Omit<AgentAuditEventParams, 'action'>): void {

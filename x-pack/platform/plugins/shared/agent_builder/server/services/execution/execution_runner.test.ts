@@ -623,6 +623,59 @@ describe('handleAgentExecution', () => {
 
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
+
+    it('acts as the execution owner, keeping a service account typed', async () => {
+      const owner = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+      const deps = createDeps({ conversationClient });
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          owner,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps,
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+
+      const { conversationService } = deps as unknown as {
+        conversationService: { getScopedClientAsUser: jest.Mock };
+      };
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
+        expect.objectContaining({ user: { ...owner, isAdmin: false } })
+      );
+    });
   });
 
   describe('converse span user identity', () => {

@@ -27,7 +27,13 @@ const createService = ({
   agents = {},
   attachments = { getTypeDefinition: jest.fn() },
   eventBus,
-}: { agents?: object; attachments?: object; eventBus?: object } = {}) => {
+  auditLogService,
+}: {
+  agents?: object;
+  attachments?: object;
+  eventBus?: object;
+  auditLogService?: object;
+} = {}) => {
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
     security: {} as never,
@@ -39,6 +45,7 @@ const createService = ({
     agents: agents as never,
     conversationEvents: { getDefinition: jest.fn(), list: jest.fn().mockReturnValue([]) },
     ...(eventBus ? { eventBus: eventBus as never } : {}),
+    ...(auditLogService ? { auditLogService: auditLogService as never } : {}),
   });
 };
 
@@ -69,6 +76,27 @@ describe('ConversationServiceImpl', () => {
       await createService({ agents }).getScopedClient({ request });
 
       expect(createClientMock.mock.calls[0][0].eventEmitter).toBeUndefined();
+    });
+
+    it('audits a created conversation against the request', async () => {
+      const auditLogService = { logConversationCreated: jest.fn() };
+      await createService({ agents, auditLogService }).getScopedClient({ request });
+
+      const { onConversationCreated } = createClientMock.mock.calls[0][0];
+      const user = { id: 'profile-1', username: 'jane' };
+      onConversationCreated!({ conversationId: 'conv-1', agentId: 'agent-1', user });
+
+      expect(auditLogService.logConversationCreated).toHaveBeenCalledWith(request, {
+        conversationId: 'conv-1',
+        agentId: 'agent-1',
+        user,
+      });
+    });
+
+    it('leaves onConversationCreated undefined without an audit log service', async () => {
+      await createService({ agents }).getScopedClient({ request });
+
+      expect(createClientMock.mock.calls[0][0].onConversationCreated).toBeUndefined();
     });
 
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {

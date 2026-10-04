@@ -11,6 +11,7 @@ import {
   AUDIT_TYPE,
   AgentBuilderAuditAction,
   agentAuditEvent,
+  conversationAuditEvent,
   toolAuditEvent,
 } from './audit_events';
 
@@ -108,6 +109,58 @@ describe('Agent Builder audit event builders', () => {
           type: [AUDIT_TYPE.DELETION],
           outcome: AUDIT_OUTCOME.SUCCESS,
         },
+      });
+    });
+  });
+
+  describe('conversationAuditEvent', () => {
+    it('returns a creation audit event naming the conversation and its agent', () => {
+      const event = conversationAuditEvent({
+        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+        conversationId: 'conv-1',
+        agentId: 'agent-1',
+      });
+
+      expect(event).toMatchObject({
+        message: 'User has created conversation [id=conv-1, agent=agent-1]',
+        event: {
+          action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+          category: [AUDIT_CATEGORY.DATABASE],
+          type: [AUDIT_TYPE.CREATION],
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+    });
+
+    it('names a service account and carries it as fallback attribution', () => {
+      const event = conversationAuditEvent({
+        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+        conversationId: 'conv-1',
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+      });
+
+      expect(event.message).toBe('Service account has created conversation [id=conv-1]');
+      expect(event.user).toEqual({
+        id: 'service_account:kibana/automation',
+        name: 'kibana/automation',
+      });
+    });
+
+    it('records a failure when creation errored', () => {
+      const event = conversationAuditEvent({
+        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+        conversationId: 'conv-1',
+        error: new Error('nope'),
+      });
+
+      expect(event).toMatchObject({
+        message: 'Failed attempt to create conversation [id=conv-1]',
+        event: { outcome: AUDIT_OUTCOME.FAILURE },
+        error: { message: 'nope' },
       });
     });
   });

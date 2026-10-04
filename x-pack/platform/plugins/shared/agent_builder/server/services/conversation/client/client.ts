@@ -22,6 +22,7 @@ import type {
 import {
   type ConversationEvent,
   type CurrentUser,
+  type UserIdAndName,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
@@ -32,7 +33,6 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  EventActorType,
   isConversationAccessControlRole,
   isPublicConversation,
   normalizeConversationAccessControl,
@@ -108,6 +108,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { currentUserActor } from './rounds_to_events';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
@@ -246,6 +247,13 @@ interface ConversationListEsResponse {
   };
 }
 
+export type OnConversationCreated = (params: {
+  conversationId: string;
+  agentId: string;
+  user: UserIdAndName;
+  error?: Error;
+}) => void;
+
 export const createClient = ({
   space,
   logger,
@@ -254,6 +262,7 @@ export const createClient = ({
   agentRegistry,
   conversationEvents,
   eventEmitter,
+  onConversationCreated,
 }: {
   space: string;
   logger: Logger;
@@ -262,6 +271,7 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
+  onConversationCreated?: OnConversationCreated;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -273,6 +283,7 @@ export const createClient = ({
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
   });
 };
 
@@ -307,6 +318,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
+  private readonly onConversationCreated?: OnConversationCreated;
 
   constructor({
     storage,
@@ -317,6 +329,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -326,6 +339,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
+    onConversationCreated?: OnConversationCreated;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -335,6 +349,7 @@ class ConversationClientImpl implements ConversationClient {
     this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
+    this.onConversationCreated = onConversationCreated;
   }
 
   /**
@@ -678,6 +693,20 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
+    // Not done at the route layer: converse creates conversations implicitly too.
+    const notifyCreated = (error?: Error) => {
+      try {
+        this.onConversationCreated?.({
+          conversationId: id,
+          agentId: conversation.agent_id,
+          user: { id: this.user.id, username: this.user.username, type: this.user.type },
+          ...(error ? { error } : {}),
+        });
+      } catch (notifyError) {
+        this.logger.warn(`Failed to notify creation of conversation "${id}": ${notifyError}`);
+      }
+    };
+
     let indexed: { _seq_no?: number; _primary_term?: number };
     try {
       indexed = await this.storage.getClient().index({
@@ -687,11 +716,11 @@ class ConversationClientImpl implements ConversationClient {
         refresh: true,
       });
     } catch (error) {
-      if (isVersionConflictError(error)) {
-        throw createConversationAlreadyExistsError({ conversationId: id });
-      }
-
-      throw error;
+      const failure = isVersionConflictError(error)
+        ? createConversationAlreadyExistsError({ conversationId: id })
+        : error;
+      notifyCreated(failure instanceof Error ? failure : new Error(String(failure)));
+      throw failure;
     }
 
     if (indexed._seq_no === undefined || indexed._primary_term === undefined) {
@@ -699,6 +728,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     this.notifyAttachmentEvents(id, conversation.events ?? []);
+    notifyCreated();
 
     return this.get(id);
   }
@@ -727,12 +757,7 @@ class ConversationClientImpl implements ConversationClient {
     id: string;
     events: ConversationAddEventInput[];
   }): Promise<ConversationEvent[]> {
-    const { id: userId, username } = this.getUser();
-    const actor = {
-      type: EventActorType.user,
-      id: userId ?? username,
-      ...(username ? { username } : {}),
-    };
+    const actor = currentUserActor(this.getUser());
     const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
     const materialized = materializeConversationEvents({
       events: validatedEvents,
@@ -1205,9 +1230,9 @@ class ConversationClientImpl implements ConversationClient {
       return originAuthor;
     }
 
-    const { id, username } = this.getUser();
+    const { id, username, type } = this.getUser();
 
-    return id === undefined ? undefined : { id, username };
+    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {

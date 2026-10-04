@@ -11,7 +11,12 @@ import {
   extractApiKeyIdFromAuthzHeader,
   type SecurityServiceStart,
 } from '@kbn/core-security-server';
-import type { CurrentUser } from '@kbn/agent-builder-common';
+import {
+  REALM_USER_ID_PREFIX,
+  SERVICE_ACCOUNT_ID_PREFIX,
+  type CurrentUser,
+  type UserPrincipalType,
+} from '@kbn/agent-builder-common';
 import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -25,6 +30,15 @@ interface StableUserIdAuthUser {
   authentication_realm?: { type?: string; name?: string };
 }
 
+/** Elasticsearch's realm for its own service accounts. */
+const SERVICE_ACCOUNT_REALM_TYPE = '_service_account';
+
+const isServiceAccountPrincipal = (authUser: StableUserIdAuthUser): boolean =>
+  authUser.authentication_realm?.type === SERVICE_ACCOUNT_REALM_TYPE;
+
+const principalTypeOf = (authUser: StableUserIdAuthUser): UserPrincipalType =>
+  isServiceAccountPrincipal(authUser) ? 'service_account' : 'user';
+
 /**
  * Builds a stable principal id for Agent Builder ownership checks.
  *
@@ -33,7 +47,8 @@ interface StableUserIdAuthUser {
  * otherwise encode realm type/name with the username so same-username
  * principals in different realms remain distinct.
  *
- * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
+ * Synthetic ids carry `SERVICE_ACCOUNT_ID_PREFIX` or `REALM_USER_ID_PREFIX`, which is what
+ * `isUserProfileId` keys off to keep them out of user profile lookups.
  */
 export const toStableUserId = async ({
   authUser,
@@ -42,6 +57,13 @@ export const toStableUserId = async ({
   authUser: StableUserIdAuthUser;
   resolveApiKeyProfileUid?: () => Promise<string | undefined>;
 }): Promise<string | undefined> => {
+  // Elasticsearch reports the `<namespace>/<name>` principal as the username, which is already
+  // unique and is the id the security plugin uses for the account. Service accounts have no user
+  // profile, so this comes before any lookup.
+  if (isServiceAccountPrincipal(authUser) && authUser.username) {
+    return `${SERVICE_ACCOUNT_ID_PREFIX}${authUser.username}`;
+  }
+
   const isApiKey = authUser.authentication_type === 'api_key';
   let profileUid = authUser.profile_uid;
 
@@ -64,7 +86,7 @@ export const toStableUserId = async ({
     return undefined;
   }
 
-  return `realm:${JSON.stringify([realmType, realmName, username])}`;
+  return `${REALM_USER_ID_PREFIX}${JSON.stringify([realmType, realmName, username])}`;
 };
 
 /**
@@ -116,8 +138,9 @@ const resolveApiKeyOwnerProfileUid = async ({
  * username persisted on the task's userScope). This is required for Cross-Project Search, where
  * the API key owner's username does not match the originating user.
  *
- * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
- * back to the ES `_security/_authenticate` API for the username only.
+ * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), and for
+ * requests Kibana created itself against a service account, we fall back to the ES
+ * `_security/_authenticate` API, which reports the realm as well as the username.
  */
 export const getUserFromRequest = async ({
   request,
@@ -138,14 +161,23 @@ export const getUserFromRequest = async ({
         resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
       }),
       username: authUser.username,
+      type: principalTypeOf(authUser),
       isAdmin,
     };
   }
 
+  // Only service accounts get a synthesized id here. A user on this path may have a profile that
+  // `getCurrentUser` could not see, and a realm id would stop matching their profile-owned
+  // conversations, whereas username matching still finds them.
   const authResponse = await esClient.security.authenticate();
   return {
-    id: authUser?.profile_uid,
+    id:
+      authUser?.profile_uid ??
+      (isServiceAccountPrincipal(authResponse)
+        ? await toStableUserId({ authUser: authResponse })
+        : undefined),
     username: authResponse.username,
+    type: principalTypeOf(authResponse),
     isAdmin,
   };
 };
