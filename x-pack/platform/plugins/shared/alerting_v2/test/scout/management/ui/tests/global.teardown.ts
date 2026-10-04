@@ -6,7 +6,7 @@
  */
 
 import { globalTeardownHook, tags } from '@kbn/scout';
-import { unsetAlertingV2Setting } from '../../../common/alerting_v2_setting';
+import { unsetAlertingV2Setting } from '../../../common/settings';
 
 globalTeardownHook(
   'Unset alerting:v2:enabled',

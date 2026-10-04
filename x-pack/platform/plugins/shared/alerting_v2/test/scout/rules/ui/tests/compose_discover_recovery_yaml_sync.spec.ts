@@ -48,7 +48,7 @@ const yamlRule = ({
 
 test.describe(
   'ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327)',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     const createdRuleIds: string[] = [];
 

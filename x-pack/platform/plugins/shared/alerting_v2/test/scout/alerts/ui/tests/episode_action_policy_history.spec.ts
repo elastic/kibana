@@ -14,7 +14,7 @@ const EPISODE_ID = 'episode-policy-history-ep-1';
 
 test.describe(
   'Episode details — action policy history tab',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: RULE_ID });

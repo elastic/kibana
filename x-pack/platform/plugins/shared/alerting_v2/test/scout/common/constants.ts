@@ -7,9 +7,6 @@
 
 import { tags } from '@kbn/scout';
 
-/**
- * Scout tag for every API and engine suite (not UI suites); centralized since it may change later.
- */
 export const API_ENGINE_TAG = tags.deploymentAgnostic;
 
 export const COMMON_HEADERS = {
@@ -18,7 +15,6 @@ export const COMMON_HEADERS = {
   'Content-Type': 'application/json;charset=UTF-8',
 } as const;
 
-/** Matches the default `xpack.alerting_v2.rules.minimumScheduleInterval`; tests drive faster runs through `_run`. */
 export const SCHEDULE_INTERVAL = '1m';
 export const LOOKBACK_WINDOW = '1m';
 export const POLL_TIMEOUT_MS = 45_000;

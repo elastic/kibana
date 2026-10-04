@@ -1,6 +1,6 @@
 # alerting_v2 Scout tests
 
-Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can schedule them as independent Playwright configs. They run against the default Scout servers; there is no custom server config set, so the same suites can run on serverless.
+Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can schedule them as independent Playwright configs. There is no custom server config set, so the same suites can run on serverless.
 
 Each config has a global setup hook that turns on the `alerting:v2:enabled` advanced setting (every alerting_v2 route returns 503 without it) and a global teardown hook that unsets it. The exception is `agent_builder_skills`, which needs the setting unset to cover the disabled cases.
 
@@ -36,17 +36,17 @@ manifest lists it.
 
 ## Rule executions
 
-Rules are created with `SCHEDULE_INTERVAL` (`1m`), the default `xpack.alerting_v2.rules.minimumScheduleInterval`; anything shorter is rejected with `400 SCHEDULE_INTERVAL_TOO_SHORT`. A rule runs once on creation and then only every minute, so specs that depend on rule executions request them through the `_run` API:
+Rules are created with `SCHEDULE_INTERVAL` (`1m`), the default `xpack.alerting_v2.rules.minimumScheduleInterval`. Anything shorter is rejected with `400 SCHEDULE_INTERVAL_TOO_SHORT`. A rule runs once on creation and then only every minute, so specs that depend on rule executions request them through the `_run` API:
 
 - `ruleEvents.waitForAtLeast` and `ruleExecutions.waitForRuns` call `rules.run` on every poll whose condition is not met yet.
 - Inline `expect.poll` blocks that wait for rule-produced state call `apiServices.alertingV2.rules.run(rule.id)` at the start of each iteration.
-- `rules.run` resolves with the HTTP status; 409 (a run is already in flight) is expected while polling.
+- `rules.run` resolves with the HTTP status. 409 (a run is already in flight) is expected while polling.
 
 Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatcher and execution-history suites, do not need `_run`.
 
 ## Serverless
 
-- Action policy writes grant an API key for the caller, and on serverless that grant goes through UIAM, which rejects kbnClient's basic credentials. The API fixture therefore sends `apiServices.alertingV2.actionPolicies` requests with an admin API key from `requestAuth`.
+- Action policy writes grant an API key for the caller, and on serverless that grant goes through UIAM, which rejects kbnClient's basic credentials. Both fixtures therefore send `apiServices.alertingV2.actionPolicies` requests with an admin API key: the API fixture gets it from `requestAuth`, the UI fixture mints it from the admin SAML session (`common/ui/fixtures/admin_api_key.ts`).
 - Internal routes (`/internal/...`) are restricted on serverless; requests through `apiClient` must send `testData.COMMON_HEADERS` (it carries `x-elastic-internal-origin`).
 
 ## Layout
@@ -54,7 +54,7 @@ Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatc
 ```text
 test/scout/
 ├── agent_builder_skills/api/     # no global setup
-├── common/{alerting_v2_setting,builders,constants,roles,urls}.ts
+├── common/{builders,constants,roles,settings,urls}.ts
 ├── common/services/
 ├── common/api/fixtures/          # apiTest + alertingV2 apiServices
 ├── common/ui/fixtures/           # test + page objects

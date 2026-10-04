@@ -49,58 +49,58 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
     await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
   });
 
-  test('creates a policy from the form and persists what was typed', async ({
-    apiServices,
-    browserAuth,
-    pageObjects,
-  }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
-    const { actionPoliciesList, actionPolicyForm } = pageObjects;
+  test(
+    'creates a policy from the form and persists what was typed',
+    { tag: ['@local-serverless-observability_complete'] },
+    async ({ apiServices, browserAuth, pageObjects }) => {
+      await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
+      const { actionPoliciesList, actionPolicyForm } = pageObjects;
 
-    await test.step('fill in and submit the create form', async () => {
-      // `beforeAll` leaves the list empty, which hides the header create
-      // button (`createActionPolicyButton`) — create options live on the
-      // empty-state cards instead. Open the form by URL; empty-state vs
-      // header create is covered by the list page RTL suite.
-      await actionPolicyForm.gotoCreate();
-      await expect(actionPolicyForm.container).toBeVisible();
-      // A missing workflows privilege or a disabled `workflows:ui:enabled`
-      // swaps the combo box for a callout, which would otherwise surface as an
-      // opaque "option never appeared" failure.
-      await expect(actionPolicyForm.workflowsDisabledCallout).toHaveCount(0);
+      await test.step('fill in and submit the create form', async () => {
+        // `beforeAll` leaves the list empty, which hides the header create
+        // button (`createActionPolicyButton`) — create options live on the
+        // empty-state cards instead. Open the form by URL; empty-state vs
+        // header create is covered by the list page RTL suite.
+        await actionPolicyForm.gotoCreate();
+        await expect(actionPolicyForm.container).toBeVisible();
+        // A missing workflows privilege or a disabled `workflows:ui:enabled`
+        // swaps the combo box for a callout, which would otherwise surface as an
+        // opaque "option never appeared" failure.
+        await expect(actionPolicyForm.workflowsDisabledCallout).toHaveCount(0);
 
-      await actionPolicyForm.setName(CREATED_POLICY_NAME);
-      await actionPolicyForm.setMatcher(MATCHER);
-      await actionPolicyForm.selectWorkflow(workflowName);
-      await actionPolicyForm.submit();
-    });
-
-    await test.step('the form returns to the list with the new policy', async () => {
-      await expect(actionPoliciesList.detailsLink(CREATED_POLICY_NAME)).toBeVisible();
-      // Capture the created policy ID for teardown before any count assertions.
-      const { items } = await apiServices.alertingV2.actionPolicies.list({
-        search: CREATED_POLICY_NAME,
-      });
-      if (items[0]?.id) {
-        createdPolicyIds.push(items[0].id);
-      }
-    });
-
-    await test.step('the persisted policy matches the submitted form', async () => {
-      const { items } = await apiServices.alertingV2.actionPolicies.list({
-        search: CREATED_POLICY_NAME,
+        await actionPolicyForm.setName(CREATED_POLICY_NAME);
+        await actionPolicyForm.setMatcher(MATCHER);
+        await actionPolicyForm.selectWorkflow(workflowName);
+        await actionPolicyForm.submit();
       });
 
-      expect(items).toHaveLength(1);
-      expect(items[0]).toMatchObject({
-        name: CREATED_POLICY_NAME,
-        matcher: { expression: MATCHER },
-        grouping_mode: 'per_episode',
-        throttle: { strategy: 'on_status_change' },
-        destinations: [{ type: 'workflow', id: workflowId }],
+      await test.step('the form returns to the list with the new policy', async () => {
+        await expect(actionPoliciesList.detailsLink(CREATED_POLICY_NAME)).toBeVisible();
+        // Capture the created policy ID for teardown before any count assertions.
+        const { items } = await apiServices.alertingV2.actionPolicies.list({
+          search: CREATED_POLICY_NAME,
+        });
+        if (items[0]?.id) {
+          createdPolicyIds.push(items[0].id);
+        }
       });
-    });
-  });
+
+      await test.step('the persisted policy matches the submitted form', async () => {
+        const { items } = await apiServices.alertingV2.actionPolicies.list({
+          search: CREATED_POLICY_NAME,
+        });
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+          name: CREATED_POLICY_NAME,
+          matcher: { expression: MATCHER },
+          grouping_mode: 'per_episode',
+          throttle: { strategy: 'on_status_change' },
+          destinations: [{ type: 'workflow', id: workflowId }],
+        });
+      });
+    }
+  );
 
   test('edits an existing policy without dropping untouched fields', async ({
     apiServices,

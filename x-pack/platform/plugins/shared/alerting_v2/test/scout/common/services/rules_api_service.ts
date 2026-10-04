@@ -41,16 +41,11 @@ export interface RuleApiSpaceOptions {
   spaceId?: string;
 }
 
-/** `_run` statuses returned to the caller instead of thrown: disabled, not found, already running. */
 const RUN_RULE_EXPECTED_ERROR_STATUSES = [400, 404, 409];
 
 export type RunRule = (id: string, options?: RuleApiSpaceOptions) => Promise<number>;
 
 export interface RulesApiService {
-  /**
-   * Requests an immediate execution via `_run` and resolves with the HTTP status
-   * (202, or 400/404/409 when the rule is disabled, missing, or already running).
-   */
   run: RunRule;
   create: (data: CreateRuleData, options?: RuleApiSpaceOptions) => Promise<RuleResponse>;
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;

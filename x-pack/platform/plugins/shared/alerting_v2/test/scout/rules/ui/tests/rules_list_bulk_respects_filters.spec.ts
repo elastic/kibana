@@ -10,7 +10,7 @@ import { buildCreateRuleData, test } from '../fixtures';
 
 test.describe(
   'Rules list bulk actions respect active filters',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     const RUN_ID = Date.now().toString();
     const tagA = `scout-bulk-filter-a-${RUN_ID}`;

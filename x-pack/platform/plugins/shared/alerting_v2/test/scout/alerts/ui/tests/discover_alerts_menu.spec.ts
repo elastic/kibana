@@ -13,7 +13,7 @@ const SAMPLE_DATA_SET = 'ecommerce';
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: '@local-stateful-classic',
+    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {

@@ -6,7 +6,7 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout';
-import { enableAlertingV2Setting } from '../../../common/alerting_v2_setting';
+import { enableAlertingV2Setting } from '../../../common/settings';
 
 globalSetupHook(
   'Enable alerting:v2:enabled',

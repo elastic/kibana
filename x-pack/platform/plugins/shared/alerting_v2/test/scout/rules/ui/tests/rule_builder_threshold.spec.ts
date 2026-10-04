@@ -15,7 +15,7 @@ const EDITED_RULE_NAME = 'scout-rule-builder-edited';
 
 test.describe(
   'Rule Builder — threshold create and edit flows',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     const createdRuleIds: string[] = [];
 

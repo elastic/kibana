@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { test as baseTest } from '@kbn/scout';
+import { apiClientFixture, mergeTests, test as baseTest } from '@kbn/scout';
 import type { BrowserAuthFixture, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { extendPageObjects, type AlertingPageObjects } from './page_objects';
+import { createAdminApiKey } from './admin_api_key';
 import {
   buildAlertingApiServices,
   type AlertingApiServicesFixture,
@@ -29,7 +30,7 @@ export interface UiWorkerFixtures extends ScoutWorkerFixtures {
   apiServices: AlertingApiServicesFixture;
 }
 
-export const test = baseTest.extend<
+export const test = mergeTests(baseTest, apiClientFixture).extend<
   {
     browserAuth: AlertingBrowserAuthFixture;
     pageObjects: AlertingPageObjects;
@@ -52,14 +53,29 @@ export const test = baseTest.extend<
   },
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log, config },
-      use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
+      { apiServices, esClient, kbnClient, log, config, samlAuth, apiClient },
+      use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>,
+      workerInfo
     ) => {
+      const adminApiKey = createAdminApiKey({
+        samlAuth,
+        apiClient,
+        log,
+        name: `alerting-v2-ui-admin-worker-${workerInfo.parallelIndex + 1}`,
+      });
+
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
+        alertingV2: buildAlertingApiServices({
+          esClient,
+          kbnClient,
+          log,
+          config,
+          getActionPolicyAuthHeaders: adminApiKey.getHeaders,
+        }),
       };
       await use(extendedApiServices);
+      await adminApiKey.invalidate();
     },
     { scope: 'worker' },
   ],
