@@ -126,10 +126,6 @@ const CornerControl: React.FC<{
 }> = ({ selected, interactive, emphasized, title, onToggle }) => {
   const { euiTheme } = useEuiTheme();
 
-  if (!interactive) {
-    return null;
-  }
-
   // Match default filter chrome; selection is signaled by the accent dot only.
   const iconColor = emphasized ? 'primary' : euiTheme.colors.textSubdued;
 
@@ -165,6 +161,21 @@ const CornerControl: React.FC<{
       ) : null}
     </span>
   );
+
+  if (!interactive) {
+    // Keep the icon's space so the title wraps the same and the tile height doesn't change.
+    return (
+      <span
+        aria-hidden
+        css={css`
+          display: inline-flex;
+          visibility: hidden;
+        `}
+      >
+        {icon}
+      </span>
+    );
+  }
 
   return (
     <button
@@ -230,6 +241,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   const isZero = card.value === 0;
   const isLoading = card.isLoading ?? false;
   const interactive = !isZero && !isLoading;
+  const metric = isZero ? '—' : card.value.toLocaleString();
   // Hover only — mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -396,34 +408,41 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 align-items: flex-end;
               `}
             >
-              {isLoading ? (
-                <EuiLoadingSpinner size="l" />
-              ) : (
-                <>
-                  <EuiTitle
-                    size="l"
-                    css={css`
-                      line-height: ${METRIC_LINE_HEIGHT};
-                      text-align: end;
-                      ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
-                    `}
-                  >
-                    <span>{isZero ? '—' : card.value.toLocaleString()}</span>
-                  </EuiTitle>
-                  {isZero && card.noDataMessage && (
-                    <EuiText
-                      size="xs"
-                      color="subdued"
+              {/* The spinner sits inside the title so the value's line box keeps the tile
+                  height while loading; otherwise the table below jumps. */}
+              <EuiTitle
+                size="l"
+                css={css`
+                  line-height: ${METRIC_LINE_HEIGHT};
+                  text-align: end;
+                  ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
+                `}
+              >
+                <span>
+                  {isLoading ? (
+                    <EuiLoadingSpinner
+                      size="l"
                       css={css`
-                        text-align: end;
-                        margin-block-start: ${euiTheme.size.xs};
-                        font-style: italic;
+                        vertical-align: middle;
                       `}
-                    >
-                      {card.noDataMessage}
-                    </EuiText>
+                    />
+                  ) : (
+                    metric
                   )}
-                </>
+                </span>
+              </EuiTitle>
+              {!isLoading && isZero && card.noDataMessage && (
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={css`
+                    text-align: end;
+                    margin-block-start: ${euiTheme.size.xs};
+                    font-style: italic;
+                  `}
+                >
+                  {card.noDataMessage}
+                </EuiText>
               )}
             </div>
           </EuiFlexItem>
