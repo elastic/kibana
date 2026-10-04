@@ -34,4 +34,11 @@ describe('registerNightshiftFeature', () => {
 
     expect(privileges?.read.api).toEqual([NIGHTSHIFT_API_PRIVILEGES.read, 'read_proposals']);
   });
+
+  it('grants `alerts:read` with `all` and `read` so significant events in `.rule-events` are readable', () => {
+    const { privileges } = getRegisteredFeature();
+
+    expect(privileges?.all.alerts).toEqual({ read: true });
+    expect(privileges?.read.alerts).toEqual({ read: true });
+  });
 });
