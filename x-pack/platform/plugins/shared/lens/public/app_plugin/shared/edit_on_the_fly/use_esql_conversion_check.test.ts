@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import {
   generateEsqlQuery,
-  esqlConversionFailureReasonMessages,
+  getFailureTooltip,
   type FramePublicAPI,
   type TypedLensSerializedState,
   type Visualization,
@@ -174,9 +174,8 @@ describe('useEsqlConversionCheck', () => {
     const { result } = renderHook(() => useEsqlConversionCheck(true, hookParams, hookServices));
 
     expect(result.current.isConvertToEsqlButtonDisabled).toBe(true);
-    expect(result.current.convertToEsqlButtonTooltip).toBe(
-      esqlConversionFailureReasonMessages.formula_not_supported
-    );
+    const { title, message } = getFailureTooltip('formula_not_supported');
+    expect(result.current.convertToEsqlButtonTooltip).toBe(`${title}: ${message}`);
     expect(convertFormBasedToTextBasedLayer).not.toHaveBeenCalled();
   });
 
