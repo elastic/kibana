@@ -6,7 +6,8 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/app-header",
@@ -21,6 +22,7 @@
     "@kbn/i18n",
     "@kbn/management-plugin",
     "@kbn/esql-editor",
+    "@kbn/scout",
     "@kbn/share-plugin",
     "@kbn/utility-types"
   ],

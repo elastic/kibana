@@ -1,0 +1,50 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "27328c153583ee5-34dcde5fed4642d",
+      "title": "ES|QL View create and edit creates, edits, and validates a view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/crud.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "174d8d67239cc3c-9d68d1bb1c8160b",
+      "title": "ES|QL View deletion deletes one view and multiple selected views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/delete.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "ecca2f920d05f1b-8c480d2d5ecbf4d",
+      "title": "ES|QL Views table lists, searches, reloads, and opens a view in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/table.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    }
+  ]
+}
