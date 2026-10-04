@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { SiemMigrationVendor } from '../../../../common/siem_migrations/model/common.gen';
-
-export const MIGRATION_VENDOR_COLOR_CONFIG: Record<SiemMigrationVendor, string> = {
+export const MIGRATION_VENDOR_COLOR_CONFIG: Record<string, string> = {
   // lighter shades as instructed by design
   splunk: '#D9E8FF', // bgLightPrimary
   qradar: '#FDDDE9', // bgLightAccent
   'microsoft-sentinel': '#E6F1E8', // bgLightSuccess (Azure green)
+  tines: '#E8E4F5', // Tines brand-adjacent lavender
 };

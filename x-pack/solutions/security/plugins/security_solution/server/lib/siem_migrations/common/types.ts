@@ -23,6 +23,10 @@ import type {
   RuleMigration,
   RuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  WorkflowMigration,
+  WorkflowMigrationWorkflow,
+} from '../../../../common/siem_migrations/workflows/types';
 
 export interface SiemMigrationsClientDependencies {
   inferenceService: InferenceServerStart;
@@ -45,8 +49,11 @@ export type SiemMigrationsIndexNameProvider = () => Promise<string>;
 
 export type Stored<T extends object> = T & { id: string };
 
-export type MigrationDocument = RuleMigration | DashboardMigration;
-export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
+export type MigrationDocument = RuleMigration | DashboardMigration | WorkflowMigration;
+export type ItemDocument =
+  | RuleMigrationRule
+  | DashboardMigrationDashboard
+  | WorkflowMigrationWorkflow;
 
 export type StoredSiemMigration = Stored<MigrationDocument>;
 export type StoredSiemMigrationItem = Stored<ItemDocument>;

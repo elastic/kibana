@@ -16,6 +16,7 @@ import {
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
   SIEM_MIGRATIONS_MANAGE_PATH,
+  SIEM_MIGRATIONS_WORKFLOWS_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
@@ -76,6 +77,25 @@ const subLinks: LinkItem[] = [
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
   },
+  {
+    id: SecurityPageName.siemMigrationsWorkflows,
+    title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationWorkflows.title', {
+      defaultMessage: 'Translated workflows',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.appLinks.siemMigrationsWorkflows.description',
+      {
+        defaultMessage: 'Migrate your Tines stories to Elastic Workflows YAML.',
+      }
+    ),
+    landingIcon: IconAgent,
+    path: SIEM_MIGRATIONS_WORKFLOWS_PATH,
+    capabilities: [[`${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    skipUrlState: true,
+    hideTimeline: true,
+    hideWhenExperimentalKey: 'siemMigrationsDisabled',
+    experimentalKey: 'tinesWorkflowsMigration',
+  },
 ];
 
 export const links: LinkItem = {
@@ -107,6 +127,7 @@ export const links: LinkItem = {
         SecurityPageName.siemMigrationsManage,
         SecurityPageName.siemMigrationsRules,
         SecurityPageName.siemMigrationsDashboards,
+        SecurityPageName.siemMigrationsWorkflows,
       ],
     },
   ],

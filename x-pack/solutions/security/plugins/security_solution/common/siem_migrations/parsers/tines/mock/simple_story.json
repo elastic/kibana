@@ -1,0 +1,143 @@
+{
+  "schema_version": 18,
+  "standard_lib_version": 41,
+  "action_runtime_version": 6,
+  "name": "Simple story",
+  "description": "In the simple story we will create a fictional situation where a detection system is configured to send alerts to our Tines tenant. The alert will contain the type of alert (infection, ddos, credential stuffing, etc.) and details on any users affected. If the alert is related to an infection, based on the users job title, we will take a specific action.",
+  "guid": "8de58314250ff167127d6ae213711de9",
+  "slug": "simple_story",
+  "agents": [
+    {
+      "type": "Agents::TriggerAgent",
+      "name": "User is ceo",
+      "disabled": false,
+      "description": null,
+      "guid": "9fda86d826c2da6b1001d83de774e6cd",
+      "options": {
+        "rules": [
+          {
+            "type": "regex",
+            "value": "ceo",
+            "path": "<<explode_users.user.job>>"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Agents::EmailAgent",
+      "name": "Notify by email",
+      "disabled": false,
+      "description": null,
+      "guid": "2a1c3710c175566adbac7bdfcb8aa0af",
+      "options": {
+        "recipients": "tinesdemouser@outlook.com",
+        "subject": "Engineer in infected",
+        "body": "Hello,<br/><br/>An alert has been detected that relates to an infected engineer. The user's details are shown below:<br/><b>Name:</b> <<explode_users.user.name>><br/><b>Age:</b> <<explode_users.user.age>><br/><b>Country:</b> <<explode_users.user.country>><br/><br/>Thanks!"
+      }
+    },
+    {
+      "type": "Agents::WebhookAgent",
+      "name": "Receive events",
+      "disabled": false,
+      "description": null,
+      "guid": "2f1f4538338172e208f653d3a614afb6",
+      "options": {
+        "secret": "201367c22bd83f4e79ac81aa9f9efb7c",
+        "verbs": "post",
+        "path": "faac546b6297d276b866af0487343601",
+        "include_headers": "false"
+      }
+    },
+    {
+      "type": "Agents::TriggerAgent",
+      "name": "Type is infection",
+      "disabled": false,
+      "description": null,
+      "guid": "e606d66f945ba059655a672497d78170",
+      "options": {
+        "rules": [
+          {
+            "type": "regex",
+            "value": "infection",
+            "path": "<<receive_events.type>>"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Explode users",
+      "disabled": false,
+      "description": null,
+      "guid": "51ce4f788c04cf81dc7eb7dda25f575b",
+      "options": {
+        "mode": "explode",
+        "path": "=receive_events.users",
+        "to": "user"
+      }
+    },
+    {
+      "type": "Agents::TriggerAgent",
+      "name": "User is student",
+      "disabled": false,
+      "description": null,
+      "guid": "845aa2aa857ffe8832856050abf7d994",
+      "options": {
+        "rules": [
+          {
+            "type": "regex",
+            "value": "student",
+            "path": "<<explode_users.user.job>>"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Agents::TriggerAgent",
+      "name": "User is engineer",
+      "disabled": false,
+      "description": null,
+      "guid": "bded45ec772c9f48984d39da6388ff56",
+      "options": {
+        "rules": [
+          {
+            "type": "regex",
+            "value": "engineer",
+            "path": "<<explode_users.user.job>>"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Send a post request",
+      "disabled": false,
+      "description": null,
+      "guid": "dbe0171f0253ebde721ddfb086c323a5",
+      "options": {
+        "url": "https://postman-echo.com/post",
+        "content_type": "json",
+        "method": "post",
+        "payload": {
+          "name": "<<explode_users.user.name>>",
+          "age": "<<explode_users.user.age>>",
+          "country": "<<explode_users.user.country>>",
+          "job": "<<explode_users.user.job>>"
+        },
+        "log_error_on_status": []
+      }
+    }
+  ],
+  "diagram_notes": [],
+  "links": [
+    { "source": 0, "receiver": 7 },
+    { "source": 2, "receiver": 3 },
+    { "source": 3, "receiver": 4 },
+    { "source": 4, "receiver": 6 },
+    { "source": 4, "receiver": 5 },
+    { "source": 4, "receiver": 0 },
+    { "source": 6, "receiver": 1 }
+  ],
+  "tags": [],
+  "exported_at": "2023-12-15T01:43:37Z"
+}

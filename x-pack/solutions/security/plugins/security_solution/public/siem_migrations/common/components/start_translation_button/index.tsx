@@ -6,23 +6,19 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import type { MigrationsServiceTaskStats } from '../../service/migrations_service_base';
 import * as i18n from './translations';
-import type { MigrationStats } from '../../types';
 
 export interface StartTranslationButtonProps {
-  migrationStats: MigrationStats;
+  migrationStats: MigrationsServiceTaskStats;
   isStopped: boolean;
-  startMigration: (migrationStats: MigrationStats) => void;
+  startMigration: () => void;
   isStarting: boolean;
 }
 
 export const StartTranslationButton = React.memo<StartTranslationButtonProps>(
-  ({ migrationStats, isStopped, startMigration, isStarting }) => {
-    const onStartMigration = useCallback(() => {
-      startMigration(migrationStats);
-    }, [migrationStats, startMigration]);
-
+  ({ isStopped, startMigration, isStarting }) => {
     const text = useMemo(() => {
       if (isStopped) {
         return isStarting
@@ -40,7 +36,7 @@ export const StartTranslationButton = React.memo<StartTranslationButtonProps>(
         data-test-subj={'startMigrationButton'}
         aria-label={text}
         fill={!isStopped}
-        onClick={onStartMigration}
+        onClick={startMigration}
         isLoading={isStarting}
         size="s"
       >
