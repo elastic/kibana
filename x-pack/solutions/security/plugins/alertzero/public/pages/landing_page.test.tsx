@@ -155,6 +155,27 @@ describe('LandingPage', () => {
     expect(screen.queryByText('Enable your workers')).not.toBeInTheDocument();
   });
 
+  describe('onboarding condition', () => {
+    // The count endpoint does not filter by status, so closed investigations are part of `total`.
+    it.each([
+      { investigations: 0, workers: [{ enabled: false }, { enabled: false }], onboarding: true },
+      { investigations: 0, workers: [{ enabled: false }, { enabled: true }], onboarding: false },
+      { investigations: 1, workers: [{ enabled: false }, { enabled: false }], onboarding: false },
+      { investigations: 1, workers: [{ enabled: true }, { enabled: false }], onboarding: false },
+    ])(
+      'onboarding=$onboarding with $investigations investigations and workers $workers',
+      ({ investigations, workers, onboarding }) => {
+        mockUseWorkers.mockReturnValue(workersResult(workers));
+        mockUseInvestigationsCount.mockReturnValue(investigationsResult(investigations));
+
+        renderPage();
+
+        expect(screen.queryByText('Enable your workers') != null).toBe(onboarding);
+        expect(screen.queryByTestId('conversations-page') != null).toBe(!onboarding);
+      }
+    );
+  });
+
   it('shows a loading spinner while workers are loading', () => {
     mockUseWorkers.mockReturnValue(workersResult([], { isLoading: true, data: undefined }));
 
