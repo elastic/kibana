@@ -1,0 +1,142 @@
+{
+  "sha1": "6c6ab6c65660f5b2b737af94b41ef010c667a897",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "88922a52a5a9911-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "e8f6d3c738719c6-8cf1f3cf6c6d663",
+      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 47,
+        "column": 24
+      }
+    },
+    {
+      "id": "e8f6d3c738719c6-a0554bccd589a70",
+      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 97,
+        "column": 26
+      }
+    },
+    {
+      "id": "ca90eb46c808715-c6dcf15528a3e01",
+      "title": "Action Policies - read/write privileges editor sees every write affordance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 32,
+        "column": 6
+      }
+    },
+    {
+      "id": "ca90eb46c808715-5993a4bf6be8200",
+      "title": "Action Policies - read/write privileges read-only user cannot access write affordances",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 43,
+        "column": 11
+      }
+    },
+    {
+      "id": "ca90eb46c808715-1c84e85eee0a8b0",
+      "title": "Action Policies - read/write privileges read-only user is blocked from the edit route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 61,
+        "column": 13
+      }
+    },
+    {
+      "id": "da62bfa2a2aafb2-624163cd0374a5d",
+      "title": "Action Policies - affected rules navigates from the details flyout to the affected rules and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 45,
+        "column": 23
+      }
+    },
+    {
+      "id": "da62bfa2a2aafb2-3f409768cd06e1b",
+      "title": "Action Policies - affected rules hides the link from users who cannot read rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 79,
+        "column": 11
+      }
+    },
+    {
+      "id": "51fb9f3f83006da-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

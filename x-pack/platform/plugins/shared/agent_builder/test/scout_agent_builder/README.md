@@ -36,7 +36,7 @@ confirm the `.meta/` manifest lists it.
 If `converse` exceeds the Scout lane target (~15 minutes of test time), split the
 dual-mode specs (`converse_tool_calling`, `converse_attachments`,
 `converse_error`, `converse_interrupted_executions`, `converse_simple_multi`) into a `converse_modes`
-namespace — the same pattern as `scout_alerting_v2`'s `engine_executor`.
+namespace — the same pattern as alerting_v2's `test/scout/engine_executor`.
 
 ## Layout
 
