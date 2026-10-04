@@ -236,7 +236,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       path: string;
       body?: unknown;
       rawBody?: BufferedRawBody;
-      query?: Record<string, string | number | boolean | undefined>;
+      // A value may be a single string/number/boolean, or an array (sent as repeated
+      // query-string keys), matching RequestOptions['query'] and CallKibanaApiParams['query'].
+      query?: Record<string, string | number | boolean | string[] | undefined>;
       headers?: Record<string, string>;
     };
 
@@ -475,12 +477,31 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     return result;
   }
 
-  private buildFullUrl(kibanaUrl: string, path: string, query?: Record<string, string>): string {
+  private buildFullUrl(kibanaUrl: string, path: string, query?: Record<string, any>): string {
     let fullUrl = `${kibanaUrl}${path}`;
     if (query && Object.keys(query).length > 0) {
-      fullUrl = `${fullUrl}?${new URLSearchParams(query).toString()}`;
+      fullUrl = `${fullUrl}?${this.buildQueryString(query)}`;
     }
     return fullUrl;
+  }
+
+  /**
+   * Serializes query params, appending array values as repeated keys (e.g.
+   * `status=running&status=upcoming`) instead of letting `URLSearchParams` comma-join them,
+   * which breaks routes whose query schema expects a real array/repeated-key value.
+   */
+  private buildQueryString(query: Record<string, any>): string {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (Array.isArray(value)) {
+        for (const entry of value) {
+          searchParams.append(key, String(entry));
+        }
+      } else if (value !== undefined) {
+        searchParams.append(key, String(value));
+      }
+    }
+    return searchParams.toString();
   }
 
   private buildFormData(formData: Record<string, FormDataFieldSpec>): FormData {
@@ -564,7 +585,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // Build full URL with query parameters
     let fullUrl = `${kibanaUrl}${path}`;
     if (query && Object.keys(query).length > 0) {
-      const queryString = new URLSearchParams(query).toString();
+      const queryString = this.buildQueryString(query);
       fullUrl = `${fullUrl}?${queryString}`;
     }
 

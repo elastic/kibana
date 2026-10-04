@@ -208,6 +208,42 @@ describe('ElasticsearchActionStepImpl', () => {
         expect.objectContaining({ maxResponseSize: expect.any(Number) })
       );
     });
+
+    it('should append an array query value as repeated keys instead of comma-joining it', async () => {
+      mockedBuildRequest.mockReturnValue({
+        method: 'GET',
+        path: '/my-test/_search',
+        query: { stored_fields: ['field_one', 'field_two'] },
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        stored_fields: ['field_one', 'field_two'],
+      };
+      const step = {
+        id: 'search_step',
+        type: 'elasticsearch.search',
+        stepId: 'search_step',
+        stepType: 'elasticsearch.search',
+        configuration: { name: 'search_step', type: 'elasticsearch.search', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (esStep as any)._run(stepWith);
+
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/my-test/_search?stored_fields=field_one&stored_fields=field_two',
+        }),
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
+    });
   });
 
   describe('raw request format', () => {
