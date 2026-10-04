@@ -330,7 +330,7 @@ describe('createVisualizationGraph', () => {
 
   it('injects data_source into every layer when the config LLM omits it (XY multi-layer)', async () => {
     const canonicalQuery =
-      'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+      'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)';
     const xyConfigWithoutDataSource = asAuthoringResponse({
       type: 'xy',
       layers: [{ type: 'series' }, { type: 'series' }],
