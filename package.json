@@ -342,6 +342,7 @@
     "@kbn/cloud-security-posture-graph": "workspace:*",
     "@kbn/cloud-security-posture-plugin": "workspace:*",
     "@kbn/code-editor": "workspace:*",
+    "@kbn/code-intelligence-plugin": "workspace:*",
     "@kbn/coloring": "workspace:*",
     "@kbn/config": "workspace:*",
     "@kbn/config-mocks": "workspace:*",
