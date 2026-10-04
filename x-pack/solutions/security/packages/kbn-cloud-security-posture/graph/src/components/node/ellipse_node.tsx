@@ -54,7 +54,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
     countryClickHandler,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('m', { property: 'filter' });
+  const shadow = useEuiShadow('m', { property: 'filter', border: 'none' });
   const fillColor = useNodeFillColor(color ?? 'primary');
   const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (

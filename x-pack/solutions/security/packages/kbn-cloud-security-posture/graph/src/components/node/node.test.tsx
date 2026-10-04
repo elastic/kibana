@@ -369,4 +369,23 @@ describe('Entity Nodes', () => {
       }
     );
   });
+
+  describe('Shape centering', () => {
+    it.each(['diamond', 'ellipse', 'hexagon', 'pentagon', 'rectangle'] as const)(
+      '%s node does not override its centering transform when selected in dark mode',
+      (shape) => {
+        renderNodeInFlow({ shape });
+
+        // EUI's dark-mode floating border adds `transform: translateZ(0)` to the shadow styles,
+        // which would replace the `translate(-50%, ...)` that centers the shape inside the node.
+        const css = Array.from(document.styleSheets)
+          .flatMap((sheet) => Array.from(sheet.cssRules))
+          .map((rule) => rule.cssText)
+          .join('\n');
+
+        expect(css).toContain('drop-shadow');
+        expect(css).not.toContain('translateZ');
+      }
+    );
+  });
 });
