@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 
 export interface SeverityHeatmapHoverSummaryProps {
@@ -18,14 +19,14 @@ export const SeverityHeatmapHoverSummary = ({
   severityLabel,
   timestamp,
 }: SeverityHeatmapHoverSummaryProps) => {
+  const { euiTheme } = useEuiTheme();
   const timeLabel = timestamp && timestamp.length > 0 ? timestamp : '';
 
   return (
-    <EuiPanel
-      paddingSize="s"
-      hasShadow={false}
-      hasBorder={false}
-      color="plain"
+    <div
+      css={css`
+        padding: ${euiTheme.size.s};
+      `}
       data-test-subj="alertingV2EpisodeSeverityHeatmapHoverSummary"
     >
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -45,6 +46,6 @@ export const SeverityHeatmapHoverSummary = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 };
