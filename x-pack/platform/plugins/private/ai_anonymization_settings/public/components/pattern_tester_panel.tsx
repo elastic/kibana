@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -38,6 +38,23 @@ export const DEFAULT_EXAMPLE_INPUT_OBJECT: Record<string, unknown> = {
 };
 
 export const DEFAULT_EXAMPLE_INPUT = JSON.stringify(DEFAULT_EXAMPLE_INPUT_OBJECT, null, 2);
+
+/** JSON objects/arrays are tested structurally; anything else is tested as plain text. */
+const parseTesterInput = (value: string): unknown => {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed !== null && typeof parsed === 'object' ? parsed : value;
+  } catch {
+    return value;
+  }
+};
+
+const formatTesterOutput = (maskedInput: unknown): string => {
+  if (maskedInput === undefined) {
+    return '';
+  }
+  return typeof maskedInput === 'string' ? maskedInput : JSON.stringify(maskedInput, null, 2);
+};
 
 interface PatternTesterPanelProps {
   /** Regex rules to test with, e.g. all enabled rules, or the enabled rules plus a draft rule. */
@@ -100,22 +117,13 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
   defaultInput = DEFAULT_EXAMPLE_INPUT,
 }) => {
   const [inputValue, setInputValue] = useState(defaultInput);
-  const [inputError, setInputError] = useState<string | undefined>();
   const { test, result, isLoading } = usePatternTester();
 
-  const handleTest = async () => {
-    try {
-      const parsedInput = JSON.parse(inputValue);
-      setInputError(undefined);
-      await test(parsedInput, rules);
-    } catch (e) {
-      setInputError(
-        i18n.translate('xpack.aiAnonymizationSettings.patternTester.invalidJson', {
-          defaultMessage: 'Input must be valid JSON',
-        })
-      );
-    }
-  };
+  const parsedInput = useMemo(() => parseTesterInput(inputValue), [inputValue]);
+  const editorLanguage = typeof parsedInput === 'string' ? 'plaintext' : 'json';
+
+  const outputValue = formatTesterOutput(result?.maskedInput);
+  const handleTest = () => test(parsedInput, rules);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -136,15 +144,13 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
               helpText={
                 <FormattedMessage
                   id="xpack.aiAnonymizationSettings.patternTester.inputHelpText"
-                  defaultMessage="What the analyst sees. Edit freely to try your own values."
+                  defaultMessage="What the analyst sees. Paste JSON or plain text to try your own values."
                 />
               }
-              isInvalid={Boolean(inputError)}
-              error={inputError}
               fullWidth
             >
               <CodeEditor
-                languageId="json"
+                languageId={editorLanguage}
                 height={CODE_EDITOR_HEIGHT}
                 value={inputValue}
                 onChange={setInputValue}
@@ -165,7 +171,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
                 </EuiTitle>
               }
               labelAppend={
-                <EuiCopy textToCopy={result ? JSON.stringify(result.maskedInput, null, 2) : ''}>
+                <EuiCopy textToCopy={outputValue}>
                   {(copy) => (
                     <EuiButtonEmpty
                       size="xs"
@@ -191,9 +197,9 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
               fullWidth
             >
               <CodeEditor
-                languageId="json"
+                languageId={editorLanguage}
                 height={CODE_EDITOR_HEIGHT}
-                value={result ? JSON.stringify(result.maskedInput, null, 2) : ''}
+                value={outputValue}
                 onChange={() => {}}
                 options={{
                   readOnly: true,
