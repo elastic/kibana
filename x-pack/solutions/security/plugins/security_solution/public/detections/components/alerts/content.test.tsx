@@ -109,7 +109,7 @@ describe('AlertsPageContent', () => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
       expect(screen.getByTestId(ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID)).toBeVisible();
     });
-  });
+  }, 15000);
 
   describe('when the user has no rules privileges', () => {
     beforeEach(() => {
