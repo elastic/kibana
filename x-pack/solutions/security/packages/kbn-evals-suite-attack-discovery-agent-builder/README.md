@@ -4,14 +4,14 @@ Isolated evaluation suite for the Attack Discovery 2.0 Agent Builder integration
 
 ## Eval profiles and CI cadence
 
-This package ships **three eval cohorts** plus a documented fourth profile that is not automated here yet.
+This package ships **three eval cohorts**: golden-path, clean, and dense (weekly/on-demand mix below), plus the on-demand **full profile** discrimination cohort.
 
 | Profile | Spec | Seed data | CI cadence | Primary question |
 | --- | --- | --- | --- | --- |
 | **Golden-path** | `evals/attack_discovery_agent_builder.spec.ts` | `src/fixtures.ts` — 2 marker alerts | **Weekly** (`llm_evals.yml` sets `EVAL_GREP`) | Does the default agent **route**, **call AD tools**, and **complete the workflow**? |
 | **Clean profile** | `evals/clean_profile_provided_alerts.spec.ts` | `src/scenario_registry/` — 4 chains, 16 alerts + raw events | **On-demand** (full suite or `--grep "clean profile"`) | On realistic multi-stage chains, does AD produce **quality discoveries** with context gathering? |
 | **Dense profile** | `evals/dense_profile_live_retrieval.spec.ts` | `src/scenario_registry/` — the 4 clean chains + background noise, 95 alerts | **On-demand** (full suite or `--grep "dense profile"`) | At a realistic alert volume, does AD **retrieve and correlate** the real chains out of a crowded index, live, without being handed the alerts? |
-| **Full profile** | — (not in this package) | External noise generator (~150+ distractor alerts) | Manual / future follow-up | With ~150+ distractor alerts, does AD find real chains **without noise false positives**? |
+| **Full profile** | `evals/full_profile_discrimination.spec.ts` | `scenario_registry/` full seed (7 chains + 150 noise alerts) | **On-demand** — `--grep "full profile"` | With noise present, does AD find real chains **without citing noise alerts**? |
 
 ### Golden-path (`fixtures.ts`)
 
@@ -29,7 +29,7 @@ Weekly CI runs only these cases (see `EVAL_GREP` in `llm_evals.yml`).
 
 ### Clean profile (`scenario_registry/`)
 
-Kibana-native scenario definitions for multi-stage attack chains. All seeding is in-process via `esClient.index()` — no external dependencies.
+Kibana-native scenario definitions for multi-stage attack chains. All seeding is in-process via `esClient.index()` — no external dependencies (a Kibana-native reimplementation of the portable seeder's `--profile clean`; it does not invoke `ad-2.0-portable-seeder.py` at runtime).
 
 | Scenario key | Host | Stages |
 | --- | --- | --- |
@@ -81,9 +81,21 @@ Two rules that are easy to miss, both learned by breaking them:
    the reference maximum simply inverts it). The values have to sit inside the
    reference band, which means varying them per occurrence.
 
-### Full profile (out of scope for this package)
+### Full profile (on-demand)
 
-Includes clean profile plus cloud scenarios (AWS, Azure, macOS) and background noise (~110 unrelated alerts + a 40-alert noisy rule cluster). Not automated until discrimination/FPR evaluators exist.
+Includes clean profile plus cloud scenarios (`aws-compromise`, `azure-oauth`, `macos-toolkit`) and noise:
+
+- ~110 unrelated background alerts
+- 40-alert Defender signature-update cluster
+
+**CI cadence:** on-demand only (`evals/full_profile_discrimination.spec.ts`). Not wired to weekly `llm_evals.yml`.
+
+**FPR evaluators:** `NoiseFalsePositive`, `DiscoveryCountCap`, `MinValidatedDiscovery` — insights must not cite noise alert IDs, discovery count must stay bounded, and at least one validated discovery is required.
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "full profile"
+```
 
 ## Natural routing (default)
 
@@ -120,7 +132,14 @@ node scripts/evals run --suite attack-discovery-agent-builder \
   --grep "dense profile"
 ```
 
-Full package (golden-path + clean profile + dense profile):
+Full profile (on-demand):
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "full profile"
+```
+
+Full package (golden-path + clean profile + dense profile + full profile):
 
 ```bash
 node scripts/evals run --suite attack-discovery-agent-builder
