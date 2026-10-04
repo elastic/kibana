@@ -64,17 +64,18 @@ const buildAlertLastSeenBaseQuery = (alertsIndex: string, cutoff: string): strin
     `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`) BY \`entity.id\``,
   ].join('\n');
 
-const buildLastSeenAlertDataQuery = ({
-  namespace,
-  timeRange,
-  sort: { direction: dir },
-  cursor,
-  pageSize,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string => {
+const buildLastSeenAlertDataQuery = (args: QueryArgs): string => {
+  const {
+    namespace,
+    timeRange,
+    sort: { direction: dir },
+    cursor,
+    pageSize,
+    rowsMode,
+    concreteEntityIndexName,
+    searchExpression,
+    entityExpression,
+  } = args;
   const inner = [
     buildAlertLastSeenBaseQuery(alertsIndexOf(namespace), alertLookbackCutoff(timeRange)),
     ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
@@ -82,7 +83,7 @@ const buildLastSeenAlertDataQuery = ({
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedRowsFilter(rowsMode),
     ...buildFilterClause(entityExpression),
-    buildKeepClause(LAST_SEEN_ALERT_FIELD),
+    buildKeepClause(args, LAST_SEEN_ALERT_FIELD),
     ...buildCursorClause(cursor),
   ].join('\n');
 
@@ -119,17 +120,18 @@ const buildAlertCountSortBaseQuery = (alertsIndex: string, cutoff: string): stri
     `| STATS ${ALERT_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
-const buildAlertCountSortDataQuery = ({
-  namespace,
-  timeRange,
-  sort: { direction: dir },
-  cursor,
-  pageSize,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string => {
+const buildAlertCountSortDataQuery = (args: QueryArgs): string => {
+  const {
+    namespace,
+    timeRange,
+    sort: { direction: dir },
+    cursor,
+    pageSize,
+    rowsMode,
+    concreteEntityIndexName,
+    searchExpression,
+    entityExpression,
+  } = args;
   const inner = [
     buildAlertCountSortBaseQuery(alertsIndexOf(namespace), alertLookbackCutoff(timeRange)),
     ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
@@ -137,7 +139,7 @@ const buildAlertCountSortDataQuery = ({
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedRowsFilter(rowsMode),
     ...buildFilterClause(entityExpression),
-    buildKeepClause(ALERT_COUNT_FIELD),
+    buildKeepClause(args, ALERT_COUNT_FIELD),
     ...buildCursorClause(cursor),
   ].join('\n');
 

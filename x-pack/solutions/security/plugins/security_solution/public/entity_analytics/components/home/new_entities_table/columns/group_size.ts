@@ -23,15 +23,16 @@ import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 // ── query builders: group_size sort ──────────────────────────────────────────
 // Inner FROM is the entity index, so searchFilters can stay in WHERE (KQL legal).
 
-const buildGroupSizeSortDataQuery = ({
-  namespace,
-  sort: { direction: dir },
-  cursor,
-  pageSize,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string => {
+const buildGroupSizeSortDataQuery = (args: QueryArgs): string => {
+  const {
+    namespace,
+    sort: { direction: dir },
+    cursor,
+    pageSize,
+    concreteEntityIndexName,
+    searchExpression,
+    entityExpression,
+  } = args;
   const entityAlias = entityAliasOf(namespace);
   const inner = [
     `FROM ${entityAlias}`,
@@ -47,7 +48,7 @@ const buildGroupSizeSortDataQuery = ({
     buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildFilterClause(entityExpression),
-    buildKeepClause(GROUP_SIZE_FIELD),
+    buildKeepClause(args, GROUP_SIZE_FIELD),
     ...buildCursorClause(cursor),
     buildSortSuffix(GROUP_SIZE_FIELD, dir, pageSize),
   ].join('\n');

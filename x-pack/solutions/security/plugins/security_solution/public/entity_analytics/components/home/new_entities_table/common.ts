@@ -90,6 +90,8 @@ export interface QueryArgs {
    * Always applied as `| WHERE …` (after LOOKUP on foreign sorts).
    */
   entityExpression?: string;
+  /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
+  keepFields?: readonly string[];
 }
 
 export interface RunContext {
@@ -133,8 +135,11 @@ export const toList = (items: readonly string[]) => items.map(esc).join(', ');
 
 const quoteField = (f: string) => (/[@\s]/.test(f) ? `\`${f}\`` : f);
 
-export const buildKeepClause = (...extra: string[]): string => {
-  const fields = [...new Set([...ENTITY_FIELDS, ...extra])];
+export const buildKeepClause = (
+  args: Pick<QueryArgs, 'keepFields'>,
+  ...extra: string[]
+): string => {
+  const fields = [...new Set([...ENTITY_FIELDS, ...(args.keepFields ?? []), ...extra])];
   return `| KEEP ${fields.map(quoteField).join(', ')}`;
 };
 

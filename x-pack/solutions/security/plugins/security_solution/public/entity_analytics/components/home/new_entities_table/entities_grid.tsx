@@ -34,12 +34,13 @@ import { i18n } from '@kbn/i18n';
 import { useEntityGridData } from './use_entity_grid_data';
 import { useEntityChildren } from './use_entity_children';
 import { PAGE_SIZE_OPTIONS } from './common';
-import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
+import { renderGridCell, RowActionsCell } from './entities_cell_renderer';
 import { ExpandedEntityRow } from './entities_expanded_row';
 import { AdditionalControls } from '../entities_table/additional_controls';
+import { DataViewContext } from '../entities_table';
 import { LastUpdated } from '../last_updated';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
-import type { GridColumnId, ColumnDescriptor } from './columns/registry';
+import type { ColumnDescriptor } from './columns/registry';
 import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import type { Row, RowsMode } from './common';
@@ -112,14 +113,7 @@ const RenderEntityGridCell: RenderCellValue = (cellProps) => {
     cellProps as typeof cellProps & EntityGridCellContext;
   const row = rows[rowIndex - pageIndex * pageSize];
   if (!row) return null;
-  return renderEntityCell(
-    columnId as GridColumnId,
-    row[columnId],
-    row,
-    watchlistNames,
-    euiTheme,
-    cellHandlers
-  );
+  return renderGridCell(columnId, row[columnId], row, watchlistNames, euiTheme, cellHandlers);
 };
 
 const EntityGridExpanderHeader = () => (
@@ -318,23 +312,36 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   pageSizeOptions = PAGE_SIZE_OPTIONS,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { dataView } = useContext(DataViewContext);
   const isIndividualRows = rowsMode === 'individual';
   const showToolbar = groupSelectorComponent !== undefined;
 
   const { expandedIds: expandedIdList, toggleExpandedId } = useEntityAnalyticsUrlState();
   const expandedIds = useMemo(() => new Set(expandedIdList), [expandedIdList]);
+
+  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
+
+  const catalogIdSet = useMemo(() => new Set(columns.map((c) => c.id)), [columns]);
+  const keepFields = useMemo(
+    () => visibleColumns.filter((id) => !catalogIdSet.has(id)),
+    [visibleColumns, catalogIdSet]
+  );
+
   const { childMap, isChildFetching, prefetchChildren } = useEntityChildren({
     expandedIds,
     timeRange,
+    keepFields,
   });
-
-  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
 
   const prevColumnsRef = useRef(columns);
   useEffect(() => {
     if (prevColumnsRef.current === columns) return;
+    const prevCatalog = new Set(prevColumnsRef.current.map((c) => c.id));
     prevColumnsRef.current = columns;
-    setVisibleColumns(columns.map((c) => c.id));
+    setVisibleColumns((prev) => {
+      const extras = prev.filter((id) => !prevCatalog.has(id));
+      return [...columns.map((c) => c.id), ...extras];
+    });
   }, [columns]);
 
   const { rows, total, updatedAt, isFetching } = useEntityGridData({
@@ -346,10 +353,12 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     entityExpression,
     timeRange,
     rowsMode,
+    keepFields,
   });
 
   const onAddColumn = useCallback(
-    (columnId: string) => setVisibleColumns((prev) => [...prev, columnId]),
+    (columnId: string) =>
+      setVisibleColumns((prev) => (prev.includes(columnId) ? prev : [...prev, columnId])),
     []
   );
   const onRemoveColumn = useCallback(
@@ -375,10 +384,24 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     [expandedIds, isChildFetching]
   );
 
-  const gridColumns = useMemo(
-    () => columns.map((col) => ({ ...col, isResizable: false })),
-    [columns]
+  const extraColumns = useMemo(
+    (): ColumnDescriptor[] =>
+      keepFields.map((id) => ({
+        id,
+        displayAsText: dataView?.getFieldByName(id)?.customLabel || id,
+        initialWidth: 160,
+        isSortable: false,
+        isExpandable: false,
+      })),
+    [keepFields, dataView]
   );
+
+  const gridColumns = useMemo(
+    () => [...columns, ...extraColumns].map((col) => ({ ...col, isResizable: false })),
+    [columns, extraColumns]
+  );
+
+  const gridViewColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
@@ -411,7 +434,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
                     onAddColumn={onAddColumn}
                     onRemoveColumn={onRemoveColumn}
                     onResetColumns={onResetColumns}
-                    showFieldsButton={false}
+                    showFieldsButton={true}
                   />
                 ),
                 append:
@@ -462,12 +485,20 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       ...cellContext,
       expandedIds,
       childMap,
-      columns,
+      columns: gridViewColumns,
       prefetchChildren,
       toggleExpandedId,
       rowActions,
     }),
-    [cellContext, expandedIds, childMap, columns, prefetchChildren, toggleExpandedId, rowActions]
+    [
+      cellContext,
+      expandedIds,
+      childMap,
+      gridViewColumns,
+      prefetchChildren,
+      toggleExpandedId,
+      rowActions,
+    ]
   );
 
   return (
@@ -484,9 +515,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EuiDataGrid
           aria-label={GRID_ARIA_LABEL}
           leadingControlColumns={
-            isIndividualRows
-              ? INDIVIDUAL_LEADING_CONTROL_COLUMNS
-              : RESOLVED_LEADING_CONTROL_COLUMNS
+            isIndividualRows ? INDIVIDUAL_LEADING_CONTROL_COLUMNS : RESOLVED_LEADING_CONTROL_COLUMNS
           }
           columns={gridColumns}
           columnVisibility={columnVisibility}

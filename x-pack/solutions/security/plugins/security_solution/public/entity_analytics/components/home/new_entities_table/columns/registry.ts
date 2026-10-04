@@ -46,6 +46,10 @@ export const ALL_COLUMNS = [
 
 export type GridColumnId = (typeof ALL_COLUMNS)[number]['id'];
 
+const GRID_COLUMN_ID_SET: ReadonlySet<string> = new Set(ALL_COLUMNS.map((c) => c.id));
+
+export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID_SET.has(id);
+
 // `ALL_COLUMNS` typed as `readonly ColumnDescriptor[]` for runtime access (`.find`, `.map`).
 export const ALL_COLUMNS_LIST: readonly ColumnDescriptor[] = ALL_COLUMNS;
 

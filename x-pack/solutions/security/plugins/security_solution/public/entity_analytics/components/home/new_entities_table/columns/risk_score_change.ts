@@ -21,14 +21,7 @@ import {
   buildSortSuffix,
   buildCursorClause,
 } from '../common';
-import type {
-  QueryArgs,
-  RunContext,
-  Row,
-  TimeRange,
-  RowsMode,
-  ColumnDescriptor,
-} from '../common';
+import type { QueryArgs, RunContext, Row, TimeRange, ColumnDescriptor } from '../common';
 
 const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
 
@@ -38,14 +31,15 @@ const RISK_SCORE_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk
 
 // ── query builders: risk_score_change sort ────────────────────────────────────
 
-const buildRiskScoreChangeBaseQuery = (
-  namespace: string,
-  timeRange: TimeRange,
-  concreteEntityIndexName: string,
-  rowsMode: RowsMode,
-  searchExpression?: string,
-  entityExpression?: string
-): string => {
+const buildRiskScoreChangeBaseQuery = (args: QueryArgs): string => {
+  const {
+    namespace,
+    timeRange,
+    concreteEntityIndexName,
+    rowsMode,
+    searchExpression,
+    entityExpression,
+  } = args;
   const days = TIME_RANGE_DAYS[timeRange];
   return [
     `FROM ${riskScoreIndexOf(namespace)}`,
@@ -59,53 +53,19 @@ const buildRiskScoreChangeBaseQuery = (
     ...buildResolvedRowsFilter(rowsMode),
     ...buildFilterClause(entityExpression),
     `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - reference_score`,
-    buildKeepClause(RISK_SCORE_CHANGE_FIELD),
+    buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
   ].join('\n');
 };
 
-const buildRiskScoreChangeDataQuery = ({
-  namespace,
-  timeRange,
-  sort: { direction: dir },
-  cursor,
-  pageSize,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
+const buildRiskScoreChangeDataQuery = (args: QueryArgs): string =>
   [
-    buildRiskScoreChangeBaseQuery(
-      namespace,
-      timeRange,
-      concreteEntityIndexName,
-      rowsMode,
-      searchExpression,
-      entityExpression
-    ),
-    ...buildCursorClause(cursor),
-    buildSortSuffix(RISK_SCORE_CHANGE_FIELD, dir, pageSize),
+    buildRiskScoreChangeBaseQuery(args),
+    ...buildCursorClause(args.cursor),
+    buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, args.pageSize),
   ].join('\n');
 
-const buildRiskScoreChangeCountQuery = ({
-  namespace,
-  timeRange,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
-  [
-    buildRiskScoreChangeBaseQuery(
-      namespace,
-      timeRange,
-      concreteEntityIndexName,
-      rowsMode,
-      searchExpression,
-      entityExpression
-    ),
-    `| STATS total = COUNT(*)`,
-  ].join('\n');
+const buildRiskScoreChangeCountQuery = (args: QueryArgs): string =>
+  [buildRiskScoreChangeBaseQuery(args), `| STATS total = COUNT(*)`].join('\n');
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 

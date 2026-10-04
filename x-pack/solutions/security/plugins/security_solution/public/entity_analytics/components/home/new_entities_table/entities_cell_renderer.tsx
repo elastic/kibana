@@ -30,7 +30,7 @@ import {
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
-import type { GridColumnId } from './columns/registry';
+import { isGridColumnId, type GridColumnId } from './columns/registry';
 import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
 import { RiskScoreCell } from '../entities_table/risk_score_cell';
 import { AssetCriticalityBadge } from '../../asset_criticality';
@@ -77,17 +77,20 @@ const cellTruncateCss = css`
   flex: 1;
 `;
 
-const DefaultCell: React.FC<{ value: unknown }> = ({ value }) => (
-  <div
-    css={css`
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    `}
-  >
-    {String(value ?? '—')}
-  </div>
-);
+const DefaultCell: React.FC<{ value: unknown }> = ({ value }) => {
+  const text = Array.isArray(value) ? value.map((v) => String(v)).join(', ') : String(value ?? '—');
+  return (
+    <div
+      css={css`
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      `}
+    >
+      {text}
+    </div>
+  );
+};
 
 interface RowActionsCellProps {
   onInvestigateInTimeline: () => void;
@@ -374,4 +377,18 @@ export const renderEntityCell = (
   }
 
   return assertNever(columnId);
+};
+
+export const renderGridCell = (
+  columnId: string,
+  value: unknown,
+  row: Record<string, unknown>,
+  watchlistNames: Map<string, string>,
+  euiTheme: EuiThemeComputed,
+  handlers?: CellHandlers
+): JSX.Element => {
+  if (!isGridColumnId(columnId)) {
+    return <DefaultCell value={value} />;
+  }
+  return renderEntityCell(columnId, value, row, watchlistNames, euiTheme, handlers);
 };

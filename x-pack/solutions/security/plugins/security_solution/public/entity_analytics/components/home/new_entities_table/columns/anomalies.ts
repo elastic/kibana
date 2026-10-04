@@ -37,17 +37,18 @@ const buildAnomalyCountSortBaseQuery = (cutoff: string): string =>
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
-const buildAnomalyCountSortDataQuery = ({
-  namespace,
-  timeRange,
-  sort: { direction: dir },
-  cursor,
-  pageSize,
-  rowsMode,
-  concreteEntityIndexName,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string => {
+const buildAnomalyCountSortDataQuery = (args: QueryArgs): string => {
+  const {
+    namespace,
+    timeRange,
+    sort: { direction: dir },
+    cursor,
+    pageSize,
+    rowsMode,
+    concreteEntityIndexName,
+    searchExpression,
+    entityExpression,
+  } = args;
   const inner = [
     buildAnomalyCountSortBaseQuery(alertLookbackCutoff(timeRange)),
     ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
@@ -55,7 +56,7 @@ const buildAnomalyCountSortDataQuery = ({
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedRowsFilter(rowsMode),
     ...buildFilterClause(entityExpression),
-    buildKeepClause(ANOMALY_COUNT_FIELD),
+    buildKeepClause(args, ANOMALY_COUNT_FIELD),
     ...buildCursorClause(cursor),
   ].join('\n');
 

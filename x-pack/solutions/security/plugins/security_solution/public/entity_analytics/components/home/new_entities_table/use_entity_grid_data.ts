@@ -73,6 +73,7 @@ export interface UseEntityGridDataOptions {
   entityExpression?: string;
   timeRange: TimeRange;
   rowsMode?: RowsMode;
+  keepFields?: readonly string[];
 }
 
 export const useEntityGridData = ({
@@ -84,6 +85,7 @@ export const useEntityGridData = ({
   entityExpression,
   timeRange,
   rowsMode = 'resolved',
+  keepFields,
 }: UseEntityGridDataOptions) => {
   const queryClient = useQueryClient();
   const {
@@ -96,6 +98,8 @@ export const useEntityGridData = ({
   const concreteEntityIndexName = resolvedIndex?.indexName ?? null;
 
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+
+  const keepFieldsKey = (keepFields ?? []).join('\0');
 
   const shellKey = (index: number) =>
     [
@@ -110,6 +114,7 @@ export const useEntityGridData = ({
       rowsMode,
       concreteEntityIndexName,
       spaceId,
+      keepFieldsKey,
     ] as const;
 
   // Page N's cursor is page N-1's cached next_cursor. If the user jumps ahead,
@@ -164,6 +169,7 @@ export const useEntityGridData = ({
         concreteEntityIndexName,
         searchExpression,
         entityExpression,
+        keepFields,
       };
 
       const allRows = await runQuery(buildSortQuery(args));
@@ -207,6 +213,7 @@ export const useEntityGridData = ({
         concreteEntityIndexName,
         searchExpression,
         entityExpression,
+        keepFields,
       };
 
       const [countRow] = await runQuery(buildCountQuery(args));
@@ -259,6 +266,7 @@ export const useEntityGridData = ({
         concreteEntityIndexName,
         searchExpression,
         entityExpression,
+        keepFields,
       };
 
       return enrichEntityRows(pageRows, args, skip, { runQuery, http }, ENRICH_FNS);

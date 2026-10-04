@@ -49,15 +49,21 @@ const CHILDREN_GC_TIME_MS = 5 * 60_000;
 const getEntityChildrenQueryKey = (
   entityId: string,
   timeRange: TimeRange,
-  concreteEntityIndexName: string
-) => [ENTITY_CHILDREN_QUERY_KEY, entityId, timeRange, concreteEntityIndexName] as const;
+  concreteEntityIndexName: string,
+  keepFieldsKey: string
+) =>
+  [ENTITY_CHILDREN_QUERY_KEY, entityId, timeRange, concreteEntityIndexName, keepFieldsKey] as const;
 
-const buildChildQuery = (namespace: string, entityId: string): string =>
+const buildChildQuery = (
+  namespace: string,
+  entityId: string,
+  keepFields?: readonly string[]
+): string =>
   [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| WHERE ${ENTITY_ID_FIELD} == ${esc(entityId)} OR ${RESOLVED_TO_FIELD} == ${esc(entityId)}`,
-    buildKeepClause(),
+    buildKeepClause({ keepFields }),
     `| SORT ${RISK_SCORE_NORM_FIELD} DESC NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT 100`,
   ].join('\n');
@@ -69,20 +75,21 @@ interface FetchEntityChildrenParams {
   concreteEntityIndexName: string;
   searchService: DataPublicPluginStart['search'];
   http: HttpSetup;
+  keepFields?: readonly string[];
 }
 
 const fetchEntityChildrenShell = async ({
   entityId,
   spaceId,
-  concreteEntityIndexName,
   searchService,
+  keepFields,
 }: FetchEntityChildrenParams): Promise<Row[]> => {
   const runQuery: EsqlRunner = async (query) =>
     esqlResponseToRows(
       await lastValueFrom(searchService.search({ params: { query } }, { strategy: 'esql_async' }))
     );
 
-  const rows = await runQuery(buildChildQuery(spaceId, entityId));
+  const rows = await runQuery(buildChildQuery(spaceId, entityId, keepFields));
   for (const row of rows) row[GROUP_SIZE_FIELD] = 1;
   return rows;
 };
@@ -118,9 +125,14 @@ const enrichEntityChildren = async (
 export interface UseEntityChildrenOptions {
   expandedIds: ReadonlySet<string>;
   timeRange: TimeRange;
+  keepFields?: readonly string[];
 }
 
-export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenOptions) => {
+export const useEntityChildren = ({
+  expandedIds,
+  timeRange,
+  keepFields,
+}: UseEntityChildrenOptions) => {
   const queryClient = useQueryClient();
   const {
     data: { search: searchService },
@@ -133,6 +145,8 @@ export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenO
 
   const expandedIdList = useMemo(() => [...expandedIds], [expandedIds]);
 
+  const keepFieldsKey = (keepFields ?? []).join('\0');
+
   const fetchParams = useMemo(
     () =>
       concreteEntityIndexName
@@ -142,14 +156,20 @@ export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenO
             concreteEntityIndexName,
             searchService,
             http,
+            keepFields,
           }
         : null,
-    [concreteEntityIndexName, timeRange, spaceId, searchService, http]
+    [concreteEntityIndexName, timeRange, spaceId, searchService, http, keepFields]
   );
 
   const shellQueries = useQueries({
     queries: expandedIdList.map((entityId) => ({
-      queryKey: getEntityChildrenQueryKey(entityId, timeRange, concreteEntityIndexName ?? ''),
+      queryKey: getEntityChildrenQueryKey(
+        entityId,
+        timeRange,
+        concreteEntityIndexName ?? '',
+        keepFieldsKey
+      ),
       queryFn: () => {
         if (!fetchParams) throw new Error('entity store index not resolved');
         return fetchEntityChildrenShell({ ...fetchParams, entityId });
@@ -167,7 +187,8 @@ export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenO
       const shellKey = getEntityChildrenQueryKey(
         entityId,
         timeRange,
-        concreteEntityIndexName ?? ''
+        concreteEntityIndexName ?? '',
+        keepFieldsKey
       );
       return {
         queryKey: [
@@ -175,6 +196,7 @@ export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenO
           entityId,
           timeRange,
           concreteEntityIndexName ?? '',
+          keepFieldsKey,
           shell?.dataUpdatedAt ?? 0,
         ],
         queryFn: () => {
@@ -224,13 +246,14 @@ export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenO
         queryKey: getEntityChildrenQueryKey(
           entityId,
           timeRange,
-          fetchParams.concreteEntityIndexName
+          fetchParams.concreteEntityIndexName,
+          keepFieldsKey
         ),
         queryFn: () => fetchEntityChildrenShell({ ...fetchParams, entityId }),
         staleTime: CHILDREN_STALE_TIME_MS,
       });
     },
-    [fetchParams, queryClient, timeRange]
+    [fetchParams, queryClient, timeRange, keepFieldsKey]
   );
 
   const resetChildren = useCallback(() => {

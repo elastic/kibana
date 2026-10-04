@@ -16,25 +16,27 @@ import {
 } from '../common';
 import type { ColumnDescriptor, QueryArgs } from '../common';
 
-const buildNativeEntityDataQuery = ({
-  namespace,
-  sort: { field, direction: dir },
-  cursor,
-  pageSize,
-  rowsMode,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
-  [
+const buildNativeEntityDataQuery = (args: QueryArgs): string => {
+  const {
+    namespace,
+    sort: { field, direction: dir },
+    cursor,
+    pageSize,
+    rowsMode,
+    searchExpression,
+    entityExpression,
+  } = args;
+  return [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedRowsFilter(rowsMode),
     ...buildCombinedFilterClause(searchExpression, entityExpression),
-    buildKeepClause(),
+    buildKeepClause(args),
     ...buildCursorClause(cursor),
     `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT ${pageSize + 1}`,
   ].join('\n');
+};
 
 const buildNativeEntityCountQuery = ({
   namespace,

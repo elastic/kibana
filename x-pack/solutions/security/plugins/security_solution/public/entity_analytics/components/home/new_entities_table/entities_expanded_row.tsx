@@ -8,9 +8,8 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiDataGridCustomBodyProps, EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
-import { renderEntityCell } from './entities_cell_renderer';
+import { renderGridCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
-import type { GridColumnId } from './columns/registry';
 
 interface ChildTreeConnectorProps {
   isLast: boolean;
@@ -68,7 +67,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
         }
 
         const w = colDef.initialWidth ?? 150;
-        const value = child[col.id as GridColumnId];
+        const value = child[col.id];
 
         if (col.id === 'entity.name') {
           return (
@@ -103,14 +102,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                     }
                   `}
                 >
-                  {renderEntityCell(
-                    col.id as GridColumnId,
-                    value,
-                    child,
-                    watchlistNames,
-                    euiTheme,
-                    handlers
-                  )}
+                  {renderGridCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
                 </div>
               </div>
             </div>
@@ -139,14 +131,7 @@ export const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
               }
             `}
           >
-            {renderEntityCell(
-              col.id as GridColumnId,
-              value,
-              child,
-              watchlistNames,
-              euiTheme,
-              handlers
-            )}
+            {renderGridCell(col.id, value, child, watchlistNames, euiTheme, handlers)}
           </div>
         );
       })}
