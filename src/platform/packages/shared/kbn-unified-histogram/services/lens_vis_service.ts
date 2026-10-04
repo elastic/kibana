@@ -70,6 +70,7 @@ import {
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
+const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
 function resolveLensDataView(dataSource: DataSource): DataView | undefined {
@@ -684,7 +685,8 @@ export class LensVisService {
     const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
       normalizedQuery,
-      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}`
+      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}
+| LIMIT ${ESQL_HISTOGRAM_RESULT_LIMIT}`
     );
   };
 
