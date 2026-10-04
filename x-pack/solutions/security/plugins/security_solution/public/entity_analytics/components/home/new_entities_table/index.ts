@@ -34,5 +34,6 @@ export type { EntityGridResponse } from './common';
 export {
   buildEntityFilterClauses,
   buildEntityFiltersExpression,
+  buildEntityFiltersQuery,
   useEntityGridFilters,
 } from './use_entity_grid_filters';

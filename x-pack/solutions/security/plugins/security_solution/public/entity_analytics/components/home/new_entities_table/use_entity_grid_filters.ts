@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { convertFiltersToESQLExpression, convertQueryToESQLExpression } from '@kbn/esql-utils';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
@@ -35,6 +36,23 @@ export const buildEntityFiltersExpression = (filters: EntityFilters): string => 
     parts.push(buildMvContainsExpression('entity.source', filters.dataSources));
 
   return parts.join(' AND ');
+};
+
+/** DSL counterpart of {@link buildEntityFiltersExpression}. */
+export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] => {
+  const clauses: QueryDslQueryContainer[] = [];
+
+  if (filters.entityTypes.length)
+    clauses.push({ terms: { 'entity.EngineMetadata.Type': filters.entityTypes } });
+  if (filters.riskLevels.length)
+    clauses.push({ terms: { 'entity.risk.calculated_level': filters.riskLevels } });
+  if (filters.assetCriticality.length)
+    clauses.push({ terms: { 'asset.criticality': filters.assetCriticality } });
+  if (filters.watchlists.length)
+    clauses.push({ terms: { 'entity.attributes.watchlists': filters.watchlists } });
+  if (filters.dataSources.length) clauses.push({ terms: { 'entity.source': filters.dataSources } });
+
+  return clauses;
 };
 
 /** `| WHERE …` pipe clauses for NAT tile queries (empty when no filters). */
