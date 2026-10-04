@@ -44,6 +44,36 @@ triggers:
           type: string
           maxLength: 500
           description: Optional chat model connector or inference endpoint id for this run.
+        notificationDestinations:
+          type: array
+          maxItems: 20
+          description: Destinations that receive the settled investigation outcome.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - type
+              - connector_id
+              - params
+            properties:
+              type:
+                type: string
+                minLength: 1
+                maxLength: 100
+              connector_id:
+                type: string
+                minLength: 1
+                maxLength: 500
+              params:
+                type: object
+                additionalProperties: true
+                description: Connector-specific destination properties, validated by the notification handler at runtime. Limited to 4096 JSON characters, three container levels, and 20 entries per object or array.
+              automation_id:
+                type: string
+                maxLength: 500
+              automation_name:
+                type: string
+                maxLength: 500
       required:
         - message
         - title
@@ -649,6 +679,15 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'failed'
+    on-failure:
+      continue: true
+
+  # Sends the settled outcome to the recorded destinations and stores each delivery attempt.
+  # Notification failures are recorded without failing the investigation workflow.
+  - name: notify_destinations
+    type: nightshift.sendNotifications
+    with:
+      investigation_id: '{{ execution.id }}'
     on-failure:
       continue: true
 

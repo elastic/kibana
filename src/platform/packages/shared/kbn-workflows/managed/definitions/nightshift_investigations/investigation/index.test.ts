@@ -9,6 +9,9 @@
 
 import { parse } from 'yaml';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from '.';
+import { buildFieldsZodValidator } from '../../../../spec/lib/build_fields_zod_validator';
+import { getInputsFromDefinition } from '../../../../spec/lib/field_conversion';
+import { WorkflowSchema } from '../../../../spec/schema';
 
 interface WorkflowStep {
   name: string;
@@ -72,6 +75,7 @@ describe('Nightshift investigation workflow', () => {
       'persist_investigation_failed',
       'emit_investigation_completed',
       'emit_investigation_failed',
+      'notify_destinations',
       'fail_investigation',
     ]);
     expect(investigation.steps.some((step) => step.name === 'merge_investigation_gaps')).toBe(
@@ -115,6 +119,14 @@ describe('Nightshift investigation workflow', () => {
     expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
   });
 
+  it('sends notifications from the settled record without failing the run on a delivery error', () => {
+    const notify = requireStep('notify_destinations');
+    expect(notify.type).toBe('nightshift.sendNotifications');
+    expect(notify.with).toEqual({ investigation_id: '{{ execution.id }}' });
+    expect(notify['on-failure']).toEqual({ continue: true });
+    expect(notify.if).toBeUndefined();
+  });
+
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
       'plugin-id': 'nightshift_investigation',
@@ -122,6 +134,78 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
+  });
+
+  it('passes WorkflowSchema normalization', () => {
+    const result = WorkflowSchema.safeParse(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml));
+    expect(result.success ? null : result.error.issues).toBeNull();
+  });
+
+  it('accepts generic destinations and leaves connector-specific validation to runtime', () => {
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
+    );
+    const base = { message: 'Investigate', title: 'Test' };
+    const destination = {
+      type: 'slack',
+      connector_id: 'slack',
+      params: { channel: '#alerts', thread_ts: '1.2' },
+    };
+    expect(validator.safeParse({ ...base, notificationDestinations: [destination] }).success).toBe(
+      true
+    );
+    expect(
+      validator.safeParse({
+        ...base,
+        notificationDestinations: [
+          { type: 'future-connector', connector_id: 'c', params: { recipient: 'user' } },
+        ],
+      }).success
+    ).toBe(true);
+    expect(
+      validator.safeParse({ ...base, notificationDestinations: [{ ...destination, params: {} }] })
+        .success
+    ).toBe(true);
+    expect(validator.safeParse(base).success).toBe(true);
+  });
+
+  it('enforces envelope bounds and rejects fields outside params', () => {
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
+    );
+    const base = { message: 'Investigate', title: 'Test' };
+    const destination = { type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } };
+    const valid = (notificationDestinations: object[]) =>
+      validator.safeParse({ ...base, notificationDestinations }).success;
+    for (const [field, limit] of [
+      ['type', 100],
+      ['connector_id', 500],
+    ] as const) {
+      for (const value of [undefined, '', 'x'.repeat(limit + 1)])
+        expect(valid([{ ...destination, [field]: value }])).toBe(false);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(limit) }])).toBe(true);
+    }
+    for (const field of ['automation_id', 'automation_name']) {
+      expect(valid([{ ...destination, [field]: '' }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(500) }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(501) }])).toBe(false);
+    }
+    for (const params of [undefined, null, [], 'channel'])
+      expect(valid([{ ...destination, params }])).toBe(false);
+    for (const field of [
+      'destination_index',
+      'status',
+      'attempt_id',
+      'attempted_at',
+      'message_ts',
+      'error',
+      'sent_at',
+      'channel',
+      'thread_ts',
+    ])
+      expect(valid([{ ...destination, [field]: 'sent' }])).toBe(false);
+    expect(valid(Array(20).fill(destination))).toBe(true);
+    expect(valid(Array(21).fill(destination))).toBe(false);
   });
 
   it('space-scopes the path of every kibana.request step', () => {

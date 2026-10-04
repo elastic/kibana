@@ -39,6 +39,9 @@ describe('nightshift investigation saved object model version 4', () => {
 
   it('registers a schema-only model version without data or mapping changes', () => {
     expect(modelVersion4?.changes).toEqual([]);
+    expect(Object.keys(modelVersions)).toEqual(['1', '2', '3', '4']);
+    expect(modelVersion4?.schemas?.create).toBeDefined();
+    expect(modelVersion4?.schemas?.forwardCompatibility).toBeDefined();
   });
 
   it('accepts an impact with a top-level summary and evidence and no entities on create', () => {
@@ -75,4 +78,42 @@ describe('nightshift investigation saved object model version 4', () => {
       })
     ).toThrow();
   });
+
+  it.each(['create', 'forwardCompatibility'] as const)(
+    'preserves immutable destinations and separate delivery attempts in the %s schema',
+    (schemaName) => {
+      const attributes = {
+        title: 'Checkout latency',
+        status: 'completed',
+        subject_type: 'alert',
+        subject_id: 'alert-1',
+        trigger_type: 'automatic',
+        created_at: '2026-09-30T00:00:00.000Z',
+        impact: { summary: 'Checkout latency rose.', evidence: { description: 'Latency chart' } },
+        notificationDestinations: [
+          {
+            type: 'slack',
+            connector_id: 'elastic-apps-slack',
+            params: { channel: '#alerts' },
+            automation_id: 'auto-1',
+            automation_name: 'Prod alerts',
+          },
+        ],
+        notifications: [
+          {
+            destination_index: 0,
+            status: 'sent',
+            attempt_id: 'attempt-1',
+            attempted_at: '2026-09-30T00:04:00.000Z',
+            message_ts: '1759190400.000100',
+            sent_at: '2026-09-30T00:05:00.000Z',
+          },
+        ],
+      };
+      const attributesSchema = modelVersion4?.schemas?.[schemaName] as {
+        validate: (value: unknown) => unknown;
+      };
+      expect(attributesSchema.validate(attributes)).toEqual(attributes);
+    }
+  );
 });

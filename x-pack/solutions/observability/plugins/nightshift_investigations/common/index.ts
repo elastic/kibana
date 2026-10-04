@@ -38,6 +38,9 @@ export type {
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
   InvestigationContext,
+  InvestigationNotification,
+  InvestigationNotificationDestination,
+  InvestigationNotificationOutcome,
   InvestigationSubject,
 } from './schemas';
 
@@ -45,13 +48,19 @@ export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
+  investigationNotificationSchema,
+  investigationNotificationDestinationSchema,
+  investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
+  MAX_INVESTIGATION_NOTIFICATIONS,
 } from './schemas';
 
 import type {
   AlertInvestigationContext,
   InvestigationContext,
+  InvestigationNotification,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
@@ -84,6 +93,8 @@ export interface StartInvestigationRequest {
    */
   concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
+  /** Destinations to send the outcome to once the investigation settles. */
+  notificationDestinations?: InvestigationNotificationDestination[];
 }
 
 export interface StartInvestigationResponse {
@@ -106,6 +117,10 @@ export const INVESTIGATION_STATUSES = [
   'cancelled',
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
+
+/** Whether an investigation has settled and can no longer transition to another status. */
+export const isTerminalStatus = (status: InvestigationStatus): boolean =>
+  status === 'completed' || status === 'failed' || status === 'cancelled';
 
 export const UPDATABLE_INVESTIGATION_STATUSES = [
   'running',
@@ -147,6 +162,10 @@ export interface GetInvestigationResponse extends InvestigationStructuredOutput 
   executed_by?: string;
   error?: string;
   conversation_id?: string;
+  /** Immutable destinations recorded when the investigation starts. */
+  readonly notificationDestinations?: readonly InvestigationNotificationDestination[];
+  /** Delivery attempts and their results, linked to a destination by destination_index. */
+  notifications?: InvestigationNotification[];
 }
 
 export interface InvestigationStatusEvent {

@@ -23,6 +23,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { NightshiftInvestigationsConfig } from './config';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
@@ -37,6 +38,7 @@ import {
   isInvestigationRunAvailable,
 } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
+import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
@@ -137,6 +139,9 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
+    const investigationLocator = plugins.share.url.locators.create(
+      new InvestigationLocatorDefinition()
+    );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
@@ -314,6 +319,13 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('resolve_model'),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          sendNotificationsStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
           })
         );
         // Obtain + materialize steps are always registered so the combined workflow

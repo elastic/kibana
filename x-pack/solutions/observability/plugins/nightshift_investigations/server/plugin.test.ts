@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { ensureMemoryIndex } from './memory/ensure_memory_index';
 import { NightshiftInvestigationsPlugin } from './plugin';
@@ -27,12 +29,24 @@ const createPlugin = (memoryEnabled = false) =>
 
 const createSetupDeps = () =>
   ({
+    share: { url: new MockUrlService() },
     taskManager: {
       registerTaskDefinitions: jest.fn(),
     },
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
+  it('registers the investigation locator on the server', async () => {
+    const dependencies = createSetupDeps();
+    createPlugin().setup(coreMock.createSetup(), dependencies);
+    const locator = dependencies.share.url.locators.get(NIGHTSHIFT_INVESTIGATION_LOCATOR_ID);
+    expect(await locator?.getLocation({ investigationId: 'inv/1' })).toEqual({
+      app: 'nightshift',
+      path: '?investigationId=inv%2F1',
+      state: {},
+    });
+  });
+
   it('accepts one investigation quota callback', () => {
     const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
     const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
@@ -51,7 +65,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers model resolution when Cortex and decision trees are disabled', () => {
+  it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
       ...createSetupDeps(),
@@ -65,8 +79,17 @@ describe('NightshiftInvestigationsPlugin setup', () => {
 
     createPlugin().setup(coreMock.createSetup(), dependencies);
 
-    expect(registerStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'nightshift.resolveModel' })
+    expect(registerStepDefinition.mock.calls.map(([definition]) => definition.id)).toEqual(
+      expect.arrayContaining([
+        'nightshift.resolveModel',
+        'nightshift.sendNotifications',
+        'nightshift.obtainSandbox',
+        'nightshift.cortexHydrate',
+        'nightshift.memoryMaterializeToSandbox',
+        'nightshift.composeHydrateNotifications',
+        'nightshift.cortexOptimize',
+        'nightshift.memoryOptimize',
+      ])
     );
   });
 });

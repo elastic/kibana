@@ -17,6 +17,13 @@ import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { validateNotificationDestination } from '../lib/notifications/notification_delivery';
+import { investigationNotificationDestinationsSchema } from '../../common/schemas';
+import type {
+  InvestigationNotification,
+  InvestigationNotificationDestination,
+  InvestigationNotificationOutcome,
+} from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
@@ -40,6 +47,7 @@ import {
   freeFormContextSchema,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
+  isTerminalStatus,
 } from '../../common';
 import type {
   InvestigationAttributes,
@@ -66,10 +74,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
-}
-
-function isTerminalStatus(status: InvestigationStatus): boolean {
-  return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
 /** Used when persist omitted `error`. */
@@ -121,6 +125,7 @@ interface ExecutionInvestigationMetadata {
   title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
+  notificationDestinations?: InvestigationNotificationDestination[];
 }
 /**
  * Context fields each subject type's id arrives under. The `satisfies` clause is what makes a
@@ -211,6 +216,8 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     recommendations: recommendations.success ? recommendations.data : undefined,
     conversation_id: record.conversation_id,
     impact: record.impact,
+    notificationDestinations: record.notificationDestinations,
+    notifications: record.notifications,
   };
 };
 
@@ -223,6 +230,10 @@ const parseExecutionInvestigationMetadata = (
       : undefined;
   const rawConcurrencyKey = inputs?.concurrency_key;
   const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
+  const notificationDestinations = investigationNotificationDestinationsSchema
+    .optional()
+    .parse(inputs?.notificationDestinations);
+  notificationDestinations?.forEach(validateNotificationDestination);
 
   return {
     subject: recoverSubjectFromInput(inputs),
@@ -230,6 +241,7 @@ const parseExecutionInvestigationMetadata = (
     title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
+    ...(notificationDestinations?.length ? { notificationDestinations } : {}),
   };
 };
 
@@ -380,6 +392,7 @@ export class NightshiftInvestigationsClient {
     connector_id,
     concurrency_key,
     context = {},
+    notificationDestinations,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
@@ -394,6 +407,11 @@ export class NightshiftInvestigationsClient {
     ) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
+
+    const parsedNotificationDestinations = investigationNotificationDestinationsSchema
+      .optional()
+      .parse(notificationDestinations);
+    parsedNotificationDestinations?.forEach(validateNotificationDestination);
 
     const resolvedConnectorId = await resolveNightshiftModelForRequest({
       request: this.request,
@@ -457,6 +475,9 @@ export class NightshiftInvestigationsClient {
       stream_names: stream_names ?? [],
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       ...(concurrency_key ? { concurrency_key } : {}),
+      ...(parsedNotificationDestinations?.length
+        ? { notificationDestinations: parsedNotificationDestinations }
+        : {}),
       context: {
         ...prepared.context,
         source: resolvedSubject.type,
@@ -484,6 +505,7 @@ export class NightshiftInvestigationsClient {
       title,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
+      notificationDestinations: parsedNotificationDestinations,
     }).catch((error) => {
       this.logger.warn(
         `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
@@ -504,12 +526,14 @@ export class NightshiftInvestigationsClient {
     title,
     triggerType,
     concurrencyKey,
+    notificationDestinations,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
     title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
+    notificationDestinations?: InvestigationNotificationDestination[];
   }): Promise<void> {
     if (concurrencyKey) {
       await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
@@ -523,6 +547,7 @@ export class NightshiftInvestigationsClient {
         ...toSubjectFields(subject),
         trigger_type: triggerType,
         concurrency_key: concurrencyKey,
+        ...(notificationDestinations?.length ? { notificationDestinations } : {}),
         created_at: new Date().toISOString(),
       },
     });
@@ -577,9 +602,8 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
-      execution.context
-    );
+    const { subject, title, triggerType, concurrencyKey, notificationDestinations } =
+      parseExecutionInvestigationMetadata(execution.context);
 
     if (!subject || !title) {
       throw new InvestigationMetadataMissingError(investigationId);
@@ -597,6 +621,7 @@ export class NightshiftInvestigationsClient {
         ...toSubjectFields(subject),
         trigger_type: triggerType,
         concurrency_key: concurrencyKey,
+        ...(notificationDestinations ? { notificationDestinations } : {}),
         executed_by: execution.executedBy,
         created_at: startedAt,
         started_at: startedAt,
@@ -732,6 +757,83 @@ export class NightshiftInvestigationsClient {
       }
       throw err;
     }
+  }
+
+  /**
+   * Reads the investigation and skips nonterminal runs, missing destinations, or existing attempts.
+   * Appends an unconfirmed attempt and saves it before the caller posts the prepared notification.
+   * The persisted attempt makes sequential replays skip delivery after a crash or result-write failure.
+   * Assumes one sender per investigation; overlapping callers are not coordinated.
+   */
+  async claimNotificationDestination(
+    investigationId: string,
+    destinationIndex: number,
+    attemptId: string
+  ): Promise<InvestigationNotification | undefined> {
+    const investigation = await this.investigationRepository.get(investigationId);
+    if (!investigation) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+    const notificationDestination = investigation.notificationDestinations?.[destinationIndex];
+    if (
+      !isTerminalStatus(investigation.status) ||
+      !notificationDestination ||
+      investigation.notifications?.some(
+        ({ destination_index }) => destination_index === destinationIndex
+      )
+    ) {
+      return undefined;
+    }
+    const notification: InvestigationNotification = {
+      destination_index: destinationIndex,
+      status: 'unconfirmed',
+      attempt_id: attemptId,
+      attempted_at: new Date().toISOString(),
+    };
+    await this.investigationRepository.update({
+      id: investigationId,
+      patch: { notifications: [...(investigation.notifications ?? []), notification] },
+    });
+    return notification;
+  }
+
+  /**
+   * Reads the investigation and matches the stored attempt by destination index and attempt ID.
+   * Clears obsolete result fields, applies the outcome, and saves it with the other stored attempts.
+   * Rejects a missing attempt so an outcome cannot be attached to a different delivery.
+   */
+  async recordNotificationOutcome(
+    investigationId: string,
+    destinationIndex: number,
+    attemptId: string,
+    outcome: InvestigationNotificationOutcome
+  ): Promise<void> {
+    const investigation = await this.investigationRepository.get(investigationId);
+    if (!investigation) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+    const notificationIndex =
+      investigation.notifications?.findIndex(
+        ({ destination_index, attempt_id }) =>
+          destination_index === destinationIndex && attempt_id === attemptId
+      ) ?? -1;
+    if (notificationIndex === -1) {
+      throw new InvestigationConflictError(
+        `Notification attempt "${attemptId}" for destination ${destinationIndex} was not found on investigation "${investigationId}"`
+      );
+    }
+    const notifications = [...(investigation.notifications ?? [])];
+    notifications[notificationIndex] = {
+      ...notifications[notificationIndex],
+      error: undefined,
+      message_ts: undefined,
+      sent_at: undefined,
+      ...outcome,
+    };
+    await this.investigationRepository.update({
+      id: investigationId,
+      patch: { notifications },
+    });
   }
 
   /**
