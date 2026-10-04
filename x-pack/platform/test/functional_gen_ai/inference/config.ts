@@ -22,6 +22,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    mochaOpts: {
+      ...xpackFunctionalConfig.get('mochaOpts'),
+      // Product doc install downloads artifacts and can outlast the default hook timeout.
+      timeout: 20 * 60 * 1000,
+      hookTimeout: 20 * 60 * 1000,
+    },
     services,
     testFiles: [require.resolve('./tests')],
     esTestCluster: {

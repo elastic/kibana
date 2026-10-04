@@ -67,6 +67,18 @@ Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 - params for the inference endpoint:
 `inferenceId`
 
+## Run tests
+
+Unit tests for the document processing pipeline (no Kibana or Elasticsearch required):
+
+```
+node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/tasks/process_documents.test.ts
+```
+
+The tests cover:
+- Document count consistency (deduplication, sparse-doc filtering)
+- `content_title` trimming (site-name suffixes stripped, product-name pipes like `ES|QL` preserved)
+
 ## Building OpenAPI Artifacts
 
 The `build_openapi_artifacts.js` script builds knowledge base artifacts from OpenAPI specifications for Elasticsearch and Kibana.
