@@ -88,6 +88,7 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
+import { EventLoopWatchdog, setActiveEventLoopWatchdog } from './event_loop_watchdog';
 
 export interface TaskManagerSetupContract {
   /**
@@ -174,6 +175,7 @@ export class TaskManagerPlugin
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private eventLoopWatchdog?: EventLoopWatchdog;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -484,6 +486,16 @@ export class TaskManagerPlugin
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
       });
+
+      // Diagnostic prototype, disabled by default: only meaningful on nodes that actually
+      // run tasks, since it detects blocks of this node's own event loop.
+      this.eventLoopWatchdog = new EventLoopWatchdog({
+        logger: this.logger,
+        config: this.config.event_loop_watchdog,
+        dist: this.initContext.env.packageInfo.dist,
+      });
+      this.eventLoopWatchdog.start();
+      setActiveEventLoopWatchdog(this.eventLoopWatchdog);
     }
 
     createMonitoringStats({
@@ -563,6 +575,9 @@ export class TaskManagerPlugin
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();
     }
+
+    this.eventLoopWatchdog?.stop();
+    setActiveEventLoopWatchdog(undefined);
 
     this.executionControlService?.stop();
 
