@@ -27,7 +27,7 @@ describe('entity access control audit', () => {
       message: expect.stringContaining('"entityId":"id","operation":"execute"'),
       event: {
         action: `connector_access_control_${action}`,
-        category: ['iam'],
+        category: ['database'],
         type: ['access'],
         outcome: action === 'denied' ? 'failure' : 'success',
       },
@@ -64,7 +64,7 @@ describe('entity access control audit', () => {
         message: expect.stringContaining('"role":"executor"'),
         event: {
           action: 'workflow_access_control_update',
-          category: ['iam'],
+          category: ['database'],
           type: ['change'],
           outcome: 'success',
         },

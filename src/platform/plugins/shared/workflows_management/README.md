@@ -427,7 +427,7 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 Save a new workflow before you change its access controls. Access controls are stored on the workflow document.
 Open Access control from the workflow header.
 
-| Role | View | Run | Edit and delete | Change access |
+| Role | View | Run | Edit and soft-delete | Change access |
 | --- | --- | --- | --- | --- |
 | Administrator | Yes | Requires owner or ACL access | Requires owner or Editor access | Yes |
 | Owner | Yes | Yes | Yes | Yes |
@@ -442,7 +442,8 @@ Custom roles with those wildcard grants also qualify. Workflows All does not.
 API keys continue to use the normal ACL checks.
 Administrators can view private workflows and recover access after an owner is
 offboarded. Updating access preserves the existing owner. An administrator who
-first sets access on an ownerless legacy workflow becomes its owner.
+makes an ownerless legacy workflow private becomes its owner. Keeping it public
+does not assign ownership.
 Administrators must add themselves as Executor to run a private workflow, or
 Editor to edit it or test draft YAML and steps. The access dialog shows a notice
 when an administrator edits another user's ACL. Background execution keeps its
@@ -453,7 +454,7 @@ summary of each access update and one event per added, removed, or changed user.
 It records visibility and owner changes without repeating unchanged grants.
 `workflow_access_control_denied` records failed ACL checks, including execution
 checks. `workflow_access_control_admin_override` records administrative access
-when viewing a workflow or managing its ACL.
+when viewing a workflow, managing its ACL, or hard-deleting it.
 Searches, lists, batch lookups, filters, and result mapping do not emit ACL events.
 Write prechecks audit denials. The check on the stored document audits overrides.
 A rejected scheduled run emits a denial on each tick until access is restored or
@@ -478,7 +479,9 @@ Normal runs and scheduled runs still require an enabled workflow.
 
 Workflows without an ACL keep their existing access. New workflows with a user
 profile record the creator as owner and start with public access under RBAC.
-For older workflows, the recorded creator can set the first ACL; this records their profile ID as owner. Subsequent checks use profile IDs.
+For older workflows, the recorded creator or an administrator can set the first
+ACL. Keeping an ownerless workflow public does not assign an owner. Making it
+private assigns the caller as owner. Subsequent checks use profile IDs.
 
 Workflow searches apply ACL filters before pagination and aggregation. Execution
 and Inbox searches exclude inaccessible workflow IDs, including soft-deleted
@@ -488,7 +491,8 @@ Execution checks use the current ACL and the execution identity.
 
 Soft deletion retains the workflow document and its ACL for execution and change
 history reads.
-Only the owner can hard-delete a private workflow. The request must
+The owner or an administrator can hard-delete a private workflow. Administrator
+overrides are audited. The request must
 include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
 require no ACL acknowledgment. Their documents are removed before best-effort
 history cleanup, and cleanup failures do not fail deletion.

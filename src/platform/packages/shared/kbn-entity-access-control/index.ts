@@ -11,7 +11,10 @@ import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AccessControl, AccessControlEntry, AccessControlInput } from './types';
 
-export { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
+export {
+  isEntityAccessControlAdmin,
+  ENTITY_ACCESS_CONTROL_ADMIN_ACTION,
+} from './is_entity_access_control_admin';
 export { logEntityAccessControl } from './audit';
 
 export class InvalidAccessControlError extends Error {}
@@ -53,7 +56,7 @@ export const prepareAccessControl = <Role extends string>({
 }: {
   input: AccessControlInput<Role>;
   roles: readonly [Role, ...Role[]];
-  ownerId: string;
+  ownerId?: string;
   previous?: AccessControl<Role>;
   now?: string;
 }): AccessControl<Role> => {

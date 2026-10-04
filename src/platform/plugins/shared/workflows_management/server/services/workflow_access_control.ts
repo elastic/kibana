@@ -92,9 +92,10 @@ export const assertWorkflowOperation = (
   workflow: WorkflowAccessSubject,
   operation: WorkflowAccessOperation,
   profileId: string | undefined,
-  audit?: WorkflowAccessAuditContext
+  audit?: WorkflowAccessAuditContext,
+  isAdmin = false
 ): void => {
-  const decision = getWorkflowAccessDecisions(workflow, profileId)[operation];
+  const decision = getWorkflowAccessDecisions(workflow, profileId, isAdmin)[operation];
   logWorkflowAccess(decision, operation, audit);
   if (decision === 'denied') throw new WorkflowAccessDeniedError();
 };
@@ -120,7 +121,7 @@ export class WorkflowAccessControlService {
     if (!request) return false;
     let check = this.adminChecks.get(request);
     if (!check) {
-      check = isEntityAccessControlAdmin(this.core, request);
+      check = isEntityAccessControlAdmin(this.core, request, this.authz);
       this.adminChecks.set(request, check);
     }
     return check;
@@ -151,7 +152,7 @@ export class WorkflowAccessControlService {
     if (
       decisions.manage !== 'allowed' &&
       !workflow.owner_id &&
-      !workflow.access_control &&
+      workflow.access_control?.access_mode !== 'private' &&
       request &&
       profileId &&
       this.core.security.authc.getCurrentUser(request)?.username === workflow.createdBy
@@ -317,9 +318,9 @@ export class WorkflowAccessControlService {
     const stored = await this.crud.getWorkflowDocumentWithVersion(id, spaceId);
     if (!stored) throw new WorkflowNotFoundError(id);
     const { source: existing, seqNo, primaryTerm } = stored;
-    const ownerId = existing.owner_id ?? profileId;
+    const ownerId = existing.owner_id ?? (access_mode === 'private' ? profileId : undefined);
     if (existing.managed) throw new WorkflowAccessDeniedError();
-    if (!ownerId) {
+    if (access_mode === 'private' && !ownerId) {
       logWorkflowAccess('denied', 'manage', { core: this.core, request, id, spaceId });
       throw new WorkflowAccessDeniedError();
     }

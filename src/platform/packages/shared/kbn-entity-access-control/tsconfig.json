@@ -10,9 +10,8 @@
     "@kbn/zod",
     "@kbn/core-security-server",
     "@kbn/core-http-server",
-    "@kbn/core-elasticsearch-server",
+    "@kbn/security-plugin-types-server",
     "@kbn/core-security-server-mocks",
-    "@kbn/core-http-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks"
+    "@kbn/core-http-server-mocks"
   ]
 }

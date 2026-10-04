@@ -41,23 +41,25 @@ describe('WorkflowAccessControlService', () => {
   let crud: ConstructorParameters<typeof WorkflowAccessControlService>[1];
   let authz: ReturnType<typeof securityMock.createStart>['authz'];
   const atSpace = jest.fn();
+  const globally = jest.fn();
 
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     core = coreMock.createStart();
-    jest
-      .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
-      .mockImplementation(async () => ({
-        has_all_requested:
-          core.security.authc.getCurrentUser(request)?.roles.includes('superuser') ?? false,
-        username: 'user',
-        application: {},
-        cluster: {},
-        index: {},
-      }));
     core.userProfile.getCurrentProfileId.mockResolvedValue('owner');
     document = makeDocument();
     authz = securityMock.createStart().authz;
+    globally.mockReset().mockImplementation(async () => ({
+      hasAllRequested:
+        core.security.authc.getCurrentUser(request)?.roles.includes('superuser') ?? false,
+      username: 'user',
+      privileges: { kibana: [], elasticsearch: { cluster: {}, index: {} } },
+    }));
+    authz.checkPrivilegesWithRequest.mockReturnValue({
+      globally,
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+    });
     jest.spyOn(authz.actions.api, 'get').mockImplementation((subject: string) => `api:${subject}`);
     atSpace.mockReset().mockResolvedValue({ hasPrivilegeUids: ['reader'] });
     authz.checkUserProfilesPrivileges.mockReturnValue({ atSpace });
@@ -114,9 +116,7 @@ describe('WorkflowAccessControlService', () => {
         const result = await service.toDto({ ...document, id: String(index) }, request);
         expect(result.permissions.read).toBe(true);
       }
-      expect(
-        core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges
-      ).toHaveBeenCalledTimes(1);
+      expect(globally).toHaveBeenCalledTimes(1);
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
@@ -302,6 +302,32 @@ describe('WorkflowAccessControlService', () => {
         access_control: { access_mode: 'private' },
       });
     });
+
+    it.each([undefined, { access_mode: 'public' as const, entries: [] }])(
+      'leaves a public workflow ownerless and preserves creator access',
+      async (accessControl) => {
+        delete document.owner_id;
+        document.access_control = accessControl;
+        const result = await service.update('id', 'default', { access_mode: 'public' }, request);
+        expect(result.owner_id).toBeUndefined();
+        expect(document.owner_id).toBeUndefined();
+        jest
+          .spyOn(core.security.authc, 'getCurrentUser')
+          .mockReturnValue(
+            securityServiceMock.createMockAuthenticatedUser({ username: 'alice', roles: [] })
+          );
+        core.userProfile.getCurrentProfileId.mockResolvedValue('alice-profile');
+        const creatorRequest = httpServerMock.createKibanaRequest();
+        expect((await service.permissions(document, creatorRequest)).manage).toBe(true);
+        const claimed = await service.update(
+          'id',
+          'default',
+          { access_mode: 'private' },
+          creatorRequest
+        );
+        expect(claimed.owner_id).toBe('alice-profile');
+      }
+    );
 
     it('still rejects new grants without recipient RBAC', async () => {
       atSpace.mockResolvedValue({ hasPrivilegeUids: [] });

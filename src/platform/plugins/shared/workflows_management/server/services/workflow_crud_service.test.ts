@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
@@ -3343,7 +3344,8 @@ describe('WorkflowCrudService force deletion access', () => {
     ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', true],
     ['public API key', { access_mode: 'public', entries: [] }, undefined, true],
     ['private owner', { access_mode: 'private', entries: [] }, 'owner', true],
-    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', false],
+    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', true],
+    ['private API key', { access_mode: 'private', entries: [] }, 'admin-api-key', false],
     ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', false],
     [
       'private editor',
@@ -3363,13 +3365,24 @@ describe('WorkflowCrudService force deletion access', () => {
     ],
   ] as const)('%s', async (_, accessControl, profileId, allowed) => {
     const core = coreMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
     core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
     jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
       securityServiceMock.createMockAuthenticatedUser({
-        roles: profileId === 'admin' ? ['superuser'] : [],
+        roles: profileId?.startsWith('admin') ? ['superuser'] : [],
+        authentication_type: profileId === 'admin-api-key' ? 'api_key' : 'realm',
       })
     );
-    const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+    const security = securityMock.createStart();
+    security.authz.checkPrivilegesWithRequest.mockReturnValue({
+      globally: jest.fn().mockResolvedValue({ hasAllRequested: profileId?.startsWith('admin') }),
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      authz: security.authz,
+    });
     client.search.mockResolvedValue({
       hits: {
         hits: [
@@ -3392,9 +3405,17 @@ describe('WorkflowCrudService force deletion access', () => {
         force: true,
         acknowledgeAclLoss: accessControl?.access_mode === 'private',
       },
-      httpServerMock.createKibanaRequest()
+      request
     );
 
+    if (profileId === 'admin') {
+      await result;
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'workflow_access_control_admin_override' }),
+        })
+      );
+    }
     if (allowed) {
       await expect(result).resolves.toMatchObject({ deleted: 1, failures: [] });
       expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalledWith(

@@ -233,6 +233,20 @@ steps:
   });
 
   apiTest(
+    'an administrator can hard-delete a private workflow without an ACL grant',
+    async ({ apiClient }) => {
+      expect(await apiClient.delete(workflowPath, { headers: adminHeaders })).toHaveStatusCode(403);
+      expect(
+        await apiClient.delete(`${workflowPath}?force=true&acknowledgeAclLoss=true`, {
+          headers: adminHeaders,
+        })
+      ).toHaveStatusCode(200);
+      expect(await apiClient.get(workflowPath, { headers: adminHeaders })).toHaveStatusCode(404);
+      workflowId = undefined;
+    }
+  );
+
+  apiTest(
     'an administrator needs an Editor grant to change the workflow',
     async ({ apiClient }) => {
       const recovered = await apiClient.get(workflowPath, { headers: adminHeaders });
@@ -244,11 +258,6 @@ steps:
         });
       expect(await update()).toHaveStatusCode(403);
       expect(await apiClient.delete(workflowPath, { headers: adminHeaders })).toHaveStatusCode(403);
-      expect(
-        await apiClient.delete(`${workflowPath}?force=true&acknowledgeAclLoss=true`, {
-          headers: adminHeaders,
-        })
-      ).toHaveStatusCode(403);
       const profile = await apiClient.get('internal/security/user_profile', {
         headers: adminHeaders,
       });

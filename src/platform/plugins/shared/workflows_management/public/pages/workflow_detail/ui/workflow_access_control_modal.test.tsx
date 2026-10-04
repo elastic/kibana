@@ -35,6 +35,29 @@ describe('WorkflowAccessControlModal', () => {
     mockUserProfile.suggest.mockResolvedValue([]);
   });
 
+  it('warns before claiming an ownerless workflow as private', async () => {
+    const workflow = createMockWorkflowDetailDto({
+      owner_id: undefined,
+      access_control: { access_mode: 'public', entries: [] },
+      permissions: { read: true, edit: true, execute: true, manage: true },
+    });
+    render(
+      <TestWrapper>
+        <EuiProvider>
+          <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
+        </EuiProvider>
+      </TestWrapper>
+    );
+    const notice = 'You will become the owner when you make this workflow private.';
+    expect(screen.queryByText(notice)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByLabelText('Visibility'));
+    await userEvent.click(screen.getByRole('option', { name: /^Private/ }));
+    expect(await screen.findByText(notice)).toBeInTheDocument();
+    await userEvent.click(screen.getByLabelText('Visibility'));
+    await userEvent.click(screen.getByRole('option', { name: /^Public/ }));
+    expect(screen.queryByText(notice)).not.toBeInTheDocument();
+  });
+
   it('shows the admin notice and updates execution permission after a self-grant', async () => {
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'admin', user: { username: 'admin' } });
     mockUserProfile.suggest.mockResolvedValue([

@@ -40,7 +40,7 @@ export const logEntityAccessControl = (
       message,
       event: {
         action: `${entityType}_access_control_${action}`,
-        category: ['iam'],
+        category: ['database'],
         type: [action === 'update' ? 'change' : 'access'],
         outcome: action === 'denied' ? 'failure' : 'success',
       },

@@ -11,6 +11,7 @@ import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   ExecutionStatus,
   type WorkflowDetailDto,
@@ -1797,7 +1798,7 @@ steps:
 
         const access = await mockWorkflowsService.getAccessControl();
         expect(access.assertAccess).toHaveBeenCalledWith(workflow, operation, mockRequest, {
-          allowAdminOverride: false,
+          allowAdminOverride: true,
         });
       }
     );
@@ -2130,27 +2131,26 @@ steps:
       const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
       if (!workflow) throw new Error('Missing workflow fixture');
       const core = coreMock.createStart();
-      jest
-        .mocked(
-          core.elasticsearch.client.asScoped(mockRequest).asCurrentUser.security.hasPrivileges
-        )
-        .mockResolvedValue({
-          has_all_requested: isAdmin,
-          username: 'user',
-          application: {},
-          cluster: {},
-          index: {},
-        });
+      const authz = securityMock.createStart().authz;
+      authz.checkPrivilegesWithRequest.mockReturnValue({
+        globally: jest.fn().mockResolvedValue({ hasAllRequested: isAdmin }),
+        atSpace: jest.fn(),
+        atSpaces: jest.fn(),
+      });
       core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
       jest
         .spyOn(core.security.authc, 'getCurrentUser')
         .mockReturnValue(
           securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
         );
-      const access = new WorkflowAccessControlService(core, {
-        getWorkflowDocumentWithVersion: jest.fn(),
-        writeWorkflowDocumentWithOcc: jest.fn(),
-      });
+      const access = new WorkflowAccessControlService(
+        core,
+        {
+          getWorkflowDocumentWithVersion: jest.fn(),
+          writeWorkflowDocumentWithOcc: jest.fn(),
+        },
+        authz
+      );
       mockWorkflowsService.getAccessControl.mockResolvedValue(access);
       const privateWorkflow = {
         ...workflow,

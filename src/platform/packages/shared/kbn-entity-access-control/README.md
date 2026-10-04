@@ -29,8 +29,8 @@ can add that restriction without changing the stored shape.
 
 ## Administrator access
 
-`await isEntityAccessControlAdmin(core, request)` checks an unregistered Elasticsearch
-application privilege. Administrators qualify through wildcard application grants,
+`await isEntityAccessControlAdmin(core, request, authz)` uses Kibana’s authorization helper
+to check an unregistered application privilege. Administrators qualify through wildcard application grants,
 such as those in the Stack `superuser` and Serverless project `admin` roles. Ordinary
 feature grants do not. Routes must use full authentication. API keys and
 unauthenticated requests do not get the override. Failed privilege checks deny it.
@@ -42,7 +42,7 @@ Never accept `isAdmin` from request input or an ACL entry. Feature and space che
 still apply when the ACL filter returns `match_all`.
 
 ```ts
-const isAdmin = await isEntityAccessControlAdmin(core, request);
+const isAdmin = await isEntityAccessControlAdmin(core, request, authz);
 const canManage = hasEntityAccess({
   accessControl: entity.access_control,
   ownerId: entity.owner_id,

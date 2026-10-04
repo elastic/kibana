@@ -12,7 +12,7 @@ import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
 import type { KibanaRequest } from '@kbn/core/server';
-import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
+import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
@@ -1134,7 +1134,10 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const deletionOptions = { ...options, profileId, request };
+    const isAdmin =
+      options?.force === true &&
+      (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
+    const deletionOptions = { ...options, profileId, request, isAdmin };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1182,7 +1185,8 @@ export class WorkflowCrudService {
           versioned.source,
           getWorkflowDeleteOperation(versioned.source, options?.force),
           profileId,
-          this.accessAuditContext(request, id, spaceId)
+          this.accessAuditContext(request, id, spaceId),
+          isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
         if (batch && !accountId && !options?.force) {
@@ -1291,6 +1295,7 @@ export class WorkflowCrudService {
       acknowledgeAclLoss?: boolean;
       profileId?: string;
       request?: KibanaRequest;
+      isAdmin?: boolean;
     },
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
@@ -1327,7 +1332,8 @@ export class WorkflowCrudService {
           workflow,
           getWorkflowDeleteOperation(workflow, options?.force),
           options?.profileId,
-          this.accessAuditContext(options?.request, id, spaceId)
+          this.accessAuditContext(options?.request, id, spaceId),
+          options?.force === true && options?.isAdmin
         ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,

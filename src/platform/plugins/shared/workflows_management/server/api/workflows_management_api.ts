@@ -666,7 +666,7 @@ export class WorkflowsManagementApi {
           workflow,
           getWorkflowDeleteOperation(workflow, options?.force),
           request,
-          { allowAdminOverride: false }
+          { allowAdminOverride: options?.force === true }
         );
       }
     }

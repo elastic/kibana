@@ -9,16 +9,22 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
 import { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
 
 describe('isEntityAccessControlAdmin', () => {
   const core = {
     security: securityServiceMock.createStart(),
-    elasticsearch: elasticsearchServiceMock.createStart(),
   };
   const request = httpServerMock.createKibanaRequest();
-  const hasPrivileges = core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges;
+  const globally = jest.fn();
+  const authz = {
+    checkPrivilegesWithRequest: jest.fn(() => ({
+      globally,
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+    })),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,34 +43,26 @@ describe('isEntityAccessControlAdmin', () => {
     jest
       .spyOn(core.security.authc, 'getCurrentUser')
       .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: [role] }));
-    hasPrivileges.mockResolvedValue({
-      has_all_requested: allowed,
-      username: 'user',
-      application: {},
-      cluster: {},
-      index: {},
-    });
-    await expect(isEntityAccessControlAdmin(core, request)).resolves.toBe(allowed);
-    expect(hasPrivileges).toHaveBeenCalledWith({
-      application: [
-        {
-          application: 'kibana-.kibana',
-          resources: ['*'],
-          privileges: ['entity_access_control:admin'],
-        },
-      ],
-    });
+    globally.mockResolvedValue({ hasAllRequested: allowed });
+    await expect(isEntityAccessControlAdmin(core, request, authz)).resolves.toBe(allowed);
+    expect(authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+    expect(globally).toHaveBeenCalledWith({ kibana: ['entity_access_control:admin'] });
   });
 
   it('does not grant an override without a request', async () => {
-    await expect(isEntityAccessControlAdmin(core)).resolves.toBe(false);
-    expect(hasPrivileges).not.toHaveBeenCalled();
+    await expect(isEntityAccessControlAdmin(core, undefined, authz)).resolves.toBe(false);
+    expect(globally).not.toHaveBeenCalled();
+  });
+
+  it('does not grant an override without authorization services', async () => {
+    await expect(isEntityAccessControlAdmin(core, request)).resolves.toBe(false);
+    expect(globally).not.toHaveBeenCalled();
   });
 
   it('does not grant an override without an authenticated user', async () => {
     jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(null);
-    await expect(isEntityAccessControlAdmin(core, request)).resolves.toBe(false);
-    expect(hasPrivileges).not.toHaveBeenCalled();
+    await expect(isEntityAccessControlAdmin(core, request, authz)).resolves.toBe(false);
+    expect(globally).not.toHaveBeenCalled();
   });
 
   it('does not grant API keys an override', async () => {
@@ -74,12 +72,12 @@ describe('isEntityAccessControlAdmin', () => {
         authentication_type: 'api_key',
       })
     );
-    await expect(isEntityAccessControlAdmin(core, request)).resolves.toBe(false);
-    expect(hasPrivileges).not.toHaveBeenCalled();
+    await expect(isEntityAccessControlAdmin(core, request, authz)).resolves.toBe(false);
+    expect(globally).not.toHaveBeenCalled();
   });
 
   it('denies the override when privilege lookup fails', async () => {
-    hasPrivileges.mockRejectedValue(new Error('unavailable'));
-    await expect(isEntityAccessControlAdmin(core, request)).resolves.toBe(false);
+    globally.mockRejectedValue(new Error('unavailable'));
+    await expect(isEntityAccessControlAdmin(core, request, authz)).resolves.toBe(false);
   });
 });

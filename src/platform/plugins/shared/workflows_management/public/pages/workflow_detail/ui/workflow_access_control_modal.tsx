@@ -30,7 +30,7 @@ import { AccessControlForm } from '@kbn/entity-access-control-ui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   WorkflowAccessControlRole,
@@ -77,7 +77,10 @@ export const WorkflowAccessControlModal = ({
     queryFn: () => userProfile.getCurrent<UserProfileWithAvatar['data']>({ dataPath: 'avatar' }),
   });
   const ownerId =
-    workflow.owner_id ?? (workflow.permissions?.manage ? currentProfile?.uid : undefined);
+    workflow.owner_id ??
+    (value.access_mode === 'private' && workflow.permissions?.manage
+      ? currentProfile?.uid
+      : undefined);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 200);
   const [isSaving, setIsSaving] = useState(false);
@@ -175,6 +178,17 @@ export const WorkflowAccessControlModal = ({
             <EuiSpacer size="m" />
           </>
         )}
+        {!workflow.owner_id && value.access_mode === 'private' && workflow.permissions?.manage && (
+          <>
+            <KbnInfoCallout
+              size="s"
+              title={i18n.translate('workflows.access.claimOwnershipNotice', {
+                defaultMessage: 'You will become the owner when you make this workflow private.',
+              })}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <AccessControlForm
           value={value}
           onChange={setValue}
@@ -217,7 +231,7 @@ export const WorkflowAccessControlModal = ({
           onClick={save}
           fill
           isLoading={isSaving}
-          isDisabled={!ownerId}
+          isDisabled={value.access_mode === 'private' && !ownerId}
           data-test-subj="workflowAccessSave"
         >
           {i18n.translate('workflows.access.saveButtonLabel', { defaultMessage: 'Save' })}
