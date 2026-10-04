@@ -79,11 +79,14 @@ Use this skill when:
 - Reference the entity-analytics skill for deeper entity profiling or asset criticality review
 
 ## Tool Selection Guardrails
+- Reuse data already in context: if the alert document or entity values appear in the user's message, an attachment, or a previous tool result, do NOT re-fetch them — call a tool only for information you do not already have.
 - For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
+- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, other platform.core index/exploration tools, or workflow tools for alert inventory, count, or related-alert correlation — no speculative index discovery or raw search. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
+- Bound corroboration: at most one 'security.alert-analysis.get-related-alerts' call (widen the time window to 168h at most once), one 'security.security_labs_search' call per indicator or technique, and one 'security.entity_risk_score' call per entity. Stop corroborating as soon as the evidence supports a disposition.
+- Once the final analysis and disposition are written, make no further tool calls.
 
 ## Best Practices
 - Always start with the alert details before expanding investigation scope
