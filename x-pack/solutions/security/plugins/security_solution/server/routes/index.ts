@@ -94,7 +94,7 @@ export const initRoutes = (
   registerPrebuiltRulesRoutes(router, logger);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
-  registerRuleManagementRoutes(router, config, ml, logger);
+  registerRuleManagementRoutes(router, config, ml, logger, eventBus);
   registerRuleMonitoringRoutes(router);
   registerRulePreviewRoutes(
     router,
