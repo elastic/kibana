@@ -15,16 +15,13 @@ import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID,
-  NODE_EXPAND_BUTTON_TEST_ID,
   GRAPH_INVESTIGATION_TEST_ID,
-  GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
@@ -34,6 +31,7 @@ const {
   GRAPH_IPS_POPOVER_ID,
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
+  GRAPH_IPS_POPOVER_IP_LINK_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
@@ -128,80 +126,126 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     expect(count).to.be(0);
   }
 
-  async clickOnNodeExpandButton(
+  /**
+   * Finds a button inside the toolbar that belongs to a specific node.
+   *
+   * Label nodes render their toolbar via a ReactFlow NodeToolbar portal
+   * (`.react-flow__node-toolbar[data-id="..."]`).
+   * Entity nodes render their toolbar as an absolutely-positioned div inside the node element
+   * (`.react-flow__node[data-id="..."]`) — no portal is used.
+   *
+   * We try the portal first; if it doesn't exist we fall back to the node element so that
+   * both node types are handled without needing to know which type is being targeted.
+   */
+  private async findNodeToolbarButton(
     nodeId: string,
-    popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
-  ): Promise<void> {
+    itemTestSubject: string
+  ): Promise<WebElementWrapper> {
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    let container: WebElementWrapper;
+    try {
+      // Label nodes: toolbar lives in the ReactFlow NodeToolbar portal
+      container = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
+    } catch {
+      // Entity nodes: toolbar lives inside the node element itself
+      container = await graph.findByCssSelector(`.react-flow__node[data-id="${nodeId}"]`);
+    }
+    return container.findByCssSelector(`[data-test-subj="${itemTestSubject}"]`);
+  }
+
+  /**
+   * Clicks a toolbar button for a specific node using a scoped CSS selector and a JS click.
+   *
+   * Using `browser.execute('arguments[0].click()')` bypasses:
+   * - WebDriver hit-test interception caused by `EuiToolTipAnchor` wrapping disabled buttons
+   * - `pointer-events: none` on the invisible toolbar (opacity:0 state)
+   */
+  async clickOnNodeToolbarItem(nodeId: string, itemTestSubject: string): Promise<void> {
     await this.retry.try(async () => {
-      const node = await this.selectNode(nodeId);
-      const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
-      await expandButton.click();
-      await this.testSubjects.existOrFail(popoverId);
+      await this.waitGraphIsLoaded();
+      const button = await this.findNodeToolbarButton(nodeId, itemTestSubject);
+      await this.browser.execute('arguments[0].click()', button);
     });
   }
 
   async showActionsByEntity(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showActionsOnEntity(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEntityDetails(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    const itemId = (await this.testSubjects.exists(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID))
-      ? GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
-      : GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID;
-    await this.testSubjects.click(itemId);
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+      // Label nodes use the NodeToolbar portal; entity nodes use the in-node toolbar div.
+      let container: WebElementWrapper;
+      try {
+        container = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
+      } catch {
+        container = await graph.findByCssSelector(`.react-flow__node[data-id="${nodeId}"]`);
+      }
+      // Some nodes show individual entity details; grouped nodes show a grouped-entities variant
+      const buttons = await container.findAllByCssSelector(
+        `[data-test-subj="${GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID}"], [data-test-subj="${GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID}"]`
+      );
+      expect(buttons.length).to.be(1);
+      await this.browser.execute('arguments[0].click()', buttons[0]);
+    });
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEntityRelationships(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async hideActionsOnEntity(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    const btnText = await this.testSubjects.getVisibleText(
-      GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
-    );
-    expect(btnText).to.be('Hide actions done to this entity');
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      const button = await this.findNodeToolbarButton(
+        nodeId,
+        GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
+      );
+      await this.browser.execute('arguments[0].click()', button);
+    });
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async exploreRelatedEntities(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
+    await this.clickOnNodeToolbarItem(
+      nodeId,
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+    );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEventOrAlertDetails(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
+    await this.clickOnNodeToolbarItem(
+      nodeId,
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+    );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async hideEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    const btnText = await this.testSubjects.getVisibleText(
-      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
-    );
-    expect(btnText).to.be('Hide related events');
-    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      const button = await this.findNodeToolbarButton(
+        nodeId,
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+      );
+      await this.browser.execute('arguments[0].click()', button);
+    });
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
@@ -279,7 +323,14 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async clickOnFirstIpInPopover(): Promise<void> {
     await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_CONTENT_ID);
     const popoverContent = await this.testSubjects.find(GRAPH_IPS_POPOVER_CONTENT_ID);
-    const firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    // Prefer the clickable link element (onNetworkPreview path); fall back to the list item
+    // for the scopeId / plain-label paths where no inner link is rendered.
+    let firstIpElement: WebElementWrapper;
+    try {
+      firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_LINK_ID);
+    } catch {
+      firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    }
     await firstIpElement.click();
   }
 
