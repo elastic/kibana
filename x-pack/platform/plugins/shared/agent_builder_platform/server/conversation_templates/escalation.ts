@@ -12,6 +12,7 @@ export const escalationTemplate: ConversationTemplate = {
   version: 1,
   name: 'Escalation',
   description: 'Use for escalations',
+  summary: { skillId: 'summarize-conversation' },
   fields: {
     status: {
       input_type: 'SELECT',
