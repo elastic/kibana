@@ -160,4 +160,96 @@ describe('createAgentBuilderClient', () => {
     });
     expect(result).toEqual(conversation);
   });
+
+  // ── configurationOverrides → configuration_overrides ───────────────────────
+  // Suites pin a skill (or tools, or capabilities) per eval run through this
+  // translation, so a camelCase→snake_case slip here silently unpins every suite
+  // that relies on it. Each field is asserted separately, including the values
+  // that are easy to drop: explicit `false`, empty arrays and empty strings.
+  describe('configurationOverrides', () => {
+    it('omits configuration_overrides entirely when not provided', async () => {
+      http.fetch.mockResolvedValue({});
+
+      await client.converse({ agentId: 'my-agent', input: 'question' });
+
+      expect(lastRequestBody().configuration_overrides).toBeUndefined();
+    });
+
+    it('translates all four override fields to snake_case', async () => {
+      http.fetch.mockResolvedValue({});
+
+      await client.converse({
+        agentId: 'my-agent',
+        input: 'question',
+        configurationOverrides: {
+          instructions: 'answer only from telemetry',
+          tools: [{ toolIds: ['execute_esql', 'generate_esql'] }],
+          skillIds: ['deep-watch-forensics'],
+          enableElasticCapabilities: true,
+        },
+      });
+
+      expect(lastRequestBody().configuration_overrides).toEqual({
+        instructions: 'answer only from telemetry',
+        tools: [{ tool_ids: ['execute_esql', 'generate_esql'] }],
+        skill_ids: ['deep-watch-forensics'],
+        enable_elastic_capabilities: true,
+      });
+    });
+
+    it('keeps an explicit false and empty arrays rather than dropping them', async () => {
+      // `enableElasticCapabilities: false` is a real instruction (disable the
+      // platform capabilities), not an absent value — a truthiness check would
+      // silently re-enable them. Same for empty lists, which mean "pin nothing".
+      http.fetch.mockResolvedValue({});
+
+      await client.converse({
+        agentId: 'my-agent',
+        input: 'question',
+        configurationOverrides: {
+          instructions: '',
+          tools: [],
+          skillIds: [],
+          enableElasticCapabilities: false,
+        },
+      });
+
+      expect(lastRequestBody().configuration_overrides).toEqual({
+        instructions: '',
+        tools: [],
+        skill_ids: [],
+        enable_elastic_capabilities: false,
+      });
+    });
+
+    it('translates a subset without inventing the other fields', async () => {
+      http.fetch.mockResolvedValue({});
+
+      await client.converse({
+        agentId: 'my-agent',
+        input: 'question',
+        configurationOverrides: { skillIds: ['deep-watch-forensics'] },
+      });
+
+      expect(lastRequestBody().configuration_overrides).toEqual({
+        skill_ids: ['deep-watch-forensics'],
+      });
+    });
+
+    it('maps every tool entry, not just the first', async () => {
+      http.fetch.mockResolvedValue({});
+
+      await client.converse({
+        agentId: 'my-agent',
+        input: 'question',
+        configurationOverrides: {
+          tools: [{ toolIds: ['a'] }, { toolIds: ['b', 'c'] }],
+        },
+      });
+
+      expect(lastRequestBody().configuration_overrides).toEqual({
+        tools: [{ tool_ids: ['a'] }, { tool_ids: ['b', 'c'] }],
+      });
+    });
+  });
 });
