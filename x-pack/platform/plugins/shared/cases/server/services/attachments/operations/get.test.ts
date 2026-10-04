@@ -176,6 +176,36 @@ describe('AttachmentService getter', () => {
         expect(res).toStrictEqual({ saved_objects: [asUnifiedUserAttachment()] });
       });
 
+      it('returns a per-item error and logs a warning for an unrecognized attachment type', async () => {
+        const unrecognizedAttachment = createFileAttachment({
+          externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+        });
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            unrecognizedAttachment,
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1']);
+
+        expect(res.saved_objects).toEqual([
+          {
+            id: unrecognizedAttachment.id,
+            type: unrecognizedAttachment.type,
+            references: unrecognizedAttachment.references,
+            error: {
+              error: 'Bad Request',
+              message: expect.stringContaining('is not recognized'),
+              statusCode: 400,
+            },
+          },
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`Attachment ${unrecognizedAttachment.id}`)
+        );
+      });
+
       it('returns migrated legacy events in unified shape', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
@@ -532,6 +562,22 @@ describe('AttachmentService getter', () => {
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
         CASE_ATTACHMENT_SAVED_OBJECT,
         '1'
+      );
+    });
+
+    it('falls back to a legacy shape instead of throwing for an unrecognized attachment type', async () => {
+      const unrecognizedAttachment = createFileAttachment({
+        externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValue(unrecognizedAttachment);
+
+      const res = await attachmentGetter.get({ savedObjectId: '1' });
+
+      expect(res.attributes).toEqual(
+        expect.objectContaining({
+          type: 'externalReference',
+          externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+        })
       );
     });
 

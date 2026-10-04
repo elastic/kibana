@@ -23,6 +23,9 @@ const buildEaName = <TSuffix extends string>(
 export const EA_EXECUTION_CONTEXT_NAMES = {
   ENTITY_RESOLUTION: buildEaName('entity_resolution'),
   ENTITY_STORE_MANAGEMENT: buildEaName('entity_store_management'),
+  EXPLORE_HOSTS_PAGE: buildEaName('explore-hosts_page'),
+  EXPLORE_NETWORK_PAGE: buildEaName('explore-network_page'),
+  EXPLORE_USERS_PAGE: buildEaName('explore-users_page'),
   RISK_SCORE_MANAGEMENT: buildEaName('risk_score_management'),
 } as const;
 

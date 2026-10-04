@@ -32,7 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('rules-list-clear-filter');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
     }
-    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
     await testSubjects.click('manageRulesPageButton');
   }
 
@@ -79,7 +79,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
       await testSubjects.click('manageRulesPageButton');
     });
 

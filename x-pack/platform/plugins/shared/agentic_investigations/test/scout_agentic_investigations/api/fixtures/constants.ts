@@ -20,6 +20,9 @@ export const PUBLIC_HEADERS = {
 export const LIST_ESCALATIONS_PATH = 'internal/investigations/escalations';
 export const CREATE_ESCALATION_PATH = 'internal/investigations/escalations';
 export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/escalations/${id}`;
+export const ESCALATION_LINK_PATH = (id: string) =>
+  `internal/investigations/escalations/${id}/_link`;
+
 export const ESCALATION_ASSIGNEES_PATH = (id: string) =>
   `internal/investigations/escalations/${id}/assignees`;
 

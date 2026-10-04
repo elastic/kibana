@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { RiskScoreDistribution } from '../../common';
 import type { EntityMaintainerTelemetryEventType } from '../tasks/entity_maintainers/types';
 
 // ------------------------------------
@@ -32,6 +33,9 @@ interface StoreUsageEventPayload {
   storeSize: number;
   entityType: string;
   namespace: string;
+  sources?: Record<string, number>;
+  baseScoreDistribution?: RiskScoreDistribution;
+  resolutionScoreDistribution?: RiskScoreDistribution;
 }
 
 interface MetadataUsageEventPayload {
@@ -267,6 +271,70 @@ export const ENTITY_STORE_DELETION_EVENT = {
   },
 } as const satisfies EventTypeOpts<DeletionEvent>;
 
+const riskScoreDistributionSchema = (scoreKind: 'base' | 'resolution') => {
+  const scoreField =
+    scoreKind === 'base'
+      ? 'entity.risk.calculated_score_norm'
+      : 'entity.relationships.resolution.risk.calculated_score_norm';
+  return {
+    _meta: {
+      optional: true,
+      description: `Distribution of ${scoreKind} risk scores for all entities of this type currently in the store`,
+    },
+    properties: {
+      critical: {
+        type: 'long' as const,
+        _meta: {
+          optional: true,
+          description: `Entities of this type whose ${scoreKind} risk band is Critical`,
+        },
+      },
+      high: {
+        type: 'long' as const,
+        _meta: {
+          optional: true,
+          description: `Entities of this type whose ${scoreKind} risk band is High`,
+        },
+      },
+      moderate: {
+        type: 'long' as const,
+        _meta: {
+          optional: true,
+          description: `Entities of this type whose ${scoreKind} risk band is Moderate`,
+        },
+      },
+      low: {
+        type: 'long' as const,
+        _meta: {
+          optional: true,
+          description: `Entities of this type whose ${scoreKind} risk band is Low`,
+        },
+      },
+      unknown: {
+        type: 'long' as const,
+        _meta: {
+          optional: true,
+          description: `Entities of this type whose ${scoreKind} risk band is Unknown or missing`,
+        },
+      },
+      normP50: {
+        type: 'float' as const,
+        _meta: {
+          optional: true,
+          description: `Median ${scoreField} for entities of this type that have a ${scoreKind} score`,
+        },
+      },
+      normP90: {
+        type: 'float' as const,
+        _meta: {
+          optional: true,
+          description: `90th percentile ${scoreField} for entities of this type that have a ${scoreKind} score`,
+        },
+      },
+    },
+  } as const;
+};
+
 export const ENTITY_STORE_USAGE_EVENT = {
   eventType: 'entity_store_usage',
   schema: {
@@ -288,6 +356,23 @@ export const ENTITY_STORE_USAGE_EVENT = {
         description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
+    sources: {
+      properties: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Entities of this type with this source',
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description:
+          'Count of entities by entity.source. Keys are source values with dots replaced by __. The key "other" counts sources past the reported limit. An entity with several sources is counted once per source, so these counts can exceed storeSize',
+      },
+    },
+    baseScoreDistribution: riskScoreDistributionSchema('base'),
+    resolutionScoreDistribution: riskScoreDistributionSchema('resolution'),
   },
 } as const satisfies EventTypeOpts<StoreUsageEventPayload>;
 

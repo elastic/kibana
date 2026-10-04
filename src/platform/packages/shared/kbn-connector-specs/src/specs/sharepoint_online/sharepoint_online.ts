@@ -39,6 +39,19 @@ const GraphCollectionOutputSchema = lazySchema(() =>
   })
 );
 
+// Graph site IDs are "hostname,siteCollectionId,webId", so they can exceed the
+// usual ID bound when the hostname is long. SharePoint caps KQL query text at
+// 4,096 characters. Pre-authenticated download URLs embed a tempauth token and
+// routinely run past 1,000 characters.
+const SHAREPOINT_MAX_ID_LENGTH = 512;
+const SHAREPOINT_MAX_SEARCH_LENGTH = 2000;
+const SHAREPOINT_MAX_KQL_LENGTH = 4096;
+const SHAREPOINT_MAX_PATH_LENGTH = 1024;
+const SHAREPOINT_MAX_URL_LENGTH = 2048;
+const SHAREPOINT_MAX_DOWNLOAD_URL_LENGTH = 8192;
+const SHAREPOINT_MAX_QUERY_PARAM_KEY_LENGTH = 200;
+const SHAREPOINT_ENTITY_TYPES = ['site', 'list', 'listItem', 'drive', 'driveItem'] as const;
+
 const APP_ONLY_AUTH_TYPES = new Set([
   'oauth_client_credentials',
   'oauth_client_credentials_private_key_jwt',
@@ -205,6 +218,7 @@ export const SharepointOnline: ConnectorSpec = {
         .object({
           search: z
             .string()
+            .max(SHAREPOINT_MAX_SEARCH_LENGTH)
             .optional()
             .describe(
               'Optional search keyword to filter sites by name. Only used with delegated auth (oauth_authorization_code) where /sites/getAllSites is unavailable. With app-only auth this field is ignored. Omit or pass "*" for a wildcard that returns all accessible sites.'
@@ -251,6 +265,7 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           siteId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the SharePoint site whose pages you want to list. Use getAllSites to discover site IDs.'
             ),
@@ -288,11 +303,13 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           siteId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the SharePoint site that contains the page. Use getAllSites to discover site IDs.'
             ),
           pageId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the page to fetch. Use getSitePages to list pages and discover their IDs for a given site.'
             ),
@@ -339,6 +356,7 @@ export const SharepointOnline: ConnectorSpec = {
             .object({
               siteId: z
                 .string()
+                .max(SHAREPOINT_MAX_ID_LENGTH)
                 .describe(
                   'The ID of the SharePoint site to retrieve. Use getAllSites to discover site IDs.'
                 ),
@@ -348,6 +366,7 @@ export const SharepointOnline: ConnectorSpec = {
             .object({
               relativeUrl: z
                 .string()
+                .max(SHAREPOINT_MAX_URL_LENGTH)
                 .describe(
                   'The relative URL of the site as a path in the format "hostname:/path:", e.g. "contoso.sharepoint.com:/sites/hr:". Use this as an alternative to siteId when you know the URL but not the ID.'
                 ),
@@ -391,6 +410,7 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           siteId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the SharePoint site whose document libraries (drives) you want to list. Use getAllSites to discover site IDs.'
             ),
@@ -431,6 +451,7 @@ export const SharepointOnline: ConnectorSpec = {
           .object({
             siteId: z
               .string()
+              .max(SHAREPOINT_MAX_ID_LENGTH)
               .describe(
                 'The ID of the SharePoint site whose lists you want to enumerate. Use getAllSites to discover site IDs.'
               ),
@@ -471,11 +492,13 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           siteId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the SharePoint site that owns the list. Use getAllSites to discover site IDs.'
             ),
           listId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the list whose items you want to retrieve. Use getSiteLists to discover list IDs for a given site.'
             ),
@@ -522,11 +545,13 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           driveId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the document library (drive) to browse. Use getSiteDrives to discover drive IDs for a site.'
             ),
           path: z
             .string()
+            .max(SHAREPOINT_MAX_PATH_LENGTH)
             .optional()
             .describe(
               'Optional relative path within the drive root to scope the listing (e.g. "Folder/Subfolder"). Omit to list the root of the drive.'
@@ -565,11 +590,13 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           driveId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the document library (drive) that contains the file. Use getSiteDrives to discover drive IDs.'
             ),
           itemId: z
             .string()
+            .max(SHAREPOINT_MAX_ID_LENGTH)
             .describe(
               'The ID of the file item to download. Use getDriveItems to list items in a drive and discover their IDs.'
             ),
@@ -621,8 +648,9 @@ export const SharepointOnline: ConnectorSpec = {
           downloadUrl: z
             .string()
             .url()
+            .max(SHAREPOINT_MAX_DOWNLOAD_URL_LENGTH)
             .describe(
-              'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems. Note: these URLs are time-limited and should be used promptly.'
+              'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems, and must be an https URL on a *.sharepoint.com host. Note: these URLs are time-limited and should be used promptly.'
             ),
         })
       ),
@@ -643,9 +671,18 @@ export const SharepointOnline: ConnectorSpec = {
             'downloadItemFromURL requires a downloadUrl. Use getDriveItems to find items with @microsoft.graph.downloadUrl.'
           );
         }
-        ctx.log.debug(`SharePoint downloading item from URL ${typedInput.downloadUrl}`);
+        const { protocol, hostname } = new URL(typedInput.downloadUrl);
+        if (protocol !== 'https:' || !hostname.endsWith('.sharepoint.com')) {
+          throw new Error(
+            `downloadItemFromURL only downloads from https://*.sharepoint.com, not ${protocol}//${hostname}. Use the @microsoft.graph.downloadUrl returned by getDriveItems.`
+          );
+        }
+        ctx.log.debug(`SharePoint downloading item from ${hostname}`);
+        // The download URL carries its own short-lived token; ctx.client's Graph
+        // bearer token must not travel with it.
         const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
+          headers: { Authorization: undefined },
         });
         const buffer = Buffer.from(response.data);
         return {
@@ -665,6 +702,7 @@ export const SharepointOnline: ConnectorSpec = {
           method: z.enum(['GET', 'POST']).describe('HTTP method'),
           path: z
             .string()
+            .max(SHAREPOINT_MAX_URL_LENGTH)
             .describe("Graph path starting with '/v1.0/' (e.g., '/v1.0/me')")
             .refine((value) => value.startsWith('/v1.0/'), {
               message: "Path must start with '/v1.0/'",
@@ -673,7 +711,10 @@ export const SharepointOnline: ConnectorSpec = {
               message: 'Path must not be a full URL',
             }),
           query: z
-            .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+            .record(
+              z.string().max(SHAREPOINT_MAX_QUERY_PARAM_KEY_LENGTH),
+              z.union([z.string().max(SHAREPOINT_MAX_SEARCH_LENGTH), z.number(), z.boolean()])
+            )
             .optional()
             .describe('Query parameters (e.g., $top, $filter)'),
           body: z.any().optional().describe('Request body (for POST)'),
@@ -716,11 +757,13 @@ export const SharepointOnline: ConnectorSpec = {
         z.object({
           query: z
             .string()
+            .max(SHAREPOINT_MAX_KQL_LENGTH)
             .describe(
               'KQL search query string. Examples: "contoso product", "filename:budget filetype:xlsx", "author:jane AND filetype:docx". Supports standard KQL operators (AND, OR, NOT) and property restrictions.'
             ),
           entityTypes: z
-            .array(z.enum(['site', 'list', 'listItem', 'drive', 'driveItem']))
+            .array(z.enum(SHAREPOINT_ENTITY_TYPES))
+            .max(SHAREPOINT_ENTITY_TYPES.length)
             .optional()
             .describe(
               'Entity types to include in the search. Valid groupings (cannot be mixed arbitrarily): (driveItem, listItem), (site, list), or (drive) alone. Defaults to ["site"] if omitted.'
