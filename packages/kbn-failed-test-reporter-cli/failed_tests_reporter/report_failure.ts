@@ -158,6 +158,22 @@ function renderDetailsTable(rows: Array<[string, string]>): string[] {
  * NDJSON failure reports.
  */
 
+function getJUnitLocation(failure: TestFailure): string {
+  return failure.location ?? getLocationFromClassname(failure.classname);
+}
+
+const TEST_FILE_EXTENSION = /\.[cm]?[jt]sx?$/;
+
+/**
+ * The failing test file, stored in the issue metadata so tools like the skip-test bot don't
+ * have to guess it. Jest classnames only carry the test directory, and some Cypress classnames
+ * are a bare test name, so only a location with a script extension counts as a file.
+ */
+function getJUnitTestFile(failure: TestFailure): string | undefined {
+  const location = getJUnitLocation(failure);
+  return TEST_FILE_EXTENSION.test(location) ? location : undefined;
+}
+
 function createJUnitTitle(failure: TestFailure, prependTitle: string): string {
   if (prependTitle && prependTitle.trim() !== '') {
     return `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`;
@@ -177,7 +193,7 @@ function createJUnitBody(
 ): string {
   const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
-  const location = failure.location ?? getLocationFromClassname(failure.classname);
+  const location = getJUnitLocation(failure);
   const detailsTable = renderDetailsTable([
     ['Report name', getReportNameFromClassname(failure.classname)],
     ['Location', location === 'unknown' ? '' : location],
@@ -207,6 +223,10 @@ function createJUnitBody(
   };
   if (failure.testType) {
     metadata['test.type'] = failure.testType;
+  }
+  const testFile = getJUnitTestFile(failure);
+  if (testFile) {
+    metadata['test.file'] = testFile;
   }
 
   return updateIssueMetadata(bodyContent.join('\n'), metadata);
@@ -379,8 +399,11 @@ async function updateJUnitFailureIssue(
   failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
+  // Also refresh `test.file`, which backfills issues opened before it was recorded.
+  const testFile = failure && getJUnitTestFile(failure);
   const newBody = updateIssueMetadata(issue.github.body, {
     'test.failCount': newCount,
+    ...(testFile ? { 'test.file': testFile } : {}),
   });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);

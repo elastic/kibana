@@ -9,6 +9,7 @@
 
 import dedent from 'dedent';
 
+import { getIssueMetadata } from './issue_metadata';
 import {
   createFailureIssue,
   extractErrorMessage,
@@ -117,7 +118,7 @@ describe('createFailureIssue()', () => {
 
       First failure: [kibana-on-merge - main](https://build-url)
 
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\"}} -->",
+      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\",\\"test.file\\":\\"x-pack/platform/test/functional/apps/maps/sample_data.js\\"}} -->",
             Array [
               "failed-test",
             ],
@@ -157,6 +158,31 @@ describe('createFailureIssue()', () => {
     expect(title).toContain(classname);
     expect(body).toContain('| Location | x-pack/platform/example/tests/example.test.ts |');
     expect(body).toContain(`"test.class":"${classname}"`);
+    expect(body).toContain('"test.file":"x-pack/platform/example/tests/example.test.ts"');
+  });
+
+  it.each([
+    ['only a Jest test directory', 'Jest Tests.x-pack/platform/example/tests'],
+    ['part of a Cypress test name', 'upgrades from v8.19.0 cleanly'],
+  ])('omits test.file when the location is %s', async (_, classname) => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname,
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    const [, body] = api.createIssue.mock.calls[0];
+    expect(body).not.toContain('test.file');
   });
 
   it('normalizes multiple code owners in the details table', async () => {
@@ -323,6 +349,50 @@ describe('updateFailureIssue()', () => {
     // without a failure object there is no message to compare, so the comment
     // history is not fetched at all
     expect(api.getIssueComments).not.toHaveBeenCalled();
+  });
+
+  it('backfills test.file on an issue opened before it was recorded', async () => {
+    const api = createGithubApi();
+    const classname =
+      'Jest Integration Tests.x-pack/platform/plugins/shared/encrypted_saved_objects/integration_tests/ci_checks';
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname,
+        name: 'test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: dedent`
+            # existing issue body
+
+            <!-- kibanaCiData = {"failed-test":{"test.class":"${classname}","test.failCount":10}} -->
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname,
+        location:
+          'x-pack/platform/plugins/shared/encrypted_saved_objects/integration_tests/ci_checks/check_registered_types.test.ts',
+        name: 'test',
+        failure: 'Error: expect(received).toMatchInlineSnapshot(snapshot)',
+        time: '1.000',
+        likelyIrrelevant: false,
+        testType: 'jest',
+      }
+    );
+
+    const [, newBody] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
+    expect(getIssueMetadata(newBody, 'test.failCount')).toBe(11);
+    expect(getIssueMetadata(newBody, 'test.class')).toBe(classname);
+    expect(getIssueMetadata(newBody, 'test.file')).toBe(
+      'x-pack/platform/plugins/shared/encrypted_saved_objects/integration_tests/ci_checks/check_registered_types.test.ts'
+    );
   });
 
   it('includes new error message in FTR comment when the failure is new', async () => {
