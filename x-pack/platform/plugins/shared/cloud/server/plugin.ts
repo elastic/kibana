@@ -148,6 +148,15 @@ export interface CloudSetup {
    */
   isEce?: boolean;
   /**
+   * `true` when running on FedRAMP High (govcloud-high). Set by Cloud via kibana.yml.
+   */
+  isFedrampHigh?: boolean;
+  /**
+   * `true` when running on Elastic Cloud Hosted (ECH). Set by Cloud via kibana.yml.
+   * Unset or `false` on ECE and self-managed.
+   */
+  isElasticCloudHosted?: boolean;
+  /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
    */
@@ -371,6 +380,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
       isEce,
+      isFedrampHigh: this.config.isFedrampHigh,
+      isElasticCloudHosted: this.config.isElasticCloudHosted,
       trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
