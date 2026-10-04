@@ -8,7 +8,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { SiemMigrationSort } from '../../common/data/types';
 import type { SiemMigrationSortHandler } from '../../common/data/sort';
-import { commonSortingOptions, getFieldExistenceSort } from '../../common/data/sort';
+import {
+  commonSortingOptions,
+  getCaseInsensitiveStringSort,
+  getFieldExistenceSort,
+} from '../../common/data/sort';
 
 const sortMissingValue = (direction: estypes.SortOrder = 'asc') =>
   direction === 'desc' ? '_last' : '_first';
@@ -58,9 +62,7 @@ const sortingOptions = {
   updated(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
     return [{ updated_at: direction }];
   },
-  name(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
-    return [{ 'elastic_rule.title.keyword': direction }];
-  },
+  name: getCaseInsensitiveStringSort(['elastic_rule.title.keyword', 'original_rule.title.keyword']),
 };
 
 const DEFAULT_SORTING: estypes.Sort = [
