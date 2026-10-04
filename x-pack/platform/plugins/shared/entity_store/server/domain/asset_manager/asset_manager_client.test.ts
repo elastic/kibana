@@ -33,6 +33,9 @@ import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import { getHistorySnapshotTaskId } from '../../tasks/config';
+import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
+import { getHistorySnapshotIndexTemplateId } from './history_snapshot_index_template';
 
 jest.mock('./install_assets');
 jest.mock('../../tasks/extract_entity_task');
@@ -827,6 +830,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
         exists: jest.fn().mockResolvedValue(true),
         getIndexTemplate,
         getDataStream: jest.fn().mockResolvedValue({ data_streams: [{}] }),
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [] }),
       },
       cluster: { getComponentTemplate },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -980,6 +984,165 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       expect(templates.every((t) => !t.installed)).toBe(true);
       expect(componentTemplates.every((t) => !t.installed)).toBe(true);
+    });
+  });
+});
+
+describe('AssetManagerClient.getStatus history snapshot components', () => {
+  const namespace = 'default';
+
+  const buildClient = ({
+    templateExists,
+    indexNames,
+    taskExists,
+    resolveIndexError,
+  }: {
+    templateExists: boolean;
+    indexNames: string[];
+    taskExists: boolean;
+    resolveIndexError?: Error;
+  }) => {
+    const getIndexTemplate = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+      if (templateExists && name === getHistorySnapshotIndexTemplateId(namespace)) {
+        return {};
+      }
+      throw new Error('index_template not found [404]');
+    });
+
+    const resolveIndex = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+      if (resolveIndexError) {
+        throw resolveIndexError;
+      }
+      if (name === getHistorySnapshotIndexPattern(namespace)) {
+        return { indices: indexNames.map((indexName) => ({ name: indexName })) };
+      }
+      return { indices: [] };
+    });
+
+    const esClient = {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        getIndexTemplate,
+        getDataStream: jest.fn().mockResolvedValue({ data_streams: [{}] }),
+        resolveIndex,
+      },
+      cluster: {
+        getComponentTemplate: jest
+          .fn()
+          .mockRejectedValue(new Error('component_template not found')),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+
+    const taskManager = {
+      get: jest.fn().mockImplementation(async (id: string) => {
+        if (taskExists && id === getHistorySnapshotTaskId(namespace)) {
+          return { id, state: { namespace } };
+        }
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', id);
+      }),
+    } as unknown as jest.Mocked<TaskManagerStartContract>;
+
+    const client = new AssetManagerClient({
+      logger: loggerMock.create(),
+      esClient,
+      internalEsClient: esClient,
+      taskManager,
+      engineDescriptorClient: {
+        getAll: jest.fn().mockResolvedValue([{ type: 'user', status: 'started' }]),
+      } as unknown as import('../saved_objects').EngineDescriptorClient,
+      globalStateClient: {
+        findOrThrow: jest.fn().mockResolvedValue({
+          historySnapshot: { status: 'started', frequency: '24h', retentionDays: 60 },
+          logsExtraction: {},
+        }),
+        findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
+      } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      namespace,
+      isServerless: true,
+      logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+      security: {} as SecurityPluginStart,
+      analytics: {
+        reportEvent: jest.fn(),
+      } as unknown as import('../../telemetry/events').TelemetryReporter,
+      savedObjectsClient: {} as SavedObjectsClientContract,
+    });
+
+    return client;
+  };
+
+  const getHistorySnapshotComponents = async (client: AssetManagerClient) => {
+    const status = await client.getStatus(true);
+    if (!('historySnapshotComponents' in status)) {
+      throw new Error('expected history snapshot components');
+    }
+    return status.historySnapshotComponents ?? [];
+  };
+
+  it('reports the index template, index pattern, and task when no snapshot indices exist', async () => {
+    const client = buildClient({ templateExists: true, indexNames: [], taskExists: true });
+
+    const components = await getHistorySnapshotComponents(client);
+
+    expect(components).toEqual([
+      {
+        id: getHistorySnapshotIndexTemplateId(namespace),
+        installed: true,
+        resource: 'index_template',
+      },
+      {
+        id: getHistorySnapshotIndexPattern(namespace),
+        installed: false,
+        resource: 'index',
+      },
+      {
+        id: getHistorySnapshotTaskId(namespace),
+        installed: true,
+        resource: 'task',
+      },
+    ]);
+  });
+
+  it('lists concrete snapshot indices newest first and omits the index pattern', async () => {
+    const older = '.entities.v2.history.default.2026-09-01-00';
+    const newer = '.entities.v2.history.default.2026-10-01-14';
+    const client = buildClient({
+      templateExists: false,
+      indexNames: [older, newer],
+      taskExists: false,
+    });
+
+    const components = await getHistorySnapshotComponents(client);
+    const indices = components.filter((component) => component.resource === 'index');
+
+    expect(indices).toEqual([
+      { id: newer, installed: true, resource: 'index' },
+      { id: older, installed: true, resource: 'index' },
+    ]);
+    expect(components.find((component) => component.resource === 'task')?.installed).toBe(false);
+    expect(components.find((component) => component.resource === 'index_template')?.installed).toBe(
+      false
+    );
+  });
+
+  it('keeps the template and task rows when listing snapshot indices fails', async () => {
+    const client = buildClient({
+      templateExists: true,
+      indexNames: [],
+      taskExists: false,
+      resolveIndexError: new Error('resolve failed'),
+    });
+
+    const components = await getHistorySnapshotComponents(client);
+
+    expect(components.map((component) => component.resource)).toEqual([
+      'index_template',
+      'index',
+      'task',
+    ]);
+    expect(components[1]).toEqual({
+      id: getHistorySnapshotIndexPattern(namespace),
+      installed: false,
+      resource: 'index',
     });
   });
 });

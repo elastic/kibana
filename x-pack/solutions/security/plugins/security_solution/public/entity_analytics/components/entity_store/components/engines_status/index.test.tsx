@@ -19,6 +19,16 @@ jest.mock('../../hooks/use_entity_store', () => ({
     mutate: mockInstallMutate,
     isLoading: false,
   }),
+  useEnableHistorySnapshotMutation: () => ({
+    mutate: jest.fn(),
+    isLoading: false,
+    error: null,
+  }),
+  useDisableHistorySnapshotMutation: () => ({
+    mutate: jest.fn(),
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 const mockDownloadBlob = jest.fn();
@@ -90,6 +100,39 @@ describe('EngineStatus', () => {
 
     expect(screen.getByText('User Store')).toBeInTheDocument();
     expect(screen.getByText('Download status')).toBeInTheDocument();
+    expect(screen.queryByTestId('history-snapshot-status')).not.toBeInTheDocument();
+  });
+
+  it('renders the history snapshot section when snapshot status is available', () => {
+    const mockData = {
+      engines: [
+        {
+          type: EntityType.user,
+          components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
+        },
+      ],
+      historySnapshot: {
+        status: 'started',
+        frequency: '24h',
+        retentionDays: 60,
+        components: [
+          {
+            id: 'entity_store:v2:history_snapshot_task:default',
+            installed: true,
+            resource: 'task',
+          },
+        ],
+      },
+    };
+    mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
+
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('history-snapshot-status')).toBeInTheDocument();
+    expect(screen.getByText('History Snapshot')).toBeInTheDocument();
+    expect(screen.getByTestId('history-snapshot-switch')).toBeChecked();
   });
 
   it('calls downloadJson when download button is clicked', () => {

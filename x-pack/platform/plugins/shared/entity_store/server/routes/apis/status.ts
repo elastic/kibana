@@ -11,11 +11,16 @@ import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import type { EntityStoreHistorySnapshotStatus } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
-import type { LogExtractionConfig } from '../../domain/saved_objects';
+import type {
+  EngineComponentStatus,
+  EntityStoreStatus,
+  GetStatusSuccessResult,
+} from '../../domain/types';
+import type { HistorySnapshotState, LogExtractionConfig } from '../../domain/saved_objects';
 import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
@@ -54,6 +59,24 @@ type StatusEngine = Omit<
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
+  /** Omitted when the Entity Store is not installed. */
+  historySnapshot?: EntityStoreHistorySnapshotStatus;
+}
+
+function toPublicHistorySnapshot(
+  historySnapshot: HistorySnapshotState,
+  components: EngineComponentStatus[] | undefined
+): EntityStoreHistorySnapshotStatus {
+  return {
+    status: historySnapshot.status,
+    frequency: historySnapshot.frequency,
+    retentionDays: historySnapshot.retentionDays,
+    ...(historySnapshot.lastExecutionTimestamp
+      ? { lastExecutionTimestamp: historySnapshot.lastExecutionTimestamp }
+      : {}),
+    ...(historySnapshot.lastError ? { lastError: historySnapshot.lastError } : {}),
+    ...(components ? { components } : {}),
+  };
 }
 
 const querySchema = z.object({
@@ -151,8 +174,12 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig, logsExtractionConfigByType } =
-            rest as GetStatusSuccessResult;
+          const {
+            logsExtractionConfig,
+            logsExtractionConfigByType,
+            historySnapshot,
+            historySnapshotComponents,
+          } = rest as GetStatusSuccessResult;
 
           return res.ok({
             body: {
@@ -162,6 +189,10 @@ export function registerStatus(router: EntityStorePluginRouter) {
                   engine,
                   logsExtractionConfigByType[engine.type] ?? logsExtractionConfig
                 )
+              ),
+              historySnapshot: toPublicHistorySnapshot(
+                historySnapshot,
+                withComponents ? historySnapshotComponents : undefined
               ),
             },
           });

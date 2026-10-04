@@ -46,6 +46,10 @@ responses:
                   timestampField: "@timestamp"
                   maxPageSearchSize: 10000
                   lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+              historySnapshot:
+                status: started
+                frequency: "24h"
+                retentionDays: 60
           notInstalledExample:
             summary: "Entity Store not installed"
             description: "The Entity Store has not been installed."

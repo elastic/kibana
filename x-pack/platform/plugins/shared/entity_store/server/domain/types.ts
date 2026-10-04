@@ -44,6 +44,8 @@ export interface GetStatusSuccessResult {
   status: EntityStoreStatus;
   engines: Array<EngineDescriptor | (EngineDescriptor & { components: EngineComponentStatus[] })>;
   historySnapshot: HistorySnapshotState;
+  /** Snapshot index template, indices, and task. Set only when status is requested with components. */
+  historySnapshotComponents?: EngineComponentStatus[];
   logsExtractionConfig: LogExtractionConfig;
   /** Config in effect per entity type, keyed by the types with an installed engine. */
   logsExtractionConfigByType: Partial<Record<EntityType, LogExtractionConfig>>;

@@ -50,6 +50,7 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
+import { getHistorySnapshotTaskId } from '../../tasks/config';
 import {
   getEntitiesAlias,
   ENTITY_LATEST,
@@ -63,6 +64,9 @@ import {
   getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
+import { getHistorySnapshotIndexTemplateId } from './history_snapshot_index_template';
+import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
+import { resolveHistorySnapshotIndexPatterns } from './resolve_entity_store_indices';
 import { getComponentTemplateName } from './component_templates';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import {
@@ -437,13 +441,15 @@ export class AssetManagerClient {
       ) as Partial<Record<EntityType, LogExtractionConfig>>;
 
       if (withComponents) {
-        const enginesWithComponents = await Promise.all(
-          engines.map((engine) => this.getEngineWithComponents(engine))
-        );
+        const [enginesWithComponents, historySnapshotComponents] = await Promise.all([
+          Promise.all(engines.map((engine) => this.getEngineWithComponents(engine))),
+          this.getHistorySnapshotComponents(),
+        ]);
         return {
           status,
           engines: enginesWithComponents,
           historySnapshot,
+          historySnapshotComponents,
           logsExtractionConfig,
           logsExtractionConfigByType,
         };
@@ -694,6 +700,70 @@ export class AssetManagerClient {
         return { id: name, installed, resource };
       })
     );
+  }
+
+  /**
+   * Store-wide history snapshot assets: index template, concrete snapshot indices, and the
+   * snapshot task. Index listing failures are reported as a missing index pattern so the rest of
+   * the status response still returns.
+   */
+  private async getHistorySnapshotComponents(): Promise<EngineComponentStatus[]> {
+    const [indexTemplate, indices, task] = await Promise.all([
+      this.getHistorySnapshotIndexTemplateComponent(),
+      this.getHistorySnapshotIndexComponents(),
+      this.getHistorySnapshotTaskComponent(),
+    ]);
+
+    return [indexTemplate, ...indices, task];
+  }
+
+  private async getHistorySnapshotIndexTemplateComponent(): Promise<EngineComponentStatus> {
+    const id = getHistorySnapshotIndexTemplateId(this.namespace);
+    const installed = await this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: id }));
+    return { id, installed, resource: 'index_template' };
+  }
+
+  private async getHistorySnapshotIndexComponents(): Promise<EngineComponentStatus[]> {
+    const pattern = getHistorySnapshotIndexPattern(this.namespace);
+    try {
+      const names = await this.listHistorySnapshotIndices();
+      if (names.length === 0) {
+        return [{ id: pattern, installed: false, resource: 'index' }];
+      }
+      return names.map((id) => ({ id, installed: true, resource: 'index' as const }));
+    } catch (error) {
+      this.logger.warn(`Failed to list history snapshot indices: ${getErrorMessage(error)}`);
+      return [{ id: pattern, installed: false, resource: 'index' }];
+    }
+  }
+
+  private async listHistorySnapshotIndices(): Promise<string[]> {
+    const patterns = await resolveHistorySnapshotIndexPatterns(this.esClient, this.namespace);
+    const resolved = await Promise.all(
+      patterns.map(async (name) => {
+        const result = await this.esClient.indices.resolveIndex({
+          name,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
+        return (result.indices ?? []).map((index) => index.name);
+      })
+    );
+
+    return [...new Set(resolved.flat())].sort((a, b) => b.localeCompare(a));
+  }
+
+  private async getHistorySnapshotTaskComponent(): Promise<EngineComponentStatus> {
+    const taskId = getHistorySnapshotTaskId(this.namespace);
+    try {
+      await this.taskManager.get(taskId);
+      return { id: taskId, installed: true, resource: 'task' };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e as Error)) {
+        return { id: taskId, installed: false, resource: 'task' };
+      }
+      throw e;
+    }
   }
 
   /**

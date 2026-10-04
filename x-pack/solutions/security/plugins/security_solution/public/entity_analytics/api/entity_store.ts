@@ -90,12 +90,29 @@ export const useEntityStoreRoutes = () => {
         context,
       });
 
+    const enableHistorySnapshot = async (context?: KibanaExecutionContext) =>
+      http.fetch<{ ok: boolean }>(ENTITY_STORE_ROUTES.public.ENABLE_HISTORY_SNAPSHOT, {
+        method: 'PUT',
+        version: API_VERSIONS.public.v1,
+        context,
+      });
+
+    const disableHistorySnapshot = async (context?: KibanaExecutionContext) =>
+      http.fetch<{ ok: boolean }>(ENTITY_STORE_ROUTES.public.DISABLE_HISTORY_SNAPSHOT, {
+        method: 'PUT',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({ clearHistorySnapshots: false }),
+        context,
+      });
+
     return {
       getEntityStoreStatus,
       installEntityStore,
       startEntityStore,
       stopEntityStore,
       deleteEntityStore,
+      enableHistorySnapshot,
+      disableHistorySnapshot,
     };
   }, [http, notifications]);
 };
