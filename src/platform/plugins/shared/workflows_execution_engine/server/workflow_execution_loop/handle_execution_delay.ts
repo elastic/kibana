@@ -13,6 +13,7 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
+import { DEFAULT_WORKFLOW_TIMEOUT } from '../default_workflow_settings';
 import { getResolvedStepTimeout } from '../step/timeout_zone_step/step_level/enter_step_timeout_zone_node_impl';
 import {
   getHitlIdleDeadlineMsForNode,
@@ -112,6 +113,34 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
   }
 }
 
+/** Arms the parent's wake task when the graph has no timeout to schedule one */
+async function armSyncParentWakeTask(
+  params: WorkflowExecutionLoopParams,
+  workflowExecution: EsWorkflowExecution
+): Promise<void> {
+  const startedAtMs = workflowExecution.startedAt
+    ? new Date(workflowExecution.startedAt).getTime()
+    : Date.now();
+  const runAt = new Date(
+    Math.max(startedAtMs + parseDuration(DEFAULT_WORKFLOW_TIMEOUT), Date.now() + 500)
+  );
+
+  try {
+    await params.workflowTaskManager.ensureWakeTask({
+      executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId || 'default',
+      fakeRequest: params.fakeRequest,
+      runAt,
+    });
+  } catch (error: unknown) {
+    params.workflowLogger.logWarn(
+      `Failed to arm sync parent wake task (execution=${workflowExecution.id}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
 /**
  * Lost-wakeup handshake: after attempting to arm the parent's authenticated resume
  * task, re-read the sync child. If it already finished during arming, pull the
@@ -197,6 +226,17 @@ export async function ensureWorkflowIdleTimeoutResumeAfterLoop(
 ): Promise<void> {
   const resumeAt = getWorkflowIdleTimeoutResumeAtAfterLoop(params);
   if (resumeAt === undefined) {
+    const workflowExecution = params.workflowRuntime.getWorkflowExecution();
+    if (workflowExecution.status !== ExecutionStatus.WAITING_FOR_CHILD) {
+      return;
+    }
+
+    await armSyncParentWakeTask(params, workflowExecution);
+    const node = params.workflowRuntime.getCurrentNode();
+    if (node?.stepId) {
+      const stepExecution = params.workflowExecutionState.getLatestStepExecution(node.stepId);
+      await wakeIfSyncChildAlreadyTerminal(params, stepExecution?.state?.executionId);
+    }
     return;
   }
 
@@ -238,8 +278,16 @@ export async function handleExecutionDelay(
       status: stepStatus,
     });
 
-    await scheduleWorkflowGlobalTimeoutResumeTask(params, workflowExecution, stepExecutionRuntime);
+    const scheduledResume = await scheduleWorkflowGlobalTimeoutResumeTask(
+      params,
+      workflowExecution,
+      stepExecutionRuntime
+    );
     if (stepStatus === ExecutionStatus.WAITING_FOR_CHILD) {
+      // Arm 1st when the timeout scheduler did not, so the handshake can wake it
+      if (!scheduledResume) {
+        await armSyncParentWakeTask(params, workflowExecution);
+      }
       await wakeIfSyncChildAlreadyTerminal(
         params,
         stepExecutionRuntime.stepExecution?.state?.executionId
