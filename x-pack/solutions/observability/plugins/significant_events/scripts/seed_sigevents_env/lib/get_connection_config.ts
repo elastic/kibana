@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { getCACertificates, type ConnectionOptions } from 'tls';
+import { Client } from '@elastic/elasticsearch';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
@@ -16,6 +19,12 @@ export interface ConnectionConfig {
   username: string;
   password: string;
 }
+
+/** Default superuser credentials of `node scripts/es snapshot` and `node scripts/es serverless`, tried in order. */
+const DEFAULT_CREDENTIALS = [
+  { username: 'elastic', password: 'changeme' },
+  { username: 'elastic_serverless', password: 'changeme' },
+] as const;
 
 interface KibanaConfig {
   elasticsearch: { hosts: string };
@@ -105,17 +114,92 @@ async function resolveKibanaUrl(rawUrl: string, log: ToolingLog): Promise<string
   return rawUrl;
 }
 
+/** Trusts the Kibana dev CA for https connections to localhost (used by `node scripts/es serverless`). */
+export function getEsTlsOptions(esUrl: string): ConnectionOptions | undefined {
+  const { protocol, hostname } = new URL(esUrl);
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  return protocol === 'https:' && isLocalhost
+    ? { ca: [...getCACertificates('default'), fs.readFileSync(CA_CERT_PATH)] }
+    : undefined;
+}
+
+async function canAuthenticate(
+  esUrl: string,
+  username: string,
+  password: string
+): Promise<boolean> {
+  const client = new Client({
+    node: esUrl,
+    auth: { username, password },
+    tls: getEsTlsOptions(esUrl),
+    requestTimeout: 5_000,
+    maxRetries: 0,
+  });
+  try {
+    await client.security.authenticate();
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await client.close();
+  }
+}
+
+function withSwitchedProtocol(url: string): string {
+  const parsed = new URL(url);
+  parsed.protocol = 'https:';
+  return parsed.toString().replace(/\/$/, '');
+}
+
+/**
+ * Finds a working ES URL + superuser credential pair. Explicit flags are always honoured;
+ * otherwise local HTTP can fall back to HTTPS and the stateful/serverless default users are probed.
+ */
+async function discoverEsConnection(
+  flags: Record<string, unknown>,
+  configuredEsUrl: string,
+  log: ToolingLog
+): Promise<{ esUrl: string; username: string; password: string }> {
+  const targetEsUrl = String(flags['es-url'] || configuredEsUrl);
+  const { protocol, hostname } = new URL(targetEsUrl);
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  const esUrls =
+    !flags['es-url'] && protocol === 'http:' && isLocalhost
+      ? [targetEsUrl, withSwitchedProtocol(targetEsUrl)]
+      : [targetEsUrl];
+  const usernames = flags['es-username']
+    ? [String(flags['es-username'])]
+    : DEFAULT_CREDENTIALS.map(({ username }) => username);
+  const credentials = usernames.map((username) => ({
+    username,
+    password: String(flags['es-password'] || 'changeme'),
+  }));
+
+  for (const esUrl of esUrls) {
+    for (const { username, password } of credentials) {
+      if (await canAuthenticate(esUrl, username, password)) {
+        log.info(`Connected to Elasticsearch at ${esUrl} as "${username}"`);
+        return { esUrl, username, password };
+      }
+    }
+  }
+
+  throw new Error(
+    `Could not authenticate against Elasticsearch at ${esUrls.join(' or ')} with users ${credentials
+      .map(({ username }) => username)
+      .join(', ')} — pass --es-url / --es-username / --es-password explicitly.`
+  );
+}
+
 export async function getConnectionConfig(
   flags: Record<string, unknown>,
   log: ToolingLog
 ): Promise<ConnectionConfig> {
   const { elasticsearch, server: serverConfig } = readKibanaConfig(log);
 
-  const esUrl = String(flags['es-url'] || elasticsearch.hosts);
-  // kibana.dev.yml carries kibana_system credentials — always fall back to elastic/changeme
-  // for the seeder which needs superuser access to write system indices and seed data.
-  const username = String(flags['es-username'] || 'elastic');
-  const password = String(flags['es-password'] || 'changeme');
+  // kibana.dev.yml carries kibana_system credentials — the seeder needs superuser access to
+  // write system indices and seed data, so it probes the default dev superusers instead.
+  const { esUrl, username, password } = await discoverEsConnection(flags, elasticsearch.hosts, log);
 
   const rawKibanaUrl = flags['kibana-url']
     ? String(flags['kibana-url'])
