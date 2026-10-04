@@ -24,7 +24,7 @@ import {
   parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
-import { TIMEFIELD_ROUTE, TIMEFIELD_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { respondWithSwrCache } from '@kbn/http-swr-cache';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
@@ -322,16 +322,16 @@ export const registerGetTimeFieldRoute = (
       })
   );
 
-  // Cacheable variant for queries short enough to fit in a URL, see TIMEFIELD_GET_MAX_QUERY_LENGTH.
+  // Cacheable variant for queries short enough to fit in a URL, see ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH.
   router.get(
     {
       path: TIMEFIELD_ROUTE,
       security,
       validate: {
         query: schema.object({
-          query: schema.string({ maxLength: TIMEFIELD_GET_MAX_QUERY_LENGTH }),
+          query: schema.string({ maxLength: ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH }),
           projectRouting: schema.maybe(
-            schema.string({ maxLength: TIMEFIELD_GET_MAX_QUERY_LENGTH })
+            schema.string({ maxLength: ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH })
           ),
         }),
       },

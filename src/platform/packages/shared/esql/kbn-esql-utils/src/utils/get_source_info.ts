@@ -10,6 +10,7 @@ import type { HttpStart } from '@kbn/core/public';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
+import { fitsInCacheableGetRequest } from './fits_in_cacheable_get_request';
 
 export interface ESQLSourceInfoColumn {
   name: string;
@@ -73,20 +74,22 @@ export async function getESQLSourceInfo({
     return cached;
   }
 
-  const pending = http
-    .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
-      body: JSON.stringify({
-        query,
-        projectRouting,
-        timeRange,
-        timeFieldName,
-        esqlVariables: cleanVariables,
-      }),
-    })
-    .catch((error) => {
-      sourceInfoCache.delete(cacheKey);
-      throw error;
-    });
+  const body = JSON.stringify({
+    query,
+    projectRouting,
+    timeRange,
+    timeFieldName,
+    esqlVariables: cleanVariables,
+  });
+  // GET is HTTP-cacheable (stale-while-revalidate); POST is the fallback for long requests
+  const request = fitsInCacheableGetRequest({ request: body })
+    ? http.get<ESQLSourceInfo>(SOURCE_INFO_ROUTE, { query: { request: body } })
+    : http.post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, { body });
+
+  const pending = request.catch((error) => {
+    sourceInfoCache.delete(cacheKey);
+    throw error;
+  });
 
   sourceInfoCache.set(cacheKey, pending);
   return pending;

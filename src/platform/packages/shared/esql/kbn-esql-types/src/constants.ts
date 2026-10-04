@@ -13,9 +13,9 @@ export const JOIN_INDICES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/join
 export const TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE =
   '/internal/esql/autocomplete/timeseries/indices';
 export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
-// Longest query string TIMEFIELD_ROUTE is called with via (cacheable) GET; longer queries use
+// Longest query string ES|QL routes are called with via (cacheable) GET; longer requests use
 // POST to stay under URL-length limits of proxies in front of Kibana.
-export const TIMEFIELD_GET_MAX_QUERY_LENGTH = 2000;
+export const ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH = 2000;
 export const SOURCE_INFO_ROUTE = '/internal/esql/source_info';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const VIEWS_BULK_DELETE_ROUTE = `${VIEWS_ROUTE}/_bulk_delete`;

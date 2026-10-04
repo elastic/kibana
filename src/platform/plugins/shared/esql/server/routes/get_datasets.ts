@@ -10,6 +10,7 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { DATASETS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { respondWithSwrCache } from '@kbn/http-swr-cache';
 // TODO: Re-enable when datasets are available in Tech preview
 // import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
@@ -37,7 +38,10 @@ export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInit
         //   outcome: 'success',
         //   'http.response.status_code': 200,
         // });
-        return response.ok({
+        return respondWithSwrCache({
+          context: requestHandlerContext,
+          request,
+          response,
           body: result,
         });
       } catch (error) {

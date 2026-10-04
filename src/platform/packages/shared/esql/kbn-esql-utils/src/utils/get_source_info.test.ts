@@ -20,18 +20,17 @@ describe('getESQLSourceInfo', () => {
     clearESQLSourceInfoCache();
   });
 
-  const createHttp = (impl?: (path: string, options: { body: string }) => unknown): HttpStart => {
-    return {
-      post: jest.fn(async (path: string, options: { body: string }) => {
-        if (impl) {
-          return impl(path, options);
-        }
-        return { columns: [{ name: 'message', esType: 'keyword' }] };
-      }),
-    } as unknown as HttpStart;
+  const createHttp = (impl?: () => unknown): HttpStart => {
+    const respond = jest.fn(async () => {
+      if (impl) {
+        return impl();
+      }
+      return { columns: [{ name: 'message', esType: 'keyword' }] };
+    });
+    return { get: respond, post: jest.fn(respond) } as unknown as HttpStart;
   };
 
-  it('POSTs the query to SOURCE_INFO_ROUTE', async () => {
+  it('GETs the query from SOURCE_INFO_ROUTE when it fits in a URL', async () => {
     const http = createHttp();
     const result = await getESQLSourceInfo({
       query: 'FROM logs-*',
@@ -41,14 +40,16 @@ describe('getESQLSourceInfo', () => {
       timeFieldName: '@timestamp',
     });
 
-    expect(http.post).toHaveBeenCalledWith(SOURCE_INFO_ROUTE, {
-      body: JSON.stringify({
-        query: 'FROM logs-*',
-        projectRouting: '_alias:*',
-        timeRange: { from: 'now-15m', to: 'now' },
-        timeFieldName: '@timestamp',
-        esqlVariables: undefined,
-      }),
+    expect(http.get).toHaveBeenCalledWith(SOURCE_INFO_ROUTE, {
+      query: {
+        request: JSON.stringify({
+          query: 'FROM logs-*',
+          projectRouting: '_alias:*',
+          timeRange: { from: 'now-15m', to: 'now' },
+          timeFieldName: '@timestamp',
+          esqlVariables: undefined,
+        }),
+      },
     });
     expect(result.columns).toEqual([{ name: 'message', esType: 'keyword' }]);
   });
@@ -70,7 +71,7 @@ describe('getESQLSourceInfo', () => {
       esqlVariables: variables,
     });
 
-    const posted = JSON.parse((http.post as jest.Mock).mock.calls[0][1].body);
+    const posted = JSON.parse((http.get as jest.Mock).mock.calls[0][1].query.request);
     expect(posted.esqlVariables).toEqual([
       { key: 'field', value: 'message', type: ESQLVariableType.FIELDS },
     ]);
@@ -97,7 +98,7 @@ describe('getESQLSourceInfo', () => {
     ]);
 
     expect(first).toBe(second);
-    expect(http.post).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledTimes(1);
   });
 
   it('evicts the cache entry when the request fails', async () => {
@@ -108,6 +109,6 @@ describe('getESQLSourceInfo', () => {
 
     await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('network');
     await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('network');
-    expect(http.post).toHaveBeenCalledTimes(2);
+    expect(http.get).toHaveBeenCalledTimes(2);
   });
 });

@@ -32,6 +32,7 @@ function buildMocks() {
     post: jest.fn((_, h) => {
       handler.mockImplementation(h);
     }),
+    get: jest.fn(),
   };
 
   const errorLogger = { error: jest.fn() };

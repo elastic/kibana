@@ -8,7 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { TIMEFIELD_ROUTE, TIMEFIELD_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { getESQLTimeField } from './get_time_field';
 
 describe('getESQLTimeField', () => {
@@ -77,7 +77,7 @@ describe('getESQLTimeField', () => {
     it('falls back to POST when projectRouting alone pushes the total length over the threshold', async () => {
       const http = createHttp();
       const query = 'FROM logs-timefield-get-routing-*';
-      const projectRouting = 'x'.repeat(TIMEFIELD_GET_MAX_QUERY_LENGTH);
+      const projectRouting = 'x'.repeat(ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH);
 
       await getESQLTimeField({ query, http, projectRouting });
 

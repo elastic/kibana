@@ -488,8 +488,7 @@ describe('EsqlSource', () => {
   });
 
   describe('create with http', () => {
-    // TIMEFIELD_ROUTE is requested via GET (http.get) for short queries, cacheable
-    // like the fields endpoint; SOURCE_INFO_ROUTE is still POST-only. Track both.
+    // Short requests use cacheable GET, long ones POST; track both.
     const requestedPaths = (http: HttpStart) => [
       ...(http.post as jest.Mock).mock.calls.map((call) => call[0] as string),
       ...(http.get as jest.Mock).mock.calls.map((call) => call[0] as string),
@@ -500,23 +499,19 @@ describe('EsqlSource', () => {
       timeField?: string;
       sourceInfoError?: Error;
     }): HttpStart => {
-      return {
-        post: jest.fn(async (path: string) => {
-          if (path === SOURCE_INFO_ROUTE) {
-            if (overrides?.sourceInfoError) {
-              throw overrides.sourceInfoError;
-            }
-            return overrides?.sourceInfo ?? { columns: [] };
+      const respond = async (path: string) => {
+        if (path === SOURCE_INFO_ROUTE) {
+          if (overrides?.sourceInfoError) {
+            throw overrides.sourceInfoError;
           }
-          throw new Error(`unexpected path ${path}`);
-        }),
-        get: jest.fn(async (path: string) => {
-          if (path === TIMEFIELD_ROUTE) {
-            return { timeField: overrides?.timeField };
-          }
-          throw new Error(`unexpected path ${path}`);
-        }),
-      } as unknown as HttpStart;
+          return overrides?.sourceInfo ?? { columns: [] };
+        }
+        if (path === TIMEFIELD_ROUTE) {
+          return { timeField: overrides?.timeField };
+        }
+        throw new Error(`unexpected path ${path}`);
+      };
+      return { post: jest.fn(respond), get: jest.fn(respond) } as unknown as HttpStart;
     };
 
     it('resolves time field and LIMIT 0 schema in parallel', async () => {
