@@ -25,6 +25,7 @@ import type {
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
 import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
+import { deleteLegacyOnboardingFlows } from './lib/state';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import type { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
@@ -135,6 +136,10 @@ export class ObservabilityOnboardingPlugin
   }
 
   public start(core: CoreStart) {
+    // One-time cleanup of flows created before ownership tracking (createdBy) existed.
+    // Self-extinguishing no-op once the legacy flows are gone. Remove when every branch
+    // that ever wrote ownerless flows is out of maintenance.
+    void deleteLegacyOnboardingFlows({ coreStart: core, logger: this.logger });
     return {};
   }
 
