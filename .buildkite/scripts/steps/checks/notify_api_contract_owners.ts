@@ -299,13 +299,19 @@ export const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
     ).values()
   );
 
-async function main() {
-  const reportPaths = process.argv.slice(2);
-
+/**
+ * Reads the impact reports. `complete` is true only when every report exists and
+ * parses: a missing report means that check was skipped or crashed.
+ */
+export const readImpactReports = (
+  reportPaths: readonly string[]
+): { entries: ImpactEntry[]; complete: boolean } => {
   const entries: ImpactEntry[] = [];
+  let complete = reportPaths.length > 0;
 
   for (const reportPath of reportPaths) {
     if (!existsSync(reportPath)) {
+      complete = false;
       continue;
     }
     let report: unknown;
@@ -313,17 +319,39 @@ async function main() {
       report = JSON.parse(readFileSync(reportPath, 'utf-8'));
     } catch {
       console.error(`Failed to parse report at ${reportPath}, skipping`);
+      complete = false;
       continue;
     }
     if (isImpactReport(report)) {
       entries.push(...report.entries);
     } else {
       console.error(`Report at ${reportPath} has no recognized shape, skipping`);
+      complete = false;
     }
   }
 
+  return { entries, complete };
+};
+
+export const RESOLVED_COMMENT_BODY = `## API Contract Breaking Changes
+
+The latest run found no breaking changes in the public OpenAPI surface, so the earlier results on this PR no longer apply.`;
+
+export const notifyApiContractOwners = async (reportPaths: readonly string[]): Promise<void> => {
+  const { entries, complete } = readImpactReports(reportPaths);
+
   if (entries.length === 0) {
-    console.log('No breaking changes to report');
+    if (!complete) {
+      console.log('No breaking changes to report');
+      return;
+    }
+    console.log('No breaking changes found, updating an earlier comment if there is one...');
+    await upsertComment({
+      commentBody: RESOLVED_COMMENT_BODY,
+      commentContext: COMMENT_CONTEXT,
+      clearPrevious: false,
+      createIfMissing: false,
+    });
     return;
   }
 
@@ -336,10 +364,10 @@ async function main() {
   });
 
   console.log('PR comment posted successfully');
-}
+};
 
 if (basename(process.argv[1] ?? '') === 'notify_api_contract_owners.ts') {
-  main().catch((error) => {
+  notifyApiContractOwners(process.argv.slice(2)).catch((error) => {
     console.error('Failed to post API contract notification:', error);
     process.exit(1);
   });
