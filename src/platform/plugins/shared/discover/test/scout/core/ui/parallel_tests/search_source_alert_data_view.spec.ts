@@ -161,10 +161,10 @@ spaceTest.describe(
 
         await spaceTest.step('the previous notification link restores original state', async () => {
           await page.goto(new URL(contextLink, page.url()).toString());
+          // The toast is shown on mount and auto-dismisses, so assert it before waiting on the fetch.
+          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
           await pageObjects.discover.waitUntilSearchingHasFinished();
           await pageObjects.dataGrid.waitForDocTableRendered();
-
-          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
           await expectSearchSourceAlertInitialResults(pageObjects, initialDataViewTitle);
           await expect
             .poll(async () =>
@@ -281,10 +281,10 @@ spaceTest.describe(
 
         await spaceTest.step('the previous notification link still renders results', async () => {
           await page.goto(new URL(contextLink, page.url()).toString());
+          // The toast is shown on mount and auto-dismisses, so assert it before waiting on the fetch.
+          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
           await pageObjects.discover.waitUntilSearchingHasFinished();
           await pageObjects.dataGrid.waitForDocTableRendered();
-
-          await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
           await expectSearchSourceAlertInitialResults(pageObjects, dataViewTitle);
           await expect
             .poll(async () =>

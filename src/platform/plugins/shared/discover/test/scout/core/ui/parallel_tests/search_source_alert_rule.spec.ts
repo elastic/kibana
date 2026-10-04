@@ -144,10 +144,10 @@ spaceTest.describe(
           'the previous notification link restores original params',
           async () => {
             await page.goto(new URL(contextLink, page.url()).toString());
+            // The toast is shown on mount and auto-dismisses, so assert it before waiting on the fetch.
+            await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
             await pageObjects.discover.waitUntilSearchingHasFinished();
             await pageObjects.dataGrid.waitForDocTableRendered();
-
-            await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
             await expectSearchSourceAlertInitialResults(pageObjects, sourceIndex);
           }
         );
@@ -199,10 +199,10 @@ spaceTest.describe(
         await apiServices.alerting.rules.delete(ruleId, scoutSpace.id);
 
         await page.goto(new URL(contextLink, page.url()).toString());
+        // The toast is shown on mount and auto-dismisses, so assert it before waiting on the fetch.
+        await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.dataGrid.waitForDocTableRendered();
-
-        await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
         await expectSearchSourceAlertInitialResults(pageObjects, dataViewTitle);
         await expect
           .poll(async () =>
