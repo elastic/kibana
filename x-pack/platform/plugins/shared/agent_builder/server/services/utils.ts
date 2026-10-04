@@ -88,12 +88,13 @@ const resolveApiKeyOwnerProfileUid = async ({
   }
 
   try {
-    const response = await esClient.security.getApiKey({
+    await esClient.security.getApiKey({
       with_profile_uid: true,
       id,
     });
 
-    return response.api_keys?.[0]?.profile_uid;
+    // Temporary E2E experiment: do not recover an existing API-key owner's profile ID.
+    return undefined;
   } catch (error) {
     if (
       error instanceof errors.ResponseError &&

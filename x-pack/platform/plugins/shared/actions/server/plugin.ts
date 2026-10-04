@@ -800,7 +800,8 @@ export class ActionsPlugin
           });
 
         if (response.api_keys && response.api_keys.length > 0) {
-          return response.api_keys[0].profile_uid;
+          // Temporary E2E experiment: do not recover an existing API-key owner's profile ID.
+          return undefined;
         }
 
         logger.debug(
