@@ -7,7 +7,7 @@
 
 import type { Output, FullAgentPolicyInput, TemplateAgentPolicyInput } from '../../types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE, outputType, otlpProtocol } from '../../../common/constants';
 
 import { generateOtelcolConfig } from './otel_collector';
 
@@ -3865,6 +3865,97 @@ describe('generateOtelcolConfig', () => {
           otel_disable_beatsauth: true,
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('OTLP data output', () => {
+    const otlpOutputId = 'my-otlp-output';
+    const otlpEndpoint = 'my-cluster.ingest.elastic.cloud:4317';
+
+    const baseOtlpOutput: Output = {
+      type: outputType.Otlp,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'My OTLP output',
+      id: otlpOutputId,
+      otlp_exporter: {
+        endpoint: otlpEndpoint,
+        protocol: otlpProtocol.Grpc,
+      },
+    } as unknown as Output;
+
+    it('generates otlp/<id> exporter for gRPC protocol', () => {
+      const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: baseOtlpOutput });
+
+      expect(result.exporters).toEqual({
+        [`otlp/${otlpOutputId}`]: { endpoint: otlpEndpoint },
+      });
+    });
+
+    it('generates otlphttp/<id> exporter for HTTP/protobuf protocol', () => {
+      const httpOutput = {
+        ...baseOtlpOutput,
+        otlp_exporter: { endpoint: otlpEndpoint, protocol: otlpProtocol.HttpProtobuf },
+      } as unknown as Output;
+
+      const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: httpOutput });
+
+      expect(result.exporters).toEqual({
+        [`otlphttp/${otlpOutputId}`]: { endpoint: otlpEndpoint },
+      });
+    });
+
+    it('does not generate a beatsauth extension', () => {
+      const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: baseOtlpOutput });
+
+      expect(result.extensions).toBeUndefined();
+      expect(result.service?.extensions).toBeUndefined();
+      expect(JSON.stringify(result)).not.toContain('beatsauth');
+    });
+
+    it('wires the forward connector and fan-in pipeline', () => {
+      const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: baseOtlpOutput });
+
+      expect(result.connectors).toEqual({ [`forward/${otlpOutputId}`]: {} });
+      expect(result.service?.pipelines?.[`metrics/${otlpOutputId}`]).toEqual({
+        receivers: [`forward/${otlpOutputId}`],
+        exporters: [`otlp/${otlpOutputId}`],
+      });
+    });
+
+    it('passes protocol field through to the exporter', () => {
+      const outputWithHeaders = {
+        ...baseOtlpOutput,
+        otlp_exporter: {
+          endpoint: otlpEndpoint,
+          protocol: otlpProtocol.Grpc,
+          headers: { 'X-Custom-Header': 'my-value' },
+          timeout: '30s',
+        },
+      } as unknown as Output;
+
+      const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: outputWithHeaders });
+      const exporter = result.exporters?.[`otlp/${otlpOutputId}`];
+
+      expect(exporter).toEqual({
+        endpoint: otlpEndpoint,
+        headers: { 'X-Custom-Header': 'my-value' },
+        timeout: '30s',
+      });
+      expect(exporter).not.toHaveProperty('protocol');
+    });
+
+    it('includes tls secrets in the exporter when present', () => {
+      const tlsSecret = { id: 'secret-ref-abc' };
+      const outputWithSecrets = {
+        ...baseOtlpOutput,
+        secrets: { otlp_exporter: { tls: { key_pem: tlsSecret } } },
+      } as unknown as Output;
+
+      const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: outputWithSecrets });
+      const exporter = result.exporters?.[`otlp/${otlpOutputId}`];
+
+      expect(exporter?.secrets).toEqual({ tls: { key_pem: tlsSecret } });
     });
   });
 });

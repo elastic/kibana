@@ -6,10 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { updateEventStatusToolHandler } from './handler';
 import {
   createEventStatusUpdateTool,
@@ -18,6 +19,10 @@ import {
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanManageSignificantEvents: jest.fn(),
 }));
 
 jest.mock('./handler', () => ({
@@ -30,7 +35,7 @@ describe('event_status_update tool', () => {
   it('uses expected tool id', () => {
     const tool = createEventStatusUpdateTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -40,34 +45,42 @@ describe('event_status_update tool', () => {
 
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
     (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
-      event_uuid: 'e1',
+      event_id: 'e1',
       updated: 1,
       ignored: 0,
-      status: 'closed',
+      status: 'inactive',
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
       getEventClient: jest.fn().mockReturnValue({}),
+      getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
     });
 
     const tool = createEventStatusUpdateTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
 
     const result = await invokeHandler(
       tool as never,
-      { event_uuid: 'e1', status: 'closed' },
+      { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },
       createMockToolContext()
+    );
+    expect(updateEventStatusToolHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ assessmentNote: 'Recovered after rollback' })
     );
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
     }
+    expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ request: expect.anything() })
+    );
   });
 });

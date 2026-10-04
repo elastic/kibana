@@ -13,20 +13,26 @@ import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import type { ClassicRulesPageProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
-const Placeholder = ({ name, privilegeCheck }: { name: string; privilegeCheck?: unknown }) => (
-  <div data-test-subj={name} data-has-privilege-check={privilegeCheck != null}>
+const Placeholder = ({
+  name,
+  privilegeCheck,
+  ...rest
+}: { name: string; privilegeCheck?: unknown } & Record<string, unknown>) => (
+  <div data-test-subj={name} data-has-privilege-check={privilegeCheck != null} {...rest}>
     {name}
   </div>
 );
@@ -64,10 +70,11 @@ const mockAlertingVTwo = {
       privilegeCheck={privilegeCheck}
     />
   ),
-  EpisodesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+  EpisodesPage: ({ hostApp, privilegeCheck, manageRulesHref }: AlertingV2PageProps) => (
     <Placeholder
-      name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`}
+      name={`episodesPage:${hostApp?.alerts?.app ?? 'none'}`}
       privilegeCheck={privilegeCheck}
+      {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
   ),
   ActionPoliciesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
@@ -86,7 +93,7 @@ const mockAlertingVTwo = {
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
-    episodes: { app: appId, pathPrefix: paths.episodes },
+    alerts: { app: appId, pathPrefix: paths.alerts },
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })),
@@ -148,14 +155,14 @@ describe('ObservabilityAlertingApp', () => {
     mockTriggersActionsUi.getClassicRulesPage.mockClear();
   });
 
-  it('redirects / to inbox', () => {
+  it('redirects / to alerts', () => {
     const { history } = renderAt('/');
 
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
-  it('renders EpisodesPage at /inbox with observability host', async () => {
-    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_INBOX_PATH);
+  it('renders EpisodesPage at /alerts with observability host', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
@@ -285,15 +292,15 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('redirects unknown paths to inbox', () => {
+  it('redirects unknown paths to alerts', () => {
     const { history } = renderAt('/unknown');
 
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
   it.each([
     {
-      path: OBSERVABILITY_ALERTING_INBOX_PATH,
+      path: OBSERVABILITY_ALERTING_ALERTS_PATH,
       testId: `episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
       hasPrivilegeCheck: 'true',
     },
@@ -328,4 +335,52 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId(testId)).toHaveAttribute('data-has-privilege-check', hasPrivilegeCheck);
     }
   );
+
+  it('passes manageRulesHref pointing to /rules/v2 for a v2-only user', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_ALERTS_PATH,
+      v2RulesCapabilities
+    );
+    const prepend = coreStart.http.basePath.prepend;
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+      'data-manage-rules-href',
+      prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`)
+    );
+  });
+
+  it('passes manageRulesHref pointing to /rules/v2 for a mixed v1+v2 user', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_ALERTS_PATH,
+      mixedRulesCapabilities
+    );
+    const prepend = coreStart.http.basePath.prepend;
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+      'data-manage-rules-href',
+      prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`)
+    );
+  });
+
+  it('passes manageRulesHref pointing to /rules/v1 for a v1-only user', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_ALERTS_PATH,
+      v1RulesCapabilities
+    );
+    const prepend = coreStart.http.basePath.prepend;
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+      'data-manage-rules-href',
+      prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`)
+    );
+  });
 });

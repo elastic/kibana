@@ -58,6 +58,12 @@ observableTypes:
         type: string
         description: The observable type label.
         example: My observable type
+extractObservables:
+  type: boolean
+  description: >
+    Indicates whether observables (for example, IPs, hashes, and URLs) are
+    automatically extracted from case comments and events.
+  example: true
 owner:
   $ref: 'owner.yaml'
 templates:

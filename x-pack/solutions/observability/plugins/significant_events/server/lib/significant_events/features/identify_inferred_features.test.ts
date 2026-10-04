@@ -6,12 +6,21 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
+import { loggerMock } from '@kbn/logging-mocks';
+import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
 import {
   buildKnownFeatureIds,
   buildTelemetry,
   findSimilarFeatures,
+  identifyInferredFeatures,
   selectPreviouslyIdentifiedFeatures,
 } from './identify_inferred_features';
+
+jest.mock('./identify_features_via_agent', () => ({
+  executeFeatureIdentificationAgent: jest.fn(),
+}));
+
+const mockExecuteFeatureIdentificationAgent = jest.mocked(executeFeatureIdentificationAgent);
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
@@ -238,6 +247,45 @@ describe('buildTelemetry', () => {
       expect.objectContaining({
         features_remapped: 2,
       })
+    );
+  });
+});
+
+describe('identifyInferredFeatures', () => {
+  it('passes the run id to feature identification as the interaction id', async () => {
+    mockExecuteFeatureIdentificationAgent.mockResolvedValue({
+      features: [],
+      ignoredFeatures: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+    });
+
+    const kiClient = {
+      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      bulk: jest.fn(),
+      getDefaultExpiresAt: jest.fn(),
+    };
+
+    await identifyInferredFeatures({
+      esClient: {},
+      kiClient,
+      agentBuilder: {},
+      request: {},
+      connectorId: 'connector-1',
+      logger: loggerMock.create(),
+      signal: new AbortController().signal,
+      streamName: 'logs.test',
+      streamType: 'wired',
+      definition: { name: 'logs.test' },
+      runId: 'run-1',
+      documents: [{ _id: 'doc-1', fields: { message: 'hello' } }],
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+    } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
+
+    expect(mockExecuteFeatureIdentificationAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ interactionId: 'run-1' })
     );
   });
 });

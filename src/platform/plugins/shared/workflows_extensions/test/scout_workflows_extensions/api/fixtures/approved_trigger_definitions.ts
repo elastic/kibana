@@ -40,15 +40,15 @@
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
     id: 'ai.attachmentAdded',
-    schemaHash: '843b39ae3d48c95ab9b31c0f0c88be551b2498700535062b186aca8114c783bf',
+    schemaHash: 'c82f96366f59ded38993b577bbeea35d01d916dc9403881636f193c4ccf39526',
   },
   {
     id: 'ai.attachmentDeleted',
-    schemaHash: 'e89135cede7bc011a830318bbaec7e29709e72d41a71e4a04d747fe3cc6549b6',
+    schemaHash: '1867659824969a51ef31fb3f7a808a1dfec1cccc0beb8976eb94a4c7a5b701ae',
   },
   {
     id: 'ai.attachmentUpdated',
-    schemaHash: '4725f1ac547f598dbef94ac23d8bf667a75cdba14e64697126e2fd10263cd687',
+    schemaHash: '73a6023bf61fccf1dab6d9f6a35f028e6b89d054565444262a3e7da734fbe1d1',
   },
   {
     id: 'ai.conversation.metadataUpdated',
@@ -108,7 +108,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleEventsGenerated',
-    schemaHash: '809265f7f0af6bdd32df0498a0f756a17220587024df2fe25eb69b0060b38fe1',
+    schemaHash: 'c88c0616eebb07a89f0225f4d1f52045eb886c4e14de6598b480389d4cf2d19d',
   },
   {
     id: 'alerting.ruleExecutionFailed',
@@ -200,11 +200,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: '537230a2eb86302d4a80e93f396effd93681ba4a2e11fd70c5b7b5b56fe4c3fb',
+    schemaHash: '090e3242d2363bc4171d8136809cbf578ca1002e1e2cde81e4f354b4ba9dbb6e',
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: 'f140133a6ecef997484c3d4ef94b326207b4f1124cce889d34fef6e38fa019fe',
+    schemaHash: 'b0f707c9cd0d9933a57ed7f3503b8cc62bbf36a1e7dc6a57071a07f7a6297ae6',
   },
   {
     id: 'workflows.failed',

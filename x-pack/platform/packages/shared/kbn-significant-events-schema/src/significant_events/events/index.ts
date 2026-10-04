@@ -16,23 +16,22 @@ import {
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
 
-export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['open', 'closed', 'dismissed'] as const;
+export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['active', 'inactive'] as const;
 
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(dedent`
-    "open" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not open a new event;
-    "closed" = a failure condition is confirmed recovered;
-    "dismissed" = the proposed incident is a false alarm, benign/positive change, unrelated finding, a background pattern at its usual rate, or is not confirmed by evidence, with no plausible failure, degradation, or exposure left unverified.
+    "active" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
+    "inactive" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
   `);
 
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
 /**
  * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
- * prior event for the same issue so successive write cycles dedup against it. "closed" and
- * "dismissed" are excluded — a recovered or dismissed issue that recurs should open a fresh event.
+ * prior event for the same issue so successive write cycles dedup against it. An inactive issue
+ * that recurs should create a fresh event.
  */
-export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = ['open'] as const;
+export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = ['active'] as const;
 
 /**
  * One investigation run attached to this significant event.
@@ -59,12 +58,6 @@ export type SignificantEventInvestigation = z.infer<typeof significantEventInves
 
 export const significantEventSchema = significantEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
-  event_uuid: z.string().max(MAX_ID_LENGTH).describe('Unique ID of an event.'),
-  previous_event_uuid: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe('event_uuid of the original event that this event was derived from.'),
   status: significantEventStatusSchema,
   assessment_note: z
     .string()

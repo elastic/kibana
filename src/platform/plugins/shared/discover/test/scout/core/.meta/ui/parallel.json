@@ -1,5 +1,5 @@
 {
-  "sha1": "6e55a404a1fd6cbb2123d301e2ac196ddb30b214",
+  "sha1": "e855465e57b01d5e315e314aba91ae86cfd4620b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -137,6 +137,84 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/date_nanos_mixed.spec.ts",
         "line": 28,
         "column": 23
+      }
+    },
+    {
+      "id": "99b156606a173cd-ef103b49efde01e",
+      "title": "Discover app - accessibility has no automated a11y violations on the main page or after starting a new search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "99b156606a173cd-5ea7b01d898f8d2",
+      "title": "Discover app - accessibility has no automated a11y violations in the save flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 37,
+        "column": 29
+      }
+    },
+    {
+      "id": "99b156606a173cd-a5581524b2a9e0c",
+      "title": "Discover app - accessibility has no automated a11y violations in the top nav overlays",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "99b156606a173cd-02f828082c25579",
+      "title": "Discover app - accessibility has no automated a11y violations in the histogram interval selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 112,
+        "column": 47
+      }
+    },
+    {
+      "id": "99b156606a173cd-d2b7927e9ba6fff",
+      "title": "Discover app - accessibility has no automated a11y violations in the field statistics view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 120,
+        "column": 11
+      }
+    },
+    {
+      "id": "99b156606a173cd-056864d6f4b48e8",
+      "title": "Discover app - accessibility has no automated a11y violations in the field editor opened from the sidebar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 126,
+        "column": 13
       }
     },
     {
@@ -333,6 +411,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_session_multiple_data_views.spec.ts",
         "line": 53,
         "column": 15
+      }
+    },
+    {
+      "id": "7fd98054e985fc1-7e7d8909d81f43b",
+      "title": "Discover embeddable - doc viewer share direct link shares a panel document as a Discover deep link that restores the document and its context",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/doc_viewer_share_direct_link.spec.ts",
+        "line": 32,
+        "column": 46
       }
     },
     {
@@ -669,8 +760,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 59,
-        "column": 20
+        "line": 63,
+        "column": 18
       }
     },
     {
@@ -689,7 +780,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 88,
+        "line": 92,
         "column": 25
       }
     },
@@ -709,8 +800,48 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 107,
+        "line": 111,
         "column": 11
+      }
+    },
+    {
+      "id": "e63dc63a751efba-4b6cb42aaa57ae0",
+      "title": "histogram recovers the histogram after an empty time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
+        "line": 122,
+        "column": 5
+      }
+    },
+    {
+      "id": "e63dc63a751efba-97566dbbe775245",
+      "title": "histogram keeps a narrowed histogram time range after save and reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
+        "line": 145,
+        "column": 25
       }
     },
     {
@@ -906,27 +1037,7 @@
       }
     },
     {
-      "id": "8f1297d9b373f25-4924e54ac2170bf",
-      "title": "Discover CSV export exports a newly saved classic session",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
-        "line": 25,
-        "column": 23
-      }
-    },
-    {
-      "id": "8f1297d9b373f25-be2cf1be62751ee",
+      "id": "3c7d701134b0d19-be2cf1be62751ee",
       "title": "Discover CSV export exports an ES|QL session",
       "expectedStatus": "passed",
       "tags": [
@@ -940,33 +1051,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
-        "line": 29,
-        "column": 56
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_esql.spec.ts",
+        "line": 22,
+        "column": 23
       }
     },
     {
-      "id": "8f1297d9b373f25-b08e63367768777",
-      "title": "Discover CSV export exports a saved Discover session",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
-        "line": 36,
-        "column": 28
-      }
-    },
-    {
-      "id": "8f1297d9b373f25-a8b026509fa02cd",
+      "id": "93e03bc757f4c6a-a8b026509fa02cd",
       "title": "Discover CSV export exports a filtered saved Discover session",
       "expectedStatus": "passed",
       "tags": [
@@ -980,9 +1071,49 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting.spec.ts",
-        "line": 43,
-        "column": 68
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_filtered_search.spec.ts",
+        "line": 22,
+        "column": 23
+      }
+    },
+    {
+      "id": "f941e8405294450-4924e54ac2170bf",
+      "title": "Discover CSV export exports a newly saved classic session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_new_search.spec.ts",
+        "line": 24,
+        "column": 23
+      }
+    },
+    {
+      "id": "bb0ecb35065aa30-b08e63367768777",
+      "title": "Discover CSV export exports a saved Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/reporting_saved_search.spec.ts",
+        "line": 22,
+        "column": 23
       }
     },
     {
@@ -1022,6 +1153,19 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/resizable_panels.spec.ts",
         "line": 29,
+        "column": 5
+      }
+    },
+    {
+      "id": "afc4eaebb20dbf9-b29513722402475",
+      "title": "Discover saved queries - accessibility has no automated a11y violations across the saved query lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/saved_queries_accessibility.spec.ts",
+        "line": 51,
         "column": 5
       }
     },
@@ -1066,6 +1210,159 @@
       }
     },
     {
+      "id": "1fdc29104a88cee-486ca7221335a36",
+      "title": "Discover app - search source alert data view should not overwrite current data view with alert data view when starting or saving a Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-d156a9404608439",
+      "title": "Discover app - search source alert data view should preserve snapshot data view state while View in Discover uses current state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 77,
+        "column": 26
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-664fc133c5e1bbd",
+      "title": "Discover app - search source alert data view should navigate to ad-hoc alert results via snapshot and current links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 158,
+        "column": 27
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-173c1aa8adc8bfb",
+      "title": "Discover app - search source alert data view should preserve snapshot results but reject current results after data view removal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 203,
+        "column": 56
+      }
+    },
+    {
+      "id": "2053671c9e50145-1b6525042764f02",
+      "title": "Discover app - search source alert privileges allows a Discover alert user to view a rule's results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_privileges.spec.ts",
+        "line": 57,
+        "column": 56
+      }
+    },
+    {
+      "id": "96f8a9ef7d9f67d-87576156180cd96",
+      "title": "Discover app - search source alert rule should validate the time field and create an alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
+        "line": 47,
+        "column": 56
+      }
+    },
+    {
+      "id": "96f8a9ef7d9f67d-d05d147bd8378c8",
+      "title": "Discover app - search source alert rule should preserve snapshot rule state while View in Discover uses updated params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
+        "line": 79,
+        "column": 24
+      }
+    },
+    {
+      "id": "96f8a9ef7d9f67d-6340e52d4c341f9",
+      "title": "Discover app - search source alert rule should display results after rule removal on following generated link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
+        "line": 117,
+        "column": 88
+      }
+    },
+    {
       "id": "3fe9adfc7cac7c0-81b70185dedb8c7",
       "title": "Discover shared links - doc viewer syncs and restores a shared classic document",
       "expectedStatus": "passed",
@@ -1074,8 +1371,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
-        "line": 66,
-        "column": 32
+        "line": 72,
+        "column": 26
       }
     },
     {
@@ -1087,8 +1384,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
-        "line": 66,
-        "column": 32
+        "line": 72,
+        "column": 26
+      }
+    },
+    {
+      "id": "3fe9adfc7cac7c0-ed244ad16472599",
+      "title": "Discover shared links - doc viewer carries the ES|QL control and its selection onto a shared document link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
+        "line": 113,
+        "column": 22
+      }
+    },
+    {
+      "id": "3fe9adfc7cac7c0-0e1f94044cc8e43",
+      "title": "Discover shared links - doc viewer shares a nested group-by document as a flat Discover deep link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
+        "line": 148,
+        "column": 43
       }
     },
     {

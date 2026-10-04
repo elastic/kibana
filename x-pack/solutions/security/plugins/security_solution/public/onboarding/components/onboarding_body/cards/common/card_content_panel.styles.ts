@@ -12,7 +12,7 @@ import { useDarkPanelStyles } from '../../onboarding_card_panel.styles';
 export const NESTED_PANEL_CLASS_NAME = 'onboardingCardContentPanelNested';
 
 export const useCardContentPanelStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
+  const { colorMode } = useEuiTheme();
   const darkPanelStyles = useDarkPanelStyles(colorMode === COLOR_MODES_STANDARD.dark);
 
   return css`
@@ -20,7 +20,6 @@ export const useCardContentPanelStyles = () => {
     ${darkPanelStyles}
 
     .${NESTED_PANEL_CLASS_NAME} {
-      padding-top: ${euiTheme.size.s};
       ${darkPanelStyles}
     }
   `;

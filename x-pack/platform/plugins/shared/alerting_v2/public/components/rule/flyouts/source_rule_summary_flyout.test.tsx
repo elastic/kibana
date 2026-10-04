@@ -48,9 +48,9 @@ const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     metadata: { name: 'My classic rule', tags: ['tag-a', 'tag-b'] },
     schedule: { every: '1m' },
     grouping: { fields: ['host.name', 'service.name'] },
-    created_by: 'elastic',
+    created_by: { profile_uid: 'elastic' },
     created_at: '2026-01-15T10:00:00.000Z',
-    updated_by: 'admin',
+    updated_by: { profile_uid: 'admin' },
     updated_at: '2026-06-01T12:00:00.000Z',
     ...overrides,
   } as unknown as RuleResponse);

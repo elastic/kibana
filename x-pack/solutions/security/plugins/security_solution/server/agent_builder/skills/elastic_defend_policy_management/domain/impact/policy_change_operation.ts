@@ -115,6 +115,10 @@ export type DeviceControlEligibilityReason =
   | 'endpoint_trusted_devices_disabled'
   | 'trusted_devices_experimental_disabled';
 
+export type CustomYaraSignaturesEligibilityReason =
+  | 'endpoint_custom_yara_signatures_disabled'
+  | 'custom_yara_signatures_experimental_disabled';
+
 export interface EligibilityContext {
   readonly proposedConfig: PolicyConfig;
   readonly licenseStripped: PolicyConfig;
@@ -123,6 +127,8 @@ export interface EligibilityContext {
   readonly protectionsStripped: PolicyConfig;
   readonly deviceControlStripped: PolicyConfig;
   readonly deviceControlReason: DeviceControlEligibilityReason;
+  readonly customYaraSignaturesStripped: PolicyConfig;
+  readonly customYaraSignaturesReason: CustomYaraSignaturesEligibilityReason;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }
@@ -190,6 +196,7 @@ export interface PolicyAssessmentBlocker {
 export interface PolicyChangeAssessment {
   readonly policy: NormalizedEndpointPolicy;
   readonly proposed: NormalizedPolicyConfig;
+  readonly proposedConfig: PreparedPolicyChangeSet['proposedConfig'];
   readonly fields: readonly FieldRegistryEntry[];
   readonly requestedOperations: readonly PolicyChangeOperation[];
   readonly changes: readonly PolicyChangeFact[];

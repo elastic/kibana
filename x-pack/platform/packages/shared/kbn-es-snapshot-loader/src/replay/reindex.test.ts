@@ -63,7 +63,9 @@ describe('createTimestampPipeline', () => {
     const maxTimestamp = '2024-01-15T12:00:00.000Z';
     const pipelineName = 'test-pipeline';
 
-    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp });
+    const nowMs = Date.parse('2024-01-15T13:00:00.000Z');
+
+    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp, nowMs });
 
     expect(esClient.ingest.putPipeline).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,7 +73,7 @@ describe('createTimestampPipeline', () => {
         processors: expect.arrayContaining([
           expect.objectContaining({
             script: expect.objectContaining({
-              params: { max_timestamp: maxTimestamp },
+              params: { max_timestamp: maxTimestamp, now_ms: nowMs },
             }),
           }),
         ]),
@@ -225,6 +227,9 @@ describe('replaySnapshot', () => {
         }),
         deleteRepository: jest.fn().mockResolvedValue({}),
       },
+      cluster: {
+        health: jest.fn().mockResolvedValue({ timed_out: false }),
+      },
       indices: {
         delete: jest.fn().mockResolvedValue({}),
         getDataStream: jest
@@ -286,6 +291,49 @@ describe('replaySnapshot', () => {
     expect(nginxCall[0].script).toBeUndefined();
   });
 
+  it('reads the clock once and shares it between the pipeline and inline-script reindexes', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.snapshot.get as unknown as jest.Mock).mockResolvedValue({
+      snapshots: [
+        {
+          snapshot: 'test-snap',
+          indices: ['logs.otel', 'logs-nginx-default'],
+          start_time: '2024-01-01T00:00:00.000Z',
+          end_time: '2024-01-01T01:00:00.000Z',
+          state: 'SUCCESS',
+        },
+      ],
+    });
+    (esClient.snapshot.restore as unknown as jest.Mock).mockResolvedValue({
+      snapshot: {
+        indices: ['snapshot-loader-temp-logs.otel', 'snapshot-loader-temp-logs-nginx-default'],
+      },
+    });
+    let clock = Date.parse('2024-01-15T13:00:00.000Z');
+    const dateNow = jest.spyOn(Date, 'now').mockImplementation(() => (clock += 1000));
+
+    try {
+      await replaySnapshot({
+        esClient,
+        log,
+        repository: mockRepo,
+        snapshotName: 'test-snap',
+        patterns: ['logs*'],
+        shouldUseInlineScript: (destIndex) => destIndex === 'logs.otel',
+      });
+    } finally {
+      dateNow.mockRestore();
+    }
+
+    const pipelineNow = (esClient.ingest.putPipeline as jest.Mock).mock.calls[0][0].processors[0]
+      .script.params.now_ms;
+    const inlineCall = (esClient.reindex as unknown as jest.Mock).mock.calls.find(
+      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs.otel'
+    );
+    expect(typeof pipelineNow).toBe('number');
+    expect(inlineCall[0].script.params.now_ms).toBe(pipelineNow);
+  });
+
   it('uses explicit pipeline when shouldUseInlineScript is not provided', async () => {
     const esClient = createFullMockEsClient();
 
@@ -300,6 +348,11 @@ describe('replaySnapshot', () => {
     const reindexCall = (esClient.reindex as unknown as jest.Mock).mock.calls[0][0];
     expect(reindexCall.dest.pipeline).toBeDefined();
     expect(reindexCall.script).toBeUndefined();
+    expect(esClient.snapshot.restore).toHaveBeenCalledWith(
+      expect.not.objectContaining({ index_settings: expect.anything() }),
+      { requestTimeout: 5 * 60 * 1000 }
+    );
+    expect(esClient.cluster.health).not.toHaveBeenCalled();
   });
 
   it('invokes beforeReindex with correct params after restore and before reindex', async () => {
@@ -330,5 +383,86 @@ describe('replaySnapshot', () => {
       .invocationCallOrder[0];
     const reindexOrder = (esClient.reindex as unknown as jest.Mock).mock.invocationCallOrder[0];
     expect(restoreOrder).toBeLessThan(reindexOrder);
+  });
+
+  it('passes index settings to restore and cleans up restored names after a health timeout', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.cluster.health as unknown as jest.Mock).mockResolvedValue({ timed_out: true });
+    const indexSettings = {
+      'index.number_of_replicas': 0,
+      'index.auto_expand_replicas': '0-1',
+    };
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+      indexSettings,
+    });
+
+    expect(esClient.snapshot.restore).toHaveBeenCalledWith(
+      expect.objectContaining({ index_settings: indexSettings }),
+      { requestTimeout: 5 * 60 * 1000 }
+    );
+    expect(esClient.indices.delete).toHaveBeenCalledWith({
+      index: 'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001',
+      ignore_unavailable: true,
+    });
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+    expect(result.restoredIndices).toEqual([
+      'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001',
+    ]);
+    expect(result.errors).toEqual([
+      'Restored indices did not become active within 120 seconds: snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001',
+    ]);
+  });
+
+  it('does not delete a pre-existing temp index when restore fails', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.snapshot.restore as unknown as jest.Mock).mockRejectedValue(
+      new Error('resource_already_exists_exception: temp index already exists')
+    );
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+      indexSettings: { 'index.auto_expand_replicas': '0-1' },
+    });
+
+    expect(esClient.cluster.health).not.toHaveBeenCalled();
+    expect(esClient.indices.delete).not.toHaveBeenCalled();
+    expect(result.restoredIndices).toEqual([]);
+    expect(result.errors).toEqual(['resource_already_exists_exception: temp index already exists']);
+  });
+
+  it('cleans up restored indices when the health request fails', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.cluster.health as unknown as jest.Mock).mockRejectedValue(
+      new Error('health request failed')
+    );
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+      indexSettings: { 'index.auto_expand_replicas': '0-1' },
+    });
+
+    expect(esClient.indices.delete).toHaveBeenCalledWith({
+      index: 'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001',
+      ignore_unavailable: true,
+    });
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+    expect(result.restoredIndices).toEqual([
+      'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001',
+    ]);
+    expect(result.errors).toEqual(['health request failed']);
   });
 });

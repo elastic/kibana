@@ -10,6 +10,7 @@
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import { samlAuthFixture as coreWorkerFixtures } from './saml_auth';
+import { parseBufferResponse, parseTextResponse } from './api_client_parsers';
 
 /**
  * Strips leading slashes from a URL path so that supertest concatenates it
@@ -34,20 +35,20 @@ export interface ApiClientOptions {
   signal?: AbortSignal;
 }
 
-export interface ApiClientResponse {
+export interface ApiClientResponse<T = any> {
   statusCode: number;
   statusMessage: string;
   headers: Record<string, string | string[]>;
-  body: any;
+  body: T;
 }
 
 export interface ApiClientFixture {
-  get(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  post(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  put(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  delete(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  patch(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  head(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  get<T = any>(url: string, options?: ApiClientOptions): Promise<ApiClientResponse<T>>;
+  post<T = any>(url: string, options?: ApiClientOptions): Promise<ApiClientResponse<T>>;
+  put<T = any>(url: string, options?: ApiClientOptions): Promise<ApiClientResponse<T>>;
+  delete<T = any>(url: string, options?: ApiClientOptions): Promise<ApiClientResponse<T>>;
+  patch<T = any>(url: string, options?: ApiClientOptions): Promise<ApiClientResponse<T>>;
+  head<T = any>(url: string, options?: ApiClientOptions): Promise<ApiClientResponse<T>>;
 }
 
 export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiClientFixture }>({
@@ -86,17 +87,15 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             req = req.set('Accept', 'application/json');
           }
 
+          // Return the raw payload as a UTF-8 string for text responseType. Superagent has no
+          // parser for e.g. `application/ndjson`, so without this `res.body` would be a Buffer.
+          if (options.responseType === 'text') {
+            req = req.buffer(true).parse(parseTextResponse);
+          }
+
           // Enable binary buffering for buffer responseType
           if (options.responseType === 'buffer') {
-            req = req.buffer(true).parse((res, callback) => {
-              const chunks: Buffer[] = [];
-              res.on('data', (chunk: Buffer) => {
-                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-              });
-              res.on('end', () => {
-                callback(null, Buffer.concat(chunks));
-              });
-            });
+            req = req.buffer(true).parse(parseBufferResponse);
           }
 
           // Handle body and auto-set Content-Type if needed

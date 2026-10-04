@@ -10,6 +10,8 @@
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import { resolveSelector } from '../../utils';
+import { euiSelectors } from '../../eui_components';
+import type { EsqlControlOptions } from '../../ui_components';
 import { type DataViewOptions } from './base';
 import { SaveMixin } from './save';
 
@@ -431,69 +433,13 @@ export abstract class LayoutMixin extends SaveMixin {
    * picks "Create control" from the suggestion widget and saves the flyout. Returns once
    * the control group is rendered.
    */
-  async createEsqlControl(
-    query: string,
-    {
-      variableName,
-      label,
-      values,
-    }: { variableName?: string; label?: string; values?: string[] } = {}
-  ) {
+  async createEsqlControl(query: string, options: EsqlControlOptions = {}) {
     // Monaco registers its text model only once the editor has mounted, and the ES|QL
     // editor can still be mounting after the tab reports loaded, for instance right after
-    // adding a new Discover panel. Setting a value or triggering suggestions before then
-    // has no model to act on.
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
-    await this.codeEditor.setCodeEditorValue(query);
-    await this.codeEditor.triggerSuggest(query);
-
-    const suggestionWidget = this.codeEditor.getCodeEditorSuggestWidget();
-    await suggestionWidget.waitFor({ state: 'visible' });
-    await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
-
-    const flyout = this.page.testSubj.locator('create_esql_control_flyout');
-    await flyout.waitFor({ state: 'visible' });
-
-    if (variableName !== undefined) {
-      await this.page.testSubj.fill('esqlVariableName', variableName);
-    }
-    if (label !== undefined) {
-      await this.page.testSubj.fill('esqlControlLabel', label);
-    }
-    if (values) {
-      await this.page.testSubj.locator('esqlControlTypeDropdown').click();
-      await this.page.testSubj.locator('staticValues').click();
-      const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
-      for (const value of values) {
-        await valuesComboBox.setCustomSelectedOptions([value]);
-      }
-    }
-
-    // Save stays disabled until `available_options` is populated (see `formIsInvalid` in
-    // esql/public/triggers/esql_controls/control_flyout/index.tsx), and the click waits for
-    // it to become enabled. That means waiting on the control's own ES|QL query rather than
-    // on rendering, so query latency sets the budget.
-    await this.page.testSubj.locator('saveEsqlControlsFlyoutButton').click({ timeout: 30_000 });
-    await flyout.waitFor({ state: 'hidden' });
+    // adding a new Discover panel. `createControlFromEditorSuggestion` waits for that before typing.
+    await this.esqlEditor.createControlFromEditorSuggestion(query, options);
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
-
-  public readonly controls = {
-    getControlFrame: (controlId: string): Locator =>
-      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
-    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
-      this.controls.getControlFrame(controlId).getByText(value),
-    /**
-     * Locator for an options-list control's selected-values label, e.g. `AE` for a
-     * single selection or `AE, CN` for multiple. Unlike
-     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
-     * assert that a value is the *only* selection.
-     */
-    getSelectionsLocator: (controlId: string): Locator =>
-      this.page.testSubj
-        .locator(`optionsList-control-${controlId}`)
-        .getByTestId('optionsListSelections'),
-  };
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
 
@@ -926,8 +872,9 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   getDocHeaderLabels(): Locator {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     return this.page.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
   }
 

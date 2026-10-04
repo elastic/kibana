@@ -45,6 +45,8 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 }));
 
 const mockAreWorkflowsEnabled = jest.fn();
+const mockGetWorkflow = jest.fn();
+const mockGetWorkflowExecutionStates = jest.fn();
 const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
 jest.mock('@kbn/workflows', () => {
   const actual = jest.requireActual('@kbn/workflows');
@@ -52,6 +54,8 @@ jest.mock('@kbn/workflows', () => {
     ...actual,
     WorkflowRepository: jest.fn().mockImplementation(() => ({
       areWorkflowsEnabled: mockAreWorkflowsEnabled,
+      getWorkflow: mockGetWorkflow,
+      getWorkflowExecutionStates: mockGetWorkflowExecutionStates,
       isWorkflowEnabled: mockIsWorkflowEnabled,
     })),
   };
@@ -98,6 +102,8 @@ describe('user-interactive task priority', () => {
     jest.clearAllMocks();
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
     mockAreWorkflowsEnabled.mockResolvedValue(new Map<string, boolean>());
+    mockGetWorkflow.mockResolvedValue(undefined);
+    mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
     mockIsWorkflowEnabled.mockResolvedValue(true);
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
     mockUpdateWorkflowExecution.mockResolvedValue(undefined);
@@ -181,7 +187,9 @@ describe('user-interactive task priority', () => {
     });
 
     it('schedules bulkScheduleWorkflow at Standard priority', async () => {
-      mockAreWorkflowsEnabled.mockResolvedValue(new Map([['default:wf-bulk', true]]));
+      mockGetWorkflowExecutionStates.mockResolvedValue(
+        new Map([['default:wf-bulk', { enabled: true }]])
+      );
       mockBulkCreateWorkflowExecutions.mockImplementation(
         async (executions: Array<{ id: string }>) => executions.map(({ id }) => ({ id }))
       );

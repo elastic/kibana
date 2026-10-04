@@ -4,10 +4,10 @@ Owner: `@elastic/nightshift-sre-agent-team`
 
 Browser-only plugin serving the Significant Events UI at `/app/significant_events`.
 
-The application covers the Significant Events surface: streams onboarding overview,
-knowledge indicators, rules (queries), detections, events and settings. It
-consumes the `significant_events` plugin (server APIs via the typed
-`significantEventsRepositoryClient`).
+The application covers the Significant Events management surface: streams onboarding
+overview, knowledge indicators, rules (queries), detections and events. Settings is a
+standalone page at `/settings`. The application consumes the `significant_events` plugin
+(server APIs via the typed `significantEventsRepositoryClient`).
 
 Availability is decided server-side by `GET /internal/significant_events/availability`
 (rollout feature flag, project type, pricing tier, Enterprise license and required
