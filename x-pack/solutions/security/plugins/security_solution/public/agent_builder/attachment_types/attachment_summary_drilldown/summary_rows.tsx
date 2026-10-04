@@ -23,7 +23,7 @@ import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyou
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { SEVERITY_COLOR } from '../../../common/utils/risk_color_palette';
-import { toAlertDescriptor } from './to_flyout_descriptor';
+import { toAlertDescriptor, toRuleDescriptor } from './to_flyout_descriptor';
 
 const ALERT_TYPE_NAME = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.alert.typeName',
@@ -341,6 +341,91 @@ export const renderAlertSection = ({
           descriptor={descriptor}
           iconColor={severityToColor(severity)}
           severity={severity}
+          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+        />,
+      ]}
+    />
+  );
+};
+
+const RULE_TYPE_NAME = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.rule.typeName',
+  { defaultMessage: 'Rule' }
+);
+
+const RULES_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.rules.summaryTitle',
+  { defaultMessage: 'Rules' }
+);
+
+const parseRuleNameFromAttachment = (attachment: UnknownAttachment): string | undefined => {
+  const data = attachment.data as { attachmentLabel?: unknown; text?: unknown } | undefined;
+  if (typeof data?.attachmentLabel === 'string') return data.attachmentLabel;
+  if (typeof data?.text !== 'string') return undefined;
+  try {
+    const parsed = JSON.parse(data.text) as Record<string, unknown>;
+    if (typeof parsed?.name === 'string') return parsed.name;
+  } catch {
+    // prose or malformed JSON
+  }
+  return undefined;
+};
+
+interface RuleSummaryRowProps {
+  label: string;
+  descriptor: FlyoutDescriptor | null;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}
+
+const RuleSummaryRow = ({
+  label,
+  descriptor,
+  resolveSecurityCanvasContext,
+}: RuleSummaryRowProps) => {
+  const [openCount, setOpenCount] = useState(0);
+
+  return (
+    <AttachmentSummaryRow
+      label={label}
+      typeName={RULE_TYPE_NAME}
+      iconType="securityApp"
+      onClick={descriptor ? () => setOpenCount((c) => c + 1) : undefined}
+    >
+      {openCount > 0 && descriptor ? (
+        <div css={css({ display: 'none' })} key={openCount}>
+          <Suspense fallback={null}>
+            <LazyFlyoutOpener
+              descriptor={descriptor}
+              resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+            />
+          </Suspense>
+        </div>
+      ) : null}
+    </AttachmentSummaryRow>
+  );
+};
+
+export interface RenderRuleSectionParams {
+  attachment: UnknownAttachment;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}
+
+/** Returns a section with one row for a `security.rule` attachment. */
+export const renderRuleSection = ({
+  attachment,
+  resolveSecurityCanvasContext,
+}: RenderRuleSectionParams): ReactNode => {
+  const label = parseRuleNameFromAttachment(attachment) ?? RULE_TYPE_NAME;
+  const descriptor = toRuleDescriptor(attachment);
+
+  return (
+    <AttachmentSummaryGroup
+      title={RULES_TITLE}
+      rows={[
+        <RuleSummaryRow
+          key="rule"
+          label={label}
+          descriptor={descriptor}
           resolveSecurityCanvasContext={resolveSecurityCanvasContext}
         />,
       ]}

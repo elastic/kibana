@@ -9,7 +9,7 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { renderAlertSection, renderAlertsSection } from './summary_rows';
+import { renderAlertSection, renderAlertsSection, renderRuleSection } from './summary_rows';
 
 export const createAlertSummaryRows =
   <TAttachment extends UnknownAttachment = UnknownAttachment>({
@@ -19,6 +19,15 @@ export const createAlertSummaryRows =
   }): NonNullable<AttachmentUIDefinition<TAttachment>['renderConversationDetailsContent']> =>
   ({ attachment }) =>
     renderAlertSection({ attachment, resolveSecurityCanvasContext });
+
+export const createRuleSummaryRows =
+  <TAttachment extends UnknownAttachment = UnknownAttachment>({
+    resolveSecurityCanvasContext,
+  }: {
+    resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  }): NonNullable<AttachmentUIDefinition<TAttachment>['renderConversationDetailsContent']> =>
+  ({ attachment }) =>
+    renderRuleSection({ attachment, resolveSecurityCanvasContext });
 
 export const createAlertsSummaryRows =
   <TAttachment extends UnknownAttachment = UnknownAttachment>({

@@ -28,6 +28,7 @@ import { createImpactAttachmentDefinition } from './impact';
 import {
   createAlertSummaryRows,
   createAlertsSummaryRows,
+  createRuleSummaryRows,
 } from './attachment_summary_drilldown/create_details_drilldown';
 
 /**
@@ -69,7 +70,12 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  * Registers the baseline attachment UI definitions:
  *   - `security.alert` — label, icon, and the attachment summary drill-down. The drill-down is
  *     lazy behind a click, so this stays eager: the summary reads labels on first paint.
- *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
+ *   - `security.alerts` — label + icon + drill-down (fetches names from ES). A batch names a
+ *     set of alerts; the list opens each one's document flyout.
+ *   - `security.rule` (when `aiRuleCreationEnabled` is false) — baseline label, icon, and
+ *     drill-down so AlertZero workflow rows appear even when AI rule creation is off. When the
+ *     flag is on, `registerRuleAttachment` handles this type with the full inline card too, so
+ *     the baseline is skipped to avoid a double-registration.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
@@ -80,11 +86,13 @@ export const registerAttachmentUiDefinitions = ({
   resolveSecurityCanvasContext,
   getSpaceId,
   data,
+  aiRuleCreationEnabled,
 }: {
   attachments: AttachmentServiceStartContract;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   getSpaceId: () => Promise<string>;
   data: DataPublicPluginStart;
+  aiRuleCreationEnabled: boolean;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
@@ -113,6 +121,35 @@ export const registerAttachmentUiDefinitions = ({
       }),
     }
   );
+
+  // When `aiRuleCreationEnabled` is off, `registerRuleAttachment` is never called, so
+  // `security.rule` rows produced by AlertZero workflows and the investigate-rule skill
+  // would be invisible. Register the baseline here so the summary still renders them.
+  if (!aiRuleCreationEnabled) {
+    attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+      SecurityAgentBuilderAttachments.rule,
+      {
+        getLabel: (attachment) => {
+          const label = attachment?.data?.attachmentLabel;
+          if (typeof label === 'string') return label;
+          const text = (attachment?.data as { text?: unknown })?.text;
+          if (typeof text === 'string') {
+            try {
+              const parsed = JSON.parse(text) as { name?: string };
+              if (typeof parsed?.name === 'string') return parsed.name;
+            } catch {
+              // prose or malformed JSON
+            }
+          }
+          return i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.label', {
+            defaultMessage: 'Security Rule',
+          });
+        },
+        getIcon: () => 'securityApp',
+        renderConversationDetailsContent: createRuleSummaryRows({ resolveSecurityCanvasContext }),
+      }
+    );
+  }
 };
 
 /**
@@ -240,17 +277,25 @@ export const registerRuleAttachment = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   void import(
     /* webpackChunkName: "security_rule_attachment" */
     './rule'
   ).then(({ registerRuleAttachment: register }) => {
-    register({ attachments, application, aiRuleCreation, uiSettings });
+    register({
+      attachments,
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    });
   });
 };
 

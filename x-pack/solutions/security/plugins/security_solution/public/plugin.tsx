@@ -371,6 +371,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         getSpaceId: () => plugins.spaces.getActiveSpace().then((s) => s.id),
         data: plugins.data,
+        aiRuleCreationEnabled: this.experimentalFeatures.aiRuleCreationEnabled,
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -390,6 +391,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           application: core.application,
           aiRuleCreation: this.services.aiRuleCreation,
           uiSettings: core.uiSettings,
+          resolveSecurityCanvasContext: () =>
+            this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         });
       }
       registerEntityAnalyticsDashboardAttachment({

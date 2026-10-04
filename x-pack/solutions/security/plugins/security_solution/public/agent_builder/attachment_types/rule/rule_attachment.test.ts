@@ -66,8 +66,20 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
       expect(definition.getActionButtons).toEqual(expect.any(Function));
+    });
+
+    it('exposes renderConversationDetailsContent for the attachment summary drill-down', () => {
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
+      });
+      expect(definition.renderConversationDetailsContent).toEqual(expect.any(Function));
     });
   });
 
@@ -80,6 +92,7 @@ describe('createRuleAttachmentDefinition', () => {
         application: makeApplication(canEdit),
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
       return definition.getActionButtons!({
         attachment: {
@@ -125,6 +138,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
 
       expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
@@ -141,6 +155,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
 
       const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -153,6 +168,22 @@ describe('createRuleAttachmentDefinition', () => {
       expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Rule');
     });
 
+    it('registers renderConversationDetailsContent on the rule attachment definition', () => {
+      const application = makeApplication(true);
+      registerRuleAttachment({
+        attachments: mockAttachments,
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
+      });
+
+      const ruleCall = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+      );
+      expect(ruleCall![1].renderConversationDetailsContent).toEqual(expect.any(Function));
+    });
+
     it('returns attachmentLabel when provided in alert attachment data', () => {
       const application = makeApplication(true);
       registerRuleAttachment({
@@ -160,6 +191,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
 
       const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -183,6 +215,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
       const label = definition.getLabel(
         makeAttachment(JSON.stringify(validRule), 'My Rule') as never
@@ -196,6 +229,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
       const label = definition.getLabel(makeAttachment(JSON.stringify(validRule)) as never);
       expect(label).toBe('Test Rule');
@@ -207,6 +241,7 @@ describe('createRuleAttachmentDefinition', () => {
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
+        resolveSecurityCanvasContext: jest.fn(),
       });
       const label = definition.getLabel(makeAttachment('invalid') as never);
       expect(label).toBe('Security Rule');

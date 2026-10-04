@@ -30,21 +30,30 @@ import {
   getRuleAttachmentIntent,
   parseRuleFromAttachment,
 } from './helpers';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { createRuleSummaryRows } from '../attachment_summary_drilldown/create_details_drilldown';
 
 export const registerRuleAttachment = ({
   attachments,
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.rule,
-    createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings })
+    createRuleAttachmentDefinition({
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    })
   );
 };
 
@@ -52,10 +61,12 @@ export const createRuleAttachmentDefinition = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<RuleAttachment> => {
   // `RuleInlineContent` only reads `rulesPrivileges.rules.read`, so derive privileges once from the
   // already-loaded capabilities instead of mounting the fetching `UserPrivilegesProvider` per card
@@ -72,6 +83,7 @@ export const createRuleAttachmentDefinition = ({
         defaultMessage: 'Security Rule',
       }),
     getIcon: () => 'securityApp',
+    renderConversationDetailsContent: createRuleSummaryRows({ resolveSecurityCanvasContext }),
     renderInlineContent: (props) => (
       <UserPrivilegesContext.Provider value={privileges}>
         <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
