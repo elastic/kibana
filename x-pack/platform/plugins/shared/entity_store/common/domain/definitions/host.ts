@@ -19,6 +19,7 @@ import {
 export const hostEntityDefinition: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
+  materialization: 'extracted',
   identityField: {
     euidRanking: {
       branches: [

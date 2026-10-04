@@ -22,6 +22,7 @@ import {
 export const genericEntityDefinition = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
+  materialization: 'extracted',
   identityField: { singleField: 'entity.id', skipTypePrepend: true },
   indexPatterns: [],
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],

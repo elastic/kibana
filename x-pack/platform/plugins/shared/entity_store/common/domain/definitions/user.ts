@@ -38,6 +38,7 @@ const localNamespaceGate: Condition = {
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
+  materialization: 'extracted',
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   identityField: {
     /**
