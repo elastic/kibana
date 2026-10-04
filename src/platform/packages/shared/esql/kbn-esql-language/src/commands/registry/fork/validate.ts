@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand } from '@elastic/esql/types';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLCommand,
+} from '@elastic/esql/types';
 import { isSubQuery, Walker } from '@elastic/esql';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
@@ -30,19 +35,24 @@ export const validate = (
 
   messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
 
-  const allCommands = Walker.commands(ast);
-  const forks = allCommands.filter(({ name }) => name === 'fork');
+  const forks: ESQLCommand[] = [];
+  Walker.walk(ast, {
+    visitCommand: (node) => {
+      if (node.name === 'fork') {
+        forks.push(node);
+      }
+    },
+    visitParens: (node, parent, walker) => {
+      // Enter FORK branches, but leave independent subqueries to their own validation.
+      const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
+      if (isSubQuery(node) && !isForkBranch) {
+        walker.skipChildren();
+      }
+    },
+  });
 
   if (forks.length > 1) {
     messages.push(errors.tooManyForks(forks[1]));
-  }
-
-  // FORK is not allowed when the query contains subqueries
-  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
-  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
-
-  if (hasSubqueries) {
-    messages.push(errors.forkNotAllowedWithSubqueries(forkCommand));
   }
 
   return messages;
