@@ -211,4 +211,42 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
     expect(createOrUpdateMock).not.toHaveBeenCalled();
     expect(mockOnClose).not.toHaveBeenCalled();
   });
+
+  it('should not overwrite in-progress user input when the query refetches', async () => {
+    const existingId = 'test-id';
+    // useGetUserInstructions is a staleTime:0 query, so every render settles with a fresh data
+    // reference. Returning a new object per call reproduces that background-refetch churn.
+    useGetUserInstructionsMock.mockImplementation(() => ({
+      userInstructions: [{ id: existingId, text: 'Original instruction', public: false }],
+      isLoading: false,
+      isRefetching: false,
+      isSuccess: true,
+      isError: false,
+      refetch: getUserInstructionsMock,
+    }));
+
+    const { findByRole, findByTestId } = renderWithI18n(
+      <KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />
+    );
+
+    const textarea = (await findByRole('textbox')) as HTMLTextAreaElement;
+    expect(textarea.value).toBe('Original instruction');
+
+    // Editing re-renders the flyout, which re-fires the seeding effect with a fresh reference.
+    fireEvent.change(textarea, { target: { value: 'Edited instruction' } });
+    expect(textarea.value).toBe('Edited instruction');
+
+    const saveButton = await findByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton');
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+
+    expect(createOrUpdateMock).toHaveBeenCalledWith({
+      entry: {
+        id: existingId,
+        text: 'Edited instruction',
+        public: false,
+      },
+    });
+  });
 });
