@@ -33,7 +33,11 @@ import {
   syntheticsMonitorSavedObjectType,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
-import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
+import {
+  assertSecretsEncapsulated,
+  formatSecrets,
+  normalizeSecrets,
+} from '../synthetics_service/utils';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
@@ -235,23 +239,29 @@ export class MonitorConfigRepository {
     const soType = decryptedPreviousMonitor.type;
     const prevSpaces = (decryptedPreviousMonitor.namespaces || []).sort();
 
+    assertSecretsEncapsulated(data, id);
+
     const spaces = (data.spaces || []).sort();
     // If the spaces have changed, we need to delete the saved object and recreate it
     if (isEqual(prevSpaces, spaces)) {
       // `mergeAttributes: false` fully replaces the attributes. The default deep-merge
       // keeps stale keys in top-level map fields that aren't mapped as `flattened`
       // (notably `labels`), making it impossible to delete individual entries. See #274387.
-      return this.soClient.update<MonitorFields>(soType, id, data, {
+      return this.soClient.update<SyntheticsMonitorWithSecretsAttributes>(soType, id, data, {
         references,
         mergeAttributes: false,
       });
     } else {
       await this.soClient.delete(soType, id, { force: true });
-      return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
-        id,
-        ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
-        references,
-      });
+      return await this.soClient.create<SyntheticsMonitorWithSecretsAttributes>(
+        syntheticsMonitorSavedObjectType,
+        data,
+        {
+          id,
+          ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+          references,
+        }
+      );
     }
   }
 
@@ -260,7 +270,7 @@ export class MonitorConfigRepository {
     namespace,
   }: {
     monitors: Array<{
-      attributes: MonitorFields;
+      attributes: SyntheticsMonitorWithSecretsAttributes;
       id: string;
       previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
       references?: SavedObjectReference[];
@@ -270,14 +280,14 @@ export class MonitorConfigRepository {
     // Split monitors into those needing recreation and those that can be updated
     const toRecreate: Array<{
       id: string;
-      attributes: MonitorFields;
+      attributes: SyntheticsMonitorWithSecretsAttributes;
       previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
       references?: SavedObjectReference[];
     }> = [];
     const toUpdate: Array<{
       type: string;
       id: string;
-      attributes: MonitorFields;
+      attributes: SyntheticsMonitorWithSecretsAttributes;
       namespace?: string;
       references?: SavedObjectReference[];
       mergeAttributes?: boolean;
@@ -285,6 +295,8 @@ export class MonitorConfigRepository {
 
     for (const monitor of monitors) {
       const { attributes, id, previousMonitor, references } = monitor;
+      assertSecretsEncapsulated(attributes, id);
+
       const prevSpaces = (previousMonitor.namespaces || []).sort();
       const spaces = (attributes.spaces || []).sort();
       if (!isEqual(prevSpaces, spaces) && !isEmpty(spaces)) {
@@ -313,7 +325,9 @@ export class MonitorConfigRepository {
     }
 
     // Use bulkCreate for recreations
-    let recreateResults: Array<SavedObject<MonitorFields> | SavedObjectErrorResult> = [];
+    let recreateResults: Array<
+      SavedObject<SyntheticsMonitorWithSecretsAttributes> | SavedObjectErrorResult
+    > = [];
     if (toRecreate.length > 0) {
       const bulkCreateObjects = toRecreate.map(({ id, attributes, references }) => ({
         id,
@@ -322,13 +336,14 @@ export class MonitorConfigRepository {
         ...(!isEmpty(attributes.spaces) && { initialNamespaces: attributes.spaces }),
         references,
       }));
-      const bulkCreateResult = await this.soClient.bulkCreate<MonitorFields>(bulkCreateObjects);
+      const bulkCreateResult =
+        await this.soClient.bulkCreate<SyntheticsMonitorWithSecretsAttributes>(bulkCreateObjects);
       recreateResults = bulkCreateResult.saved_objects;
     }
 
     // Bulk update the rest
     const bulkUpdateResult = toUpdate.length
-      ? await this.soClient.bulkUpdate<MonitorFields>(toUpdate)
+      ? await this.soClient.bulkUpdate<SyntheticsMonitorWithSecretsAttributes>(toUpdate)
       : { saved_objects: [] };
 
     // Combine results

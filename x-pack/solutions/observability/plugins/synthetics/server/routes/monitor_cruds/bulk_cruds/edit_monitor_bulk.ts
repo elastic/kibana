@@ -95,7 +95,7 @@ export const syncEditedMonitorBulk = async ({
             [ConfigKey.CONFIG_ID]: monitorId,
             [ConfigKey.MONITOR_QUERY_ID]:
               monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
-          } as unknown as MonitorFields,
+          },
           previousMonitor: decryptedPreviousMonitor,
           ...(references.length > 0 && { references }),
         };
@@ -162,7 +162,7 @@ export const rollbackCompletely = async ({
     await monitorConfigRepository.bulkUpdate({
       monitors: monitorsToUpdate.map(({ decryptedPreviousMonitor }) => ({
         id: decryptedPreviousMonitor.id,
-        attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        attributes: decryptedPreviousMonitor.attributes,
         previousMonitor: decryptedPreviousMonitor,
       })),
     });
@@ -210,7 +210,7 @@ export const rollbackFailedUpdates = async ({
       })
       .map(({ decryptedPreviousMonitor }) => ({
         id: decryptedPreviousMonitor.id,
-        attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        attributes: decryptedPreviousMonitor.attributes,
         previousMonitor: decryptedPreviousMonitor,
       }));
 
