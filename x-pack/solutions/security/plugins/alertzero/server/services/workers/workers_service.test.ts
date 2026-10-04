@@ -1717,9 +1717,11 @@ describe('WorkersService', () => {
         );
 
         expect(result).toEqual({ outcome: 'attached', matched: 2, updated: 2 });
+        // The ids come from an earlier event, so a rule deleted since then must not stop the rest.
         expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
           attachRuleIds: ['new-1', 'new-2'],
           detachRuleIds: [],
+          ignoreMissingRules: true,
         });
         // The Worker's own per-space workflow, not the shared alert analysis workflow.
         expect(getAttachmentServiceMock).toHaveBeenCalledWith(
@@ -1806,6 +1808,7 @@ describe('WorkersService', () => {
           expect(attachment.updateRuleAttachments).toHaveBeenLastCalledWith({
             attachRuleIds: [],
             detachRuleIds: ['new-1', 'new-2'],
+            ignoreMissingRules: true,
           });
           expect(attachment.attached.size).toBe(0);
         });

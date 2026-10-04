@@ -63,14 +63,14 @@ export const AttachAlertTriageRulesResponse = lazySchema(() =>
     z.object({
       outcome: z.literal('attached'),
       /**
-       * Distinct rule ids the call considered: the unique ids in the request for the ids target (including ids that match no rule), or the unattached rules found for the all_unattached target.
+       * Rules found: for the ids target, the requested ids that still match a rule (ids of rules deleted since the request was made are ignored), or the unattached rules found for the all_unattached target.
        */
       matched: z
         .number()
         .int()
         .min(0)
         .describe(
-          'Distinct rule ids the call considered: the unique ids in the request for the ids target (including ids that match no rule), or the unattached rules found for the all_unattached target.'
+          'Rules found: for the ids target, the requested ids that still match a rule (ids of rules deleted since the request was made are ignored), or the unattached rules found for the all_unattached target.'
         ),
       /**
        * Rules that did not carry the action and now do.

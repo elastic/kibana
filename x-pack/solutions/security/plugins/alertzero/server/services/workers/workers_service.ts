@@ -527,9 +527,12 @@ export class WorkersService {
     let result: { matched: number; updated: number; skippedRuleCount?: number };
     if (body.target === 'ids') {
       touchedRuleIdChunks.push(body.ruleIds);
+      // The ids come from an event that fired earlier, so a rule deleted since then must not stop
+      // the others being attached.
       const { matched, updated } = await attachmentService.updateRuleAttachments({
         attachRuleIds: body.ruleIds,
         detachRuleIds: [],
+        ignoreMissingRules: true,
       });
       result = { matched, updated };
     } else {
@@ -549,7 +552,9 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
     if (!statusAfter.installed || !statusAfter.enabled) {
-      await detachRuleIdChunks(attachmentService, touchedRuleIdChunks);
+      await detachRuleIdChunks(attachmentService, touchedRuleIdChunks, {
+        ignoreMissingRules: true,
+      });
       return { outcome: 'worker_disabled' };
     }
 
