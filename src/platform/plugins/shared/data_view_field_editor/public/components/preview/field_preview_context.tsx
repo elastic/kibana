@@ -317,6 +317,23 @@ export const FieldPreviewProvider: FC<
     }
   }, [script?.source, controller]);
 
+  /**
+   * The script validation resolves against the preview response, so as soon as an _execute param
+   * changes the preview has to count as loading and the response of a request that is still in
+   * flight has to be discarded: it describes the previous form values, and the guard in
+   * updatePreview() only discards it once the next request has been issued, which the 500ms
+   * debounce below delays.
+   */
+  useEffect(() => {
+    if (
+      controller.allParamsDefined(type, script?.source, currentDocIndex) &&
+      controller.hasSomeParamsChanged(type, script?.source, currentDocId)
+    ) {
+      controller.setIsLoadingPreview(true);
+      controller.discardInFlightPreview();
+    }
+  }, [controller, type, script?.source, currentDocIndex, currentDocId]);
+
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)
   useEffect(() => {

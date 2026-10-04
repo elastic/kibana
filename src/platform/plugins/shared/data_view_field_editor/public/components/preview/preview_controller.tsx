@@ -657,6 +657,11 @@ export class PreviewController {
 
   incrementPreviewCount = () => ++this.previewCount;
 
+  /** Makes the response of any in-flight _execute request be discarded when it arrives. */
+  discardInFlightPreview = () => {
+    ++this.previewCount;
+  };
+
   allParamsDefined = (
     type: Params['type'],
     script: string | undefined,
