@@ -630,4 +630,58 @@ describe('EsqlSource', () => {
       expect(postedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
     });
   });
+
+  describe('getFilterableFields', () => {
+    const createSchemaHttp = (schemas: Record<string, string[]>): HttpStart =>
+      ({
+        post: jest.fn(async (path: string, { body }: { body: string }) => {
+          if (path === TIMEFIELD_ROUTE) {
+            return { timeField: '@timestamp' };
+          }
+          const { query } = JSON.parse(body) as { query: string };
+          return { columns: (schemas[query] ?? []).map((name) => ({ name, esType: 'keyword' })) };
+        }),
+      } as unknown as HttpStart);
+
+    const names = (columns: ReadonlyArray<{ name: string }>) => columns.map(({ name }) => name);
+
+    it('returns the fields of the FROM target, not the result columns', async () => {
+      const http = createSchemaHttp({
+        'FROM filterable-* | STATS count = COUNT(*) BY host': ['count', 'host'],
+        'FROM filterable-*': ['@timestamp', 'host', 'message'],
+      });
+      const source = await EsqlSource.create({
+        query: 'FROM filterable-* | STATS count = COUNT(*) BY host',
+        http,
+      });
+
+      expect(names(source.getColumns())).toEqual(['count', 'host']);
+      expect(names(await source.getFilterableFields(http))).toEqual([
+        '@timestamp',
+        'host',
+        'message',
+      ]);
+    });
+
+    it('resolves the schema of a dataset once for all queries on it', async () => {
+      const http = createSchemaHttp({ 'FROM once-*': ['host'] });
+      const first = await EsqlSource.create({ query: 'FROM once-* | KEEP host', http });
+      const second = await EsqlSource.create({ query: 'FROM once-* | SORT host', http });
+      (http.post as jest.Mock).mockClear();
+
+      await first.getFilterableFields(http);
+      await second.getFilterableFields(http);
+
+      expect(http.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to the result columns when the query has no FROM or TS command', async () => {
+      const source = await EsqlSource.create({
+        query: 'ROW a = 1',
+        resultColumns: [makeColumn('a', 'number')],
+      });
+
+      expect(names(await source.getFilterableFields())).toEqual(['a']);
+    });
+  });
 });

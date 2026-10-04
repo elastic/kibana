@@ -8,6 +8,7 @@
  */
 
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
@@ -17,10 +18,11 @@ import {
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk } from '../utils';
-import { setDataView } from './tab_state_data_view';
+import { setDataSource, setDataView } from './tab_state_data_view';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import type { DiscoverAppState } from '../types';
+import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -59,9 +61,19 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
         if (tabDataStateContainer) {
           const searchSource = await fromSavedObjectTabToSearchSource({ tab, services });
-          const dataView = searchSource.getField('index');
+          const query = searchSource.getField('query');
+          let dataView = searchSource.getField('index');
 
-          if (dataView) {
+          if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
+            const previousSource = tabRuntimeState.currentDataSource$.getValue();
+            const { esqlSource, dataView: esqlDataView } = await resolveEsqlSource({
+              esql: query.esql,
+              services,
+              previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+            });
+            dataView = esqlDataView;
+            dispatch(setDataSource({ tabId: tab.id, dataSource: esqlSource }));
+          } else if (dataView) {
             dispatch(setDataView({ tabId: tab.id, dataView }));
           }
 

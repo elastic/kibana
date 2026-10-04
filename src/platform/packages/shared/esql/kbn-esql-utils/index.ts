@@ -9,11 +9,13 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
   getESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
@@ -66,6 +68,7 @@ export {
   getFieldParamDefinition,
   getESQLSources,
   getEsqlColumns,
+  getEsqlSourceColumns,
   getEsqlPolicies,
   getJoinIndices,
   getTimeseriesIndices,

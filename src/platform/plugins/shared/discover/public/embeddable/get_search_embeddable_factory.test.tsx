@@ -26,6 +26,7 @@ import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/re
 import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/context_awareness';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import { deserializeState } from './utils/serialization_utils';
@@ -462,6 +463,7 @@ describe('saved search embeddable', () => {
       discoverServiceMock.data.search.searchSource.create = jest
         .fn()
         .mockResolvedValueOnce(esqlSearchSource);
+      discoverServiceMock.dataViews.create = createMockDataViewsService().create;
 
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
@@ -473,6 +475,55 @@ describe('saved search embeddable', () => {
       await waitOneTick();
 
       expect(api.esql$.getValue().length).toBeGreaterThan(0);
+    });
+
+    it('should not restore the saved data view of an ES|QL panel', async () => {
+      const { search } = createSearchFnMock(1);
+      const esqlSearchSource = createSearchSourceMock(
+        { index: dataViewMock, query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' } },
+        undefined,
+        search
+      );
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { serializedSearchSource: esqlSearchSource.getSerializedFields() },
+      });
+      const createSearchSource = jest
+        .fn()
+        .mockResolvedValueOnce(esqlSearchSource)
+        .mockResolvedValueOnce(createSearchSourceMock({}, undefined, search));
+      discoverServiceMock.data.search.searchSource.create = createSearchSource;
+      discoverServiceMock.dataViews.create = createMockDataViewsService().create;
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      const [serializedFields] = createSearchSource.mock.calls[0];
+      expect(serializedFields.query).toEqual({ esql: 'FROM kibana_sample_data_logs | LIMIT 1' });
+      expect(serializedFields).not.toHaveProperty('index');
+    });
+
+    it('should restore the saved data view of a classic panel', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+      const createSearchSource = discoverServiceMock.data.search.searchSource.create as jest.Mock;
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(createSearchSource.mock.calls[0][0]).toHaveProperty('index', dataViewMock.id);
     });
 
     it('should be empty for esql$ when the initial query is not an ES|QL query', async () => {

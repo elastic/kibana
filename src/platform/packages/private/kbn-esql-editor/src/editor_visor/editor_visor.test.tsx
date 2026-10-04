@@ -15,11 +15,13 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn().mockResolvedValue({
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  EsqlSource: { create: jest.fn().mockResolvedValue({ id: 'mock-esql-source' }) },
+  registerEsqlSourceInDataViewsCache: jest.fn().mockResolvedValue({
     id: 'mock-adhoc-dataview',
     title: 'test_index',
     type: 'esql',
@@ -80,6 +82,30 @@ describe('Quick search visor', () => {
     await waitFor(() => {
       expect(kqlMock.QueryStringInput).toHaveBeenCalled();
     });
+  });
+
+  it('suggests the fields of the queried dataset, not of the query result', async () => {
+    renderWithI18n(
+      renderESQLVisor({ ...props, query: 'FROM meow1 | STATS count = COUNT(*) BY host' })
+    );
+
+    await waitFor(() =>
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          indexPatterns: [expect.objectContaining({ id: 'mock-adhoc-dataview' })],
+        }),
+        expect.anything()
+      )
+    );
+    expect(EsqlSource.create).toHaveBeenCalledWith({
+      query: 'FROM meow1',
+      http: corePluginMock.http,
+    });
+    expect(registerEsqlSourceInDataViewsCache).toHaveBeenCalledWith(
+      dataMock.dataViews,
+      { id: 'mock-esql-source' },
+      corePluginMock.http
+    );
   });
 
   it('should submit a KQL filter using indexes from the editor query', async () => {

@@ -503,6 +503,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     minimalQueryRef,
     getJoinIndicesCallback,
+    effectiveProjectRouting,
   } = useMemoizedCaches({
     code,
     core,
@@ -577,6 +578,7 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     getJoinIndicesCallback,
     enableResourceBrowser,
+    projectRouting: effectiveProjectRouting,
   });
 
   const {

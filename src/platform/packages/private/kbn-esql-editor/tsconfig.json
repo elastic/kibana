@@ -23,6 +23,7 @@
     "@kbn/code-editor",
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-utils",
+    "@kbn/data-source",
     "@kbn/content-management-favorites-public",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-favorites-common",

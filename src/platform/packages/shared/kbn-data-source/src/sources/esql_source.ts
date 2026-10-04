@@ -14,6 +14,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { HttpStart } from '@kbn/core/public';
 import {
   getIndexPatternFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getESQLSourceInfo,
   getESQLTimeField,
   buildEsqlSourceCacheKey,
@@ -278,6 +279,25 @@ export class EsqlSource implements DataSourceBase {
       projectRouting: this.projectRouting,
       resultColumns,
     });
+  }
+
+  /**
+   * Fields of the queried dataset, which is what filters and KQL apply to: the columns of the
+   * source command alone (`FROM x | STATS ...` → `FROM x`), resolved once per dataset.
+   * Without `http`, only an already resolved schema is returned.
+   */
+  public async getFilterableFields(http?: HttpStart): Promise<readonly Column[]> {
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(this.query);
+    if (!sourceQuery) {
+      return this.columns;
+    }
+    const datasetSource = await EsqlSource.create({
+      query: sourceQuery,
+      timeFieldName: this.timeFieldName,
+      projectRouting: this.projectRouting,
+      http,
+    });
+    return datasetSource.getColumns();
   }
 
   public isRollup(): boolean {
