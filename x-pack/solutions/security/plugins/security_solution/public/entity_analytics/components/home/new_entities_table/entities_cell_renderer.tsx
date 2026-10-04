@@ -517,14 +517,30 @@ const renderKnownEntityCell = (
   return assertNever(columnId);
 };
 
+/** Columns that page enrichers fill after the sort query; the sort column has its value. */
+const ENRICHED_COLUMN_IDS: ReadonlySet<string> = new Set<GridColumnId>([
+  'alert_count',
+  'last_seen_alert',
+  'anomaly_count',
+  'case_count',
+  'risk_score_change',
+  'group_size',
+]);
+
 export const renderEntityCell = (
   columnId: string,
   value: unknown,
   row: Record<string, unknown>,
   watchlistNames: Map<string, string>,
   euiTheme: EuiThemeComputed,
-  handlers?: CellHandlers
+  handlers?: CellHandlers,
+  isEnriching = false
 ): JSX.Element => {
+  // Enrichers set every field they own (null or 0 when empty), so `undefined` here
+  // means "not loaded yet", not "no value". Show nothing rather than "—".
+  if (isEnriching && value === undefined && ENRICHED_COLUMN_IDS.has(columnId)) {
+    return <></>;
+  }
   if (!isGridColumnId(columnId)) {
     return <DefaultCell value={value} />;
   }

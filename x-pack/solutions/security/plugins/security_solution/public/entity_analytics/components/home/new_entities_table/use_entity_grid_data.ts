@@ -81,6 +81,42 @@ const buildNextCursor = (pageRows: Row[], args: QueryArgs, hasNextPage: boolean)
   });
 };
 
+interface PageRowsInput {
+  shellRows?: Row[];
+  isShellPrevious: boolean;
+  enrichedRows?: Row[];
+  isEnrichPrevious: boolean;
+  isEnrichFetching: boolean;
+}
+
+/**
+ * Picks the rows to paint. keepPreviousData holds the last page on both queries, so
+ * previous enrich data never goes onto a new shell (other entity ids). `isEnriching`
+ * is true while the painted rows are a new shell and its enrich query is in flight:
+ * enrich cells have no value yet, which is different from "no value".
+ */
+export const selectPageRows = ({
+  shellRows,
+  isShellPrevious,
+  enrichedRows,
+  isEnrichPrevious,
+  isEnrichFetching,
+}: PageRowsInput): { rows: Row[]; isEnriching: boolean } => {
+  if (isShellPrevious) return { rows: enrichedRows ?? shellRows ?? [], isEnriching: false };
+  // A background refetch of the same page keeps its entities: keep the enriched rows
+  // until fresh enrich data arrives, instead of flashing skeletons.
+  if (isEnrichPrevious && enrichedRows && shellRows && haveSameEntities(enrichedRows, shellRows)) {
+    return { rows: enrichedRows, isEnriching: false };
+  }
+  if (isEnrichPrevious || enrichedRows == null) {
+    return { rows: shellRows ?? [], isEnriching: shellRows != null && isEnrichFetching };
+  }
+  return { rows: enrichedRows, isEnriching: false };
+};
+
+const haveSameEntities = (a: readonly Row[], b: readonly Row[]): boolean =>
+  a.length === b.length && a.every((row, i) => getEntityId(row) === getEntityId(b[i]));
+
 // ── hook ──────────────────────────────────────────────────────────────────────
 
 export interface UseEntityGridDataOptions {
@@ -249,19 +285,19 @@ export const useEntityGridData = ({
   // Prefer shell (empties the grid), then count / enrich — one toast when several fail together.
   useErrorToast(GRID_QUERY_ERROR_TITLE, shellQuery.error ?? countQuery.error ?? enrichQuery.error);
 
-  // keepPreviousData on both queries holds the last page across key changes. Do not
-  // paint previous enrich onto a new shell (different entity ids).
-  const rows =
-    (shellQuery.isPreviousData
-      ? enrichQuery.data ?? shellRows
-      : enrichQuery.isPreviousData
-      ? shellRows
-      : enrichQuery.data ?? shellRows) ?? [];
+  const { rows, isEnriching } = selectPageRows({
+    shellRows,
+    isShellPrevious: shellQuery.isPreviousData,
+    enrichedRows: enrichQuery.data,
+    isEnrichPrevious: enrichQuery.isPreviousData,
+    isEnrichFetching: enrichQuery.isFetching,
+  });
   const total = countQuery.data ?? (rows.length > 0 ? pageIndex * pageSize + rows.length : 0);
   const updatedAt = Math.max(shellQuery.dataUpdatedAt, enrichQuery.dataUpdatedAt) || null;
 
   return {
     rows,
+    isEnriching,
     total,
     updatedAt,
     isFetching:

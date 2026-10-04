@@ -100,6 +100,8 @@ interface EntityGridCellContext {
   watchlistNames: Map<string, string>;
   euiTheme: EuiThemeComputed;
   cellHandlers?: CellHandlers;
+  /** The painted rows are not enriched yet; enrich cells stay blank until they are. */
+  isEnriching: boolean;
 }
 
 /** Custom-body / expander React context — expand state lives here, not in cellContext. */
@@ -127,11 +129,19 @@ const useEntityGridView = (): EntityGridView => {
 
 const RenderEntityGridCell: RenderCellValue = (cellProps) => {
   const { rowIndex, columnId } = cellProps;
-  const { rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers } =
+  const { rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, isEnriching } =
     cellProps as typeof cellProps & EntityGridCellContext;
   const row = rows[rowIndex - pageIndex * pageSize];
   if (!row) return null;
-  return renderEntityCell(columnId, row[columnId], row, watchlistNames, euiTheme, cellHandlers);
+  return renderEntityCell(
+    columnId,
+    row[columnId],
+    row,
+    watchlistNames,
+    euiTheme,
+    cellHandlers,
+    isEnriching
+  );
 };
 
 const EntityGridExpanderHeader = () => (
@@ -374,7 +384,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     [visibleColumns]
   );
 
-  const { rows, total, updatedAt, isFetching } = useEntityGridData({
+  const { rows, isEnriching, total, updatedAt, isFetching } = useEntityGridData({
     sortField,
     sortDirection,
     pageIndex,
@@ -536,8 +546,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       watchlistNames,
       euiTheme,
       cellHandlers,
+      isEnriching,
     }),
-    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers]
+    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, isEnriching]
   );
 
   const gridView = useMemo(
