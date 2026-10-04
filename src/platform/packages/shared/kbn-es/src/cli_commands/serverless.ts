@@ -84,6 +84,7 @@ export const serverless: Command = {
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
+      --no-dev-config     Prevents loading the config/es.dev.yml file, if present
 
     Examples:
 
@@ -117,6 +118,7 @@ export const serverless: Command = {
         esProjectType: ['projectType', 'project-type'], // ensure BWC: can still run with `--projectType`
         dataPath: 'data-path',
         uiamOAuth: 'uiam-oauth',
+        devConfig: 'dev-config',
       },
 
       string: ['esProjectType', 'tag', 'image', 'basePath', 'resources', 'host', 'dataPath'],
@@ -138,6 +140,7 @@ export const serverless: Command = {
         ssl: true,
         uiam: true,
         uiamOAuth: false,
+        devConfig: true,
       },
     }) as unknown as ServerlessCliOptions;
 
