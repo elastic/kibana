@@ -7,6 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
+import {
+  toFeatureAvailability,
+  type FeatureAvailability,
+} from '../../../../util/feature_availability';
 import type {
   GetDecisionTreeResponse,
   GetDecisionTreeVersionResponse,
@@ -29,18 +33,21 @@ const decisionTreeKeys = {
 /**
  * Reports whether xpack.nightshift_investigations.decision_trees.enabled is on. A failed request
  * means the feature is disabled or absent, which is treated the same as it being off.
+ *
+ * The loading state is part of the answer: the page cannot tell a hidden tab from an unanswered
+ * query, and treats an unknown tab as a bad URL.
  */
-export const useDecisionTreesEnabled = (): boolean => {
+export const useDecisionTreesEnabled = (): FeatureAvailability => {
   const { core } = useKibana();
 
-  const { data } = useQuery({
-    queryKey: decisionTreeKeys.availability,
-    queryFn: ({ signal }) =>
-      core.http.get<{ enabled: boolean }>(DECISION_TREES_AVAILABILITY_PATH, { signal }),
-    retry: false,
-  });
-
-  return data?.enabled ?? false;
+  return toFeatureAvailability(
+    useQuery({
+      queryKey: decisionTreeKeys.availability,
+      queryFn: ({ signal }) =>
+        core.http.get<{ enabled: boolean }>(DECISION_TREES_AVAILABILITY_PATH, { signal }),
+      retry: false,
+    })
+  );
 };
 
 export const useDecisionTrees = () => {

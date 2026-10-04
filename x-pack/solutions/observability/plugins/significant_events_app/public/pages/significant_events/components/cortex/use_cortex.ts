@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
+import {
+  toFeatureAvailability,
+  type FeatureAvailability,
+} from '../../../../util/feature_availability';
 import type { CortexPage, GetCortexPageResponse } from './types';
 
 const cortexKeys = {
@@ -43,19 +47,22 @@ const useCortexClient = () => {
 /**
  * Reports whether Cortex is usable: the Nightshift plugin has to be installed, and
  * `xpack.nightshift_investigations.cortex.enabled` has to be on.
+ *
+ * The loading state is part of the answer: the page cannot tell a hidden tab from
+ * an unanswered query, and treats an unknown tab as a bad URL.
  */
-export const useCortexEnabled = (): boolean => {
+export const useCortexEnabled = (): FeatureAvailability => {
   const client = useCortexClient();
 
-  const { data } = useQuery({
-    queryKey: cortexKeys.availability,
-    queryFn: ({ signal }) =>
-      client!.fetch('GET /internal/nightshift/cortex/availability', { signal: signal ?? null }),
-    enabled: client !== undefined,
-    retry: false,
-  });
-
-  return data?.enabled ?? false;
+  return toFeatureAvailability(
+    useQuery({
+      queryKey: cortexKeys.availability,
+      queryFn: ({ signal }) =>
+        client!.fetch('GET /internal/nightshift/cortex/availability', { signal: signal ?? null }),
+      enabled: client !== undefined,
+      retry: false,
+    })
+  );
 };
 
 export const useCortexPages = () => {

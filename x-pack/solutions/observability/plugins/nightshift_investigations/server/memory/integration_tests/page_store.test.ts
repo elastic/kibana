@@ -25,7 +25,6 @@ const createPage = (slug: string, overrides: Partial<MemoryPageWrite> = {}): Mem
   tags: ['runbook'],
   categories: ['operations'],
   references: [],
-  status: 'established',
   user: 'nightshift-test',
   ...overrides,
 });
@@ -176,18 +175,115 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     expect(archived).toEqual(
       expect.objectContaining({
         id: pageA.id,
-        status: 'archived',
+        archived: true,
         archive_reason: 'harmful',
       })
     );
     expect((await storeA.retrieve()).map(({ id }) => id)).toEqual(['memory_cache-warmup']);
-    expect((await storeA.list({ status: 'archived' })).pages.map(({ id }) => id)).toEqual([
+    expect((await storeA.list({ filter: 'archived' })).pages.map(({ id }) => id)).toEqual([
       pageA.id,
     ]);
+    expect((await storeA.list({ filter: 'active' })).pages.map(({ id }) => id)).toEqual([
+      'memory_cache-warmup',
+    ]);
 
+    // The header's two numbers under every list filter. `total` follows the
+    // listing; `archived` is the Space's own count, so the Active view no longer
+    // reports "0 archived" for a Space that has one.
+    for (const [filter, total] of [
+      ['active', 1],
+      ['archived', 1],
+      ['all', 2],
+    ] as const) {
+      const page = await storeA.listPaginated({ filter });
+      expect(page.stats).toMatchObject({ total, archived: 1 });
+    }
+
+    // Restoring clears the reason, which is the only archived marker.
+    const restored = await storeA.unarchive(pageA.id);
+    expect(restored).toEqual(expect.objectContaining({ id: pageA.id, archived: false }));
+    expect((await storeA.get(pageA.id))?.archive_reason).toBeUndefined();
+
+    // Counters apply again once restored: the page stood at 2 impressions before
+    // archiving, and the update adds one more.
     await storeA.applyCounterUpdates([{ id: pageA.id, addImp: 1, addConv: 1 }]);
-    expect((await storeA.get(pageA.id))?.telemetry.impressions).toBe(2);
+    expect((await storeA.get(pageA.id))?.telemetry.impressions).toBe(3);
+    // The archive/unarchive round trip preserved the rest of the document.
+    expect((await storeA.get(pageA.id))?.content).toContain('partition lag');
     expect((await storeB.get(pageB.id))?.title).toBe('Payments database recovery');
+  });
+
+  it('excludes a legacy status-only archived document from active listing and recall', async () => {
+    // Written the way a pre-`archive_reason` document looks: `status: 'archived'`
+    // and no reason. The read path has always reported it as archived, so the
+    // queries have to agree — otherwise it is listed as active and recalled.
+    // Its own Space, so the counts below are about this document alone.
+    const spaceId = 'space-legacy';
+    const storedId = `${spaceId}:memory_legacy-archived`;
+    await esClient.index({
+      index: MEMORY_INDEX,
+      id: storedId,
+      refresh: 'wait_for',
+      document: {
+        '@timestamp': new Date(NOW_SECONDS * 1000).toISOString(),
+        type: 'memory',
+        title: 'Legacy archived memory',
+        content: 'Retired before archive_reason existed.',
+        tags: ['memory'],
+        attributes: {
+          status: 'archived',
+          slug: 'legacy-archived',
+          space_id: spaceId,
+          impressions: 4,
+          conversions: 2,
+          last_impression_time: new Date(NOW_SECONDS * 1000).toISOString(),
+          categories: [],
+          references: [],
+          created_at: new Date(NOW_SECONDS * 1000).toISOString(),
+          updated_at: new Date(NOW_SECONDS * 1000).toISOString(),
+          created_by: 'nightshift-test',
+          updated_by: 'nightshift-test',
+        },
+      },
+    });
+
+    const store = createMemoryPageStore({
+      esClient,
+      logger,
+      spaceId,
+      now: () => NOW_SECONDS,
+    });
+
+    try {
+      expect((await store.get('memory_legacy-archived'))?.archived).toBe(true);
+
+      // Recall must not hand an archived memory to the agent.
+      expect(await store.retrieve()).toEqual([]);
+
+      // Nothing active, and the header still counts the archived one: the
+      // archived number is scoped to the Space, not to the active listing.
+      const active = await store.listPaginated({ filter: 'active' });
+      expect(active.pages).toEqual([]);
+      expect(active.total).toBe(0);
+      expect(active.stats).toMatchObject({ total: 0, archived: 1 });
+
+      const archived = await store.listPaginated({ filter: 'archived' });
+      expect(archived.pages.map(({ id }) => id)).toEqual(['memory_legacy-archived']);
+      expect(archived.stats).toMatchObject({ total: 1, archived: 1 });
+
+      // And so does the unfiltered listing, which has no reason to differ.
+      const all = await store.listPaginated({ filter: 'all' });
+      expect(all.stats).toMatchObject({ total: 1, archived: 1 });
+
+      // A keyword narrows the listing but not the archived number. The header's
+      // "N archived" describes the Space's Archived list, which the client does
+      // not filter by keyword, so a keyword-scoped count would describe nothing
+      // anybody is looking at.
+      const byKeyword = await store.listPaginated({ filter: 'active', tags: ['checkout'] });
+      expect(byKeyword.stats).toMatchObject({ total: 0, archived: 1 });
+    } finally {
+      await esClient.delete({ index: MEMORY_INDEX, id: storedId, refresh: 'wait_for' });
+    }
   });
 
   // Semantic/RRF retrieval requires a configured inference endpoint and is intentionally

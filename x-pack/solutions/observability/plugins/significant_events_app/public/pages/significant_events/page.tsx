@@ -15,6 +15,7 @@ import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
+import type { FeatureAvailability } from '../../util/feature_availability';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
@@ -37,7 +38,9 @@ import { StreamsView } from './components/streams_view/streams_view';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
 import { DecisionTreesTab } from './components/decision_trees/tab';
+import { MemoryTab } from './components/memory/tab';
 import { useDecisionTreesEnabled } from './components/decision_trees/use_decision_trees';
+import { useMemoryEnabled } from './components/memory/use_memory';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -50,6 +53,7 @@ const significantEventsTabs = [
   SIGNIFICANT_EVENTS_TAB,
   'cortex',
   'decision_trees',
+  'memory',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
@@ -78,8 +82,32 @@ export function SignificantEventsPage() {
   const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const isCortexEnabled = useCortexEnabled();
-  const isDecisionTreesEnabled = useDecisionTreesEnabled();
+  const cortexAvailability = useCortexEnabled();
+  const decisionTreesAvailability = useDecisionTreesEnabled();
+  const memoryAvailability = useMemoryEnabled();
+  const isCortexEnabled = cortexAvailability.isEnabled;
+  const isDecisionTreesEnabled = decisionTreesAvailability.isEnabled;
+  const isMemoryEnabled = memoryAvailability.isEnabled;
+
+  /**
+   * The availability query that decides whether each gated tab is in the header.
+   *
+   * All three read as "off" until their query answers, so on the first render a tab
+   * named in the URL is not in the list. The page reacts to an unknown tab by
+   * redirecting to the first one, which used to bounce a direct link to a working
+   * tab before the query came back — and a refresh never came back to it at all.
+   * The tab's own gate is the thing that has to settle first, so the page waits for
+   * that one rather than for all of them, and redirects only once it has settled and
+   * the tab is still absent.
+   *
+   * The Detections tab is not here: `useDeveloperMode` reads a settings value with a
+   * synchronous default, so it is known on the first render.
+   */
+  const availabilityGateByTab: Partial<Record<SignificantEventsTabId, FeatureAvailability>> = {
+    cortex: cortexAvailability,
+    memory: memoryAvailability,
+    decision_trees: decisionTreesAvailability,
+  };
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -193,6 +221,18 @@ export function SignificantEventsPage() {
             },
           ]
         : []),
+      ...(isMemoryEnabled
+        ? [
+            {
+              id: 'memory',
+              label: i18n.translate('xpack.significantEventsApp.memoryTab', {
+                defaultMessage: 'Memory',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'memory' } }),
+              isSelected: tab === 'memory',
+            },
+          ]
+        : []),
       ...(isDecisionTreesEnabled
         ? [
             {
@@ -206,7 +246,7 @@ export function SignificantEventsPage() {
           ]
         : []),
     ],
-    [tab, router, isCortexEnabled, isDecisionTreesEnabled]
+    [tab, router, isCortexEnabled, isMemoryEnabled, isDecisionTreesEnabled]
   );
   const tabs = useMemo(
     () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
@@ -229,6 +269,12 @@ export function SignificantEventsPage() {
   // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
+  }
+
+  // The tab the route names may simply not have answered yet. Redirecting now would
+  // send it to the first tab and lose the URL the person asked for, so wait.
+  if (availabilityGateByTab[tab as SignificantEventsTabId]?.isLoading) {
+    return <SignificantEventsAppLoading />;
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
@@ -356,6 +402,7 @@ export function SignificantEventsPage() {
           {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
           {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
+          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

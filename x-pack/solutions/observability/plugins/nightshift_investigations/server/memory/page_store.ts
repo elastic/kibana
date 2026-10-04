@@ -5,34 +5,107 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import {
   MEMORY_INDEX,
   type MemoryArchiveReason,
-  type StoredMemoryPage,
-  type StoredMemoryStatus,
-  type MemoryPage,
+  type MemoryFilter,
+  type MemoryPageSummary,
   type MemoryStats,
+  type StoredMemoryPage,
+  type MemoryPage,
 } from '../../common/memory';
 import { formatPageRefs, previewText } from './log_format';
 import { applyUpdate, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
+import { canonicalizeTag, MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const MAX_LIST_SIZE = 500;
+const DEFAULT_PAGE_SIZE = 25;
+/**
+ * Largest slice the list route may request. Exported so the route's zod bound and
+ * the store's own clamp cannot drift apart.
+ */
+export const MAX_PAGE_SIZE = 200;
 const MAX_ARCHIVE_ATTEMPTS = 3;
 const MAX_COUNTER_UPDATE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
+const ARCHIVE_REASON_FIELD = 'attributes.archive_reason';
+/** Legacy field. Read only, so a pre-`archive_reason` document still reads archived. */
+const STATUS_FIELD = 'attributes.status';
+const UPDATED_AT_FIELD = 'attributes.updated_at';
+const SLUG_FIELD = 'attributes.slug';
+
+/**
+ * The one definition of "archived" for every query in this file. It matches
+ * `toPage`'s read-side derivation, so a document the read path calls archived can
+ * never appear in the active listing, the archived count, or a recall result.
+ *
+ * `archive_reason` is the field that is written; `status: 'archived'` only exists
+ * on documents written before it was introduced, and `exists` is true even for an
+ * empty reason, so a malformed one still reads as archived.
+ */
+const ARCHIVED_CLAUSE: object = {
+  bool: {
+    should: [{ exists: { field: ARCHIVE_REASON_FIELD } }, { term: { [STATUS_FIELD]: 'archived' } }],
+    minimum_should_match: 1,
+  },
+};
 
 export type { CounterUpdate };
 
+/**
+ * A write lost its optimistic-concurrency race and could not be retried into
+ * success. Distinct from a generic failure so a route can answer 409: the
+ * document changed under the operator, and retrying blindly would apply their
+ * intent to a version they never saw.
+ */
+export class MemoryVersionConflictError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'MemoryVersionConflictError';
+  }
+}
+
+/**
+ * Keywords one request may filter by, which is the write layer's per-page tag cap:
+ * a request cannot ask about more tags than one memory could carry.
+ */
+export const MAX_TAG_FILTER_KEYWORDS = MAX_MEMORY_TAGS_PER_PAGE;
+
+/**
+ * Spellings one keyword may match. Documents written before tags were
+ * canonicalized hold every spelling, so a keyword is matched against all of them.
+ */
+export const MAX_TAG_SPELLINGS_PER_KEYWORD = MAX_MEMORY_TAGS_PER_PAGE;
+
+/**
+ * Terms the tag query may carry: the client sends each selected keyword's
+ * canonical key plus every original spelling it was seen spelled, so the bound is
+ * the keyword cap times the spelling cap rather than either alone.
+ */
+export const MAX_TAG_FILTER_TERMS = MAX_TAG_FILTER_KEYWORDS * MAX_TAG_SPELLINGS_PER_KEYWORD;
+
+/**
+ * Longest single tag term. Canonical tags are capped far lower; the bound is only
+ * here so a raw spelling from a pre-canonicalization document cannot be unbounded.
+ */
+export const MAX_TAG_TERM_LENGTH = 200;
+
 export type MemoryRetrieveMatch = 'context' | 'content';
 
-export interface VersionedMemoryPage {
-  page: MemoryPage;
+/** Elasticsearch's optimistic-concurrency pair, as the store hands it out. */
+export interface MemoryPageVersion {
   seqNo: number;
   primaryTerm: number;
+}
+
+export interface VersionedMemoryPage extends MemoryPageVersion {
+  page: MemoryPage;
 }
 
 export interface MemoryPageWrite {
@@ -44,10 +117,12 @@ export interface MemoryPageWrite {
   tags: string[];
   categories: string[];
   references: string[];
-  status: StoredMemoryStatus;
   source?: string;
   merged_from?: string[];
   archive_reason?: MemoryArchiveReason;
+  /** Provenance. Metadata only — Space remains the tenancy boundary. */
+  agent_id?: string;
+  conversation_id?: string;
   telemetry?: {
     impressions: number;
     conversions: number;
@@ -56,11 +131,35 @@ export interface MemoryPageWrite {
   user: string;
 }
 
+/** One page of the browsing UI's results, with the decayed numbers already applied. */
+export interface MemoryPageListResult {
+  pages: MemoryPageSummary[];
+  stats: MemoryStats;
+  /** Total matches across all pages. */
+  total: number;
+  /** Opaque `search_after` token; absent when the result set is exhausted. */
+  cursor?: string;
+}
+
 export interface MemoryPageStore {
-  list: (options?: { status?: StoredMemoryStatus }) => Promise<{
-    pages: MemoryPage[];
+  list: (options?: { filter?: MemoryFilter; tags?: readonly string[] }) => Promise<{
+    pages: MemoryPageSummary[];
     stats: MemoryStats;
   }>;
+  /**
+   * Cursor-paginated listing for the browsing UI. Unlike `list`, this does not
+   * cap the result set, and returns a `search_after` token for the next page.
+   */
+  listPaginated: (options?: {
+    filter?: MemoryFilter;
+    cursor?: string;
+    size?: number;
+    /**
+     * Keyword filter: each selected keyword plus every original spelling of it.
+     * AND across keywords, OR across one keyword's spellings.
+     */
+    tags?: readonly string[];
+  }) => Promise<MemoryPageListResult>;
   retrieve: (options?: {
     query?: string;
     size?: number;
@@ -68,6 +167,7 @@ export interface MemoryPageStore {
     match?: MemoryRetrieveMatch;
   }) => Promise<MemoryPage[]>;
   get: (id: string) => Promise<MemoryPage | undefined>;
+  getMany: (ids: readonly string[]) => Promise<MemoryPage[]>;
   getVersioned: (id: string) => Promise<VersionedMemoryPage | undefined>;
   getByName: (name: string) => Promise<MemoryPage | undefined>;
   upsert: (page: MemoryPageWrite) => Promise<MemoryPage>;
@@ -79,7 +179,14 @@ export interface MemoryPageStore {
     version: VersionedMemoryPage,
     reason: MemoryArchiveReason
   ) => Promise<MemoryPage>;
-  delete: (id: string) => Promise<void>;
+  /** Clears `archive_reason`, returning the memory to active recall. */
+  unarchive: (id: string) => Promise<MemoryPage | undefined>;
+  /**
+   * Hard delete, conditional on the revision the caller read. The version is
+   * required: without a guard the document would be removed even if the optimizer
+   * has since rewritten what the operator was looking at.
+   */
+  delete: (id: string, version: MemoryPageVersion) => Promise<void>;
 }
 
 const normalizeSlugText = (slug: string): string =>
@@ -162,7 +269,11 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
   }
 
   const slug = source.attributes?.slug ?? slugFromMemoryId(id);
-  const status = source.attributes?.status ?? 'tentative';
+  // `archive_reason` is the single source of truth. The `status` branch only
+  // exists so documents written before the field was introduced still report as
+  // archived; it is never written.
+  const archiveReason = source.attributes?.archive_reason;
+  const archived = archiveReason !== undefined || source.attributes?.status === 'archived';
 
   return {
     id,
@@ -172,10 +283,12 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     content: source.content ?? '',
     context: source.context,
     tags: source.tags ?? [],
-    status,
+    archived,
     source: source.attributes?.source,
     merged_from: source.attributes?.merged_from,
-    archive_reason: source.attributes?.archive_reason,
+    archive_reason: archiveReason,
+    conversation_id: source.attributes?.conversation_id,
+    agent_id: source.attributes?.agent_id,
     categories: source.attributes?.categories ?? [],
     references: source.attributes?.references ?? [],
     created_at: source.attributes?.created_at ?? source['@timestamp'] ?? new Date().toISOString(),
@@ -233,9 +346,11 @@ export const createMemoryPageStore = ({
       context: page.context ?? existing?.context,
       tags: memoryTags(page.tags),
       attributes: {
-        status: page.status,
         slug: page.slug,
         space_id: spaceId,
+        // `status` is deliberately not written; `archive_reason` is the state.
+        ...(page.agent_id !== undefined ? { agent_id: page.agent_id } : {}),
+        ...(page.conversation_id !== undefined ? { conversation_id: page.conversation_id } : {}),
         categories: page.categories,
         ...(page.source !== undefined ? { source: page.source } : {}),
         ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
@@ -283,111 +398,273 @@ export const createMemoryPageStore = ({
     return mapWrittenPage(id, document);
   };
 
+  /**
+   * The write-side projection of a page. Both writes that carry a read page
+   * forward — archive and restore — go through this, so a provenance field added
+   * to one cannot be left off the other.
+   */
+  const toWrite = (page: MemoryPage): MemoryPageWrite => ({
+    slug: page.slug,
+    title: page.title,
+    description: page.description,
+    content: page.content,
+    context: page.context,
+    tags: page.tags,
+    categories: page.categories,
+    references: page.references,
+    agent_id: page.agent_id,
+    conversation_id: page.conversation_id,
+    source: page.source,
+    merged_from: page.merged_from,
+    telemetry: page.telemetry,
+    user: page.updated_by,
+  });
+
   const toArchiveWrite = (
     version: VersionedMemoryPage,
     reason: MemoryArchiveReason
-  ): MemoryPageWrite => {
-    const latest = version.page;
-    return {
-      slug: latest.slug,
-      title: latest.title,
-      description: latest.description,
-      content: latest.content,
-      context: latest.context,
-      tags: latest.tags,
-      categories: latest.categories,
-      references: latest.references,
-      status: 'archived',
-      source: latest.source,
-      merged_from: latest.merged_from,
-      archive_reason: reason,
-      telemetry: latest.telemetry,
-      user: latest.updated_by,
-    };
+  ): MemoryPageWrite => ({ ...toWrite(version.page), archive_reason: reason });
+
+  /**
+   * `updated_at desc, slug asc` — a total order, so `search_after` can never skip
+   * or repeat a row. `updated_at` alone is not stable: the optimizer writes many
+   * memories with the same timestamp, and a non-unique sort key makes paging
+   * silently drop documents.
+   */
+  // The tiebreaker is the slug, not `_id`: Elasticsearch refuses fielddata access
+  // on `_id`, so sorting on it fails outright. The slug is unique per page and
+  // mapped inside the flattened `attributes`, so it gives the same total order.
+  const PAGINATION_SORT: estypes.Sort = [
+    { [UPDATED_AT_FIELD]: { order: 'desc', unmapped_type: 'date' } },
+    { [SLUG_FIELD]: { order: 'asc', unmapped_type: 'keyword' } },
+  ];
+
+  const spaceAndTagFilter = [
+    { term: { tags: MEMORY_TAG } },
+    { term: { [SPACE_ID_FIELD]: spaceId } },
+  ];
+
+  /**
+   * One clause per selected keyword, each matching any spelling of it.
+   *
+   * Tags written before the write layer canonicalized them hold every spelling a
+   * model or a person produced (`invoke_agent`, `invoke-agent`, `Invoke Agent`),
+   * so spelling terms alone would miss documents. Grouping by the canonical key
+   * keeps one keyword's spellings together; the clauses are ANDed by
+   * `filterClause`, so selecting two keywords means both.
+   *
+   * Each group is seeded with the canonical key itself, which is never dropped:
+   * new writes store the canonical tag, so a client that has only ever seen a
+   * legacy spelling of a keyword would otherwise match every old document and
+   * none of the new ones.
+   */
+  const tagFilterClauses = (tags: readonly string[] | undefined): object[] => {
+    const byKeyword = new Map<string, string[]>();
+    for (const tag of tags ?? []) {
+      const keyword = canonicalizeTag(tag);
+      if (keyword === null) continue;
+      let spellings = byKeyword.get(keyword);
+      if (spellings === undefined) {
+        // Dropping the surplus would answer a different question than the one
+        // asked: an AND filter silently narrowed to its first N keywords looks
+        // authoritative and is wrong, and nothing downstream can tell.
+        if (byKeyword.size >= MAX_TAG_FILTER_KEYWORDS) {
+          throw badRequest(
+            `A Semantic Memory tag filter may name at most ${MAX_TAG_FILTER_KEYWORDS} keywords`
+          );
+        }
+        spellings = [keyword];
+        byKeyword.set(keyword, spellings);
+      }
+      if (
+        tag !== spellings[0] &&
+        spellings.length < MAX_TAG_SPELLINGS_PER_KEYWORD &&
+        !spellings.includes(tag)
+      ) {
+        spellings.push(tag);
+      }
+    }
+    return [...byKeyword.values()].map((spellings) => ({
+      bool: {
+        should: spellings.map((spelling) => ({ term: { tags: spelling } })),
+        minimum_should_match: 1,
+      },
+    }));
   };
 
-  const listAll = async (): Promise<MemoryPage[]> => {
-    try {
-      const response = await esClient.search<StoredMemoryPage>(
-        {
-          index: MEMORY_INDEX,
-          query: {
-            bool: {
-              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
-            },
-          },
-          size: MAX_LIST_SIZE,
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        },
-        { signal }
-      );
-
-      return response.hits.hits.flatMap((hit) => {
-        if (!hit._id || !hit._source) return [];
-        const pageId = toPageId(hit._id);
-        if (!pageId) return [];
-        const page = toPage(pageId, hit._source);
-        return page ? [page] : [];
-      });
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
-      throw err;
+  /**
+   * `active` is "not archived", where archived is `ARCHIVED_CLAUSE` — the same
+   * definition the read path applies, so a legacy `status: 'archived'` document
+   * with no reason is not offered as active.
+   *
+   * The tag clauses come last and are shared by every filter, so the total in the
+   * stats counts exactly the rows the listing returns.
+   */
+  const filterClause = (filter: MemoryFilter, tags?: readonly string[]): object[] => {
+    const tagClauses = tagFilterClauses(tags);
+    switch (filter) {
+      case 'active':
+        return [...spaceAndTagFilter, { bool: { must_not: [ARCHIVED_CLAUSE] } }, ...tagClauses];
+      case 'archived':
+        return [...spaceAndTagFilter, ARCHIVED_CLAUSE, ...tagClauses];
+      case 'all':
+      default:
+        return tagClauses.length > 0 ? [...spaceAndTagFilter, ...tagClauses] : spaceAndTagFilter;
     }
   };
 
-  return {
-    async list({ status } = {}) {
-      const allPages = await listAll();
-      const filtered = allPages.filter((page) => {
-        if (status !== undefined && page.status !== status) {
-          return false;
-        }
-        return true;
-      });
+  const hitsToPages = (
+    hits: Array<{ _id?: string; _source?: StoredMemoryPage; sort?: unknown[] }>
+  ): MemoryPage[] =>
+    hits.flatMap((hit) => {
+      if (!hit._id || !hit._source) return [];
+      const pageId = toPageId(hit._id);
+      if (!pageId) return [];
+      const page = toPage(pageId, hit._source);
+      return page ? [page] : [];
+    });
 
-      const nowSec = now();
-      let decayedImpressions = 0;
-      let decayedConversions = 0;
-      for (const page of filtered) {
-        const display = toMemoryDisplayTelemetry(page, nowSec);
-        decayedImpressions += display.impressions;
-        decayedConversions += display.conversions;
-      }
+  const toSummary = (page: MemoryPage): MemoryPageSummary => {
+    const { content, ...rest } = page;
+    const display = toMemoryDisplayTelemetry(page, now());
+    return { ...rest, usefulness: display.conversionRate, confidence: display.confidence };
+  };
 
-      return {
-        pages: filtered,
-        stats: {
-          total: filtered.length,
-          decayed_impressions: decayedImpressions,
-          decayed_conversions: decayedConversions,
+  const emptyStats = (): MemoryStats => ({ total: 0, archived: 0 });
+
+  /**
+   * The archived count for the header, hung off the listing's own search.
+   *
+   * An aggregation only ever sees the documents its own query matched, so a
+   * `global` sub-aggregation — which ignores the query and re-filters — is the
+   * only way to count archived pages from inside a query that excludes them.
+   * Nested under the listing it costs no round trip and counts exactly what a
+   * separate search would: the Space's own archived total, narrowed by neither
+   * the Active/Archived/All choice nor the selected keywords, because the header's
+   * "N archived" describes the sidebar's Archived list.
+   */
+  const archivedAgg = {
+    archived: {
+      global: {},
+      aggs: {
+        inScope: {
+          filter: { bool: { filter: [...spaceAndTagFilter, ARCHIVED_CLAUSE] } },
         },
-      };
+      },
+    },
+  };
+
+  /**
+   * `search_after` values are opaque to callers. A malformed token is dropped
+   * rather than forwarded, so a bad cursor restarts at page one instead of
+   * erroring the whole listing.
+   */
+  const decodeCursor = (cursor?: string): Array<number | string> | undefined => {
+    if (!cursor) return undefined;
+    try {
+      const decoded: unknown = JSON.parse(Buffer.from(cursor, 'base64').toString('utf8'));
+      if (!Array.isArray(decoded) || decoded.length !== PAGINATION_SORT.length) return undefined;
+      return decoded.every((part) => typeof part === 'number' || typeof part === 'string')
+        ? (decoded as Array<number | string>)
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const encodeCursor = (sort: unknown[] | undefined): string | undefined =>
+    Array.isArray(sort) && sort.length === PAGINATION_SORT.length
+      ? Buffer.from(JSON.stringify(sort), 'utf8').toString('base64')
+      : undefined;
+
+  return {
+    async list({ filter = 'all', tags } = {}) {
+      try {
+        const response = await esClient.search<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            query: { bool: { filter: filterClause(filter, tags) } },
+            size: MAX_LIST_SIZE,
+            sort: PAGINATION_SORT,
+          },
+          { signal }
+        );
+        const pages = hitsToPages(response.hits.hits);
+
+        return {
+          pages: pages.map(toSummary),
+          stats: {
+            total: pages.length,
+            archived: pages.filter((page) => page.archived).length,
+          },
+        };
+      } catch (err) {
+        if (isIndexNotFoundError(err)) {
+          return { pages: [], stats: emptyStats() };
+        }
+        throw err;
+      }
+    },
+
+    async listPaginated({ filter = 'all', cursor, size, tags } = {}) {
+      const pageSize = Math.min(Math.max(size ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
+      const searchAfter = decodeCursor(cursor);
+
+      try {
+        const response = await esClient.search<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            query: { bool: { filter: filterClause(filter, tags) } },
+            size: pageSize,
+            track_total_hits: true,
+            sort: PAGINATION_SORT,
+            aggs: archivedAgg,
+            ...(searchAfter ? { search_after: searchAfter } : {}),
+          },
+          { signal }
+        );
+
+        const hits = response.hits.hits;
+        const pages = hitsToPages(hits);
+        // A short page means there is nothing after it; a full page might be the last.
+        const lastSort = hits.length > 0 ? hits[hits.length - 1].sort : undefined;
+        const nextCursor =
+          hits.length === pageSize && pages.length === pageSize
+            ? encodeCursor(lastSort)
+            : undefined;
+        const total =
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value ?? 0;
+        const aggs = response.aggregations as
+          | { archived?: { inScope?: { doc_count?: number } } }
+          | undefined;
+
+        return {
+          pages: pages.map(toSummary),
+          stats: { total, archived: aggs?.archived?.inScope?.doc_count ?? 0 },
+          total,
+          ...(nextCursor ? { cursor: nextCursor } : {}),
+        };
+      } catch (err) {
+        if (isIndexNotFoundError(err)) {
+          return { pages: [], stats: emptyStats(), total: 0 };
+        }
+        throw err;
+      }
     },
 
     async retrieve({ query, size, match = 'context' } = {}) {
       const trimmed = query?.trim();
       const isSearch = trimmed !== undefined && trimmed.length > 0;
       const pageSize = size ?? (isSearch ? 50 : 150);
-      const spaceAndTagFilter = [
-        { term: { tags: MEMORY_TAG } },
-        { term: { [SPACE_ID_FIELD]: spaceId } },
-      ];
-      const notArchived = { term: { 'attributes.status': 'archived' } };
+      // Recall never returns archived memories, so the archived clause goes in
+      // `must_not` here — the name says what it matches, not what it selects.
+      const archived = ARCHIVED_CLAUSE;
       logger.debug(
         `Memory retrieve start match=${match} search=${isSearch} size=${pageSize} ` +
           `space=${spaceId} query=${JSON.stringify(previewText(trimmed))}`
       );
-
-      const hitsToPages = (
-        hits: Array<{ _id?: string; _source?: StoredMemoryPage }>
-      ): MemoryPage[] =>
-        hits.flatMap((hit) => {
-          if (!hit._id || !hit._source) return [];
-          const pageId = toPageId(hit._id);
-          if (!pageId) return [];
-          const page = toPage(pageId, hit._source);
-          return page ? [page] : [];
-        });
 
       const searchWithQuery = async (queryText: string) => {
         if (match === 'content') {
@@ -397,7 +674,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                   must: [
                     {
                       bool: {
@@ -432,7 +709,7 @@ export const createMemoryPageStore = ({
                   filter: {
                     bool: {
                       filter: spaceAndTagFilter,
-                      must_not: [notArchived],
+                      must_not: [archived],
                     },
                   },
                   rank_window_size: pageSize,
@@ -457,7 +734,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                   must: [{ match: { context: queryText } }],
                 },
               },
@@ -478,7 +755,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                 },
               },
               size: pageSize,
@@ -521,6 +798,41 @@ export const createMemoryPageStore = ({
         if (isIndexNotFoundError(err) || isNotFoundError(err)) {
           return undefined;
         }
+        throw err;
+      }
+    },
+
+    /**
+     * Batched read. The lineage walk needs an ancestor's ancestors, and issuing
+     * one `get` per level turns a five-deep chain into five round trips.
+     *
+     * Non-canonical and unknown ids are dropped; the caller does not need to
+     * distinguish "missing" from "malformed".
+     */
+    async getMany(ids) {
+      const canonical = [...new Set(ids)].filter(isCanonicalMemoryId);
+      if (canonical.length === 0) {
+        return [];
+      }
+      const byStoredId = new Map(canonical.map((id) => [toStoredId(id), id]));
+      try {
+        const response = await esClient.mget<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            ids: [...byStoredId.keys()],
+          },
+          { signal }
+        );
+        return response.docs.flatMap((doc) => {
+          const item = doc as { _id?: string; found?: boolean; _source?: StoredMemoryPage };
+          if (!item.found || !item._source || !item._id) return [];
+          const pageId = byStoredId.get(item._id);
+          if (!pageId) return [];
+          const page = toPage(pageId, item._source);
+          return page ? [page] : [];
+        });
+      } catch (err) {
+        if (isIndexNotFoundError(err)) return [];
         throw err;
       }
     },
@@ -622,7 +934,7 @@ export const createMemoryPageStore = ({
         let applied = false;
         for (let attempt = 0; attempt < MAX_COUNTER_UPDATE_ATTEMPTS; attempt++) {
           const versioned = await this.getVersioned(id);
-          if (!versioned || versioned.page.status === 'archived') {
+          if (!versioned || versioned.page.archived) {
             skipped++;
             break;
           }
@@ -687,7 +999,7 @@ export const createMemoryPageStore = ({
     async archive(id, reason) {
       for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
         const versioned = await this.getVersioned(id);
-        if (!versioned || versioned.page.status === 'archived') {
+        if (!versioned || versioned.page.archived) {
           return undefined;
         }
         try {
@@ -697,9 +1009,10 @@ export const createMemoryPageStore = ({
             throw err;
           }
           if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
-            throw new Error(`Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`, {
-              cause: err,
-            });
+            throw new MemoryVersionConflictError(
+              `Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`,
+              { cause: err }
+            );
           }
         }
       }
@@ -710,18 +1023,74 @@ export const createMemoryPageStore = ({
       return writeVersionedPage(version.page.id, toArchiveWrite(version, reason), version);
     },
 
-    async delete(id) {
+    /**
+     * Returns an archived memory to active recall by clearing `archive_reason`.
+     *
+     * Retries on a version conflict for the same reason `archive` does: the
+     * optimizer writes asynchronously and can land between our read and write.
+     * A memory that is already active is left untouched and returned as-is.
+     */
+    async unarchive(id) {
+      for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
+        const versioned = await this.getVersioned(id);
+        if (!versioned) {
+          return undefined;
+        }
+        if (!versioned.page.archived) {
+          return versioned.page;
+        }
+        // The reason is the only archived marker, so dropping it is the whole
+        // operation. Everything else is carried through unchanged, and a stored
+        // document always names an updater.
+        const restored: MemoryPageWrite = {
+          ...toWrite(versioned.page),
+          user: versioned.page.updated_by || 'nightshift',
+        };
+        try {
+          return await writeVersionedPage(id, restored, versioned);
+        } catch (err) {
+          if (!isElasticsearchWriteConflict(err)) {
+            throw err;
+          }
+          if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
+            throw new MemoryVersionConflictError(
+              `Memory unarchive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`,
+              { cause: err }
+            );
+          }
+        }
+      }
+      return undefined;
+    },
+
+    /**
+     * Hard delete, guarded on the version the caller read.
+     *
+     * The optimizer writes asynchronously after a round, so a blind delete can
+     * remove a document the operator never saw. The version is the one the
+     * operator reviewed, carried through the request, so the delete is
+     * conditional: if anything landed in between, Elasticsearch rejects it and the
+     * route answers 409 rather than destroying the newer content.
+     */
+    async delete(id, version) {
       const storedId = toStoredId(id);
       try {
         await esClient.delete(
           {
             index: MEMORY_INDEX,
             id: storedId,
+            if_seq_no: version.seqNo,
+            if_primary_term: version.primaryTerm,
             refresh: 'wait_for',
           },
           { signal }
         );
       } catch (err) {
+        if (isElasticsearchWriteConflict(err)) {
+          throw new MemoryVersionConflictError('Memory changed since it was read', {
+            cause: err,
+          });
+        }
         if (!isIndexNotFoundError(err) && (err as { statusCode?: number }).statusCode !== 404) {
           throw err;
         }
