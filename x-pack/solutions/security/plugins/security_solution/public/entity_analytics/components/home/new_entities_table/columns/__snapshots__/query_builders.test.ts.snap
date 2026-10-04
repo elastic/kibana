@@ -972,6 +972,7 @@ FROM entities-latest-default
 exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries with filters and a cursor: count 1`] = `
 "FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -1047,6 +1048,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 "FROM (
 FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -1124,6 +1126,7 @@ FROM .alerts-security.alerts-default
 exports[`entities grid query builders sort by last_seen_alert builds the sort and count queries: count 1`] = `
 "FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -1198,6 +1201,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 "FROM (
 FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`

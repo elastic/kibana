@@ -108,11 +108,9 @@ const buildAlertCountBaseQuery = (args: QueryArgs): string =>
     `| STATS ${ALERT_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
-const buildLastSeenAlertBaseQuery = ({ namespace, timeRange }: QueryArgs): string =>
+const buildLastSeenAlertBaseQuery = (args: QueryArgs): string =>
   [
-    `FROM ${alertsIndexOf(namespace)}`,
-    `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
-    ...buildAlertEuidPipeline(),
+    ...buildOpenAlertEntityRows(args),
     `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`) BY \`entity.id\``,
   ].join('\n');
 
