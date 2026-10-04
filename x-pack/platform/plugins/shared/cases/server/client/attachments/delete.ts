@@ -18,6 +18,7 @@ import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
+import { emitAttachmentsDeletedEvents } from './trigger_utils';
 
 /**
  * Delete all comments for a case.
@@ -76,6 +77,8 @@ export async function deleteAll(
     const attachments = comments.saved_objects.map((comment) => comment.attributes);
 
     await handleAlerts({ alertsService, attachments, caseId: caseID });
+
+    emitAttachmentsDeletedEvents(clientArgs, caseID, comments.saved_objects);
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID}: ${error}`,
@@ -152,6 +155,8 @@ export async function deleteComment(
     });
 
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
+
+    emitAttachmentsDeletedEvents(clientArgs, id, [attachment]);
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${savedObjectId}: ${error}`,

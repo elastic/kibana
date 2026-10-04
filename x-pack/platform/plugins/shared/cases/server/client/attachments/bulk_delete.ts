@@ -23,6 +23,7 @@ import type { BulkDeleteFileArgs } from './types';
 import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
+import { emitAttachmentsDeletedEvents } from './trigger_utils';
 
 export const bulkDeleteFileAttachments = async (
   { caseId, fileIds }: BulkDeleteFileArgs,
@@ -87,6 +88,8 @@ export const bulkDeleteFileAttachments = async (
       })),
       user,
     });
+
+    emitAttachmentsDeletedEvents(clientArgs, caseId, fileAttachments);
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,

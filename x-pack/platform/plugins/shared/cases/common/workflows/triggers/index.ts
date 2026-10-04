@@ -22,6 +22,12 @@ import {
   CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION,
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION,
+  ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
+  ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION,
+  ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_IDS_DESCRIPTION,
+  ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_INDICES_DESCRIPTION,
+  ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_IDS_DESCRIPTION,
+  ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_INDICES_DESCRIPTION,
   COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
@@ -214,6 +220,87 @@ triggers:
 \`\`\``,
           values: {
             triggerId: AttachmentsAddedTriggerId,
+          },
+        }
+      ),
+    ],
+  },
+};
+
+export const AttachmentsDeletedTriggerId = 'cases.attachmentsDeleted' as const;
+
+const attachmentsDeletedEventSchema = baseCaseEventSchema.extend({
+  attachmentIds: z
+    .array(z.string())
+    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION }),
+  attachmentType: z
+    .string()
+    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
+  alertIds: z
+    .array(z.string())
+    .optional()
+    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_IDS_DESCRIPTION }),
+  alertIndices: z
+    .array(z.string())
+    .optional()
+    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_INDICES_DESCRIPTION }),
+  eventIds: z
+    .array(z.string())
+    .optional()
+    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_IDS_DESCRIPTION }),
+  eventIndices: z
+    .array(z.string())
+    .optional()
+    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_INDICES_DESCRIPTION }),
+});
+
+export const attachmentsDeletedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: AttachmentsDeletedTriggerId,
+  stability: 'tech_preview',
+  eventSchema: attachmentsDeletedEventSchema,
+  title: i18n.translate('xpack.cases.workflowTriggers.attachmentsDeleted.title', {
+    defaultMessage: 'Cases - Attachments deleted',
+  }),
+  description: i18n.translate('xpack.cases.workflowTriggers.attachmentsDeleted.description', {
+    defaultMessage:
+      'Emitted when one or more attachments of the same type are deleted from a case.',
+  }),
+  documentation: {
+    details: i18n.translate(
+      'xpack.cases.workflowTriggers.attachmentsDeleted.documentation.details',
+      {
+        defaultMessage:
+          'Emitted after attachments are deleted from a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs deleted in that operation for this type), and event.attachmentType (e.g. "comment", "alert"). For alert attachments, event.alertIds and event.alertIndices identify the alerts that were removed from the case; for event attachments, event.eventIds and event.eventIndices identify the events. Use KQL on event.* for trigger conditions.',
+      }
+    ),
+    examples: [
+      i18n.translate(
+        'xpack.cases.workflowTriggers.attachmentsDeleted.documentation.exampleCaseFilter',
+        {
+          defaultMessage: `## Run only for Security cases
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution"'
+\`\`\``,
+          values: {
+            triggerId: AttachmentsDeletedTriggerId,
+          },
+        }
+      ),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.attachmentsDeleted.documentation.exampleAlertFilter',
+        {
+          defaultMessage: `## Run only when alerts are removed from a case
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.alertIds: *'
+\`\`\``,
+          values: {
+            triggerId: AttachmentsDeletedTriggerId,
           },
         }
       ),
