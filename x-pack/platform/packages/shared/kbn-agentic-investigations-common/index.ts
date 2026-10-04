@@ -60,19 +60,23 @@ export {
 } from './src/components/details/proposed_action_button';
 
 export {
-  AttachmentSummarySection,
-  type AttachmentSummarySectionProps,
-  AttachmentSummaryList,
-  type AttachmentSummaryListProps,
-  AttachmentSummaryGroup,
-  type AttachmentSummaryGroupProps,
+  AttachmentsTab,
+  type AttachmentsTabProps,
+  AttachmentGroupList,
+  type AttachmentGroupListProps,
   DEFAULT_COLLAPSED_COUNT,
-  AttachmentSummaryRow,
-  type AttachmentSummaryRowProps,
-  selectSummaryAttachments,
-  SUMMARY_ATTACHMENT_TYPES,
-  type SummaryAttachmentType,
-} from './src/components/attachment_summary';
+  AttachmentRow,
+  type AttachmentRowProps,
+  ATTACHMENT_GROUPS,
+  type KnownAttachmentGroup,
+  groupAttachments,
+  type AttachmentGroup,
+  type AttachmentGroupRenderer,
+  type AttachmentGroupRendererProps,
+  type AttachmentGroupRendererRegistry,
+  registerAttachmentGroupRenderer,
+  getAttachmentGroupRenderer,
+} from './src/components/attachments';
 
 export {
   registerAgenticInvestigationTemplateUI,

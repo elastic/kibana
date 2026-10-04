@@ -9,12 +9,45 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
+// The rules API validates `id` as a UUID.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const isUuid = (v: unknown): v is string => typeof v === 'string' && UUID_RE.test(v);
+
 /** Producers build the payload from a fields map, so values arrive as arrays. */
 const firstValue = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
     return value;
   }
   return Array.isArray(value) && typeof value[0] === 'string' ? value[0] : undefined;
+};
+
+/**
+ * Maps a `security.rule` attachment onto the rule flyout it should open, or `null` when the
+ * rule has not been saved yet (create-intent only — read-only row).
+ */
+export const toRuleDescriptor = (attachment: UnknownAttachment): FlyoutDescriptor | null => {
+  // Prefer origin when it's already a UUID (set by ai_rule_creation_handler via saved.id).
+  const origin = (attachment as { origin?: unknown }).origin;
+  if (isUuid(origin)) {
+    return { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId: origin };
+  }
+
+  // Workflow-created attachments set origin to rule_id (not the SO UUID). Fall back to the
+  // `id` field embedded in data.text, which is always the internal UUID.
+  try {
+    const text = (attachment.data as { text?: unknown })?.text;
+    if (typeof text === 'string') {
+      const parsed = JSON.parse(text) as Record<string, unknown>;
+      if (isUuid(parsed.id)) {
+        return { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId: parsed.id };
+      }
+    }
+  } catch {
+    // malformed JSON — treat as unsaveable
+  }
+
+  return null;
 };
 
 /**

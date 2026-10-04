@@ -6,12 +6,14 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';
 import { useDataViewManagerStatus } from '../../../data_view_manager/hooks/use_data_view_manager_status';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
+import { FlyoutSessionContextProvider } from '../../../flyout_v2/session_context';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 
@@ -88,10 +90,12 @@ export const AttachmentSummaryFlyoutOpener = ({
     services: bundle.kibanaServices,
     store: bundle.store,
     children: (
-      <>
+      <FlyoutSessionContextProvider
+        value={{ session: 'start', historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY }}
+      >
         <DataViewManagerBootstrap />
         <OpenFlyoutOnMount descriptor={descriptor} />
-      </>
+      </FlyoutSessionContextProvider>
     ),
   });
 };

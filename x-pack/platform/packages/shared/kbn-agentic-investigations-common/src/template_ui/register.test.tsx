@@ -107,14 +107,16 @@ const register = (
   });
 
 describe('registerAgenticInvestigationTemplateUI', () => {
-  it('registers the overview tab', () => {
+  it('registers the overview and attachments tabs', () => {
     const { contract } = createFakeService();
 
     register(contract);
 
     expect(contract.getTab('investigation.overview')?.label).toBe('Overview');
+    expect(contract.getTab('investigation.attachments')?.label).toBe('Attachments');
     expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual([
       'investigation.overview',
+      'investigation.attachments',
     ]);
   });
 

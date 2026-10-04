@@ -15,16 +15,9 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
-  const resolveSecurityCanvasContext = jest.fn();
-  const getSpaceId = jest.fn().mockResolvedValue('default');
-  const mockData = { search: { search: jest.fn() } };
-
   const register = () =>
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
-      resolveSecurityCanvasContext,
-      getSpaceId,
-      data: mockData as never,
     });
 
   beforeEach(() => {
@@ -34,10 +27,10 @@ describe('registerAttachmentUiDefinitions', () => {
   it('returns attachmentLabel when provided in alert attachment data', () => {
     register();
 
-    const ruleCall = mockAddAttachmentType.mock.calls.find(
+    const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = ruleCall![1];
+    const config = alertCall![1];
 
     const attachment = {
       id: 'test',
@@ -50,10 +43,10 @@ describe('registerAttachmentUiDefinitions', () => {
   it('returns default label when attachmentLabel is not provided', () => {
     register();
 
-    const ruleCall = mockAddAttachmentType.mock.calls.find(
+    const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = ruleCall![1];
+    const config = alertCall![1];
 
     const attachment = {
       id: 'test',
@@ -72,23 +65,23 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(entityCall).toBeUndefined();
   });
 
-  it('registers a renderConversationDetailsContent for security.alert', () => {
+  it('does not set renderConversationDetailsContent on security.alert (table rendering moved to attachments tab)', () => {
     register();
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    expect(alertCall![1].renderConversationDetailsContent).toBeDefined();
+    expect(alertCall![1].renderConversationDetailsContent).toBeUndefined();
   });
 
-  it('registers a renderConversationDetailsContent for security.alerts', () => {
+  it('does not set renderConversationDetailsContent on security.alerts (table rendering moved to attachments tab)', () => {
     register();
 
     const alertsCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
     );
     expect(alertsCall).toBeDefined();
-    expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
+    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
   });
 });
 
