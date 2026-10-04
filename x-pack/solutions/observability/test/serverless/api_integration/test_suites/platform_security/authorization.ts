@@ -8553,6 +8553,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_all": Array [
@@ -8634,6 +8635,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_read": Array [

@@ -29,6 +29,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/i18n",
     "@kbn/core",
+    "@kbn/core-security-server",
     "@kbn/developer-toolbar-plugin",
     "@kbn/test-jest-helpers",
   ]
