@@ -85,48 +85,80 @@ describe('getToolCallCount', () => {
 
 describe('summarizePersistenceCalls', () => {
   const persistenceToolId = platformSignificantEventsTools.eventsWrite;
+  const writeCall = ({
+    id,
+    items,
+    itemResults,
+    groupId,
+  }: {
+    id: string;
+    items?: Array<Record<string, unknown>>;
+    itemResults?: Array<Record<string, unknown>>;
+    groupId?: string;
+  }): ConverseStep => ({
+    type: 'tool_call',
+    tool_id: persistenceToolId,
+    tool_call_id: id,
+    ...(groupId !== undefined ? { tool_call_group_id: groupId } : {}),
+    ...(items !== undefined ? { params: { items } } : {}),
+    ...(itemResults !== undefined ? { results: [{ data: { results: itemResults } }] } : {}),
+  });
+  const itemResult = (
+    index: number,
+    reason: 'bulk_error' | 'unknown_event_id' | undefined
+  ): Record<string, unknown> =>
+    reason === undefined ? { index, written: true } : { index, written: false, reason };
+  const summarize = (calls: ConverseStep[]) => summarizePersistenceCalls(calls, persistenceToolId);
 
   it('accepts one persistence call', () => {
-    expect(
-      summarizePersistenceCalls(
-        [{ type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' }],
-        persistenceToolId
-      )
-    ).toEqual({ count: 1, valid: true, retriedPartialFailure: false, retriedSchemaFailure: false });
+    expect(summarize([writeCall({ id: 'write-1' })])).toEqual({
+      count: 1,
+      valid: true,
+      retriedPartialFailure: false,
+      retriedSchemaFailure: false,
+    });
   });
 
   it('accepts exactly one retry after an item-level bulk error', () => {
+    const failedItem = { event_id: 'failed-event', status: 'open', title: 'Failed event' };
     expect(
-      summarizePersistenceCalls(
-        [
-          {
-            type: 'tool_call',
-            tool_id: persistenceToolId,
-            tool_call_id: 'write-1',
-            results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
-          },
-          {
-            type: 'tool_call',
-            tool_id: persistenceToolId,
-            tool_call_id: 'write-2',
-            params: { items: [{ event_id: 'failed-event' }] },
-          },
-        ],
-        persistenceToolId
-      )
-    ).toEqual({ count: 2, valid: true, retriedPartialFailure: true, retriedSchemaFailure: false });
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'bulk_error')],
+        }),
+        writeCall({ id: 'write-2', items: [failedItem] }),
+      ])
+    ).toEqual({
+      count: 2,
+      valid: true,
+      retriedPartialFailure: true,
+      retriedSchemaFailure: false,
+    });
+  });
+
+  it('rejects an item retry from the same parallel call group', () => {
+    const failedItem = { event_id: 'failed-event', status: 'open', title: 'Failed event' };
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          groupId: 'parallel-writes',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'bulk_error')],
+        }),
+        writeCall({
+          id: 'write-2',
+          groupId: 'parallel-writes',
+          items: [failedItem],
+        }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
   });
 
   it('rejects repeated calls without a partial bulk failure', () => {
-    expect(
-      summarizePersistenceCalls(
-        [
-          { type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' },
-          { type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-2' },
-        ],
-        persistenceToolId
-      )
-    ).toEqual({
+    expect(summarize([writeCall({ id: 'write-1' }), writeCall({ id: 'write-2' })])).toEqual({
       count: 2,
       valid: false,
       retriedPartialFailure: false,
@@ -136,52 +168,245 @@ describe('summarizePersistenceCalls', () => {
 
   it('accepts exactly one retry after a schema or tool error', () => {
     expect(
-      summarizePersistenceCalls(
-        [
-          {
-            type: 'tool_call',
-            tool_id: persistenceToolId,
-            tool_call_id: 'write-1',
-            params: {},
-            results: [{ type: 'error', data: { message: 'Pass items as a non-empty array' } }],
-          },
-          {
-            type: 'tool_call',
-            tool_id: persistenceToolId,
-            tool_call_id: 'write-2',
-            params: { items: [{ event_id: 'event-1' }] },
-          },
-        ],
-        persistenceToolId
-      )
+      summarize([
+        {
+          type: 'tool_call',
+          tool_id: persistenceToolId,
+          tool_call_id: 'write-1',
+          params: {},
+          results: [{ type: 'error', data: { message: 'Pass items as a non-empty array' } }],
+        },
+        writeCall({ id: 'write-2', items: [{ event_id: 'event-1' }] }),
+      ])
     ).toEqual({ count: 2, valid: true, retriedPartialFailure: false, retriedSchemaFailure: true });
   });
 
-  it('rejects a retry that resubmits more than the failed items', () => {
+  it('rejects a schema recovery call from the same parallel call group', () => {
     expect(
-      summarizePersistenceCalls(
-        [
-          {
-            type: 'tool_call',
-            tool_id: persistenceToolId,
-            tool_call_id: 'write-1',
-            results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
-          },
-          {
-            type: 'tool_call',
-            tool_id: persistenceToolId,
-            tool_call_id: 'write-2',
-            params: { items: [{ event_id: 'failed-event' }, { event_id: 'successful-event' }] },
-          },
-        ],
-        persistenceToolId
-      )
+      summarize([
+        {
+          type: 'tool_call',
+          tool_id: persistenceToolId,
+          tool_call_id: 'write-1',
+          tool_call_group_id: 'parallel-writes',
+          params: {},
+          results: [{ type: 'error', data: { message: 'Pass items as a non-empty array' } }],
+        },
+        writeCall({
+          id: 'write-2',
+          groupId: 'parallel-writes',
+          items: [{ event_id: 'event-1' }],
+        }),
+      ])
+    ).toMatchObject({ valid: false, retriedSchemaFailure: false });
+  });
+
+  it('rejects a retry that resubmits more than the failed items', () => {
+    const failedItem = { event_id: 'failed-event', title: 'Failed' };
+    const successfulItem = { event_id: 'successful-event', title: 'Successful' };
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem, successfulItem],
+          itemResults: [itemResult(0, 'bulk_error'), itemResult(1, undefined)],
+        }),
+        writeCall({ id: 'write-2', items: [failedItem, successfulItem] }),
+      ])
     ).toEqual({
       count: 2,
       valid: false,
       retriedPartialFailure: false,
       retriedSchemaFailure: false,
     });
+  });
+
+  it('accepts an unknown event id retry with the id removed and all other fields unchanged', () => {
+    const signal = { type: 'detection', metadata: { rule_uuid: 'rule-x' } };
+    const failedItem = {
+      event_id: 'unknown-id',
+      status: 'open',
+      title: 'Event X',
+      signals: [signal],
+    };
+    const { event_id: _, ...retryItem } = failedItem;
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'unknown_event_id')],
+        }),
+        writeCall({ id: 'write-2', items: [retryItem] }),
+      ])
+    ).toMatchObject({ valid: true, retriedPartialFailure: true });
+  });
+
+  it('rejects retrying a successful item in place of the failed item', () => {
+    const failedItem = { event_id: 'event-x', title: 'X' };
+    const successfulItem = { event_id: 'event-y', title: 'Y' };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem, successfulItem],
+          itemResults: [itemResult(0, 'bulk_error'), itemResult(1, undefined)],
+        }),
+        writeCall({ id: 'write-2', items: [successfulItem] }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects a retry that omits one retryable failure', () => {
+    const failedX = { event_id: 'event-x', title: 'X' };
+    const failedZ = { event_id: 'event-z', title: 'Z' };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedX, failedZ],
+          itemResults: [itemResult(0, 'bulk_error'), itemResult(1, 'bulk_error')],
+        }),
+        writeCall({ id: 'write-2', items: [failedX] }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it('pairs an unknown event id retry that has no detection rules', () => {
+    const failedItem = { event_id: 'unknown-id', status: 'dismissed', title: 'No rules' };
+    const retryItem = { status: 'dismissed', title: 'No rules' };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'unknown_event_id')],
+        }),
+        writeCall({ id: 'write-2', items: [retryItem] }),
+      ])
+    ).toMatchObject({ valid: true, retriedPartialFailure: true });
+  });
+
+  it('rejects a bulk error retry that changes an input field', () => {
+    const failedItem = { event_id: 'event-x', status: 'open', title: 'Original' };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'bulk_error')],
+        }),
+        writeCall({ id: 'write-2', items: [{ ...failedItem, title: 'Changed' }] }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects an unknown event id retry that repeats the rejected id', () => {
+    const failedItem = { event_id: 'unknown-id', status: 'open', title: 'Event X' };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'unknown_event_id')],
+        }),
+        writeCall({ id: 'write-2', items: [failedItem] }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects swapping two rejected ids between otherwise identical items', () => {
+    const failedA = { event_id: 'unknown-a', status: 'open', title: 'Same event' };
+    const failedB = { event_id: 'unknown-b', status: 'open', title: 'Same event' };
+    const search: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EVENT_SEARCH,
+      tool_call_id: 'search-1',
+      tool_call_group_id: 'search-group',
+      results: [
+        {
+          data: {
+            events: [
+              { event_id: 'unknown-a', status: 'open' },
+              { event_id: 'unknown-b', status: 'open' },
+            ],
+          },
+        },
+      ],
+    };
+
+    expect(
+      summarize([
+        search,
+        writeCall({
+          id: 'write-1',
+          groupId: 'write-group',
+          items: [failedA, failedB],
+          itemResults: [itemResult(0, 'unknown_event_id'), itemResult(1, 'unknown_event_id')],
+        }),
+        writeCall({
+          id: 'write-2',
+          groupId: 'retry-group',
+          items: [
+            { ...failedA, event_id: 'unknown-b' },
+            { ...failedB, event_id: 'unknown-a' },
+          ],
+        }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it.each<[string, string, string, boolean]>([
+    ['an open id from an earlier search group', 'known-open-id', 'retry-group', true],
+    ['a freshly invented id', 'invented-id', 'retry-group', false],
+    ['an open id from the retry call group', 'known-open-id', 'shared-group', false],
+  ])('handles corrected unknown ids using %s', (_, retryEventId, retryGroupId, expectedValid) => {
+    const failedItem = { event_id: 'unknown-id', status: 'open', title: 'Event X' };
+    const search: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EVENT_SEARCH,
+      tool_call_id: 'search-1',
+      tool_call_group_id: 'shared-group',
+      results: [{ data: { events: [{ event_id: 'known-open-id', status: 'open' }], total: 1 } }],
+    };
+
+    expect(
+      summarize([
+        search,
+        writeCall({
+          id: 'write-1',
+          groupId: 'write-group',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'unknown_event_id')],
+        }),
+        writeCall({
+          id: 'write-2',
+          groupId: retryGroupId,
+          items: [{ ...failedItem, event_id: retryEventId }],
+        }),
+      ])
+    ).toMatchObject({ valid: expectedValid, retriedPartialFailure: expectedValid });
+  });
+
+  it('rejects a second call that only resends successful first-call items', () => {
+    const successfulItem = { event_id: 'successful-event', status: 'open' };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          items: [successfulItem],
+          itemResults: [itemResult(0, undefined)],
+        }),
+        writeCall({ id: 'write-2', items: [successfulItem] }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
   });
 });
 
