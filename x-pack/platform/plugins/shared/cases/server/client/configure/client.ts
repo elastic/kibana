@@ -580,6 +580,7 @@ export async function create(
           OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables
             .autoExtractDefault ??
           false,
+        workflowTags: validatedConfigurationRequest.workflowTags ?? [],
       },
       id: savedObjectID,
     });

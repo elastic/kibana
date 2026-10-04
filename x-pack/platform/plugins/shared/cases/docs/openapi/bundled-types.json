@@ -570,6 +570,16 @@
                       "templates": {
                         "$ref": "#/components/schemas/templates"
                       },
+                      "workflowTags": {
+                        "type": "array",
+                        "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                        "maxItems": 100,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
                       "updated_at": {
                         "type": "string",
                         "format": "date-time",
@@ -834,6 +844,16 @@
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -1103,6 +1123,16 @@
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -5581,6 +5611,16 @@
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           }
         }
       },
@@ -5681,6 +5721,16 @@
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
