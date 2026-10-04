@@ -27,6 +27,12 @@ export const INTERNAL_EXCEPTION_FILTER = `${INTERNAL_LIST_URL}/_create_filter` a
  */
 export const EXCEPTION_LIST_URL = '/api/exception_lists';
 export const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
+export const EXCEPTION_LIST_BULK_ACTION_URL = `${EXCEPTION_LIST_URL}/_bulk_action` as const;
+/**
+ * Idle socket timeout for the exception list bulk action route. The response is sent only
+ * after every list is processed, so a large batch can exceed Kibana's default 120s.
+ */
+export const EXCEPTION_LIST_BULK_ACTION_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
 
 /**
  * Internal exception list routes

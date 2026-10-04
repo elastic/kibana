@@ -7,6 +7,7 @@
 
 import type { UnionToIntersection } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   CreateExceptionListItemOptions,
@@ -153,6 +154,30 @@ export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDef
   DeleteExceptionListItemOptions
 >;
 
+/**
+ * A rule that prevents an exception list container from being deleted.
+ */
+export interface ExceptionListPreDeleteListBlocker {
+  id: string;
+  rule_id: string;
+  name: string;
+}
+
+/**
+ * Extension point is triggered prior to deleting an exception list container. Handlers must
+ * return the data unchanged, or with `blockedBy` populated to refuse the deletion. During a
+ * bulk delete, a populated `blockedBy` (or a thrown error) fails only the list being
+ * processed; every other list in the batch proceeds.
+ */
+export type ExceptionsListPreDeleteListServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreDeleteList',
+  {
+    list: ExceptionListSchema;
+    namespaceType: NamespaceType;
+    blockedBy: ExceptionListPreDeleteListBlocker[];
+  }
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreImportServerExtension
   | ExceptionsListPreCreateItemServerExtension
@@ -162,7 +187,8 @@ export type ExtensionPoint =
   | ExceptionsListPreMultiListFindServerExtension
   | ExceptionsListPreExportServerExtension
   | ExceptionsListPreSummaryServerExtension
-  | ExceptionsListPreDeleteItemServerExtension;
+  | ExceptionsListPreDeleteItemServerExtension
+  | ExceptionsListPreDeleteListServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks
