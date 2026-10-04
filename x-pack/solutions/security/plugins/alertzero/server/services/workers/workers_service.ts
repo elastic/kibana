@@ -7,7 +7,11 @@
 
 import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
+import type {
+  AttachAlertTriageRulesRequestBody,
+  AttachAlertTriageRulesResponse,
+  UpdateWorkerResponse,
+} from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
@@ -410,6 +414,26 @@ export class WorkersService {
         request
       );
 
+      if (isAlertTriageWorker && patch.enabled && alertTriageAttachmentService) {
+        // Rules created between the attach pass above and the enable just persisted were seen by
+        // the rule-created workflow while the Worker was still off, so it attached nothing for
+        // them. One more pass closes that gap; it skips rules that already carry the action, so
+        // it is cheap and idempotent. A failure here must not undo the enable that already
+        // succeeded, so it is logged and the rules stay visible as unattached.
+        try {
+          const reconcileResult = await attachAlertTriageWorkerToAllRules(
+            alertTriageAttachmentService
+          );
+          skippedRuleCount = reconcileResult.skippedRuleCount;
+        } catch (err) {
+          this.logger.error(
+            `Alert Triage Worker: reconciling rules created during enable failed: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      }
+
       if (isAlertTriageWorker && !patch.enabled) {
         // Detach after disabling; don't let a partial detach — or a failure resolving the
         // attachment service itself — fail the disable, which has already been persisted above.
@@ -450,6 +474,86 @@ export class WorkersService {
       outcome: 'updated',
       response: { worker, ...(skippedRuleCount > 0 ? { skippedRuleCount } : {}) },
     };
+  }
+
+  /**
+   * Attaches the Alert Triage Worker's rule action to rules, but only while the Worker is enabled
+   * in the request's space. The enabled check and the attach happen in this one call, so a rule
+   * created while the Worker is off is not given an action that targets a disabled workflow.
+   *
+   * The status is read twice, before and after the attach. A disable persists the flag and then
+   * detaches every attached rule, so an attach that lands after that detach started was preceded
+   * by the flag flip: the second read sees the Worker off and detaches what this call just
+   * attached. Without it, that attach would leave rules carrying the action while the Worker is
+   * off, because the detach-all had already run without seeing them.
+   *
+   * Expected conditions are returned as typed outcomes, not thrown: a lookup that fails for any
+   * other reason (transport, authorization) throws, so a caller cannot mistake a failure for
+   * "nothing to do".
+   */
+  async attachRulesToAlertTriageWorker(
+    body: AttachAlertTriageRulesRequestBody,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<AttachAlertTriageRulesResponse> {
+    const registration = workerRegistry.get(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID);
+    const managedWorkflows = await this.managedWorkflows;
+    if (!registration || !managedWorkflows) {
+      return { outcome: 'worker_unavailable' };
+    }
+
+    const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+      spaceId,
+      workflowIdSuffix: spaceId,
+    });
+    // A document at this id that this plugin did not install is not a Worker.
+    if (status.installed && status.status === 'not_managed') {
+      return { outcome: 'worker_unavailable' };
+    }
+    if (!status.installed || !status.enabled) {
+      return { outcome: 'worker_disabled' };
+    }
+
+    const attachmentService = await this.getAlertTriageAttachmentService(
+      request,
+      status.workflowId
+    );
+    if (!attachmentService) {
+      return { outcome: 'worker_unavailable' };
+    }
+
+    // What this call attached, in the chunks it attached them in, so a late disable can undo it.
+    const touchedRuleIdChunks: string[][] = [];
+    let result: { matched: number; updated: number; skippedRuleCount?: number };
+    if (body.target === 'ids') {
+      touchedRuleIdChunks.push(body.ruleIds);
+      const { matched, updated } = await attachmentService.updateRuleAttachments({
+        attachRuleIds: body.ruleIds,
+        detachRuleIds: [],
+      });
+      result = { matched, updated };
+    } else {
+      let attached = 0;
+      const { skippedRuleCount } = await attachAlertTriageWorkerToAllRules(
+        attachmentService,
+        (ruleIds) => {
+          touchedRuleIdChunks.push(ruleIds);
+          attached += ruleIds.length;
+        }
+      );
+      result = { matched: attached, updated: attached, skippedRuleCount };
+    }
+
+    const statusAfter = await managedWorkflows.getWorkflowStatus(registration.id, {
+      spaceId,
+      workflowIdSuffix: spaceId,
+    });
+    if (!statusAfter.installed || !statusAfter.enabled) {
+      await detachRuleIdChunks(attachmentService, touchedRuleIdChunks);
+      return { outcome: 'worker_disabled' };
+    }
+
+    return { outcome: 'attached', ...result };
   }
 
   /**
