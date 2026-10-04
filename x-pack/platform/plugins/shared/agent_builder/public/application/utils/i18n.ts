@@ -3030,6 +3030,35 @@ export const labels = {
       defaultMessage: 'AI Indices',
     }),
   },
+  autoApprovedApis: {
+    sectionTitle: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionTitle', {
+      defaultMessage: 'Auto-approved APIs',
+    }),
+    sectionDescription: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionDescription', {
+      defaultMessage:
+        'Allow this agent to call APIs that modify or delete data without asking for confirmation.',
+    }),
+    elasticsearchLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.elasticsearchLabel', {
+      defaultMessage: 'Elasticsearch APIs',
+    }),
+    kibanaLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.kibanaLabel', {
+      defaultMessage: 'Kibana APIs',
+    }),
+    placeholder: i18n.translate('xpack.agentBuilder.autoApprovedApis.placeholder', {
+      defaultMessage: 'Select APIs',
+    }),
+    optionalLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.optionalLabel', {
+      defaultMessage: 'Optional',
+    }),
+    helpText: i18n.translate('xpack.agentBuilder.autoApprovedApis.helpText', {
+      defaultMessage:
+        'Every API is listed, not only the ones that modify data. APIs that only read data never ask for confirmation.',
+    }),
+    restrictedHelpText: i18n.translate('xpack.agentBuilder.autoApprovedApis.restrictedHelpText', {
+      defaultMessage:
+        'Only the owner, managers, or an administrator can change the auto-approved APIs.',
+    }),
+  },
 };
 
 // Shared badge config for the Connectors "Technical preview" label, reused across the
