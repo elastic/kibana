@@ -177,6 +177,21 @@ export const seedResponseConsoleFromCase = async ({
           },
         },
       },
+      // Dynamic string mapping is `text`, and the security data view sorts and
+      // aggregates `host.id`. Keyword fields have doc values, so that search succeeds.
+      mappings: {
+        dynamic_templates: [
+          {
+            strings_as_keyword: {
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
     });
     alertIndexCreated = true;
 
