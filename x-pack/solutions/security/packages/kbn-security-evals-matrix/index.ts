@@ -6,3 +6,6 @@
  */
 
 export * as cli from './src/cli';
+// Re-exported for the persona-matrix suite's golden replay contract test.
+export { planReplay, summarizePlan } from './src/matrix/replay_plan';
+export type { ReplayCell, PlanIssue } from './src/matrix/replay_plan';
