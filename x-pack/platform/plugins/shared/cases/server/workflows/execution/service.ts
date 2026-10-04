@@ -299,15 +299,19 @@ export class CasesWorkflowRunService {
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
     //
-    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
-    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
-    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
+    // eventOverrides injects the server-owned caseIds into `event` *after* trigger preprocessing
+    // runs. Preprocessing replaces the whole `event` object with the alert-event shape, so
+    // pre-merging caseIds into event (before the call) would silently drop them on alert runs.
+    //
+    // expandSelections lists only the compact selections checked against case membership above,
+    // so a kind the workflows server learns to expand later is not expanded on a case's behalf.
     const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
       inputs: sanitizedInputs,
       request,
       preprocessingContext: context,
+      expandSelections: ['alertIds', 'documentIds'],
       metadata,
       eventOverrides: {
         caseIds,
