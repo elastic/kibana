@@ -55,6 +55,33 @@ describe('useAuthentications', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('forwards a caller-supplied executionContext to useSearchStrategy', () => {
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:explore-hosts_page',
+        id: 'authentications',
+      },
+    };
+    renderHook(() => useAuthentications({ ...props, executionContext }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({ executionContext })
+    );
+  });
+
+  it('does not pass an executionContext to useSearchStrategy when the caller omits it', () => {
+    renderHook(() => useAuthentications(props), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({ executionContext: undefined })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const localProps = {
       ...props,
