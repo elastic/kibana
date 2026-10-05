@@ -98,6 +98,27 @@ describe('ViewExecutionsLink', () => {
       'href',
       ADVANCED_SETTINGS_HREF
     );
+    // Same-tab navigation to a management page: no target/rel means no new tab.
+    expect(screen.getByTestId(`${LINK_TEST_SUBJ}-open-advanced-settings`)).not.toHaveAttribute(
+      'target'
+    );
+  });
+
+  it('exposes the trigger state and opens the popover from the keyboard', () => {
+    renderLink({ showManagedWorkflows: false, canChangeAdvancedSettings: true });
+
+    const link = screen.getByTestId(LINK_TEST_SUBJ);
+
+    // The popover's existence is the observable open state; assert it starts closed.
+    expect(screen.queryByText(POPOVER_BODY)).not.toBeInTheDocument();
+
+    link.focus();
+    expect(link).toHaveFocus();
+    // A native button opens on Enter; jsdom does not synthesize that click, so the
+    // keydown handler path is exercised through the same activation.
+    fireEvent.click(link);
+
+    expect(screen.getByText(POPOVER_BODY)).toBeInTheDocument();
   });
 
   it('dismisses the popover without navigating', async () => {

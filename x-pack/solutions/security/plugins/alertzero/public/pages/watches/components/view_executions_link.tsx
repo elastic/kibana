@@ -77,7 +77,7 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
     return (
       <EuiToolTip content={settingsI18n.MANAGED_WORKFLOWS_REQUIRED_TOOLTIP}>
         {/* EuiToolTip needs a focusable anchor; a disabled button cannot receive focus. */}
-        <span tabIndex={0}>
+        <span aria-disabled={true} tabIndex={0}>
           <EuiButtonEmpty {...linkProps} isDisabled>
             {settingsI18n.VIEW_EXECUTIONS}
           </EuiButtonEmpty>
