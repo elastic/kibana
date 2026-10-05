@@ -7,7 +7,11 @@
 
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
-import type { ProfilingStatus, TopNFunctions } from '@kbn/profiling-utils';
+import type {
+  ProfilingSchemasAvailability,
+  ProfilingStatus,
+  TopNFunctions,
+} from '@kbn/profiling-utils';
 import {
   createFlameGraph,
   type BaseFlameGraph,
@@ -55,6 +59,12 @@ export interface Services {
     showErrorFrames: boolean;
   }) => Promise<ElasticFlameGraph>;
   fetchProfilingStatus: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingStatus>;
+  fetchAvailableSchemas: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+  }) => Promise<ProfilingSchemasAvailability>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
@@ -124,6 +134,14 @@ export function getServices(): Services {
     },
     fetchProfilingStatus: async ({ http }) => {
       return (await http.get(paths.Status, {})) as ProfilingStatus;
+    },
+    fetchAvailableSchemas: async ({ http, timeFrom, timeTo, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      return (await http.get(paths.Schemas, { query })) as ProfilingSchemasAvailability;
     },
     postSetupResources: async ({ http }) => {
       await http.post(paths.HasSetupESResources, { body: JSON.stringify({}) });
