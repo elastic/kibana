@@ -753,7 +753,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     ] as SignificantEvent['investigations'];
     const canonicalEvent = makeStoredEvent(eventId, {
       investigations: canonicalInvestigations,
-      severity: '40-medium',
+      severity: 'medium',
     });
     const eventSearchClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
