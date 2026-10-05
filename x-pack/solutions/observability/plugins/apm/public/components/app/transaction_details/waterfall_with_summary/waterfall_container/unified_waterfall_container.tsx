@@ -74,12 +74,20 @@ export function UnifiedWaterfallContainer({
   const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
   const { pauseAutoRefresh, resumeAutoRefresh } = useTimeRangeId();
 
+  // Mirror the same lookup UnifiedWaterfallFlyout performs so we only pause
+  // when the flyout is actually rendered (stale deep-links or items absent
+  // from the current fetch window must not leave auto-refresh suspended).
+  const traceItemsById = useMemo(
+    () => new Map(traceItems.map((item) => [item.id, item])),
+    [traceItems]
+  );
+  const flyoutVisible = waterfallItemId != null && traceItemsById.has(waterfallItemId);
+
   useEffect(() => {
-    if (waterfallItemId) {
-      pauseAutoRefresh();
-      return resumeAutoRefresh;
-    }
-  }, [waterfallItemId, pauseAutoRefresh, resumeAutoRefresh]);
+    if (!flyoutVisible) return;
+    pauseAutoRefresh();
+    return resumeAutoRefresh;
+  }, [flyoutVisible, pauseAutoRefresh, resumeAutoRefresh]);
 
   // Every error-badge click navigates to the service's Errors page. The page
   // renders two sections ("APM errors" + "Errors from logs") scoped by the kuery

@@ -205,11 +205,18 @@ export function UnifiedSearchBar({
     } as Filter;
   });
 
-  const onRefresh = () => {
-    if (isAutoRefreshPaused) return;
+  const doRefresh = () => {
     clearCache();
     incrementTimeRangeId();
     onPageRefreshStart();
+  };
+
+  // onAutoRefresh is wired to the SearchBar timer tick — guard it so the timer
+  // fires silently while a flyout is open. doRefresh is kept unguarded for the
+  // handleSubmit path where the user explicitly requests a refresh.
+  const onAutoRefresh = () => {
+    if (isAutoRefreshPaused) return;
+    doRefresh();
   };
 
   const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {
@@ -259,7 +266,7 @@ export function UnifiedSearchBar({
         });
       } else {
         action = SearchQueryActions.Refresh;
-        onRefresh();
+        doRefresh();
       }
       telemetry.reportSearchQuerySubmitted({
         kueryFields,
@@ -291,7 +298,7 @@ export function UnifiedSearchBar({
         showSubmitButton={showSubmitButton}
         displayStyle="inPage"
         onQuerySubmit={handleSubmit}
-        onRefresh={onRefresh}
+        onRefresh={onAutoRefresh}
         onRefreshChange={onRefreshChange}
         isClearable={isClearable}
         dataTestSubj="apmUnifiedSearchBar"
