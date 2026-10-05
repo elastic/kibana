@@ -345,8 +345,9 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       ) : null}
-      {isTestMode && <EuiSpacer size="m" />}
       {isTestMode ? (
+        <>
+          <EuiSpacer size="m" />
         <KbnInfoCallout
           announceOnMount
           data-test-subj="emailTestModeFixedMessageCallout"
@@ -364,6 +365,7 @@ export const EmailParamsFields = ({
             </p>
           }
         />
+        </>
       ) : (
         <>
           {showEmailSubjectAndMessage && (
