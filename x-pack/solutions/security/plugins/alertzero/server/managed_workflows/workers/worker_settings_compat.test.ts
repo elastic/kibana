@@ -24,7 +24,7 @@ import {
   describeContractChanges,
   diffWorkerSettingsContracts,
   parseSettingsContractSnapshot,
-  unrecordedBreakingChange,
+  unacceptedBreakingChange,
 } from './test_helpers/settings_contract';
 import { createWorkerSettingsRegistration, toTemplateValues } from './worker_settings';
 
@@ -445,7 +445,7 @@ describe('stored Worker settings compatibility', () => {
       if (baseText === undefined) {
         return;
       }
-      const failure = unrecordedBreakingChange(
+      const failure = unacceptedBreakingChange(
         parseSettingsContractSnapshot(baseText),
         committed,
         current

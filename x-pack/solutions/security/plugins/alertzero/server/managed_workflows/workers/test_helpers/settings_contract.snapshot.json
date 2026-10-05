@@ -1,5 +1,5 @@
 {
-  "preCustomerResets": [],
+  "acceptedBreakingChanges": [],
   "workers": {
     "system-security-detection-rule-coverage": {
       "defaults": {

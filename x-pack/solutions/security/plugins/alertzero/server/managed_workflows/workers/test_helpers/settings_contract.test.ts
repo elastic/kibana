@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import {
   GENERATE_SETTINGS_CONTRACT_SNAPSHOT,
-  PRE_CUSTOMER_RESET_FLAG,
+  ACCEPT_BREAKING_CHANGE_FLAG,
   buildWorkerSettingsContracts,
   describeContractChanges,
   diffWorkerSettingsContracts,
   normalizeSettingsSchema,
-  unrecordedBreakingChange,
+  unacceptedBreakingChange,
   type SettingsContractSnapshot,
   type WorkerSettingsContracts,
 } from './settings_contract';
@@ -98,7 +98,7 @@ describe('Worker settings contract', () => {
       expect(message).toContain('This change is safe for stored Worker settings.');
       expect(message).toContain('[safe] added rule-tuning.extras.added with a default');
       expect(message).toContain(GENERATE_SETTINGS_CONTRACT_SNAPSHOT);
-      expect(message).not.toContain(PRE_CUSTOMER_RESET_FLAG);
+      expect(message).not.toContain(ACCEPT_BREAKING_CHANGE_FLAG);
     });
 
     it('loosening a bound and widening an enum', () => {
@@ -164,7 +164,7 @@ describe('Worker settings contract', () => {
     });
   });
 
-  describe('breaking changes, which need a recorded reset', () => {
+  describe('breaking changes, which need to be accepted', () => {
     it.each([
       [
         'a tightened bound',
@@ -207,7 +207,7 @@ describe('Worker settings contract', () => {
       expect(message).toContain(expected);
       expect(message).toContain('https://github.com/elastic/security-team/issues/19312');
       expect(message).toContain(
-        `${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${PRE_CUSTOMER_RESET_FLAG} <issue-url>`
+        `${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${ACCEPT_BREAKING_CHANGE_FLAG} <issue-url>`
       );
     });
 
@@ -292,9 +292,9 @@ describe('Worker settings contract', () => {
   describe('against the base branch', () => {
     const snapshot = (
       workers: WorkerSettingsContracts,
-      resetIssues: string[] = []
+      acceptedIssues: string[] = []
     ): SettingsContractSnapshot => ({
-      preCustomerResets: resetIssues.map((issue) => ({ issue, changes: [] })),
+      acceptedBreakingChanges: acceptedIssues.map((issue) => ({ issue, changes: [] })),
       workers,
     });
     const tightened = () =>
@@ -303,19 +303,19 @@ describe('Worker settings contract', () => {
         { analysisWindowDays: 7 }
       );
 
-    it('stays red when the snapshot was regenerated without recording a reset', () => {
-      const message = unrecordedBreakingChange(
+    it('stays red when the snapshot was regenerated without accepting the breaking change', () => {
+      const message = unacceptedBreakingChange(
         snapshot(base()),
         snapshot(tightened()),
         tightened()
       );
-      expect(message).toContain('no reset was recorded');
+      expect(message).toContain('it was not accepted');
       expect(message).toContain('tightened rule-tuning.extras.analysisWindowDays minimum');
     });
 
-    it('passes once the reset is recorded', () => {
+    it('passes once the breaking change is accepted', () => {
       expect(
-        unrecordedBreakingChange(
+        unacceptedBreakingChange(
           snapshot(base()),
           snapshot(tightened(), ['https://github.com/elastic/security-team/issues/1']),
           tightened()
@@ -323,12 +323,12 @@ describe('Worker settings contract', () => {
       ).toBeUndefined();
     });
 
-    it('passes a safe change without a reset', () => {
+    it('passes a safe change without accepting anything', () => {
       const added = contractFor(
         { analysisWindowDays: windowDays(), added: z.boolean() },
         { analysisWindowDays: 7, added: false }
       );
-      expect(unrecordedBreakingChange(snapshot(base()), snapshot(added), added)).toBeUndefined();
+      expect(unacceptedBreakingChange(snapshot(base()), snapshot(added), added)).toBeUndefined();
     });
   });
 });

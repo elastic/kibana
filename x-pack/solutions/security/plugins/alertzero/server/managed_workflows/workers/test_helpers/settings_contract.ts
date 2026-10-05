@@ -37,12 +37,12 @@ export const GENERATE_SETTINGS_CONTRACT_SNAPSHOT =
   'node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js';
 
 /**
- * Accepts a breaking change by recording a coordinated reset of pre-customer environments. It has
- * no meaning once customers store settings; #19312 replaces it with a migration check.
+ * Accepts a breaking change and records the issue where the coordinated reset of the affected
+ * environments was agreed. #19312 replaces it with a migration check.
  */
-export const PRE_CUSTOMER_RESET_FLAG = '--pre-customer-reset';
+export const ACCEPT_BREAKING_CHANGE_FLAG = '--accept-breaking-change';
 
-const RECORD_A_RESET = `Before customers exist, a breaking change can go in only with a coordinated reset of the affected environments. Agree it with the Common Worker Layer team on an issue, then run:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${PRE_CUSTOMER_RESET_FLAG} <issue-url>`;
+const ACCEPT_A_BREAKING_CHANGE = `Before customers exist, a breaking change can go in only with a coordinated reset of the affected environments. Agree it with the Common Worker Layer team on an issue, then run:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${ACCEPT_BREAKING_CHANGE_FLAG} <issue-url>`;
 
 const KNOWN_SCHEMA_KEYS = new Set([
   '$schema',
@@ -112,15 +112,15 @@ export interface WorkerSettingsContract {
 
 export type WorkerSettingsContracts = Readonly<Record<string, WorkerSettingsContract>>;
 
-export interface PreCustomerReset {
+export interface AcceptedBreakingChange {
   /** The issue where the reset was agreed and the affected environments are listed. */
   issue: string;
   changes: readonly string[];
 }
 
 export interface SettingsContractSnapshot {
-  /** Append-only. Each entry is one breaking change accepted by resetting pre-customer environments. */
-  preCustomerResets: readonly PreCustomerReset[];
+  /** Append-only. Each entry is one breaking change accepted with a coordinated reset. */
+  acceptedBreakingChanges: readonly AcceptedBreakingChange[];
   workers: WorkerSettingsContracts;
 }
 
@@ -566,7 +566,7 @@ export const describeContractChanges = (changes: readonly ContractChange[]): str
     if (changes.some((change) => change.kind === 'breaking' && change.mayBeLabelChange)) {
       lines.push('If only the label on the page should change, keep the stored key and value.');
     }
-    lines.push(RECORD_A_RESET);
+    lines.push(ACCEPT_A_BREAKING_CHANGE);
   } else {
     lines.push(`Update the snapshot with:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT}`);
   }
@@ -577,10 +577,10 @@ export const describeContractChanges = (changes: readonly ContractChange[]): str
 };
 
 /**
- * Against the base branch, a breaking diff must come with a newly recorded reset. Regenerating the
- * snapshot without the reset flag does not add one, so the reflexive fix stays red.
+ * Against the base branch, a breaking diff must come with a newly accepted breaking change.
+ * Regenerating the snapshot without the flag does not add one, so the reflexive fix stays red.
  */
-export const unrecordedBreakingChange = (
+export const unacceptedBreakingChange = (
   base: SettingsContractSnapshot,
   committed: SettingsContractSnapshot,
   current: WorkerSettingsContracts
@@ -589,21 +589,25 @@ export const unrecordedBreakingChange = (
   if (breaking.length === 0) {
     return undefined;
   }
-  if (committed.preCustomerResets.length > base.preCustomerResets.length) {
+  if (committed.acceptedBreakingChanges.length > base.acceptedBreakingChanges.length) {
     return undefined;
   }
   return [
-    'This change breaks Worker settings stored by the base branch, and no reset was recorded.',
+    'This change breaks Worker settings stored by the base branch, and it was not accepted.',
     ...breaking.map((change) => `- ${change.text}`),
     '',
     `It needs ${BREAKING_CHANGE_EXITS}.`,
-    RECORD_A_RESET,
+    ACCEPT_A_BREAKING_CHANGE,
   ].join('\n');
 };
 
 export const parseSettingsContractSnapshot = (text: string): SettingsContractSnapshot => {
   const parsed: unknown = JSON.parse(text);
-  if (!isRecord(parsed) || !Array.isArray(parsed.preCustomerResets) || !isRecord(parsed.workers)) {
+  if (
+    !isRecord(parsed) ||
+    !Array.isArray(parsed.acceptedBreakingChanges) ||
+    !isRecord(parsed.workers)
+  ) {
     throw new Error(
       `${SETTINGS_CONTRACT_SNAPSHOT_FILE} is not a settings contract snapshot. Regenerate it with:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT}`
     );

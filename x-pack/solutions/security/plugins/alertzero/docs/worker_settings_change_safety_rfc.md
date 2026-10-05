@@ -282,7 +282,7 @@ a coordinated reset (plugin README, "Pre-customer state").
 If only the label on the page should change, keep the stored key and value.
 Before customers exist, a breaking change can go in only with a coordinated reset of the affected
 environments. Agree it with the Common Worker Layer team on an issue, then run:
-node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js --pre-customer-reset <issue-url>
+node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js --accept-breaking-change <issue-url>
 ```
 
 JSON Schema keywords the classifier does not understand fail the build with "Unclassified … Teach
@@ -292,18 +292,17 @@ first uses, say, a date-time format, CWL extends the classifier.
 ### 4. Breaking changes before customers
 
 Until the migration flow exists, the only way to ship a breaking change is to reset the environments
-that hold old documents, which is only possible while AlertZero has no customers. The flag says so in
-its name:
+that hold old documents, which is only possible while AlertZero has no customers:
 
 1. The Watch team tries the label-only fix first: keep the stored key and value, change only what
    the settings page shows.
 2. If the change is really needed, they open an issue describing it and the environments to reset,
    and agree it with CWL.
-3. They run the generator with `--pre-customer-reset <issue-url>`. It records the reset in the
-   snapshot:
+3. They run the generator with `--accept-breaking-change <issue-url>`. It records the change and
+   the issue in the snapshot:
 
    ```json
-   "preCustomerResets": [
+   "acceptedBreakingChanges": [
      {
        "issue": "https://github.com/elastic/security-team/issues/NNNNN",
        "changes": ["tightened system-security-detection-rule-tuning.extras.fpCountThreshold minimum from 2 to 3"]
@@ -322,7 +321,7 @@ and a migration step for it. Until then, a breaking change with customers stays 
 
 The generator refuses to write a breaking change. A developer could still delete the snapshot and
 regenerate it. A second test closes that: it compares the current schemas with the snapshot as it is
-on the base branch, and requires a new `preCustomerResets` entry for any breaking difference.
+on the base branch, and requires a new `acceptedBreakingChanges` entry for any breaking difference.
 
 The test does not check out another branch. Git keeps every version of every file, and
 `git show <commit>:<path>` prints a file as it was at that commit, from the local `.git`. A PR's
@@ -352,7 +351,7 @@ states that a render-helper change needs a definition version bump.
 
 | Goal | How |
 |---|---|
-| 1. Breaking changes cannot ship by mistake | The contract test classifies every change. The generator refuses a breaking one without `--pre-customer-reset`. The base-branch comparison keeps a deleted-and-regenerated snapshot red. A CODEOWNERS entry routing the snapshot to CWL is a planned follow-up; until then a deliberately hand-written reset entry is visible in the diff but not routed to CWL |
+| 1. Breaking changes cannot ship by mistake | The contract test classifies every change. The generator refuses a breaking one without `--accept-breaking-change`. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`, so an accepted breaking change needs that team's review |
 | 2. Does not depend on documentation | The tests fire on the change itself, and each message names the next command |
 | 3. Customers are never affected | The guard is unit tests only. Test helpers and snapshots live in `test_helpers/`, which the distributable build excludes. The one runtime change moves a narrowed autonomy level to the nearest allowed level below it, never above, so page and workflow agree |
 | 4. Adding a setting never strands configured Workers | Defaults are filled at startup (already on `main`). An added field with a default, including a boolean or an array, produces only a `[safe]` line |
@@ -392,7 +391,7 @@ breaking.
 
 **Rename, remove or retype a field, tighten a bound.** Reported as
 `[breaking]`. Prefer keeping the stored key and changing only the label. Otherwise, before
-customers, agree a reset on an issue and use `--pre-customer-reset`. After that, only a migration.
+customers, agree a reset on an issue and use `--accept-breaking-change`. After that, only a migration.
 
 **Add a Worker.** Add `fixtures/<worker_id_in_snake_case>/current.json` with the settings a
 configured space would store and `current.expected.txt` with lines its rendered workflow must
@@ -401,16 +400,13 @@ contain, then run the generator. The contract test reports `[safe] added Worker 
 ## What the Common Worker Layer team does
 
 - Owns the guard and extends the classifier when a new schema feature appears.
-- Reviews snapshot changes and every recorded reset.
+- Reviews snapshot changes and every accepted breaking change.
 - Decides breaking changes: label-only fix, reset (before customers), or migration.
 - Builds the migration flow ([security-team#19312](https://github.com/elastic/security-team/issues/19312)),
-  which replaces the reset flag and the settings-version tripwire test.
+  which replaces the accept flag and the settings-version tripwire test.
 
 ## Limitations and follow-ups
 
-- **CODEOWNERS.** All AlertZero paths are owned by `@elastic/security-solution` today, so any
-  reviewer from that team can approve a snapshot change. A follow-up adds a CODEOWNERS entry for
-  `test_helpers/` and `worker_settings_compat.test.ts`, owned by a CWL team.
 - **Zod refinements are not in the contract.** The OpenAPI generator emits the `nonempty` and
   `date-math` formats as `.superRefine`, which JSON Schema cannot express, so tightening one is not
   caught. No settings field uses them today.
