@@ -41,7 +41,6 @@ import type {
   EventsPaginatedSearchOptions,
   SignificantEventsReadClient,
 } from './event_client';
-import { readLegacySourceFields } from './legacy_source_fields';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
@@ -90,7 +89,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   const data = JSON.parse(row.data_json || '{}') as Omit<
     SignificantEvent,
     '@timestamp' | 'status' | 'severity'
-  > & { stream_names?: unknown };
+  >;
   // Sigevents does not model the full alert lifecycle yet: episode states other than
   // active/inactive (e.g. pending, recovering) are still ongoing, so they map to `active`.
   const episodeStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
@@ -98,13 +97,13 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   // carrying `info` (or no severity) comes from another rule source, so it falls back to the
   // neutral `medium` instead of being hidden as `low` or escalated.
   const severity = row.severity ?? 'medium';
-  return readLegacySourceFields({
+  return {
     ...data,
-    source_ids: normalizeSourceIds(data.source_ids ?? data.stream_names),
+    source_ids: normalizeSourceIds(data.source_ids),
     '@timestamp': row['@timestamp'],
     status: isSignificantEventStatus(episodeStatus) ? episodeStatus : 'active',
     severity: isSignificantEventSeverity(severity) ? severity : 'medium',
-  });
+  };
 };
 
 const decodeSignificantEventResponse = (

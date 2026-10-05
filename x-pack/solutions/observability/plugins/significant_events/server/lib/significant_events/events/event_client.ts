@@ -49,7 +49,6 @@ import {
   type StoredEvent,
   type eventsMappings,
 } from './data_stream';
-import { readLegacySourceFields } from './legacy_source_fields';
 import { FIELD_EVENT_UUID, FIELD_EVENT_ID } from '../field_names';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import type {
@@ -233,13 +232,10 @@ export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
   return { ...normalizedSignal, verdict } as SignalEntry;
 };
 
-const normalizeStoredEvent = (stored: SignificantEvent): SignificantEvent => {
-  const event = readLegacySourceFields(stored);
-  return {
-    ...event,
-    signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
-  };
-};
+const normalizeStoredEvent = (stored: SignificantEvent): SignificantEvent => ({
+  ...stored,
+  signals: stored.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
+});
 
 const multiValueContainsAnyFilter = ({
   where,
