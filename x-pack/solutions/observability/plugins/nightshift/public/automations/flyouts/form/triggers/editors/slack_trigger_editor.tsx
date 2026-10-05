@@ -35,30 +35,26 @@ export const SlackTriggerEditor = ({
       onChange={(channels) => onChange({ ...trigger, channels })}
       testSubject="automationSlackTriggerChannels"
     />
-    {trigger.kind === 'slack_message' && (
-      <PillPopover
-        ariaLabel={triggerLabels.anyMessage}
-        label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
-        testSubject="automationSlackTriggerMessage"
-      >
-        {() => (
-          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
-            <EuiFieldText
-              compressed
-              autoFocus
-              aria-label={triggerLabels.anyMessage}
-              placeholder={triggerLabels.messageContains}
-              value={trigger.messageFilter}
-              onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
-              data-test-subj="automationSlackTriggerMessageInput"
-            />
-          </EuiPanel>
-        )}
-      </PillPopover>
-    )}
-    <EuiText size="s">
-      {trigger.kind === 'slack_message' ? triggerLabels.from : triggerLabels.slackBy}
-    </EuiText>
+    <PillPopover
+      ariaLabel={triggerLabels.anyMessage}
+      label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
+      testSubject="automationSlackTriggerMessage"
+    >
+      {() => (
+        <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+          <EuiFieldText
+            compressed
+            autoFocus
+            aria-label={triggerLabels.anyMessage}
+            placeholder={triggerLabels.messageContains}
+            value={trigger.messageFilter}
+            onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
+            data-test-subj="automationSlackTriggerMessageInput"
+          />
+        </EuiPanel>
+      )}
+    </PillPopover>
+    <EuiText size="s">{triggerLabels.from}</EuiText>
     <ListPill
       ariaLabel={triggerLabels.anyone}
       emptyLabel={triggerLabels.anyone}

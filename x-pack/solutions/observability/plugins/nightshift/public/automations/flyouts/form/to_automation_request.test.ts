@@ -144,13 +144,6 @@ describe('automation request', () => {
           },
         ],
       });
-      expect(
-        toAutomationRequestBody({
-          ...values,
-          name: 'Slack',
-          trigger: { kind: 'slack_mention', channels: [], users: [], messageFilter: 'ignored' },
-        }).trigger
-      ).toEqual({ rows: [{ kind: 'slack', event: 'mention' }] });
     });
   });
 });

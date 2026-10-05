@@ -17,18 +17,13 @@ describe('getTriggerDisplay', () => {
       label: 'Scheduled',
       icon: 'calendar',
     });
-    expect(getTriggerDisplay({ kind: 'slack', event: 'mention' })).toEqual({
-      label: 'Agent mentioned in channel',
+    expect(getTriggerDisplay({ kind: 'slack', event: 'message' })).toEqual({
+      label: 'New message in channel',
       icon: 'logoSlack',
     });
   });
 
   it('orders alert, Slack, and scheduled triggers', () => {
-    expect(TRIGGER_LABEL_ORDER).toEqual([
-      'Alert triggered',
-      'New message in channel',
-      'Agent mentioned in channel',
-      'Scheduled',
-    ]);
+    expect(TRIGGER_LABEL_ORDER).toEqual(['Alert triggered', 'New message in channel', 'Scheduled']);
   });
 });

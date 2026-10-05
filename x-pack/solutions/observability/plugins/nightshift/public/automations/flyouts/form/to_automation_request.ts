@@ -44,7 +44,7 @@ const toTriggerRow = (
     };
   }
   if (isSlackTrigger(trigger)) {
-    const messageFilter = trigger.kind === 'slack_message' ? trigger.messageFilter.trim() : '';
+    const messageFilter = trigger.messageFilter.trim();
     return {
       kind: 'slack',
       event: SLACK_TRIGGER_EVENTS[trigger.kind],

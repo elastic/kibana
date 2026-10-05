@@ -48,14 +48,6 @@ describe('SlackTriggerEditor', () => {
     expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
   });
 
-  it('describes mention triggers without a message filter', () => {
-    render(<Editor kind="slack_mention" />);
-    expect(screen.getByText('Agent mentioned')).toBeInTheDocument();
-    expect(screen.getByText('in')).toBeInTheDocument();
-    expect(screen.getByText('by')).toBeInTheDocument();
-    expect(screen.queryByTestId('automationSlackTriggerMessage')).not.toBeInTheDocument();
-  });
-
   it('adds channels and a message filter', async () => {
     render(<Editor kind="slack_message" />);
 
