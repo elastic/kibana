@@ -19,7 +19,7 @@ const validResponse = {
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { expression: 'host.name: "server-1"' },
   group_by: ['host.name'],
-  grouping_mode: 'per_episode' as const,
+  grouping_mode: 'per_alert' as const,
   throttle: { strategy: 'on_status_change' as const },
   created_by: { profile_uid: 'user-1' },
   created_at: '2026-01-01T00:00:00.000Z',

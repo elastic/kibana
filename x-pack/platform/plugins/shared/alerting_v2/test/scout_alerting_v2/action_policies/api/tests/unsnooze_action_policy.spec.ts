@@ -39,7 +39,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
   });
 
   apiTest(
-    'unsnooze: unsnoozes a snoozed policy and returns snoozed_until=null',
+    'unsnooze: unsnoozes a snoozed policy and omits snoozed_until',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-unsnooze' })
@@ -64,7 +64,8 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
         buildCreateActionPolicyData({ name: 'test-unsnooze-disabled' })
       );
       await apiServices.alertingV2.actionPolicies.snooze(created.id, getSnoozeDate());
-      const disabled = await apiServices.alertingV2.actionPolicies.disable(created.id);
+      const { snoozed_until: _snoozedUntil, ...disabled } =
+        await apiServices.alertingV2.actionPolicies.disable(created.id);
 
       const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

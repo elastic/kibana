@@ -327,10 +327,10 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId('actionPolicyDetailsFlyoutGroupByBlock')).toBeInTheDocument();
     });
 
-    it('does not render the Group by column when grouping mode is per_episode', () => {
+    it('does not render the Group by column when grouping mode is per_alert', () => {
       renderFlyout({
         policy: createPolicy({
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           group_by: undefined,
           throttle: { strategy: 'on_status_change' },
         }),
@@ -367,10 +367,10 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('service.name')).toBeInTheDocument();
     });
 
-    it('does not render group-by field badges when grouping mode is per_episode', () => {
+    it('does not render group-by field badges when grouping mode is per_alert', () => {
       renderFlyout({
         policy: createPolicy({
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           group_by: undefined,
           throttle: { strategy: 'on_status_change' },
         }),
