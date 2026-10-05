@@ -32,19 +32,40 @@ describe('storage explorer with no APM indices', () => {
   }
 
   it('returns empty index statistics instead of surfacing an absent-index error', async () => {
-    const emptyStats = {
-      _all: { total: { store: { size_in_bytes: 0 } } },
-      indices: {},
-    };
-    const stats = jest.fn(async ({ ignore_unavailable }: { ignore_unavailable?: boolean }) => {
-      if (!ignore_unavailable) {
-        throw missingIndex;
-      }
-      return emptyStats;
-    });
+    const stats = jest.fn().mockRejectedValue(missingIndex);
     const context = contextFor({ indices: { stats } });
 
-    await expect(getTotalIndicesStats({ context, apmEventClient })).resolves.toEqual(emptyStats);
+    await expect(getTotalIndicesStats({ context, apmEventClient })).resolves.toEqual({
+      _all: { total: { store: { size_in_bytes: 0 } } },
+      indices: {},
+    });
+    expect(stats).toHaveBeenCalledWith({
+      index: 'traces-apm-missing,metrics-apm-missing,logs-apm-missing',
+      expand_wildcards: 'all',
+    });
+  });
+
+  it('does not hide unrelated index statistics errors', async () => {
+    const securityError = new Error('security_exception: missing monitor privilege');
+    const stats = jest.fn().mockRejectedValue(securityError);
+    const context = contextFor({ indices: { stats } });
+
+    await expect(getTotalIndicesStats({ context, apmEventClient })).rejects.toBe(securityError);
+  });
+
+  it('keeps normal index statistics unchanged when indices exist', async () => {
+    const normalStats = {
+      _all: { total: { store: { size_in_bytes: 42 } } },
+      indices: {
+        'traces-apm-000001': {
+          total: { store: { size_in_bytes: 42 } },
+        },
+      },
+    };
+    const stats = jest.fn().mockResolvedValue(normalStats);
+    const context = contextFor({ indices: { stats } });
+
+    await expect(getTotalIndicesStats({ context, apmEventClient })).resolves.toBe(normalStats);
   });
 
   it('returns an empty lifecycle map when APM indices have not been created', async () => {
