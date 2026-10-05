@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse, stringify } from 'query-string';
+import qs from 'query-string';
 
 import type {
   CreatePackagePolicyRouteState,
@@ -25,7 +25,7 @@ export function appendOnSaveQueryParamsToPath({
   mappingOptions?: CreatePackagePolicyRouteState['onSaveQueryParams'];
 }) {
   const [basePath, queryStringIn] = path.split('?');
-  const queryParams = parse(queryStringIn);
+  const queryParams = qs.parse(queryStringIn);
   // Agentless policies have no agent policies; use their own id. TODO handle multiple.
   const policyId =
     savedPolicyResult.type === 'agentless'
@@ -46,7 +46,7 @@ export function appendOnSaveQueryParamsToPath({
     }
   });
 
-  const queryString = stringify(queryParams);
+  const queryString = qs.stringify(queryParams);
 
   return basePath + (queryString ? `?${queryString}` : '');
 }

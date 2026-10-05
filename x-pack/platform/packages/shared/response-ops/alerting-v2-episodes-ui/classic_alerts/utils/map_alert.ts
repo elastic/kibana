@@ -8,6 +8,7 @@
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_FLAPPING,
   ALERT_GROUPING,
   ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,
@@ -29,21 +30,9 @@ import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-
 import type { AlertEpisode } from '../../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../../utils/histogram_utils';
 
-/**
- * Maps legacy v1 severity values that don't exist in the v2 `EpisodeSeverity`
- * enum to the nearest v2 equivalent so they are filterable, sortable, and
- * rendered correctly in the v2 table.
- */
-export const V1_SEVERITY_MAP: Record<string, string> = {
-  warning: 'medium',
-  minor: 'low',
-  major: 'high',
-};
-
 const normalizeV1Severity = (severity: string | undefined): string | null => {
   if (severity == null) return null;
-  const lower = severity.toLowerCase();
-  return V1_SEVERITY_MAP[lower] ?? lower;
+  return severity.toLowerCase();
 };
 
 /**
@@ -67,6 +56,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   ALERT_GROUPING,
+  ALERT_FLAPPING,
 ] as const;
 
 /**
@@ -99,6 +89,7 @@ export interface ClassicAlertSource {
   [ALERT_WORKFLOW_STATUS]?: string;
   [ALERT_WORKFLOW_TAGS]?: string | string[];
   [ALERT_GROUPING]?: Record<string, unknown>;
+  [ALERT_FLAPPING]?: boolean;
 }
 
 export interface ClassicAlertActionContext {
@@ -181,6 +172,7 @@ export const mapClassicAlertToEpisode = (
     supports_timeline: false,
     source_action_context: actionContext,
     source_grouping: grouping ? flattenObject(grouping) : undefined,
+    is_flapping: source[ALERT_FLAPPING] ?? false,
   };
 };
 

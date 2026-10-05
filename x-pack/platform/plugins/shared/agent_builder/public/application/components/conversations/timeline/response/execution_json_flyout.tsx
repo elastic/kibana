@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { useConversationFlyoutSessionProps } from '../../../../hooks/use_conversation_flyout_session_props';
 
 const title = i18n.translate('xpack.agentBuilder.response.jsonFlyout.title', {
   defaultMessage: 'Raw response',
@@ -20,22 +21,31 @@ interface ExecutionJsonFlyoutProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
   /** The execution's steps, which the saved event omits because they are stored as separate events. */
   steps?: ConversationRoundStep[];
+  conversationId?: string;
+  agentId?: string;
   onClose: () => void;
 }
 
 export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
   executionTerminatedEvent,
   steps,
+  conversationId,
+  agentId,
   onClose,
 }) => {
+  const flyoutSessionProps = useConversationFlyoutSessionProps(title);
   const formattedJson = useMemo(() => {
     const { data } = executionTerminatedEvent;
     return JSON.stringify(
-      { ...executionTerminatedEvent, data: { ...data, steps: data.steps ?? steps } },
+      {
+        conversation_id: conversationId,
+        agent_id: agentId,
+        execution: { ...executionTerminatedEvent, data: { ...data, steps: data.steps ?? steps } },
+      },
       null,
       2
     );
-  }, [executionTerminatedEvent, steps]);
+  }, [executionTerminatedEvent, steps, conversationId, agentId]);
 
   return (
     <EuiFlyout
@@ -46,6 +56,7 @@ export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
       css={css`
         z-index: ${euiThemeVars.euiZFlyout + 4};
       `}
+      {...flyoutSessionProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

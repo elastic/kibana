@@ -9,7 +9,7 @@ import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
   PolicyMatcher,
-  UpdateActionPolicyBody,
+  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_STRATEGY_FOR_MODE } from './constants';
@@ -61,12 +61,8 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   };
 };
 
-export const toUpdatePayload = (
-  state: ActionPolicyFormState,
-  version: string
-): UpdateActionPolicyBody => {
+export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolicyData => {
   return {
-    version,
     name: state.name,
     description: state.description,
     grouping_mode: state.groupingMode,

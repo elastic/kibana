@@ -12,12 +12,13 @@ import {
   ACTION_POLICY_MAX_DESTINATIONS,
   FIND_DEFAULT_PER_PAGE,
   FIND_MAX_RESULT_WINDOW,
-  VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
+  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
+  MAX_PER_PAGE,
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
@@ -40,7 +41,7 @@ const workflowActionPolicyDestinationSchema = z
     type: z
       .literal(actionPolicyDestinationTypeSchema.enum.workflow)
       .describe('The destination type.'),
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow identifier.'),
   })
   .strict()
   .meta({ id: 'alerting_workflow_action_policy_destination' });
@@ -216,6 +217,29 @@ export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
 
+/**
+ * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`. Adds
+ * an optional `enabled` on top of the create-action-policy data. Left as a
+ * plain optional (no schema-level default) because the meaning of "omitted"
+ * differs by outcome: on create it defaults to `true`, on replace it
+ * preserves the existing stored value — both handled in application code,
+ * not here.
+ */
+export const putActionPolicyDataSchema = createActionPolicyDataBaseSchema
+  .extend({
+    enabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.'
+      ),
+  })
+  .check(validateGroupingModeAndStrategy)
+  .meta({ id: 'alerting_put_action_policy' });
+
+export type PutActionPolicyData = z.infer<typeof putActionPolicyDataSchema>;
+export type PutActionPolicyDataInput = z.input<typeof putActionPolicyDataSchema>;
+
 export const updateActionPolicyDataSchema = z
   .object({
     name: actionPolicyNameSchema.optional(),
@@ -254,23 +278,10 @@ export const updateActionPolicyDataSchema = z
       return;
     }
     validateGroupingModeAndStrategy(payload);
-  });
-
-export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
-
-export const updateActionPolicyBodySchema = updateActionPolicyDataSchema
-  .extend({
-    version: z
-      .string()
-      .min(1)
-      .max(VERSION_MAX_LENGTH)
-      .describe(
-        'The current version of the action policy, used for optimistic concurrency control.'
-      ),
   })
   .meta({ id: 'alerting_update_action_policy' });
 
-export type UpdateActionPolicyBody = z.infer<typeof updateActionPolicyBodySchema>;
+export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
 
 /** Sort field for the find action policies (list) API. */
 export const findActionPoliciesSortFieldSchema = z
@@ -284,20 +295,22 @@ export const findActionPoliciesRequestSchema = z
     page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
       .optional()
       .describe('The page number to return. Defaults to 1.'),
-    per_page: queryIntSchema({ min: 1, max: 100 })
+    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe('The number of action policies to return per page. Defaults to 20.'),
+    filter: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe(
+        'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+      ),
     search: z
       .string()
       .min(1)
       .max(256)
       .optional()
       .describe('A text string to search across action policy fields.'),
-    enabled: z
-      .enum(['true', 'false'])
-      .transform((v) => v === 'true')
-      .optional()
-      .describe('Filter by enabled status. Accepts the strings true or false.'),
     sort_field: findActionPoliciesSortFieldSchema
       .optional()
       .describe('The field to sort action policies by.'),

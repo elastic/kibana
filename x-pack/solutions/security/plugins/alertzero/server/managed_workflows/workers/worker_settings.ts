@@ -7,11 +7,12 @@
 
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
@@ -29,15 +30,21 @@ type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
   | typeof SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
-  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
+  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
+  // Stays at 1: the narrowed `allowedAutonomyLevels` (assisted dropped) is already handled by
+  // `projectStoredAutonomyLevel` reading a stored `assisted` down to `manual`, and the new
+  // `extras.autoCloseConfidenceScoreMinThreshold` field is already handled by
+  // `applyMissingWorkerSettingDefaults` backfilling it onto documents that predate it. A version
+  // bump here would reject every already-installed v1 document outright — the version check in
+  // `parseWorkerValues` runs after those defaults are filled but rejects on the mismatch anyway.
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: 1,
 };
 
 /**
@@ -57,14 +64,16 @@ const toTemplateValues = (
 });
 
 /**
- * Reads persisted template values back as stored — nothing defaulted or merged, so an older
- * document fails here and the Worker projects as unavailable. Autonomy is the exception: a level
- * the Worker no longer offers is projected rather than failing the read.
+ * Reads persisted template values. Missing schedule and extras keys are filled from the current
+ * defaults first; a present value is left as stored, so an out-of-range value still fails here
+ * and the Worker projects as unavailable. Autonomy is projected when the Worker no longer offers
+ * the stored level.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
-  raw: Record<string, unknown>
+  stored: Record<string, unknown>
 ): WorkerSettings => {
+  const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
   const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
@@ -102,6 +111,8 @@ export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
   createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
+  withMissingDefaults: (raw) =>
+    applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), raw),
   applyPatch: (raw, patch) => {
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);

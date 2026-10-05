@@ -21,13 +21,9 @@ export const proposalAttachmentDataSchema = z.object({
   /**
    * Titles the card, and the one thing that has to be stored rather than read:
    * the label is rendered synchronously, so it cannot wait on the proposal.
-   * Absent on a proposal with nothing to name it by, which the UI titles with a
-   * translated fallback rather than an untranslatable string stamped here.
-   *
-   * Written from the action's name today; it should carry the proposal's own
-   * title once proposals have one.
+   * Carries the proposal's own title, which `create()` always resolves.
    */
-  title: z.string().max(256).optional(),
+  title: z.string().max(256),
 });
 
 export type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;

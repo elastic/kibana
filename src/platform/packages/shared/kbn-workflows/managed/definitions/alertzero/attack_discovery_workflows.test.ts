@@ -14,11 +14,13 @@ import {
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
@@ -32,9 +34,12 @@ import {
 } from '../../../spec/schema';
 
 /**
- * Verdicts the FP/TP analysis workflow may return. Each one must have a dedicated
- * switch case in the review workflow, so a verdict never falls through to the
- * default arm.
+ * Verdicts the review workflow may apply. Each one must have a dedicated switch
+ * case, so a verdict never falls through to the default arm.
+ *
+ * The analysis workflow returns only the first three. `failed` is an execution
+ * state the review derives when the analysis produced no payload at all, which is
+ * why it is a case here and not an output there.
  */
 const VERDICTS = ['false_positive', 'true_positive', 'inconclusive', 'failed'] as const;
 
@@ -661,18 +666,14 @@ describe('Attack Discovery worker chain', () => {
       expect(verdictSwitch?.type).toBe('switch');
     });
 
-    it('switches on the stub verdict', () => {
-      expect(verdictSwitch?.expression).toContain('inputs.stub_verdict');
+    // The verdict arrives from another workflow, so `resolve_analysis` is the one
+    // place it is interpreted and every reader below goes through it.
+    it('switches on the resolved analysis verdict', () => {
+      expect(verdictSwitch?.expression).toBe('{{ steps.resolve_analysis.output.verdict }}');
     });
 
-    // #19276 AC1. A default run then exercises the escalation path, the same one
-    // true_positive takes.
-    it('defaults the stub verdict from consts.default_verdict', () => {
-      expect(verdictSwitch?.expression).toContain('default: consts.default_verdict');
-    });
-
-    it('defaults consts.default_verdict to inconclusive', () => {
-      expect(review.consts?.default_verdict).toBe('inconclusive');
+    it('does not switch on an input the caller could set', () => {
+      expect(verdictSwitch?.expression).not.toContain('inputs.');
     });
 
     // Both escalating verdicts reach the same gate, which is why neither case
@@ -684,29 +685,34 @@ describe('Attack Discovery worker chain', () => {
       }
     );
 
-    it('exposes every verdict as an input so all branches stay reachable', () => {
-      expect(review.triggers?.[0]?.inputs?.properties?.stub_verdict?.enum).toEqual([...VERDICTS]);
+    // The verdict is the analysis's to decide, so there is no longer an input that
+    // can set it. An analyst can read the classification but not override it.
+    it('takes no verdict input', () => {
+      expect(review.triggers?.[0]?.inputs?.properties?.stub_verdict).toBeUndefined();
     });
 
-    // The goal of this PR: every console stub #290732 committed is gone. The only
-    // remaining console step is `run_fp_tp_analysis`, which waits on #19211, plus
-    // `report_unknown_verdict`, which is a defensive default arm rather than a
-    // placeholder.
-    it('leaves exactly two console steps', () => {
+    // Every console stub is now gone: `run_fp_tp_analysis` calls the real analysis
+    // workflow, and `report_unknown_verdict` is a defensive default arm rather than
+    // a placeholder.
+    it('leaves exactly one console step', () => {
       expect(
         reviewSteps.filter((step) => step.type === 'console').map((step) => step.name)
-      ).toEqual(['run_fp_tp_analysis', 'report_unknown_verdict']);
+      ).toEqual(['report_unknown_verdict']);
     });
 
     it.each([
       ['resolve_investigation_id', 'data.set'],
+      ['resolve_display_text', 'kibana.request'],
       ['open_investigation', 'ai.conversation.create'],
       ['verify_investigation', 'ai.conversation.metadata.read'],
       ['attach_discovery', 'ai.attachment.add'],
       ['attach_alerts', 'foreach'],
       ['attach_alert_batch', 'ai.attachment.add'],
       ['verify_evidence', 'ai.attachment.read'],
+      ['run_fp_tp_analysis', 'workflow.execute'],
+      ['resolve_analysis', 'data.set'],
       ['attach_verdict', 'ai.attachment.add'],
+      ['refresh_verdict', 'ai.attachment.update'],
       ['close_investigation_false_positive', 'ai.conversation.metadata.patch'],
       ['close_attack_false_positive', 'security.setAttackStatus'],
       ['record_analysis_failure', 'ai.conversation.metadata.patch'],
@@ -719,8 +725,111 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(reviewSteps, name)?.type).toBe(type);
     });
 
-    it('still stubs run_fp_tp_analysis pending #19211', () => {
-      expect(stepIn(reviewSteps, 'run_fp_tp_analysis')?.type).toBe('console');
+    describe('the FP/TP analysis handoff', () => {
+      const runAnalysis = stepIn(reviewSteps, 'run_fp_tp_analysis');
+      const analysisInputs = asInputs(runAnalysis);
+
+      it('calls the analysis workflow', () => {
+        expect(review.consts?.fp_tp_analysis).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
+        );
+      });
+
+      it('resolves the workflow id from that const', () => {
+        expect(runAnalysis?.with?.['workflow-id']).toBe('{{ consts.fp_tp_analysis }}');
+      });
+
+      // Synchronous: the review needs the verdict inline, and every write the
+      // verdict produces is the review's.
+      it('waits for the verdict rather than dispatching detached', () => {
+        expect(runAnalysis?.type).toBe('workflow.execute');
+      });
+
+      // IDS ONLY. The analysis loads the authoritative documents itself, so a retry
+      // cannot reason over a copy of either that went stale between attempts.
+      it('hands the analysis nothing but the two ids', () => {
+        expect(Object.keys(analysisInputs).sort()).toEqual([
+          'attack_discovery_id',
+          'investigation_id',
+        ]);
+      });
+
+      it('names the attack under review', () => {
+        expect(analysisInputs.attack_discovery_id).toBe('{{ inputs.attack_discovery_id }}');
+      });
+
+      it('names the Investigation by its derived id', () => {
+        expect(analysisInputs.investigation_id).toBe(derivedInvestigationId);
+      });
+
+      // The failure contract: the analysis fails its run rather than classifying,
+      // and continuing is what lets `resolve_analysis` route that to the `failed`
+      // arm instead of abandoning the Investigation mid-review.
+      it('continues when the analysis fails so the failure can be recorded', () => {
+        expect(runAnalysis?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('runs the analysis before applying a verdict', () => {
+        expect(reviewStepNames.indexOf('run_fp_tp_analysis')).toBeLessThan(
+          reviewStepNames.indexOf('apply_verdict')
+        );
+      });
+    });
+
+    describe('the resolved analysis result', () => {
+      const resolved = asWith(stepIn(reviewSteps, 'resolve_analysis'));
+
+      // Renders the mapping exactly as the engine will, so each assertion reads the
+      // value a real execution produces rather than the template source. `output` is
+      // what a failed child leaves behind: nothing.
+      const resolve = (template: string, output: Record<string, string> = {}) =>
+        createWorkflowLiquidEngine().parseAndRender(template, {
+          consts: review.consts,
+          execution: { id: 'review-run-1' },
+          steps: { run_fp_tp_analysis: { output } },
+        });
+
+      // A failed child hands its parent nothing, so an absent verdict IS the
+      // failure signal. This is the whole `failed` mapping.
+      it('falls back to the failed verdict when the analysis produced none', async () => {
+        await expect(resolve(resolved.verdict)).resolves.toBe('failed');
+      });
+
+      it('takes the analysis verdict when there is one', async () => {
+        await expect(resolve(resolved.verdict, { verdict: 'false_positive' })).resolves.toBe(
+          'false_positive'
+        );
+      });
+
+      it('names failed as an execution state rather than a classification', () => {
+        expect(review.consts?.failed_verdict).toBe('failed');
+      });
+
+      // The attachment requires a summary, so a failed analysis has to supply one
+      // rather than attach an empty verdict. The execution reference is what makes
+      // the failure investigable, since the error itself lives in workflow history.
+      it('explains the failure when the analysis produced no summary', async () => {
+        await expect(resolve(resolved.summary_markdown)).resolves.toContain(
+          'See review execution review-run-1'
+        );
+      });
+
+      // The `{% if %}` rather than `| default:` is load-bearing: appending the
+      // execution id after a `default:` would append it to the child's summary too.
+      it('passes the analysis summary through untouched when there is one', async () => {
+        await expect(
+          resolve(resolved.summary_markdown, { summary_markdown: 'A **summary**' })
+        ).resolves.toBe('A **summary**');
+      });
+
+      // `${{ }}`, not `{{ }}`: the rationale is optional, and the attachment's
+      // renderer null-checks it, so a stringified absence would render an empty
+      // `## Rationale` section.
+      it('keeps an absent rationale absent rather than empty', () => {
+        expect(resolved.rationale_markdown).toBe(
+          '${{ steps.run_fp_tp_analysis.output.rationale_markdown }}'
+        );
+      });
     });
 
     describe('the Investigation', () => {
@@ -758,10 +867,13 @@ describe('Attack Discovery worker chain', () => {
 
       // #19022 asks for the narrative on the Investigation itself, not only in an
       // attachment, so it is readable without resolving anything.
+      // Plain text, because the Investigation list and overview show it as-is.
       it('seeds the attack narrative into summary', () => {
         const metadata = open?.with?.metadata as Record<string, string> | undefined;
 
-        expect(metadata?.summary).toBe('{{ inputs.summary_markdown }}');
+        expect(metadata?.summary).toBe(
+          "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
+        );
       });
 
       // kibana-q0t5. The Investigation id is a pure function of the attack, so every
@@ -820,11 +932,167 @@ describe('Attack Discovery worker chain', () => {
       // review-side lookup. A regrouped alert set, and Kibana scheduled AD vs this
       // Worker (`ownerId` differs; `generation_source` is not passed yet), are
       // intentional producer splits.
-      it('derives the Investigation id first, with no lookup before it', () => {
-        expect(review.steps.map((step) => step.name).slice(0, 2)).toEqual([
+      // The only step between them reads the DISCOVERY's display text, not the
+      // Investigation, so there is still no Investigation lookup before the create.
+      it('derives the Investigation id first, with no Investigation lookup before it', () => {
+        expect(review.steps.map((step) => step.name).slice(0, 3)).toEqual([
           'resolve_investigation_id',
+          'resolve_display_text',
           'open_investigation',
         ]);
+      });
+    });
+
+    // The inputs are the persisted, anonymized text with `{{ field value }}` tokens,
+    // which plain text and plain markdown surfaces would show raw. Every surface an
+    // analyst reads takes the display text instead, and falls back to the inputs
+    // when the step failed.
+    describe('display text', () => {
+      const HOST_UUID = '2911864a-7591-4fdd-8c40-be92b7c5507f';
+      const anonymizedInputs = {
+        alert_ids: ['alert-1'],
+        summary_markdown: `OneNote file on {{ host.name ${HOST_UUID} }} ran curl`,
+        title: `Qbot on ${HOST_UUID}`,
+      };
+      // As the find API returns it: field values as inline code, original values restored.
+      const displayText = {
+        summary_markdown: 'OneNote file on `SRVWIN04` ran curl',
+        title: 'Qbot on SRVWIN04',
+      };
+      const render = (template: unknown, discovery?: Record<string, string>) =>
+        createWorkflowLiquidEngine().parseAndRender(String(template), {
+          consts: review.consts,
+          inputs: anonymizedInputs,
+          steps: {
+            resolve_analysis: { output: { verdict: 'inconclusive' } },
+            resolve_display_text: discovery != null ? { output: { data: [discovery] } } : {},
+          },
+        });
+      const open = () => asWith(stepIn(reviewSteps, 'open_investigation'));
+      const metadata = () => open().metadata as unknown as Record<string, string>;
+      const comment = () => asWith(stepIn(reviewSteps, 'resolve_escalation')).comment;
+
+      // The public find API, so the text is rendered and de-anonymized by the product
+      // itself, under the workflow identity's privileges.
+      it('reads the discovery under review from the find API, in its space', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.with).toEqual({
+          headers: { 'elastic-api-version': '2023-10-31' },
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/api/attack_discovery/_find',
+          query: { ids: '{{ inputs.attack_discovery_id }}', include_all_authors: 'true' },
+        });
+      });
+
+      // One retry, since a transient failure leaves the fallback text in place for good, and
+      // then the review continues on the inputs.
+      it('retries once, then continues when the display text cannot be read', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.['on-failure']).toEqual({
+          continue: true,
+          retry: { delay: '5s', 'max-attempts': 1 },
+        });
+      });
+
+      it('bounds each attempt well below the transport default', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.timeout).toBe('30s');
+      });
+
+      it.each([
+        ['the Investigation title', () => open().title, displayText.title],
+        [
+          'the Investigation summary',
+          () => metadata().summary,
+          'OneNote file on SRVWIN04 ran curl',
+        ],
+      ])('uses the display text for %s', async (_, template, expected) => {
+        expect(await render(template(), displayText)).toBe(expected);
+      });
+
+      it.each([
+        ['the Investigation title', () => open().title, anonymizedInputs.title],
+        ['the Investigation summary', () => metadata().summary, anonymizedInputs.summary_markdown],
+      ])('falls back to the inputs for %s', async (_, template, expected) => {
+        expect(await render(template())).toBe(expected);
+      });
+
+      it('falls back to the inputs when the find API returns no discovery', async () => {
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(String(open().title), {
+          inputs: anonymizedInputs,
+          steps: { resolve_display_text: { output: { data: [] } } },
+        });
+
+        expect(rendered).toBe(anonymizedInputs.title);
+      });
+
+      it('keeps the Investigation summary within the discovery bound', async () => {
+        const rendered = await render(metadata().summary, {
+          ...displayText,
+          summary_markdown: 'a'.repeat(9000),
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(8000);
+      });
+
+      it('names the discovery by its display title in the journal', async () => {
+        const journal = asInputs(stepIn(reviewSteps, 'journal_review_started')).message;
+
+        expect(await render(journal, displayText)).toContain(`"${displayText.title}"`);
+      });
+
+      // A re-review cannot repair the Investigation title or summary, because its create
+      // 409s, so the journal is the only record that the fallback was used.
+      describe('journal fallback note', () => {
+        const NOTE = 'shown anonymized';
+        const journal = () =>
+          String(asInputs(stepIn(reviewSteps, 'journal_review_started')).message);
+
+        it('says the text is anonymized when the display text could not be read', async () => {
+          expect(await render(journal())).toContain(NOTE);
+        });
+
+        it('says nothing about it when the display text was read', async () => {
+          const rendered = await render(journal(), displayText);
+
+          expect(rendered).not.toContain(NOTE);
+          expect(rendered).toContain(`"${displayText.title}". 1 correlated detection alert(s).`);
+        });
+
+        it('keeps the sentences separated when the note is shown', async () => {
+          expect(await render(journal())).toContain(
+            `"${anonymizedInputs.title}". Could not read the discovery's display text, so names and values below are shown anonymized. 1 correlated detection alert(s).`
+          );
+        });
+      });
+
+      // The AlertZero queue row shows the proposal's title as its summary.
+      it('titles the proposal with the display title', async () => {
+        const title = asInputs(stepIn(reviewSteps, 'escalation_gate')).title;
+
+        expect(await render(title, displayText)).toBe(displayText.title);
+      });
+
+      it('falls back to the input title for the proposal', async () => {
+        const title = asInputs(stepIn(reviewSteps, 'escalation_gate')).title;
+
+        expect(await render(title)).toBe(anonymizedInputs.title);
+      });
+
+      it('shows the display title and summary in the proposal comment, with no tokens', async () => {
+        const rendered = await render(comment(), displayText);
+
+        expect(rendered).toContain(`## ${displayText.title}`);
+        expect(rendered).toContain(displayText.summary_markdown);
+        expect(rendered).not.toContain('{{');
+      });
+
+      // The proposal record bounds its comment at 8192 characters.
+      it('keeps the proposal comment within the proposal bound at the largest title and summary', async () => {
+        const rendered = await render(comment(), {
+          ...displayText,
+          summary_markdown: 'a'.repeat(8000),
+          title: 't'.repeat(1024),
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(8192);
       });
     });
 
@@ -922,10 +1190,13 @@ describe('Attack Discovery worker chain', () => {
 
       // The heading and the narrative are rendered by the type from these fields, so
       // the workflow passes the verdict as an enum rather than as assembled markdown.
+      // All three come from the analysis via `resolve_analysis`: the summary is the
+      // conclusion's, not the discovery's `inputs.summary_markdown`.
       it('passes the verdict as structured data rather than a markdown blob', () => {
         expect(stepIn(reviewSteps, 'attach_verdict')?.with?.data).toEqual({
-          summary_markdown: '{{ inputs.summary_markdown }}',
-          verdict: '{{ inputs.stub_verdict | default: consts.default_verdict }}',
+          summary_markdown: '{{ steps.resolve_analysis.output.summary_markdown }}',
+          verdict: '{{ steps.resolve_analysis.output.verdict }}',
+          rationale_markdown: '${{ steps.resolve_analysis.output.rationale_markdown }}',
         });
       });
 
@@ -1004,6 +1275,47 @@ describe('Attack Discovery worker chain', () => {
       // produced it.
       it('continues past a failed attachment', () => {
         expect(attachments.map((step) => step['on-failure']?.continue)).toEqual([true, true, true]);
+      });
+
+      // A re-review lands on the SAME Investigation, so the add above 409s and its
+      // verdict is discarded — while the switch, the journal and the run output all
+      // act on the NEW one. The evidence attachments keep the first snapshot on
+      // purpose; the conclusion is the one that has to follow the analysis.
+      describe('refreshing the verdict on a re-review', () => {
+        const refresh = stepIn(reviewSteps, 'refresh_verdict');
+
+        // `update` versions rather than overwrites, so the superseded verdict stays
+        // in the attachment's history.
+        it('updates rather than adding a second verdict attachment', () => {
+          expect(refresh?.type).toBe('ai.attachment.update');
+        });
+
+        it('targets the attachment the add created', () => {
+          expect(refresh?.with?.attachment_id).toBe('analysis-verdict');
+        });
+
+        // Only on the 409 path: a first review's add already wrote this.
+        it('runs only when the add did not write the verdict', () => {
+          expect(refresh?.if).toBe('${{ steps.attach_verdict.error != null }}');
+        });
+
+        // The whole point: the refreshed payload is the one every other consumer of
+        // the verdict reads, so it cannot drift from them.
+        it('writes the same payload the rest of the review acts on', () => {
+          expect(refresh?.with?.data).toEqual(stepIn(reviewSteps, 'attach_verdict')?.with?.data);
+        });
+
+        it('refreshes before any lifecycle action is taken', () => {
+          expect(reviewStepNames.indexOf('refresh_verdict')).toBeLessThan(
+            reviewStepNames.indexOf('apply_verdict')
+          );
+        });
+
+        // Same reason the add continues: a verdict that could not be recorded is not
+        // a reason to abandon the review that produced it.
+        it('continues past a failed refresh', () => {
+          expect(refresh?.['on-failure']?.continue).toBe(true);
+        });
       });
     });
 
@@ -1202,7 +1514,9 @@ describe('Attack Discovery worker chain', () => {
 
     it('creates exactly one proposal', () => {
       expect(
-        reviewSteps.filter((step) => step.with?.['workflow-id'] === 'system-create-proposal')
+        reviewSteps.filter(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+        )
       ).toHaveLength(1);
     });
 
@@ -1213,6 +1527,18 @@ describe('Attack Discovery worker chain', () => {
       );
 
       expect(rendered.trim()).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+    });
+
+    // This workflow's trigger allows 1024 characters, while the proposal step
+    // caps titles at 256: forwarding one unbounded fails the escalation for an
+    // otherwise valid discovery.
+    it('bounds the proposal title it forwards', async () => {
+      const rendered = await createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'escalation_gate')).title,
+        { inputs: { title: 'A'.repeat(1024) } }
+      );
+
+      expect(rendered.length).toBeLessThanOrEqual(256);
     });
 
     it('installs the action it points at', () => {
@@ -1514,9 +1840,7 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with?.request as
-      | { body?: { trigger_mode?: string }; path?: string }
-      | undefined;
+    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
     it('POSTs the chat converse route, not the agent_builder converse route', () => {
       expect(request?.path).toContain('/api/chat/converse');

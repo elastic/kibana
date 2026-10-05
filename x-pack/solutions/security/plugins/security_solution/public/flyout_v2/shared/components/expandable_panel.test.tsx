@@ -81,6 +81,23 @@ describe('<ExpandablePanel />', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('should render a title button and invoke its callback when a link is provided', async () => {
+      const callback = jest.fn();
+      const props = {
+        ...defaultProps,
+        header: { ...defaultProps.header, link: { callback, tooltip: 'test tooltip' } },
+      };
+      const { getByRole } = render(
+        <ThemeProvider>
+          <ExpandablePanel {...props}>{children}</ExpandablePanel>
+        </ThemeProvider>
+      );
+
+      await userEvent.click(getByRole('button', { name: 'test title' }));
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
     it('should render header properly when headerContent is available', () => {
       const props = {
         ...defaultProps,

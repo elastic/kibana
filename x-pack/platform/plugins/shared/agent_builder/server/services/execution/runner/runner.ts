@@ -69,6 +69,7 @@ import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
@@ -103,6 +104,7 @@ export interface CreateScopedRunnerDeps {
   conversationService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
+  conversationEventsService: ConversationEventsServiceStart;
   conversationTemplates: ConversationTemplatesServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
@@ -332,11 +334,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       skills: true,
       aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
-      subagents: experimentalEnabled,
       todos: experimentalEnabled,
       datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
-      askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
     };

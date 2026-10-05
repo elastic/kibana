@@ -345,7 +345,7 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
         <>
           <EuiHorizontalRule margin="l" />
           <SettingsSection
-            data-test-subj="cases-redesign-legacy-custom-fields-section"
+            data-test-subj="cases-legacy-custom-fields-section"
             title={
               templatesEnabled
                 ? i18n.LEGACY_CUSTOM_FIELDS_AND_TEMPLATES_TITLE

@@ -15,6 +15,7 @@ import { measurePerformanceAsync } from '../../../../../../common';
 // Model IDs that ship with Elasticsearch and must not be deleted during cleanup
 const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
 const ML_ANNOTATIONS_INDEX_ALIAS_READ = '.ml-annotations-read';
+const ML_NOTIFICATIONS_INDEX_PATTERN = '.ml-notifications*';
 const ML_INTERNAL_HEADERS = { [ELASTIC_HTTP_VERSION_HEADER]: '1' } as const;
 
 export interface Annotation {
@@ -203,10 +204,25 @@ export interface MlIndicesApi {
   cleanAll: () => Promise<void>;
 }
 
+export interface MlNotificationsApi {
+  /**
+   * Poll until at least one notification for the given job ID appears in .ml-notifications*.
+   * Pass `earliestMs` to ignore notifications retained from earlier runs; it must match the
+   * `earliest` value used by the notifications API, which filters with a strict `timestamp > earliest`.
+   */
+  waitForToIndex: (jobId: string, earliestMs?: number, timeout?: number) => Promise<void>;
+  /**
+   * Delete every document in .ml-notifications* via the Elasticsearch API. Deleting ML jobs does
+   * not remove their notifications, so use this to stop retained ones leaking into a later run.
+   */
+  deleteAll: () => Promise<void>;
+}
+
 export interface MlApiService {
   anomalyDetection: MlADJobsApi;
   datafeeds: MlDatafeedsApi;
   dataFrameAnalytics: MlDataFrameAnalyticsApi;
+  notifications: MlNotificationsApi;
   trainedModels: MlTrainedModelsApi;
   ingestPipelines: MlIngestPipelinesApi;
   savedObjects: MlSavedObjectsApi;
@@ -954,6 +970,52 @@ export const getMlApiHelper = (
     },
   };
 
+  const notifications: MlNotificationsApi = {
+    async waitForToIndex(
+      jobId: string,
+      earliestMs?: number,
+      timeout: number = 60 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `notifications for '${jobId}' to exist in .ml-notifications*`,
+        async () => {
+          const resp = await esClient.search({
+            index: ML_NOTIFICATIONS_INDEX_PATTERN,
+            size: 1,
+            query: {
+              bool: {
+                filter: [
+                  { term: { job_id: { value: jobId } } },
+                  ...(earliestMs === undefined
+                    ? []
+                    : [{ range: { timestamp: { gt: earliestMs } } }]),
+                ],
+              },
+            },
+          });
+          if (resp.hits.hits.length > 0) return true;
+          throw new Error(`Notifications for '${jobId}' not yet indexed`);
+        },
+        timeout
+      );
+    },
+
+    async deleteAll(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.notifications.deleteAll', async () => {
+        await esClient.deleteByQuery({
+          index: ML_NOTIFICATIONS_INDEX_PATTERN,
+          query: { match_all: {} },
+          ignore_unavailable: true,
+          // notifications can be written while the delete runs; a version conflict on one of
+          // them must not fail the cleanup
+          conflicts: 'proceed',
+          refresh: true,
+          wait_for_completion: true,
+        });
+      });
+    },
+  };
+
   const indices: MlIndicesApi = {
     async cleanAnomalyDetection() {
       await measurePerformanceAsync(log, 'mlApi.indices.cleanAnomalyDetection', async () => {
@@ -962,6 +1024,7 @@ export const getMlApiHelper = (
         await anomalyDetection.filters.deleteAll();
         await anomalyDetection.annotations.deleteAll();
         await anomalyDetection.deleteExpiredData();
+        await notifications.deleteAll();
         await savedObjects.sync();
       });
     },
@@ -994,6 +1057,7 @@ export const getMlApiHelper = (
     anomalyDetection,
     datafeeds,
     dataFrameAnalytics,
+    notifications,
     trainedModels,
     ingestPipelines,
     savedObjects,
