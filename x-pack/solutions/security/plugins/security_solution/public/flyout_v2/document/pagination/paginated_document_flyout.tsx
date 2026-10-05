@@ -51,18 +51,6 @@ export const PaginatedDocumentFlyout = memo(
       hasFlyoutQueryError,
     } = useFlyoutPagination();
 
-    if (hasFlyoutQueryError) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={QUERY_ERROR}
-          data-test-subj={FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID}
-        />
-      );
-    }
-
     return (
       <DocumentFlyoutWrapper
         documentId={flyoutDocumentId ?? undefined}
@@ -70,6 +58,17 @@ export const PaginatedDocumentFlyout = memo(
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
         isPaginationLoading={isFlyoutDocumentLoading}
+        queryErrorCallout={
+          hasFlyoutQueryError ? (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              iconType="warning"
+              title={QUERY_ERROR}
+              data-test-subj={FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID}
+            />
+          ) : undefined
+        }
       />
     );
   }

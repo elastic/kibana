@@ -26,6 +26,15 @@ jest.mock('../../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn().mockReturnValue({}),
 }));
 
+const mockWriteOnOpen = jest.fn();
+const mockBuildOnClose = jest.fn().mockReturnValue(jest.fn());
+jest.mock('../../shared/url_state/flyout_v2_url_writer', () => ({
+  useFlyoutV2UrlWriter: jest.fn(() => ({
+    writeOnOpen: mockWriteOnOpen,
+    buildOnClose: mockBuildOnClose,
+  })),
+}));
+
 // Only the flyout-manager store is faked; `useGeneratedHtmlId` must stay real so the hook
 // still mints the id it registers the overlay under.
 jest.mock('@elastic/eui', () => ({
@@ -78,6 +87,7 @@ describe('usePaginatedFlyout', () => {
     jest.clearAllMocks();
     jest.mocked(useOpenFlyout).mockReturnValue(openFlyout);
     mockFlyoutManagerSessions([]);
+    mockBuildOnClose.mockReturnValue(jest.fn());
   });
 
   it('openDocumentFlyout is stable across re-renders', () => {
@@ -260,6 +270,78 @@ describe('usePaginatedFlyout', () => {
       });
 
       expect(close).toHaveBeenCalled();
+    });
+  });
+
+  describe('V2 URL descriptor sync', () => {
+    it('writes the descriptor for the resolved document on open', () => {
+      const resolveDocument = jest.fn().mockReturnValue({
+        flyoutDocumentId: 'alert-1',
+        flyoutDocumentIndexName: 'index-1',
+      });
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions({ resolveDocument })));
+
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith({
+        kind: 'document',
+        documentId: 'alert-1',
+        indexName: 'index-1',
+      });
+    });
+
+    it('writes a fresh descriptor on every pagination step, even with the overlay already open', () => {
+      const resolveDocument = jest
+        .fn()
+        .mockReturnValueOnce({ flyoutDocumentId: 'alert-1', flyoutDocumentIndexName: 'index-1' })
+        .mockReturnValueOnce({ flyoutDocumentId: 'alert-2', flyoutDocumentIndexName: 'index-1' });
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions({ resolveDocument })));
+
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+        result.current.openPaginatedFlyout(1);
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledTimes(2);
+      expect(mockWriteOnOpen).toHaveBeenLastCalledWith({
+        kind: 'document',
+        documentId: 'alert-2',
+        indexName: 'index-1',
+      });
+    });
+
+    it('does not write a descriptor when no document was resolved', () => {
+      const { result } = renderHook(() =>
+        usePaginatedFlyout(makeOptions({ resolveDocument: jest.fn().mockReturnValue(null) }))
+      );
+
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+
+      expect(mockWriteOnOpen).not.toHaveBeenCalled();
+    });
+
+    it('builds onClose fresh at close time so it reads the latest write generation', () => {
+      const resolveDocument = jest.fn().mockReturnValue({
+        flyoutDocumentId: 'alert-1',
+        flyoutDocumentIndexName: 'index-1',
+      });
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions({ resolveDocument })));
+
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+      expect(mockBuildOnClose).not.toHaveBeenCalled();
+
+      const [, options] = openFlyout.mock.calls[0];
+      act(() => {
+        options.onClose();
+      });
+
+      expect(mockBuildOnClose).toHaveBeenCalledWith(null);
     });
   });
 

@@ -62,8 +62,9 @@ export interface ResolvedDocument {
  *
  * `useEsDocSearch` never reports `Loading` again once it has resolved something: when its `id`
  * changes it keeps returning `Found` with the previously fetched hit until the new response lands.
- * Comparing the resolved hit's `_id` with the requested one is therefore the only reliable way to
- * tell "showing the requested document" from "still fetching it" — without it a paginated flyout
+ * Comparing the resolved hit's `_id` and `_index` with the requested ones is therefore the only
+ * reliable way to tell "showing the requested document" from "still fetching it" — `_id` alone is
+ * not enough, since it is only unique within its own index — without it a paginated flyout
  * keeps the previous document fully rendered while its pagination control already points at the
  * new position, which on a slow connection reads as if nothing happened.
  */
@@ -97,7 +98,7 @@ export const useResolvedDocument = ({
     requestState === ElasticRequestState.NotFoundDataView;
   const isResolving =
     requestState === ElasticRequestState.Loading ||
-    (!skip && !hasSettled && hit?.raw._id !== documentId);
+    (!skip && !hasSettled && (hit?.raw._id !== documentId || hit?.raw._index !== indexName));
 
   return {
     requestState,

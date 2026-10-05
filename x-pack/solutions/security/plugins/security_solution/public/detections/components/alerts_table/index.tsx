@@ -35,6 +35,10 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { QueryClientProvider } from '@kbn/react-query';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import {
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -42,7 +46,7 @@ import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/fl
 import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/pagination/paginated_document_flyout';
 import { usePaginatedFlyout } from '../../../flyout_v2/document/pagination/use_paginated_flyout';
 import type { ScopedPaginationSlice } from '../../../flyout_v2/document/pagination/types';
-import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
+import { createCellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { alertsTableRef } from './alerts_table_ref';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import type {
@@ -323,10 +327,20 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     () => tablePropsOverrides.sort ?? sort
   );
 
+  // The new document details flyout must render alert field cell actions on the details-flyout
+  // trigger so the "Toggle column in table" action is available (it is not registered on the
+  // default trigger), and forward `alertsTableRef` so that action can target this imperatively
+  // controlled table. The alerts table on the Cases page uses the case-events trigger instead.
   const renderFlyoutCellActions = useMemo(
     () =>
-      ((props) =>
-        cellActionRenderer({ ...props, scopeId: tableType })) as typeof cellActionRenderer,
+      createCellActionRenderer(tableType, {
+        triggerId:
+          tableType === TableId.alertsOnCasePage
+            ? SECURITY_CELL_ACTIONS_CASE_EVENTS
+            : SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+        visibleCellActions: 6,
+        alertsTableRef,
+      }),
     [tableType]
   );
 
@@ -371,7 +385,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     origin: FLYOUT_ORIGIN.ALERTS_TABLE,
   });
 
-  const { flyoutDocumentIndex, pageSize } = slice;
+  const { flyoutDocumentIndex, pageSize, isFlyoutDocumentLoading } = slice;
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
@@ -471,10 +485,31 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // effect below never fires without a resolved alert), so `hasFlyoutQueryError`
   // is surfaced separately and consumers must check it before rendering.
   useEffect(() => {
-    if (flyoutDocumentIndex == null || flyoutPageIndex === tablePageIndex) {
+    if (flyoutDocumentIndex == null) {
       setState({ isFlyoutDocumentLoading: false, hasFlyoutQueryError: false });
       return;
     }
+
+    if (flyoutPageIndex === tablePageIndex) {
+      // Nothing to catch up on: the common case is that the identity already
+      // matches the table's page (resolved synchronously on click, or by the
+      // cross-page effect below before the table ever moved here). Leave it be —
+      // re-resolving on every table refetch would repoint the flyout whenever the
+      // result set shifts underneath it (e.g. closing an alert removes it from a
+      // table filtered on open alerts).
+      if (!isFlyoutDocumentLoading) return;
+      // A cross-page fetch was in flight and the table caught up to the flyout's
+      // target page before it resolved (the user also moved the table's own
+      // pagination there). Resolve from the table's own data instead of clearing
+      // loading while the previously displayed alert is still shown.
+      const identity = resolveDocument(flyoutDocumentIndex);
+      if (identity) {
+        setState({ ...identity, isFlyoutDocumentLoading: false, hasFlyoutQueryError: false });
+      }
+      // else: the table hasn't loaded this page yet either — stay loading until it does.
+      return;
+    }
+
     const offset = flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage;
     const alertOnRequestedPage = flyoutAlertsData?.alerts?.[offset];
     setState({
@@ -487,8 +522,10 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     flyoutAlertsData?.alerts,
     flyoutPageIndex,
     isFetchingFlyoutAlerts,
+    isFlyoutDocumentLoading,
     isFlyoutQueryError,
     reduxItemsPerPage,
+    resolveDocument,
     setState,
     tablePageIndex,
   ]);

@@ -13,6 +13,11 @@ import { PaginationStoreProvider } from './context';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../shared/hooks/use_open_flyout';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/telemetry';
+import { useFlyoutV2UrlWriter } from '../../shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  urlParamKeyForHistoryKey,
+} from '../../shared/url_state/flyout_v2_url_param';
 import type {
   ScopedPaginationSlice,
   UsePaginatedFlyoutOptions,
@@ -74,6 +79,8 @@ export const usePaginatedFlyout = ({
 
   const openFlyout = useOpenFlyout();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
   const v2OverlayRef = useRef<OverlayRef | null>(null);
 
@@ -107,8 +114,24 @@ export const usePaginatedFlyout = ({
 
   // Bundle mutable infra values so the stable `openPaginatedFlyout` never
   // captures a stale closure.
-  const infraRef = useRef({ openFlyout, defaultFlyoutProperties, renderBody, origin, onClose });
-  infraRef.current = { openFlyout, defaultFlyoutProperties, renderBody, origin, onClose };
+  const infraRef = useRef({
+    openFlyout,
+    defaultFlyoutProperties,
+    renderBody,
+    origin,
+    onClose,
+    writeOnOpen,
+    buildOnClose,
+  });
+  infraRef.current = {
+    openFlyout,
+    defaultFlyoutProperties,
+    renderBody,
+    origin,
+    onClose,
+    writeOnOpen,
+    buildOnClose,
+  };
 
   const setState = useCallback((partial: Partial<ScopedPaginationSlice>): void => {
     storeRef.current.setState(partial);
@@ -134,6 +157,17 @@ export const usePaginatedFlyout = ({
         ...(stateUpdate ?? {}),
       });
 
+      const { writeOnOpen: infraWriteOnOpen } = infraRef.current;
+      // Keep the V2 URL descriptor in sync with the document actually on screen, so refreshing
+      // or sharing the URL reopens it (pagination position itself is not restored).
+      if (stateUpdate?.flyoutDocumentId) {
+        infraWriteOnOpen({
+          kind: FLYOUT_DESCRIPTOR_KIND.document,
+          documentId: stateUpdate.flyoutDocumentId,
+          indexName: stateUpdate.flyoutDocumentIndexName ?? '',
+        });
+      }
+
       if (v2OverlayRef.current) return;
       const {
         openFlyout: infraOpenFlyout,
@@ -141,6 +175,7 @@ export const usePaginatedFlyout = ({
         renderBody: infraRenderBody,
         origin: infraOrigin,
         onClose: infraOnClose,
+        buildOnClose: infraBuildOnClose,
       } = infraRef.current;
       const store = storeRef.current;
       v2OverlayRef.current = infraOpenFlyout(
@@ -150,10 +185,12 @@ export const usePaginatedFlyout = ({
           id: flyoutId,
           historyKey,
           session: FLYOUT_SESSION_KIND.START,
-          onClose: (flyout: OverlayRef) => {
-            flyout.close();
+          onClose: () => {
             v2OverlayRef.current = null;
             store.setState(SOFT_RESET);
+            // Built here, not at open time: it must read the generation written by the most
+            // recent pagination step, not the one in effect when the overlay first opened.
+            infraBuildOnClose(null)();
             infraOnClose?.();
           },
         },

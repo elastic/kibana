@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,6 +59,13 @@ export interface DocumentFlyoutWrapperProps {
    * displayed document stays mounted behind a spinner instead of unmounting the whole flyout.
    */
   isPaginationLoading?: boolean;
+  /**
+   * Callout to show when the pagination source's own cross-page query (the one that resolves
+   * which document to show next) failed. Takes priority over the resolved document's body so the
+   * error replaces the content while the previously resolved document's header and pagination
+   * controls stay mounted.
+   */
+  queryErrorCallout?: ReactNode;
 }
 
 /**
@@ -73,6 +81,7 @@ export const DocumentFlyoutWrapper = memo(
     onAlertUpdated,
     dataTestSubj,
     isPaginationLoading,
+    queryErrorCallout,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
@@ -153,6 +162,7 @@ export const DocumentFlyoutWrapper = memo(
             onAlertUpdated={handleAlertUpdated}
             dataTestSubj={dataTestSubj}
             isPaginationLoading={isPaginationLoading || isReloading}
+            unavailableDocumentCallout={queryErrorCallout}
           />
         </>
       );

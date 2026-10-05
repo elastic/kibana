@@ -84,7 +84,7 @@ describe('PaginatedDocumentFlyout', () => {
     );
   });
 
-  it('renders an error instead of the previously displayed document when the cross-page query errors', () => {
+  it('keeps the flyout mounted and passes an error callout when the cross-page query errors', () => {
     const store = createPaginationStore();
     act(() => {
       store.setState({
@@ -94,13 +94,19 @@ describe('PaginatedDocumentFlyout', () => {
       });
     });
 
-    const { getByTestId, queryByTestId } = renderWithStore(store);
+    const { getByTestId } = renderWithStore(store);
 
     act(() => {
       store.setState({ flyoutDocumentIndex: 60, hasFlyoutQueryError: true });
     });
 
-    expect(getByTestId('securitySolutionFlyoutV2PaginationQueryError')).toBeInTheDocument();
-    expect(queryByTestId('documentFlyoutWrapperStub')).not.toBeInTheDocument();
+    expect(getByTestId('documentFlyoutWrapperStub')).toBeInTheDocument();
+    expect(mockDocumentFlyoutWrapper).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        documentId: 'alert-1',
+        indexName: 'index-1',
+        queryErrorCallout: expect.anything(),
+      })
+    );
   });
 });

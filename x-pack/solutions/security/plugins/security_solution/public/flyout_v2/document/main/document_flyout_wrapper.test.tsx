@@ -38,11 +38,15 @@ jest.mock('.', () => ({
 }));
 
 // `_id` matters: the wrapper tells "still resolving the next document" from "showing the
-// requested one" by comparing the rendered hit's `_id` with the requested document id.
-const createHit = (id: string, eventKind: string = 'event'): DataTableRecord =>
+// requested one" by comparing the rendered hit's `_id` and `_index` with the requested document's.
+const createHit = (
+  id: string,
+  eventKind: string = 'event',
+  index: string = 'my-index'
+): DataTableRecord =>
   ({
     id,
-    raw: { _id: id },
+    raw: { _id: id, _index: index },
     flattened: { 'event.kind': eventKind },
     isAnchor: false,
   } as DataTableRecord);
@@ -264,6 +268,36 @@ describe('DocumentFlyoutWrapper', () => {
     );
 
     expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hit: firstHit, isPaginationLoading: true })
+    );
+  });
+
+  it('keeps reporting pagination loading when a stale hit shares `_id` with the next document but lives in a different index', () => {
+    const firstHit = createHit('doc-id');
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, firstHit, jest.fn()]);
+
+    const { rerender, getByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hit: firstHit, isPaginationLoading: false })
+    );
+
+    // `useEsDocSearch` still returns `firstHit` (same `_id`, different index) while it fetches
+    // the newly requested document from `other-index`. Without comparing `_index` too, this would
+    // be mistaken for the requested document having already resolved.
+    rerender(
+      <TestProviders>
+        <DocumentFlyoutWrapper
+          documentId="doc-id"
+          indexName="other-index"
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
     expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
       expect.objectContaining({ hit: firstHit, isPaginationLoading: true })

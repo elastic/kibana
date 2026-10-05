@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
@@ -62,7 +62,7 @@ import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
 import { PaginatedDocumentFlyout } from '../../../../../flyout_v2/document/pagination/paginated_document_flyout';
 import { usePaginatedFlyout } from '../../../../../flyout_v2/document/pagination/use_paginated_flyout';
-import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import { useFlyoutSessionContext } from '../../../../../flyout_v2/session_context';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -149,6 +149,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const enableNewFlyout = useIsNewFlyoutEnabled();
     const { openAttackFlyout } = useFlyoutApi();
+    const { historyKey: ambientFlyoutHistoryKey } = useFlyoutSessionContext();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
@@ -205,18 +206,40 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [refetch, timelineCellActionRenderer]
     );
 
+    // `resolveDocument` runs inside `usePaginatedFlyout`, so it can't destructure
+    // `closePaginatedFlyout` from that same hook call. The ref lets it reach the latest
+    // instance once the hook below has returned it.
+    const closePaginatedFlyoutRef = useRef<() => void>(() => {});
+
     // Resolves the identity of the document at an absolute row index (0-based
     // across the full result set) from the currently-loaded rows. Returns null
     // when the row is not in memory — the parallel cross-page query will resolve
     // it and call openPaginatedFlyout again once the data is available. The
     // flyout fetches the document itself from `_id`/`_index`, as it did before
     // pagination was introduced.
+    //
+    // Attack-discovery rows are routed to the attack flyout instead, mirroring the direct-click
+    // branch in `handleOnEventDetailPanelOpened` below: they have no document identity this
+    // pagination flow can resolve, so the paginated document flyout is closed first.
     const resolveDocument = useCallback(
       (documentIndex: number) => {
         const targetRow = tableRows[documentIndex];
         if (!targetRow) {
           return null;
         }
+
+        if (isAttackDiscoveryRow(targetRow)) {
+          closePaginatedFlyoutRef.current();
+          openAttackFlyout({
+            attackId: targetRow._id,
+            indexName: targetRow.ecs._index ?? '',
+            onAttackUpdated: refetch,
+            origin: FLYOUT_ORIGIN.TIMELINE,
+            attackTitle: getAttackTitleValue(targetRow),
+          });
+          return null;
+        }
+
         return {
           flyoutDocumentId: targetRow._id,
           // `raw._index` is the concrete index carried by the underlying TimelineItem
@@ -227,7 +250,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           totalDocumentCount: tableRows.length,
         };
       },
-      [tableRows]
+      [tableRows, openAttackFlyout, refetch]
     );
 
     const {
@@ -237,9 +260,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     } = usePaginatedFlyout({
       resolveDocument,
       renderBody: getTimelineBody,
-      historyKey: documentFlyoutHistoryKey,
+      historyKey: ambientFlyoutHistoryKey,
       origin: FLYOUT_ORIGIN.TIMELINE,
     });
+    closePaginatedFlyoutRef.current = closePaginatedFlyout;
 
     // Timeline's row icon is driven by `expandedDoc`, while in-flyout
     // pagination is driven by the external pagination store. Keep the two in
