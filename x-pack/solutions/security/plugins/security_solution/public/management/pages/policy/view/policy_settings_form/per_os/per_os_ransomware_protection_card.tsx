@@ -9,7 +9,6 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { hasProtectionPopup } from '../../../../../../../common/endpoint/models/policy_config_helpers';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -151,11 +150,7 @@ const PerOsRansomwareProtectionRow = memo<PerOsRansomwareProtectionRowProps>(
     const osPolicy = accessor.read();
     const ransomwareMode = readRansomwareMode(osPolicy);
     const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
-    const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', os, onChange);
-    // Linux ransomware has no user notification: the endpoint's notification code only reads
-    // `popup.ransomware` on Windows/macOS. `hasProtectionPopup` is the single source of truth for
-    // that, so the row's shape follows it instead of a hard-coded OS check.
-    const showNotifyUser = subfeaturesVisible && hasProtectionPopup(os, 'ransomware');
+    const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', onChange);
 
     return (
       <OsRow
@@ -171,7 +166,7 @@ const PerOsRansomwareProtectionRow = memo<PerOsRansomwareProtectionRowProps>(
         isLast={isLast}
         data-test-subj={getTestId()}
       >
-        {showNotifyUser && (
+        {subfeaturesVisible && (
           <PerOsNotifyUserOption
             accessor={accessor}
             onChange={onChange}

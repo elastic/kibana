@@ -263,8 +263,8 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   });
 
   // A policy stored before Linux ransomware existed (or one saved while the
-  // `linuxRansomwareProtection` flag was off) has no `ransomware` object at all. Rendering must
-  // survive it, and setting a mode has to create the branch rather than throw.
+  // `linuxRansomwareProtection` flag was off) has no `ransomware` or `popup.ransomware` object at
+  // all. Rendering must survive it, and setting a mode has to create both branches rather than throw.
   it('renders and writes a mode when the whole Linux ransomware branch is absent', async () => {
     const onChange = jest.fn();
     policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
@@ -273,6 +273,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     policy.windows.ransomware.mode = ProtectionModes.off;
     policy.mac.ransomware.mode = ProtectionModes.off;
     delete policy.linux.ransomware;
+    delete policy.linux.popup.ransomware;
 
     renderResult = mockedContext.render(
       <PerOsRansomwareProtectionCard
@@ -301,7 +302,9 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
       supported: policyFactoryWithSupportedFeatures().linux.ransomware?.supported,
     });
     expect(isEndpointPolicyValidForLicense(updatedPolicy, Platinum)).toBe(true);
-    // Linux has no ransomware popup: the endpoint's notification code never reads it.
-    expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
+    expect(updatedPolicy.linux.popup.ransomware).toEqual({
+      enabled: false,
+      message: DefaultPolicyNotificationMessage,
+    });
   });
 });

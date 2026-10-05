@@ -198,6 +198,10 @@ export const policyFactory = ({
           message: '',
           enabled: true,
         },
+        ransomware: {
+          message: '',
+          enabled: true,
+        },
         behavior_protection: {
           message: '',
           enabled: true,
@@ -441,6 +445,13 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: true, // disabling/configuring malware popup is a paid feature
         },
+        // Mirrors `linux.ransomware`: an absent branch must stay absent.
+        ...(policy.linux.popup.ransomware && {
+          ransomware: {
+            message: '',
+            enabled: false,
+          },
+        }),
         memory_protection: {
           message: '',
           enabled: false,

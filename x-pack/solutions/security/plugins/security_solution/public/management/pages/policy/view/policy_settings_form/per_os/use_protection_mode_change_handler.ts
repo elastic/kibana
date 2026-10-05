@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import type { PolicyConfig, ProtectionFields } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { hasProtectionPopup } from '../../../../../../../common/endpoint/models/policy_config_helpers';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import type {
   BehaviorProtectionOSes,
@@ -45,7 +44,6 @@ export interface PerOsProtectionModeChangeSideEffectOptions<Protection extends P
 export const useProtectionModeChangeHandler = <Protection extends PolicyProtection>(
   accessor: PerOsPolicyAccessor<ProtectionOperatingSystems[Protection]>,
   protection: Protection,
-  os: ProtectionOperatingSystems[Protection],
   onChange: PolicyFormComponentCommonProps['onChange'],
   additionalOnModeChange?: (options: PerOsProtectionModeChangeSideEffectOptions<Protection>) => void
 ): ((nextMode: ProtectionModes) => void) => {
@@ -67,14 +65,8 @@ export const useProtectionModeChangeHandler = <Protection extends PolicyProtecti
           mode: nextMode,
         };
         // An active mode always writes popup.enabled from the new mode, true only for prevent.
-        // off is the only mode that leaves popup.enabled untouched. Some OS/protection pairs
-        // (Linux ransomware) have no popup branch at all, so writing here would create one the
-        // endpoint never reads.
-        if (
-          isPlatinumPlus &&
-          nextMode !== ProtectionModes.off &&
-          hasProtectionPopup(os, protection)
-        ) {
+        // off is the only mode that leaves popup.enabled untouched.
+        if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
           protectionPolicy.popup[protection] = {
             ...createPopupBranch(protection, nextMode === ProtectionModes.prevent),
             ...protectionPolicy.popup[protection],
@@ -86,6 +78,6 @@ export const useProtectionModeChangeHandler = <Protection extends PolicyProtecti
       });
       onChange({ isValid: true, updatedPolicy });
     },
-    [accessor, additionalOnModeChange, isPlatinumPlus, onChange, os, protection]
+    [accessor, additionalOnModeChange, isPlatinumPlus, onChange, protection]
   );
 };

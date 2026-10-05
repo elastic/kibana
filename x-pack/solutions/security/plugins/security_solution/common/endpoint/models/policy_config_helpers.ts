@@ -36,6 +36,8 @@ const allOsValues = [
 const getPolicyPopupReference = (): Array<{
   keyPath: string;
   osList: PolicyOperatingSystem[];
+  /** Operating systems where the popup is optional in the policy: absent there has no message. */
+  optionalOsList?: PolicyOperatingSystem[];
 }> => [
   {
     keyPath: 'popup.malware.message',
@@ -51,13 +53,22 @@ const getPolicyPopupReference = (): Array<{
   },
   {
     keyPath: 'popup.ransomware.message',
-    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    osList: [...allOsValues],
+    optionalOsList: [PolicyOperatingSystem.linux],
   },
   {
     keyPath: 'popup.device_control.message',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
   },
 ];
+
+/** Popup message paths `policy` carries; an optional popup that is absent carries none. */
+const getPolicyPopupMessagePaths = (policy: PolicyConfig): string[] =>
+  getPolicyPopupReference().flatMap(({ keyPath, osList, optionalOsList = [] }) =>
+    osList
+      .filter((os) => !optionalOsList.includes(os) || get(policy, `${os}.${keyPath}`) !== undefined)
+      .map((os) => `${os}.${keyPath}`)
+  );
 
 export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
   {
@@ -144,6 +155,10 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
     linux: {
       ...result.linux,
       ...getDisabledLinuxSpecificProtections(result),
+      popup: {
+        ...result.linux.popup,
+        ...getDisabledLinuxSpecificPopups(result),
+      },
     },
   };
 };
@@ -260,6 +275,11 @@ const getDisabledLinuxSpecificProtections = (policy: PolicyConfig) =>
     ? { ransomware: { ...policy.linux.ransomware, mode: ProtectionModes.off } }
     : {};
 
+const getDisabledLinuxSpecificPopups = (policy: PolicyConfig) =>
+  policy.linux.popup.ransomware
+    ? { ransomware: { ...policy.linux.popup.ransomware, enabled: false } }
+    : {};
+
 /**
  * Returns the provided with only event collection turned enabled
  * @param policy
@@ -311,17 +331,11 @@ export function isBillablePolicy(policy: PolicyConfig) {
   return !isPolicySetToEventCollectionOnly(policy).isOnlyCollectingEvents;
 }
 
-export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
-  const popupRefs = getPolicyPopupReference();
-
-  return popupRefs.some(({ keyPath, osList }) => {
-    return osList.some((osValue) => {
-      const fullKeyPathForOs = `${osValue}.${keyPath}`;
-      const currentValue = get(policy, fullKeyPathForOs);
-      return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
-    });
+export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean =>
+  getPolicyPopupMessagePaths(policy).some((path) => {
+    const currentValue = get(policy, path);
+    return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
   });
-};
 
 export interface DeviceControlNotificationConflict {
   readonly os: PolicyOperatingSystem.windows | PolicyOperatingSystem.mac;
@@ -347,17 +361,13 @@ export const getDeviceControlNotificationConflicts = (
 };
 
 export const resetCustomNotifications = (
+  policy: PolicyConfig,
   customNotification = DefaultPolicyNotificationMessage
-): Partial<PolicyConfig> => {
-  const popupRefs = getPolicyPopupReference();
-
-  return popupRefs.reduce((acc, { keyPath, osList }) => {
-    osList.forEach((osValue) => {
-      set(acc, `${osValue}.${keyPath}`, customNotification);
-    });
+): Partial<PolicyConfig> =>
+  getPolicyPopupMessagePaths(policy).reduce((acc, path) => {
+    set(acc, path, customNotification);
     return acc;
   }, {});
-};
 
 /**
  * Returns a copy of the passed `PolicyConfig` with device_control fields completely removed
@@ -422,15 +432,16 @@ export const isLinuxRansomwareProtectionEnabled = ({
   linuxRansomwareProtection && perOsPolicySettings;
 
 /**
- * Returns a copy of the passed `PolicyConfig` with Linux ransomware protection removed.
- * Used when `isLinuxRansomwareProtectionEnabled` is false.
+ * Returns a copy of the passed `PolicyConfig` with Linux ransomware protection and its user
+ * notification removed. Used when `isLinuxRansomwareProtectionEnabled` is false.
  */
 export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
-  const { ransomware: linuxRansomware, ...linuxRest } = policy.linux;
+  const { ransomware: linuxRansomware, popup, ...linuxRest } = policy.linux;
+  const { ransomware: linuxRansomwarePopup, ...popupRest } = popup;
 
   return {
     ...policy,
-    linux: linuxRest,
+    linux: { ...linuxRest, popup: popupRest },
   };
 };
 
@@ -457,18 +468,6 @@ const forEachCouplingOs = (
   }
 };
 
-/**
- * Whether the endpoint on `os` reads a user notification for `protection`.
- */
-export const hasProtectionPopup = (
-  os: PolicyOperatingSystem | keyof UIPolicyConfig,
-  protection: PolicyCouplingProtection
-): boolean =>
-  getPolicyPopupReference().some(
-    ({ keyPath, osList }) =>
-      keyPath === `popup.${protection}.message` && osList.some((popupOs) => popupOs === os)
-  );
-
 export const setProtectionModeAndPopup = ({
   policy,
   protection,
@@ -486,7 +485,7 @@ export const setProtectionModeAndPopup = ({
 }): PolicyConfig => {
   forEachCouplingOs(osList, (os) => {
     set(policy, `${os}.${protection}.mode`, mode);
-    if (syncPopupEnabled && hasProtectionPopup(os, protection)) {
+    if (syncPopupEnabled) {
       set(policy, `${os}.popup.${protection}.enabled`, popupEnabled);
     }
   });

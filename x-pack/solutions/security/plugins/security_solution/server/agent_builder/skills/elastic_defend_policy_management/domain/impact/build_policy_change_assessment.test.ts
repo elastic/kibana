@@ -157,9 +157,10 @@ describe('buildPolicyChangeAssessment', () => {
     });
   });
 
-  it('applies set_protection_level ransomware to Linux and backfills a license-valid supported flag when the flag is on', () => {
+  it('applies set_protection_level ransomware to Linux and backfills a license-valid supported flag and notification when the flag is on', () => {
     const stored = policyFactory();
     delete stored.linux.ransomware;
+    delete stored.linux.popup.ransomware;
 
     const assessment = buildPolicyChangeAssessment(
       createPolicy(stored),
@@ -176,10 +177,12 @@ describe('buildPolicyChangeAssessment', () => {
       mode: ProtectionModes.prevent,
       supported: true,
     });
-    expect(assessment.globalBlockers).toEqual([]);
+    expect(assessment.proposed.linux.popup.ransomware?.enabled).toBe(true);
     expect(
-      assessment.changes.some((change) => change.path === 'linux.popup.ransomware.enabled')
-    ).toBe(false);
+      assessment.changes.find((change) => change.path === 'linux.popup.ransomware.enabled')
+        ?.eligibility
+    ).toEqual({ eligible: true });
+    expect(assessment.globalBlockers).toEqual([]);
   });
 
   it('never touches Linux ransomware for a protection-level operation while the flag is off', () => {
@@ -187,6 +190,7 @@ describe('buildPolicyChangeAssessment', () => {
     stored.windows.ransomware.mode = ProtectionModes.off;
     stored.mac.ransomware.mode = ProtectionModes.off;
     delete stored.linux.ransomware;
+    delete stored.linux.popup.ransomware;
 
     const assessment = buildPolicyChangeAssessment(
       createPolicy(stored),
@@ -194,9 +198,13 @@ describe('buildPolicyChangeAssessment', () => {
       { ...capabilities(), linuxRansomwareProtection: false }
     );
 
-    expect(assessment.changes.some((change) => change.path.startsWith('linux.ransomware'))).toBe(
-      false
-    );
+    expect(
+      assessment.changes.some(
+        (change) =>
+          change.path.startsWith('linux.ransomware') ||
+          change.path.startsWith('linux.popup.ransomware')
+      )
+    ).toBe(false);
     expect(assessment.proposed.linux.ransomware).toBeUndefined();
     const windowsChange = assessment.changes.find(
       (change) => change.path === 'windows.ransomware.mode'

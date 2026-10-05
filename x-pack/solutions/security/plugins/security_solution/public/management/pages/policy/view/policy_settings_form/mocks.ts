@@ -129,6 +129,8 @@ export const getPolicySettingsFormTestSubjects = (
       linux: {
         row: perOsRansomwareTestSubj('linux'),
         modeSelect: perOsRansomwareTestSubj('linux-mode'),
+        notifyUserCheckbox: perOsRansomwareTestSubj('linux-notifyUser-checkbox'),
+        notifyCustomMessage: perOsRansomwareTestSubj('linux-notifyUser-customMessage'),
       },
     },
     memory: {

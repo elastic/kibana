@@ -50,6 +50,7 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   // Linux ransomware is optional: a policy that predates it, or where it is gated off, has none.
   const linuxRansomware = policy.linux.ransomware;
+  const linuxRansomwarePopup = policy.linux.popup.ransomware;
 
   if (isAtLeast(license, 'platinum')) {
     const defaults = policyFactoryWithSupportedFeatures();
@@ -90,7 +91,9 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled ||
-    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled
+    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled ||
+    (linuxRansomwarePopup !== undefined &&
+      linuxRansomwarePopup.enabled !== defaults.linux.popup.ransomware?.enabled)
   ) {
     return false;
   }
@@ -99,7 +102,10 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
     (policy.windows.popup.ransomware.message !== '' &&
       policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
     (policy.mac.popup.ransomware.message !== '' &&
-      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage)
+      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
+    (linuxRansomwarePopup !== undefined &&
+      linuxRansomwarePopup.message !== '' &&
+      linuxRansomwarePopup.message !== DefaultPolicyNotificationMessage)
   ) {
     return false;
   }

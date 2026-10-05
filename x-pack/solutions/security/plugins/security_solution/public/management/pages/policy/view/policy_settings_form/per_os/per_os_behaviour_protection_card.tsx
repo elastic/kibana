@@ -130,7 +130,6 @@ const PerOsBehaviourProtectionRow = memo<PerOsBehaviourProtectionRowProps>(
     const handleModeChange = useProtectionModeChangeHandler(
       accessor,
       'behavior_protection',
-      os,
       onChange
     );
 

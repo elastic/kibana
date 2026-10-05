@@ -17,7 +17,10 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoin
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
-import { policyFactoryWithSupportedFeatures } from '../../../../../../../common/endpoint/models/policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  policyFactoryWithSupportedFeatures,
+} from '../../../../../../../common/endpoint/models/policy_config';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import type { PerOsRansomwareProtectionCardProps } from './per_os_ransomware_protection_card';
@@ -85,16 +88,21 @@ describe('PerOsRansomwareProtectionCard', () => {
     ).toHaveLength(3);
   });
 
-  it('the Linux row has no notify-user control, even when its mode is prevent', () => {
+  it('toggling the Linux notification writes only linux.popup.ransomware', async () => {
     policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+    policy.linux.popup.ransomware = { enabled: true, message: '' };
+    const windowsBefore = cloneDeep(policy.windows);
+    const macBefore = cloneDeep(policy.mac);
     render();
 
-    expect(renderResult.getByTestId(testSubj.linux.modeSelect)).toHaveTextContent(
-      /^Detect & prevent$/
-    );
-    expect(
-      within(renderResult.getByTestId(testSubj.linux.row)).queryByText('Notify user')
-    ).not.toBeInTheDocument();
+    const notifyCheckbox = renderResult.getByTestId(testSubj.linux.notifyUserCheckbox);
+    expect(notifyCheckbox).toBeChecked();
+    await userEvent.click(notifyCheckbox);
+
+    const updatedPolicy = getUpdatedPolicy();
+    expect(updatedPolicy.linux.popup.ransomware?.enabled).toBe(false);
+    expect(updatedPolicy.windows).toEqual(windowsBefore);
+    expect(updatedPolicy.mac).toEqual(macBefore);
   });
 
   it('a policy lacking linux.ransomware renders the Linux row as off', () => {
@@ -104,10 +112,11 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(renderResult.getByTestId(testSubj.linux.modeSelect)).toHaveTextContent(/^Disable$/);
   });
 
-  it('changing the Linux mode writes linux.ransomware.mode and never adds linux.popup.ransomware', async () => {
+  it('changing the Linux mode writes linux.ransomware.mode and syncs the Linux notification', async () => {
     policy.windows.ransomware.mode = ProtectionModes.off;
     policy.mac.ransomware.mode = ProtectionModes.off;
     policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+    policy.linux.popup.ransomware = { enabled: false, message: 'keep me' };
     render();
 
     await selectOsControlOption(renderResult, testSubj.linux.modeSelect, /^Detect & prevent$/);
@@ -117,13 +126,14 @@ describe('PerOsRansomwareProtectionCard', () => {
       mode: ProtectionModes.prevent,
       supported: true,
     });
-    expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
+    expect(updatedPolicy.linux.popup.ransomware).toEqual({ enabled: true, message: 'keep me' });
   });
 
-  it('seeds supported per license when the Linux ransomware branch was absent', async () => {
+  it('seeds supported per license and a complete notification when the Linux ransomware branches were absent', async () => {
     policy.windows.ransomware.mode = ProtectionModes.off;
     policy.mac.ransomware.mode = ProtectionModes.off;
     delete policy.linux.ransomware;
+    delete policy.linux.popup.ransomware;
     render();
 
     await selectOsControlOption(renderResult, testSubj.linux.modeSelect, /^Detect$/);
@@ -133,7 +143,10 @@ describe('PerOsRansomwareProtectionCard', () => {
       mode: ProtectionModes.detect,
       supported: policyFactoryWithSupportedFeatures().linux.ransomware?.supported,
     });
-    expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
+    expect(updatedPolicy.linux.popup.ransomware).toEqual({
+      enabled: false,
+      message: DefaultPolicyNotificationMessage,
+    });
   });
 
   it('the master toggle turns Linux on/off together with Windows and macOS when the flag is on', async () => {
@@ -148,7 +161,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(updatedPolicy.windows.ransomware.mode).toBe(ProtectionModes.prevent);
     expect(updatedPolicy.mac.ransomware.mode).toBe(ProtectionModes.prevent);
     expect(updatedPolicy.linux.ransomware?.mode).toBe(ProtectionModes.prevent);
-    expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
+    expect(updatedPolicy.linux.popup.ransomware?.enabled).toBe(true);
   });
 
   describe('and linuxRansomwareProtection is disabled', () => {
@@ -183,10 +196,11 @@ describe('PerOsRansomwareProtectionCard', () => {
       expect(updatedPolicy.linux).toEqual(linuxBefore);
     });
 
-    it('the master toggle leaves an absent linux.ransomware branch absent', async () => {
+    it('the master toggle leaves absent Linux ransomware branches absent', async () => {
       policy.windows.ransomware.mode = ProtectionModes.off;
       policy.mac.ransomware.mode = ProtectionModes.off;
       delete policy.linux.ransomware;
+      delete policy.linux.popup.ransomware;
       render();
 
       await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
@@ -194,6 +208,7 @@ describe('PerOsRansomwareProtectionCard', () => {
       const updatedPolicy = getUpdatedPolicy();
       expect(updatedPolicy.windows.ransomware.mode).toBe(ProtectionModes.prevent);
       expect(updatedPolicy.linux.ransomware).toBeUndefined();
+      expect(updatedPolicy.linux.popup.ransomware).toBeUndefined();
     });
   });
 

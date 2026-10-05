@@ -58,10 +58,10 @@ const protectionReference = (protection: PolicyCouplingProtection) =>
   getPolicyProtectionsReference().find(({ keyPath }) => keyPath === `${protection}.mode`);
 
 /**
- * `set_protection_level`/`set_protection_enabled` are card-level operations that otherwise apply
- * to every OS a protection supports. Linux ransomware must stay untouched while
- * `linuxRansomwareProtection` is off, so those broad operations are the one place that needs to
- * drop Linux from the protection's OS list before dispatch runs.
+ * Card-level operations (`set_protection_level`/`set_protection_enabled`) and coupled popup writes
+ * otherwise apply to every OS a protection supports. Linux ransomware and its notification must
+ * stay untouched while `linuxRansomwareProtection` is off, so those broad writes drop Linux from
+ * the protection's OS list before dispatch runs.
  */
 const restrictBroadOsList = (
   protection: PolicyCouplingProtection,
@@ -73,18 +73,22 @@ const restrictBroadOsList = (
     : osList;
 
 /**
- * `setProtectionModeAndPopup` writes `linux.ransomware.mode` with a plain `set()`, which creates
- * `{ mode }` with no `supported` key when `linux.ransomware` was previously absent. A missing
- * `supported` fails license validation, so any dispatch that could have materialized the field
- * must be followed by this backfill.
+ * `setProtectionModeAndPopup` and `setPopupEnabled` write Linux ransomware leaves with a plain
+ * `set()`, which creates `{ mode }` with no `supported` key and `{ enabled }` with no `message` key
+ * when the branch was previously absent. A missing `supported` fails license validation and a
+ * missing `message` leaves an incomplete notification, so any dispatch that could have
+ * materialized either branch must be followed by this backfill.
  */
-const backfillLinuxRansomwareSupported = (
+const backfillLinuxRansomware = (
   policy: PolicyConfig,
   licenseInformation: ILicense | null
 ): void => {
-  const { ransomware } = policy.linux;
+  const { ransomware, popup } = policy.linux;
   if (ransomware !== undefined && ransomware.supported === undefined) {
     ransomware.supported = isAtLeast(licenseInformation, 'platinum');
+  }
+  if (popup.ransomware !== undefined && popup.ransomware.message === undefined) {
+    popup.ransomware.message = '';
   }
 };
 
@@ -199,7 +203,7 @@ const dispatch = (
     }
     if (operation.op === 'set_protection_enabled' && protection === 'behavior_protection')
       helpers.setBehaviorReputationService(policy, mode !== ProtectionModes.off);
-    backfillLinuxRansomwareSupported(policy, licenseInformation);
+    backfillLinuxRansomware(policy, licenseInformation);
     return;
   }
   const target = classified ?? classifySetFieldValue(operation.path, operation.value);
@@ -243,7 +247,12 @@ const dispatch = (
     case 'popup_enabled': {
       const reference = protectionReference(target.protection);
       if (reference)
-        helpers.setPopupEnabled(policy, target.protection, reference.osList, target.value);
+        helpers.setPopupEnabled(
+          policy,
+          target.protection,
+          restrictBroadOsList(target.protection, reference.osList, linuxRansomwareProtection),
+          target.value
+        );
       break;
     }
     case 'malware_boolean': {
@@ -258,7 +267,7 @@ const dispatch = (
     default:
       set(policy, operation.path, operation.value);
   }
-  backfillLinuxRansomwareSupported(policy, licenseInformation);
+  backfillLinuxRansomware(policy, licenseInformation);
 };
 
 const validateOperation = (

@@ -329,9 +329,10 @@ describe('expandChangeSet', () => {
     expect(prepared.proposedConfig.mac.device_control?.enabled).toBe(true);
   });
 
-  it('backfills a Platinum-valid linux.ransomware.supported when the mode is set on a policy that lacks it', () => {
+  it('backfills a Platinum-valid linux.ransomware.supported and a complete notification when the mode is set on a policy that lacks them', () => {
     const policy = policyFactory();
     delete policy.linux.ransomware;
+    delete policy.linux.popup.ransomware;
     const platinum = licenseMock.createLicense({ license: { type: 'platinum' } });
 
     const prepared = expandChangeSet(
@@ -344,7 +345,7 @@ describe('expandChangeSet', () => {
       mode: ProtectionModes.prevent,
       supported: true,
     });
-    expect(prepared.proposedConfig.linux.popup).not.toHaveProperty('ransomware');
+    expect(prepared.proposedConfig.linux.popup.ransomware).toEqual({ enabled: true, message: '' });
   });
 
   it('backfills supported false below Platinum when linux.ransomware is materialized', () => {
@@ -364,11 +365,12 @@ describe('expandChangeSet', () => {
     });
   });
 
-  it('never touches linux.ransomware for a card-level operation while the flag is off', () => {
+  it('never touches Linux ransomware or its notification for a card-level operation while the flag is off', () => {
     const policy = policyFactory();
     policy.windows.ransomware.mode = ProtectionModes.off;
     policy.mac.ransomware.mode = ProtectionModes.off;
     delete policy.linux.ransomware;
+    delete policy.linux.popup.ransomware;
 
     const prepared = expandChangeSet(
       [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
@@ -377,12 +379,36 @@ describe('expandChangeSet', () => {
     );
 
     expect(prepared.proposedConfig.linux.ransomware).toBeUndefined();
+    expect(prepared.proposedConfig.linux.popup.ransomware).toBeUndefined();
     expect(changeAt(prepared.explicitChanges, 'windows.ransomware.mode')?.to).toBe(
       ProtectionModes.prevent
     );
     expect(
-      pathsOf(prepared.explicitChanges).some((path) => path.startsWith('linux.ransomware'))
+      pathsOf(prepared.explicitChanges).some(
+        (path) => path.startsWith('linux.ransomware') || path.startsWith('linux.popup.ransomware')
+      )
     ).toBe(false);
+  });
+
+  it('couples a ransomware notification change to Linux only while the flag is on', () => {
+    const withoutLinux = policyFactory();
+    delete withoutLinux.linux.ransomware;
+    delete withoutLinux.linux.popup.ransomware;
+
+    const flagOff = expandChangeSet(
+      [{ op: 'set_field', path: 'windows.popup.ransomware.enabled', value: false }],
+      withoutLinux,
+      { linuxRansomwareProtection: false, licenseInformation: null }
+    );
+    expect(flagOff.proposedConfig.mac.popup.ransomware.enabled).toBe(false);
+    expect(flagOff.proposedConfig.linux.popup.ransomware).toBeUndefined();
+
+    const flagOn = expandChangeSet(
+      [{ op: 'set_field', path: 'windows.popup.ransomware.enabled', value: false }],
+      policyFactory(),
+      ransomwareLinuxContext
+    );
+    expect(flagOn.proposedConfig.linux.popup.ransomware).toEqual({ enabled: false, message: '' });
   });
 
   it('refuses unknown, excluded, derived, and other non-writable direct paths', () => {

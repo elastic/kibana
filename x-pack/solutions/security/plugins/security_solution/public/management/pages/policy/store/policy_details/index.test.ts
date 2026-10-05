@@ -462,6 +462,10 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      ransomware: {
+                        enabled: false,
+                        message: '',
+                      },
                     },
                     advanced: {
                       capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',

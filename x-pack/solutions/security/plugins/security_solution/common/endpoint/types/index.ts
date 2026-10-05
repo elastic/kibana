@@ -1111,7 +1111,7 @@ export interface PolicyConfig {
     memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     /**
      * Absent on policies created before Linux ransomware existed and wherever
-     * `linuxRansomwareProtection` is off; absent means off. Linux has no ransomware popup.
+     * `linuxRansomwareProtection` is off; absent means off.
      */
     ransomware?: ProtectionFields & SupportedFields;
     popup: {
@@ -1124,6 +1124,11 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      /** Present alongside `ransomware`; absent wherever that is absent. */
+      ransomware?: {
         message: string;
         enabled: boolean;
       };

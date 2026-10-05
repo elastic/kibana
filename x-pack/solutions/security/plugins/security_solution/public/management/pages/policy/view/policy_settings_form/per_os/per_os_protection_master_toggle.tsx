@@ -11,7 +11,6 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import type { ImmutableArray, PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { hasProtectionPopup } from '../../../../../../../common/endpoint/models/policy_config_helpers';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
@@ -117,15 +116,11 @@ export const PerOsProtectionMasterToggle = memo(
           osPolicy[protection] = protectionBranch;
 
           if (isPlatinumPlus) {
-            // Some OS/protection pairs (Linux ransomware) have no popup branch at all, so writing
-            // here would create a notification the endpoint never reads.
-            if (hasProtectionPopup(os, protection)) {
-              osPolicy.popup[protection] = {
-                ...createPopupBranch(protection, value),
-                ...osPolicy.popup[protection],
-                enabled: value,
-              };
-            }
+            osPolicy.popup[protection] = {
+              ...createPopupBranch(protection, value),
+              ...osPolicy.popup[protection],
+              enabled: value,
+            };
 
             if (protection === 'behavior_protection') {
               protectionBranch.reputation_service = value;

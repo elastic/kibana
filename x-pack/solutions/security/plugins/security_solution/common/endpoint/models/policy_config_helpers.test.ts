@@ -22,7 +22,6 @@ import {
   removeLinuxDnsEvents,
   removeLinuxRansomware,
   isLinuxRansomwareProtectionEnabled,
-  hasProtectionPopup,
   setCustomYaraSignatures,
   setProtectionModeAndPopup,
 } from './policy_config_helpers';
@@ -324,6 +323,17 @@ describe('Policy Config helpers', () => {
       set(policy, 'windows.popup.ransomware.message', '');
       expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
     });
+
+    it('treats an absent Linux ransomware notification as default', () => {
+      expect(checkIfPopupMessagesContainCustomNotifications(removeLinuxRansomware(policy))).toBe(
+        false
+      );
+    });
+
+    it('returns true when the Linux ransomware message is custom', () => {
+      set(policy, 'linux.popup.ransomware.message', 'Custom message');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
   });
 
   describe('resetCustomNotifications', () => {
@@ -341,12 +351,13 @@ describe('Policy Config helpers', () => {
       'linux.popup.malware.message',
       'linux.popup.behavior_protection.message',
       'linux.popup.memory_protection.message',
+      'linux.popup.ransomware.message',
       'mac.popup.malware.message',
       'mac.popup.behavior_protection.message',
       'mac.popup.memory_protection.message',
     ])('resets %s to default message', (keyPath) => {
       set(policy, keyPath, `Custom message`);
-      const defaultNotifications = resetCustomNotifications();
+      const defaultNotifications = resetCustomNotifications(policy);
 
       const updatedPolicy = merge({}, policy, defaultNotifications);
       expect(get(updatedPolicy, keyPath)).toBe(DefaultPolicyNotificationMessage);
@@ -354,7 +365,7 @@ describe('Policy Config helpers', () => {
 
     it('does not change default messages', () => {
       set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
-      const defaultNotifications = resetCustomNotifications();
+      const defaultNotifications = resetCustomNotifications(policy);
 
       const updatedPolicy = merge({}, policy, defaultNotifications);
       expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
@@ -364,7 +375,7 @@ describe('Policy Config helpers', () => {
 
     it('resets empty messages to default messages', () => {
       set(policy, 'windows.popup.malware.message', '');
-      const defaultNotifications = resetCustomNotifications();
+      const defaultNotifications = resetCustomNotifications(policy);
 
       const updatedPolicy = merge({}, policy, defaultNotifications);
       expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
@@ -376,7 +387,7 @@ describe('Policy Config helpers', () => {
       set(policy, 'windows.popup.malware.message', 'Custom message');
       set(policy, 'mac.popup.memory_protection.message', 'Another custom message');
       set(policy, 'linux.popup.behavior_protection.message', 'Yet another custom message');
-      const defaultNotifications = resetCustomNotifications();
+      const defaultNotifications = resetCustomNotifications(policy);
 
       const updatedPolicy = merge({}, policy, defaultNotifications);
       expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
@@ -388,6 +399,18 @@ describe('Policy Config helpers', () => {
       expect(get(updatedPolicy, 'linux.popup.behavior_protection.message')).toBe(
         DefaultPolicyNotificationMessage
       );
+    });
+
+    it('does not add a Linux ransomware notification to a policy without one', () => {
+      const withoutLinuxRansomware = removeLinuxRansomware(policy);
+
+      const updatedPolicy = merge(
+        {},
+        withoutLinuxRansomware,
+        resetCustomNotifications(withoutLinuxRansomware)
+      );
+
+      expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
     });
   });
 
@@ -570,15 +593,20 @@ describe('Policy Config helpers', () => {
   });
 
   describe('removeLinuxRansomware', () => {
-    it('removes Linux ransomware and leaves every other field untouched', () => {
+    it('removes Linux ransomware and its notification and leaves every other field untouched', () => {
       const policy = policyFactory();
       const originalPolicy = JSON.parse(JSON.stringify(policy));
 
       const result = removeLinuxRansomware(policy);
 
       expect(result.linux).not.toHaveProperty('ransomware');
-      const { ransomware: removed, ...linuxRest } = originalPolicy.linux;
-      expect(result).toEqual({ ...originalPolicy, linux: linuxRest });
+      expect(result.linux.popup).not.toHaveProperty('ransomware');
+      const {
+        ransomware: removed,
+        popup: { ransomware: removedPopup, ...popupRest },
+        ...linuxRest
+      } = originalPolicy.linux;
+      expect(result).toEqual({ ...originalPolicy, linux: { ...linuxRest, popup: popupRest } });
       expect(policy).toEqual(originalPolicy);
     });
   });
@@ -599,21 +627,8 @@ describe('Policy Config helpers', () => {
     );
   });
 
-  describe('hasProtectionPopup', () => {
-    it.each([
-      [PolicyOperatingSystem.windows, 'ransomware', true],
-      [PolicyOperatingSystem.mac, 'ransomware', true],
-      [PolicyOperatingSystem.linux, 'ransomware', false],
-      [PolicyOperatingSystem.linux, 'malware', true],
-      [PolicyOperatingSystem.linux, 'memory_protection', true],
-      [PolicyOperatingSystem.linux, 'behavior_protection', true],
-    ] as const)('on %s, %s has a popup: %s', (os, protection, expected) => {
-      expect(hasProtectionPopup(os, protection)).toBe(expected);
-    });
-  });
-
   describe('setProtectionModeAndPopup', () => {
-    it('does not write a Linux ransomware popup the endpoint never reads', () => {
+    it('writes the Linux ransomware notification alongside Windows and macOS', () => {
       const policy = policyFactory();
 
       setProtectionModeAndPopup({
@@ -626,7 +641,7 @@ describe('Policy Config helpers', () => {
       });
 
       expect(policy.linux.ransomware?.mode).toBe(ProtectionModes.detect);
-      expect(policy.linux.popup).not.toHaveProperty('ransomware');
+      expect(policy.linux.popup.ransomware?.enabled).toBe(false);
       expect(policy.windows.popup.ransomware.enabled).toBe(false);
       expect(policy.mac.popup.ransomware.enabled).toBe(false);
     });
@@ -836,6 +851,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
       malware: { message: '', enabled: false },
       behavior_protection: { message: '', enabled: false },
       memory_protection: { message: '', enabled: false },
+      ransomware: { message: '', enabled: false },
     },
     logging: { file: 'info' },
     advanced: {

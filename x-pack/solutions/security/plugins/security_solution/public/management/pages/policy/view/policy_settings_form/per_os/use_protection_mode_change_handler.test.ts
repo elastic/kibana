@@ -32,7 +32,6 @@ describe('useProtectionModeChangeHandler', () => {
       useProtectionModeChangeHandler(
         createMemoryProtectionPolicyAccessor(policy, 'mac'),
         'memory_protection',
-        'mac',
         onChange,
         additionalOnModeChange
       )

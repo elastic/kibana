@@ -233,6 +233,21 @@ describe('policy_config and licenses', () => {
         expect(valid).toBeFalsy();
       });
 
+      it('blocks the Linux ransomware notification to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.linux.popup.ransomware = { message: '', enabled: true };
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeFalsy();
+        expect(isEndpointPolicyValidForLicense(policy, Basic)).toBeFalsy();
+      });
+
+      it('allows a policy without a Linux ransomware notification for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        delete policy.linux.popup.ransomware;
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeTruthy();
+      });
+
       it('allows ransomware notification message changes with a Platinum license', () => {
         const policy = policyFactory();
         disableEnterpriseFeatures(policy);
@@ -251,6 +266,14 @@ describe('policy_config and licenses', () => {
 
         valid = isEndpointPolicyValidForLicense(policy, Basic);
         expect(valid).toBeFalsy();
+      });
+
+      it('blocks Linux ransomware notification message changes for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.linux.popup.ransomware = { message: 'BOOM', enabled: false };
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeFalsy();
+        expect(isEndpointPolicyValidForLicense(policy, Basic)).toBeFalsy();
       });
     });
 
@@ -492,6 +515,7 @@ describe('policy_config and licenses', () => {
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.ransomware.message = popupMessage;
       policy.mac.popup.ransomware.message = popupMessage;
+      policy.linux.popup.ransomware = { message: popupMessage, enabled: true };
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
@@ -503,6 +527,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.mac.ransomware.mode).toEqual(defaults.mac.ransomware.mode);
       expect(retPolicy.mac.popup.ransomware.enabled).toEqual(defaults.mac.popup.ransomware.enabled);
       expect(retPolicy.mac.popup.ransomware.message).not.toEqual(popupMessage);
+      expect(retPolicy.linux.popup.ransomware).toEqual(defaults.linux.popup.ransomware);
 
       // need to invert the test, since it could be either value
       expect(['', DefaultPolicyNotificationMessage]).toContain(
