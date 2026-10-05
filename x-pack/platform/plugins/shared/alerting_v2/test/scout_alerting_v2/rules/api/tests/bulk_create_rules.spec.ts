@@ -95,10 +95,13 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: should reject unknowns keys in the body', async ({ apiClient }) => {
+  apiTest('validation: should reject unknown keys in the body', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_CREATE_URL, {
       headers: writerHeaders,
-      body: { unknown: 'value' },
+      body: {
+        items: [buildCreateRuleData({ metadata: { name: 'unknown-key' } })],
+        unknown: 'value',
+      },
     });
 
     expect(response).toHaveStatusCode(400);
