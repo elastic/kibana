@@ -559,6 +559,13 @@ export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as con
 export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
 
 /**
+ * Observable management events. One confirmed UI write each — a bulk delete reports one event
+ * whatever the number of removed observables. Use the server-side observable counters for write
+ * totals; they count every caller (API, workflows, etc.).
+ */
+export const CASES_OBSERVABLES_DELETED_EVENT_TYPE = 'cases_observables_deleted' as const;
+
+/**
  * Field Library management events. One confirmed UI write each, never a total — see
  * `register_management_events`.
  */
