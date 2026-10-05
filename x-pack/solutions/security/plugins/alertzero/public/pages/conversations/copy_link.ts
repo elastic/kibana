@@ -9,13 +9,17 @@ import { copyToClipboard } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { COPY_LINK_TOASTS } from './translations';
 
-export const copyLinkWithToast = (
+/**
+ * Copies the link and returns whether it worked. Only a failure is reported here: each control
+ * confirms success its own way (the flyout's tooltip, the card menu's toast).
+ */
+export const copyLink = (
   toasts: NotificationsStart['toasts'] | undefined,
   link: string
-): void => {
-  if (copyToClipboard(link)) {
-    toasts?.addSuccess(COPY_LINK_TOASTS.copied);
-  } else {
+): boolean => {
+  const copied = copyToClipboard(link);
+  if (!copied) {
     toasts?.addDanger(COPY_LINK_TOASTS.failed);
   }
+  return copied;
 };

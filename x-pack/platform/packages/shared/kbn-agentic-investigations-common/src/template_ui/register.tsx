@@ -80,9 +80,10 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
   /**
    * Called by the in-chat flyout's "Copy link" button. Supplied by the caller, which decides
-   * what to copy and how to confirm it.
+   * what to copy. Returns whether it was copied: the button's tooltip confirms success, so the
+   * caller only reports a failure.
    */
-  onCopyLink: () => void;
+  onCopyLink: () => boolean;
 }
 
 /**

@@ -50,7 +50,7 @@ import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
 import { useCopyInvestigationLink } from './use_copy_investigation_link';
-import { QUEUE_PAGE_INFO } from './translations';
+import { COPY_LINK_TOASTS, QUEUE_PAGE_INFO } from './translations';
 import { decisionErrorMessage } from './decision_errors';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
@@ -327,11 +327,12 @@ const ConversationsPageContent: React.FC = () => {
   const copyLinkForProposal = useCallback(
     (proposalId: Investigation['id']) => {
       const conversationId = proposalsById.get(proposalId)?.conversationId;
-      if (conversationId) {
-        copyInvestigationLink(conversationId);
+      // The card menu closes on click, so there is no tooltip to confirm in: use a toast.
+      if (conversationId && copyInvestigationLink(conversationId)) {
+        notifications?.toasts.addSuccess(COPY_LINK_TOASTS.copied);
       }
     },
-    [proposalsById, copyInvestigationLink]
+    [proposalsById, copyInvestigationLink, notifications]
   );
   useInvestigationDetails({
     conversationId: selectedConversationId,

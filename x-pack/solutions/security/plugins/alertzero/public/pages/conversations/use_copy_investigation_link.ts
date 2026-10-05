@@ -10,13 +10,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ALERTZERO_APP_ID } from '../../../common/constants';
 import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
-import { copyLinkWithToast } from './copy_link';
+import { copyLink } from './copy_link';
 
 /**
- * Copies an app link that opens the given conversation's details flyout. Shared by the card menu
- * and the flyout's trailing action, so both build and report the copy identically.
+ * Copies an app link that opens the given conversation's details flyout, and returns whether it
+ * worked. Shared by the card menu and the flyout's trailing action, so both build the link
+ * identically; each confirms success its own way.
  */
-export const useCopyInvestigationLink = (): ((conversationId: string) => void) => {
+export const useCopyInvestigationLink = (): ((conversationId: string) => boolean) => {
   const {
     services: { application, notifications },
   } = useKibana<CoreStart>();
@@ -27,7 +28,7 @@ export const useCopyInvestigationLink = (): ((conversationId: string) => void) =
         path: `?${SELECTED_CONVERSATION_ID_PARAM}=${encodeURIComponent(conversationId)}`,
         absolute: true,
       });
-      copyLinkWithToast(notifications?.toasts, link);
+      return copyLink(notifications?.toasts, link);
     },
     [application, notifications]
   );

@@ -33,6 +33,9 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     }),
   },
   tooltips: {
+    linkCopied: i18n.translate('xpack.alertzero.baseActions.tooltips.linkCopied', {
+      defaultMessage: 'Link copied',
+    }),
     openMenu: i18n.translate('xpack.alertzero.baseActions.openMenu', {
       defaultMessage: 'Open actions menu',
     }),

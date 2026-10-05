@@ -38,7 +38,7 @@ describe('useCopyInvestigationLink', () => {
     mockCopy.mockReturnValue(true);
     const { result } = renderHook(() => useCopyInvestigationLink());
 
-    result.current('conv-1');
+    expect(result.current('conv-1')).toBe(true);
 
     expect(mockCopy).toHaveBeenCalledWith(
       'http://localhost:5601/app/alertzero?selectedConversationId=conv-1'
@@ -47,14 +47,16 @@ describe('useCopyInvestigationLink', () => {
       path: '?selectedConversationId=conv-1',
       absolute: true,
     });
-    expect(addSuccess).toHaveBeenCalledWith('Link copied');
+    // Success is confirmed by the caller's own control, not here.
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addDanger).not.toHaveBeenCalled();
   });
 
   it('reports a failed copy', () => {
     mockCopy.mockReturnValue(false);
     const { result } = renderHook(() => useCopyInvestigationLink());
 
-    result.current('conv-1');
+    expect(result.current('conv-1')).toBe(false);
 
     expect(addDanger).toHaveBeenCalledWith('Could not copy the link');
     expect(addSuccess).not.toHaveBeenCalled();

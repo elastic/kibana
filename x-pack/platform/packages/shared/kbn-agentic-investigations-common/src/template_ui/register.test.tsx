@@ -103,7 +103,7 @@ const register = (
     templateId: 'investigation',
     name: 'Investigation',
     icon: 'securitySignalDetected',
-    onCopyLink: jest.fn(),
+    onCopyLink: () => true,
     ...overrides,
   });
 
@@ -172,7 +172,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   });
 
   it('adds a Copy link flyout action that calls onCopyLink', () => {
-    const onCopyLink = jest.fn();
+    const onCopyLink = jest.fn().mockReturnValue(true);
     const { contract } = createFakeService();
     register(contract, { onCopyLink });
 

@@ -49,7 +49,7 @@ import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_invest
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
-import { copyLinkWithToast } from './pages/conversations/copy_link';
+import { copyLink } from './pages/conversations/copy_link';
 import { ProposedActionsBoundary } from './pages/conversations/proposed_actions_boundary';
 import { getSharedAppQueryClient } from './shared_app_query_client';
 import type {
@@ -415,7 +415,7 @@ export class AlertZeroPublicPlugin
             renderCloseInvestigationModal,
             // In the chat the flyout sits over the chat's own URL, which already names the
             // conversation, so that is the link to share.
-            onCopyLink: () => copyLinkWithToast(core.notifications.toasts, window.location.href),
+            onCopyLink: () => copyLink(core.notifications.toasts, window.location.href),
             renderEscalationModal: canManageEscalations
               ? (props) =>
                   React.createElement(

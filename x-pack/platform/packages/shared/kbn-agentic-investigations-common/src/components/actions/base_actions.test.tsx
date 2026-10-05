@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { BaseActions } from './base_actions';
@@ -63,16 +63,45 @@ describe('BaseActions copy link', () => {
 });
 
 describe('getCopyLinkFlyoutAction', () => {
-  it('builds the flyout icon button from the same label as the menu item', () => {
-    const onClick = jest.fn();
-    const action = getCopyLinkFlyoutAction(onClick);
+  const renderTooltip = (action: ReturnType<typeof getCopyLinkFlyoutAction>) =>
+    renderWithKibanaRenderContext(<>{action.toolTipContent}</>);
 
-    expect(action).toMatchObject({
-      iconType: 'link',
-      'aria-label': 'Copy link',
-      toolTipContent: 'Copy link',
-    });
-    action.onClick?.({} as never);
-    expect(onClick).toHaveBeenCalledTimes(1);
+  it('builds the flyout icon button from the same label as the menu item', () => {
+    const action = getCopyLinkFlyoutAction(() => true);
+
+    expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
+  });
+
+  it('confirms a successful copy in its tooltip', () => {
+    const onCopy = jest.fn().mockReturnValue(true);
+    const action = getCopyLinkFlyoutAction(onCopy);
+    renderTooltip(action);
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+
+    act(() => action.onClick?.({} as never));
+
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Link copied')).toBeInTheDocument();
+  });
+
+  it('keeps the plain label when the copy fails', () => {
+    const action = getCopyLinkFlyoutAction(() => false);
+    renderTooltip(action);
+
+    act(() => action.onClick?.({} as never));
+
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+    expect(screen.queryByText('Link copied')).not.toBeInTheDocument();
+  });
+
+  it('reads "Copy link" again once the tooltip has closed and reopens', () => {
+    const action = getCopyLinkFlyoutAction(() => true);
+    const { unmount } = renderTooltip(action);
+    act(() => action.onClick?.({} as never));
+    unmount();
+
+    renderTooltip(action);
+
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
   });
 });

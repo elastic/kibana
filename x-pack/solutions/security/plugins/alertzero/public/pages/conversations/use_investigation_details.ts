@@ -27,7 +27,7 @@ export const useInvestigationDetails = ({
 }: {
   conversationId?: string;
   onClose: () => void;
-  onCopyLink: (conversationId: string) => void;
+  onCopyLink: (conversationId: string) => boolean;
 }): void => {
   const {
     services: { agentBuilder },
