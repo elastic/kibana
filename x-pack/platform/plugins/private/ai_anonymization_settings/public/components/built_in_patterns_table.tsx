@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React, { useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -15,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +25,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RegexAnonymizationRule } from '@kbn/inference-common';
 import { SAMPLE_VALUES_BY_ENTITY_CLASS } from '../lib/entity_classes';
 import { usePatternTester } from '../hooks/use_pattern_tester';
+
+// Wide enough for the entity prefix and a good part of the hash; the full token is in a tooltip.
+// Name and entity type get fixed widths so the Pattern column takes all the remaining space.
+const NAME_COLUMN_WIDTH = '20%';
+const ENTITY_TYPE_COLUMN_WIDTH = '160px';
+const EXAMPLE_OUTPUT_COLUMN_WIDTH = '52ch';
+
+const truncatedTextStyles = css`
+  display: block;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const fullTextStyles = css`
+  font-family: monospace;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+`;
 
 interface BuiltInPatternsTableProps {
   patterns: RegexAnonymizationRule[];
@@ -85,19 +108,41 @@ export const BuiltInPatternsTable: React.FC<BuiltInPatternsTableProps> = ({
       name: i18n.translate('xpack.aiAnonymizationSettings.builtInPatterns.table.name', {
         defaultMessage: 'Name (Target)',
       }),
+      width: NAME_COLUMN_WIDTH,
     },
     {
       field: 'entityClass',
       name: i18n.translate('xpack.aiAnonymizationSettings.builtInPatterns.table.entityType', {
         defaultMessage: 'Entity type',
       }),
+      width: ENTITY_TYPE_COLUMN_WIDTH,
       render: (entityClass: string) => <EuiBadge color="hollow">{entityClass}</EuiBadge>,
+    },
+    {
+      field: 'pattern',
+      name: i18n.translate('xpack.aiAnonymizationSettings.builtInPatterns.table.pattern', {
+        defaultMessage: 'Pattern',
+      }),
+      // Clips the cell so the (non-wrapping) regex cannot paint over the next column.
+      truncateText: true,
+      render: (pattern: string, item: RegexAnonymizationRule) => (
+        <EuiToolTip
+          content={<span css={fullTextStyles}>{pattern}</span>}
+          display="block"
+          data-test-subj={`aiAnonymizationSettingsBuiltInPatternTooltip-${item.id}`}
+        >
+          <EuiCode css={truncatedTextStyles} tabIndex={0}>
+            {pattern}
+          </EuiCode>
+        </EuiToolTip>
+      ),
     },
     {
       name: i18n.translate('xpack.aiAnonymizationSettings.builtInPatterns.table.exampleOutput', {
         defaultMessage: 'Example Output',
       }),
-      width: '360px',
+      width: EXAMPLE_OUTPUT_COLUMN_WIDTH,
+      truncateText: true,
       render: (item: RegexAnonymizationRule) => {
         const example = item.id ? exampleOutputById[item.id] : undefined;
         if (!example) {
@@ -108,9 +153,15 @@ export const BuiltInPatternsTable: React.FC<BuiltInPatternsTableProps> = ({
           );
         }
         return (
-          <EuiText size="s" color="accent">
-            {example}
-          </EuiText>
+          <EuiToolTip
+            content={<span css={fullTextStyles}>{example}</span>}
+            display="block"
+            data-test-subj={`aiAnonymizationSettingsBuiltInExampleTooltip-${item.id}`}
+          >
+            <EuiText size="s" color="accent" css={truncatedTextStyles} tabIndex={0}>
+              {example}
+            </EuiText>
+          </EuiToolTip>
         );
       },
     },
