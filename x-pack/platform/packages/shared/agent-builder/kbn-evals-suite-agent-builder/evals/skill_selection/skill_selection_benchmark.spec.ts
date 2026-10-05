@@ -13,7 +13,7 @@ import type { BenchmarkExample } from './benchmark_dataset';
 import {
   ALERT_ANALYSIS_EXAMPLES,
   AUTOMATIC_TROUBLESHOOTING_EXAMPLES,
-  DASHBOARD_MANAGEMENT_EXAMPLES,
+  DASHBOARDS_EXAMPLES,
   DETECTION_RULE_EDIT_EXAMPLES,
   ENTITY_ANALYTICS_EXAMPLES,
   FIND_RULES_EXAMPLES,
@@ -115,10 +115,10 @@ evaluate.describe(
       await evaluateBenchmark({ skillId: 'skill-authoring', examples: SKILL_AUTHORING_EXAMPLES });
     });
 
-    evaluate('dashboard-management routing', async ({ evaluateBenchmark }) => {
+    evaluate('dashboards routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'dashboard-management',
-        examples: DASHBOARD_MANAGEMENT_EXAMPLES,
+        skillId: 'dashboards',
+        examples: DASHBOARDS_EXAMPLES,
       });
     });
   }

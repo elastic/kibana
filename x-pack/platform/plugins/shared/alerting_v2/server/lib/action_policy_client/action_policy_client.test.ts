@@ -139,7 +139,6 @@ describe('ActionPolicyClient', () => {
       expect(res).toEqual(
         expect.objectContaining({
           id: 'policy-id-1',
-          version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
           enabled: true,
@@ -223,6 +222,55 @@ describe('ActionPolicyClient', () => {
       expect(res.name).toBe('my-policy');
       expect(res.description).toBe('my-policy description');
       expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
+    });
+
+    it('creates a disabled policy when options.enabled is false', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-id-disabled',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.createActionPolicy({
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+        },
+        options: { id: 'policy-id-disabled', enabled: false },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ enabled: false }),
+        { id: 'policy-id-disabled', overwrite: false }
+      );
+      expect(res).toEqual(expect.objectContaining({ id: 'policy-id-disabled', enabled: false }));
+    });
+
+    it('defaults to an enabled policy when options.enabled is omitted', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-id-default-enabled',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.createActionPolicy({
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+        },
+        options: { id: 'policy-id-default-enabled' },
+      });
+
+      expect(res).toEqual(
+        expect.objectContaining({ id: 'policy-id-default-enabled', enabled: true })
+      );
     });
 
     it('stores tags as null on create', async () => {
@@ -565,7 +613,6 @@ describe('ActionPolicyClient', () => {
       items: Array<{
         id: string;
         attributes: ActionPolicySavedObjectAttributes;
-        version?: string;
       }>,
       total?: number
     ) => ({
@@ -575,7 +622,6 @@ describe('ActionPolicyClient', () => {
         attributes: item.attributes,
         references: [],
         score: 0,
-        version: item.version ?? 'WzEsMV0=',
       })),
       total: total ?? items.length,
       page: 1,
@@ -771,7 +817,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse(
           [
             { id: 'policy-find-1', attributes: policyAttributes },
-            { id: 'policy-find-2', attributes: secondAttributes, version: 'WzIsMV0=' },
+            { id: 'policy-find-2', attributes: secondAttributes },
           ],
           2
         )
@@ -828,7 +874,7 @@ describe('ActionPolicyClient', () => {
           group_by: null,
           throttle: null,
         },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: original-policy');
@@ -887,7 +933,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.updateActionPolicy({
         data: { throttle: { strategy: 'on_status_change' } },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -937,7 +983,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.updateActionPolicy({
         data: { throttle: { strategy: 'per_status_interval', interval: '5m' } },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -985,7 +1031,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: updated-policy');
@@ -1011,7 +1057,6 @@ describe('ActionPolicyClient', () => {
       expect(res).toEqual(
         expect.objectContaining({
           id: 'policy-id-update-1',
-          version: 'WzIsMV0=',
           name: 'updated-policy',
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
@@ -1059,7 +1104,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       await Promise.resolve();
@@ -1113,7 +1158,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-decrypt-fail', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-decrypt-fail' },
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1163,7 +1208,7 @@ describe('ActionPolicyClient', () => {
 
       await client.updateActionPolicy({
         data: { name: 'renamed-policy' },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -1221,7 +1266,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-1' },
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
@@ -1267,7 +1312,7 @@ describe('ActionPolicyClient', () => {
             name: 'updated-policy',
             destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           },
-          options: { id: 'policy-id-update-throw', version: 'WzEsMV0=' },
+          options: { id: 'policy-id-update-throw' },
         })
       ).rejects.toThrow('storage error');
 
@@ -1317,7 +1362,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-no-key', version: 'WzEsMV0=' },
+        options: { id: 'policy-id-update-no-key' },
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
@@ -1327,7 +1372,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [] },
-          options: { id: 'policy-id-update-invalid', version: 'WzEsMV0=' },
+          options: { id: 'policy-id-update-invalid' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -1348,52 +1393,11 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [{ type: 'workflow', id: 'some-workflow' }] },
-          options: { id: 'policy-id-update-404', version: 'WzEsMV0=' },
+          options: { id: 'policy-id-update-404' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
-    });
-
-    it('throws 409 conflict when version is stale', async () => {
-      const existingAttributes: ActionPolicySavedObjectAttributes = {
-        name: 'original-policy',
-        description: 'original-policy description',
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        apiKey: 'old-api-key',
-        apiKeyOwner: 'old-user',
-        apiKeyCreatedByUser: false,
-        createdBy: { profile_uid: 'creator_profile_uid' },
-        createdAt: '2024-12-01T00:00:00.000Z',
-        updatedBy: { profile_uid: 'updater_profile_uid' },
-        updatedAt: '2024-12-01T00:00:00.000Z',
-      };
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-conflict',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        version: 'WzEsMV0=',
-        attributes: existingAttributes,
-      });
-
-      mockSavedObjectsClient.update.mockRejectedValueOnce(
-        SavedObjectsErrorHelpers.createConflictError(
-          ACTION_POLICY_SAVED_OBJECT_TYPE,
-          'policy-id-conflict'
-        )
-      );
-
-      await expect(
-        client.updateActionPolicy({
-          data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
-          options: { id: 'policy-id-conflict', version: 'WzEsMV0=' },
-        })
-      ).rejects.toMatchObject({
-        output: { statusCode: 409 },
-      });
-
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
   });
 
@@ -1454,6 +1458,31 @@ describe('ActionPolicyClient', () => {
           }),
         });
         expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      it('creates the policy with enabled=false when the body disables it', async () => {
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'policy-id-upsert-new',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzEsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-upsert-new',
+          data: { ...baseUpsertData, enabled: false },
+        });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ enabled: false }),
+          { id: 'policy-id-upsert-new', overwrite: false }
+        );
+        expect(res).toEqual({
+          created: true,
+          policy: expect.objectContaining({ id: 'policy-id-upsert-new', enabled: false }),
+        });
       });
 
       it('invalidates the new API key and throws 409 when another caller wins the race', async () => {
@@ -1556,6 +1585,86 @@ describe('ActionPolicyClient', () => {
         // Old key invalidated AFTER successful SO update.
         expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
         expect(res.created).toBe(false);
+      });
+
+      it('enables the policy when the body sets enabled=true on a disabled policy', async () => {
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'policy-id-update-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-update-1',
+          data: { ...baseUpsertData, enabled: true },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-update-1',
+          expect.objectContaining({ enabled: true }),
+          { version: 'WzEsMV0=' }
+        );
+        expect(res.policy.enabled).toBe(true);
+      });
+
+      it('disables the policy when the body sets enabled=false on an enabled policy', async () => {
+        const enabledExistingDoc = {
+          id: 'policy-id-update-enabled',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzEsMV0=',
+          attributes: { ...existingAttributes, enabled: true },
+        };
+        mockSavedObjectsClient.get
+          .mockReset()
+          .mockResolvedValueOnce(enabledExistingDoc)
+          .mockResolvedValueOnce(enabledExistingDoc);
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'policy-id-update-enabled',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-update-enabled',
+          data: { ...baseUpsertData, enabled: false },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-update-enabled',
+          expect.objectContaining({ enabled: false }),
+          { version: 'WzEsMV0=' }
+        );
+        expect(res.policy.enabled).toBe(false);
+      });
+
+      it('preserves the existing enabled value when the body omits enabled', async () => {
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'policy-id-update-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-update-1',
+          data: baseUpsertData,
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-update-1',
+          expect.objectContaining({ enabled: false }),
+          { version: 'WzEsMV0=' }
+        );
+        expect(res.policy.enabled).toBe(false);
       });
 
       it('invalidates the new API key and throws 409 when version is stale', async () => {
@@ -2839,7 +2948,7 @@ describe('ActionPolicyClient', () => {
         () =>
           client.updateActionPolicy({
             data: { name: 'renamed' },
-            options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+            options: { id: 'policy-id-update-1' },
           }),
       ],
       ['upsertActionPolicy', () => client.upsertActionPolicy({ id: 'policy-1', data: validData })],
@@ -2974,7 +3083,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
-          options: { id: 'policy-version-conflict', version: 'WzEsMV0=' },
+          options: { id: 'policy-version-conflict' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -3008,7 +3117,6 @@ describe('ActionPolicyClient', () => {
       items: Array<{
         id: string;
         attributes: ActionPolicySavedObjectAttributes;
-        version?: string;
       }>,
       total?: number
     ) => ({
@@ -3018,7 +3126,6 @@ describe('ActionPolicyClient', () => {
         attributes: item.attributes,
         references: [],
         score: 0,
-        version: item.version ?? 'WzEsMV0=',
       })),
       total: total ?? items.length,
       page: 1,

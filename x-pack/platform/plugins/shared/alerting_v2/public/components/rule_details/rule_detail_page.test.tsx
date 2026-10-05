@@ -132,9 +132,9 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'Test Events Rule',
-    version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },

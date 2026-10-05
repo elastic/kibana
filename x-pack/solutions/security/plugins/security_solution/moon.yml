@@ -296,6 +296,7 @@ dependsOn:
   - '@kbn/anonymization-common'
   - '@kbn/workflows-extensions'
   - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-markdown'
   - '@kbn/controls-schemas'
@@ -332,6 +333,7 @@ fileGroups:
     - test/scout/**/*
     - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
+    - test/scout_edr_real_fleet/**/*
     - test/scout_managed_mitre/**/*
     - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*

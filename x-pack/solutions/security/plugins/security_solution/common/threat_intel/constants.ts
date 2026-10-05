@@ -33,6 +33,7 @@ export const THREAT_INTEL_API_BASE = '/internal/threat_intel' as const;
 export const CREATE_THREAT_REPORT_API_PATH =
   `${THREAT_INTEL_API_BASE}/create_threat_report` as const;
 export const EXTRACT_IOCS_API_PATH = `${THREAT_INTEL_API_BASE}/extract_iocs` as const;
+export const ENRICH_REPORT_CORE_API_PATH = `${THREAT_INTEL_API_BASE}/enrich_report_core` as const;
 export const EXTRACT_DIAMOND_API_PATH = `${THREAT_INTEL_API_BASE}/extract_diamond` as const;
 export const ASSESS_RELEVANCE_API_PATH = `${THREAT_INTEL_API_BASE}/assess_relevance` as const;
 export const ENRICH_TAXONOMY_API_PATH = `${THREAT_INTEL_API_BASE}/enrich_taxonomy` as const;

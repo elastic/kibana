@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -64,7 +65,7 @@ import { getWorkflowZodSchema } from '../../common/schema';
 import { fetchOccHitsByIds, type OccWorkflowHit } from '../api/lib/bulk_occ_index';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { cleanupDeletedWorkflows, deleteWorkflows } from '../api/lib/workflow_deletion';
-import { disableAllWorkflows } from '../api/lib/workflow_disable_all';
+import { disableAllWorkflows, mutateWorkflowToDisabled } from '../api/lib/workflow_disable_all';
 import {
   transformStorageDocumentToWorkflowDto,
   transformStoragePartialToWorkflowDto,
@@ -94,6 +95,7 @@ import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
+import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
@@ -136,10 +138,10 @@ export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
   private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
-    return (
-      (await this.deps
+    return firstValueFrom(
+      this.deps
         .getCoreStart()
-        .featureFlags?.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)) ?? false
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
     );
   }
 
@@ -1314,6 +1316,15 @@ export class WorkflowCrudService {
       getWorkflowExecutions: (params, sp) =>
         this.deps.executionQueryService.getWorkflowExecutions(params, sp),
     });
+  }
+
+  /** Disables one workflow, including a soft-deleted one, and unschedules its triggers. */
+  async disableWorkflow(id: string, spaceId: string): Promise<void> {
+    await this.readModifyWriteWorkflowDocument(id, spaceId, {
+      mutate: mutateWorkflowToDisabled,
+      getOptions: { includeDeleted: true },
+    });
+    await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
   }
 
   async disableAllWorkflows(

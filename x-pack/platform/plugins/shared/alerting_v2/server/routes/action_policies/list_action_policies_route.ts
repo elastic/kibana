@@ -27,7 +27,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { listActionPoliciesOasExamples } from './list_action_policies_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 
@@ -78,14 +78,14 @@ export const toFindActionPoliciesResponse = ({
 @injectable()
 export class ListActionPoliciesRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}`;
+  static path = ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
     },
   };
   static routeOptions = {
-    access: 'public' as const,
+    access: 'internal' as const,
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
     oasOperationObject: listActionPoliciesOasExamples,

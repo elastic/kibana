@@ -29,6 +29,7 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
+  applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
   executeEsqlQuery,
@@ -54,7 +55,7 @@ const GROUP_HASH_FIELD = 'group_hash';
  * decodes to `closed` here by explicit choice, not by accident of iteration order.
  *
  * `AlertEventsClient.createAlertEvent` persists the `alert_status` *input* under the nested
- * `episode.status` field — there is no top-level `alert_status` column on `.rule-events`
+ * `alert.status` field — there is no top-level `alert_status` column on `.rule-events`
  * (`alert_events.ts` mapping). `pending`/`recovering` are never written by Significant Events
  * (only `active`/`inactive` per `SIGNIFICANT_EVENTS_STATUS_MAP`), so they fall back to `open`.
  */
@@ -101,7 +102,7 @@ interface RuleEventSourceRow {
   '@timestamp': string;
   [GROUP_HASH_FIELD]: string;
   severity?: AlertEventSeverity;
-  episode?: { status?: AlertEpisodeStatus };
+  alert?: { status?: AlertEpisodeStatus };
   data_json: string;
 }
 
@@ -132,9 +133,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
     '@timestamp': row['@timestamp'],
     event_uuid: row[GROUP_HASH_FIELD],
     status:
-      EPISODE_STATUS_TO_SIGNIFICANT_EVENT_STATUS[
-        row.episode?.status ?? ALERT_EPISODE_STATUS.ACTIVE
-      ],
+      EPISODE_STATUS_TO_SIGNIFICANT_EVENT_STATUS[row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE],
     // `RULE_EVENT_SEVERITY_TO_SIGNIFICANT_EVENT_SEVERITY` has no `info` entry (Significant Events
     // never writes it) — fall back to `'40-medium'` for any row this reader wasn't built to expect.
     severity:
@@ -189,6 +188,11 @@ const buildFreeTextWhere = (search: string | undefined): ESQLAstExpression | und
     'event_id'
   )})) == TO_LOWER(${esql.str(search)}))`;
 };
+
+const activeStatusWhere = (): ESQLAstExpression =>
+  esql.exp`${esql.col('alert.status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
+    esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
+  )})`;
 
 const eventIdEquals = (eventId: string): ESQLAstExpression =>
   esql.exp`FIELD_EXTRACT(${esql.col('data')}, ${esql.str('event_id')}) == ${esql.str(eventId)}`;
@@ -263,26 +267,31 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     options: RuleEventsCurrentStateSearchOptions
   ): ComposerQuery {
     // `created_at` reflects the earliest (historical) `@timestamp` for the series, so it must be
-    // computed before `applyTimeRange` narrows the row set — otherwise a `from` bound would hide
-    // the series' true creation time.
+    // computed before any filter narrows the row set.
     let query = buildBaseQuery(this.clients.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
 
-    query = applyTimeRange({ query, from: options.from, to: options.to });
+    query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    // Free-text search runs pre-latest (against the full lineage); status/severity run post-latest
-    // (against only the current state) so a stale revision cannot make a closed series look open.
+    // Free-text search and status/severity run post-latest (against only the current state) so a
+    // stale revision cannot make a closed series look open.
     const searchWhere = buildFreeTextWhere(options.search);
     if (searchWhere) {
       query = query.where`${searchWhere}`;
     }
 
-    query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
+    // The time range selects series active during it, always shown in their current state.
+    query = applyLifetimeOverlap({
+      query,
+      from: options.from,
+      to: options.to,
+      activeWhere: activeStatusWhere(),
+    });
 
     if (options.status?.length) {
-      // `episode.status` — the nested field `AlertEventsClient.createAlertEvent` persists the
+      // `alert.status` — the nested field `AlertEventsClient.createAlertEvent` persists the
       // `alert_status` input under (see `EPISODE_STATUS_TO_SIGNIFICANT_EVENT_STATUS` doc comment).
-      query = query.where`${esql.col('episode.status')} IN (${options.status.map((status) =>
+      query = query.where`${esql.col('alert.status')} IN (${options.status.map((status) =>
         esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
       )})`;
     }
@@ -387,7 +396,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
    * Returns the latest version per `group_hash` for all active ("open") events within the given
    * time range, optionally narrowed to candidate stream/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. Mirrors `EventClient`'s
-   * `findLatestActive`, but filters on the nested `episode.status` column (via
+   * `findLatestActive`, but filters on the nested `alert.status` column (via
    * `SIGNIFICANT_EVENTS_STATUS_MAP`, see `buildLatestByCurrentStateQuery`'s status branch) instead
    * of a top-level `status` column, and reads `stream_names` / `signals.metadata.rule_uuid`
    * through `FIELD_EXTRACT` since both live in the flattened `data` column.
@@ -405,11 +414,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    query = query.where`${esql.col(
-      'episode.status'
-    )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
-      esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
-    )})`;
+    query = query.where`${activeStatusWhere()}`;
 
     if (options.streamNames?.length) {
       query = query.where`${streamNamesIntersects(options.streamNames)}`;

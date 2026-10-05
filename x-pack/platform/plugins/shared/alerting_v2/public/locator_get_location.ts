@@ -51,14 +51,14 @@ export const getRuleLibraryLocation = (
 };
 
 export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): KibanaLocation => {
-  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.episodes);
+  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.alerts);
 
   if (params.episodeId) {
     return { app, path: `${pathPrefix}/${encodeURIComponent(params.episodeId)}`, state: {} };
   }
 
   if (params.filters || params.timeRange) {
-    const episodesList = Object.fromEntries(
+    const alertsList = Object.fromEntries(
       Object.entries({
         ruleId: params.filters?.ruleId,
         groupHash: params.filters?.groupHash,
@@ -72,9 +72,9 @@ export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): Ki
       }).filter(([, value]) => value != null)
     );
 
-    if (Object.keys(episodesList).length > 0) {
+    if (Object.keys(alertsList).length > 0) {
       const search = new URLSearchParams();
-      search.set('_a', encodeRison({ episodesList }));
+      search.set('_a', encodeRison({ alertsList }));
       return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
     }
   }

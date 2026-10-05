@@ -49,7 +49,6 @@ describe('updateInvestigation body schema', () => {
       error: undefined,
       hypotheses: undefined,
       recommendations: undefined,
-      blind_spots: undefined,
       impact: undefined,
     });
   });
@@ -74,10 +73,6 @@ describe('updateInvestigation body schema', () => {
         { title: 'Add a disk alert', confidence: 0.7 },
         { title: 'Re-enable log rotation', confidence: 0.95 },
       ],
-      blind_spots: [
-        { title: 'No profiling', confidence: 0.6, description: 'Profiles were unavailable.' },
-        { title: 'No metrics', confidence: 0.8, description: 'Host metrics were not shipped.' },
-      ],
       impact: { entities: [] },
       conversation_id: 'conv-1',
     };
@@ -88,10 +83,6 @@ describe('updateInvestigation body schema', () => {
         recommendations: [
           { title: 'Re-enable log rotation', confidence: 0.95 },
           { title: 'Add a disk alert', confidence: 0.7 },
-        ],
-        blind_spots: [
-          { title: 'No metrics', confidence: 0.8, description: 'Host metrics were not shipped.' },
-          { title: 'No profiling', confidence: 0.6, description: 'Profiles were unavailable.' },
         ],
       })
     );
@@ -104,13 +95,32 @@ describe('updateInvestigation body schema', () => {
     expect(() =>
       parseBody({
         status: 'completed',
-        blind_spots: Array.from({ length: 4 }, (_, index) => ({
-          title: `Gap ${index}`,
+        recommendations: Array.from({ length: 4 }, (_, index) => ({
+          title: `Step ${index}`,
           confidence: 0.5,
-          description: 'Missing data.',
         })),
       })
     ).toThrow();
+  });
+
+  it('accepts an impact with only a top-level summary and evidence', () => {
+    const impact = {
+      summary: 'Checkout failed for 30% of requests.',
+      evidence: { description: 'Failed checkout requests per 5 minutes.' },
+    };
+
+    expect(parseBody({ status: 'completed', impact })).toEqual(expect.objectContaining({ impact }));
+  });
+
+  it('drops the removed blind spots and timeline fields', () => {
+    const parsed = parseBody({
+      status: 'completed',
+      blind_spots: [{ title: 'No profiling', confidence: 0.6, description: 'Unavailable.' }],
+      timeline: [{ timestamp: '2026-09-25T10:02:00Z', type: 'change', summary: 'Deploy.' }],
+    });
+
+    expect(parsed).not.toHaveProperty('blind_spots');
+    expect(parsed).not.toHaveProperty('timeline');
   });
 
   it('still rejects a severity outside the canonical tiers', () => {

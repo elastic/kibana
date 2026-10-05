@@ -7,7 +7,7 @@
 
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -30,15 +30,21 @@ type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
   | typeof SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
-  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
+  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
+  // Stays at 1: the narrowed `allowedAutonomyLevels` (assisted dropped) is already handled by
+  // `projectStoredAutonomyLevel` reading a stored `assisted` down to `manual`, and the new
+  // `extras.autoCloseConfidenceScoreMinThreshold` field is already handled by
+  // `applyMissingWorkerSettingDefaults` backfilling it onto documents that predate it. A version
+  // bump here would reject every already-installed v1 document outright — the version check in
+  // `parseWorkerValues` runs after those defaults are filled but rejects on the mismatch anyway.
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: 1,
 };
 
 /**

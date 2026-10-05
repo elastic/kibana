@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-/**
- * Maximum length of a service account's human-readable display name.
- */
+/** Maximum description length accepted by Elasticsearch. */
+export const SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH = 1000;
+
+/** Maximum length of a service account's human-readable display name. */
 export const SERVICE_ACCOUNT_NAME_MAX_LENGTH = 128;
 
 /**
@@ -65,3 +66,9 @@ export interface ServiceAccountRoleLimits {
  * Cap on a single page of listed service accounts.
  */
 export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;
+
+/** Maximum roles per Elasticsearch service account. */
+export const ES_SERVICE_ACCOUNT_MAX_ROLES = 1000;
+
+/** Maximum roles per UIAM service account, limited by the roles encoded in its tokens. */
+export const UIAM_SERVICE_ACCOUNT_MAX_ROLES = 50;

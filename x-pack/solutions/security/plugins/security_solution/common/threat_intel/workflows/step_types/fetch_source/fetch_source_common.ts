@@ -47,6 +47,7 @@ export const iocEntrySchema = z.object({
   port: z.number().optional(),
   reference: z.string().optional(),
   block_index: z.number().optional(),
+  deferred_unreviewed: z.boolean().optional(),
 });
 
 export type IocEntry = z.infer<typeof iocEntrySchema>;
@@ -66,6 +67,7 @@ export const normalizedReportSchema = z.object({
     title: z.string(),
     body_text: z.string(),
     language: z.string().default('en'),
+    article_url: z.string().optional(),
   }),
   severity: z.object({
     level: z.enum(SEVERITY_LEVELS),

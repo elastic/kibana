@@ -445,7 +445,7 @@ export class SpacesPage {
   }
 
   /**
-   * Selects a space in the nav menu and waits for the resulting navigation to commit.
+   * Selects a space in the nav menu and waits for the new space's chrome to render.
    *
    * Selecting a space `await`s an analytics flush before it calls `navigateToUrl`
    * (`nav_control/components/spaces_menu.tsx`), so the click resolves long before the
@@ -453,6 +453,10 @@ export class SpacesPage {
    * stack where the telemetry endpoint is unreachable. Settling here rather than in each
    * spec also means callers are never left with an in-flight navigation for a subsequent
    * `page.goto` to collide with.
+   *
+   * Entering a space is a full page load, and `commit` only means the new document started
+   * loading, so wait for the space switcher in the new document's header: callers act on
+   * that header immediately after switching.
    */
   async switchToSpaceFromNav(spaceId: string) {
     const landedInSpace = (url: URL) =>
@@ -467,6 +471,8 @@ export class SpacesPage {
         .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
         .click(),
     ]);
+
+    await this.spacesSelectorLocator().waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   navSearchInputLocator() {

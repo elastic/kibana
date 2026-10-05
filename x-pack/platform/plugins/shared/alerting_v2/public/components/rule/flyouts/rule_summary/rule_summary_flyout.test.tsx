@@ -98,7 +98,8 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'My Rule', description: 'A rule description', version: 1 },
+  version: 1,
+  metadata: { name: 'My Rule', description: 'A rule description' },
   artifacts: [],
   time_field: '@timestamp',
   schedule: { every: '5m' },
@@ -149,6 +150,8 @@ describe('RuleSummaryFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+    // ownFocus={false} omits the overlay mask so the rules list stays visible behind the flyout.
+    expect(document.querySelector('.euiOverlayMask')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
     expect(screen.getByTestId('ruleSummaryAbout')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();

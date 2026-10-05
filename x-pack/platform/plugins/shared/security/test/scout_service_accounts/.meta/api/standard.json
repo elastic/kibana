@@ -1,5 +1,5 @@
 {
-  "sha1": "cd6522b764938e6aaa4b8dbdc79f85e4f5b99b45",
+  "sha1": "504af76b1b9e8453ab5ccd5360db85c119aac6d0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -148,6 +148,32 @@
       }
     },
     {
+      "id": "8787fdb38dae7c3-0dc849e50be6fb9",
+      "title": "Create Serverless service accounts persists the requested name and roles in UIAM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "8787fdb38dae7c3-026c73e4916e641",
+      "title": "Create Serverless service accounts rejects descriptions on Serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
+        "line": 70,
+        "column": 15
+      }
+    },
+    {
       "id": "0eb73a3c441f598-876734e2c1092d5",
       "title": "Execute Elasticsearch service account workloads uses the account identity and permits only its own roles",
       "expectedStatus": "passed",
@@ -169,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 118,
+        "line": 123,
         "column": 28
       }
     },
@@ -182,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 130,
-        "column": 25
+        "line": 145,
+        "column": 13
       }
     },
     {
@@ -195,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
+        "line": 175,
         "column": 14
       }
     },
@@ -208,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
+        "line": 175,
         "column": 14
       }
     },
@@ -221,7 +247,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
+        "line": 175,
         "column": 14
       }
     },
@@ -234,7 +260,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 180,
+        "line": 195,
         "column": 20
       }
     },
@@ -353,6 +379,19 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
         "line": 335,
         "column": 40
+      }
+    },
+    {
+      "id": "5ac4e5e6b743160-8ca300758f25a84",
+      "title": "Classify real requests authenticated with an Elasticsearch service account token classifies the request as that service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_service_account.spec.ts",
+        "line": 68,
+        "column": 13
       }
     }
   ]

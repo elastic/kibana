@@ -502,6 +502,8 @@ describe('UiamService', () => {
             {
               organization_id: 'organization-id',
               name: 'test-account',
+              project_type: 'security',
+              project_id: 'project-id',
               role_assignments: {},
               assumable_by: [],
             },
@@ -1278,6 +1280,8 @@ describe('UiamService', () => {
     const body = {
       organization_id: 'organization-id',
       name: 'nightshift-relay',
+      project_type: 'security' as const,
+      project_id: 'project-id',
       role_assignments: roleAssignments,
       assumable_by: [
         {
@@ -1292,9 +1296,12 @@ describe('UiamService', () => {
     it('properly calls UIAM service to create a service account', async () => {
       const mockResponse: UiamServiceAccount = {
         id: 'service-account-id',
-        type: 'project',
+        type: 'organization',
+        scope: 'project',
         name: 'nightshift-relay',
         organization_id: 'organization-id',
+        project_type: 'security',
+        project_id: 'project-id',
         role_assignments: roleAssignments,
         assumable_by: body.assumable_by,
       };
@@ -1319,7 +1326,8 @@ describe('UiamService', () => {
         },
         body: JSON.stringify({
           ...body,
-          type: 'project',
+          type: 'organization',
+          scope: 'project',
         }),
         dispatcher: AGENT_MOCK,
       });
@@ -1397,7 +1405,8 @@ describe('UiamService', () => {
         },
         body: JSON.stringify({
           ...body,
-          type: 'project',
+          type: 'organization',
+          scope: 'project',
         }),
         dispatcher: AGENT_MOCK,
       });
@@ -1444,9 +1453,12 @@ describe('UiamService', () => {
       service_accounts: [
         {
           id: 'service-account-id',
-          type: 'project',
+          type: 'organization',
+          scope: 'project',
           name: 'nightshift-relay',
           organization_id: 'organization-id',
+          project_type: 'security',
+          project_id: 'project-id',
           role_assignments: {},
           assumable_by: [],
           creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
@@ -1553,9 +1565,12 @@ describe('UiamService', () => {
   describe('#getServiceAccount', () => {
     const mockResponse = {
       id: 'service-account-id',
-      type: 'project',
+      type: 'organization',
+      scope: 'project',
       name: 'nightshift-relay',
       organization_id: 'organization-id',
+      project_type: 'security',
+      project_id: 'project-id',
       role_assignments: {},
       assumable_by: [],
       creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },

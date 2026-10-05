@@ -1,5 +1,5 @@
 {
-  "sha1": "8a53ca288caa7bfefbef0bc98427cf4f9e33fe03",
+  "sha1": "34b6b1e2bed11ee34e48c146b3b20888d5421044",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -65,6 +65,45 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
         "line": 38,
         "column": 25
+      }
+    },
+    {
+      "id": "1c089c23a3a34ee-c086c6dd3ca9c78",
+      "title": "Discover session API — visualization persistence preserves a saved Line histogram through a session API round trip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
+        "line": 112,
+        "column": 19
+      }
+    },
+    {
+      "id": "1c089c23a3a34ee-81bc50dd8256a34",
+      "title": "Discover session API — visualization persistence preserves a histogram breakdown and its legend through a session API round trip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
+        "line": 147,
+        "column": 31
+      }
+    },
+    {
+      "id": "1c089c23a3a34ee-b267b371abd83b2",
+      "title": "Discover session API — visualization persistence preserves a Treemap Lens suggestion through a session API round trip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
+        "line": 176,
+        "column": 15
       }
     },
     {
@@ -909,8 +948,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 66
+      }
+    },
+    {
+      "id": "7559256b7de2725-b111512c2c5891a",
+      "title": "Discover ES|QL visualization persistence preserves the chart data view ID after reload with a selected ES|QL control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 43,
+        "column": 22
       }
     },
     {
@@ -922,8 +974,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 42,
-        "column": 22
+        "line": 81,
+        "column": 24
       }
     },
     {
@@ -935,8 +987,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 71,
-        "column": 6
+        "line": 101,
+        "column": 24
       }
     },
     {
@@ -948,7 +1000,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 90,
+        "line": 121,
         "column": 24
       }
     },
@@ -961,7 +1013,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 113,
+        "line": 144,
         "column": 22
       }
     },
@@ -974,8 +1026,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 136,
-        "column": 22
+        "line": 167,
+        "column": 24
       }
     },
     {

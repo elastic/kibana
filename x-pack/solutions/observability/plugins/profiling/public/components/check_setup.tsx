@@ -78,7 +78,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displaySetupScreen =
     (status === AsyncStatus.Settled &&
-      data?.type !== 'serverless' &&
+      data?.profiling_enabled !== false &&
       data?.has_setup !== true &&
       data?.pre_8_9_1_data === false) ||
     !!error;
@@ -144,7 +144,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   if (
     status === AsyncStatus.Settled &&
-    data?.type === 'serverless' &&
     data?.profiling_enabled === false &&
     pathname !== '/profiling-not-enabled'
   ) {

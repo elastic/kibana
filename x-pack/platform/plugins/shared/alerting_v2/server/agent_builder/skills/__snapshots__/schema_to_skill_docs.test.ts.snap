@@ -303,7 +303,7 @@ For the default one-rule path, see [single-rule action policies](./action-policy
 exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# No-Data Strategy
 
-\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'ignore' }\`.
+\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set via the \`set_no_data\` operation as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'ignore' }\`.
 
 | Strategy | Behaviour |
 |---|---|
@@ -341,7 +341,7 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Recovery Strategy
 
-\`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'no_breach' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).
+\`recovery\` is a **top-level rule field** (not inside the query). It is set via the \`set_recovery\` operation as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'no_breach' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).
 
 - \`no_breach\`: Recovers the alert episode when its group no longer appears in the breach results.
 - \`condition\`: Recovers the alert episode when \`query.base\` plus \`segment\` returns the group. Requires \`query.breach\`.
@@ -406,14 +406,12 @@ Use \`set_schedule\` to control how often the rule runs (\`every\`) and how far 
 
 #### \`operation: \\"set_query\\"\`
 
-Use \`set_query\` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.
+Use \`set_query\` to define the ES|QL condition that should fire the rule.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_query\\" | required |  |
 | \`query\` | object | required | ES\\\\|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it. |
-| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. |
-| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | optional | What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching. |
 
 ##### \`query\`
 
@@ -421,6 +419,24 @@ Use \`set_query\` to define the ES|QL condition that should fire the rule. Optio
 |---|---|---|---|
 | \`base\` | string | required | ES\\\\|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`. (min length: 1, max length: 10000) |
 | \`breach\` | object | optional | Optional ES\\\\|QL clause appended to \`query.base\`. If omitted, every row from \`query.base\` is a match, and a \`no_data\` strategy other than \`ignore\` then requires \`no_data.query\`. |
+
+#### \`operation: \\"set_recovery\\"\`
+
+Use \`set_recovery\` to control how alert episodes recover. Requires \`kind: alert\`.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_recovery\\" | required |  |
+| \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | required | When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. |
+
+#### \`operation: \\"set_no_data\\"\`
+
+Use \`set_no_data\` to control what happens when data stops arriving. Requires \`kind: alert\`.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_no_data\\" | required |  |
+| \`no_data\` | { strategy: \\"ignore\\", ... } \\\\| { strategy: \\"keep_last\\", ... } \\\\| { strategy: \\"resolve\\", ... } \\\\| { strategy: \\"alert\\", ... } | required | What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching. |
 
 #### \`operation: \\"set_grouping\\"\`
 
@@ -445,7 +461,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`count\` | integer | optional | Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match. (min: 0, max: 1000) |
+| \`count\` | integer | optional | Consecutive matches the alert episode spends in \`pending\` before it becomes \`active\` on the next match. For example, \`2\` opens it on the third consecutive match. Set to \`0\` to open it on the first match. (min: 0, max: 1000) |
 | \`timeframe\` | string | optional | Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`. (max length: 32) |
 | \`operator\` | \\"and\\" \\\\| \\"or\\" | optional | When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present. (enum: and \\\\| or) |
 
@@ -453,7 +469,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`count\` | integer | optional | Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery. (min: 0, max: 1000) |
+| \`count\` | integer | optional | Consecutive recoveries the alert episode spends in \`recovering\` before it becomes \`inactive\` on the next recovery. For example, \`2\` closes it on the third consecutive recovery. Set to \`0\` to close it on the first recovery. (min: 0, max: 1000) |
 | \`timeframe\` | string | optional | Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`. (max length: 32) |
 | \`operator\` | \\"and\\" \\\\| \\"or\\" | optional | When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present. (enum: and \\\\| or) |
 
@@ -670,11 +686,11 @@ exports[`schema_to_skill_docs generateStateTransitionDoc matches the reviewed sk
 Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
 
 - \`pending\` — Delay before a match opens an alert episode.
-  - \`pending.count\` — Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match.
+  - \`pending.count\` — Consecutive matches the alert episode spends in \`pending\` before it becomes \`active\` on the next match. For example, \`2\` opens it on the third consecutive match. Set to \`0\` to open it on the first match.
   - \`pending.timeframe\` — Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.
   - \`pending.operator\` — When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.
 - \`recovering\` — Delay before a recovered match closes the alert episode. Has no effect when \`recovery.strategy\` is \`manual\`.
-  - \`recovering.count\` — Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery.
+  - \`recovering.count\` — Consecutive recoveries the alert episode spends in \`recovering\` before it becomes \`inactive\` on the next recovery. For example, \`2\` closes it on the third consecutive recovery. Set to \`0\` to close it on the first recovery.
   - \`recovering.timeframe\` — Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.
   - \`recovering.operator\` — When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.
 

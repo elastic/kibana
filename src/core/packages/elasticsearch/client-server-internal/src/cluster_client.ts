@@ -233,23 +233,21 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
-    // provider's post-authentication headers override the one that came in on the wire.
-    //
-    // A UIAM bearer token that rode in over HTTP brings its own client authentication, so whatever
-    // arrived with it in `scopedHeaders` is forwarded verbatim - including nothing at all, which
-    // UIAM denies if the token required it. Kibana's shared secret is never substituted: the token
-    // may be bound to another client. Everything else is a credential Kibana can vouch for - a
-    // UIAM API key, or a bearer token Kibana minted itself and bound to a fake request (service
-    // accounts, task runs) - so it may require client authentication of Kibana's own.
-    let clientAuthentication: string | undefined | null;
+    // provider's post-authentication headers override the one that came in on the wire. The client
+    // authentication that travels with it is read from the same object, so a secret the request
+    // already carries is relayed rather than replaced.
+    let clientAuthentication: string | string[] | undefined;
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      const isUiamInboundToken =
-        requestHeaders !== undefined && credential !== null && isUiamBearerCredential(credential);
-      if (credential && !isUiamInboundToken) {
+      if (credential) {
         clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
-            ? { credentialSource: 'inbound', credential, requestHeaders }
+            ? {
+                credentialSource: 'inbound',
+                credential,
+                relayedClientAuthentication: scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
+                requestHeaders,
+              }
             : {
                 credentialSource: isExternalCredential ? 'external' : 'internal',
                 credential,
@@ -262,7 +260,9 @@ export class ClusterClient implements ICustomClusterClient {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       ...scopedHeaders,
-      ...(clientAuthentication ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication } : {}),
+      ...(clientAuthentication !== undefined
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
     };
   }
 
@@ -279,28 +279,27 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // A UIAM bearer token on a real request brings its own client authentication, so forward
-    // whatever rode in with it verbatim and never substitute Kibana's shared secret: the token may
-    // be bound to another client. If it required client authentication and none arrived, UIAM
-    // denies the call, which is the correct outcome.
-    //
-    // Everything else is a credential Kibana vouches for itself, so it gets Kibana's own secret.
-    // That includes a fake request's bearer token, which Kibana minted and bound to the request
-    // (service accounts, task runs). `internal` applies regardless of the request shape: for a
-    // real request these are the auth provider's post-authentication headers, and for a fake one
-    // the credential was minted by Kibana, so neither needs an attestation to be trusted. The
-    // exception is a fake request explicitly marked as carrying a user-created (external) UIAM
-    // credential, which UIAM rejects when presented with client authentication.
-    const isUiamInboundToken =
-      isRealRequest(request) && isUiamBearerCredential(authorizationHeader);
+    // Unlike `getScopedHeaders`, this path never reads the wire. `authHeaders` is the
+    // authentication provider's post-authentication output, so the credential has already been
+    // through `_authenticate` and Kibana can vouch for it without an attestation. A UIAM bearer
+    // token on a real request is the exception: it may be bound to another client, so it keeps
+    // the client authentication the provider resolved for it, and only an attestation Kibana
+    // could have minted itself earns Kibana's own secret.
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
-    const clientAuthentication = isUiamInboundToken
-      ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER]
-      : this.security?.uiam?.getElasticsearchClientAuthentication({
-          credentialSource: isExternalCredential ? 'external' : 'internal',
-          credential: authorizationHeader,
-        });
+    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication(
+      isRealRequest(request) && isUiamBearerCredential(authorizationHeader)
+        ? {
+            credentialSource: 'inbound',
+            credential: authorizationHeader,
+            relayedClientAuthentication: authHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: ensureRawRequest(request).headers ?? {},
+          }
+        : {
+            credentialSource: isExternalCredential ? 'external' : 'internal',
+            credential: authorizationHeader,
+          }
+    );
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),

@@ -30,6 +30,12 @@ per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
 of suites that drop out of the report.
 
+The body ends with hidden `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's
+file, title, framework and test ids, the branches a test of the suite failed on (`suite.branches`,
+pull requests left out) and the pipelines its file failed on (`suite.pipelines`). Besides the
+matching below, `/skip` and the Slack notifications of `elastic/kibana-operations` (`triage/`)
+read it to find the `describe` block to skip and the branches to skip it on.
+
 A GitHub write that fails is logged and recorded, the run goes on with the next suite and exits
 non-zero at the end. `--dry-run` reads the real issues and logs what would be filed without
 writing anything.

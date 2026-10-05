@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -213,6 +214,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
+    if (params.description !== undefined) {
+      throw Boom.badRequest('Service account descriptions are not supported on Serverless.');
+    }
     const { name, roles } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
@@ -237,6 +241,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
@@ -387,6 +393,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   releaseFakeRequest(request: KibanaRequest): void {
     this.fakeRequests.release(request);
+  }
+
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null {
+    const serviceAccountId = this.fakeRequests.getServiceAccountId(request);
+    return serviceAccountId ? { type: 'service_account', serviceAccountId, variant: 'uiam' } : null;
   }
 
   async reauthenticateFakeRequest(

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
-
-type RouteContext = Parameters<RequestHandler>[0];
+import type { SubscriptionAvailability } from '../../common/availability';
+import type { AlertZeroRequestHandlerContext } from '../types';
 
 /**
  * Minimal request handler context for route tests: every AlertZero handler is wrapped in
@@ -15,9 +14,16 @@ type RouteContext = Parameters<RequestHandler>[0];
  */
 export const createRouteContextMock = ({
   settingEnabled = true,
-}: { settingEnabled?: boolean } = {}): RouteContext =>
+  subscription = 'available',
+  hasRequiredDependencies = true,
+}: {
+  settingEnabled?: boolean;
+  subscription?: SubscriptionAvailability;
+  hasRequiredDependencies?: boolean;
+} = {}): AlertZeroRequestHandlerContext =>
   ({
+    alertzero: Promise.resolve({ subscription, hasRequiredDependencies }),
     core: Promise.resolve({
       uiSettings: { client: { get: jest.fn().mockResolvedValue(settingEnabled) } },
     }),
-  } as unknown as RouteContext);
+  } as unknown as AlertZeroRequestHandlerContext);

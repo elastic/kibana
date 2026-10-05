@@ -66,6 +66,7 @@ const FlyoutTemplateResolved = ({
   paddingSize,
   flyoutMenuProps,
   tabs: tabsProp,
+  tabBarProps,
   defaultSelectedTabId,
   selectedTabId: controlledSelectedTabId,
   onTabChange,
@@ -172,8 +173,8 @@ const FlyoutTemplateResolved = ({
   );
 
   const tabsContextValue = useMemo<FlyoutTabsState>(
-    () => ({ tabs, selectedTabId, selectTab }),
-    [tabs, selectedTabId, selectTab]
+    () => ({ tabs, tabBarProps, selectedTabId, selectTab }),
+    [tabs, tabBarProps, selectedTabId, selectTab]
   );
 
   const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });

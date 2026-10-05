@@ -16,35 +16,35 @@ tags:
 triggers:
   - type: manual
     inputs:
-      - name: detectionLookback
-        type: string
-        default: 'now-24h'
-        required: false
-        description: 'Lookback window for unprocessed detections; older detections are considered stale and excluded from the batch.'
-      - name: detectionBatchMax
-        type: number
-        default: 10
-        required: false
-        description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
-      - name: flakyRuleDetectionThreshold
-        type: number
-        default: 10
-        required: false
-        description: 'Rules with at least this many change-point detections inside the detectionLookback window are treated as flaky and suppressed from escalation until their oldest unprocessed detection ages past the probe interval.'
-      - name: flakyRuleProbeAfterMinutes
-        type: number
-        default: 360
-        required: false
-        description: 'A suppressed rule is let through to the agent once its oldest unprocessed detection is at least this old. Must stay below the detectionLookback window (default 24h=1440m) or the probe can never fire.'
-      - name: flakyRuleExemptSeverityScore
-        type: number
-        default: 80
-        required: false
-        description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
-      - name: rootTriggeredBy
-        type: string
-        required: false
-        description: 'Root workflow trigger type propagated by a managed driver.'
+      properties:
+        detectionLookback:
+          type: string
+          default: 'now-24h'
+          description: 'Lookback window for unprocessed detections; older detections are considered stale and excluded from the batch.'
+        detectionBatchMax:
+          type: number
+          default: 10
+          description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
+        flakyRuleDetectionThreshold:
+          type: number
+          default: 10
+          description: 'Rules with at least this many change-point detections inside the detectionLookback window are treated as flaky and suppressed from escalation until their oldest unprocessed detection ages past the probe interval.'
+        flakyRuleProbeAfterMinutes:
+          type: number
+          default: 360
+          description: 'A suppressed rule is let through to the agent once its oldest unprocessed detection is at least this old. Must stay below the detectionLookback window (default 24h=1440m) or the probe can never fire.'
+        flakyRuleExemptSeverityScore:
+          type: number
+          default: 80
+          description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+        rootTriggeredBy:
+          type: string
+          description: 'Root workflow trigger type propagated by a managed driver.'
+        connector_id:
+          type: string
+          maxLength: 255
+          description: 'Optional chat model connector or inference endpoint ID for this run.'
+      additionalProperties: false
 outputs:
   - name: processedCount
     type: number
@@ -195,15 +195,19 @@ steps:
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
   # -----------------------------------------------------------------------
+  - name: resolve_model
+    type: significantEvents.resolveModel
+    with:
+      step: discovery
+      connector_id: '{{ inputs.connector_id }}'
+
   - name: run_discovery_agent
     type: ai.agent
     agent-id: 'significant-events.discovery'
-    # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    connector-id-by-feature: 'significant_events_discovery'
-    plugin-id: 'significant_events_discovery'
-    aggregate-by: 'significant_events'
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    # Keep usage attribution IDs in sync with @kbn/significant-events-schema nightshift_usage_ids.ts.
+    plugin-id: 'nightshift_discovery'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

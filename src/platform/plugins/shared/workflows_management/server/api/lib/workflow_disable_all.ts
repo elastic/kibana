@@ -18,7 +18,7 @@ import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 
-const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowProperties => {
+export const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowProperties => {
   const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
   return {
     ...source,
