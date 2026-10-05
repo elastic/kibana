@@ -27,3 +27,7 @@ export type {
   NightshiftInvestigationsRepositoryClient,
   NightshiftInvestigationsEndpoint,
 } from './api';
+export type {
+  NightshiftInvestigationsAPIReturnType,
+  NightshiftInvestigationsAPIClientRequestParamsOf,
+} from './api';

@@ -55,7 +55,7 @@ const renderSection = ({
   render(
     <I18nProvider>
       <InvestigationSection
-        id="80-critical"
+        id="critical"
         investigations={investigations}
         total={total}
         hasMore={hasMore}
@@ -72,10 +72,10 @@ describe('InvestigationSection', () => {
     renderSection({ isInitialLoading: true });
 
     expect(
-      screen.getByTestId('nightshiftInvestigationSectionSkeleton-80-critical')
+      screen.getByTestId('nightshiftInvestigationSectionSkeleton-critical')
     ).toBeInTheDocument();
     expect(
-      screen.queryByTestId('nightshiftInvestigationSectionCount-80-critical')
+      screen.queryByTestId('nightshiftInvestigationSectionCount-critical')
     ).not.toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe('InvestigationSection', () => {
     const { rerender } = render(
       <I18nProvider>
         <InvestigationSection
-          id="80-critical"
+          id="critical"
           investigations={[investigation]}
           total={1}
           hasMore={false}
@@ -100,13 +100,13 @@ describe('InvestigationSection', () => {
     );
 
     expect(
-      screen.queryByTestId('nightshiftInvestigationSectionShowMore-80-critical')
+      screen.queryByTestId('nightshiftInvestigationSectionShowMore-critical')
     ).not.toBeInTheDocument();
 
     rerender(
       <I18nProvider>
         <InvestigationSection
-          id="80-critical"
+          id="critical"
           investigations={[investigation]}
           total={11}
           hasMore={true}
@@ -117,7 +117,7 @@ describe('InvestigationSection', () => {
     );
 
     expect(
-      screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical')
+      screen.getByTestId('nightshiftInvestigationSectionShowMore-critical')
     ).toBeInTheDocument();
   });
 
@@ -125,7 +125,7 @@ describe('InvestigationSection', () => {
     const onShowMore = jest.fn();
     renderSection({ investigations: [investigation], total: 11, hasMore: true, onShowMore });
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-critical'));
     expect(onShowMore).toHaveBeenCalledTimes(1);
   });
 
@@ -133,7 +133,7 @@ describe('InvestigationSection', () => {
     const onRetry = jest.fn();
     renderSection({ error: new Error('Network unavailable'), onRetry });
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-critical'));
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
   });

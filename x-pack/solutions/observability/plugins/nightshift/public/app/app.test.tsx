@@ -127,10 +127,10 @@ function setSections({
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts: {
-      '80-critical': sections.find((section) => section.id === '80-critical')?.total ?? 0,
-      '60-high': sections.find((section) => section.id === '60-high')?.total ?? 0,
-      '40-medium': sections.find((section) => section.id === '40-medium')?.total ?? 0,
-      '20-low': sections.find((section) => section.id === '20-low')?.total ?? 0,
+      critical: sections.find((section) => section.id === 'critical')?.total ?? 0,
+      high: sections.find((section) => section.id === 'high')?.total ?? 0,
+      medium: sections.find((section) => section.id === 'medium')?.total ?? 0,
+      low: sections.find((section) => section.id === 'low')?.total ?? 0,
     },
     hasActiveInvestigations,
     isInitialLoading,
@@ -148,10 +148,10 @@ function defaultSections(
 ): InvestigationSectionState[] {
   return [
     makeSection('in-progress', overrides['in-progress']),
-    makeSection('80-critical', overrides['80-critical']),
-    makeSection('60-high', overrides['60-high']),
-    makeSection('40-medium', overrides['40-medium']),
-    makeSection('20-low', overrides['20-low']),
+    makeSection('critical', overrides['critical']),
+    makeSection('high', overrides['high']),
+    makeSection('medium', overrides['medium']),
+    makeSection('low', overrides['low']),
     makeSection('not-rated', overrides['not-rated']),
   ];
 }
@@ -243,10 +243,10 @@ describe('NightshiftApp', () => {
     setSections({
       sections: defaultSections({
         'in-progress': { isInitialLoading: true },
-        '80-critical': { isInitialLoading: true },
-        '60-high': { isInitialLoading: true },
-        '40-medium': { isInitialLoading: true },
-        '20-low': { isInitialLoading: true },
+        critical: { isInitialLoading: true },
+        high: { isInitialLoading: true },
+        medium: { isInitialLoading: true },
+        low: { isInitialLoading: true },
         'not-rated': { isInitialLoading: true },
       }),
       isInitialLoading: true,
@@ -264,10 +264,10 @@ describe('NightshiftApp', () => {
     setSections({
       sections: defaultSections({
         'in-progress': { error },
-        '80-critical': { error },
-        '60-high': { error },
-        '40-medium': { error },
-        '20-low': { error },
+        critical: { error },
+        high: { error },
+        medium: { error },
+        low: { error },
         'not-rated': { error },
       }),
     });
@@ -303,13 +303,13 @@ describe('NightshiftApp', () => {
     const fetchHigh = jest.fn();
     setSections({
       sections: defaultSections({
-        '80-critical': {
+        critical: {
           investigations: [criticalInvestigation],
           total: 11,
           hasMore: true,
           fetchNextPage: fetchCritical,
         },
-        '60-high': {
+        high: {
           investigations: [highInvestigation],
           total: 11,
           hasMore: true,
@@ -320,7 +320,7 @@ describe('NightshiftApp', () => {
 
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-critical'));
     expect(fetchCritical).toHaveBeenCalledTimes(1);
     expect(fetchHigh).not.toHaveBeenCalled();
   });
@@ -329,9 +329,7 @@ describe('NightshiftApp', () => {
     renderApp();
 
     expect(screen.getByTestId('nightshiftInvestigationSection-in-progress')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSection-80-critical')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-not-rated')
     ).not.toBeInTheDocument();
@@ -353,7 +351,7 @@ describe('NightshiftApp', () => {
   it('does not scroll from a severity tile with no investigations', () => {
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
@@ -361,26 +359,26 @@ describe('NightshiftApp', () => {
   it('scrolls to a severity section from its tile', () => {
     setSections({
       sections: defaultSections({
-        '80-critical': { investigations: [criticalInvestigation], total: 1 },
+        critical: { investigations: [criticalInvestigation], total: 1 },
       }),
     });
 
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=80-critical');
+    expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
   });
 
   it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {
     setSections({
-      sections: defaultSections({ '80-critical': { error: new Error('boom') } }),
+      sections: defaultSections({ critical: { error: new Error('boom') } }),
     });
 
     renderApp();
 
-    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-80-critical'));
+    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
@@ -389,7 +387,7 @@ describe('NightshiftApp', () => {
 
     renderApp();
 
-    expect(screen.queryByTestId('nightshiftSeverityTileCount-80-critical')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-critical')).not.toBeInTheDocument();
   });
 
   it("opens the selected investigation's conversation details flyout and clears the URL on close", async () => {
