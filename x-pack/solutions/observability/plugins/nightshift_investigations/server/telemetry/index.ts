@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import { NightshiftTelemetryClient } from './client';
+import { semanticMemoryMaterializedEvent, semanticMemoryOptimizedEvent } from './events';
+
+export const setupNightshiftTelemetry = ({
+  analytics,
+  logger,
+}: {
+  analytics: AnalyticsServiceSetup;
+  logger: Logger;
+}): NightshiftTelemetryClient => {
+  analytics.registerEventType(semanticMemoryMaterializedEvent);
+  analytics.registerEventType(semanticMemoryOptimizedEvent);
+  return new NightshiftTelemetryClient(analytics, logger);
+};
+
+export { NightshiftTelemetryClient };
+export type { SemanticMemoryMaterializedEvent, SemanticMemoryOptimizedEvent } from './events';
 export {
   NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE,
   NIGHTSHIFT_CORTEX_HYDRATED_EVENT_TYPE,

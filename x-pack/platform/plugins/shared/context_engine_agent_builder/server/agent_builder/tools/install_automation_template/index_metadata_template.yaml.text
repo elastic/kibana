@@ -18,6 +18,9 @@ enabled: true
 consts:
   # The Context Engine AI index the indicators are written into.
   ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance. Used as the KI ID so that two
+  # installations on the same source index produce distinct, non-colliding profile KIs.
+  automation_name: __AUTOMATION_NAME__
   # The index being profiled. Also the index every generated ES|QL reads FROM.
   source_index: __SOURCE_INDEX__
   # A keyword field whose distribution grounds the profile. Pick the one an analyst would
@@ -266,13 +269,13 @@ steps:
     type: if
     condition: "steps.verify_ki.output.passed : true"
     steps:
-      # `ki_id` is the index name, so a re-run replaces this profile on an index destination, and
-      # appends a newer revision of the same KI on a data stream, rather than writing a second KI.
+      # `ki_id` is the automation name, so a re-run replaces this profile in-place, and two
+      # installations on the same source index produce distinct, non-colliding profile KIs.
       - name: create_ki
         type: context-engine.createKi
         with:
           ai_index_id: "{{ consts.ai_index_id }}"
-          ki_id: "{{ consts.source_index }}"
+          ki_id: "{{ consts.automation_name }}"
           ki: "${{ steps.assemble_ki.output.ki }}"
     else:
       - name: log_verification_failure

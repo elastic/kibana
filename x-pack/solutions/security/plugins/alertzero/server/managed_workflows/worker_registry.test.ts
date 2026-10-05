@@ -63,7 +63,15 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     every: '1m',
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-hunt-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-hunt-continuous-threat-hunt': {
+    settingsVersion: 1,
+    scheduleInterval: '4h',
+    // No extras: tier2When/candidateLimit/fanOutMax are fixed implementation constants,
+    // not settings.
+    // Default autonomy is manual, so the scheduled trigger is omitted even though
+    // scheduleInterval is a setting (assisted/supervised re-render it in).
+    triggerTypes: ['manual'],
+  },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
@@ -71,7 +79,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-detection-rule-coverage': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    triggerTypes: ['scheduled', 'manual'],
+  },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
@@ -120,14 +133,22 @@ describe('workerRegistry', () => {
 
       // A Worker with no schedule must not gain one by accident, and vice versa.
       expect(parsed.triggers?.map(({ type }) => type)).toEqual(expected.triggerTypes);
-      expect(parsed.triggers?.[0]?.with?.every).toBe(expected.every ?? expected.scheduleInterval);
+      if (expected.triggerTypes.includes('scheduled')) {
+        const scheduled = parsed.triggers?.find(({ type }) => type === 'scheduled');
+        expect(scheduled?.with?.every).toBe(expected.every ?? expected.scheduleInterval);
+      } else {
+        expect(parsed.triggers?.[0]?.with?.every).toBeUndefined();
+      }
       // A fixed cadence must stay out of the settings contract, or the shared Watch
       // page would render an interval control the Worker does not accept writes for.
       if (expected.scheduleInterval === undefined) {
         expect(yaml).not.toContain('scheduleInterval');
       }
 
-      expect(yaml).not.toContain('candidateLimit');
+      // Hunt renders candidateLimit as a fixed constant; no other Worker may leak that dial name.
+      if (catalog.id !== 'system-security-hunt-continuous-threat-hunt') {
+        expect(yaml).not.toContain('candidateLimit');
+      }
     }
   );
 
