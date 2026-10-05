@@ -21,6 +21,7 @@ import type { ExperimentalFeatures } from '../../../../common/experimental_featu
 import type { EntityAttachment } from './types';
 import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
+import { EntityPill } from './entity_pill';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
   buildEntityRightPanel,
@@ -152,6 +153,13 @@ export const createEntityAttachmentDefinition = ({
 
   return {
     ...baseDefinition,
+    renderConversationDetailsContent: ({ attachment }) => (
+      <EntityPill
+        attachment={attachment}
+        application={resolvedApplication}
+        resolveSecurityCanvasContext={resolvedResolveCanvasContext}
+      />
+    ),
     canvasWidth: ENTITY_CANVAS_WIDTH,
     renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>, { closeCanvas }) => (
       <EntityAnalyticsAgentNavigationProvider

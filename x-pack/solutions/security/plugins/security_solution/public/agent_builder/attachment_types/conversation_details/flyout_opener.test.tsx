@@ -12,15 +12,15 @@ import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { AttachmentSummaryFlyoutOpener } from './open_flyout_on_mount';
+import { ConversationDetailsFlyoutOpener } from './flyout_opener';
 
 jest.mock('../../../flyout_v2/use_flyout_api');
 jest.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
 
-// The real bundle mounts the whole Security provider stack; the opener only needs to be inside it.
 jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+
 const initDataViewManager = jest.fn();
 let dataViewStatus = 'ready';
 jest.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => ({
@@ -37,23 +37,26 @@ const descriptor: FlyoutDescriptor = {
 };
 
 const resolveSecurityCanvasContext = jest.fn().mockResolvedValue({ store: {}, kibanaServices: {} });
+const resolveDescriptor = jest.fn().mockResolvedValue(descriptor);
 
-const renderOpener = (d: FlyoutDescriptor = descriptor) =>
+const renderOpener = (
+  overrides: { resolveDescriptor?: () => Promise<FlyoutDescriptor | null> } = {}
+) =>
   render(
-    <AttachmentSummaryFlyoutOpener
-      descriptor={d}
+    <ConversationDetailsFlyoutOpener
+      resolveDescriptor={overrides.resolveDescriptor ?? resolveDescriptor}
       resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   );
 
-describe('AttachmentSummaryFlyoutOpener', () => {
+describe('ConversationDetailsFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataViewStatus = 'ready';
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
-  it('opens the flyout for the given descriptor, attributed to the summary', async () => {
+  it('opens the flyout for the given descriptor, attributed to the attachment summary', async () => {
     renderOpener();
 
     await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalledTimes(1));
@@ -80,5 +83,14 @@ describe('AttachmentSummaryFlyoutOpener', () => {
 
     await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalled());
     expect(initDataViewManager).not.toHaveBeenCalled();
+  });
+
+  it('does not open the flyout when the descriptor resolves to null', async () => {
+    renderOpener({ resolveDescriptor: jest.fn().mockResolvedValue(null) });
+
+    // Give it time to resolve.
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(openDescriptorAsStart).not.toHaveBeenCalled();
   });
 });

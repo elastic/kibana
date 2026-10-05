@@ -187,8 +187,6 @@ export const FLYOUT_ORIGIN = {
   RISK_SCORE_PREVIEW: 'risk_score_preview',
   // Entity attachment action in AI chat.
   AI_CHAT_ENTITY_ATTACHMENT: 'ai_chat_entity_attachment',
-  // Attachment summary row in the investigation details flyout.
-  ATTACHMENT_SUMMARY: 'attachment_summary',
   // Privileged user monitoring users table.
   PRIVILEGED_USERS_TABLE: 'privileged_users_table',
   // Privileged access detection chart entity link.
@@ -203,6 +201,8 @@ export const FLYOUT_ORIGIN = {
   ROW_ACTION: 'row_action',
   // Clickable alert-id chip in the Attack Summary / Background markdown section.
   ATTACK_SUMMARY_ALERT: 'attack_summary_alert',
+  // Attachment summary row in the investigation details flyout.
+  ATTACHMENT_SUMMARY: 'attachment_summary',
 } as const;
 export type FlyoutOrigin = (typeof FLYOUT_ORIGIN)[keyof typeof FLYOUT_ORIGIN];
 

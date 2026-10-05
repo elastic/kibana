@@ -6,19 +6,23 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { AttachmentSummarySection } from '../attachment_summary';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { AttachmentsSection } from '../attachments_section';
 
 const SUMMARY_LIMIT = 120;
 
 export interface OverviewTabProps {
   investigation: Investigation;
   attachments: VersionedAttachment[] | undefined;
+  /**
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
+   */
   attachmentsService: AttachmentServiceStartContract;
   /**
    * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
@@ -59,16 +63,14 @@ export const OverviewTab = memo<OverviewTabProps>(
                   </EuiButtonEmpty>
                 </div>
               )}
+              <EuiSpacer size={isCondensed ? 'xs' : 'l'} />
+              <AttachmentsSection
+                attachments={attachments}
+                attachmentsService={attachmentsService}
+              />
             </DetailsBlock>
           </EuiFlexItem>
         )}
-
-        {/* Not wrapped in an EuiFlexItem: the section renders nothing when the investigation has
-            no listable attachment, and an empty item would still take a gutter. */}
-        <AttachmentSummarySection
-          attachments={attachments}
-          attachmentsService={attachmentsService}
-        />
 
         {proposedActionsContent && (
           <EuiFlexItem>
