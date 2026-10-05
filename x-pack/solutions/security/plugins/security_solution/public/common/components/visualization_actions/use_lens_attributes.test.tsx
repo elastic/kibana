@@ -438,7 +438,8 @@ describe('useLensAttributes', () => {
     ]);
   });
 
-  it('should return Lens attributes if adHocDataViews exist', () => {
+  it('preserves a chart-specific ad hoc data view instead of injecting the scope spec', () => {
+    const chartAdHocDataViews = { mockAdHocDataViews: {} };
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -446,13 +447,46 @@ describe('useLensAttributes', () => {
             ...kpiHostMetricLensAttributes,
             state: {
               ...kpiHostMetricLensAttributes.state,
-              adHocDataViews: { mockAdHocDataViews: {} },
+              adHocDataViews: chartAdHocDataViews,
             },
           },
         }),
       { wrapper }
     );
 
-    expect(result?.current).not.toBeNull();
+    expect(result.current?.state.adHocDataViews).toEqual(chartAdHocDataViews);
+  });
+
+  it('attaches the unpersisted scope data view spec', () => {
+    const { dataView } = withIndices(['auditbeat-*']);
+    jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result.current?.state.adHocDataViews?.[dataView.id ?? '']).toEqual(dataView.toSpec());
+  });
+
+  it('does not inject a spec when the scope data view is persisted', () => {
+    const { dataView } = withIndices(['auditbeat-*']);
+    dataView.version = 'WzEsMV0=';
+    jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result.current?.state.adHocDataViews).toBeUndefined();
   });
 });

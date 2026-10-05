@@ -200,8 +200,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     () =>
       attributes?.state?.adHocDataViews != null
         ? Object.values(attributes?.state?.adHocDataViews).reduce((acc, adHocDataView) => {
-            if (adHocDataView?.name != null) {
-              acc.push(adHocDataView?.name);
+            // `title` is the index pattern. `name` is the display label (for example
+            // "Security solution explore") and is not what Inspect should show.
+            const indexPattern = adHocDataView?.title ?? adHocDataView?.name;
+            if (indexPattern != null) {
+              acc.push(indexPattern);
             }
             return acc;
           }, [] as string[])
