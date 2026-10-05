@@ -10,6 +10,8 @@
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
+import { InspectorPage } from './inspector';
+import { QueryBar } from './query_bar';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 // Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
@@ -29,10 +31,12 @@ export class MapsPage {
   public readonly exitFullScreenButton;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
+  private readonly queryBar: QueryBar;
   private readonly mapContainer;
   private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
+  public readonly inspector: InspectorPage;
 
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
@@ -49,10 +53,12 @@ export class MapsPage {
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
     this.appMenu = new AppMenu(this.page);
+    this.queryBar = new QueryBar(this.page);
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.mapContainer = this.page.testSubj.locator('mapContainer');
     this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
     this.saveModal = new SavedObjectSaveModal(this.page);
+    this.inspector = new InspectorPage(this.page);
   }
 
   async gotoNewMap() {
@@ -123,12 +129,12 @@ export class MapsPage {
     await this.saveAndReturnButton.click();
   }
 
-  /** Waits until map layers are loaded. Works in both standalone (expanded TOC) and minimized TOC contexts. */
+  /** Waits until map layers are loaded. */
   async waitForLayersToLoad() {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
-    // visible before that, so gate both branches on this signal.
+    // visible before that, so gate on this signal before checking loading state.
     await this.page.waitForFunction(
       () =>
         Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
@@ -136,37 +142,34 @@ export class MapsPage {
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
 
-    // Wait until one of the two TOC states has rendered before branching; an immediate
-    // isVisible() snapshot after mapContainer can race with the TOC appearing.
-    const mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
-    const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
-    await this.page
-      .locator('[data-test-subj="mapLayerTOC"], [data-test-subj="mapExpandLayerControlButton"]')
-      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.waitForLoadCycleIfNeeded();
 
-    if (await mapLayerToc.isVisible()) {
-      // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
-      // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
-      await this.page.waitForFunction(
-        () => {
-          const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
-          if (!toc) {
-            return false;
-          }
-          const layerCount = toc.querySelectorAll(
-            '[data-test-subj^="layerTocActionsPanelToggleButton"]'
-          ).length;
-          const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
-          return layerCount > 0 && spinnerCount === 0;
-        },
-        undefined,
-        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-      );
-    } else {
-      await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-      await expect(expandButton.locator('[role="progressbar"]')).toHaveCount(0, {
+    await expect
+      .poll(() => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'), {
         timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-      });
+      })
+      .toBe(false);
+  }
+
+  /**
+   * If the map is not currently loading, waits up to 1000 ms for a load cycle to begin —
+   * bridging the gap between a triggering action resolving and the new request's loading
+   * state reaching the DOM. Falls through if no load starts in that window
+   * (e.g. the action required no re-fetch).
+   */
+  private async waitForLoadCycleIfNeeded() {
+    const alreadyLoading = (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
+    if (!alreadyLoading) {
+      await this.page
+        .waitForFunction(
+          () =>
+            document
+              .querySelector('[data-test-subj="mapContainer"]')
+              ?.getAttribute('data-map-loading') === 'true',
+          undefined,
+          { timeout: 1000 }
+        )
+        .catch(() => {});
     }
   }
 
@@ -198,18 +201,6 @@ export class MapsPage {
     }
   }
 
-  private async closeSetViewPopover() {
-    // timeout: 0 prevents waiting for the element to appear — the form only exists in
-    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
-    if (await this.setViewForm.isVisible({ timeout: 1_000 })) {
-      // page.keyboard.press is more robust than setViewForm.press in embedded contexts:
-      // during map panning the dashboard re-renders the panel, detaching the form element,
-      // which causes locator.press to retry until it times out.
-      await this.page.keyboard.press('Escape');
-      await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    }
-  }
-
   async setView(lat: number, lon: number, zoom: number) {
     await this.openSetViewPopover();
     await this.page.testSubj.locator('latitudeInput').fill(lat.toString());
@@ -219,7 +210,20 @@ export class MapsPage {
     await this.waitForMapPanAndZoom();
   }
 
-  async waitForMapPanAndZoom() {
+  async waitForMapPanAndZoom(origView?: { lat: number; lon: number; zoom: number }) {
+    if (origView) {
+      // Wait until the view has changed from origView (pan has started).
+      await expect
+        .poll(
+          async () => {
+            const currentView = await this.getView();
+            return JSON.stringify(currentView) !== JSON.stringify(origView);
+          },
+          { timeout: DEFAULT_MAP_LOADING_TIMEOUT, intervals: [500] }
+        )
+        .toBe(true);
+    }
+
     let prevView: { lat: number; lon: number; zoom: number } | undefined;
     await expect
       .poll(
@@ -237,12 +241,81 @@ export class MapsPage {
   }
 
   async getView(): Promise<{ lat: number; lon: number; zoom: number }> {
-    await this.openSetViewPopover();
-    const lat = await this.page.testSubj.locator('latitudeInput').inputValue();
-    const lon = await this.page.testSubj.locator('longitudeInput').inputValue();
-    const zoom = await this.page.testSubj.locator('zoomInput').inputValue();
-    await this.closeSetViewPopover();
-    return { lat: parseFloat(lat), lon: parseFloat(lon), zoom: parseFloat(zoom) };
+    const attrs = await this.mapContainer.evaluate((el) => ({
+      lat: (el as HTMLElement).dataset.mapLat,
+      lon: (el as HTMLElement).dataset.mapLon,
+      zoom: (el as HTMLElement).dataset.mapZoom,
+    }));
+    if (attrs.lat === undefined || attrs.lon === undefined || attrs.zoom === undefined) {
+      throw new Error('Map view data attributes not found on mapContainer');
+    }
+    return { lat: parseFloat(attrs.lat), lon: parseFloat(attrs.lon), zoom: parseFloat(attrs.zoom) };
+  }
+
+  async openMapWithId(id: string) {
+    await this.page.gotoApp(`maps/map/${id}`);
+    await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Opens the inspector, selects a request by name, reads its raw JSON response,
+   * closes the inspector, and returns the parsed response body.
+   */
+  async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
+    await this.inspector.open();
+    await this.inspector.openInspectorRequestsView();
+
+    const comboBox = this.page.components.comboBox('inspectorRequestChooser');
+    await comboBox.setSelectedOptions([requestName]);
+
+    const responseBody = await this.inspector.getResponse();
+    await this.inspector.close();
+    return responseBody;
+  }
+
+  /**
+   * Opens the inspector, reads the "Hits" value from the request statistics table,
+   * closes the inspector, and returns it as a string.
+   */
+  async getHits(): Promise<string> {
+    await this.inspector.open();
+    await this.inspector.openInspectorRequestsView();
+    await this.inspector.openRequestsStatisticsTab();
+
+    const rows = await this.inspector.getTableData();
+    const hitsRow = rows.find((row) => row[0] === 'Hits');
+    const hits = hitsRow?.[1];
+
+    if (!hits) {
+      throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+    }
+
+    await this.inspector.close();
+    return hits;
+  }
+
+  /** Opens the map settings panel and enables "Auto fit map to data bounds". */
+  async enableAutoFitToBounds() {
+    await this.appMenu.clickItem('openSettingsButton');
+    const autoFitSwitch = this.page.testSubj.locator('autoFitToDataBoundsSwitch');
+    await autoFitSwitch.waitFor({ state: 'visible' });
+    if ((await autoFitSwitch.getAttribute('aria-checked')) !== 'true') {
+      await autoFitSwitch.click();
+      await this.page.waitForFunction(
+        (subj) =>
+          document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+          'true',
+        'autoFitToDataBoundsSwitch'
+      );
+    }
+    await this.page.testSubj.click('mapSettingSubmitButton');
+  }
+
+  /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
+  async setAndSubmitQuery(query: string) {
+    await this.queryBar.setQuery(query);
+    await this.queryBar.submitQuery();
+    await this.waitForLayersToLoad();
   }
 
   /**

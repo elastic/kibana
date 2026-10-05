@@ -9,7 +9,11 @@ import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
+import {
+  resolveFieldMeta,
+  shouldDefaultCollectS3Logs,
+  toTyped,
+} from '../service_settings_step/field_config';
 import type {
   ServiceVars,
   ServiceDataStreamVars,
@@ -52,6 +56,11 @@ export function buildStreamVars(
       continue;
     }
     result[key] = toTyped(value, meta);
+  }
+
+  // An S3 input with a bucket ARN but no explicit toggle must read from the bucket, not SQS.
+  if (shouldDefaultCollectS3Logs(service, activeInput, dsVars.varsByInput[activeInput])) {
+    result.collect_s3_logs = true;
   }
 
   // Emit manifest defaults for show_user fields belonging to this input not explicitly set.

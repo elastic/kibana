@@ -23,7 +23,7 @@ import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { createMockLocators, TestProviders } from '../../test_utils/test_providers';
-import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
@@ -37,7 +37,7 @@ let mockCanReadExecutionHistory = true;
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
-  useEpisodeAutoAttach: jest.fn(),
+  useAlertAutoAttach: jest.fn(),
 }));
 
 jest.mock('@kbn/core-di-browser', () => {
@@ -145,7 +145,7 @@ const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
-const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
+const mockUseAlertAutoAttach = jest.mocked(useAlertAutoAttach);
 const mockRuleOverviewPanelSection = jest.mocked(AlertEpisodeRuleOverviewPanelSection);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
@@ -611,10 +611,10 @@ describe('EpisodeDetailsPage', () => {
   });
 
   describe('Agent Builder auto-attach', () => {
-    it('passes the loaded episode to useEpisodeAutoAttach', () => {
+    it('passes the loaded episode to useAlertAutoAttach', () => {
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+      expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
         mockEpisode,
         {
           ruleName: 'Rule A',
@@ -636,7 +636,7 @@ describe('EpisodeDetailsPage', () => {
 
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+      expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
         mockEpisode,
         {
           ruleName: undefined,
@@ -674,7 +674,7 @@ describe('EpisodeDetailsPage', () => {
         </MockChromeContextProvider>
       );
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(
+      expect(mockUseAlertAutoAttach).toHaveBeenLastCalledWith(
         nextEpisode,
         {
           ruleName: 'Rule A',

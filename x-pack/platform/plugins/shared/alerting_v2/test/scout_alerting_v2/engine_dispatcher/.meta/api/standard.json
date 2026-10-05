@@ -1,5 +1,5 @@
 {
-  "sha1": "ded364362069fa7941fd1184257b8e147b8e7dfb",
+  "sha1": "a8675c801e83dd7a331e6ff315233cc9baee6a9a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -131,8 +131,8 @@
       }
     },
     {
-      "id": "bf3ddf78696d2df-7f01b1734bf391d",
-      "title": "Dispatcher throttle strategies / per_episode + on_status_change throttles on a second dispatch when status is unchanged",
+      "id": "bf3ddf78696d2df-159291ccca999fe",
+      "title": "Dispatcher throttle strategies / per_alert + on_status_change throttles on a second dispatch when status is unchanged",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -145,8 +145,8 @@
       }
     },
     {
-      "id": "bf3ddf78696d2df-3398fde1b86cae8",
-      "title": "Dispatcher throttle strategies / per_episode + per_status_interval throttles within the interval when status is unchanged",
+      "id": "bf3ddf78696d2df-bc5270746632182",
+      "title": "Dispatcher throttle strategies / per_alert + per_status_interval throttles within the interval when status is unchanged",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -159,8 +159,8 @@
       }
     },
     {
-      "id": "bf3ddf78696d2df-bb557dc468cabac",
-      "title": "Dispatcher throttle strategies / per_episode + every_time dispatches a new event even when the episode status is unchanged",
+      "id": "bf3ddf78696d2df-c0bd7bec44bcc2d",
+      "title": "Dispatcher throttle strategies / per_alert + every_time dispatches a new event even when the episode status is unchanged",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
