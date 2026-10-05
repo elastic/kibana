@@ -16,6 +16,9 @@ import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepLogsView } from './step_logs_view';
 import { useKibana } from '../../../hooks/use_kibana';
 
+const LOGS_PAGE_SIZE = 100;
+const MAX_LOG_PAGES = 100;
+
 interface StepLogsSectionProps {
   stepExecution: WorkflowStepExecutionDto;
   workflowExecutionId: string;
@@ -39,11 +42,18 @@ export const StepLogsSection = React.memo<StepLogsSectionProps>(
       () => ({
         fetchLogs: async () => {
           if (!stepExecution.id) return [];
-          const response = await api.getExecutionLogs(workflowExecutionId, {
-            stepExecutionId: stepExecution.id,
-            sortOrder: 'asc',
-          });
-          return response.logs;
+          const allLogs: Awaited<ReturnType<typeof api.getExecutionLogs>>['logs'] = [];
+          for (let page = 1; page <= MAX_LOG_PAGES; page++) {
+            const response = await api.getExecutionLogs(workflowExecutionId, {
+              stepExecutionId: stepExecution.id,
+              sortOrder: 'asc',
+              size: LOGS_PAGE_SIZE,
+              page,
+            });
+            allLogs.push(...response.logs);
+            if (response.logs.length === 0 || allLogs.length >= response.total) break;
+          }
+          return allLogs;
         },
       }),
       [api, workflowExecutionId, stepExecution.id]

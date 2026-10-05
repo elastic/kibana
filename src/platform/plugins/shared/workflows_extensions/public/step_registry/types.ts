@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowExecutionLogEntry } from '@kbn/workflows';
 import type { EditorHandlers, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
-import type { WorkflowExecutionLogEntry } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 

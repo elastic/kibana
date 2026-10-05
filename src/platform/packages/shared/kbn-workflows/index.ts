@@ -59,6 +59,7 @@ export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
 export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
 export * from './common/privileges';
+export type { WorkflowExecutionLogEntry } from './common/workflow_execution_log_entry';
 export * from './common/utils';
 export * from './common/step_types';
 export * from './common/hitl';
