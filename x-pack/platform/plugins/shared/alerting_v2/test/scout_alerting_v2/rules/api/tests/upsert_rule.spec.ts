@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
@@ -116,9 +117,9 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'upsert: should create an enabled rule when the body omits enabled',
+    'upsert: should create an enabled rule and schedule its task when the body omits enabled',
     async ({ apiClient, apiServices }) => {
-      const id = 'rule-created-enabled-by-default';
+      const id = `rule-created-enabled-by-default-${randomUUID()}`;
       const response = await apiClient.put(getRuleUrl(id), {
         headers: writerHeaders,
         body: buildCreateRuleData({ metadata: { name: 'created-enabled-by-default' } }),
@@ -128,13 +129,14 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
 
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.enabled).toBe(true);
+      await apiServices.alertingV2.ruleExecutions.waitForTaskScheduled({ ruleId: id });
     }
   );
 
   apiTest(
-    'upsert: should create a disabled rule when the body sets enabled=false',
+    'upsert: should create a disabled rule without scheduling a task when the body sets enabled=false',
     async ({ apiClient, apiServices }) => {
-      const id = 'rule-created-disabled';
+      const id = `rule-created-disabled-${randomUUID()}`;
       const response = await apiClient.put(getRuleUrl(id), {
         headers: writerHeaders,
         body: {
@@ -147,11 +149,12 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
 
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.enabled).toBe(false);
+      await apiServices.alertingV2.ruleExecutions.waitForTaskRemoved({ ruleId: id });
     }
   );
 
   apiTest(
-    'upsert: should enable a disabled rule when the replace body sets enabled=true',
+    'upsert: should enable a disabled rule and schedule its task when the replace body sets enabled=true',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'to-be-enabled' } })
@@ -160,6 +163,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
 
       await apiServices.alertingV2.rules.bulkDisable({ ids: [id] });
       expect((await apiServices.alertingV2.rules.get(id)).enabled).toBe(false);
+      await apiServices.alertingV2.ruleExecutions.waitForTaskRemoved({ ruleId: id });
 
       const response = await apiClient.put(getRuleUrl(id), {
         headers: writerHeaders,
@@ -173,17 +177,19 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
 
       const reFetched = await apiServices.alertingV2.rules.get(id);
       expect(reFetched.enabled).toBe(true);
+      await apiServices.alertingV2.ruleExecutions.waitForTaskScheduled({ ruleId: id });
     }
   );
 
   apiTest(
-    'upsert: should disable an enabled rule when the replace body sets enabled=false',
+    'upsert: should disable an enabled rule and remove its task when the replace body sets enabled=false',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'to-be-disabled-via-put' } })
       );
       const id = created.id;
       expect(created.enabled).toBe(true);
+      await apiServices.alertingV2.ruleExecutions.waitForTaskScheduled({ ruleId: id });
 
       const response = await apiClient.put(getRuleUrl(id), {
         headers: writerHeaders,
@@ -197,6 +203,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
 
       const reFetched = await apiServices.alertingV2.rules.get(id);
       expect(reFetched.enabled).toBe(false);
+      await apiServices.alertingV2.ruleExecutions.waitForTaskRemoved({ ruleId: id });
     }
   );
 
