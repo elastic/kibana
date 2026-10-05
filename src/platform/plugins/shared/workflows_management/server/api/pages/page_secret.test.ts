@@ -10,7 +10,7 @@
 import { computePageSecret, PAGE_SECRET_LENGTH, verifyPageSecret } from './page_secret';
 
 const KEY = 'k'.repeat(32);
-const BASE = { spaceId: 'default', workflowId: 'workflow-1', generation: 0 };
+const BASE = { spaceId: 'default', pageKey: '0b5f3c1e-8d2a-4f6b-9c7e-1a2b3c4d5e6f' };
 
 describe('page secret', () => {
   it('is a fixed-length hex string', () => {
@@ -27,15 +27,14 @@ describe('page secret', () => {
     expect(verifyPageSecret(KEY, BASE, computePageSecret(KEY, BASE))).toBe(true);
   });
 
-  it('changes with the generation, which is how rotation retires a URL', () => {
+  it('changes with the page key, which is how rotation retires a URL', () => {
     const secret = computePageSecret(KEY, BASE);
-    expect(verifyPageSecret(KEY, { ...BASE, generation: 1 }, secret)).toBe(false);
+    expect(verifyPageSecret(KEY, { ...BASE, pageKey: 'rotated' }, secret)).toBe(false);
   });
 
-  it('rejects a secret from another space, workflow, or signing key', () => {
+  it('rejects a secret from another space or signing key', () => {
     const secret = computePageSecret(KEY, BASE);
     expect(verifyPageSecret(KEY, { ...BASE, spaceId: 'other' }, secret)).toBe(false);
-    expect(verifyPageSecret(KEY, { ...BASE, workflowId: 'workflow-2' }, secret)).toBe(false);
     expect(verifyPageSecret('x'.repeat(32), BASE, secret)).toBe(false);
   });
 

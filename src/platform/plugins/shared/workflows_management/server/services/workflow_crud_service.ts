@@ -76,6 +76,7 @@ import {
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
+import { createPageKey, withPageKey } from '../api/pages/page_key';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -1000,7 +1001,8 @@ export class WorkflowCrudService {
           validationErrors.push(...fieldResult.validationErrors);
         }
 
-        const merged: WorkflowProperties = { ...existingSource, ...updatedData };
+        // Adding a page trigger to an existing workflow gives it a page key here.
+        const merged: WorkflowProperties = withPageKey({ ...existingSource, ...updatedData });
         if (merged.triggerTypes === undefined) {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
@@ -1041,21 +1043,23 @@ export class WorkflowCrudService {
   }
 
   /**
-   * Retires a workflow page URL by incrementing the counter its secret is derived
-   * from. Only `pageGeneration` changes: the YAML and version stay the same, so a
-   * rotation is not a new workflow version.
+   * Retires a workflow page URL by giving the page a new key. Only `pageKey` changes:
+   * the YAML stays the same, so a rotation is not a new workflow definition.
    */
-  async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+  async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
     const profileId =
       (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       request,
       mutate: (existingSource: WorkflowProperties) => {
         assertWorkflowOperation(existingSource, 'edit', profileId);
-        return { ...existingSource, pageGeneration: (existingSource.pageGeneration ?? 0) + 1 };
+        return { ...existingSource, pageKey: createPageKey() };
       },
     });
-    return finalData.pageGeneration ?? 0;
+    if (!finalData.pageKey) {
+      throw new Error(`Workflow ${id} has no page key after rotation`);
+    }
+    return finalData.pageKey;
   }
 
   async updateWorkflow(

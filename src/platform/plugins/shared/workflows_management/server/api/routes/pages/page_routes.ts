@@ -12,6 +12,7 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 import { isPageTrigger, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   PAGE_FORM_API_PATH,
+  PAGE_KEY_MAX_LENGTH,
   PAGE_LINK_API_PATH,
   PAGE_ROTATE_API_PATH,
   PAGE_WORKFLOW_ID_MAX_LENGTH,
@@ -20,7 +21,6 @@ import { buildPageRunRequest } from '../../pages/page_run_identity';
 import { computePageSecret, PAGE_SECRET_LENGTH } from '../../pages/page_secret';
 import {
   buildPageUrl,
-  getPageGeneration,
   getPageSubmitter,
   parsePageSubmission,
   renderPageForm,
@@ -40,20 +40,23 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-const workflowIdSchema = schema.string({
-  maxLength: PAGE_WORKFLOW_ID_MAX_LENGTH,
-  meta: { description: 'ID of the workflow that defines the page.' },
-});
-
 const pageParamsSchema = schema.object({
-  workflowId: workflowIdSchema,
+  pageKey: schema.string({
+    maxLength: PAGE_KEY_MAX_LENGTH,
+    meta: { description: 'Opaque page id. Reveals nothing about the workflow.' },
+  }),
   secret: schema.string({
     maxLength: PAGE_SECRET_LENGTH,
-    meta: { description: 'Secret derived from the workflow. Opens the page.' },
+    meta: { description: 'Secret derived from the page id. Opens the page.' },
   }),
 });
 
-const workflowParamsSchema = schema.object({ workflowId: workflowIdSchema });
+const workflowParamsSchema = schema.object({
+  workflowId: schema.string({
+    maxLength: PAGE_WORKFLOW_ID_MAX_LENGTH,
+    meta: { description: 'ID of the workflow that defines the page.' },
+  }),
+});
 
 const hasPageTrigger = (workflow: WorkflowDetailDto | null): workflow is WorkflowDetailDto =>
   Boolean(workflow?.definition?.triggers.some(isPageTrigger));
@@ -64,16 +67,15 @@ const toPageLinkBody = (
   {
     basePath,
     spaceId,
-    workflowId,
+    pageKey,
     enabled,
-    generation,
-  }: { basePath: string; spaceId: string; workflowId: string; enabled: boolean; generation: number }
+  }: { basePath: string; spaceId: string; pageKey: string; enabled: boolean }
 ) => ({
   enabled,
   path: buildPageUrl({
     basePath,
-    workflowId,
-    secret: computePageSecret(signingKey, { spaceId, workflowId, generation }),
+    pageKey,
+    secret: computePageSecret(signingKey, { spaceId, pageKey }),
   }),
 });
 
@@ -95,13 +97,11 @@ export function registerPageFormRoute(deps: RouteDependencies, signingKey: strin
       { version: API_VERSION, validate: { request: { params: pageParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { workflowId, secret } = request.params;
-          const page = await resolvePage(workflowsService.getWorkflow.bind(workflowsService), {
-            signingKey,
-            spaceId: spaces.getSpaceId(request),
-            workflowId,
-            secret,
-          });
+          const { pageKey, secret } = request.params;
+          const page = await resolvePage(
+            workflowsService.getWorkflowByPageKey.bind(workflowsService),
+            { signingKey, spaceId: spaces.getSpaceId(request), pageKey, secret }
+          );
           return htmlOk(response, renderPageForm({ page, basePath: request.basePath, secret }));
         } catch (error) {
           return handleExternalResumeError(response, error, logger);
@@ -139,17 +139,16 @@ export function registerPageSubmitRoute(
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
-        const { workflowId, secret } = request.params;
-        let resolved = false;
+        const { pageKey, secret } = request.params;
+        // Set only once the URL resolves to a real page; a bad URL is not a run attempt.
+        let workflowId: string | undefined;
         try {
           const spaceId = spaces.getSpaceId(request);
-          const page = await resolvePage(workflowsService.getWorkflow.bind(workflowsService), {
-            signingKey,
-            spaceId,
-            workflowId,
-            secret,
-          });
-          resolved = true;
+          const page = await resolvePage(
+            workflowsService.getWorkflowByPageKey.bind(workflowsService),
+            { signingKey, spaceId, pageKey, secret }
+          );
+          workflowId = page.workflow.id;
           const inputs = parsePageSubmission(request.body, page.inputsSchema);
           const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
@@ -161,14 +160,13 @@ export function registerPageSubmitRoute(
             inputs,
             request: buildPageRunRequest(runAsApiKey),
             preprocessingContext: context,
-            metadata: { submittedVia: 'page', submitter },
+            metadata: { submittedVia: 'page', pageKey, submitter },
           });
 
           audit.logWorkflowRun(request, { workflowId, executionId: workflowExecutionId });
           return htmlSuccess(response);
         } catch (error) {
-          // Only audit runs against a real page; a bad URL is not a run attempt.
-          if (resolved) {
+          if (workflowId) {
             audit.logWorkflowRun(request, { workflowId, error });
           }
           return handleExternalResumeError(response, error, logger);
@@ -199,13 +197,18 @@ export function registerPageLinkRoute(deps: RouteDependencies, signingKey: strin
           if (!hasPageTrigger(workflow)) {
             return response.notFound({ body: { message: 'Workflow does not define a page.' } });
           }
+          // A workflow saved before page keys existed gets one on its next save.
+          if (!workflow.pageKey) {
+            return response.notFound({
+              body: { message: 'Save the workflow to create its page URL.' },
+            });
+          }
           return response.ok({
             body: toPageLinkBody(signingKey, {
               basePath: request.basePath,
               spaceId,
-              workflowId,
+              pageKey: workflow.pageKey,
               enabled: workflow.enabled,
-              generation: getPageGeneration(workflow),
             }),
           });
         } catch (error) {
@@ -215,7 +218,7 @@ export function registerPageLinkRoute(deps: RouteDependencies, signingKey: strin
     );
 }
 
-/** Retires the current page URL by incrementing `pageGeneration`, and returns the new URL. */
+/** Retires the current page URL by assigning a new page key, and returns the new URL. */
 export function registerPageRotateRoute(deps: RouteDependencies, signingKey: string) {
   const { router, api, spaces, audit, logger } = deps;
 
@@ -236,15 +239,14 @@ export function registerPageRotateRoute(deps: RouteDependencies, signingKey: str
           if (!hasPageTrigger(workflow)) {
             return response.notFound({ body: { message: 'Workflow does not define a page.' } });
           }
-          const generation = await api.rotatePage(workflowId, spaceId, request);
+          const pageKey = await api.rotatePage(workflowId, spaceId, request);
           audit.logWorkflowUpdated(request, { id: workflowId });
           return response.ok({
             body: toPageLinkBody(signingKey, {
               basePath: request.basePath,
               spaceId,
-              workflowId,
+              pageKey,
               enabled: workflow.enabled,
-              generation,
             }),
           });
         } catch (error) {

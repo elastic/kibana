@@ -597,7 +597,7 @@ export class WorkflowsManagementApi {
   }
 
   /** Retires the workflow page URL. Needs edit access, like any change to the workflow. */
-  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
     await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     return this.workflowsService.rotatePage(id, spaceId, request);
   }
