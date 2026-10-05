@@ -28,10 +28,11 @@ const isBuiltInRegexRule = (rule: AnonymizationRule): rule is RegexAnonymization
  *
  * Built-in rules present in `rules` but no longer shipped in code are left untouched (rather
  * than dropped) so removing a built-in doesn't silently invalidate an unrelated saved object.
- * Built-in rules shipped in code but missing from `rules` (e.g. one added in a later release)
- * are appended using their code-defined default `enabled` state, so new built-ins actually
- * reach environments that saved settings before that rule existed. Custom (non-built-in) and
- * NER rules are returned unchanged.
+ * Built-in rules shipped in code but missing from `rules` (e.g. one added in a later release, or
+ * any built-in for settings saved before built-ins existed) are appended **disabled**, so they
+ * show up in the UI without changing what an environment that already saved settings masks —
+ * enabling a new rule is the admin's decision, not a side effect of upgrading. Custom
+ * (non-built-in) and NER rules are returned unchanged.
  */
 export function refreshBuiltInAnonymizationRules(rules: AnonymizationRule[]): AnonymizationRule[] {
   const currentById = new Map(DEFAULT_BUILTIN_REGEX_RULES.map((rule) => [rule.id, rule]));
@@ -45,7 +46,9 @@ export function refreshBuiltInAnonymizationRules(rules: AnonymizationRule[]): An
   });
 
   const knownIds = new Set(refreshed.filter(isBuiltInRegexRule).map((rule) => rule.id));
-  const missingBuiltIns = DEFAULT_BUILTIN_REGEX_RULES.filter((rule) => !knownIds.has(rule.id));
+  const missingBuiltIns = DEFAULT_BUILTIN_REGEX_RULES.filter((rule) => !knownIds.has(rule.id)).map(
+    (rule) => ({ ...rule, enabled: false })
+  );
 
   return [...refreshed, ...missingBuiltIns];
 }

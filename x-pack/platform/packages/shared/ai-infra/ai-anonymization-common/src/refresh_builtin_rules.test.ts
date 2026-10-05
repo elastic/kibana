@@ -51,7 +51,7 @@ describe('refreshBuiltInAnonymizationRules', () => {
     expect(refreshed.enabled).toBe(false);
   });
 
-  it('appends a built-in rule missing from the persisted array using its code-defined default', () => {
+  it('appends a built-in rule missing from the persisted array, disabled, so an upgrade never switches new masking on', () => {
     const rulesMissingHostName = DEFAULT_BUILTIN_REGEX_RULES.filter(
       (rule) => rule.id !== 'builtin-host-name'
     );
@@ -66,7 +66,8 @@ describe('refreshBuiltInAnonymizationRules', () => {
       (rule) => rule.id === 'builtin-host-name'
     )!;
 
-    expect(hostNameRule).toEqual(codeDefault);
+    expect(codeDefault.enabled).toBe(true);
+    expect(hostNameRule).toEqual({ ...codeDefault, enabled: false });
   });
 
   it('leaves a built-in id no longer shipped in code untouched, rather than dropping it', () => {
@@ -114,6 +115,23 @@ describe('refreshBuiltInAnonymizationRules', () => {
 
     expect(refreshed[0]).toEqual(customRule);
     expect(refreshed[refreshed.length - 2]).toEqual(nerRule);
-    expect(refreshed[refreshed.length - 1]).toEqual(ipv4Default);
+    expect(refreshed[refreshed.length - 1]).toEqual({ ...ipv4Default, enabled: false });
+  });
+
+  it('keeps masking exactly as it was for settings saved before built-ins existed', () => {
+    // Shape of the value saved by earlier releases: no `id`/`builtIn`, only EMAIL enabled.
+    const legacyEmail: RegexAnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+      enabled: true,
+    };
+
+    const refreshed = refreshBuiltInAnonymizationRules([legacyEmail, nerRule]);
+
+    expect(refreshed.filter((rule) => rule.enabled)).toEqual([legacyEmail]);
+    expect(refreshed.filter((rule) => rule.type === 'RegExp' && rule.builtIn)).toHaveLength(
+      DEFAULT_BUILTIN_REGEX_RULES.length
+    );
   });
 });
