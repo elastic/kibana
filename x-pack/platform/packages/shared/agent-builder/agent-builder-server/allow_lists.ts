@@ -363,13 +363,12 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
+  'platform.alerting.alert',
   'platform.alerting.rule',
   'platform.alerting.action_policy',
-  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
-  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
