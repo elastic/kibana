@@ -15,9 +15,10 @@ import {
   clearNodeSelection,
   invertNodeSelection,
   selectAllNodes,
+  selectedNodeIdsSelector,
   selectNeighborNodes,
   type GraphDispatch,
-  workspaceSelector,
+  workspaceNodeCountSelector,
 } from '../../state_management';
 
 interface SelectionToolBarProps {
@@ -26,8 +27,9 @@ interface SelectionToolBarProps {
 
 export const SelectionToolBar = ({ onSetControl }: SelectionToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { nodeIds, selectedNodeIds } = useSelector(workspaceSelector);
-  const haveNodes = nodeIds.length === 0;
+  const nodeCount = useSelector(workspaceNodeCountSelector);
+  const selectedNodeIds = useSelector(selectedNodeIdsSelector);
+  const haveNodes = nodeCount === 0;
 
   const selectAllButtonMsg = i18n.translate(
     'xpack.graph.sidebar.selections.selectAllButtonTooltip',

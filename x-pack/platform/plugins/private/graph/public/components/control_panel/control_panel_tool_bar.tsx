@@ -12,15 +12,19 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import type { ControlType, WorkspaceField } from '../../types';
 import {
   blocklistSelectedNodes,
+  canRedoWorkspaceSelector,
+  canUndoWorkspaceSelector,
   deleteSelectedNodes,
   expandSelectedNodes,
   fillWorkspaceConnections,
+  isWorkspaceLayoutRunningSelector,
   redoWorkspace,
+  selectedNodeIdsSelector,
   startWorkspaceLayout,
   stopWorkspaceLayout,
   type GraphDispatch,
   undoWorkspace,
-  workspaceSelector,
+  workspaceNodeCountSelector,
 } from '../../state_management';
 
 interface ControlPanelToolBarProps {
@@ -33,9 +37,12 @@ export const ControlPanelToolBar = ({
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { isLayoutRunning, nodeIds, selectedNodeIds, undoHistory, redoHistory } =
-    useSelector(workspaceSelector);
-  const haveNodes = nodeIds.length === 0;
+  const isLayoutRunning = useSelector(isWorkspaceLayoutRunningSelector);
+  const nodeCount = useSelector(workspaceNodeCountSelector);
+  const selectedNodeIds = useSelector(selectedNodeIdsSelector);
+  const canUndo = useSelector(canUndoWorkspaceSelector);
+  const canRedo = useSelector(canRedoWorkspaceSelector);
+  const haveNodes = nodeCount === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
     defaultMessage: 'Undo',
@@ -106,7 +113,7 @@ export const ControlPanelToolBar = ({
             iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
-            isDisabled={undoHistory.length < 1}
+            isDisabled={!canUndo}
             onClick={onUndoClick}
           />
         </EuiToolTip>
@@ -119,7 +126,7 @@ export const ControlPanelToolBar = ({
             iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
-            isDisabled={redoHistory.length === 0}
+            isDisabled={!canRedo}
             onClick={onRedoClick}
           />
         </EuiToolTip>
@@ -132,7 +139,7 @@ export const ControlPanelToolBar = ({
             iconType="plus"
             size="xs"
             aria-label={expandButtonMsg}
-            isDisabled={liveResponseFields.length === 0 || nodeIds.length === 0}
+            isDisabled={liveResponseFields.length === 0 || nodeCount === 0}
             onClick={onExpandButtonClick}
           />
         </EuiToolTip>
@@ -203,7 +210,7 @@ export const ControlPanelToolBar = ({
         </EuiToolTip>
       </EuiFlexItem>
 
-      {(nodeIds.length === 0 || !isLayoutRunning) && (
+      {(nodeCount === 0 || !isLayoutRunning) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={runLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -211,14 +218,14 @@ export const ControlPanelToolBar = ({
               iconType="play"
               size="xs"
               aria-label={runLayoutButtonMsg}
-              isDisabled={nodeIds.length === 0}
+              isDisabled={nodeCount === 0}
               onClick={onRunLayoutClick}
             />
           </EuiToolTip>
         </EuiFlexItem>
       )}
 
-      {isLayoutRunning && nodeIds.length > 0 && (
+      {isLayoutRunning && nodeCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={pauseLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon

@@ -309,6 +309,7 @@ type ReduxGraphVisualizationProps = Omit<
 
 export const ReduxGraphVisualization = (props: ReduxGraphVisualizationProps) => {
   const dispatch = useDispatch<GraphDispatch>();
+  // D3 mutates the runtime graph; workspace updates trigger position renders during layout ticks.
   const { selectedEdgeIds, selectedNodeIds } = useSelector(workspaceSelector);
 
   return (
