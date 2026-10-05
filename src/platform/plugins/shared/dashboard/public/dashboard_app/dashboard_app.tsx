@@ -39,6 +39,10 @@ import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
+import { DashboardChangeHistoryProvider } from '../dashboard_history/dashboard_change_history_provider';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { dashboardQueryClient } from '../services/dashboard_query_client';
+import { ChangeHistoryTrigger } from '@kbn/change-history-ui';
 
 export interface DashboardAppProps {
   history: History;
@@ -183,42 +187,47 @@ export function DashboardApp({
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
-    <>
-      {dashboardApi && dashboardInternalApi && (
-        <>
-          <DashboardTabTitleSetter dashboardApi={dashboardApi} />
-          <DashboardTopNav
-            key={dashboardApi.uuid}
-            redirectTo={redirectTo}
-            embedSettings={embedSettings}
-            dashboardApi={dashboardApi}
-            dashboardInternalApi={dashboardInternalApi}
-          />
-        </>
-      )}
+    <QueryClientProvider client={dashboardQueryClient}>
+      <DashboardChangeHistoryProvider
+        dashboardApi={dashboardApi}
+        dashboardId={savedDashboardId ?? 'new-dashboard'}
+      >
+        {dashboardApi && dashboardInternalApi && (
+          <>
+            <DashboardTabTitleSetter dashboardApi={dashboardApi} />
+            <DashboardTopNav
+              key={dashboardApi.uuid}
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardApi={dashboardApi}
+              dashboardInternalApi={dashboardInternalApi}
+            />
+          </>
+        )}
 
-      {getLegacyConflictWarning?.()}
-      <DashboardRenderer
-        key={regenerateId}
-        locator={locator}
-        onApiAvailable={(dashboard, dashboardInternal) => {
-          setDashboardAppApi(dashboard);
-          if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
-            setDashboardApi(dashboard);
-            setDashboardInternalApi(dashboardInternal);
-            if (expandedPanelId) {
-              dashboard?.expandPanel(expandedPanelId);
+        {getLegacyConflictWarning?.()}
+        <DashboardRenderer
+          key={regenerateId}
+          locator={locator}
+          onApiAvailable={(dashboard, dashboardInternal) => {
+            setDashboardAppApi(dashboard);
+            if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
+              setDashboardApi(dashboard);
+              setDashboardInternalApi(dashboardInternal);
+              if (expandedPanelId) {
+                dashboard?.expandPanel(expandedPanelId);
+              }
             }
-          }
-        }}
-        onApiCleanup={() => {
-          setDashboardAppApi(undefined);
-        }}
-        dashboardRedirect={redirectTo}
-        savedObjectId={savedDashboardId}
-        showPlainSpinner={showPlainSpinner}
-        getCreationOptions={getCreationOptions}
-      />
-    </>
+          }}
+          onApiCleanup={() => {
+            setDashboardAppApi(undefined);
+          }}
+          dashboardRedirect={redirectTo}
+          savedObjectId={savedDashboardId}
+          showPlainSpinner={showPlainSpinner}
+          getCreationOptions={getCreationOptions}
+        />
+      </DashboardChangeHistoryProvider>
+    </QueryClientProvider>
   );
 }

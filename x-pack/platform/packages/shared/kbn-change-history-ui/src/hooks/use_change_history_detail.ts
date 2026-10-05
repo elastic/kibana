@@ -46,7 +46,7 @@ export const useChangeHistoryDetail = ({
       if (!changeId) {
         throw new Error('changeId is required');
       }
-
+      // console.log({ objectId, changeId, signal });
       return adapter.getChange({ objectId, changeId, signal });
     },
     {
@@ -61,6 +61,7 @@ export const useChangeHistoryDetail = ({
       : changeId
       ? data
       : undefined;
+  // console.log({ change, pendingChange, isPendingSelection, data, error, isLoading });
 
   return {
     change,

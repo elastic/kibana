@@ -377,6 +377,7 @@ export function getDashboardApi({
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
     isAccessControlEnabled: Boolean(isAccessControlEnabled),
+    onSave$,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

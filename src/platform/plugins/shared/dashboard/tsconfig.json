@@ -14,6 +14,7 @@
     "test/scout_anonymous_authc/**/*",
     "test/scout_search_sessions/**/*",
     "test/scout_test_plugins/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -135,6 +136,8 @@
     "@kbn/ui-callout",
     "@kbn/zod-helpers",
     "@kbn/as-code-dashboard-schema",
+    "@kbn/change-history",
+    "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]
 }

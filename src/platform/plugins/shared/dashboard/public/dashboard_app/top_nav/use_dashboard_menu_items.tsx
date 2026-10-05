@@ -21,6 +21,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
+import { useChangeHistoryModal } from '@kbn/change-history-ui';
 import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -49,6 +50,7 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
   const accessControlClient = getAccessControlClient();
   const appId = useObservable(coreServices.application.currentAppId$);
+  const { openModal } = useChangeHistoryModal();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -351,6 +353,15 @@ export const useDashboardMenuItems = ({
         run: (params) => openSettingsFlyout(dashboardApi, params?.returnFocus),
       } as AppMenuItemType,
 
+      history: {
+        order: 7,
+        disableButton: disableTopNav,
+        id: 'dashboard-history',
+        testId: 'dashboardHistoryMenuItem',
+        iconType: 'clock',
+        run: openModal,
+        label: topNavStrings.history.label,
+      },
       // Action items
       edit: {
         label: topNavStrings.edit.label,
@@ -416,6 +427,7 @@ export const useDashboardMenuItems = ({
     resetChangesMenuItem,
     exportItems,
     viewMode,
+    openModal,
   ]);
 
   /**
@@ -479,6 +491,7 @@ export const useDashboardMenuItems = ({
       menuItems.add,
       menuItems.switchToViewMode,
       menuItems.settings,
+      menuItems.history,
     ];
 
     if (shareAction) {

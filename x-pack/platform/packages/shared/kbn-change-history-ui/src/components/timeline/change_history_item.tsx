@@ -35,6 +35,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
   selected,
   onClick,
 }: ChangeHistoryItemProps): JSX.Element {
+  console.log({ item });
   const { renderBadge, renderChangesSummary, supports } = useChangeHistoryConfig();
   const modalSelection = useContext(ChangeHistoryModalSelectionContext);
   const { euiTheme } = useEuiTheme();
@@ -63,6 +64,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
     const hasCompare = supports.compare && Boolean(modalSelection.requestCompareToVersion);
     const hasRestore = Boolean(modalSelection.requestRestoreVersion);
 
+    console.log({ hasCompare, hasRestore, supports });
     if (!hasCompare && !hasRestore) {
       return null;
     }
