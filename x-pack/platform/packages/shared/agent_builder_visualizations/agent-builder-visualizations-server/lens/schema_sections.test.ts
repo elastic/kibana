@@ -151,4 +151,9 @@ describe('Lens schema sections', () => {
     expect(schema.safeParse({ sections: ['legend', 'axis'] }).success).toBe(true);
     expect(schema.safeParse({ sections: ['data_source'] }).success).toBe(false);
   });
+
+  // The index goes into every config prompt verbatim, so any change to it shows up here for review.
+  it.each(Object.values(SupportedChartType))('keeps the %s section index', (chartType) => {
+    expect(getSchemaSectionIndex(chartType)).toMatchSnapshot();
+  });
 });
