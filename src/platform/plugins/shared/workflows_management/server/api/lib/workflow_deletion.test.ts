@@ -96,7 +96,7 @@ describe('deleteWorkflows', () => {
         assertCanDelete,
       })
     ).rejects.toThrow('Access revoked');
-    expect(assertCanDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test' }));
+    expect(assertCanDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test' }), 'wf-1');
     expect(client.bulk).not.toHaveBeenCalled();
     expect(client.delete).not.toHaveBeenCalled();
   });

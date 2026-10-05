@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
@@ -161,6 +162,7 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      minimumScheduleInterval: getMinimumScheduleInterval(),
       esqlMenu: ESQLMenu,
       esqlEditorActionsProvider: EsqlEditorActionsProvider,
       esqlEditorActionsRegister: EsqlEditorActionsRegister,

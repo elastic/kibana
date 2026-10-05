@@ -65,26 +65,26 @@ const hasImpact = (impact?: InvestigationImpact): impact is InvestigationImpact 
   Boolean(impact?.summary?.trim() || impact?.evidence || impact?.entities?.length);
 
 const SEVERITY_BADGES: Record<Severity, { color: string; label: string }> = {
-  '80-critical': {
+  critical: {
     color: 'danger',
     label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityCritical', {
       defaultMessage: 'Critical',
     }),
   },
-  '60-high': {
+  high: {
     color: 'warning',
     label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityHigh', {
       defaultMessage: 'High',
     }),
   },
-  '40-medium': {
+  medium: {
     // Matches the severity dot color on the Nightshift landing page (`SEVERITY_DOT_COLOR`).
     color: 'primary',
     label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityMedium', {
       defaultMessage: 'Medium',
     }),
   },
-  '20-low': {
+  low: {
     // Matches the severity dot color on the Nightshift landing page (`SEVERITY_DOT_COLOR`).
     color: 'success',
     label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityLow', {
