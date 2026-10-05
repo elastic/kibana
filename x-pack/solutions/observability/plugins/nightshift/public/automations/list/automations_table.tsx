@@ -99,7 +99,7 @@ export const AutomationsTable = ({
       sortable: (automation) => usedToday.get(automation.id) ?? 0,
       render: (automation: Automation) => (
         <AutomationUsageCell
-          used={usedToday.get(automation.id) ?? 0}
+          used={usedToday.get(automation.id)}
           limit={automation.runtime.dailyDispatchLimit}
         />
       ),

@@ -12,10 +12,12 @@ export const TimeField = ({
   label,
   value,
   onChange,
+  step,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  step?: number;
 }) => (
   <EuiFieldText
     data-test-subj="nightshiftTimeFieldFieldText"
@@ -23,6 +25,7 @@ export const TimeField = ({
     compressed
     aria-label={label}
     value={value}
+    step={step}
     onChange={(event) => event.target.value && onChange(event.target.value)}
   />
 );

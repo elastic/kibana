@@ -16,6 +16,12 @@ describe('AutomationUsageCell', () => {
     expect(screen.getByTestId('automationUsage')).toHaveTextContent('3 / 5');
   });
 
+  it('shows a dash when usage is unknown', () => {
+    render(<AutomationUsageCell limit={5} />);
+
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
   it('shows a dash without a limit', () => {
     render(<AutomationUsageCell used={3} />);
 
